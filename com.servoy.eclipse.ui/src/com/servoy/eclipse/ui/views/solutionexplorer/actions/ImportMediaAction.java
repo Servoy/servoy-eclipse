@@ -56,7 +56,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Action to import media from file.
- * 
+ *
  * @author rgansevles
  */
 public class ImportMediaAction extends Action implements ISelectionChangedListener
@@ -67,14 +67,14 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 
 	/**
 	 * Creates a new "create new method" action for the given solution view.
-	 * 
+	 *
 	 * @param viewer the solution view to use.
 	 */
 	public ImportMediaAction(SolutionExplorerView viewer)
 	{
 		this.viewer = viewer;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.png"));
 		setText("Import media");
 		setToolTipText(getText());
 	}
@@ -83,15 +83,16 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 	{
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		solution = null;
-		if (sel.size() == 1 &&
-			((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA) || (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA_FOLDER)))
+		if (sel.size() == 1 && ((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA) ||
+			(((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA_FOLDER)))
 		{
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
 			SimpleUserNode solutionNode = node.getAncestorOfType(Solution.class);
 			if (solutionNode != null)
 			{
 				// make sure you have the in-memory version of the solution
-				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
+				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+					((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
 			}
 		}
 		setEnabled(solution != null);
@@ -127,15 +128,15 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 
 	/**
 	 * Add media files to an editing solution
-	 * 
+	 *
 	 * @param editingSolution
 	 * @param directory null when filenames are absolute
 	 * @param fileNames
 	 * @throws IOException
 	 * @throws RepositoryException
 	 */
-	public static void addMediaFiles(Solution editingSolution, String directory, String[] fileNames, String targetParentPath) throws IOException,
-		RepositoryException
+	public static void addMediaFiles(Solution editingSolution, String directory, String[] fileNames, String targetParentPath)
+		throws IOException, RepositoryException
 	{
 		List<Pair<File, String>> filesToSave = new ArrayList<Pair<File, String>>(fileNames.length + 1);
 		List<Media> existingMediasInCurrentSolution = new ArrayList<Media>();
@@ -233,7 +234,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 	 * @param editingSolution
 	 * @param file
 	 * @param targetParentPath
-	 * 
+	 *
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws RepositoryException

@@ -75,6 +75,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IAnchorConstants;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -292,7 +293,7 @@ public class ElementFactory
 			}
 		}
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-		AbstractBase copy = (AbstractBase)component.cloneObj(parent, false, validator, true, true,
+		AbstractBase copy = (AbstractBase)component.cloneObj(parent, true, validator, true, true,
 			true /* when component is an override we want a flattened one */);
 		if (copy instanceof ISupportBounds)
 		{
@@ -529,7 +530,7 @@ public class ElementFactory
 			{
 				IDataProvider dataProvider = (IDataProvider)o;
 
-				int fieldSpacing = configuration.getFieldSpacing() > 0 ? configuration.getFieldSpacing() : 10;
+				int fieldSpacing = configuration.getFieldSpacing() >= 0 ? configuration.getFieldSpacing() : 10;
 				if (loc == null)
 				{
 					loc = startLocation;
@@ -659,7 +660,7 @@ public class ElementFactory
 
 					fillTextProperty(label, configuration, name, labelText, false, true);
 
-					int labelSpacing = configuration.getLabelSpacing() > 0 ? configuration.getLabelSpacing() : 20;
+					int labelSpacing = configuration.getLabelSpacing() >= 0 ? configuration.getLabelSpacing() : 20;
 
 					if (configuration.isPlaceHorizontally())
 					{
@@ -1515,6 +1516,11 @@ public class ElementFactory
 									}
 								}
 							}
+							if (o instanceof IChildWebObject)
+							{
+								((IChildWebObject)o).resetUUID();
+							}
+
 							return IPersistVisitor.CONTINUE_TRAVERSAL;
 						}
 					});

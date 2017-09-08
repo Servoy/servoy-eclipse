@@ -141,9 +141,11 @@ public class GhostHandler implements IServerService
 								{
 									for (IChildWebObject p : ((WebComponent)bean).getAllPersistMappedProperties())
 									{
+										if (p == null) continue;
 										String text = p.getJsonKey() + (p.getIndex() >= 0 ? "[" + p.getIndex() + "]" : "");
 
 										// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
+										// TODO make this generic - spec should be able to tell what to show in the ghost caption in editor; maybe other components what other properties
 										if (p.getProperty("json") != null)
 										{
 											JSONObject json = (JSONObject)p.getProperty("json");

@@ -41,8 +41,8 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.Activator.ShortcutDefinition;
-import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
+import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
@@ -86,7 +86,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 	{
 		makeSureNeededPluginsAreStarted();
 
-		Job job = new Job("Smart client start")
+		Job job = new Job("Smart client launch")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -113,7 +113,8 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
-		monitor.beginTask("Smart client start", 5);
+		StartClientHandler.setLastCommand(StartClientHandler.START_SMART_CLIENT);
+		monitor.beginTask("Smart client launch", 5);
 		monitor.worked(1);
 		try
 		{
@@ -128,8 +129,8 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(),
-								"Solution type problem", "Cant open this solution type in this client");
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+								"Cant open this solution type in this client");
 						}
 					});
 					return;

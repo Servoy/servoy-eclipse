@@ -140,7 +140,8 @@ public class WarExporter
 	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
 	// RAGTEST log4j
 	private static final String[] NG_LIBS = new String[] { "org.slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "servoy_ngclient_" +
-		ClientVersion.getBundleVersion() + ".jar", "sablo_" + ClientVersion.getBundleVersion() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
+		ClientVersion.getBundleVersionWithPostFix() +
+		".jar", "sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
 
@@ -289,8 +290,9 @@ public class WarExporter
 			args.add(wroPropertiesFile.getAbsolutePath());
 			args.add("-m");
 			args.add("-c");
-			String processors = "semicolonAppender,cssDataUri";
-			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,cssCompressor";
+			String processors = "semicolonAppender";
+			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,cssMin";
+			processors += ",cssDataUri";
 			args.add(processors);
 
 			ProcessBuilder builder = new ProcessBuilder(args);
@@ -613,11 +615,19 @@ public class WarExporter
 	 */
 	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
 	{
-		List<String> pluginLocations = exportModel.getPluginLocations();
+		List<String> pluginLocations = new ArrayList<String>();
 		File eclipseParent = null;
 		File userDir = new File(System.getProperty("user.dir"));
 		if (System.getProperty("eclipse.home.location") != null)
+		{
 			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
+			if (eclipseParent.exists())
+			{
+				//first check the plugins folder of eclipse home
+				pluginLocations.add(new File(eclipseParent, "/plugins").getAbsolutePath().toString());
+			}
+		}
+		pluginLocations.addAll(exportModel.getPluginLocations());
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -627,18 +637,13 @@ public class WarExporter
 				File pluginLocation = new File(pluginLocations.get(i));
 				if (!pluginLocation.exists())
 				{
-					if (eclipseParent != null)
-					{
-						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
-					}
-					if (!pluginLocation.exists())
+					if (!pluginLocation.isAbsolute() && !pluginLocation.exists())
 					{
 						pluginLocation = new File(userDir, pluginLocations.get(i));
 					}
 					if (!pluginLocation.exists())
 					{
-						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
-							" none are found");
+						System.err.println("Trying userDir" + userDir + " as parent for " + pluginLocations.get(i) + " but is not found");
 					}
 				}
 				FileFilter filter = new WildcardFileFilter(libName);
@@ -844,7 +849,8 @@ public class WarExporter
 				{
 					if (!destinationFolder.exists()) destinationFolder.mkdir();
 					SolutionSerializer.writeRuntimeSolution(null, new File(destinationFolder, sp.getSolution().getName() + ".runtime"), sp.getSolution(),
-						ApplicationServerRegistry.get().getDeveloperRepository(), sp.getModules());
+						ApplicationServerRegistry.get().getDeveloperRepository(),
+						sp.getSolution().getReferencedModulesRecursive(new HashMap<String, Solution>()).values().toArray(new Solution[0]));
 				}
 			}
 

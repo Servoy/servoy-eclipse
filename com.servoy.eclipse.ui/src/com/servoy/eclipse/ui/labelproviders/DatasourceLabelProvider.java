@@ -38,8 +38,8 @@ public class DatasourceLabelProvider extends LabelProvider implements IDefaultIm
 	public static final DatasourceLabelProvider INSTANCE_IMAGE_NAMEONLY = new DatasourceLabelProvider(Messages.LabelNone, true, false);
 //	public static final DatasourceLabelProvider INSTANCE_NO_IMAGE_NAMEONLY = new DatasourceLabelProvider(Messages.LabelNone, false, false);
 
-	private static final Image SERVER_IMAGE = Activator.getDefault().loadImageFromBundle("server.gif");
-	private static final Image TABLE_IMAGE = Activator.getDefault().loadImageFromBundle("portal.gif");
+	private static final Image SERVER_IMAGE = Activator.getDefault().loadImageFromBundle("server.png");
+	private static final Image TABLE_IMAGE = Activator.getDefault().loadImageFromBundle("portal.png");
 	private static final Image VIEW_IMAGE = Activator.getDefault().loadImageFromBundle("view.png");
 
 	private final String defaultText;

@@ -72,11 +72,13 @@
 	height: 26px;
 	min-width: 26px;
 	text-align: center;
-	border: 1px solid transparent;
-	border-radius: 2px;
+	border: 0px;
 	margin: 2px;
-	
-	background-color: #d9d9d9;
+	padding: 0px;
+}
+
+.toolbar-action button{
+	background-color: transparent;
 }
 
 .toolbar-action:hover {

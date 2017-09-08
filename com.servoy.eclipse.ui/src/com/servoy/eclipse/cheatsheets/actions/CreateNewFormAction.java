@@ -18,9 +18,11 @@
 package com.servoy.eclipse.cheatsheets.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 
 /**
@@ -34,7 +36,14 @@ public class CreateNewFormAction extends Action
 	{
 		NewFormWizard wizard = new NewFormWizard();
 		wizard.init(PlatformUI.getWorkbench(), null);
-		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard);
+		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), wizard)
+		{
+			@Override
+			protected IDialogSettings getDialogBoundsSettings()
+			{
+				return EditorUtil.getDialogSettings("newformdialog");
+			}
+		};
 		dialog.create();
 		dialog.open();
 	}

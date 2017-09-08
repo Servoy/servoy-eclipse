@@ -45,7 +45,7 @@ import com.servoy.j2db.util.IDelegate;
  *
  * @author acostescu
  */
-public abstract class ArrayTypePropertyController extends PropertyController<Object, Object>implements IPropertySetter<Object, ISetterAwarePropertySource>
+public abstract class ArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 
 	protected ILabelProvider labelProvider = null;
@@ -223,7 +223,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		return cellEditor;
 	}
 
-	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object>implements ISetterAwarePropertySource
+	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object> implements ISetterAwarePropertySource
 	{
 
 		protected IPropertyDescriptor[] elementPropertyDescriptors;
@@ -248,8 +248,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		protected abstract Object defaultGetElement(final int idx);
 
 		protected abstract boolean defaultIsElementSet(final int idx);
-
-		protected abstract Object resetComplexElementValue(Object id, final int idx);
 
 		protected abstract int getIndexFromId(String id);
 
@@ -367,22 +365,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				ServoyLog.logError(e);
 			}
 			return false;
-		}
-
-
-		@Override
-		public Object resetComplexPropertyValue(Object id)
-		{
-			try
-			{
-				final int idx = getIndexFromId((String)id);
-				return resetComplexElementValue(id, idx);
-			}
-			catch (NumberFormatException e)
-			{
-				ServoyLog.logError(e);
-			}
-			return null;
 		}
 
 	}

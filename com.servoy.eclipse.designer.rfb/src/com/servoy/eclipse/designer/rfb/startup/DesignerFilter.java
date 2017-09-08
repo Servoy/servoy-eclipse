@@ -55,6 +55,7 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.util.HTTPUtils;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -73,7 +74,6 @@ import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.HTTPUtils;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -246,7 +246,7 @@ public class DesignerFilter implements Filter
 												size.put("width", Integer.valueOf(80));
 												model.put("size", size);
 												jsonWriter.key("model").value(new JSONObject(model));
-												jsonWriter.key("icon").value("rfb/angular/js/modules/toolbaractions/icons/template.gif");
+												jsonWriter.key("icon").value("rfb/angular/js/modules/toolbaractions/icons/template_save.png");
 												jsonWriter.endObject();
 											}
 										}
@@ -330,7 +330,8 @@ public class DesignerFilter implements Filter
 							{
 								ArrayList<WebObjectSpecification> webComponentSpecsCollectionEx = new ArrayList<WebObjectSpecification>(
 									webComponentSpecsCollection);
-								webComponentSpecsCollectionEx.addAll(componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecifications().values());
+								webComponentSpecsCollectionEx.addAll(
+									componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecifications().values());
 								webComponentSpecsCollection = webComponentSpecsCollectionEx;
 							}
 							for (WebObjectSpecification spec : webComponentSpecsCollection)

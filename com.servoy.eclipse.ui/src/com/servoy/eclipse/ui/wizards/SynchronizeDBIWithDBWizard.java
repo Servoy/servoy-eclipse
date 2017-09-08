@@ -125,7 +125,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 	public SynchronizeDBIWithDBWizard()
 	{
 		setWindowTitle("Synchronize DB tables with DB information");
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_tables_large.png"));
+		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("sync_dbi.png"));
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -250,8 +250,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					}
 				};
 
-				Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
-				Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
+				Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
+				Image tableImage = Activator.getDefault().loadImageFromBundle("portal.png");
 				Image viewImage = Activator.getDefault().loadImageFromBundle("view.png");
 
 				if (foundMissingTables.size() > 0)

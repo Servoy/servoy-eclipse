@@ -243,6 +243,10 @@ angular.module('editorContent',['servoyApp'])
   };
 
   var formData = $editorContentService.formData(true);
+  
+  if (formData.formProperties && formData.formProperties.absoluteLayout) {
+	  $scope.absoluteLayout = formData.formProperties.absoluteLayout['']
+  }
 
   if (formData.parts) {
     for (var name in formData.parts) {
@@ -337,8 +341,8 @@ angular.module('editorContent',['servoyApp'])
     callServerSideApi: function(methodName, args) {
       return null;
     },
-    getFormComponentElements: function(propertyName, templateUUID) {
-    	return $compile($templateCache.get(templateUUID))($scope);
+    getFormComponentElements: function(propertyName, formComponentValue) {
+    	return $compile($templateCache.get(formComponentValue.uuid))($scope);
 	},
 	isInDesigner: function() {
 		return true;

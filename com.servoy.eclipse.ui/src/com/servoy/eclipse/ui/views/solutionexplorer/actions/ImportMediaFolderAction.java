@@ -45,7 +45,7 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 
 	/**
 	 * Creates a new "create new method" action for the given solution view.
-	 * 
+	 *
 	 * @param viewer the solution view to use.
 	 */
 	public ImportMediaFolderAction(SolutionExplorerView viewer)
@@ -53,7 +53,7 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 		super(viewer);
 		this.viewer = viewer;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("import_folder.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("import_folder.png"));
 		setText("Import media folder");
 		setToolTipText(getText());
 	}
@@ -63,15 +63,16 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 	{
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		solution = null;
-		if (sel.size() == 1 &&
-			((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA) || (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA_FOLDER)))
+		if (sel.size() == 1 && ((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA) ||
+			(((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA_FOLDER)))
 		{
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
 			SimpleUserNode solutionNode = node.getAncestorOfType(Solution.class);
 			if (solutionNode != null)
 			{
 				// make sure you have the in-memory version of the solution
-				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
+				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+					((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
 			}
 		}
 		setEnabled(solution != null);
@@ -97,8 +98,8 @@ public class ImportMediaFolderAction extends ImportMediaAction implements ISelec
 					monitor.beginTask("Importing Media Folder", IProgressMonitor.UNKNOWN);
 					try
 					{
-						addMediaFiles(solution, null, new String[] { folderName }, viewer.getCurrentMediaFolder() != null
-							? viewer.getCurrentMediaFolder().getPath() : null);
+						addMediaFiles(solution, null, new String[] { folderName },
+							viewer.getCurrentMediaFolder() != null ? viewer.getCurrentMediaFolder().getPath() : null);
 					}
 					catch (RepositoryException e)
 					{

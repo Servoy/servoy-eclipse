@@ -38,7 +38,7 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * Action to create a new global scope.
- * 
+ *
  * @author rgansevles
  */
 public class RenameScopeAction extends Action implements ISelectionChangedListener
@@ -47,7 +47,7 @@ public class RenameScopeAction extends Action implements ISelectionChangedListen
 
 	/**
 	 * Creates a new "create new variable" action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public RenameScopeAction(SolutionExplorerView sev)
@@ -56,7 +56,7 @@ public class RenameScopeAction extends Action implements ISelectionChangedListen
 
 		setText("Rename scope");
 		setToolTipText(getText());
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("scopes.gif"));
+		setImageDescriptor(Activator.loadDefaultImageDescriptorFromBundle("scopes.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

@@ -74,6 +74,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -268,7 +269,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									ISupportChilds parentContainer = targetLayoutContainer;
 									do
 									{
-										if (p.equals(parentContainer))
+										if (p.equals(parentContainer) || ((p instanceof IFlattenedPersistWrapper) &&
+											(((IFlattenedPersistWrapper< ? >)p).getWrappedPersist().equals(parentContainer))))
 										{
 											doAllow = false;
 											break;

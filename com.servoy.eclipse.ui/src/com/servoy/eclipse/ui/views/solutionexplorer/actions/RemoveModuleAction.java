@@ -43,7 +43,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Action for removing the selected module from one of the active modules that contains it.
- * 
+ *
  * @author acostescu
  */
 public class RemoveModuleAction extends Action implements ISelectionChangedListener
@@ -54,7 +54,7 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 
 	/**
 	 * Creates a new remove module action.
-	 * 
+	 *
 	 * @param shell shell that might be used to display a dialog to the user (too choose a parent solution).
 	 */
 	public RemoveModuleAction(Shell shell)
@@ -62,7 +62,7 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 		this.shell = shell;
 		setText("Remove module...");
 		setToolTipText("Remove module from one of the active modules that contains it (the solution itself will not be deleted)");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("remove_module.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("remove_module.png"));
 	}
 
 	@Override
@@ -142,9 +142,7 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 				}
 				options[i] = activeParentModules.get(i).getProject().getName();
 			}
-			int selectedProject = UIUtils.showOptionDialog(
-				shell,
-				"Choose parent solution",
+			int selectedProject = UIUtils.showOptionDialog(shell, "Choose parent solution",
 				"You may remove the selected solution (as module) from any of the following parent solutions (all of them are modules of the active solution that declare the selected solution as a module).\nPlease choose one of these solutions.",
 				options, defaultIndex);
 

@@ -16,7 +16,7 @@
             description="%productBlurb">
          <property
                name="cssTheme"
-               value="org.eclipse.e4.ui.css.theme.e4_classic">
+               value="com.servoy.eclipse.core.servoytheme">
          </property>
          <property
                name="applicationCSSResources"
@@ -622,5 +622,13 @@
                priorityLevel="workbench">
          </variable>
       </sourceProvider>
+   </extension>
+   <extension
+         point="org.eclipse.e4.ui.css.swt.theme">
+      <theme
+            basestylesheeturi="servoytheme/servoy.css"
+            id="com.servoy.eclipse.core.servoytheme"
+            label="Servoy Default Theme">
+      </theme>
    </extension>
 </plugin>

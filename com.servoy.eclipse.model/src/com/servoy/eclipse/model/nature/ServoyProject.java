@@ -397,9 +397,6 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	/**
 	 * Apply all changes in editingSolution to the solution, starting from nodes.
-	 *
-	 * @param nodes
-	 * @param recursive
 	 */
 	public void saveEditingSolutionNodes(final IPersist[] nodes, final boolean recursive, boolean runAsJob) throws RepositoryException
 	{
@@ -714,7 +711,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 	/**
 	 * Returns a list of all IProjects referenced by this solution's project (both static references (.project) and dynamic ones (dltk js build refs)) and it's modules, in-depth, including the solution project itself and it's modules.
 	 * Modules are computed correctly via solution property instead of via project references which are not reliable.
-	
+	 * 
 	 * @return the full list of referenced projects no matter how deep the module nesting is (including this solution's project); only goes in depth in modules.
 	 * @throws CoreException if something went wrong.
 	 */

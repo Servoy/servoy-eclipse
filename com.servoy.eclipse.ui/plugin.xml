@@ -12,7 +12,7 @@
       </category>
       <view
             name="Solution Explorer"
-            icon="icons/solution.gif"
+            icon="icons/solution.png"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView"
             id="com.servoy.eclipse.ui.views.SolutionExplorerView">
@@ -20,7 +20,7 @@
       <view
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
-            icon="icons/forms.gif"
+            icon="icons/form_hierarchy.png"
             id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
             name="Form Hierarchy">
       </view>
@@ -97,7 +97,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="com.servoy.eclipse.ui.DesignPerspective"
-            icon="icons/windowicon.png"
+            icon="icons/servoy_design.png"
             id="com.servoy.eclipse.ui.DesignPerspective"
             name="Servoy Design">
       </perspective>
@@ -113,7 +113,7 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewFormWizard"
             hasPages="true"
-            icon="icons/new_form_wizard.gif"
+            icon="icons/new_form_wizard.png"
             id="com.servoy.eclipse.ui.NewFormWizard"
             name="Form"
             project="false">
@@ -122,7 +122,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewSolutionWizard"
-            icon="icons/new_solution_wizard.gif"
+            icon="icons/new_solution_wizard.png"
             id="com.servoy.eclipse.ui.NewSolutionWizard"
             name="Servoy Solution"
             project="true">
@@ -131,7 +131,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewStyleWizard"
-            icon="icons/new_style_wizard.gif"
+            icon="icons/new_style_wizard.png"
             id="com.servoy.eclipse.ui.NewStyleWizard"
             name="Style"
             project="false">
@@ -140,7 +140,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewRelationWizard"
-            icon="icons/new_relation_wizard.gif"
+            icon="icons/new_relation_wizard.png"
             id="com.servoy.eclipse.ui.NewRelationWizard"
             name="Relation"
             project="false">
@@ -149,7 +149,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewValueListWizard"
-            icon="icons/new_valuelist_wizard.gif"
+            icon="icons/new_valuelist_wizard.png"
             id="com.servoy.eclipse.ui.NewValueListWizard"
             name="Valuelist"
             project="false">
@@ -158,7 +158,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewMethodWizard"
-            icon="icons/new_method_wizard.gif"
+            icon="icons/new_method_wizard.png"
             id="com.servoy.eclipse.ui.NewMethodWizard"
             name="Method"
             project="false">
@@ -167,7 +167,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewServerWizard"
-            icon="icons/new_server.gif"
+            icon="icons/new_server.png"
             id="com.servoy.eclipse.ui.NewServerWizard"
             name="Database Server"
             project="false">
@@ -176,7 +176,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewPackageProjectWizard"
-            icon="icons/new_solution_wizard.gif"
+            icon="icons/new_solution_wizard.png"
             id="com.servoy.eclipse.ui.NewPackageProjectWizard"
             name="New Package Project"
             project="true">
@@ -191,7 +191,7 @@
    		<wizard
             category="com.servoy.eclipse.ui"
        		class="com.servoy.eclipse.ui.wizards.ExportSolutionWizard"
-       		icon="icons/solution_icon.gif"
+       		icon="icons/solution.png"
        		id="com.servoy.eclipse.ui.ExportSolutionWizard"
        		name="Export Active Solution">
    		</wizard>
@@ -250,7 +250,7 @@
             class="com.servoy.eclipse.ui.editors.I18NEditor"
             default="true"
             extensions="properties"
-            icon="icons/i18n.gif"
+            icon="icons/i18n.png"
             id="com.servoy.eclipse.ui.editors.I18NEditor"
             matchingStrategy="com.servoy.eclipse.core.resource.I18NMatchingStrategy"
             name="I18N Editor">
@@ -262,7 +262,7 @@
             class="com.servoy.eclipse.ui.editors.RelationEditor"
             default="true"
             extensions="rel"
-            icon="icons/relation.gif"
+            icon="icons/relation.png"
             id="com.servoy.eclipse.ui.editors.RelationEditor"
             matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
             name="Relation Editor">
@@ -274,7 +274,7 @@
             class="com.servoy.eclipse.ui.editors.ValueListEditor"
             default="true"
             extensions="val"
-            icon="icons/valuelist.gif"
+            icon="icons/valuelist.png"
             id="com.servoy.eclipse.ui.editors.ValueListEditor"
             matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
             name="ValueList Editor">
@@ -285,7 +285,7 @@
       <editor
             class="com.servoy.eclipse.ui.editors.MediaViewer"
             default="true"
-            icon="icons/image.gif"
+            icon="icons/media.png"
             id="com.servoy.eclipse.ui.editors.MediaViewer"
             matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
             name="Media Viewer">
@@ -297,7 +297,7 @@
             class="com.servoy.eclipse.ui.editors.TableEditor"
             default="true"
             extensions="tbl"
-            icon="icons/portal.gif"
+            icon="icons/portal.png"
             id="com.servoy.eclipse.ui.editors.TableEditor"
             matchingStrategy="com.servoy.eclipse.core.resource.TableMatchingStrategy"
             name="Table Editor">
@@ -311,7 +311,7 @@
       <editor
             class="com.servoy.eclipse.ui.editors.ServerEditor"
             default="true"
-            icon="icons/server.gif"
+            icon="icons/server.png"
             id="com.servoy.eclipse.ui.editors.ServerEditor"
             name="Server Editor">
          <contentTypeBinding
@@ -321,7 +321,7 @@
       <editor
             class="com.servoy.eclipse.ui.editors.SecurityEditor"
             default="true"
-            icon="icons/lock.gif"
+            icon="icons/security.png"
             id="com.servoy.eclipse.ui.editors.SecurityEditor"
             name="User/Group Editor">
          <contentTypeBinding
@@ -423,7 +423,7 @@
          </menu>
          <action
                class="com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate"
-               icon="icons/i18n.gif"
+               icon="icons/i18n.png"
                id="com.servoy.eclipse.ui.actions.OpenI18nDialog"
                label="Show I18N Dialog"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/actions"
@@ -433,7 +433,7 @@
          </action>
          <action
                class="com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate"
-               icon="icons/i18n_ext.gif"
+               icon="icons/i18n_ext.png"
                id="com.servoy.eclipse.ui.actions.I18nExternalizeDialog"
                label="Show Externalize Strings Dialog"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/actions"
@@ -458,7 +458,7 @@
          <action
                class="com.servoy.eclipse.ui.actions.SearchServoyAction"
                definitionId="com.servoy.eclipse.ui.search"
-               icon="icons/search_it.gif"
+               icon="icons/search_servoy_resources.png"
                id="searchServoyResource"
                label="Locate Servoy Resource"
                menubarPath="navigate/open.ext2"
@@ -544,7 +544,7 @@
             visible="true">
          <action
                class="com.servoy.eclipse.ui.actions.ShowFontChooserActionDelegate"
-               icon="icons/text.gif"
+               icon="icons/text.png"
                id="com.servoy.eclipse.ui.actions.OpenFontDialog"
                label="Font Chooser"
                menubarPath="edit/Choosers"
@@ -555,7 +555,7 @@
          </action>
          <action
                class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
-               icon="icons/colorchooser.gif"
+               icon="icons/colorchooser.png"
                id="com.servoy.eclipse.ui.actions.OpenColorDialog"
                label="Color Chooser"
                menubarPath="edit/Choosers"
@@ -667,7 +667,11 @@
       	<markerResolutionGenerator
             class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.debug.SPEC_READ_MARKER">
-     	</markerResolutionGenerator>        
+     	</markerResolutionGenerator>
+     	<markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.methodOverride">
+      	</markerResolutionGenerator>        
      </extension>
      <extension
            point="org.eclipse.ui.commands">
@@ -728,6 +732,12 @@
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
               sequence="F4">
         </key>
+        <key
+            commandId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+            contextId="org.eclipse.dltk.ui.javascriptEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="F4">
+      </key>
      </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">
@@ -813,7 +823,7 @@
                class="com.servoy.eclipse.ui.actions.OpenInScripteditorActionDelegate"
                definitionId="com.servoy.eclipse.ui.OpenFormJsAction"
                enablesFor="1"
-               icon="icons/js.gif"
+               icon="icons/js.png"
                id="com.servoy.eclipse.ui.OpenFormJsAction"
                label="Open in Script Editor"
                menubarPath="open.ext"
@@ -839,7 +849,7 @@
                class="com.servoy.eclipse.ui.actions.OpenFormInClientActionDelegate"
                definitionId="com.servoy.eclipse.ui.OpenFormInClientAction"
                enablesFor="1"
-               icon="icons/showform.gif"
+               icon="icons/open_debug_client.png"
                id="com.servoy.eclipse.ui.OpenFormInClientAction"
                label="Open in Debug Client"
                menubarPath="open.ext"
@@ -861,7 +871,7 @@
                class="com.servoy.eclipse.ui.actions.OpenFormHierarchyActionDelegate"
                definitionId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
                enablesFor="1"
-               icon="icons/forms.gif"
+               icon="icons/form_hierarchy.png"
                id="com.servoy.eclipse.ui.OpenFormHierarchyAction"
                label="Open Form Hierarchy"
                menubarPath="open.ext"
@@ -883,6 +893,19 @@
             </or>
          </visibility>
       </objectContribution>
+      <viewerContribution
+            id="com.servoy.eclipse.ui.viewer.JavascriptEditor"
+            targetID="#JavascriptEditorContext">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenFormHierarchyAction"
+               id="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+               definitionId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+               icon="icons/form_hierarchy.png"
+               label="Open Form Hierarchy"
+               menubarPath="open.ext"
+               tooltip="Open form hierarchy">
+         </action>
+      </viewerContribution>
    </extension>
    <extension
          point="org.eclipse.ui.importWizards">
@@ -893,7 +916,7 @@
       <wizard
             category="com.servoy.eclipse.ui.ImportCategory"
             class="com.servoy.eclipse.ui.wizards.ImportSolutionWizard"
-            icon="icons/solution_icon.gif"
+            icon="icons/solution.png"
             id="com.servoy.eclipse.ui.ImportSolutionWizard"
             name="Import Solution">
       </wizard>
@@ -1267,7 +1290,7 @@
          point="org.eclipse.ui.workingSets">
       <workingSet
             description="Working set for Servoy elements."
-            icon="icons/servoy_workingset.gif"
+            icon="icons/servoy_workingset.png"
             id="com.servoy.eclipse.core.ServoyWorkingSet"
             name="Servoy Elements"
             pageClass="org.eclipse.ui.internal.ide.dialogs.ResourceWorkingSetPage"

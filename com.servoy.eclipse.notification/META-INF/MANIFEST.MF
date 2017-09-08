@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy notification
+Bundle-SymbolicName: com.servoy.eclipse.notification;singleton:=true
+Bundle-Version: 8.3.0.3200
+Bundle-Activator: com.servoy.eclipse.notification.Activator
+Bundle-Vendor: Servoy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ com.servoy.eclipse.model,
+ org.eclipse.ui.forms
+Export-Package: com.servoy.eclipse.notification.rss
+Bundle-ClassPath: .,
+ lib/rome-1.7.5-SNAPSHOT.jar,
+ lib/jdom2-2.0.6.jar,
+ lib/slf4j-api-1.7.21.jar,
+ lib/rome-utils-1.7.5-SNAPSHOT.jar

@@ -19,9 +19,8 @@ package com.servoy.eclipse.ui.editors.relation;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.LiteralDataprovider;
@@ -30,7 +29,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Label provider for relation items in relation editor.
- * 
+ *
  * @author jblok
  */
 
@@ -50,7 +49,7 @@ public class RelationItemLabelProvider extends LabelProvider implements ITableLa
 			RelationRow info = (RelationRow)element;
 			if ((info.getCIFrom() != null) || (info.getCITo() != null))
 			{
-				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				return Activator.getDefault().loadImageFromBundle("delete.png");
 			}
 		}
 		return null;

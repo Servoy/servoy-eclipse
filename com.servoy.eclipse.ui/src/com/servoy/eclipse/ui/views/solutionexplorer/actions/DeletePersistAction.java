@@ -36,7 +36,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ltk.internal.ui.refactoring.RefactoringUIMessages;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 import org.eclipse.ltk.ui.refactoring.resource.DeleteResourcesWizard;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -44,10 +43,12 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -79,7 +80,8 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	{
 		this.type = type;
 
-		setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
+		Activator.getDefault();
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("delete.png"));
 		setText(text);
 		setToolTipText(text);
 	}
@@ -198,7 +200,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 				if (isTemplateChange)
 				{
 					// TODO how nice is this to force-call this just to refresh templates?
-					ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(false);
+					ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(ILoadedNGPackagesListener.CHANGE_REASON.RELOAD, false);
 				}
 
 				if (!formsToDelete.isEmpty())

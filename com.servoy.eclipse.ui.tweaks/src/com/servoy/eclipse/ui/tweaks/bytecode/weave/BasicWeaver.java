@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.tweaks.bytecode.weave;
 
+import org.eclipse.core.runtime.Platform;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
@@ -42,7 +43,47 @@ public abstract class BasicWeaver
 
 		this.weaveClassInternal(classNode);
 
-		ClassWriter cw = new ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_FRAMES);
+		ClassWriter cw = new ClassWriter(classReader, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_FRAMES)
+		{
+			@Override
+			protected String getCommonSuperClass(String type1, String type2)
+			{
+
+				Class< ? > c, d;
+
+				try
+				{
+					c = Platform.getBundle("org.eclipse.jface").loadClass(type1.replace('/', '.'));
+					d = Platform.getBundle("org.eclipse.jface").loadClass(type2.replace('/', '.'));
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e.toString());
+				}
+				if (c.isAssignableFrom(d))
+				{
+					return type1;
+				}
+				if (d.isAssignableFrom(c))
+				{
+					return type2;
+				}
+				if (c.isInterface() || d.isInterface())
+				{
+					return "java/lang/Object";
+				}
+				else
+				{
+					do
+					{
+						c = c.getSuperclass();
+					}
+					while (!c.isAssignableFrom(d));
+					return c.getName().replace('.', '/');
+				}
+
+			}
+		};
 		classNode.accept(cw);
 
 		wovenClass.setBytes(cw.toByteArray());

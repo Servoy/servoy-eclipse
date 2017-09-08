@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -65,6 +64,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IMemento;
@@ -206,10 +206,10 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private static Pair<String, Image> VARIABLES;
 	static
 	{
-		ELEMENTS = new Pair<String, Image>("elements", getImage("element.gif"));
-		PARTS = new Pair<String, Image>("parts", getImage("parts.gif"));
-		METHODS = new Pair<String, Image>("methods", getImage("function.gif"));
-		VARIABLES = new Pair<String, Image>("variables", getImage("form_variable.gif"));
+		ELEMENTS = new Pair<String, Image>("elements", getImage("element.png"));
+		PARTS = new Pair<String, Image>("parts", getImage("parts.png"));
+		METHODS = new Pair<String, Image>("methods", getImage("function.png"));
+		VARIABLES = new Pair<String, Image>("variables", getImage("form_variable.png"));
 	}
 
 	private static Image getImage(String name)
@@ -376,13 +376,13 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				ScriptMethod sm = (ScriptMethod)element;
 				if (sm.isPrivate())
 				{
-					return uiActivator.loadImageFromBundle("private_method.gif");
+					return uiActivator.loadImageFromBundle("method_private.png");
 				}
 				if (sm.isProtected())
 				{
-					return uiActivator.loadImageFromBundle("protected_method.gif");
+					return uiActivator.loadImageFromBundle("method_protected.png");
 				}
-				return sm.isPublic() ? uiActivator.loadImageFromBundle("public_method.gif") : DLTKPluginImages.DESC_METHOD_DEFAULT.createImage();
+				return sm.isPublic() ? uiActivator.loadImageFromBundle("method_public.png") : uiActivator.loadImageFromBundle("method_default.png");
 			}
 			else if (element instanceof Pair< ? , ? >)
 			{
@@ -491,7 +491,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				ArrayList<IPersist> result = new ArrayList<IPersist>();
 				Form f = (Form)parentElement;
-				if (listSelection instanceof ScriptMethod)
+				if (listSelection instanceof ScriptMethod && showMembersAction.isChecked())
 				{
 					ScriptMethod sm = f.getScriptMethod(((ScriptMethod)listSelection).getName());
 					if (sm != null)
@@ -500,7 +500,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 						leavesToExpand.add(sm);
 					}
 				}
-				else if (listSelection instanceof BaseComponent)
+				else if (listSelection instanceof BaseComponent && showMembersAction.isChecked())
 				{
 					for (IPersist p : f.getAllObjectsAsList())
 					{
@@ -595,6 +595,9 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private static final String DIALOGSTORE_SHOW_MEMBERS = "FormHierarchy.SHOW_MEMBERS";
 	public static final String DIALOGSTORE_SHOW_ALL_MEMBERS = "FormHierarchy.SHOW_ALL_MEMBERS";
 	private static final String GROUP_ELEMENTS_BY_TYPE = "GroupElements";
+	private static final String OPEN_FORM_PREFERENCE = "FormHierarchy.OPEN_FORM";
+	public static final int OPEN_IN_FORM_EDITOR = 0;
+	public static final int OPEN_IN_SCRIPT_EDITOR = 1;
 
 	private IDialogSettings fDialogSettings;
 
@@ -634,6 +637,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private IMemento memento;
 	private StatusBarUpdater statusBarUpdater;
 	private IResourceChangeListener resourceChangeListener;
+	private OpenFormAction openInFormEditor;
+	private OpenFormAction openInScriptEditor;
 	private static final String SELECTED_FORM = "FormHierarchy.SELECTION";
 
 	@Override
@@ -664,16 +669,15 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		fParent = parent;
 		fDialogSettings = Activator.getDefault().getDialogSettings();
+		if (fDialogSettings.get(OPEN_FORM_PREFERENCE) == null) fDialogSettings.put(OPEN_FORM_PREFERENCE, OPEN_IN_FORM_EDITOR);
 		fToggleOrientationActions = new OrientationAction[] { new OrientationAction(this, VIEW_ORIENTATION_VERTICAL), new OrientationAction(this,
 			VIEW_ORIENTATION_HORIZONTAL), new OrientationAction(this, VIEW_ORIENTATION_AUTOMATIC) };
-
 		fSplitter = new SashForm(fParent, SWT.NONE);
 		initOrientation();//TODO add preference page & menu for the orientation settings
 
-		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		treeNewAction = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD), "New");
 		overrideAction = new OverrideMethodAction(this);
-
 		createTreeViewer(fSplitter);
 		createListViewer(fSplitter);
 		createSelectionProvider();
@@ -703,8 +707,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
 		statusBarUpdater = new StatusBarUpdater(slManager);
+		statusBarUpdater.setShowModule(true);
 		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(statusBarUpdater);
+		statusBarUpdater.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(statusBarUpdater);
 	}
 
 	private void createSelectionProvider()
@@ -729,12 +736,31 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction.registerAction(ScriptMethod.class, openScript);
 		IAction openPersistEditor = new OpenPersistEditorAction();
 		openAction.registerAction(BaseComponent.class, openPersistEditor);
-		IAction openFormEditor = new OpenFormEditorAction();
-		openAction.registerAction(Form.class, openFormEditor);//TODO preference whether to open form or script
+		final OpenFormEditorAction openFormEditor = new OpenFormEditorAction();
+		openFormEditor.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(openFormEditor);
+		final OpenScriptAction openScriptEditor = new OpenScriptAction();
+		openScriptEditor.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(openScriptEditor);
+		openAction.registerAction(Form.class, new Action()
+		{
+			@Override
+			public void run()
+			{
+				if (fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_FORM_EDITOR)
+				{
+					openFormEditor.run();
+				}
+				else
+				{
+					openScriptEditor.run();
+				}
+			}
+		});
 		openAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(openAction);
 
-		IAction newSubform = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form");
+		IAction newSubform = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.png"), "Create new sub form");
 		treeNewAction.registerAction(Form.class, newSubform);
 		treeNewAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(treeNewAction);
@@ -991,8 +1017,47 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		ToolBarManager lowertbmanager = new ToolBarManager(listToolBar);
 		fillListToolbar(lowertbmanager);
 		lowertbmanager.update(true);
-
 		fillListMenu();
+
+		IActionBars bars = getViewSite().getActionBars();
+		fillViewMenu(bars.getMenuManager());
+	}
+
+	private class OpenFormAction extends Action
+	{
+		private final int selectionValue;
+
+		public OpenFormAction(String text, int selectionValue, String image)
+		{
+			super(text, AS_RADIO_BUTTON);
+			this.selectionValue = selectionValue;
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle(image));
+			setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == selectionValue);
+		}
+
+		@Override
+		public void run()
+		{
+			updateOpenFormPreference(selectionValue);
+		}
+	}
+
+	private void updateOpenFormPreference(int selectionValue)
+	{
+		fDialogSettings.put(OPEN_FORM_PREFERENCE, selectionValue);
+		openInFormEditor.setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_FORM_EDITOR);
+		openInScriptEditor.setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_SCRIPT_EDITOR);
+
+	}
+
+	private void fillViewMenu(IMenuManager menuManager)
+	{
+		MenuManager openSubMenu = new MenuManager("Open Form in");
+		openInFormEditor = new OpenFormAction("Form Editor", OPEN_IN_FORM_EDITOR, "form.png");
+		openSubMenu.add(openInFormEditor);
+		openInScriptEditor = new OpenFormAction("Script Editor", OPEN_IN_SCRIPT_EDITOR, "js.png");
+		openSubMenu.add(openInScriptEditor);
+		menuManager.add(openSubMenu);
 	}
 
 	private void fillListMenu()
@@ -1080,7 +1145,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		showMembersAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(showMembersAction);
 
-		showAllAction = new FormHierarchyFilter(list, false, "inher_co.png", "Show All Inherited Members");
+		showAllAction = new FormHierarchyFilter(list, false, "show_all_inherited.png", "Show All Inherited Members");
 		showAllAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_ALL_MEMBERS));
 		showAllAction.addPropertyChangeListener(new IPropertyChangeListener()
 		{
@@ -1093,16 +1158,16 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		});
 		lowertbmanager.add(showAllAction);
 
-		hideElementsAction = new FormHierarchyFilter(list, false, "hide_elements.gif", "Hide elements");
+		hideElementsAction = new FormHierarchyFilter(list, false, "hide_elements.png", "Hide elements");
 		lowertbmanager.add(hideElementsAction);
 
-		hideMethodsAction = new FormHierarchyFilter(list, false, "hide_methods.gif", "Hide methods");
+		hideMethodsAction = new FormHierarchyFilter(list, false, "hide_method.png", "Hide methods");
 		lowertbmanager.add(hideMethodsAction);
 
-		hidePartsAction = new FormHierarchyFilter(list, false, "hide_parts.gif", "Hide parts");
+		hidePartsAction = new FormHierarchyFilter(list, false, "hide_parts.png", "Hide parts");
 		lowertbmanager.add(hidePartsAction);
 
-		hideVariablesAction = new FormHierarchyFilter(list, false, "hide_variables.gif", "Hide variables");
+		hideVariablesAction = new FormHierarchyFilter(list, false, "hide_variables.png", "Hide variables");
 		lowertbmanager.add(hideVariablesAction);
 	}
 
@@ -1258,5 +1323,12 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public Object getSelectedListElement()
 	{
 		return ((IStructuredSelection)list.getSelection()).getFirstElement();
+	}
+
+	public void open(Object obj)
+	{
+		showMembersAction.clearSelection();
+		showMembersAction.setChecked(obj instanceof ScriptMethod);
+		setSelection(obj);
 	}
 }

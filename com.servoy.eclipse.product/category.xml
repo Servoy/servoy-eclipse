@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="org.eclipse.dltk.core.servoy">
+      <category name="servoy.dltk"/>
+   </feature>
+   <feature id="org.eclipse.dltk.javascript.servoy">
+      <category name="servoy.dltk"/>
+   </feature>
+   <feature id="org.eclipse.emf.common">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature id="org.eclipse.emf.common.ui">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature id="org.eclipse.emf.ecore">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature id="org.eclipse.emf.edit">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature id="org.eclipse.emf.edit.ui">
+      <category name="servoy.emf"/>
+   </feature>
+   <feature id="org.eclipse.draw2d">
+      <category name="servoy.gef.draw2d"/>
+   </feature>
+   <feature id="org.eclipse.gef">
+      <category name="servoy.gef.draw2d"/>
+   </feature>
+   <feature id="com.servoy.css.core">
+      <category name="servoy.css"/>
+   </feature>
+   <feature id="com.servoy.eclipse.feature">
+      <category name="servoy.developer"/>
+   </feature>
+   <category-def name="servoy.developer" label="Servoy Developer"/>
+   <category-def name="servoy.dltk" label="Servoy DLTK"/>
+   <category-def name="servoy.emf" label="Eclipse EMF"/>
+   <category-def name="servoy.gef.draw2d" label="Gef &amp; Draw2d"/>
+   <category-def name="servoy.css" label="CSS Editor"/>
+</site>

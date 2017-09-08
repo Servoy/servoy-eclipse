@@ -39,12 +39,12 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 	public static final RelationLabelProvider INSTANCE_LAST_NAME_ONLY = new RelationLabelProvider(Messages.LabelNone, true, true);
 	public static final RelationLabelProvider INSTANCE_ALL = new RelationLabelProvider(Messages.LabelNone, true, false);
 
-	private static final Image RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("relation.gif");
-	private static final Image GLOBAL_RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation.gif");
-	private static final Image RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("relation_protected.gif");
-	private static final Image GLOBAL_RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation_protected.gif");
-	private static final Image RELATION_PRIVATE_IMAGE = Activator.getDefault().loadImageFromBundle("relation_private.gif");
-	private static final Image GLOBAL_RELATION_PRIVATE_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation_private.gif");
+	private static final Image RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("relation.png");
+	private static final Image GLOBAL_RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation.png");
+	private static final Image RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("relation_protected.png");
+	private static final Image GLOBAL_RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation_protected.png");
+	private static final Image RELATION_PRIVATE_IMAGE = Activator.getDefault().loadImageFromBundle("relation_private.png");
+	private static final Image GLOBAL_RELATION_PRIVATE_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation_private.png");
 
 	private final boolean lastNameOnly;
 	private final boolean showImage;
@@ -85,15 +85,15 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 		{
 			if (PersistEncapsulation.hasEncapsulation(relation, PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))
 			{
-				fileName = relation.isGlobal() ? "global_relation_private.gif" : "relation_private.gif";
+				fileName = relation.isGlobal() ? "global_relation_private.png" : "relation_private.png";
 			}
 			else if (PersistEncapsulation.isModuleScope(relation, null))
 			{
-				fileName = relation.isGlobal() ? "global_relation_protected.gif" : "relation_protected.gif";
+				fileName = relation.isGlobal() ? "global_relation_protected.png" : "relation_protected.png";
 			}
 			else
 			{
-				fileName = relation.isGlobal() ? "global_relation.gif" : "relation.gif";
+				fileName = relation.isGlobal() ? "global_relation.png" : "relation.png";
 			}
 		}
 		return fileName;

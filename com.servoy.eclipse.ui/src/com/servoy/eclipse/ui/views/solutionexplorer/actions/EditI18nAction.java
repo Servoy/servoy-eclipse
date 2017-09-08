@@ -26,12 +26,12 @@ public class EditI18nAction extends Action
 {
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public EditI18nAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("i18n.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("i18n.png"));
 		setText("Edit I18N Messages");
 		setToolTipText("Edit I18N Messages");
 	}

@@ -115,7 +115,7 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 			Image image = null;
 			if (element instanceof Table)
 			{
-				image = Activator.getDefault().loadImageFromBundle("portal.gif");
+				image = Activator.getDefault().loadImageFromBundle("portal.png");
 				try
 				{
 					IServer server = ServoyModel.getServerManager().getServer(((Table)element).getServerName());

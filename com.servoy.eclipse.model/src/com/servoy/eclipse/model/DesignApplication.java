@@ -26,6 +26,7 @@ import java.net.URLStreamHandler;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -132,7 +133,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().blockGUI(reason);
 	}
 
-	
+
 	public void updateUI(int time)
 	{
 		getClient().updateUI(time);
@@ -257,96 +258,96 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 			{
 				String servoyMobileStyle = //
 
-				"label, label.a, label.b, label.c, label.d, label.e {"//
-				+ "color: #101010;" //
-					+ "margin-left:5px;" //
-					+ "background-color: #414141;" //
-					+ "}"//
+					"label, label.a, label.b, label.c, label.d, label.e {"//
+						+ "color: #101010;" //
+						+ "margin-left:5px;" //
+						+ "background-color: #414141;" //
+						+ "}"//
 
-				+ "headertext, headertext.a {"//
-					+ "color: #ffffff;" //
-					+ "background-color: #414141;" //
-					+ "font-weight:bold;" //
-					+ "}"//
+						+ "headertext, headertext.a {"//
+						+ "color: #ffffff;" //
+						+ "background-color: #414141;" //
+						+ "font-weight:bold;" //
+						+ "}"//
 
-				+ "field {"//
-					+ "color: #101010;" //
-					+ "background-color: #F9F9F9;" //
-					+ "}"//
+						+ "field {"//
+						+ "color: #101010;" //
+						+ "background-color: #F9F9F9;" //
+						+ "}"//
 
-				+ "button, button.a, combobox.a, check.a, radio.a, portal.a {"//
-					+ "color: #FFFFFF;" //
-					+ "background-color: #414141;" + "font-weight:bold;" //
-					+ "}"//
+						+ "button, button.a, combobox.a, check.a, radio.a, portal.a {"//
+						+ "color: #FFFFFF;" //
+						+ "background-color: #414141;" + "font-weight:bold;" //
+						+ "}"//
 
-				+ "header, header.a, footer.a,  title_header, title_header.a, title_footer.a {" //
-					+ "background-color: #262626;" //
-					+ "}" //
+						+ "header, header.a, footer.a,  title_header, title_header.a, title_footer.a {" //
+						+ "background-color: #262626;" //
+						+ "}" //
 
-				+ "headertext.b {"//
-					+ "color: #ffffff;" //
-					+ "background-color: #4C83B1;" //
-					+ "font-weight:bold;" //
-					+ "}" //
+						+ "headertext.b {"//
+						+ "color: #ffffff;" //
+						+ "background-color: #4C83B1;" //
+						+ "font-weight:bold;" //
+						+ "}" //
 
-				+ "button.b, combobox.b, check.b, radio.b, portal.b {"//
-					+ "color: #FFFFFF;" //
-					+ "background-color: #4C83B1;" //
-					+ "font-weight:bold;" //
-					+ "}" //
+						+ "button.b, combobox.b, check.b, radio.b, portal.b {"//
+						+ "color: #FFFFFF;" //
+						+ "background-color: #4C83B1;" //
+						+ "font-weight:bold;" //
+						+ "}" //
 
-				+ "header.b, footer.b, title_header.b, title_footer.b {" //
-					+ "background-color: #5A91BF;" //
-					+ "}" //
+						+ "header.b, footer.b, title_header.b, title_footer.b {" //
+						+ "background-color: #5A91BF;" //
+						+ "}" //
 
-				+ "headertext.c {"//
-					+ "color: #101010;" //
-					+ "background-color: #4C83B1;" //
-					+ "font-weight:bold;" //
-					+ "}" //
+						+ "headertext.c {"//
+						+ "color: #101010;" //
+						+ "background-color: #4C83B1;" //
+						+ "font-weight:bold;" //
+						+ "}" //
 
-				+ "button.c, combobox.c, check.c, radio.c, portal.c {" //
-					+ "color: #363636;" //
-					+ "background-color: #F6F6F6;"//
-					+ "font-weight:bold;" //
-					+ "}"//
+						+ "button.c, combobox.c, check.c, radio.c, portal.c {" //
+						+ "color: #363636;" //
+						+ "background-color: #F6F6F6;"//
+						+ "font-weight:bold;" //
+						+ "}"//
 
-				+ "header.c, footer.c, title_header.c, title_footer.c {" //
-					+ "background-color: #E4E4E4;" //
-					+ "}" //
+						+ "header.c, footer.c, title_header.c, title_footer.c {" //
+						+ "background-color: #E4E4E4;" //
+						+ "}" //
 
-				+ "headertext.d {"//
-					+ "color: #101010;" //
-					+ "background-color: #4C83B1;" //
-					+ "font-weight:bold;" //
-					+ "}" //
+						+ "headertext.d {"//
+						+ "color: #101010;" //
+						+ "background-color: #4C83B1;" //
+						+ "font-weight:bold;" //
+						+ "}" //
 
-				+ "button.d, combobox.d, check.d, radio.d, portal.d {" //
-					+ "color: #363636;" //
-					+ "background-color: #F8F8F8;" //
-					+ "font-weight:bold;" //
-					+ "}"//
+						+ "button.d, combobox.d, check.d, radio.d, portal.d {" //
+						+ "color: #363636;" //
+						+ "background-color: #F8F8F8;" //
+						+ "font-weight:bold;" //
+						+ "}"//
 
-				+ "header.d, footer.d, title_header.d, title_footer.d {" //
-					+ "background-color: #C7C7C7;" //
-					+ "}" //
+						+ "header.d, footer.d, title_header.d, title_footer.d {" //
+						+ "background-color: #C7C7C7;" //
+						+ "}" //
 
-				+ "headertext.e {"//
-					+ "color: #101010;" //
-					+ "background-color: #4C83B1;" //
-					+ "font-weight:bold;" //
-					+ "}" //
+						+ "headertext.e {"//
+						+ "color: #101010;" //
+						+ "background-color: #4C83B1;" //
+						+ "font-weight:bold;" //
+						+ "}" //
 
-				+ "button.e, combobox.e, check.e, radio.e, portal.e {" //
-					+ "color: #363636;" //
-					+ "background-color: #FFE87C;" //
-					+ "font-weight:bold;" //
-					+ "}" //
+						+ "button.e, combobox.e, check.e, radio.e, portal.e {" //
+						+ "color: #363636;" //
+						+ "background-color: #FFE87C;" //
+						+ "font-weight:bold;" //
+						+ "}" //
 
-				+ "header.e, footer.e, title_header.e, title_footer.e {" //
-					+ "background-color: #FBEE90;" //
-					+ "}" //
-					;
+						+ "header.e, footer.e, title_header.e, title_footer.e {" //
+						+ "background-color: #FBEE90;" //
+						+ "}" //
+				;
 				flattenedSolution.createStyle("_servoy_mobile", servoyMobileStyle);
 			}
 		}
@@ -471,6 +472,34 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 							// no foundsets in designer
 							return null;
 						}
+
+						@Override
+						public SortColumn getSortColumn(ITable table, String dataProviderID, boolean logIfCannotBeResolved) throws RepositoryException
+						{
+							return null;
+						}
+
+						@Override
+						public List<SortColumn> getSortColumns(ITable t, String options)
+						{
+							return Collections.emptyList();
+						}
+
+						@Override
+						public List<SortColumn> getSortColumns(String dataSource, String options) throws RepositoryException
+						{
+							return Collections.emptyList();
+						}
+
+						@Override
+						public void addFoundSetListener(IFoundSetListener l) throws ServoyException
+						{
+						}
+
+						@Override
+						public void addTableListener(ITable table, com.servoy.j2db.dataprocessing.ITableChangeListener l)
+						{
+						};
 					};
 
 					//((FoundSetManager)foundSetManager).setInfoListener(this);

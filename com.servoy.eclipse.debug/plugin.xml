@@ -99,15 +99,15 @@
          point="org.eclipse.ui.commands">
       <command
             categoryId="com.servoy.eclipse.ui"
-            description="Start SmartClient"
+            description="Launch SmartClient"
             id="com.servoy.eclipse.ui.StartSmartClient"
-            name="Start SmartClient">
+            name="Launch SmartClient">
       </command>
       <command
             categoryId="com.servoy.eclipse.ui"
-            description="Start WebClient"
+            description="Launch WebClient"
             id="com.servoy.eclipse.ui.StartWebClient"
-            name="Start WebClient">
+            name="Launch WebClient">
          <commandParameter
                id="com.servoy.eclipse.debug.browser"
                name="com.servoy.eclipse.debug.browser"
@@ -116,9 +116,9 @@
       </command>
       <command
             categoryId="com.servoy.eclipse.ui"
-            description="Start NGClient"
+            description="Launch NGClient"
             id="com.servoy.eclipse.ui.StartNGClient"
-            name="Start NGClient">
+            name="Launch NGClient">
          <commandParameter
                id="com.servoy.eclipse.debug.browser"
                name="com.servoy.eclipse.debug.browser"
@@ -163,7 +163,7 @@
             allowMultiple="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.debug.scriptingconsole.ScriptingConsole"
-            icon="icons/commandconsole.gif"
+            icon="icons/interactive_console.png"
             id="com.servoy.eclipse.debug.scriptingconsole"
             name="Command Console"
             restorable="true">
@@ -302,43 +302,44 @@
            <toolbar
                  id="com.servoy.eclipse.debug.toolbar">
               <command
-                    commandId="com.servoy.eclipse.ui.StartSmartClient"
-                    icon="icons/launch.gif"
-                    label="Start Debug Smart Client"
-                    style="push">
-              </command>
-              <command
-                    commandId="com.servoy.eclipse.ui.StartWebClient"
-                    icon="icons/launch_web.gif"
-                    id="com.servoy.eclipse.ui.StartWebClient.dynamic"
-                    label="Start Debug Web Client"
-                    style="pulldown">
-              </command>
-              <command
-                    commandId="com.servoy.eclipse.ui.StartNGClient"
-                    icon="icons/launch_ng.gif"
-                    id="com.servoy.eclipse.ui.StartNGClient.dynamic"
-                    label="Start NGClient"
+                    commandId="com.servoy.eclipse.ui.StartClient"
+                    icon="icons/run.png"
+                    id="com.servoy.eclipse.ui.StartClient"
+                    label="Launch Debug Client"
                     style="pulldown">
               </command>
            </toolbar>
         </menuContribution>
         <menuContribution
               allPopups="false"
-              locationURI="menu:com.servoy.eclipse.ui.StartWebClient.dynamic">
-           <dynamic
-                 class="com.servoy.eclipse.debug.handlers.CreateBrowserContributions"
-                 id="com.servoy.eclipse.ui.StartWebClient.dynamic.contributions">
-           </dynamic>
+              locationURI="menu:com.servoy.eclipse.ui.StartClient">
+           <command
+                 commandId="com.servoy.eclipse.ui.StartSmartClient"
+                 id="com.servoy.eclipse.ui.StartSmartClient"
+                 icon="icons/launch.png"
+                 label="Launch Smart Client"
+                 style="push">
+                 <visibleWhen>
+              <with
+                    variable="com.servoy.eclipse.core.smartClientState">
+                 <equals
+                       value="ENABLED">
+                 </equals>
+              </with>
+           </visibleWhen>
+           </command>
         </menuContribution>
         <menuContribution
               allPopups="false"
-              locationURI="menu:com.servoy.eclipse.ui.StartNGClient.dynamic">
-           <dynamic
-                 class="com.servoy.eclipse.debug.handlers.CreateBrowserContributions"
-                 id="com.servoy.eclipse.ui.StartNGClient.dynamic.contributions">
-           </dynamic>
+              class="com.servoy.eclipse.debug.actions.LaunchWebClientContributionFactory"
+              locationURI="menu:com.servoy.eclipse.ui.StartClient">
         </menuContribution>
+        <menuContribution
+              allPopups="false"
+              class="com.servoy.eclipse.debug.actions.LaunchNGClientContributionFactory"
+              locationURI="menu:com.servoy.eclipse.ui.StartClient">
+        </menuContribution>
+        
         <menuContribution
               allPopups="false"
               locationURI="menu:org.eclipse.ui.run?after=breakpointGroup">
@@ -348,30 +349,30 @@
            </separator>
            <command
                  commandId="com.servoy.eclipse.ui.StartWebClient"
-                 icon="icons/launch_web.gif"
-                 label="Start Debug Web Client"
+                 icon="icons/launch_web.png"
+                 label="Launch Debug Web Client"
                  style="push">
            </command>
            <command
                  commandId="com.servoy.eclipse.ui.StartSmartClient"
-                 icon="icons/launch.gif"
-                 label="Start Debug Smart Client"
+                 icon="icons/launch.png"
+                 label="Launch Debug Smart Client"
                  style="push">
            </command>
            <command
                  commandId="com.servoy.eclipse.ui.StartNGClient"
-                 icon="icons/launch_ng.gif"
-                 label="Start NGClient"
+                 icon="icons/launch_ng.png"
+                 label="Launch NGClient"
                  style="push">
            </command>
         </menuContribution>
-        <group
-              id="com.servoy.eclipse.debug.group2"
-              separatorsVisible="true">
-        </group>
      </extension>
      <extension
            point="org.eclipse.ui.handlers">
+         <handler
+              class="com.servoy.eclipse.debug.handlers.StartClientHandler"
+              commandId="com.servoy.eclipse.ui.StartClient">
+        </handler>
         <handler
               class="com.servoy.eclipse.debug.handlers.StartWebClientHandler"
               commandId="com.servoy.eclipse.ui.StartWebClient">

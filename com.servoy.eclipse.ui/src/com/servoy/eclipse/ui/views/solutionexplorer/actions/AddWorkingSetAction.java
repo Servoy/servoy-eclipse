@@ -40,7 +40,7 @@ import com.servoy.j2db.persistence.Solution;
 
 /**
  * Create a new Servoy working set.
- * 
+ *
  * @author lvostinar
  *
  */
@@ -52,7 +52,7 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 	{
 		setText("Add working set");
 		setToolTipText("Add working set");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("servoy_workingset.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("new_servoy_workingset.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -100,8 +100,8 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 				else
 				{
 					// cannot add to non servoy working set
-					UIUtils.reportError("Cannot modify working set", "Working set '" + ws.getName() +
-						"' already exists but is not a Servoy working set. Cannot modify it.");
+					UIUtils.reportError("Cannot modify working set",
+						"Working set '" + ws.getName() + "' already exists but is not a Servoy working set. Cannot modify it.");
 				}
 			}
 		}

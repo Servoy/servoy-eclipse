@@ -21,9 +21,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
@@ -40,6 +42,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.j2db.persistence.WebObjectRegistry;
 
 import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
@@ -70,7 +73,7 @@ public class NGPackageManager extends BaseNGPackageManager
 				// TODO we should really check here if the property that changed does affect web packages!
 				WebComponentSpecProvider.disposeInstance();
 				WebServiceSpecProvider.disposeInstance();
-				reloadAllNGPackages(null);
+				reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.RELOAD, null);
 			}
 		});
 
@@ -87,14 +90,14 @@ public class NGPackageManager extends BaseNGPackageManager
 				{
 					if (updateInfo == RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 					{
-						reloadAllNGPackages(null);
+						reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.RESOURCES_UPDATED_ON_ACTIVE_PROJECT, null);
 					}
 					else if (updateInfo == MODULES_UPDATED)
 					{
 						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
 						clearReferencedNGPackageProjectsCache();
 						//TODO can we improve this?
-						reloadAllNGPackages(null);
+						reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.MODULES_UPDATED, null);
 //						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
 					}
 				}
@@ -102,7 +105,7 @@ public class NGPackageManager extends BaseNGPackageManager
 				public void activeProjectChanged(ServoyProject activeProject)
 				{
 					clearReferencedNGPackageProjectsCache();
-					reloadAllNGPackages(null);
+					reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.ACTIVE_PROJECT_CHANGED, null);
 				}
 			};
 			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
@@ -112,22 +115,30 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	public void reloadAllNGPackages(IProgressMonitor m)
+	public void reloadAllNGPackages(final ILoadedNGPackagesListener.CHANGE_REASON changeReason, IProgressMonitor m)
 	{
-		// do what super does but in a job; this is what code prior to the refactor did as well
-		Job registerAllNGPackagesJob = new Job("Reading ng packages from resources project...")
+		// we need to call it right away if the spec provider is not initalized yet, else we will be to late for certain calls to the spec provider
+		if (WebComponentSpecProvider.getInstance() == null)
 		{
-			@Override
-			public IStatus run(IProgressMonitor monitor)
+			super.reloadAllNGPackages(changeReason, m);
+		}
+		else
+		{
+			// do what super does but in a job; this is what code prior to the refactor did as well
+			Job registerAllNGPackagesJob = new Job("Reading ng packages from resources project...")
 			{
-				// do the actual work
-				NGPackageManager.super.reloadAllNGPackages(monitor);
-				return Status.OK_STATUS;
-			}
+				@Override
+				public IStatus run(IProgressMonitor monitor)
+				{
+					// do the actual work
+					NGPackageManager.super.reloadAllNGPackages(changeReason, monitor);
+					return Status.OK_STATUS;
+				}
 
-		};
-		registerAllNGPackagesJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), serialRule));
-		registerAllNGPackagesJob.schedule();
+			};
+			registerAllNGPackagesJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), serialRule));
+			registerAllNGPackagesJob.schedule();
+		}
 	}
 
 	// commented this out as it gets called from a resource changed event; I don't think we need a job/rule to just re-read what changed
@@ -165,12 +176,18 @@ public class NGPackageManager extends BaseNGPackageManager
 		return PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName);
 	}
 
-	public static IProject createNGPackageProject(String name) throws CoreException
+	public static IProject createNGPackageProject(String name, String location) throws CoreException
 	{
 		IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(name);
-		newProject.create(new NullProgressMonitor());
+		IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(name);
+		if (location != null)
+		{
+			IPath path = new Path(location);
+			path = path.append(name);
+			description.setLocation(path);
+		}
+		newProject.create(description, new NullProgressMonitor());
 		newProject.open(new NullProgressMonitor());
-		IProjectDescription description = newProject.getDescription();
 		description.setNatureIds(new String[] { ServoyNGPackageProject.NATURE_ID, JsonSchemaValidationNature.NATURE_ID });
 		newProject.setDescription(description, new NullProgressMonitor());
 
@@ -178,9 +195,9 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+	public void ngPackagesChanged(ILoadedNGPackagesListener.CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		super.ngPackagesChanged(loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
+		super.ngPackagesChanged(changeReason, loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
 		WebObjectRegistry.clearWebObjectCaches();
 	}
 

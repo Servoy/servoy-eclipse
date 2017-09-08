@@ -73,6 +73,7 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
+import org.sablo.websocket.utils.JSONUtils;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -151,6 +152,7 @@ import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IContentSpecConstants;
@@ -188,7 +190,9 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
@@ -216,6 +220,7 @@ import com.servoy.j2db.util.JavaVersion;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SafeArrayList;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -568,7 +573,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		throws RepositoryException
 	{
 		if (persistContext.getPersist() == propertyDescriptor.valueObject // for beans we show all
-		&& !shouldShow(propertyDescriptor))
+			&& !shouldShow(propertyDescriptor))
 		{
 			return;
 		}
@@ -715,7 +720,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-			throws RepositoryException
+		throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -725,7 +730,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
-		&& persistContext != null && persistContext.getPersist() != null &&
+			&& persistContext != null && persistContext.getPersist() != null &&
 			persistContext.getPersist().getAncestor(IRepository.FORMS) == persistContext.getContext() // only show overrides when element is shown in its 'own' form
 			&&
 			// skip some specific properties
@@ -1825,7 +1830,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					persistContext);
 				if (desc != null)
 				{
-					if (desc.hasDefault())
+					if (desc.hasDefault() && !WebObjectImpl.isPersistMappedProperty(desc)) // persist mapped property defaults are handled in WebObjectImpl directly
 					{
 						Object defaultValue = desc.getDefaultValue();
 						if (desc.getType() instanceof IDesignValueConverter)
@@ -1921,7 +1926,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 		Object defaultValue = getDefaultPersistValue(id);
 		Object propertyValue = getPersistPropertyValue(id);
-		return defaultValue != propertyValue && (defaultValue == null || !defaultValue.equals(propertyValue));
+		return defaultValue != propertyValue &&
+			(defaultValue == null || !(defaultValue.equals(propertyValue) || JSONUtils.areEqual(defaultValue, propertyValue)));
 	}
 
 	public void resetPropertyValue(Object id)
@@ -2082,24 +2088,50 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					changed = true;
 				}
 
-				boolean hasInheritedValue = (value == null && persistContext.getPersist() instanceof ISupportExtendsID &&
-					beanPropertyDescriptor.valueObject == persistContext.getPersist() &&
-					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null &&
-					((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
-				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && !(beanPropertyDescriptor.valueObject instanceof LayoutContainer) &&
-					value == null && !hasInheritedValue)
+				Object beanPropertyPersist = beanPropertyDescriptor.valueObject;
+
+				boolean isDefaultValue = (value == null); // most properties have null as a default value
+				Object defaultSpecValue = null;
+				// the exception to the above comment are properties in custom ng components that define a non-null default value in their .spec file;
+				// for example servoy-extra table component defines it's foundset as "default" : {"foundsetSelector":""} (which means "Form foundset" not "-none-")
+				PropertyDescription specPD = null;
+				if (beanPropertyPersist instanceof IChildWebObject) specPD = ((IChildWebObject)beanPropertyPersist).getPropertyDescription();
+				if (beanPropertyPersist instanceof WebComponent && ((WebComponent)beanPropertyPersist).getImplementation() instanceof WebObjectImpl)
+					specPD = ((WebObjectImpl)(((WebComponent)beanPropertyPersist).getImplementation())).getPropertyDescription();
+				if (specPD != null)
+				{
+					// find out if this property has a default value
+					PropertyDescription propDescription = specPD.getProperty((String)id);
+					if (propDescription != null)
+					{
+						if (propDescription.hasDefault() && !WebObjectImpl.isPersistMappedProperty(propDescription)) // persist mapped prop. default values are handled directly in WebObjectImpl, so ignore those
+						{
+							// so this is a property that has a default value defined in the .spec file; default might not be null
+							defaultSpecValue = propDescription.getDefaultValue();
+							isDefaultValue = JSONUtils.areEqual(defaultSpecValue,
+								ServoyJSONObject.nullToJsonNull(WebObjectImpl.convertFromJavaType(propDescription, value)));
+						}
+					}
+				}
+
+				boolean hasInheritedValue = isDefaultValue && hasInheritedValue(id, beanPropertyPersist);
+
+				if (beanPropertyPersist instanceof AbstractBase && !(beanPropertyPersist instanceof LayoutContainer) && isDefaultValue && !hasInheritedValue)
 				{
 					// just clear the property because we do not need to store null in order to override a value
-					changed |= (((AbstractBase)beanPropertyDescriptor.valueObject).getProperty((String)id) != null);
-					((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
+					Object persistValue = ((AbstractBase)beanPropertyPersist).getProperty((String)id);
+					changed |= (defaultSpecValue == null ? persistValue != null
+						: !JSONUtils.areEqual(defaultSpecValue, ServoyJSONObject.nullToJsonNull(persistValue)));
+
+					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
 				}
-				else if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
+				else if ("name".equals(id) && beanPropertyPersist instanceof ISupportUpdateableName)
 				{
 					if (value instanceof String || value == null)
 					{
-						changed |= !Utils.equalObjects(value, ((ISupportUpdateableName)beanPropertyDescriptor.valueObject).getName());
-						((ISupportUpdateableName)beanPropertyDescriptor.valueObject).updateName(
-							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), (String)value);
+						changed |= !Utils.equalObjects(value, ((ISupportUpdateableName)beanPropertyPersist).getName());
+						((ISupportUpdateableName)beanPropertyPersist).updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
+							(String)value);
 						if (changed)
 						{
 							refreshPropertiesView();
@@ -2108,14 +2140,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					else
 					{
 						// value not a string
-						ServoyLog.logWarning(
-							"Cannot set " + id + " property on object " + beanPropertyDescriptor.valueObject + " with type " + value.getClass(), null);
+						ServoyLog.logWarning("Cannot set " + id + " property on object " + beanPropertyPersist + " with type " + value.getClass(), null);
 					}
 				}
 				else
 				{
-					changed |= !Utils.equalObjects(value,
-						beanPropertyDescriptor.propertyDescriptor.getValue(beanPropertyDescriptor.valueObject, persistContext));
+					changed |= !Utils.equalObjects(value, beanPropertyDescriptor.propertyDescriptor.getValue(beanPropertyPersist, persistContext));
 
 					boolean childObjectValueFromDifferenParent = false;
 					if (value instanceof IChildWebObject)
@@ -2126,14 +2156,17 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						for (IChildWebObject childWebObject : (IChildWebObject[])value)
 						{
-							childObjectValueFromDifferenParent = childWebObject.getParent() != persistContext.getPersist();
-							if (childObjectValueFromDifferenParent) break;
+							if (childWebObject != null)
+							{
+								childObjectValueFromDifferenParent = childWebObject.getParent() != persistContext.getPersist();
+								if (childObjectValueFromDifferenParent) break;
+							}
 						}
 					}
 
 					if (!childObjectValueFromDifferenParent)
 					{
-						beanPropertyDescriptor.propertyDescriptor.setValue(beanPropertyDescriptor.valueObject, value, persistContext);
+						beanPropertyDescriptor.propertyDescriptor.setValue(beanPropertyPersist, value, persistContext);
 					}
 					if ("view".equals(id) && changed)
 					{
@@ -2171,6 +2204,44 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 			}
 		}
+	}
+
+	private boolean hasInheritedValue(Object id, Object beanPropertyPersist)
+	{
+		boolean hasInheritedValue = false;
+
+		if (beanPropertyPersist == persistContext.getPersist())
+		{
+			IPersist persistThatCouldBeExtended = (IPersist)beanPropertyPersist;
+
+			String topMostKey = (String)id;
+			while (persistThatCouldBeExtended instanceof IChildWebObject)
+			{
+				topMostKey = ((IChildWebObject)persistThatCouldBeExtended).getJsonKey();
+				persistThatCouldBeExtended = persistThatCouldBeExtended.getParent();
+			}
+
+			// ok see if there is a value for the property with id "id" inside "beanPropertyPersist" in any of the 'extended' persists
+			while (!hasInheritedValue && persistThatCouldBeExtended instanceof ISupportExtendsID)
+			{
+				// take the next 'super' persist in the inheritance chain
+				persistThatCouldBeExtended = PersistHelper.getSuperPersist((ISupportExtendsID)persistThatCouldBeExtended);
+
+				if (persistThatCouldBeExtended != null)
+				{
+					if (persistThatCouldBeExtended instanceof IBasicWebObject)
+					{
+						JSONObject ownJson = (JSONObject)((IBasicWebObject)persistThatCouldBeExtended).getOwnProperty(
+							StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
+						// we only need to check top most key (the one from the actual extended obj. even for nested objects/array); once anything is set in the 'path' to the subprop we can consider tbat it does have inherited values
+						hasInheritedValue = (!ServoyJSONObject.isJavascriptNullOrUndefined(ownJson) && ownJson.has(topMostKey));
+					}
+					else hasInheritedValue = (((AbstractBase)persistThatCouldBeExtended).getProperty((String)id) != null);
+				}
+			}
+		}
+
+		return hasInheritedValue;
 	}
 
 	public static void refreshPropertiesView()
@@ -2520,7 +2591,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
@@ -2710,8 +2781,13 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			try
 			{
 				Object object = null;
-				if (persistContainingFoundsetProperty instanceof IBasicWebComponent)
-					object = ((IBasicWebComponent)persistContainingFoundsetProperty).getProperty(forFoundsetName);
+				if (persistContainingFoundsetProperty instanceof IBasicWebObject)
+				{
+					IBasicWebObject webObjectContainingFoundsetProperty = (IBasicWebObject)persistContainingFoundsetProperty;
+					if (webObjectContainingFoundsetProperty.hasProperty(forFoundsetName))
+						object = ((IBasicWebComponent)persistContainingFoundsetProperty).getProperty(forFoundsetName);
+					else object = ((IBasicWebComponent)persistContainingFoundsetProperty).getPropertyDefaultValueClone(forFoundsetName);
+				}
 				String foundsetValue = null; // default no table
 				if (object instanceof JSONObject)
 				{

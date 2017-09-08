@@ -49,7 +49,7 @@ public class StartNGClientHandler extends StartWebClientHandler
 	@Override
 	public String getStartTitle()
 	{
-		return "NGClient start";
+		return "NGClient launch";
 	}
 
 	/*
@@ -60,6 +60,7 @@ public class StartNGClientHandler extends StartWebClientHandler
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
+		StartClientHandler.setLastCommand(StartClientHandler.START_NG_CLIENT);
 		monitor.beginTask(getStartTitle(), 5);
 		monitor.worked(1);
 		try

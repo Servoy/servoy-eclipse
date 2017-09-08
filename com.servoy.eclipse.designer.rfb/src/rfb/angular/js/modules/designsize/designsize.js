@@ -2,7 +2,7 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 	
 	var btnDesktopSize = {
 			text: "Desktop",
-			icon: "designsize/imac-64x64.png",
+			icon: "designsize/desktop_preview.png",
 			enabled: true,
 			onclick: function() { 
 				editor.setContentSizeFull(true);
@@ -13,7 +13,7 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 	var lastClicked;
 	var btnTabletSize = {
 			text: "Tablet",
-			icon: "designsize/ipad-landscape-portrait-64x64.png",
+			icon: "designsize/tablet_preview.png",
 			enabled: true,
 			onclick: function() {
 				if(lastClicked == "Tablet") isPortrait = !isPortrait;
@@ -27,7 +27,7 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 
 	var btnMobileSize = {
 			text: "Phone",
-			icon: "designsize/iphone-portrait-64x64.png",
+			icon: "designsize/mobile_preview.png",
 			enabled: true,
 			onclick: function() {
 				if(lastClicked == "Phone") isPortrait = !isPortrait;

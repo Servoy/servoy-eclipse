@@ -50,7 +50,7 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 		super(shell, UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE);
 		setText("Add reference to this Package Project");
 		setToolTipText("Adds a Package Project reference to the active solution or it's modules.");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.png"));
 	}
 
 	@Override

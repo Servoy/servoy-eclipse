@@ -188,12 +188,12 @@ public class FilteredTree extends Composite
 	 */
 	static
 	{
-		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.gif");
+		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.png");
 		if (descriptor != null)
 		{
 			JFaceResources.getImageRegistry().put(CLEAR_ICON, descriptor);
 		}
-		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.gif");
+		descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.png");
 		if (descriptor != null)
 		{
 			JFaceResources.getImageRegistry().put(DISABLED_CLEAR_ICON, descriptor);

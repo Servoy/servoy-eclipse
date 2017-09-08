@@ -128,6 +128,10 @@ public class ElementUtil
 			{
 				name = "components";
 			}
+			else if (name.startsWith("combobox"))
+			{
+				name = "comboboxes";
+			}
 			else
 			{
 				name = name.substring(0, name.lastIndexOf('.'));
@@ -140,45 +144,45 @@ public class ElementUtil
 
 	public static String getPersistImageName(IPersist persist)
 	{
-		if (persist instanceof Portal && ((Portal)persist).isMobileInsetList()) return "insetlist.gif";
+		if (persist instanceof Portal && ((Portal)persist).isMobileInsetList()) return "insetlist.png";
 		if (persist instanceof BaseComponent)
 		{
 			String lookupName = ComponentFactory.getLookupName((BaseComponent)persist);
 			if ("button".equals(lookupName))
 			{
-				return "button.gif";
+				return "button.png";
 			}
 			if ("check".equals(lookupName))
 			{
-				return "chk_on_icon.gif";
+				return "checkbox.png";
 			}
 			if ("combobox".equals(lookupName))
 			{
-				return "field.gif"; // todo: combobox.gif
+				return "combobox.png";
 			}
 			if ("field".equals(lookupName))
 			{
-				return "field.gif";
+				return "textfield.png";
 			}
 			if ("portal".equals(lookupName))
 			{
-				return "portal.gif";
+				return "portal.png";
 			}
 			if ("tabpanel".equals(lookupName))
 			{
-				return "tabs.gif";
+				return "tab.png";
 			}
 			if ("label".equals(lookupName))
 			{
-				return "text.gif";
+				return "label.png";
 			}
 			if ("radio".equals(lookupName))
 			{
-				return "radio_on.gif";
+				return "radiobutton.png";
 			}
 			if ("listbox".equals(lookupName))
 			{
-				return "list.gif";
+				return "listbox.png";
 			}
 			if ("spinner".equals(lookupName))
 			{
@@ -191,11 +195,11 @@ public class ElementUtil
 		}
 		if (persist instanceof Bean)
 		{
-			return "bean.gif";
+			return "ng_component.png";
 		}
 		if (persist instanceof RectShape)
 		{
-			return "rectangle.gif";
+			return "rectangle.png";
 		}
 		if (persist instanceof Relation)
 		{
@@ -203,42 +207,42 @@ public class ElementUtil
 		}
 		if (persist instanceof Media)
 		{
-			return "image.gif";
+			return "media.png";
 		}
 		if (persist instanceof ValueList)
 		{
-			return "valuelists.gif";
+			return "valuelists.png";
 		}
 		if (persist instanceof ScriptCalculation)
 		{
-			return "columncalc.gif";
+			return "columncalc.png";
 		}
 		if (persist instanceof ScriptVariable)
 		{
 			ScriptVariable sv = (ScriptVariable)persist;
-			if (sv.isPrivate()) return "variable_private.gif";
-			if (sv.isPublic()) return "variable_public.gif";
-			if (sv.getScopeName() != null) return "global_variable.gif";
-			else return "form_variable.gif";
+			if (sv.isPrivate()) return "variable_private.png";
+			if (sv.isPublic()) return "variable_public.png";
+			if (sv.getScopeName() != null) return "variable_global.png";
+			else return "form_variable.png";
 		}
 		if (persist instanceof ScriptMethod)
 		{
 			ScriptMethod sm = (ScriptMethod)persist;
-			if (sm.isPrivate()) return "private_method.gif";
-			else if (sm.isProtected()) return "protected_method.gif";
-			else return "public_method.gif";
+			if (sm.isPrivate()) return "method_private.png";
+			else if (sm.isProtected()) return "method_protected.png";
+			else return "method_public.png";
 		}
 		if (persist instanceof LayoutContainer)
 		{
-			return "layoutcontainer.gif";
+			return "layoutcontainer.png";
 		}
 		if (persist instanceof Part)
 		{
-			return "parts.gif";
+			return "parts.png";
 		}
 		if (persist instanceof IWebComponent)
 		{
-			return "bean.gif";
+			return "ng_component.png";
 		}
 
 		return null;
@@ -693,27 +697,21 @@ public class ElementUtil
 		return element1Rectangle.intersects(element2Rectangle);
 	}
 
-	public static String getImageRelPathForFormEncapsulation(Form f)
+	public static String getImageNameForFormEncapsulation(Form f)
 	{
 		String relPath = null;
 		if (f != null)
 		{
-			//designer.gif
+			//designer.png
 			int encapsulation = f.getEncapsulation();
-			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "icons/designer_protected.gif";
+			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "designer_protected.png";
 			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
-				relPath = "icons/designer_private.gif";
+				relPath = "designer_private.png";
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
-				relPath = "icons/designer_public.gif";
-			else relPath = "icons/designer.gif";
+				relPath = "designer_public.png";
+			else relPath = "designer.png";
 		}
 		return relPath;
-	}
-
-	public static String getImageNameForFormEncapsulation(Form form)
-	{
-		String relPath = getImageRelPathForFormEncapsulation(form);
-		return (relPath != null ? relPath.substring(6) : null);
 	}
 
 	public static Image getImageForFormEncapsulation(Form form)
@@ -723,12 +721,12 @@ public class ElementUtil
 		{
 			int encapsulation = (form).getEncapsulation();
 			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE)
-				image = Activator.getDefault().loadImageFromBundle("designer_protected.gif");
+				image = Activator.getDefault().loadImageFromBundle("designer_protected.png");
 			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
-				image = Activator.getDefault().loadImageFromBundle("designer_private.gif");
+				image = Activator.getDefault().loadImageFromBundle("designer_private.png");
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
-				image = Activator.getDefault().loadImageFromBundle("designer_public.gif");
-			else image = Activator.getDefault().loadImageFromBundle("designer.gif");
+				image = Activator.getDefault().loadImageFromBundle("designer_public.png");
+			else image = Activator.getDefault().loadImageFromBundle("designer.png");
 		}
 		return image;
 	}

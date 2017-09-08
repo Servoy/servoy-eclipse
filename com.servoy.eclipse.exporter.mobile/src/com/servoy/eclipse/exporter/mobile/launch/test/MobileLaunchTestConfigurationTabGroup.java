@@ -6,7 +6,7 @@ import org.eclipse.debug.ui.CommonTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
-import com.servoy.eclipse.exporter.mobile.action.StartMobileClientActionDelegate;
+import com.servoy.eclipse.exporter.mobile.action.StartMobileClientHandler;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationTab;
 
 public class MobileLaunchTestConfigurationTabGroup extends AbstractLaunchConfigurationTabGroup
@@ -21,7 +21,7 @@ public class MobileLaunchTestConfigurationTabGroup extends AbstractLaunchConfigu
 			@Override
 			protected String getDefaultApplicationURL()
 			{
-				return StartMobileClientActionDelegate.getDefaultApplicationURL(true);
+				return StartMobileClientHandler.getDefaultApplicationURL(true);
 			}
 
 		}, new CommonTab() }); // added "common" so that the launch configuration can be shared; although the other attributes are not used

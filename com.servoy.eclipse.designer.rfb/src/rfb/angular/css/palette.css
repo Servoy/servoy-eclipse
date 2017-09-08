@@ -8,10 +8,14 @@
 }
 
 .palette-heading {
-	font-weight: 300;
-	font-size: 14px;
+    font-weight: 500;
+	font-size: 12px;
 	cursor: pointer;
-	margin: .3em 0px
+	margin: .3em 0px 0px 0px
+}
+
+.palette-heading:hover {
+	background-color: lightgray;
 }
 
 .palette-heading span {
@@ -25,26 +29,32 @@
 
 .palette ul {
 	list-style-type: none;
-	padding-left: 12px;
-	font-weight: 400;
-	font-size: 12px;
+	padding-left: 28px;
 	cursor: copy
 }
 
 .palette li {
-	padding-top: 3px;
+	padding-top: 0px;
 	white-space: nowrap;
 }
 
 .palette img {
-	width: 1em;
-	height: 1em;
+	width: 16px;
+	height: 16px;
 	display: inline-block;
 	visibility: hidden;
 	margin-right: 4px;
+	vertical-align: middle;
 }
 
 .palette img[src] {
+	visibility: visible
+}
+#move {
+	visibility: hidden;
+}
+
+.palette-heading:hover #move {
 	visibility: visible
 }
 

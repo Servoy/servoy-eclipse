@@ -69,7 +69,7 @@ public class RemovePackageProjectReferenceAction extends Action implements ISele
 		setText("Remove reference to this Package Project");
 		setToolTipText(
 			"Removes a Package Project reference from one of the active modules that references it (the package project itself will not be deleted)");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("remove_module.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("remove_module.png"));
 	}
 
 	@Override

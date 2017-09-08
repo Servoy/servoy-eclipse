@@ -91,7 +91,7 @@ public class LinkWithEditorAction extends Action
 		this.tree = tree;
 		this.list = list;
 		setText("Link with Editor");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("synced.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("link_to_editor.png"));
 	}
 
 	@Override
@@ -224,7 +224,8 @@ public class LinkWithEditorAction extends Action
 						}
 					}
 				}
-				if (file.getName().endsWith(".spec") || file.getName().endsWith(".js") || file.getName().endsWith(".html") || file.getName().endsWith(".json"))
+				if (file.getName().endsWith(".spec") || file.getName().endsWith(".js") || file.getName().endsWith(".html") ||
+					file.getName().endsWith(".json") || file.getName().endsWith(".css"))
 				{
 					if (file.getParent() != null && file.getParent().getParent() != null)
 					{
@@ -352,7 +353,7 @@ public class LinkWithEditorAction extends Action
 				if (obj instanceof PlatformSimpleUserNode &&
 					((PlatformSimpleUserNode)obj).getRealType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
 				{
-					selected = selectWebObjectNode(treeContentProvider, packageName, webObjectName, obj);
+					selected = selectWebObjectNode(treeContentProvider, packageName, webObjectName, obj, file);
 					break;
 				}
 			}
@@ -360,12 +361,13 @@ public class LinkWithEditorAction extends Action
 		if (!selected)
 		{
 			PlatformSimpleUserNode allPackages = treeContentProvider.getAllWebPackagesNode();
-			selectWebObjectNode(treeContentProvider, packageName, webObjectName, allPackages);
+			selectWebObjectNode(treeContentProvider, packageName, webObjectName, allPackages, file);
 		}
 
 	}
 
-	private boolean selectWebObjectNode(SolutionExplorerTreeContentProvider treeContentProvider, String packageName, String webObjectName, Object obj)
+	private boolean selectWebObjectNode(SolutionExplorerTreeContentProvider treeContentProvider, String packageName, String webObjectName, Object obj,
+		IFile file)
 	{
 		for (Object o : treeContentProvider.getChildren(obj))
 		{
@@ -392,6 +394,20 @@ public class LinkWithEditorAction extends Action
 								if (n.length == 2 && webObjectName.equals(n[1]))
 								{
 									tree.setSelection(new StructuredSelection(webObjectNode), true);
+									Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
+									if (elements != null)
+									{
+										for (int i = 0; i < elements.length; i++)
+										{
+											Object element = elements[i];
+											if (((SimpleUserNode)element).getName().equals(file.getName()))
+											{
+												list.getTable().setSelection(new int[] { i });
+												list.getTable().showSelection();
+												break;
+											}
+										}
+									}
 									return true;
 								}
 							}

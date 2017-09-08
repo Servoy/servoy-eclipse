@@ -71,7 +71,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					 return false
 				 }	 
 		      })
-		          
+							    
 			var formName = $webSocket.getURLParameter("f");
 			var formLayout = $webSocket.getURLParameter("l");
 			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
@@ -922,6 +922,13 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					});
 				});
 
+				var fontPromise = $editorService.getSystemFont();
+				fontPromise.then(function(result){
+				    $document[0].body.style.fontFamily = result.font;
+				    $document[0].body.style.fontWeight = 400;
+					$document[0].body.style.fontSize = result.size+'px';
+					$document[0].body.style.lineHeight = '18px';
+				});
 
 				var promise = $editorService.getGhostComponents({
 					"resetPosition": true
@@ -1198,6 +1205,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 		getPartsStyles: function() {
 			return wsSession.callService('formeditor', 'getPartsStyles', null, false)
+		},
+		
+		getSystemFont: function(node) {
+			return wsSession.callService('formeditor', 'getSystemFont', null, false)
 		},
 
 		isInheritedForm: function() {

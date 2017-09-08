@@ -21,14 +21,18 @@ import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.util.IParentOverridable;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Delegate label provider that adds the form inheritance context to the label.
@@ -76,25 +80,70 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 	{
 		String superText = super.getText(value);
 
-		if (!(value instanceof IChildWebObject) && !(value instanceof IChildWebObject[]))
+		IPersist persistToCheckForOverride = persist;
+
+		// get persistToCheckForOverride in case of nested custom objects or arrays of custom objects
+		// also see if any in the parent changing is a default custom object (in which case the value is not overridden)
+		// and see - if we don't have a default value - which one is the deep-most parent that has a non-default value
+		while (persistToCheckForOverride instanceof IChildWebObject)
 		{
-			IPersist realPersist = persist;
-			if (realPersist instanceof IChildWebObject)
-			{
-				realPersist = ((IChildWebObject)realPersist).getParent();
-			}
-			else if (realPersist instanceof IParentOverridable)
-			{
-				realPersist = ((IParentOverridable)realPersist).getParentToOverride();
-			}
-			if (realPersist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)realPersist) &&
-				((AbstractBase)persist).hasProperty((String)propertyId))
-			{
-				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
-			}
+			persistToCheckForOverride = persistToCheckForOverride.getParent();
 		}
 
+		if (persistToCheckForOverride instanceof IParentOverridable)
+		{
+			persistToCheckForOverride = ((IParentOverridable)persistToCheckForOverride).getParentToOverride();
+		}
+
+		boolean isOverridden = false;
+		if (persistToCheckForOverride instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)persistToCheckForOverride))
+		{
+			// ok so the ancestor that can be overridden is overridden; see if the value we are interested in is inherited (set - for most cases or non-default - in case of persist mapped) or not
+			if (value instanceof IChildWebObject || value instanceof IChildWebObject[])
+			{
+				// see if this is a non-default custom object or array of custom object value in parent persist;
+				isOverridden = !isDefaultOrInheritedChildObjectValue(persist, String.valueOf(propertyId));
+			}
+			else
+			{
+				// the value is not persist-mapped; if value is set in current persist then it is overridden
+				if (((AbstractBase)persist).hasProperty((String)propertyId))
+				{
+					isOverridden = true;
+				}
+			}
+
+		}
+
+		if (isOverridden) superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
+
 		return superText;
+	}
+
+	private boolean isDefaultOrInheritedChildObjectValue(IPersist parent, String keyOfValue)
+	{
+		boolean isDefaultOrInheritedValue = true;
+
+		// see if this is a non-default custom object
+		if (parent instanceof IBasicWebObject)
+		{
+			// getJson() would actually return the flattened JSON - so we can't know from it if it's inherited or not - it's already merged
+			// so we use getOwnProperty which only takes the JSON from current persist
+			JSONObject parentJSON = (JSONObject)((IBasicWebObject)parent).getOwnProperty(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
+
+			if (!ServoyJSONObject.isJavascriptNullOrUndefined(parentJSON) && parentJSON.has(keyOfValue))
+			{
+				// non-default value (WebObjectImpl automatically generates IChildWebObjects for default values from .spec, but the json of the parent is then not linked
+				// to the json of the child); we take advantage of that to determine if it's a default spec value for this IChildWebObject or not
+
+				// make sure parent persists are non-default values as well
+				if (parent instanceof IChildWebObject)
+					isDefaultOrInheritedValue = isDefaultOrInheritedChildObjectValue(parent.getParent(), ((IChildWebObject)parent).getJsonKey());
+				else isDefaultOrInheritedValue = false;
+			} // else it is default value
+		} // else should never happen
+
+		return isDefaultOrInheritedValue;
 	}
 
 	/**

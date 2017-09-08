@@ -30,10 +30,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -79,6 +81,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -210,6 +213,7 @@ public class SolutionSerializer
 
 	public static final String PROPERTIESKEY = "@properties=";
 	public static final String TYPEKEY = "@type";
+	public static final String OVERRIDEKEY = "@override";
 
 	/**
 	 *
@@ -743,7 +747,7 @@ public class SolutionSerializer
 			// remove custom properties (extra comment part)
 			obj.remove("customProperties");
 			StringBuilder sb = new StringBuilder();
-			if (currentComment == null)
+			if (currentComment == null || "".equals(currentComment))
 			{
 				generateDefaultJSDoc(obj, sb, userTemplate, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
 			}
@@ -1011,6 +1015,10 @@ public class SolutionSerializer
 		else
 		{
 			sb.append(" *");
+		}
+		if (abstractScriptProvider instanceof ScriptMethod && PersistHelper.getOverridenMethod((ScriptMethod)abstractScriptProvider) != null)
+		{
+			sb.append("\n * " + SolutionSerializer.OVERRIDEKEY).toString();
 		}
 		sb.append("\n " + SV_COMMENT_END + "\n");
 	}
@@ -1568,7 +1576,31 @@ public class SolutionSerializer
 		if (fileForLocation == null) return false; // not a workspace file
 
 		Pair<String, String> filePath = getFilePath(persist, useOldName);
-		return fileForLocation.getFullPath().toPortableString().equals(IPath.SEPARATOR + filePath.getLeft() + filePath.getRight());
+		String fileLocation = fileForLocation.getFullPath().toPortableString();
+		String persistLocation = IPath.SEPARATOR + filePath.getLeft() + filePath.getRight();
+
+		if (fileLocation.equals(persistLocation))
+		{
+			return true;
+		}
+		else if (fileLocation.endsWith(persistLocation))
+		{
+			// in case the persist is in a nested project, check the file path has a projects chain until the persist project
+			String projectsPath = fileLocation.substring(0, fileLocation.length() - persistLocation.length());
+			StringTokenizer projectsPathTokenizer = new StringTokenizer(projectsPath, String.valueOf(IPath.SEPARATOR));
+			List<IProject> allProjects = Arrays.asList(ResourcesPlugin.getWorkspace().getRoot().getProjects());
+			while (projectsPathTokenizer.hasMoreTokens())
+			{
+				String projectName = projectsPathTokenizer.nextToken();
+				if (allProjects.indexOf(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName)) == -1)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		return false;
 	}
 
 	private static String[] getServerNameTableName(TableNode tableNode, boolean useOldName)

@@ -172,11 +172,11 @@ public class I18NExternalizeDialog extends Dialog
 	private Button showOnlyEditedMessagesButton;
 
 	private final ContentSpec contentSpec = StaticContentSpecLoader.getContentSpec();
-	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
-	private final Image elementImage = Activator.getDefault().loadImageFromBundle("element.gif");
-	private final Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
-	private final Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
-	private final Image jsImage = Activator.getDefault().loadImageFromBundle("js.gif");
+	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.png");
+	private final Image elementImage = Activator.getDefault().loadImageFromBundle("element.png");
+	private final Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
+	private final Image tableImage = Activator.getDefault().loadImageFromBundle("portal.png");
+	private final Image jsImage = Activator.getDefault().loadImageFromBundle("js.png");
 	private final ServoyProject project;
 	private ArrayList<ServoyProject> i18nProjects;
 	private HashMap<String, String> defaultMessages;
@@ -466,7 +466,8 @@ public class I18NExternalizeDialog extends Dialog
 				tableNodeFound.addChild(columnNodeFound);
 			}
 
-			TreeNode columnInfoNode = new TreeNode(columnNodeFound, columnInfo, columnInfoTitleText.startsWith("i18n:") ? STATE.EXTERNALIZE : STATE.INTERNALIZE);
+			TreeNode columnInfoNode = new TreeNode(columnNodeFound, columnInfo,
+				columnInfoTitleText.startsWith("i18n:") ? STATE.EXTERNALIZE : STATE.INTERNALIZE);
 			columnNodeFound.addChild(columnInfoNode);
 
 			return columnInfoNode;
@@ -890,33 +891,37 @@ public class I18NExternalizeDialog extends Dialog
 		showOnlyEditedMessagesButton.addSelectionListener(showSelectionListener);
 
 		GroupLayout i18NLayout = new GroupLayout(composite);
-		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
-			i18NLayout.createSequentialGroup().addContainerGap().add(
-				i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, treeViewerComposite, GroupLayout.PREFERRED_SIZE, 0,
-					Short.MAX_VALUE).add(GroupLayout.LEADING, showDatabaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showOnlyEditedMessagesButton, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(
-					i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)).add(
-					i18NLayout.createSequentialGroup().add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(commonPrefix, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).addPreferredGap(
-						LayoutStyle.RELATED).add(commonPrefixApplyButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
-		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
-			i18NLayout.createSequentialGroup().addContainerGap().add(
-				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(filterTextField, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-				treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(showDatabaseMessagesButton,
-				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-				showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-				LayoutStyle.RELATED).add(showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-				LayoutStyle.RELATED).add(showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-				LayoutStyle.RELATED).add(showOnlyEditedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap().add(
-				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(commonPrefixApplyButton,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))));
+		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
+			i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, treeViewerComposite, GroupLayout.PREFERRED_SIZE, 0,
+				Short.MAX_VALUE).add(GroupLayout.LEADING, showDatabaseMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+							GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(GroupLayout.LEADING, showOnlyEditedMessagesButton,
+									GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(
+										i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+											GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(filterTextField, GroupLayout.PREFERRED_SIZE, 0,
+												Short.MAX_VALUE)).add(
+													i18NLayout.createSequentialGroup().add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+															commonPrefix, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).addPreferredGap(
+																LayoutStyle.RELATED).add(commonPrefixApplyButton, GroupLayout.PREFERRED_SIZE,
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
+		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
+			i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+				GroupLayout.PREFERRED_SIZE).add(filterTextField, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
+					treeViewerComposite, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(showDatabaseMessagesButton,
+						GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+							showExternalizedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+								LayoutStyle.RELATED).add(showIgnoredMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+									GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(showEmptyMessagesButton, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+											showOnlyEditedMessagesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+											GroupLayout.PREFERRED_SIZE).addContainerGap().add(
+												i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(commonPrefixLabel, GroupLayout.PREFERRED_SIZE,
+													GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(commonPrefix, 0, GroupLayout.PREFERRED_SIZE,
+														Short.MAX_VALUE).add(commonPrefixApplyButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+															GroupLayout.PREFERRED_SIZE))));
 
 		composite.setLayout(i18NLayout);
 
@@ -1075,8 +1080,9 @@ public class I18NExternalizeDialog extends Dialog
 								{
 									ASTNode parent = ((StringLiteral)node).getParent();
 
-									STATE state = (parent instanceof CallExpression && ((CallExpression)parent).getExpression().toString().equals(
-										StringLiteralVisitor.I18N_EXTERNALIZE_CALLBACK)) ? STATE.EXTERNALIZE : STATE.INTERNALIZE;
+									STATE state = (parent instanceof CallExpression &&
+										((CallExpression)parent).getExpression().toString().equals(StringLiteralVisitor.I18N_EXTERNALIZE_CALLBACK))
+											? STATE.EXTERNALIZE : STATE.INTERNALIZE;
 
 									ASTNode i18nNode = (state == STATE.EXTERNALIZE) ? parent : node;
 									startIdxNodeMap.put(Integer.valueOf(i18nNode.sourceStart()), new Pair<ASTNode, STATE>(i18nNode, state));
@@ -1450,7 +1456,8 @@ public class I18NExternalizeDialog extends Dialog
 			{
 				try
 				{
-					EclipseMessages.writeMessages(editingSolution.getI18nServerName(), editingSolution.getI18nTableName(), projectMessages, workspaceFileAccess);
+					EclipseMessages.writeMessages(editingSolution.getI18nServerName(), editingSolution.getI18nTableName(), projectMessages,
+						workspaceFileAccess);
 
 					// write js i18n keys
 					Iterator<Map.Entry<IPersist, TreeMap<Integer, JSText>>> persistJSTextMapIte = persistJSTextMap.entrySet().iterator();
@@ -1479,7 +1486,8 @@ public class I18NExternalizeDialog extends Dialog
 										if (jstxt.getState() == STATE.IGNORE)
 										{
 											replaceText = "'" + jstxt.getText() + "'";
-											Map<Integer, ArrayList<Pair<ASTNode, STATE>>> linesNodes = persistToLineNumberForASTNodes.get(persistJSTextMapEntry.getKey());
+											Map<Integer, ArrayList<Pair<ASTNode, STATE>>> linesNodes = persistToLineNumberForASTNodes.get(
+												persistJSTextMapEntry.getKey());
 											if (linesNodes != null)
 											{
 												ArrayList<Pair<ASTNode, STATE>> lineNodes = linesNodes.get(Integer.valueOf(line));
@@ -1499,8 +1507,8 @@ public class I18NExternalizeDialog extends Dialog
 										}
 										else if (jstxt.getState() == STATE.EXTERNALIZE)
 										{
-											replaceText = new StringBuilder(StringLiteralVisitor.I18N_EXTERNALIZE_CALLBACK + "('").append(jstxt.getKeyHint()).append(
-												"')").toString();
+											replaceText = new StringBuilder(StringLiteralVisitor.I18N_EXTERNALIZE_CALLBACK + "('").append(
+												jstxt.getKeyHint()).append("')").toString();
 										}
 										else
 										// STATE.INTERNALIZE
@@ -1591,8 +1599,8 @@ public class I18NExternalizeDialog extends Dialog
 			{
 				node = (TreeNode)treeItem.getData();
 				if (node != null && !node.isVisible()) continue;
-				if (node == null || (!node.isElement() && !node.isColumnInfo() && !node.isJSText())) fillNodes(treeItem.getItems(), selectedNodes,
-					onlySelected, onlyChanged);
+				if (node == null || (!node.isElement() && !node.isColumnInfo() && !node.isJSText()))
+					fillNodes(treeItem.getItems(), selectedNodes, onlySelected, onlyChanged);
 				else if ((!onlySelected || treeItem.getChecked()) && (!onlyChanged || node.isChanged())) selectedNodes.add(node);
 			}
 		}
@@ -1745,8 +1753,8 @@ public class I18NExternalizeDialog extends Dialog
 				case I18NExternalizeDialog.COLUMN_TEXT :
 					return treeNode.getText();
 				case I18NExternalizeDialog.COLUMN_KEY :
-					return treeNode.getState() == STATE.INTERNALIZE ? "" : (treeNode.isJSText() && (treeNode.getState() == STATE.IGNORE) ? "$NON-NLS$"
-						: treeNode.getKey());
+					return treeNode.getState() == STATE.INTERNALIZE ? ""
+						: (treeNode.isJSText() && (treeNode.getState() == STATE.IGNORE) ? "$NON-NLS$" : treeNode.getKey());
 				case I18NExternalizeDialog.COLUMN_STATUS :
 					return treeNode.getStateAsString();
 			}

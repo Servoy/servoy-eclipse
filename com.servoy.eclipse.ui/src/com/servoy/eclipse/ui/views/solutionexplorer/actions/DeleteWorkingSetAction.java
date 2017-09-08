@@ -22,11 +22,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 
@@ -40,7 +40,8 @@ public class DeleteWorkingSetAction extends Action implements ISelectionChangedL
 
 	public DeleteWorkingSetAction()
 	{
-		setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
+		Activator.getDefault();
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("delete.png"));
 		setText("Delete working set");
 		setToolTipText("Delete working set");
 	}

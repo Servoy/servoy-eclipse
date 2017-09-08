@@ -32,7 +32,7 @@ import org.eclipse.ui.internal.browser.Messages;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.exporter.mobile.action.StartMobileClientActionDelegate;
+import com.servoy.eclipse.exporter.mobile.action.StartMobileClientHandler;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -108,7 +108,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 				org.eclipse.ui.internal.browser.IBrowserExt ext = null;
 				if (ewb != null && !ewb.getName().equals(Messages.prefSystemBrowser))
 				{
-					//ext := "org.eclipse.ui.browser." + specifiId 
+					//ext := "org.eclipse.ui.browser." + specifiId
 					ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
 					if (ext != null)
 					{
@@ -125,7 +125,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 				}
 				else if (ewb != null && ewb.getName().equals(Messages.prefSystemBrowser))
 				{
-					// default system browser					
+					// default system browser
 					browserList.add((String)possibleBrowsersNames.get("default"));
 				}
 			}
@@ -389,7 +389,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 
 	protected String getDefaultApplicationURL()
 	{
-		return StartMobileClientActionDelegate.getDefaultApplicationURL(false);
+		return StartMobileClientHandler.getDefaultApplicationURL(false);
 	}
 
 	@Override
@@ -426,8 +426,8 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 			String browserName = (String)possibleBrowsersNames.get(browserId);
 			int comboIndexToSelect = Arrays.asList(browserList).indexOf(browserName);
 			combo.select(comboIndexToSelect == -1 ? 0 : comboIndexToSelect);
-			maxTxtWarDeployTime.setText(configuration.getAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME,
-				IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME));
+			maxTxtWarDeployTime.setText(
+				configuration.getAttribute(IMobileLaunchConstants.MAX_WAR_DEPLOYMENT_TIME, IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME));
 			if (maxTxtWarDeployTime.getText().length() == 0) maxTxtWarDeployTime.setText(IMobileLaunchConstants.DEFAULT_MAX_WAR_DEPLOYMENT_TIME);
 			txtCompanyName.setText(configuration.getAttribute(IMobileLaunchConstants.COMPANY_NAME, ""));
 			txtLicenseCode.setText(configuration.getAttribute(IMobileLaunchConstants.LICENSE_CODE, ""));

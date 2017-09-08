@@ -57,7 +57,6 @@ import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
-import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
@@ -94,7 +93,6 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.resource.ImageResource;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -165,6 +163,11 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.ui.runtime.HasRuntimeClientProperty;
+import com.servoy.j2db.ui.runtime.HasRuntimeDesignTimeProperty;
+import com.servoy.j2db.ui.runtime.HasRuntimeElementType;
+import com.servoy.j2db.ui.runtime.HasRuntimeFormName;
+import com.servoy.j2db.ui.runtime.HasRuntimeName;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -244,9 +247,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	SolutionExplorerListContentProvider(SolutionExplorerView v)
 	{
 		view = v;
-		propertiesIcon = loadImage("properties_icon.gif");
-		specialPropertiesIcon = loadImage("special_properties_icon.gif");
-		functionIcon = uiActivator.loadImageFromBundle("function.gif");
+		propertiesIcon = loadImage("properties.png");
+		specialPropertiesIcon = loadImage("special_properties.png");
+		functionIcon = uiActivator.loadImageFromBundle("function.png");
 	}
 
 	public void dispose()
@@ -776,7 +779,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				else
 				{
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + name, UserNodeType.COMPONENT_RESOURCE, resource,
-						uiActivator.loadImageFromBundle("js.gif"));
+						uiActivator.loadImageFromBundle("js.png"));
 					list.add(node);
 				}
 			}
@@ -886,7 +889,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		while (stylesIterator.hasNext())
 		{
 			IRootObject style = stylesIterator.next();
-			UserNode node = new UserNode(style.getName(), UserNodeType.STYLE_ITEM, style, null);
+			UserNode node = new UserNode(style.getName(), UserNodeType.STYLE_ITEM, style, uiActivator.loadImageFromBundle("style.png"));
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1015,7 +1018,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						// developer rendering developer unresponsive for a long time.
 						String dataSource = s.getTableDatasource(tableName);
 						UserNode node = new UserNode(tableName, type, new DataSourceFeedback(dataSource), DataSourceWrapperFactory.getWrapper(dataSource),
-							uiActivator.loadImageFromBundle("portal.gif"));
+							uiActivator.loadImageFromBundle("table.png"));
 						node.setClientSupport(ClientSupport.All);
 						dlm.add(node);
 					}
@@ -1027,7 +1030,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					{
 						String dataSource = s.getTable(name).getDataSource();
 						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource),
-							uiActivator.loadImageFromBundle("portal.gif", true));
+							uiActivator.loadImageFromBundle("portal.png", true));
 						node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
 						node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
 						dlm.add(node);
@@ -1121,7 +1124,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				continue;
 			}
 			Object real = relation == null ? c : new ColumnWrapper(c, new Relation[] { relation });
-			dlm.add(new UserNode(c.getDataProviderID(), type, new ColumnFeedback(prefix, c), real, uiActivator.loadImageFromBundle("column.gif")));
+			dlm.add(new UserNode(c.getDataProviderID(), type, new ColumnFeedback(prefix, c), real, uiActivator.loadImageFromBundle("column.png")));
 		}
 		Iterator<Solution> modules = modulesOfSolution.values().iterator();
 		SortedList<UserNode> sl = new SortedList<UserNode>(NameComparator.INSTANCE);
@@ -1133,7 +1136,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				AggregateVariable av = aggs.next();
 				Object real = relation == null ? av : new ColumnWrapper(av, relation);
-				sl.add(new UserNode(av.getDataProviderID(), type, new ColumnFeedback(prefix, av), real, uiActivator.loadImageFromBundle("columnaggr.gif")));
+				sl.add(new UserNode(av.getDataProviderID(), type, new ColumnFeedback(prefix, av), real, uiActivator.loadImageFromBundle("columnaggr.png")));
 			}
 		}
 		dlm.addAll(sl);
@@ -1148,7 +1151,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				ScriptCalculation sc = calcs.next();
 				Object real = relation == null ? sc : new ColumnWrapper(sc, relation);
 				sl.add(new UserNode(sc.getDataProviderID(), UserNodeType.CALCULATIONS_ITEM, new ColumnFeedback(prefix, sc), real,
-					uiActivator.loadImageFromBundle("columncalc.gif")));
+					uiActivator.loadImageFromBundle("columncalc.png")));
 			}
 		}
 		dlm.addAll(sl);
@@ -1206,7 +1209,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			dlm.add(
 				new UserNode(form.getName(), UserNodeType.FORM_FOUNDSET, form.getName(), form.getName(), form, ElementUtil.getImageForFormEncapsulation(form)));
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
-				uiActivator.loadImageFromBundle("foundset.gif"));
+				uiActivator.loadImageFromBundle("foundset.png"));
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 			if (flatSolution != null)
 			{
@@ -1232,19 +1235,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					nodeText = getScriptMethodSignature(sm, null, false, true, true, true) + " [" + ((Form)sm.getParent()).getName() + "]";
 				}
 
-				Image icon = null;
-				if (sm.isPrivate())
-				{
-					icon = uiActivator.loadImageFromBundle("private_method.gif");
-				}
-				else if (sm.isProtected())
-				{
-					icon = uiActivator.loadImageFromBundle("protected_method.gif");
-				}
-				else
-				{
-					icon = uiActivator.loadImageFromBundle("public_method.gif");
-				}
+				Image icon = getImageForMethodEncapsulation(sm);
 
 				String sampleCode = getScriptMethodSignature(sm, null, true, false, false, false);
 				String tooltipCode = "<html><body><b>" + HtmlUtils.escapeMarkup(getScriptMethodSignature(sm, null, true, true, true, false)) +
@@ -1316,16 +1307,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private Image getImageForVariableEncapsulation(ScriptVariable sv)
 	{
-		if (sv.isPrivate()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_FIELD_PRIVATE);
-		if (sv.isPublic()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_FIELD_PUBLIC);
-		return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_OBJS_FIELD); //dltk default handling
+		if (sv.isPrivate()) return uiActivator.loadImageFromBundle("variable_private.png");
+		if (sv.isPublic()) uiActivator.loadImageFromBundle("variable_public.png");
+		return uiActivator.loadImageFromBundle("variable_default.png");
 	}
 
 	private Image getImageForMethodEncapsulation(ScriptMethod sm)
 	{
-		if (sm.isPrivate()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PRIVATE);
-		if (sm.isProtected()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PROTECTED);
-		return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PUBLIC);
+		if (sm.isPrivate()) return uiActivator.loadImageFromBundle("method_private.png");
+		if (sm.isProtected()) return uiActivator.loadImageFromBundle("method_protected.png");
+		return uiActivator.loadImageFromBundle("method_public.png");
 	}
 
 	private Object[] createGlobalScripts(SimpleUserNode un)
@@ -1366,7 +1357,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			ValueList var = (ValueList)persist;
 			SimpleUserNode node = new UserNode(getDisplayName(var, s), UserNodeType.VALUELIST_ITEM, null, var.getName(), var,
-				uiActivator.loadImageFromBundle(PersistEncapsulation.isModuleScope(var, null) ? "valuelist_protected.gif" : "valuelists.gif"));
+				uiActivator.loadImageFromBundle(PersistEncapsulation.isModuleScope(var, null) ? "valuelist_protected.png" : "valuelist.png"));
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1410,7 +1401,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				exludeMethods = new String[] { "clearFoundSet", "clear", "addFoundSetFilterParam" };
 			}
-			dlm.add(new UserNode(r.getName(), UserNodeType.RELATION, r.getName(), r.getName(), r, uiActivator.loadImageFromBundle("foundset.gif")));
+			dlm.add(new UserNode(r.getName(), UserNodeType.RELATION, r.getName(), r.getName(), r, uiActivator.loadImageFromBundle("foundset.png")));
 			SimpleUserNode[] methods = getJSMethods(RelatedFoundSet.class, r.getName(), null, UserNodeType.RELATION_METHODS, null, exludeMethods);
 
 			genTableColumns(ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(r.getForeignDataSource()), dlm,
@@ -1828,7 +1819,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter.isDeprecated(constantsElementName + (String)element)) continue;
 
 					node = new UserNode((String)element, actionType, new FieldFeedback((String)element, constantsElementName, resolver, scriptObject, ijm),
-						real, uiActivator.loadImageFromBundle("constant.gif"));
+						real, uiActivator.loadImageFromBundle("constant.png"));
 
 					// this field is a constant
 					Field field = (Field)ijm.getField((String)element, true);
@@ -1837,7 +1828,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				else
 				{
 					node = new UserNode((String)element, actionType, constantsElementName + element, null, null, real,
-						uiActivator.loadImageFromBundle("constant.gif"));
+						uiActivator.loadImageFromBundle("constant.png"));
 				}
 				dlm.add(node);
 			}
@@ -2060,9 +2051,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				nodes.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
 			}
 		}
-
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeName.class));
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeElementType.class));
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeDesignTimeProperty.class));
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeClientProperty.class));
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 
+	}
+
+	private List<SimpleUserNode> getJSMethodsFromClass(String prefix, final IBasicWebComponent webcomponent, Class< ? > clazz)
+	{
+		return Arrays.asList(getJSMethodsViaJavaMembers(new InstanceJavaMembers(new DummyScope(), clazz), clazz,
+			ScriptObjectRegistry.getScriptObjectForClass(clazz), webcomponent.getName(), prefix, UserNodeType.FORM_ELEMENTS, webcomponent, null));
 	}
 
 	private SimpleUserNode[] getScriptableMethods(Scriptable scriptable, String elementName, String prefix)

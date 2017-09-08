@@ -42,7 +42,7 @@ public class RefreshAction extends Action
 	{
 		fPart = part;
 		setText(Messages.RefreshAction_refresh);
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("refresh.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("refresh.png"));
 		setActionDefinitionId("org.eclipse.ui.file.refresh");
 //        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);
 	}

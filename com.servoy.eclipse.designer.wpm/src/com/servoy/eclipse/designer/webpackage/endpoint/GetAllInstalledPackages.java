@@ -130,6 +130,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 					if (reader != null)
 					{
 						pack.put("installed", reader.getVersion());
+						File installedResource = reader.getResource();
+						if (installedResource != null) pack.put("installedResource", installedResource.getName());
 						String parentSolutionName = getParentProjectNameForPackage(reader.getResource());
 						pack.put("activeSolution", parentSolutionName != null ? parentSolutionName : activeSolutionName);
 					}
@@ -367,6 +369,10 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	@Override
 	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 	{
+		if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+		{
+			reloadPackages();
+		}
 	}
 
 	public void resourceListenersOn()

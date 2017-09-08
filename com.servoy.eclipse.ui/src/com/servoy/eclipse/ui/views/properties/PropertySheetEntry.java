@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.commands.common.EventManager;
+import org.eclipse.core.runtime.Adapters;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.internal.views.ViewsPlugin;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 import org.eclipse.ui.views.properties.IPropertySheetEntryListener;
@@ -218,8 +218,8 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 			{
 				Object object = propertyDescriptorMaps[i].get(ids[j]);
 				if (object == null ||
-				// see if the descriptors (which have the same id) are
-				// compatible
+					// see if the descriptors (which have the same id) are
+					// compatible
 					!((IPropertyDescriptor)intersection.get(ids[j])).isCompatibleWith((IPropertyDescriptor)object))
 				{
 					intersection.remove(ids[j]);
@@ -413,7 +413,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.views.properties.IPropertySheetEntry#getEditor(org.eclipse.swt.widgets.Composite)
 	 */
 	public CellEditor getEditor(Composite parent)
@@ -516,7 +516,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 		if (provider == null && object != null)
 		{
-			provider = ViewsPlugin.getAdapter(object, IPropertySourceProvider.class, false);
+			provider = Adapters.adapt(object, IPropertySourceProvider.class, false);
 		}
 
 		if (provider != null)
@@ -525,7 +525,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		}
 		else
 		{
-			result = ViewsPlugin.getAdapter(object, IPropertySource.class, false);
+			result = Adapters.adapt(object, IPropertySource.class, false);
 		}
 
 		sources.put(object, result);

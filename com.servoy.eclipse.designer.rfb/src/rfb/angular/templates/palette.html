@@ -3,7 +3,7 @@
 		<div uib-accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
 			<div uib-accordion-group ng-repeat="(packageIndex, package) in packages" is-open="package.isOpen" ng-if="((package.components | filter:{displayName:searchText}).length > 0) || ((package.categories | filter:{displayName:searchText}).length > 0)" >
 				<uib-accordion-heading>
-					<h1 class="palette-heading handle"><i class="glyphicon glyphicon-move"></i>{{package.packageDisplayname}}<span ng-class="package.isOpen ? 'glyphicon glyphicon-chevron-down' : 'glyphicon glyphicon-chevron-right'" style="float: right"></span></h1>
+					<h1 class="palette-heading handle" ng-attr-style="{{systemFont}}"><img ng-src="{{package.isOpen ? 'templates/images/chevron_down.png' : 'templates/images/chevron_right.png'}}" style="margin-right:0"/>{{package.packageDisplayname}}<img id="move" ng-src="templates/images/move.png" style="float:right"/></h1>
 				</uib-accordion-heading>
 			    <div>
 				    <ul>
@@ -20,5 +20,5 @@
 				 </div>
 			</div>
 		</div>
-		<button type="button" class="btn btn-default linkbtn" ng-click="openPackageManager()"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Add components</button>
+		<button type="button" class="btn btn-default linkbtn" ng-click="openPackageManager()"><img ng-src="{{'templates/images/add_components.png'}}"/>Add components</button>
 </div>

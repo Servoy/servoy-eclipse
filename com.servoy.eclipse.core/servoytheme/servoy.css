@@ -1,0 +1,26 @@
+.MPartStack {
+	swt-simple: true;
+}
+
+.MTrimmedWindow.topLevel {
+	margin-top: 3px;
+	margin-bottom: 3px;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+#PerspectiveSwitcher {
+	eclipse-perspective-keyline-color: #F0F0F0 #F0F0F0;
+}
+
+.MToolBar.Draggable {
+	handle-image:  url(./dragHandle.png);
+}
+
+.MToolControl.Draggable {
+	handle-image:  url(./dragHandle.png);
+}
+
+.ModifiedDragFeedback {
+	background-color: #A0A000;
+}

@@ -44,7 +44,7 @@ public class OpenTableAction extends Action implements ISelectionChangedListener
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.png"));
 		setText("Edit table/view");
 		setToolTipText("Edit table/view");
 	}

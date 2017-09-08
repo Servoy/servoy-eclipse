@@ -662,4 +662,7 @@ public class MarkerMessages
 	 */
 	public static ServoyMarker MissingSpecification = new ServoyMarker("{0} specification \"{1}\" from package \"{2}\" is missing.",
 		ServoyBuilder.MISSING_SPEC);
+
+	public static ServoyMarker MethodOverrideProblem = new ServoyMarker("The function \"{0}\" in form \"{1}\" must override a superform method.",
+		ServoyBuilder.METHOD_OVERRIDE);
 }

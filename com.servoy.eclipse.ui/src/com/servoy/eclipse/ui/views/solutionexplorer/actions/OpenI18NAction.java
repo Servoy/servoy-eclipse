@@ -34,14 +34,14 @@ public class OpenI18NAction extends Action implements ISelectionChangedListener
 
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public OpenI18NAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.png"));
 		setText("Open I18N");
 		setToolTipText("Open I18N");
 	}

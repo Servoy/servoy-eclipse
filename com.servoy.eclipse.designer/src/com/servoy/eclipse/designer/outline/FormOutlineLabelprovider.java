@@ -68,11 +68,11 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 	{
 		if (element == FormOutlineContentProvider.PARTS)
 		{
-			return Activator.getDefault().loadImageFromOldLocation("parts.gif");
+			return Activator.getDefault().loadImageFromBundle("parts.png");
 		}
 		if (element == FormOutlineContentProvider.ELEMENTS)
 		{
-			return Activator.getDefault().loadImageFromBundle("element.gif");
+			return Activator.getDefault().loadImageFromBundle("element.png");
 		}
 		if (element instanceof Pair)
 		{
@@ -84,7 +84,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 		}
 		if (element instanceof FormElementGroup)
 		{
-			return Activator.getDefault().loadImageFromBundle("group.gif");
+			return Activator.getDefault().loadImageFromBundle("group.png");
 		}
 		return super.getImage(element);
 	}
@@ -237,11 +237,11 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 			// TODO use the image from the webcomponent spec
 			if (p instanceof WebComponent && "servoycore-formcomponent".equals(((WebComponent)p).getTypeName()))
 			{
-				imageName = "designer.gif";
+				imageName = "designer.png";
 			}
 			else
 			{
-				imageName = "element.gif";
+				imageName = "element.png";
 			}
 		}
 		else return elementNameAndImage.getRight();

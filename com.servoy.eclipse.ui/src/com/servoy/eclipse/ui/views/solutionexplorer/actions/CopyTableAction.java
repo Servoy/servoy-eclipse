@@ -61,7 +61,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 	public CopyTableAction(Shell shell)
 	{
 		this.shell = shell;
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("copy_edit.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("copy_edit.png"));
 		setText("Copy table");
 		setToolTipText("Copy table");
 	}

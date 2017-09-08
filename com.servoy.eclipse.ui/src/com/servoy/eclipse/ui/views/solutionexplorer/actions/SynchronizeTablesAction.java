@@ -34,7 +34,7 @@ import com.servoy.j2db.persistence.IServerInternal;
  * Action that allows the user to check for .dbi files that do not have a corresponding table in the database. If such files are found, the user can choose
  * either to create a new table according to that file, or delete the file.<BR>
  * This action will also create default .dbi files for tables that exist, but do not have a corresponding file.
- * 
+ *
  * @author acostescu
  */
 public class SynchronizeTablesAction extends OpenWizardAction implements ISelectionChangedListener
@@ -44,7 +44,7 @@ public class SynchronizeTablesAction extends OpenWizardAction implements ISelect
 
 	public SynchronizeTablesAction()
 	{
-		super(SynchronizeDBIWithDBWizard.class, Activator.loadImageDescriptorFromBundle("sync_tables.png"), Messages.SolutionExplorerView_synchronizeTables);
+		super(SynchronizeDBIWithDBWizard.class, Activator.loadImageDescriptorFromBundle("sync_dbi.png"), Messages.SolutionExplorerView_synchronizeTables);
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -55,8 +55,8 @@ public class SynchronizeTablesAction extends OpenWizardAction implements ISelect
 		if (state)
 		{
 			// enabled if either the servers node is selected, the resources node is selected, or one or more enabled and valid server nodes are selected
-			if (sel.size() != 1 ||
-				(((SimpleUserNode)sel.getFirstElement()).getType() != UserNodeType.SERVERS && ((SimpleUserNode)sel.getFirstElement()).getType() != UserNodeType.RESOURCES))
+			if (sel.size() != 1 || (((SimpleUserNode)sel.getFirstElement()).getType() != UserNodeType.SERVERS &&
+				((SimpleUserNode)sel.getFirstElement()).getType() != UserNodeType.RESOURCES))
 			{
 				Iterator<SimpleUserNode> it = sel.iterator();
 				while (it.hasNext() && state)

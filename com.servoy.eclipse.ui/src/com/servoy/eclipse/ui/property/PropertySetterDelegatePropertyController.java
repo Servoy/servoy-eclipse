@@ -17,10 +17,11 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.sablo.websocket.utils.JSONUtils;
 
 /**
  * Property descriptor wrapper that implements IPropertySetter.
- * 
+ *
  */
 public abstract class PropertySetterDelegatePropertyController<P, S extends PersistPropertySource> extends DelegatePropertySetterController<P, S>
 {
@@ -46,6 +47,7 @@ public abstract class PropertySetterDelegatePropertyController<P, S extends Pers
 	{
 		Object defaultValue = propertySource.getDefaultPersistValue(getId());
 		Object propertyValue = propertySource.getPersistPropertyValue(getId());
-		return defaultValue != propertyValue && (defaultValue == null || !defaultValue.equals(propertyValue));
+		return defaultValue != propertyValue &&
+			(defaultValue == null || !(defaultValue.equals(propertyValue) || JSONUtils.areEqual(defaultValue, propertyValue)));
 	}
 }

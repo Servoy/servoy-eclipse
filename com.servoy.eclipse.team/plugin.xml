@@ -27,7 +27,7 @@
 		point="org.eclipse.team.ui.configurationWizards">
 		<wizard
 			name="Servoy repository"
-			icon="icons/server.gif"
+			icon="icons/server.png"
 			class="com.servoy.eclipse.team.ui.SharingWizard"
 			id="com.servoy.eclipse.team.ui.SharingWizard">
 		</wizard>
@@ -97,7 +97,7 @@
 		<participant
       		persistent="false"
       		class="com.servoy.eclipse.team.ui.SolutionSynchronizeParticipant"
-      		icon="icons/server.gif"
+      		icon="icons/server.png"
       		name="Servoy"
       		id="com.servoy.eclipse.team.ui.SolutionSynchronizeParticipant"/>
  	</extension>
@@ -174,7 +174,7 @@
      <wizard
            class="com.servoy.eclipse.team.ui.SynchronizeWizard"
            description="Synchronize solution from Servoy repository"
-           icon="icons/server.gif"
+           icon="icons/server.png"
            id="com.servoy.eclipse.team.ui.SynchronizeWizard"
            name="Servoy">
      </wizard>

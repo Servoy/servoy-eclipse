@@ -33,7 +33,7 @@ import com.servoy.j2db.persistence.Style;
 
 /**
  * This action opens in the editor the style element currently selected in the outline of the solution view.
- * 
+ *
  * @author acostescu
  */
 public class OpenStyleAction extends Action implements ISelectionChangedListener
@@ -43,14 +43,14 @@ public class OpenStyleAction extends Action implements ISelectionChangedListener
 
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public OpenStyleAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.png"));
 		setText("Open style");
 		setToolTipText("Open style");
 	}

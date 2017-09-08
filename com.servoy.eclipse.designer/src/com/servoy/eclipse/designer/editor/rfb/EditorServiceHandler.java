@@ -20,7 +20,10 @@ package com.servoy.eclipse.designer.editor.rfb;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
@@ -105,6 +108,20 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("moveComponent", new MoveInResponsiveLayoutHandler(editorPart));
 		configuredHandlers.put("createComponent", new CreateComponentHandler(editorPart, selectionProvider));
 		configuredHandlers.put("getPartsStyles", new GetPartStylesHandler(editorPart));
+		configuredHandlers.put("getSystemFont", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
+				JSONObject result = new JSONObject();
+				result.put("font", f.getFontData()[0].getName());
+				int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / 72f);
+				result.put("size", pxHeight);
+				return result;
+			}
+		});
 		configuredHandlers.put("createComponents", new CreateComponentsHandler(editorPart, selectionProvider));
 		configuredHandlers.put("openElementWizard", new OpenElementWizardHandler(editorPart, fieldPositioner, selectionProvider));
 		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(fieldPositioner));

@@ -42,7 +42,7 @@ public class ActivateSolutionAction extends Action implements ISelectionChangedL
 	{
 		setText(Messages.SolutionExplorerView_activateSolution);
 		setToolTipText(Messages.SolutionExplorerView_activateSolutionTooltip);
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("active_solution.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("activate_solution.png"));
 	}
 
 	@Override

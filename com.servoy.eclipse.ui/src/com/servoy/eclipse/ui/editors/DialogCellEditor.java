@@ -51,7 +51,7 @@ import com.servoy.eclipse.ui.Activator;
 public abstract class DialogCellEditor extends org.eclipse.jface.viewers.DialogCellEditor implements IDialogDirectCellEditor
 {
 	public static final ILabelProvider DEFAULT_LABEL_PROVIDER = new LabelProvider();
-	public static final Image OPEN_IMAGE = Activator.getDefault().loadImageFromBundle("open.gif");
+	public static final Image OPEN_IMAGE = Activator.getDefault().loadImageFromBundle("open.png");
 
 	private Button editorButton;
 	private Control contents;

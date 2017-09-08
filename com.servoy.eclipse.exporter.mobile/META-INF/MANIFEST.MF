@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Mobile Exporter Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.exporter.mobile;singleton:=true
-Bundle-Version: 8.2.0.3100
+Bundle-Version: 8.3.0.3200_b1
 Bundle-Activator: com.servoy.eclipse.exporter.mobile.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.model,
@@ -20,9 +20,10 @@ Require-Bundle: com.servoy.eclipse.model,
  com.servoy.eclipse.model.exporter.mobile,
  org.eclipse.ui.ide,
  org.maven.ide.eclipse.grouplayout,
- org.apache.commons.collections;bundle-version="3.2.1",
+ org.apache.commons.collections,
  org.apache.httpcomponents.httpcore,
- org.apache.httpcomponents.httpclient
+ org.apache.httpcomponents.httpclient,
+ com.servoy.eclipse.debug
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

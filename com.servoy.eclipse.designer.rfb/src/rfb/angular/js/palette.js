@@ -30,6 +30,11 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 				$editorService.openPackageManager();
 			}
 			
+			var fontPromise = $editorService.getSystemFont();
+			fontPromise.then(function(result){
+			    $scope.systemFont = 'font-family: '+result.font + '; font-size: '+result.size+'px; font-weight: 400;';
+			});
+			
 			var utils = $selectionUtils.getUtilsForScope($scope);
 
 			var layoutType = null;

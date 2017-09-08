@@ -1,0 +1,178 @@
+<html>
+
+<head>
+    <script src="assets/js/jquery-3.2.0.min.js"></script>
+    <script src="assets/js/svy_template.js"></script>
+    <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+
+<body>
+    <!-- Welcome Template -->
+    <div class="popup-base" data-template="welcome" style="display: none;">
+        <div class="body body-welcome">
+            <h1 id="popup-title">Popup Title</h1>
+            <div class="step-indicator active"></div>
+            <div class="sub-title" id="sub-title"></div>
+            <div class="image" id="image"></div>
+            <a class="continue" id="continue">Button</a>
+            <span>or</span>
+            <a href="javascript:SVY_TEMPLATE.nextStep()" class="start next">Get started <img src="assets/img/arrow-next.svg" /></a>
+        </div>
+    </div>
+    <!-- END -->
+
+    <!-- Welcome Button Template -->
+    <div class="popup-base" data-template="welcome-button" style="display: none;">
+        <div class="body body-welcome-button">
+            <div class="header-guy">
+                <div class="col-50">
+                    <div class="text">
+                        <h1 id="popup-title">Popup Title</h1>
+                        <div class="step-indicator active"></div>
+                        <div class="sub-title" id="sub-title"></div>
+                    </div>
+                </div>
+                <div class="col-50 img">
+                    <img src="assets/img/welcome-guy.png" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="button-area"></div>
+        </div>
+    </div>
+    <!-- END -->
+
+    <!-- Two List Template -->
+    <div class="popup-base" data-template="two-list" style="display: none;">
+        <div class="header">
+            <h1 id="popup-title">Popup Title</h1>
+            <div class="steps"></div>
+            <div class="sub-title" id="sub-title"></div>
+        </div>
+        <div class="body">
+            <div class="two-list-menu">
+                <div class="menu" id="menu-left">
+                    <h2>Create new</h2>
+                    <ul></ul>
+                </div>
+                <div class="menu" id="menu-right">
+                    <h2>Create new</h2>
+                    <ul>
+                        <li>
+                            <a><img src="assets/img/icon-form.png" /> Form</a>
+                        </li>
+                        <li>
+                            <a><img src="assets/img/icon-database.png" /> Database server</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="footer">
+                <div class="button-bar">
+                    <a href="javascript:SVY_TEMPLATE.prevStep()" class="prev"><img src="assets/img/arrow-prev.svg" /> Back</a>
+                    <a href="javascript:SVY_TEMPLATE.nextStep()" class="next">Next <img src="assets/img/arrow-next.svg" /></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END -->
+
+    <!-- Two Icon Template -->
+    <div class="popup-base" data-template="two-icon" style="display: none;">
+        <div class="header">
+            <h1 id="popup-title">Popup Title</h1>
+            <div class="steps"></div>
+            <div class="sub-title" id="sub-title"></div>
+        </div>
+        <div class="body">
+            <div class="two-icon-icons" id="two-icon-icons">
+                <div class="center"></div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="button-bar">
+                <a href="javascript:SVY_TEMPLATE.prevStep()" class="prev"><img src="assets/img/arrow-prev.svg" /> Back</a>
+                <a href="javascript:SVY_TEMPLATE.nextStep()" class="next">Next <img src="assets/img/arrow-next.svg" /></a>
+            </div>
+        </div>
+    </div>
+    <!-- End -->
+
+    <!-- Three Icon Template -->
+    <div class="popup-base" data-template="three-icon" style="display: none;">
+        <div class="header">
+            <h1 id="popup-title">Popup Title</h1>
+            <div class="steps"></div>
+            <div class="sub-title" id="sub-title"></div>
+        </div>
+        <div class="body">
+            <div class="three-icon-icons" id="three-icon-icons">
+                <div class="center"></div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="button-bar">
+                <a href="javascript:SVY_TEMPLATE.prevStep()" class="prev"><img src="assets/img/arrow-prev.svg" /> Back</a>
+                <a href="javascript:SVY_TEMPLATE.nextStep()" class="next">Next <img src="assets/img/arrow-next.svg" /></a>
+            </div>
+        </div>
+    </div>
+    <!-- End -->
+
+    <!-- Detailed Text Template -->
+    <div class="popup-base" data-template="detailed" style="display: none;">
+        <div class="body body-detailed">
+            <div class="header">
+                <h1 id="popup-title">Popup Title</h1>
+                <div class="steps"></div>
+                <div class="sub-title" id="sub-title"></div>
+            </div>
+            <div class="body">
+                <div class="detailed-body" id="detailed-body">
+                    <h2 id="title"></h2>
+                    <p id="intro-text"></p>
+                    <span><img src="assets/img/dots.png" /> More</span>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="button-bar">
+                    <a href="javascript:SVY_TEMPLATE.prevStep()" class="prev"><img src="assets/img/arrow-prev.svg" /> Back</a>
+                    <a href="javascript:SVY_TEMPLATE.nextStep()" class="next">Next <img src="assets/img/arrow-next.svg" /></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END -->
+
+    <!-- Textual Wizard Template -->
+    <div class="popup-base" data-template="textual" style="display: none;">
+        <div class="body body-textual">
+            <div class="textual">
+                <div class="col-left">
+                    <div class="textual-image"></div>
+                </div>
+                <div class="col-right">
+                    <h1 id="popup-title">Popup Title</h1>
+                    <div id="sub-title"></div>
+                    <div id="intro-text"></div>
+                    <div class="list" id="list-items">
+                        <div class="list-title" id="list-title"></div>
+                        <ul class="list-items" id="list-items"></ul>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="footer backgrounded">
+            <div class="steps"></div>
+            <div class="button-bar">
+                <a href="javascript:SVY_TEMPLATE.prevStep()" class="prev"><img src="assets/img/arrow-prev.svg" /> Back</a>
+                <a href="javascript:SVY_TEMPLATE.nextStep()" class="next">Next <img src="assets/img/arrow-next.svg" /></a>
+            </div>
+        </div>
+    </div>
+    <!-- End -->
+</body>
+
+</html>

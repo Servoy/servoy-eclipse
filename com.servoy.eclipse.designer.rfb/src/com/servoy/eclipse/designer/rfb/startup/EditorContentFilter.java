@@ -20,8 +20,10 @@ package com.servoy.eclipse.designer.rfb.startup;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.Filter;
@@ -40,6 +42,7 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.util.HTTPUtils;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -50,7 +53,6 @@ import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
-import com.servoy.j2db.util.HTTPUtils;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -94,9 +96,8 @@ public class EditorContentFilter implements Filter
 				Set<String> formScripts = new HashSet<String>();
 				formScripts.add("js/servoy-components.js?x=" + System.currentTimeMillis());
 //				formScripts.add("solutions/" + solution + "/forms/" + form + ".js");
-				HashMap<String, String> variableSubstitution = new HashMap<String, String>();
-				variableSubstitution.put("orientation", String.valueOf(0)); // fs.getSolution().getTextOrientation()
-				ArrayList<String> css = new ArrayList<String>();
+				Map<String, Object> variableSubstitution = Collections.singletonMap("orientation", (Object)Integer.valueOf(0)); // fs.getSolution().getTextOrientation()
+				List<String> css = new ArrayList<String>();
 				css.add("css/servoy.css");
 				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebLayoutSpecification> entry : componentsSpecProviderState.getLayoutSpecifications().values())
@@ -129,8 +130,8 @@ public class EditorContentFilter implements Filter
 						formScripts.addAll(entry.getJsDesignLibrary());
 					}
 				}
-				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts, null,
-					variableSubstitution, w, null, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
+				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), css, formScripts, null, variableSubstitution, w, null,
+					NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
 				w.flush();
 				return;
 			}

@@ -33,6 +33,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.HtmlUtils;
@@ -46,6 +47,7 @@ public class StatusBarUpdater implements ISelectionChangedListener
 	private final IStatusLineManager fStatusLineManager;
 	private ScrolledFormText statusBarContribution;
 	private final ControlContribution controlContribution;
+	private boolean showModule = false;
 
 	public StatusBarUpdater(IStatusLineManager statusLineManager)
 	{
@@ -100,6 +102,10 @@ public class StatusBarUpdater implements ISelectionChangedListener
 		}
 	}
 
+	public void setShowModule(boolean show)
+	{
+		showModule = show;
+	}
 
 	protected String formatMessage(ISelection sel)
 	{
@@ -123,6 +129,10 @@ public class StatusBarUpdater implements ISelectionChangedListener
 				else
 				{
 					result = selObj.toString();
+				}
+				if (showModule && (selObj instanceof IPersist))
+				{
+					result += " [" + ((IPersist)selObj).getRootObject().getName() + "]";
 				}
 			}
 		}

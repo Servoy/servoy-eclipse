@@ -61,7 +61,7 @@ import com.servoy.j2db.util.Pair;
 public class MobileListElementEditpart extends BaseGraphicalEditPart implements IPersistChangeListener
 {
 	public static final Image COUNTBUBBLE_IMAGE = Activator.loadImageDescriptorFromBundle("mobile/list_countbubble.png").createImage();
-	public static final Image IMAGE_IMAGE = Activator.loadImageDescriptorFromBundle("image.gif").createImage();
+	public static final Image IMAGE_IMAGE = Activator.loadImageDescriptorFromBundle("media.png").createImage();
 
 	public static enum MobileListElementType
 	{

@@ -43,7 +43,7 @@ public abstract class ImportZipPackageAction extends Action
 	public ImportZipPackageAction(SolutionExplorerView viewer, String actionText, String actionTooltip)
 	{
 		this.viewer = viewer;
-		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.png"));
 		setText(actionText);
 		setToolTipText(actionTooltip);
 	}

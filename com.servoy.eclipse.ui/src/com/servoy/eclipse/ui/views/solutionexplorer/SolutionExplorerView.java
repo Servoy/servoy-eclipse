@@ -206,6 +206,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
@@ -591,7 +592,7 @@ public class SolutionExplorerView extends ViewPart
 
 		ViewLabelProvider()
 		{
-			null_image = Activator.getDefault().loadImageFromBundle("gray_dot.gif");
+			null_image = Activator.getDefault().loadImageFromBundle("gray_dot.png");
 		}
 
 		@Override
@@ -756,14 +757,14 @@ public class SolutionExplorerView extends ViewPart
 				if (selFirstEl instanceof PlatformSimpleUserNode && ((SimpleUserNode)selFirstEl).getType() == UserNodeType.FORM)
 				{
 					Form f = (Form)((PlatformSimpleUserNode)selFirstEl).getRealObject();
-					ImageDescriptor imgd = Activator.loadImageDescriptorFromBundle("designer_public.gif");
+					ImageDescriptor imgd = Activator.loadImageDescriptorFromBundle("designer_public.png");
 					switch (f.getEncapsulation())
 					{
 						case PersistEncapsulation.MODULE_SCOPE :
-							imgd = Activator.loadImageDescriptorFromBundle("designer_protected.gif");
+							imgd = Activator.loadImageDescriptorFromBundle("designer_protected.png");
 							break;
 						case PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE :
-							imgd = Activator.loadImageDescriptorFromBundle("designer_private.gif");
+							imgd = Activator.loadImageDescriptorFromBundle("designer_private.png");
 							break;
 					}
 					openNewSubFormWizardAction.setImageDescriptor(imgd);
@@ -2857,10 +2858,10 @@ public class SolutionExplorerView extends ViewPart
 		openSqlEditorAction = new OpenSqlEditorAction();
 
 		IAction newForm = new OpenNewFormWizardAction();
-		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution_icon.gif"),
+		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadDefaultImageDescriptorFromBundle("solution.png"),
 			"Create new solution");
-		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
-		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style")
+		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadDefaultImageDescriptorFromBundle("module.png"), "Create new module");
+		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style")
 		{
 			@Override
 			public boolean isEnabled()
@@ -2868,10 +2869,8 @@ public class SolutionExplorerView extends ViewPart
 				return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 			}
 		};
-		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("export_wiz.gif"),
-			"File Export");
-		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("import_wiz.gif"),
-			"Import solution");
+		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromBundle("export.png"), "File Export");
+		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromBundle("import.png"), "Import solution");
 		i18nExternalizeAction = new I18NExternalizeAction();
 		i18nCreateFromDBAction = new I18NReadFromDBAction();
 		i18nWriteToDBAction = new I18NWriteToDBAction();
@@ -2934,7 +2933,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS,
-			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new form component"));
+			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("new_form_component.png"), "Create new form component"));
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
@@ -2950,7 +2949,7 @@ public class SolutionExplorerView extends ViewPart
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		openNewSubFormWizardAction = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form");
+		openNewSubFormWizardAction = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("form.png"), "Create new sub form");
 		newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);
@@ -2962,7 +2961,7 @@ public class SolutionExplorerView extends ViewPart
 		newVariable = new NewVariableAction(this);
 		newValueList = new NewValueListAction(this);
 
-		newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style");
+		newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style");
 		importMedia = new ImportMediaAction(this);
 		newRelation = new NewRelationAction(this);
 		newForm = new OpenNewFormWizardAction();
@@ -2994,7 +2993,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInListSecondary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newForm);
 		newActionInListSecondary.registerAction(UserNodeType.VIEW, newForm);
 
-		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 
 		IAction openScript = new OpenScriptAction();
 		openAction.registerAction(UserNodeType.FORM_METHOD, openScript);
@@ -3024,7 +3023,7 @@ public class SolutionExplorerView extends ViewPart
 		IAction addComponentIconAction = new AddComponentIconResourceAction(this);
 		addComponentIcon.registerAction(UserNodeType.COMPONENT, addComponentIconAction);
 
-		deleteActionInList = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete");
+		deleteActionInList = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteMedia = new DeleteMediaAction("Delete media", this);
 		IAction deleteMediaFolder = new DeleteMediaAction("Delete media", this);
 		IAction deleteValueList = new DeletePersistAction(UserNodeType.VALUELIST_ITEM, "Delete value list");
@@ -3081,7 +3080,7 @@ public class SolutionExplorerView extends ViewPart
 
 		debugMethodAction = new DebugMethodAction(this);
 
-		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		IAction openRelation = new OpenRelationAction(); // must be another instance
 		// (in order to use only
 		// selections from the tree)
@@ -3102,7 +3101,7 @@ public class SolutionExplorerView extends ViewPart
 		openActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.VIEW, openTableInTree);
 
-		deleteActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete");
+		deleteActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteForm = new DeletePersistAction(UserNodeType.FORM, "Delete form");
 		deleteRelation = new DeletePersistAction(UserNodeType.RELATION, "Delete relation");
 		IAction deleteSolution = new DeleteSolutionAction(shell);
@@ -3653,17 +3652,17 @@ public class SolutionExplorerView extends ViewPart
 								}
 								else
 								{
-									scaledImage = uiActivator.loadImageFromBundle("image.gif");
+									scaledImage = uiActivator.loadImageFromBundle("media.png");
 								}
 							}
 							catch (SWTException e)
 							{
-								scaledImage = uiActivator.loadImageFromBundle("image.gif");
+								scaledImage = uiActivator.loadImageFromBundle("media.png");
 							}
 						}
 						else
 						{
-							if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("image.gif");
+							if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("media.png");
 						}
 					}
 					String mediaInfo = mediaNode.getInfo();
@@ -3673,7 +3672,7 @@ public class SolutionExplorerView extends ViewPart
 				else if (mediaNode.getType() == MediaNode.TYPE.FOLDER && mediaNodeTypeFilter.contains(MediaNode.TYPE.FOLDER))
 				{
 					node = new PlatformSimpleUserNode(mediaNode.getName(), UserNodeType.MEDIA_FOLDER, mediaNode,
-						uiActivator.loadImageFromBundle("media_folder.gif"));
+						uiActivator.loadImageFromBundle("media_folder.png"));
 				}
 
 				if (node != null) dlm.add(node);
@@ -3866,31 +3865,54 @@ public class SolutionExplorerView extends ViewPart
 				UserNode unElem = (UserNode)element;
 				if (unElem.getRealObject() instanceof ScriptMethod || unElem.getRealObject() instanceof ScriptVariable)
 				{
+					String name = ElementUtil.getPersistImageName((IPersist)unElem.getRealObject());
+
 					//problem (warning/error) decoration
 					int severity = getProblemType(unElem);
-					if (severity == IMarker.SEVERITY_ERROR) imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
-					else if (severity == IMarker.SEVERITY_WARNING) imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
+					if (severity == IMarker.SEVERITY_ERROR)
+					{
+						imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
+						name += "_DESC_OVR_ERROR";
+					}
+					else if (severity == IMarker.SEVERITY_WARNING)
+					{
+						imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
+						name += "_DESC_OVR_WARNING";
+					}
 
-					resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage() : image);
-
+					boolean isDeprecated = false;
 					//deprecated decoration for vars/functions
 					if (unElem.getRealObject() instanceof ISupportDeprecatedAnnotation)
 					{
 						ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)unElem.getRealObject();
-						if (isda.isDeprecated())
-						{
-							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
-						}
+						isDeprecated = isda.isDeprecated();
+						if (isDeprecated) name += "_depr";
 					}
 
+					boolean isConstructor = false;
 					//constructor decoration for functions
 					if (unElem.getRealObject() instanceof ScriptMethod)
 					{
 						ScriptMethod sm = (ScriptMethod)unElem.getRealObject();
-						if (sm.isConstructor())
+						isConstructor = sm.isConstructor();
+						if (isConstructor) name += "_constr";
+					}
+
+					resultImage = Activator.getDefault().loadImageFromBundle(name);
+					if (resultImage == null)
+					{
+						resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage()
+							: image);
+						if (isDeprecated)
+						{
+							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
+						}
+						if (isConstructor)
 						{
 							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_CONSTRUCTOR, IDecoration.TOP_RIGHT).createImage();
 						}
+
+						Activator.getDefault().putImageInCache(name, resultImage);
 					}
 				}
 			}

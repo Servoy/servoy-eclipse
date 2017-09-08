@@ -115,6 +115,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 			String packageType = pck.getString("packageType");
 			String packageVersion = pck.optString("selected");
 			String solutionName = pck.optString("activeSolution", null);
+			String installedResource = pck.optString("installedResource", null);
+
 			if (solutionName == null)
 			{
 				solutionName = selectedSolution != null ? selectedSolution : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
@@ -129,7 +131,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 				else
 				{
 					IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
-					importZipFileComponent(componentsFolder, in, packageName);
+					importZipFileComponent(componentsFolder, in, packageName, installedResource);
 				}
 			}
 
@@ -231,8 +233,24 @@ public class InstallWebPackageHandler implements IDeveloperService
 		return false;
 	}
 
-	private static void importZipFileComponent(IFolder componentsFolder, InputStream in, String name)
+	private static void importZipFileComponent(IFolder componentsFolder, InputStream in, String name, String installedResource)
 	{
+		if (installedResource != null)
+		{
+			IFile installedResourceFile = componentsFolder.getFile(installedResource);
+			if (installedResourceFile.exists())
+			{
+				try
+				{
+					installedResourceFile.delete(true, new NullProgressMonitor());
+				}
+				catch (CoreException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+
 		IFile eclipseFile = componentsFolder.getFile(name + ".zip");
 
 		if (eclipseFile.exists())

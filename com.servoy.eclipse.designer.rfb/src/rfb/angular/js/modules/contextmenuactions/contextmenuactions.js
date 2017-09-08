@@ -53,7 +53,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			}
 			return false;
 		}
-		var setAnchoring = function(anchor){
+		var setAnchoring = function(anchor, opposite){
 			var selection = editorScope.getSelection();
 			if (selection && selection.length == 1)
 			{
@@ -69,6 +69,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 					{
 						// already exists, remove it
 						beanAnchor = beanAnchor - anchor;
+						if ((beanAnchor & opposite) != opposite) beanAnchor += opposite;
 					}
 					else
 					{
@@ -86,7 +87,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 		
 			$contextmenu.add({
 				text: "Set Tab Sequence",
-				getIconStyle: function(){ return {'background-image':"url(images/th_horizontal.gif)"};},
+				getIconStyle: function(){ return {'background-image':"url(images/th_horizontal.png)"};},
 				shortcut: shortcuts[SHORTCUT_IDS.SET_TAB_SEQUENCE_ID],
 				getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
 				execute:function(){
@@ -102,7 +103,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			sizingActions.push(
         					{
         						text: "Same Width",
-        						getIconStyle: function(){ return {'background-image':"url(images/same_width.gif)"};},
+        						getIconStyle: function(){ return {'background-image':"url(images/same_width.png)"};},
         						shortcut: shortcuts[SHORTCUT_IDS.SAME_WIDTH_ID],
         						getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
         						execute:function()
@@ -115,7 +116,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			sizingActions.push(
         					{
         						text: "Same Height",
-        						getIconStyle: function(){ return {'background-image':"url(images/same_height.gif)"};},
+        						getIconStyle: function(){ return {'background-image':"url(images/same_height.png)"};},
         						shortcut: shortcuts[SHORTCUT_IDS.SAME_HEIGHT_ID],
         						getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
         						execute:function()
@@ -148,7 +149,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
         						execute:function()
         						{
-        							setAnchoring(1);
+        							setAnchoring(1, 4);
         						}
         					}
         				);
@@ -161,7 +162,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
         						execute:function()
         						{
-        							setAnchoring(2);
+        							setAnchoring(2, 8);
         						}
         					}
         				);
@@ -174,7 +175,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() {  if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
         						execute:function()
         						{
-        							setAnchoring(4);
+        							setAnchoring(4, 1);
         						}
         					}
         				);			
@@ -187,7 +188,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
         						execute:function()
         						{
-        							setAnchoring(8);
+        							setAnchoring(8, 2);
         						}
         					}
         				);
@@ -270,7 +271,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			groupingActions.push(
         					{
         						text: "Group",
-        						getIconStyle: function(){ return {'background-image':"url(images/group.gif)"}},
+        						getIconStyle: function(){ return {'background-image':"url(images/group.png)"}},
         						getItemClass: function() {if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
         						shortcut: shortcuts[SHORTCUT_IDS.GROUP_ID],
         						execute: function()
@@ -284,7 +285,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			groupingActions.push(
         					{
         						text: "Ungroup",
-        						getIconStyle: function(){ return {'background-image':"url(images/ungroup.gif)"}},
+        						getIconStyle: function(){ return {'background-image':"url(images/ungroup.png)"}},
         						getItemClass: function() {
         							if (!hasSelection()) return "disabled";
         							//at least one selected element should be a group
@@ -335,7 +336,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			$contextmenu.add(
 				{
 					text: "Save as template ...",
-					getIconStyle: function(){ return {'background-image':"url(toolbaractions/icons/template.gif)"}},
+					getIconStyle: function(){ return {'background-image':"url(toolbaractions/icons/template.png)"}},
 					execute:function()
 					{
 						$("#contextMenu").hide();
@@ -347,7 +348,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			$contextmenu.add(
 				{
 					text: "Open in Script Editor",
-					getIconStyle: function(){ return {'background-image':"url(images/js.gif)"}},
+					getIconStyle: function(){ return {'background-image':"url(images/js.png)"}},
 					shortcut: shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID],
 					execute:function()
 					{
@@ -373,7 +374,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			$contextmenu.add(
 					{
 						text: "Open Form Hierarchy",
-						getIconStyle: function(){ return {'background-image':"url(images/forms.gif)"}},
+						getIconStyle: function(){ return {'background-image':"url(images/forms.png)"}},
 						getItemClass: function() { if (!hasSelection(1)) return "enabled";}, 
 						shortcut: shortcuts[SHORTCUT_IDS.OPEN_FORM_HIERARCHY_ID],
 						execute:function()

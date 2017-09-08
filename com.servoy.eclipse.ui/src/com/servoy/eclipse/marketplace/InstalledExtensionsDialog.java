@@ -60,7 +60,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.extension.ExtensionUIUtils;
@@ -534,8 +533,8 @@ public class InstalledExtensionsDialog extends TrayDialog
 			{
 				if (table == null || getShell().isDisposed()) return;
 
-				Image updateIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif");
-				Image uninstallIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				Image updateIcon = Activator.getDefault().loadImageFromBundle("upgrade.png");
+				Image uninstallIcon = Activator.getDefault().loadImageFromBundle("delete.png");
 
 				table.setVisible(false);
 				try

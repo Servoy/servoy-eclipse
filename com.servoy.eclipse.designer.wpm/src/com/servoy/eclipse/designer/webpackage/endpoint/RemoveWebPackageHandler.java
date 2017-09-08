@@ -45,8 +45,9 @@ public class RemoveWebPackageHandler implements IDeveloperService
 
 		String packageName = pck.getString("name");
 		String solutionName = pck.getString("activeSolution");
+		String installedResource = pck.optString("installedResource", null);
 		IFolder packagesFolder = checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
-		IFile file = packagesFolder.getFile(packageName + ".zip");
+		IFile file = packagesFolder.getFile(installedResource != null ? installedResource : packageName + ".zip");
 		if (file.exists())
 		{
 			try

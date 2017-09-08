@@ -50,7 +50,7 @@ public class SolutionWizardPage extends WizardPage
 	private boolean canFinish;
 	public static final String NAME = "SolutionWizardPage";
 
-	public static final Image SOLUTION = Activator.getDefault().loadImageFromBundle("solution.gif");
+	public static final Image SOLUTION = Activator.getDefault().loadImageFromBundle("solution.png");
 	public static final Image ACTIVE_RELEASE = Activator.getDefault().loadImageFromBundle("active_release.gif");
 	public static final Image RELEASE = Activator.getDefault().loadImageFromBundle("release.gif");
 
@@ -69,8 +69,8 @@ public class SolutionWizardPage extends WizardPage
 			setControl(container);
 
 			SolutionContentProvider contentProvider = new SolutionContentProvider();
-			treeViewer = new FilteredTreeViewer(container, true, false, contentProvider, new SolutionLabelProvider(), null, SWT.SINGLE, new TreePatternFilter(
-				TreePatternFilter.FILTER_PARENTS), new LeafnodesSelectionFilter(contentProvider));
+			treeViewer = new FilteredTreeViewer(container, true, false, contentProvider, new SolutionLabelProvider(), null, SWT.SINGLE,
+				new TreePatternFilter(TreePatternFilter.FILTER_PARENTS), new LeafnodesSelectionFilter(contentProvider));
 			treeViewer.addSelectionChangedListener(new ISelectionChangedListener()
 			{
 				public void selectionChanged(SelectionChangedEvent event)

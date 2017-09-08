@@ -48,7 +48,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action to create a new valuelist depending on the selection of a solution view.
- * 
+ *
  * @author jcompagner
  */
 public class NewValueListAction extends Action implements ISelectionChangedListener
@@ -58,14 +58,14 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 
 	/**
 	 * Creates a new action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public NewValueListAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("newvaluelist.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("newvaluelist.png"));
 		setText("Create valuelist");
 		setToolTipText("Create valuelist");
 	}

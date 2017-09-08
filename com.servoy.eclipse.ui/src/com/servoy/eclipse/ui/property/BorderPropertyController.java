@@ -218,7 +218,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		switch (getBorderTypeConstant(complexProperty.getValue()))
 		{
 			case Default :
-				propertySource = new ComplexPropertySource<T>(complexProperty); // dummy without property descriptors
+				propertySource = new ComplexPropertySourceWithStandardReset<T>(complexProperty); // dummy without property descriptors
 				break;
 			case Empty :
 				propertySource = new EmptyBorderPropertySource((ComplexProperty<EmptyBorder>)complexProperty);
@@ -358,7 +358,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 	 * @author rgansevles
 	 */
 
-	public static class EmptyBorderPropertySource extends ComplexPropertySource<EmptyBorder>
+	public static class EmptyBorderPropertySource extends ComplexPropertySourceWithStandardReset<EmptyBorder>
 	{
 		private static final String INSETS = "insets.";
 
@@ -430,7 +430,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 	}
 
-	public static class MatteBorderPropertySource extends ComplexPropertySource<MatteBorder>
+	public static class MatteBorderPropertySource extends ComplexPropertySourceWithStandardReset<MatteBorder>
 	{
 		private static final String INSETS = "insets.";
 		private static final String COLOR = "color";
@@ -525,7 +525,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 	}
 
-	public static class BorderStylesPropertySource extends ComplexPropertySource<String[]>
+	public static class BorderStylesPropertySource extends ComplexPropertySourceWithStandardReset<String[]>
 	{
 		private static final String TOP_STYLE = "top_style";
 		private static final String LEFT_STYLE = "left_style";
@@ -609,7 +609,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 	}
 
-	public static class RoundedRadiusPropertySource extends ComplexPropertySource<float[]>
+	public static class RoundedRadiusPropertySource extends ComplexPropertySourceWithStandardReset<float[]>
 	{
 		private static final String TOP_LEFT_HORIZONTAL = "top_left_width";
 		private static final String TOP_RIGHT_HORIZONTAL = "top_right_width";
@@ -1043,7 +1043,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			return super.resetComplexPropertyValue(id);
 		}
 	}
-	public static class SpecialMatteBorderPropertySource extends ComplexPropertySource<SpecialMatteBorder>
+	public static class SpecialMatteBorderPropertySource extends ComplexPropertySourceWithStandardReset<SpecialMatteBorder>
 	{
 		private static final ComplexPropertyConverter<Insets> sizeConverter = new ComplexPropertyConverter<java.awt.Insets>()
 		{
@@ -1244,7 +1244,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 	}
 
-	public static class EtchedBorderPropertySource extends ComplexPropertySource<EtchedBorder>
+	public static class EtchedBorderPropertySource extends ComplexPropertySourceWithStandardReset<EtchedBorder>
 	{
 		private static final String HIGHLIGHT = "highlight";
 		private static final String SHADOW = "shadow";
@@ -1318,7 +1318,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 	}
 
-	public static class BevelBorderPropertySource extends ComplexPropertySource<BevelBorder>
+	public static class BevelBorderPropertySource extends ComplexPropertySourceWithStandardReset<BevelBorder>
 	{
 		private static final String HIGHLIGHT_INNER = "highlight_inner";
 		private static final String SHADOW_OUTER = "shadow_outer";
@@ -1404,7 +1404,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 	}
 
-	public static class LineBorderPropertySource extends ComplexPropertySource<LineBorder>
+	public static class LineBorderPropertySource extends ComplexPropertySourceWithStandardReset<LineBorder>
 	{
 		private static final String COLOR = "color";
 		private static final String THICKNESS = "thickness";
@@ -1478,7 +1478,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 	}
 
-	public static class TitledBorderPropertySource extends ComplexPropertySource<TitledBorder>
+	public static class TitledBorderPropertySource extends ComplexPropertySourceWithStandardReset<TitledBorder>
 	{
 		private static final String TITLE = "title";
 		private static final String JUSTIFICATION = "justification";
@@ -1498,8 +1498,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		private static final IPropertyController<Integer, Integer> POSITION_CONTROLLER = new ComboboxPropertyController<Integer>(POSITION, "position",
 			new ComboboxPropertyModel<Integer>(
 				new Integer[] { Integer.valueOf(TitledBorder.ABOVE_TOP), Integer.valueOf(TitledBorder.TOP), Integer.valueOf(
-					TitledBorder.BELOW_TOP), Integer.valueOf(TitledBorder.ABOVE_BOTTOM), Integer.valueOf(TitledBorder.BOTTOM), Integer.valueOf(
-						TitledBorder.BELOW_BOTTOM) },
+					TitledBorder.BELOW_TOP), Integer.valueOf(
+						TitledBorder.ABOVE_BOTTOM), Integer.valueOf(TitledBorder.BOTTOM), Integer.valueOf(TitledBorder.BELOW_BOTTOM) },
 				new String[] { Messages.PostionABOVETOP, Messages.PostionTOP, Messages.PostionBELOWTOP, Messages.PostionABOVEBOTTOM, Messages.PostionBOTTOM, Messages.PostionBELOWBOTTOM }).addDefaultValue(
 					Integer.valueOf(TitledBorder.DEFAULT_POSITION)),
 			Messages.LabelUnresolved);

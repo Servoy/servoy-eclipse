@@ -43,7 +43,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action for duplicating the selected persist(s).
- * 
+ *
  * @author acostescu
  */
 public class DuplicatePersistAction extends AbstractPersistSelectionAction
@@ -55,7 +55,7 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 	public DuplicatePersistAction(Shell shell)
 	{
 		super(shell);
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("duplicate.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("duplicate_form.png"));
 		setText(Messages.DuplicateFormAction_duplicateForm);
 		setToolTipText(Messages.DuplicateFormAction_duplicateForm);
 	}
@@ -76,31 +76,31 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 		if (persist instanceof Media) newName = "copy_" + oldName;
 		else newName = oldName + "_copy";
 		// prepare dialog
-		InputAndListDialog dialog = new InputAndListDialog(shell, "Duplicate " + persistString + ((ISupportName)persist).getName(), "Name of the duplicated " +
-			persistString + ": ", newName, new IInputValidator()
-		{
-			public String isValid(String newText)
+		InputAndListDialog dialog = new InputAndListDialog(shell, "Duplicate " + persistString + ((ISupportName)persist).getName(),
+			"Name of the duplicated " + persistString + ": ", newName, new IInputValidator()
 			{
-				String message = null;
-				String checkText = newText;
-				if (persist instanceof Media) checkText = checkText.replace(".", "");
-				message = IdentDocumentValidator.isJavaIdentifier(checkText) ? null : (newText.length() == 0 ? "" : "Invalid name");
-				if (message == null)
+				public String isValid(String newText)
 				{
-					try
+					String message = null;
+					String checkText = newText;
+					if (persist instanceof Media) checkText = checkText.replace(".", "");
+					message = IdentDocumentValidator.isJavaIdentifier(checkText) ? null : (newText.length() == 0 ? "" : "Invalid name");
+					if (message == null)
 					{
-						nameValidator.checkName(newText, -1, new ValidatorSearchContext(getPersistType()), false);
+						try
+						{
+							nameValidator.checkName(newText, -1, new ValidatorSearchContext(getPersistType()), false);
+						}
+						catch (RepositoryException e)
+						{
+							message = e.getMessage();
+							if (message == null) message = "Invalid name";
+						}
 					}
-					catch (RepositoryException e)
-					{
-						message = e.getMessage();
-						if (message == null) message = "Invalid name";
-					}
+					return message;
 				}
-				return message;
-			}
 
-		}, solutionNames, initialSolutionName, "Please select the destination solution:")
+			}, solutionNames, initialSolutionName, "Please select the destination solution:")
 		{
 			@Override
 			protected void validateInput()
@@ -165,8 +165,8 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError(e);
-					MessageDialog.openError(shell, "Cannot duplicate form", persistString + " " + ((ISupportName)persist).getName() +
-						"cannot be duplicated. Reason:\n" + e.getMessage());
+					MessageDialog.openError(shell, "Cannot duplicate form",
+						persistString + " " + ((ISupportName)persist).getName() + "cannot be duplicated. Reason:\n" + e.getMessage());
 				}
 			}
 		}

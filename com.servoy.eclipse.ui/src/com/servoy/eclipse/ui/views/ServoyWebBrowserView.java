@@ -40,7 +40,7 @@ import com.servoy.eclipse.ui.Activator;
 
 /**
  * Shows a page from the Servoy web site. The intention is to provide the Servoy developer with latest info related to Servoy.
- * 
+ *
  * @author gerzse
  */
 public abstract class ServoyWebBrowserView extends WebBrowserView
@@ -78,7 +78,7 @@ public abstract class ServoyWebBrowserView extends WebBrowserView
 	}
 
 	// Not a nice solution, but we need to get rid of the navigation bar
-	// and this is a handy way to clear the style. Another way would be 
+	// and this is a handy way to clear the style. Another way would be
 	// through secondary-id, but then the view needs to allow multiple instances.
 	@Override
 	public void createPartControl(Composite parent)
@@ -93,7 +93,7 @@ public abstract class ServoyWebBrowserView extends WebBrowserView
 		public ServoyBrowserViewer(Composite parent, final String parentBrowserViewId)
 		{
 			super(parent, BrowserViewer.BUTTON_BAR);
-			// Locate the toolbar and the busy indicator. The toolbar gets extended 
+			// Locate the toolbar and the busy indicator. The toolbar gets extended
 			// and the indicator is dropped.
 			if (this.getChildren().length > 0)
 			{
@@ -110,8 +110,8 @@ public abstract class ServoyWebBrowserView extends WebBrowserView
 							ToolBar toolbar = (ToolBar)toolbarRaw;
 
 							final ToolItem maximizeRestore = new ToolItem(toolbar, SWT.NONE);
-							final Image maximize = Activator.loadImageDescriptorFromBundle("maximize.gif").createImage();
-							final Image restore = Activator.loadImageDescriptorFromBundle("restore.gif").createImage();
+							final Image maximize = Activator.loadImageDescriptorFromBundle("maximize.png").createImage();
+							final Image restore = Activator.loadImageDescriptorFromBundle("restore.png").createImage();
 							maximizeRestore.setImage(maximize);
 							maximizeRestore.setToolTipText("Maximize");
 							maximizeRestore.addSelectionListener(new SelectionAdapter()

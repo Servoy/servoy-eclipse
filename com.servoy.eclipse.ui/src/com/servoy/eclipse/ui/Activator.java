@@ -62,6 +62,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.IApplication;
@@ -92,12 +93,16 @@ public class Activator extends AbstractUIPlugin
 	 * The path to icons used by this view (relative to the plug-in folder).
 	 */
 	public static final String ICONS_PATH = "$nl$/icons";
+	public static final String DARK_ICONS_PATH = "$nl$/darkicons";
+	public static final String DARK_ICONS_FOLDER = "/darkicons/";
 
 	private final Map<String, Image> imageCacheOld = new HashMap<String, Image>();
 
 	private final Map<String, Image> imageCacheBundle = new HashMap<String, Image>();
 
 	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
+
+	private static BundleContext context;
 
 	private static final String SERVOY_VERSION = "servoy_version";
 
@@ -108,6 +113,7 @@ public class Activator extends AbstractUIPlugin
 
 		super.start(context);
 		plugin = this;
+		Activator.context = context;
 
 		//replace Eclipse default text search query provider with Servoy's
 		SearchPlugin.getDefault().getPreferenceStore().putValue(SearchPreferencePage.TEXT_SEARCH_QUERY_PROVIDER, "com.servoy.eclipse.ui.search.textSearch");
@@ -310,21 +316,53 @@ public class Activator extends AbstractUIPlugin
 		Image img = imageCacheBundle.get(storeName);
 		if (img == null)
 		{
-			ImageDescriptor id = Activator.loadImageDescriptorFromBundle(name);
-			if (id != null)
+			if (disabled)
 			{
-				img = id.createImage();
+				// first just load the normal image from the cache (or create and store it in the cache so it will be disposed)
+				img = loadImageFromBundle(name, false);
 				if (img != null)
 				{
-					if (disabled)
-					{
-						img = new Image(img.getDevice(), img, SWT.IMAGE_GRAY);
-					}
+					img = new Image(img.getDevice(), img, SWT.IMAGE_DISABLE);
 					imageCacheBundle.put(storeName, img);
 				}
 			}
+			else
+			{
+				ImageDescriptor id = Activator.loadImageDescriptorFromBundle(name);
+				if (id != null)
+				{
+					img = id.createImage();
+					if (img != null)
+					{
+						imageCacheBundle.put(storeName, img);
+					}
+				}
+
+			}
 		}
 		return img;
+	}
+
+	/**
+	 * Loads the image from the bundle cache, so that it will be disposed.
+	 * @param name
+	 * @return
+	 */
+	public Image loadImageFromCache(String name)
+	{
+		return imageCacheBundle.get(name);
+	}
+
+	/**
+	 * stores the given image to the cache, if there was a previous one with that name then that one will be disposed
+	 * @param name
+	 * @param image
+	 */
+	public void putImageInCache(String name, Image image)
+	{
+		Image prev = loadImageFromCache(name);
+		if (prev != null) prev.dispose();
+		imageCacheBundle.put(name, image);
 	}
 
 	public Image loadImageFromOldLocation(String name)
@@ -377,6 +415,11 @@ public class Activator extends AbstractUIPlugin
 		return neededDescriptor;
 	}
 
+	public static ImageDescriptor loadDefaultImageDescriptorFromBundle(String name)
+	{
+		return getImageDescriptor(ICONS_PATH + "/" + name);
+	}
+
 	/**
 	 * Get an image with the given name from this plugin's bundle.
 	 *
@@ -385,7 +428,13 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public static ImageDescriptor loadImageDescriptorFromBundle(String name)
 	{
-		return getImageDescriptor(ICONS_PATH + "/" + name);
+		return getImageDescriptor((IconPreferences.getInstance().getUseDarkThemeIcons() && darkIconExists(name) ? DARK_ICONS_PATH : ICONS_PATH) + "/" + name);
+	}
+
+
+	private static boolean darkIconExists(String name)
+	{
+		return context.getBundle().getEntry(DARK_ICONS_FOLDER + name) != null;
 	}
 
 	/**

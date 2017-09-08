@@ -75,6 +75,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 	private final Button useMask;
 	private final Combo displayFormat;
 	private final Combo editFormat;
+	private final Button useLocalDateTime;
 
 	private Point displayCaret = null;
 	private Point editCaret = null;
@@ -164,11 +165,20 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 
 		placeholder = new Text(this, SWT.BORDER);
 		placeholder.setEnabled(!mobile);
-		GridData gridData_2 = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		GridData gridData_2 = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
 		gridData_2.widthHint = 29;
 		placeholder.setLayoutData(gridData_2);
 		placeholder.setTextLimit(1);
 		placeholder.setEnabled(false);
+
+
+		useLocalDateTime = new Button(this, SWT.CHECK);
+		useLocalDateTime.setText("Use as LocalDateTime (NG client only)");
+		useLocalDateTime.setToolTipText("Show the same date-time on all clients, don't do time convertion based on client timezone (UTC offset)");
+		useLocalDateTime.setEnabled(ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionNGClient());
+		GridData gridData_useLocalDateTime = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+		useLocalDateTime.setLayoutData(gridData_useLocalDateTime);
+
 		new Label(this, SWT.NONE);
 		new Label(this, SWT.NONE);
 
@@ -204,7 +214,8 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 			Label mobileClientFormatWarning = new Label(this, SWT.NONE);
 			mobileClientFormatWarning.setForeground(Activator.getDefault().getSharedTextColors().getColor(new RGB(255, 102, 51)));
 			mobileClientFormatWarning.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
-			mobileClientFormatWarning.setText("A format for a Calendar field is not used to format the data when it is mapped on a native date field.\r\nIts only used to determine of a \"date\", \"time\" or \"datetime\" should be used.");
+			mobileClientFormatWarning.setText(
+				"A format for a Calendar field is not used to format the data when it is mapped on a native date field.\r\nIts only used to determine of a \"date\", \"time\" or \"datetime\" should be used.");
 		}
 
 		tableViewer.setLabelProvider(new TableLabelProvider());
@@ -241,7 +252,8 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 				}
 			}
 		});
-		tableViewer.setInput(new String[][] { { "G", "Text", "Era designator" }, { "y", "Number", "Year" }, { "M", "Number/Text", "Month in year" }, { "w", "Number", "Week in year" }, { "W", "Number", "Week in month" }, { "D", "Number", "Day in year" }, { "d", "Number", "Day in month" }, { "F", "Number", "Day of week in month" }, { "E", "Text", "Day in week" }, { "a", "Text", "Am/Pm marker" }, { "H", "Number", "Hour in day (0-23)" }, { "k", "Number", "Hour in day (1-24)" }, { "K", "Number", "Hour in am/pm (0-11)" }, { "h", "Number", "Hour in am/pm (1-12)" }, { "m", "Number", "Minute in hour" }, { "s", "Number", "Second in minute" }, { "S", "Number", "Millisecond" }, { "z", "Text", "Time zone" }, { "Z", "Text", "RFC 822 Time zone" }, });
+		tableViewer.setInput(
+			new String[][] { { "G", "Text", "Era designator" }, { "y", "Number", "Year" }, { "M", "Number/Text", "Month in year" }, { "w", "Number", "Week in year" }, { "W", "Number", "Week in month" }, { "D", "Number", "Day in year" }, { "d", "Number", "Day in month" }, { "F", "Number", "Day of week in month" }, { "E", "Text", "Day in week" }, { "a", "Text", "Am/Pm marker" }, { "H", "Number", "Hour in day (0-23)" }, { "k", "Number", "Hour in day (1-24)" }, { "K", "Number", "Hour in am/pm (0-11)" }, { "h", "Number", "Hour in am/pm (1-12)" }, { "m", "Number", "Minute in hour" }, { "s", "Number", "Second in minute" }, { "S", "Number", "Millisecond" }, { "z", "Text", "Time zone" }, { "Z", "Text", "RFC 822 Time zone" }, });
 	}
 
 	/**
@@ -265,7 +277,8 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 			}
 		}
 
-		return new ParsedFormat(false, false, false, false, useMask.getSelection(), editOrPlaceholder, displayFormat.getText(), null, null, null, null);
+		return new ParsedFormat(false, false, false, false, useMask.getSelection(), editOrPlaceholder, displayFormat.getText(), null, null, null, null,
+			useLocalDateTime.getSelection());
 	}
 
 	/**
@@ -291,6 +304,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 				if (parsedFormat.getPlaceHolderCharacter() != 0) placeholder.setText(Character.toString(parsedFormat.getPlaceHolderCharacter()));
 			}
 			else if (parsedFormat.hasEditFormat()) editFormat.setText(parsedFormat.getEditFormat());
+			useLocalDateTime.setSelection(parsedFormat.useLocalDateTime());
 		}
 	}
 }

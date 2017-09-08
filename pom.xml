@@ -3,22 +3,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<prerequisites>
 		<maven>3.3.3</maven>
-  	</prerequisites>
-  	<artifactId>servoy-eclipse</artifactId>
+	</prerequisites>
+	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>8.2.0.3100</version>
+	<version>8.3.0.3200_b1</version>
 
 	<properties>
 		<tycho.version>1.0.0</tycho.version>
 		<tycho.extra.version>1.0.0</tycho.extra.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
-	    <maven.compiler.target>1.7</maven.compiler.target>
-		<sablo.version>8.2.0.3100-SNAPSHOT</sablo.version>
-	  	<servoy-version>8.2.0.3100</servoy-version>
-		<servoy-repo.url>http://developer.servoy.com/p2_repository/compile_target/install/</servoy-repo.url>
-		<servoy-deltapack.url>http://developer.servoy.com/p2_repository/compile_target/install/deltapack/</servoy-deltapack.url>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.7-M-builds/M-4.7.1RC3-201709011220/</servoy-repo.url>
 		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/</servoy-shiplibs.url>
 	</properties>
 
@@ -31,11 +28,6 @@
 		<repository>
 			<id>servoy_shiblibs</id>
 			<url>${servoy-shiplibs.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>servoy_deltapack</id>
-			<url>${servoy-deltapack.url}</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
@@ -84,46 +76,51 @@
 					</environments>
 				</configuration>
 			</plugin>
-		    <plugin>
-		      <groupId>org.eclipse.tycho.extras</groupId>
-		      <artifactId>tycho-pack200a-plugin</artifactId>
-		      <version>${tycho.extra.version}</version>
-		      <executions>
-		       <execution>
-		        <id>pack200-normalize</id>
-		        <goals>
-		         <goal>normalize</goal>
-		        </goals>
-		       </execution>
-		      </executions>
-		     </plugin>
-		    <plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-jarsigner-plugin</artifactId>
-		    <version>1.4</version>
-		    <executions>
-		     <execution>
-		      <id>sign</id>
-		      <goals>
-		       <goal>sign</goal>
-		      </goals>
-		     </execution>
-		    </executions>
-		   </plugin>
-		   <plugin>
-		      <groupId>org.eclipse.tycho.extras</groupId>
-		      <artifactId>tycho-pack200b-plugin</artifactId>
-		      <version>${tycho.extra.version}</version>
-		      <executions>
-		       <execution>
-		        <id>pack200-pack</id>
-		        <goals>
-		         <goal>pack</goal>
-		        </goals>
-		       </execution>
-		      </executions>
-		     </plugin>
-		     <plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-versions-plugin</artifactId>
+				<version>${tycho.version}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-pack200a-plugin</artifactId>
+				<version>${tycho.extra.version}</version>
+				<executions>
+					<execution>
+						<id>pack200-normalize</id>
+						<goals>
+							<goal>normalize</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-pack200b-plugin</artifactId>
+				<version>${tycho.extra.version}</version>
+				<executions>
+					<execution>
+						<id>pack200-pack</id>
+						<goals>
+							<goal>pack</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-plugin</artifactId>
 				<version>${tycho.version}</version>
@@ -142,20 +139,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
-	<dependencies>
-		<dependency>
-			<groupId>org.sablo</groupId>
-			<artifactId>sablo-core</artifactId>
-			<version>${sablo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-		</dependency>
-	</dependencies>
-	
+
 	<profiles>
 		<profile>
 			<id>product</id>
@@ -185,8 +169,41 @@
 				<module>com.servoy.eclipse.exporter.war</module>
 				<module>com.servoy.eclipse.extension.compatibility</module>
 				<module>com.servoy.eclipse.profiler</module>
+				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
 			</modules>
+		</profile>
+		<profile>
+			<id>version_push</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>replace_version_in_property_files</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<replaceregexp file="${basedir}/com.servoy.eclipse.product/p2.inf"
+											match="${project.version}" replace="${newVersion}" byline="true" />
+										<replaceregexp
+											file="${basedir}/com.servoy.eclipse.core/about.properties"
+											match="${project.version}" replace="${newVersion}" byline="true" />
+										<replaceregexp
+											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
+											match="${project.version}" replace="${newVersion}" byline="true" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>

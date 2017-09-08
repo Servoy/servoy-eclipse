@@ -28,14 +28,14 @@ import com.servoy.j2db.persistence.ISupportName;
 
 /**
  * Label provider for setting security checkboxes in form editor security page.
- * 
+ *
  * @author lvostinar
  */
 
 public class ElementSettingsLabelProvider extends LabelProvider implements ITableLabelProvider
 {
-	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_on.gif");
-	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_off.gif");
+	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("check_on.png");
+	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("check_off.png");
 
 	private final ElementSettingsModel model;
 

@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -34,14 +35,14 @@ public class OpenServerAction extends Action implements ISelectionChangedListene
 
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public OpenServerAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
 
-//		setImageDescriptor(SolutionExplorerView.loadImageDescriptor("open.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open_server.png"));
 		setText("Open server");
 		setToolTipText("Open server");
 	}

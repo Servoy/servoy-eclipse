@@ -49,7 +49,7 @@ public abstract class AbstractMovePersistAction extends AbstractPersistSelection
 	public AbstractMovePersistAction(Shell shell)
 	{
 		super(shell);
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("moveform.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("move_form.png"));
 	}
 
 	@Override
@@ -81,8 +81,9 @@ public abstract class AbstractMovePersistAction extends AbstractPersistSelection
 
 			Collections.sort(modules);
 			String[] moduleNames = modules.toArray(new String[] { });
-			final OptionDialog optionDialog = new OptionDialog(shell, "Select destination module", null, "Select module where to move " + persistString + " " +
-				((ISupportName)persist).getName(), MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0, moduleNames, 0);
+			final OptionDialog optionDialog = new OptionDialog(shell, "Select destination module", null,
+				"Select module where to move " + persistString + " " + ((ISupportName)persist).getName(), MessageDialog.INFORMATION,
+				new String[] { "OK", "Cancel" }, 0, moduleNames, 0);
 			int retval = optionDialog.open();
 			String selectedProject = null;
 			if (retval == Window.OK)
@@ -103,8 +104,8 @@ public abstract class AbstractMovePersistAction extends AbstractPersistSelection
 			}
 			catch (RepositoryException ex)
 			{
-				MessageDialog.openError(shell, persistString + " already exists", persistString + " " + ((ISupportName)persist).getName() +
-					" already exists, it won't be moved to another module");
+				MessageDialog.openError(shell, persistString + " already exists",
+					persistString + " " + ((ISupportName)persist).getName() + " already exists, it won't be moved to another module");
 				return null;
 			}
 		}

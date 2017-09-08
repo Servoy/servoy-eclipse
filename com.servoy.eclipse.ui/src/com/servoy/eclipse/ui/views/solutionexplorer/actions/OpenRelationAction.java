@@ -40,7 +40,7 @@ public class OpenRelationAction extends Action implements ISelectionChangedListe
 	 */
 	public OpenRelationAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.png"));
 		setText("Open relation");
 		setToolTipText("Open relation");
 	}
