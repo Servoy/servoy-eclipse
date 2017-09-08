@@ -17,7 +17,8 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.sablo.websocket.utils.JSONUtils;
+
+import com.servoy.j2db.util.Utils;
 
 /**
  * Property descriptor wrapper that implements IPropertySetter.
@@ -48,6 +49,6 @@ public abstract class PropertySetterDelegatePropertyController<P, S extends Pers
 		Object defaultValue = propertySource.getDefaultPersistValue(getId());
 		Object propertyValue = propertySource.getPersistPropertyValue(getId());
 		return defaultValue != propertyValue &&
-			(defaultValue == null || !(defaultValue.equals(propertyValue) || JSONUtils.areEqual(defaultValue, propertyValue)));
+			(defaultValue == null || !(defaultValue.equals(propertyValue) || Utils.areJSONEqual(defaultValue, propertyValue)));
 	}
 }

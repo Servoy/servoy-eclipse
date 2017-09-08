@@ -73,7 +73,6 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
-import org.sablo.websocket.utils.JSONUtils;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -1927,7 +1926,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		Object defaultValue = getDefaultPersistValue(id);
 		Object propertyValue = getPersistPropertyValue(id);
 		return defaultValue != propertyValue &&
-			(defaultValue == null || !(defaultValue.equals(propertyValue) || JSONUtils.areEqual(defaultValue, propertyValue)));
+			(defaultValue == null || !(defaultValue.equals(propertyValue) || Utils.areJSONEqual(defaultValue, propertyValue)));
 	}
 
 	public void resetPropertyValue(Object id)
@@ -2108,7 +2107,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						{
 							// so this is a property that has a default value defined in the .spec file; default might not be null
 							defaultSpecValue = propDescription.getDefaultValue();
-							isDefaultValue = JSONUtils.areEqual(defaultSpecValue,
+							isDefaultValue = Utils.areJSONEqual(defaultSpecValue,
 								ServoyJSONObject.nullToJsonNull(WebObjectImpl.convertFromJavaType(propDescription, value)));
 						}
 					}
@@ -2121,7 +2120,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					// just clear the property because we do not need to store null in order to override a value
 					Object persistValue = ((AbstractBase)beanPropertyPersist).getProperty((String)id);
 					changed |= (defaultSpecValue == null ? persistValue != null
-						: !JSONUtils.areEqual(defaultSpecValue, ServoyJSONObject.nullToJsonNull(persistValue)));
+						: !Utils.areJSONEqual(defaultSpecValue, ServoyJSONObject.nullToJsonNull(persistValue)));
 
 					((AbstractBase)beanPropertyPersist).clearProperty((String)id);
 				}
