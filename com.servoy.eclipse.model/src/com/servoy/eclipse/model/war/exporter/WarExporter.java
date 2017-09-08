@@ -441,19 +441,35 @@ public class WarExporter
 	private void addGroupElement(Document doc, Element group, File tmpWarDir, String relativePath, String suffix)
 	{
 		String path = relativePath;
-		String minSuffix = ".min." + suffix;
-		if (!path.endsWith(minSuffix) && path.contains("."))
+		boolean minFound = false;
+		if (path.contains("."))
 		{
-			//the minified version is preferred if it exists
-			File f = new File(tmpWarDir, path.substring(0, path.lastIndexOf("." + suffix)) + minSuffix);
-			if (f.exists()) path = f.getAbsolutePath().replace(tmpWarDir.getAbsolutePath(), "").replaceAll("\\\\", "/");
+			String currentSuffix = path.substring(path.lastIndexOf("."));
+			String minSuffix = (".min" + currentSuffix).toLowerCase();
+			if (!path.toLowerCase().endsWith(minSuffix))
+			{
+				//the minified version is preferred if it exists
+				File file = new File(tmpWarDir, path);
+				File parent = file.getParentFile();
+				String[] list = parent.list(new WildcardFileFilter(file.getName().substring(0, file.getName().indexOf(".")+1) + "*"));
+				for (String name : list)
+				{
+					if (name.toLowerCase().endsWith(minSuffix))
+					{
+						minFound = true;
+						File f = new File(parent, name);
+						path = f.getAbsolutePath().replace(tmpWarDir.getAbsolutePath(), "").replaceAll("\\\\", "/");
+						break;
+					}
+				}
+			}
 		}
 		Attr attr;
 		Element element = doc.createElement(suffix);
 		group.appendChild(element);
 		element.setTextContent(path);
 		attr = doc.createAttribute("minimize");
-		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && !path.endsWith(minSuffix)));
+		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && minFound));
 		element.setAttributeNode(attr);
 	}
 

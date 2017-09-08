@@ -189,6 +189,9 @@
 								"displayTagsPropertyName": {
 									"type": "string"
 								},
+								"resolveValuelist": {
+									"type": "boolean"
+								},
 								"oppositeOf": {
 									"type": "string"
 								},
