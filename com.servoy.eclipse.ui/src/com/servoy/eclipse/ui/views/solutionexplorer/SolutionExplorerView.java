@@ -1530,7 +1530,7 @@ public class SolutionExplorerView extends ViewPart
 	{
 		ViewForm viewForm = new ViewForm(parent, SWT.NONE);
 		list = new TableViewer(viewForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		HTMLToolTipSupport.enableFor(list, ToolTip.NO_RECREATE | SWT.BORDER_SOLID);
+		HTMLToolTipSupport.enableFor(list, ToolTip.NO_RECREATE);
 		list.setContentProvider(new SolutionExplorerListContentProvider(this));
 		list.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(new DecoratingColumnLabelProvider(labelProvider, labelDecorator)));
 		viewForm.setContent(list.getControl());
@@ -1622,7 +1622,7 @@ public class SolutionExplorerView extends ViewPart
 		tree.addFilter(clientSupportViewerFilter);
 
 		tree.setUseHashlookup(true);
-		HTMLToolTipSupport.enableFor(tree, ToolTip.NO_RECREATE | SWT.BORDER_SOLID);
+		HTMLToolTipSupport.enableFor(tree, ToolTip.NO_RECREATE);
 		drillDownAdapter = new DrillDownAdapter(tree);
 		tree.setContentProvider(new SolutionExplorerTreeContentProvider(this));
 		tree.addSelectionChangedListener(this);
