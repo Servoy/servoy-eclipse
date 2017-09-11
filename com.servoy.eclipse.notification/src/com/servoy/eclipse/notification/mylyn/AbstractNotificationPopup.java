@@ -15,9 +15,6 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-
-package com.servoy.eclipse.notification.mylyn;
-
 /*******************************************************************************
  * Copyright (c) 2004, 2015 Tasktop Technologies and others.
  * All rights reserved. This program and the accompanying materials
@@ -30,6 +27,7 @@ package com.servoy.eclipse.notification.mylyn;
  *     Tasktop Technologies - initial API and implementation
  *******************************************************************************/
 
+package com.servoy.eclipse.notification.mylyn;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -230,7 +228,6 @@ public abstract class AbstractNotificationPopup extends Window
 		titleTextLabel.setText(getPopupShellTitle());
 		titleTextLabel.setFont(boldFont);
 		titleTextLabel.setForeground(getTitleForeground());
-//		titleTextLabel.setForeground(color.getTitleText());
 		titleTextLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		titleTextLabel.setCursor(parent.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 
@@ -629,7 +626,10 @@ public abstract class AbstractNotificationPopup extends Window
 		{
 			lastUsedBgImage.dispose();
 		}
-		
+		if(color != null)
+		{
+			color.dispose();
+		}
 		if(closeImg != null)
 		{
 			closeImg.dispose();

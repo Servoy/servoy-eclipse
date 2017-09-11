@@ -60,7 +60,7 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 	{
 		super(display);
 		servoyLogoImg = Activator.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "icons/servoy_donut16x16.png").createImage();
-		linkColor = new Color(Display.getDefault(), 12, 81, 172);
+		linkColor = Display.getDefault().getSystemColor(SWT.COLOR_LINK_FOREGROUND);
 		this.notifications = notifications;
 		this.onCloseCallback = onCloseCallback;
 	}
@@ -208,7 +208,7 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 	{
 		return "Servoy notification";
 	}
-
+	
 	@Override
 	protected Image getPopupShellImage(int maximumHeight)
 	{
@@ -221,10 +221,6 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 		if(servoyLogoImg != null)
 		{
 			servoyLogoImg.dispose();
-		}
-		if(linkColor != null)
-		{
-			linkColor.dispose();
 		}
 		if(onCloseCallback != null)
 		{

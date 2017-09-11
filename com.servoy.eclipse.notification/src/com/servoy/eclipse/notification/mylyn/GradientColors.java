@@ -29,6 +29,7 @@
 
 package com.servoy.eclipse.notification.mylyn;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.DeviceResourceException;
 import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.SWT;
@@ -255,15 +256,38 @@ public class GradientColors
 
 	private RGB getRGBFromTheme(String value)
 	{
-//		if (Platform.getBundle("org.eclipse.e4.ui.css.swt.theme") != null) { //$NON-NLS-1$
-//			String backgroundColor = E4ThemeColor.getCssValueFromTheme(display, value);
-//			if (backgroundColor != null) {
-//				RGB themeColor = E4ThemeColor.getRGBFromCssString(backgroundColor);
-//				if (themeColor != null) {
-//					return themeColor;
-//				}
-//			}
-//		}
+		if (Platform.getBundle("org.eclipse.e4.ui.css.swt.theme") != null) { //$NON-NLS-1$
+			String backgroundColor = E4ThemeColor.getCssValueFromTheme(display, value);
+			if (backgroundColor != null) {
+				RGB themeColor = E4ThemeColor.getRGBFromCssString(backgroundColor);
+				if (themeColor != null) {
+					return themeColor;
+				}
+			}
+		}
 		return null;
+	}
+	
+	public void dispose()
+	{
+		if(titleText != null)
+		{
+			titleText.dispose();
+		}
+
+		if(gradientBegin != null)
+		{
+			gradientBegin.dispose();
+		}
+
+		if(gradientEnd != null)
+		{
+			gradientEnd.dispose();
+		}
+
+		if(border != null)
+		{
+			border.dispose();
+		}
 	}
 }
