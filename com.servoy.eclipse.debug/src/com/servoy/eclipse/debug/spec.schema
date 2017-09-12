@@ -502,6 +502,9 @@
 										"forFoundset": {
 											"type": "string"
 										},
+										"resolveValuelist": {
+											"type": "boolean"
+										},
 										"for": {
 											"oneOf": [
 												{
