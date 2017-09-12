@@ -67,6 +67,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -446,12 +447,13 @@ public class WarExporter
 		{
 			String currentSuffix = path.substring(path.lastIndexOf("."));
 			String minSuffix = (".min" + currentSuffix).toLowerCase();
-			if (!path.toLowerCase().endsWith(minSuffix))
+			minFound = path.toLowerCase().endsWith(minSuffix);
+			if (!minFound)
 			{
 				//the minified version is preferred if it exists
 				File file = new File(tmpWarDir, path);
 				File parent = file.getParentFile();
-				String[] list = parent.list(new WildcardFileFilter(file.getName().substring(0, file.getName().indexOf(".")+1) + "*"));
+				String[] list = parent.list(new WildcardFileFilter(file.getName().substring(0, file.getName().lastIndexOf(".") + 1) + "*", IOCase.INSENSITIVE));
 				for (String name : list)
 				{
 					if (name.toLowerCase().endsWith(minSuffix))
@@ -469,7 +471,7 @@ public class WarExporter
 		group.appendChild(element);
 		element.setTextContent(path);
 		attr = doc.createAttribute("minimize");
-		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && minFound));
+		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && !minFound));
 		element.setAttributeNode(attr);
 	}
 
