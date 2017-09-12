@@ -398,7 +398,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					JSDocScriptTemplates templates = JSDocScriptTemplates.getTemplates(servoyProject.getProject(), true);
 					String userTemplate = templates.getMethodTemplate();
 					String declaration = template.getMethodDeclaration(met.getName(), null, tagToOutput, userTemplate, substitutions,
-						templates.getCleanMethodTemplateProperty());
+						templates.getCleanMethodTemplateProperty(), override);
 
 					declaration = format(declaration, file, 0);
 
