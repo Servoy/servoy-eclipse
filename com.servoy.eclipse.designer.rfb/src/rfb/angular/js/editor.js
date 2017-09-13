@@ -33,7 +33,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	HIDE_DECORATORS: "HIDE_DECORATORS"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 100,
-	PART_LABEL_HEIGHT: 20,
+	PART_LABEL_HEIGHT: 22,
 	PART_TYPE_TITLE_HEADER: 1,
 	PART_TYPE_HEADER: 2,
 	PART_TYPE_BODY: 5,
@@ -57,6 +57,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				removedNodes: []
 			}
 			var selection = [];
+			
+			var selectedConfigGhosts = [];
 
 			function markDirty() {
 				if (timeout) {
@@ -90,45 +92,55 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.glasspane = $element.find('.contentframe-overlay')[0];
+			$scope.contentArea = $element.find('.content-area')[0];
 			$scope.editorID = $element.attr('id');
 			$scope.contentDocument = null;
 			$scope.contentSizeFull = true;
 			
-			$scope.startAutoScroll = function (direction, callback){
-				return $interval(function (){
-				    var contentArea = ($element.find('.content-area')[0]);
+			$scope.startAutoScroll = function (direction, callback) {
+				var autoScrollPixelSpeed = 2;
+				return $interval(function () {
+				    var contentArea = $scope.contentArea;
 				    var changeX = 0;
 				    var changeY = 0;
 				    switch(direction) {
 				    	case "BOTTOM_AUTOSCROLL":
 							if ((contentArea.scrollTop + contentArea.offsetHeight) === contentArea.scrollHeight)
-							angular.element($scope.glasspane).height(angular.element($scope.glasspane).height()+5);
-							contentArea.scrollTop += 5;
-							changeY = 5;
+								angular.element($scope.glasspane).height(angular.element($scope.glasspane).height() + autoScrollPixelSpeed);
+							contentArea.scrollTop += autoScrollPixelSpeed;
+							changeY = autoScrollPixelSpeed;
 							break;
 				    	case "RIGHT_AUTOSCROLL":
 							if ((contentArea.scrollLeft + contentArea.offsetWidth) === contentArea.scrollWidth)
-							angular.element($scope.glasspane).width(angular.element($scope.glasspane).width()+5);
-				    		contentArea.scrollLeft += 5;
-				    		changeX = 5;
+								angular.element($scope.glasspane).width(angular.element($scope.glasspane).width() + autoScrollPixelSpeed);
+				    		contentArea.scrollLeft += autoScrollPixelSpeed;
+				    		changeX = autoScrollPixelSpeed;
 				    		break;
 				    	case "LEFT_AUTOSCROLL":
-				    		if(contentArea.scrollLeft >= 5) {
-				    			contentArea.scrollLeft -= 5;
-				    			changeX = -5;
+				    		if(contentArea.scrollLeft >= autoScrollPixelSpeed) {
+				    			contentArea.scrollLeft -= autoScrollPixelSpeed;
+				    			changeX = -autoScrollPixelSpeed;
+				    		} else {
+				    			changeX = -contentArea.scrollLeft;
+				    			contentArea.scrollLeft = 0;
 				    		}
 				    		break;
 				    	case "TOP_AUTOSCROLL":
-				    		if(contentArea.scrollTop >= 5) {
-				    			contentArea.scrollTop -= 5;
-				    			changeY = -5;
+				    		if(contentArea.scrollTop >= autoScrollPixelSpeed) {
+				    			contentArea.scrollTop -= autoScrollPixelSpeed;
+				    			changeY = -autoScrollPixelSpeed;
+				    		} else {
+				    			changeY = -contentArea.scrollTop;
+				    			contentArea.scrollTop -= 0;
 				    		}
 				    		break;
 				    }
 				    
-				    if (callback) callback($scope, $scope.selectionToDrag,changeX,changeY,0,0);
+				    if (autoScrollPixelSpeed < 15) autoScrollPixelSpeed++;
+				    
+				    if (callback) callback($scope, $scope.selectionToDrag, changeX, changeY, 0, 0);
 				    $scope.refreshEditorContent();
-				},100);
+				}, 50);
 			};
 
 			$scope.registerDOMEvent = function(eventType, target, callback) {
@@ -156,6 +168,15 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 				
 				return eventCallback;
+			}
+			
+			$scope.getAutoscrollElementClientBounds = function() {
+				var autoscrollElementClientBounds = [];
+				autoscrollElementClientBounds[0] = $element.find('.bottomAutoscrollArea')[0].getBoundingClientRect();
+				autoscrollElementClientBounds[1] = $element.find('.rightAutoscrollArea')[0].getBoundingClientRect();
+				autoscrollElementClientBounds[2] = $element.find('.leftAutoscrollArea')[0].getBoundingClientRect();
+				autoscrollElementClientBounds[3] = $element.find('.topAutoscrollArea')[0].getBoundingClientRect();
+				return autoscrollElementClientBounds;
 			}
 			
 			$scope.unregisterDOMEvent = function(eventType, target, callback) {
@@ -193,19 +214,33 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return contentAreaStyle;
 			}
 
-			//returns the ghost object with the specified uuid
+			// returns the ghost object with the specified uuid
 			$scope.getGhost = function(uuid) {
-					if ($scope.ghosts) {
-						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
-							for (j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
-								if ($scope.ghosts.ghostContainers[i].ghosts[j].uuid == uuid)
-									return $scope.ghosts.ghostContainers[i].ghosts[j];
-							}
+				if ($scope.ghosts) {
+					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
+						for (j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
+							if ($scope.ghosts.ghostContainers[i].ghosts[j].uuid == uuid)
+								return $scope.ghosts.ghostContainers[i].ghosts[j];
 						}
 					}
-					return null;
 				}
-				//returns an array of objects for the specified container uuid
+				return null;
+			}
+			
+			// returns the ghost container object that contains the given ghost
+			$scope.getGhostContainerOf = function(ghost) {
+				if ($scope.ghosts) {
+					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
+						for (j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
+							if ($scope.ghosts.ghostContainers[i].ghosts[j] == ghost)
+								return $scope.ghosts.ghostContainers[i];
+						}
+					}
+				}
+				return null;
+			}
+			
+			//returns an array of objects for the specified container uuid
 			$scope.getContainedGhosts = function(uuid) {
 				if ($scope.ghosts) {
 					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
@@ -279,8 +314,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.getGhostStyle = function(ghost) {
+				var style;
+				
 				if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // parts
-					return {
+					style = {
 						background: "#d0d0d0",
 						top: ghost.location.y + "px",
 						right: "-" + (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) + "px",
@@ -292,31 +329,44 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						overflow: "visible"
 					};
 				} else if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) { // the form
-					return {
+					style = {
 						left: 0,
 						top: 0,
 						width: ghost.size.width + "px",
 						height: ghost.size.height + "px",
 						padding: "3px"
 					};
+				} else {
+					var xOffset = 20;
+					var yOffset = 20;
+	
+					// SOME of these are set directly in editor.css for .ghost-dnd-placeholder; if you change things that should affect
+					// the placeholder used when moving droppable config custom objects via drag&drop, please change them in editor.css as well
+					style = {
+						opacity: 0.7,
+						padding: "3px",
+						left: ghost.location.x + xOffset,
+						top: ghost.location.y + yOffset,
+						width: ghost.size.width,
+						height: ghost.size.height
+					};
+					if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_INVISIBLE) {
+						style.background = "#d0d0d0";
+					}
+					else if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION)
+					{
+						style.background = "#ffbb37";
+					}
+					else if (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+					{
+						style.background = "#e4844a";
+					}
 				}
-				var xOffset = 20;
-				var yOffset = 20;
-
-				var style = {
-					opacity: 0.7,
-					padding: "3px",
-					left: ghost.location.x + xOffset,
-					top: ghost.location.y + yOffset,
-					width: ghost.size.width,
-					height: ghost.size.height
-				};
-				if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_INVISIBLE) {
-					style.background = "#d0d0d0";
-				}
-				else if (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
-				{
-					style.background = "#e4844a";
+				
+				if (ghost.selected) {
+					// else, when "selected" is set change colors so that the user knows it's selected
+					style.background = "#07f";
+					style.color = "#fff";
 				}
 				return style;
 			}
@@ -439,13 +489,30 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return part;
 			}
 
-			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
-				for (var i = 0; i < selection.length; i++) {
-					var ghost = $scope.getGhost(selection[i].getAttribute("svy-id"));
-					if (ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART)) $scope.updateGhostLocationLimits(ghost);
+			function updateGhostsAccordingToSelection(selection) {
+				// remove selection class from all previously selected ghost elements
+				for (var i in selectedConfigGhosts) {
+					delete selectedConfigGhosts[i].selected;
 				}
-			})
+				selectedConfigGhosts.length = 0;
+				
+				for (var i = 0; i < selection.length; i++) {
+					var svyId = selection[i].getAttribute("svy-id");
+					var ghost = $scope.getGhost(svyId);
+					if (ghost) {
+						if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) $scope.updateGhostLocationLimits(ghost)
+						if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION || ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) {
+							selectedConfigGhosts.push(ghost);
+							ghost.selected = true;
+						}
+					}
+				}
+			}
 
+			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
+				updateGhostsAccordingToSelection(selection);
+			})
+			
 			function getMousePosition(event) {
 				var xMouse = -1;
 				var yMouse = -1;
@@ -731,7 +798,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.setGhosts = function(ghosts) {
-				if(!equalGhosts($scope.ghosts, ghosts)) {
+				if (!equalGhosts($scope.ghosts, ghosts)) {
 					$scope.ghosts = ghosts;
 					$scope.ghostContainerElements = {}
 	
@@ -980,9 +1047,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 								var matchedElements = []
 								for (var s = 0; s < selection.length; s++) 
 								{
+									var selElemSvyId = selection[s].getAttribute("svy-id");
 									for (var i = 0; i < nodes.length; i++) {
 										var element = nodes[i]
-										if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")) {
+										if (selElemSvyId == element.getAttribute("svy-id")) {
 											matchedElements.push(element);
 											break;
 										}
@@ -993,6 +1061,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 									$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection);
 								} else {
 									$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
+									if (selectedConfigGhosts.length > 0) updateGhostsAccordingToSelection(selection); // if config ghosts were reordered (for ex. extra table columns), after drop, the DOM elements for the ghost identified by ID changed - painting the selection needs to change as well
 								}
 
 							});
