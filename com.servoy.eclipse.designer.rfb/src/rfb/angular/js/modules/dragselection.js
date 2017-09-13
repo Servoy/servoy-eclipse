@@ -3,12 +3,15 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
 		var dragging = false;
+		var autoscrollElementClientBounds;
 		var dragStartEvent = null;
 		editorScope.selectionToDrag = null;
 		var dragCloneDiv = null;
 		var COMPONENT_TYPE = 7;
 		var initialParent = null;
 		var dragNode = null;
+		var autoscrollAreasEnabled = false;
+		var configGhostDragState;
 
 		function onmousedown(event) {
 			dragNode = utils.getNode(event);
@@ -38,6 +41,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 			//disable mouse events on the autoscroll
 			editorScope.setPointerEvents("none");
 			
+			autoscrollAreasEnabled = false;
+			
 			for (var direction in autoscrollEnter) {
 				if(autoscrollEnter[direction]) editorScope.unregisterDOMEvent("mouseenter", direction, autoscrollEnter[direction]);
 			}
@@ -61,6 +66,13 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				if (dragging) {
 
 					dragging = false;
+					autoscrollElementClientBounds = undefined;
+					if (configGhostDragState) {
+						configGhostDragState.dropTargetGhostElement.css("display", "none");
+						configGhostDragState.dropTargetGhostElement.css("left", "");
+						configGhostDragState = undefined;
+					}
+
 					// store the position changes
 					var i = 0;
 					var obj = {};
@@ -159,8 +171,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								} else {
 									var beanModel = editorScope.getBeanModel(node);
 									if (beanModel) {
+										// TODO the following two lines can be removed right?
 										beanModel.location.y;
 										beanModel.location.x
+										
 										obj[node.getAttribute("svy-id")] = {
 												x: beanModel.location.x,
 												y: beanModel.location.y
@@ -313,7 +327,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		var autoscrollLeave = [];
 
 		function addAutoscrollListeners(direction) {
-			//enable mouse events on the autoscroll
+			// enable mouse events on the auto-scroll
 			editorScope.setPointerEvents("all");
 			autoscrollEnter[direction] = editorScope.registerDOMEvent("mouseenter",direction, function(event){
 				autoscrollStop[direction] = editorScope.startAutoScroll(direction, updateAbsoluteLayoutComponentsLocations);
@@ -339,6 +353,134 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					&& initialParent[0].getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
 			return canDrop;
 		}
+		
+		function isInsideAutoscrollElementClientBounds(clientX, clientY) {
+			var inside = false;
+			var i = 0;
+			while (!inside && i < 4) { // 4 == autoscrollElementClientBounds.length always
+				var rect = autoscrollElementClientBounds[i++];
+				inside = (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom);
+			}
+			
+			return inside;
+		}
+
+		function updateConfigObjectGhostsAndDropTargetWhileDragging(mouseEvent) {
+			// "configGhostDragState" is already computed here; update the positions of siblings and drop target as needed
+			// to make it clear to the developer where the ghost(s) that he drags will get dropped
+			// configGhostDragState = { "parentGhostContainer": ..., "selectionGhosts": ..., "dropTargetGhostElement": ..., ghostElementsInContainer: ..., startX: ... };
+
+			if (!configGhostDragState) return;
+
+			// allow for any pending drop target animations to finish
+			var currentMs = new Date().getTime();
+			if (configGhostDragState.lastUpdateMs && currentMs - configGhostDragState.lastUpdateMs < 255) {
+				if (configGhostDragState.timeout) clearTimeout(configGhostDragState.timeout);
+				configGhostDragState.timeout = setTimeout(updateConfigObjectGhostsAndDropTargetWhileDragging, 255 + configGhostDragState.lastUpdateMs - currentMs, mouseEvent);
+				return;
+			} else {
+				if (configGhostDragState.timeout) {
+					clearTimeout(configGhostDragState.timeout);
+					configGhostDragState.timeout = undefined;
+				}
+				configGhostDragState.lastUpdateMs = currentMs;
+			}
+
+			var foundDropSpot = false;
+			var ghostElements = configGhostDragState.ghostElementsInContainer;
+			var x = configGhostDragState.startX, y = configGhostDragState.startY;
+
+			// first try to find the first x position of the ghost elements;
+			if (!x && ghostElements.length > 0 && ghostElements[0]) x = configGhostDragState.startX = ghostElements[0].offset().left; // elements in the array could be null (if those ghosts are really the ones being dragged right now)
+
+			var i = 0;
+			var droptTargetElementLeft = configGhostDragState.dropTargetGhostElement.offset().left;
+			var selJ = 0, selWidthBeforeNonDraggedSibling = 0; // these are useful in case the ghosts being dragged are from the beginning of the ghostContainer and we need to compute the first x position even though those are being moved
+			while (i < ghostElements.length) {
+				if (ghostElements[i]) {
+					var ghostElLeft = ghostElements[i].offset().left;
+					if (angular.isUndefined(y)) y = configGhostDragState.startY = ghostElements[i].offset().top;
+					if (angular.isUndefined(x)) x = configGhostDragState.startX = ghostElLeft - selWidthBeforeNonDraggedSibling;
+					if (!foundDropSpot && ghostElLeft + (droptTargetElementLeft > ghostElLeft ? ghostElements[i].outerWidth() : 0) > mouseEvent.clientX) {
+						// we just found where to put the drop target
+						configGhostDragState.dropTargetGhostElement.css("display", "inline");
+						configGhostDragState.dropTargetGhostElement.offset({ left: x, top: y });
+						x += configGhostDragState.dropTargetGhostElement.outerWidth();
+						foundDropSpot = true;
+					}
+
+					// set the new positions for sibling ghosts starting at "x" (might or might not be the same as before)
+					ghostElements[i].offset({ left: x });
+					x += ghostElements[i].outerWidth();
+				} else if (angular.isUndefined(x)) { // null entry in ghostElements means that that particular ghost is being dragged right now
+					selWidthBeforeNonDraggedSibling += $(editorScope.getSelection()[selJ++]).outerWidth();
+				}
+				i++;
+			}
+			if (!foundDropSpot && angular.isDefined(x) && angular.isDefined(y)) {
+				// we just found where to put the drop target
+				configGhostDragState.dropTargetGhostElement.css("display", "inline");
+				configGhostDragState.dropTargetGhostElement.offset({ left: x, top: y });
+			}
+		}
+
+		function prepareForDragging(mouseEvent) {
+			dragging = true;
+			$rootScope.$broadcast(EDITOR_EVENTS.HIDE_DECORATORS);
+			utils.setDraggingFromPallete(true);
+			if (dragCloneDiv) dragCloneDiv.css({display:'block'});
+
+			autoscrollElementClientBounds = editorScope.getAutoscrollElementClientBounds();
+
+			// if we started dragging one or more config object ghosts from an array of config objects, prepare all other
+			// ghosts (add "ghost-dnd-mode" class) in that array for dragging/reordering and show the drop placeholder for
+			// nice drag feedback; same has to be done for when dragging a new config obj. from palette, but then we don't
+			// know the target yet; the target component/property will be prepared then later while moving the mouse
+			var dragPlaceholderWidth = 0;
+
+			var selectionElements = editorScope.getSelection();
+			var parentGhostContainer, gc, selectionGhosts = [];
+			for (var i = 0; i < selectionElements.length; i++)
+			{
+				var svy_id = selectionElements[i].getAttribute("svy-id");
+				var ghost = editorScope.getGhost(svy_id);	
+				if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
+					gc = editorScope.getGhostContainerOf(ghost);
+					if (!parentGhostContainer || (gc && parentGhostContainer == gc)) {
+						parentGhostContainer = gc;
+						dragPlaceholderWidth += $(selectionElements[i]).outerWidth();
+						selectionGhosts.push(ghost);
+					} else {
+						parentGhostContainer = undefined;
+						break;				
+					}
+				} else {
+					parentGhostContainer = undefined;
+					break;
+				}
+			}
+			if (parentGhostContainer) {
+				configGhostDragState = {
+					"parentGhostContainer": parentGhostContainer,
+					"selectionGhosts": selectionGhosts,
+					"dropTargetGhostElement": $("#ghost-dnd-placeholder"),
+					"ghostElementsInContainer": [] };
+				// ok add the new class to the ghosts of the same parent but which are not part of the selection
+				for (var i = 0; i < parentGhostContainer.ghosts.length; i++) {
+					if (selectionGhosts.indexOf(parentGhostContainer.ghosts[i]) == -1) {
+						var el = $('[svy-id=' + parentGhostContainer.ghosts[i].uuid + ']');
+						configGhostDragState.ghostElementsInContainer.push(el);
+						el.addClass("ghost-dnd-mode");
+						parentGhostContainer.ghosts[i].dragSibling = true;
+					} else {
+						configGhostDragState.ghostElementsInContainer.push(null); // while dragging we do not touch the position of selected ghosts except for them following the mouse; I just put null here so that the indexes are in-sync with the ghostContainer.ghosts array
+						parentGhostContainer.ghosts[i].dragSibling = false;
+					}
+				}
+				configGhostDragState.dropTargetGhostElement.outerWidth(dragPlaceholderWidth);
+			}
+		}
+		
 		function onmousemove(event) {
 			if (dragStartEvent) {
 				var i;
@@ -347,29 +489,19 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				var beanModel;
 				if (!dragging) {
 					if (Math.abs(dragStartEvent.screenX - event.screenX) > 5 || Math.abs(dragStartEvent.screenY - event.screenY) > 5) {
-						dragging = true;
-						$rootScope.$broadcast(EDITOR_EVENTS.HIDE_DECORATORS);
-						utils.setDraggingFromPallete(true);
-
-						//if the click starts in the bottom 20px and going up, 
-						//then do not enable the bottom div & start dragging downwards
-						if ((event.clientY <= editorScope.glasspane.clientHeight - 20) || (dragStartEvent.screenY - event.screenY > 0)){
-							addAutoscrollListeners("BOTTOM_AUTOSCROLL")
-						}
-
-						//if the click starts in the right 20px and going right, 
-						//then do not enable the bottom div & start dragging downwards
-						if ((event.clientX <= editorScope.glasspane.clientWidth - 20) || (dragStartEvent.screenX - event.screenX > 0)){
-							addAutoscrollListeners("RIGHT_AUTOSCROLL")
-						}
-
-
-						addAutoscrollListeners("TOP_AUTOSCROLL")
-						addAutoscrollListeners("LEFT_AUTOSCROLL")
-
-						
-						if (dragCloneDiv) dragCloneDiv.css({display:'block'});
+						prepareForDragging(event);
 					} else return;
+				}
+				updateConfigObjectGhostsAndDropTargetWhileDragging(event);
+
+				// enable auto-scroll areas only if current mouse event is outside of them (this way, when starting to drag from an auto-scroll area it will not immediately auto-scroll)
+				if (!autoscrollAreasEnabled && !isInsideAutoscrollElementClientBounds(event.clientX, event.clientY)) {
+					autoscrollAreasEnabled = true;
+					
+					addAutoscrollListeners("BOTTOM_AUTOSCROLL")
+					addAutoscrollListeners("RIGHT_AUTOSCROLL")
+					addAutoscrollListeners("TOP_AUTOSCROLL")
+					addAutoscrollListeners("LEFT_AUTOSCROLL")
 				}
 
 				if ((event.ctrlKey || event.metaKey) && editorScope.selectionToDrag == null) {
@@ -517,7 +649,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 										}
 									}
 								}
-							}									
+							}
 							updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
 						}
 						dragStartEvent = event;

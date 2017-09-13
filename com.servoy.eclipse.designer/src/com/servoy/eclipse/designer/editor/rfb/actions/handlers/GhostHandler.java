@@ -255,7 +255,7 @@ public class GhostHandler implements IServerService
 				jsonWriter.key("size");
 				jsonWriter.object();
 				jsonWriter.key("width").value(80);
-				jsonWriter.key("height").value(20);
+				jsonWriter.key("height").value(22); // this value is also set in editor.css for .ghost-dnd-mode; update it there as well if it needs to change
 				jsonWriter.endObject();
 				jsonWriter.endObject();
 
