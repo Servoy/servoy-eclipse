@@ -463,8 +463,6 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/collapseall.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/dlcl16/collapseall.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/collapseall-disabled.png"));
-			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.profiler/icons/viewicon.gif"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/profiler_view.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/elcl16/trash.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/trash.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/dlcl16/trash.png"),

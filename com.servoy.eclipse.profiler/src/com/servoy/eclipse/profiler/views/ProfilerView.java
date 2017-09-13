@@ -1182,7 +1182,7 @@ public class ProfilerView extends ViewPart
 		};
 		clearData.setText("Clear data");
 		clearData.setToolTipText("Clear data");
-		clearData.setImageDescriptor(Activator.getImageDescriptor("icons/clear.gif"));
+		clearData.setImageDescriptor(Activator.getImageDescriptor("icons/clear.png"));
 
 		exportData = new Action()
 		{
@@ -1194,7 +1194,7 @@ public class ProfilerView extends ViewPart
 		};
 		exportData.setText("Export data");
 		exportData.setToolTipText("Export data to clipboard");
-		exportData.setImageDescriptor(Activator.getImageDescriptor("icons/exportdata.gif"));
+		exportData.setImageDescriptor(Activator.getImageDescriptor("icons/export.png"));
 
 		toggleAggregateView = new Action("Aggregate View", IAction.AS_CHECK_BOX)
 		{
@@ -1232,7 +1232,7 @@ public class ProfilerView extends ViewPart
 		};
 		toggleProfile.setText("Start profiling");
 		toggleProfile.setToolTipText("Start profiling");
-		toggleProfile.setImageDescriptor(Activator.getImageDescriptor("icons/resume_co.gif"));
+		toggleProfile.setImageDescriptor(Activator.getImageDescriptor("icons/resume.png"));
 
 		openCallPostion = new Action()
 		{

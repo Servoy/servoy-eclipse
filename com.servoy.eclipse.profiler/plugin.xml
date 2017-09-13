@@ -8,7 +8,7 @@
             allowMultiple="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.profiler.views.ProfilerView"
-            icon="icons/viewicon.gif"
+            icon="icons/profiler_view.png"
             id="com.servoy.eclipse.uicom.servoy.eclipse.profiler.views.ProfilerView"
             name="Profiler">
       </view>
