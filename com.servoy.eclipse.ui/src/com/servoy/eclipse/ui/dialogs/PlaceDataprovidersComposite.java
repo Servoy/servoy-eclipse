@@ -397,8 +397,7 @@ public class PlaceDataprovidersComposite extends Composite
 			configurationViewer.setSelection(new StructuredSelection(selection));
 		}
 
-		form.setWeights(new int[] { 30, 30, 40 });
-
+		form.setWeights(new int[] { 40, 30, 30 });
 	}
 
 	private TableViewer createTableViewer(SashForm form)

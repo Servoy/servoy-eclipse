@@ -104,6 +104,7 @@ public class AddFieldAction extends DesignerToolbarAction
 		{
 			Control contents = super.createContents(parent);
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
+			getShell().pack(true);
 			return contents;
 		}
 
