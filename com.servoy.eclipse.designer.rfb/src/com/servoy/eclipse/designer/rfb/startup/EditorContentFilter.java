@@ -20,7 +20,7 @@ package com.servoy.eclipse.designer.rfb.startup;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +53,7 @@ import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -96,7 +97,9 @@ public class EditorContentFilter implements Filter
 				Set<String> formScripts = new HashSet<String>();
 				formScripts.add("js/servoy-components.js?x=" + System.currentTimeMillis());
 //				formScripts.add("solutions/" + solution + "/forms/" + form + ".js");
-				Map<String, Object> variableSubstitution = Collections.singletonMap("orientation", (Object)Integer.valueOf(0)); // fs.getSolution().getTextOrientation()
+				Map<String, Object> variableSubstitution = new HashMap<String, Object>();
+				variableSubstitution.put("orientation", Integer.valueOf(0)); // fs.getSolution().getTextOrientation()
+				variableSubstitution.put("contextPort", Integer.valueOf(ApplicationServerRegistry.get().getWebServerPort()));
 				List<String> css = new ArrayList<String>();
 				css.add("css/servoy.css");
 				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();

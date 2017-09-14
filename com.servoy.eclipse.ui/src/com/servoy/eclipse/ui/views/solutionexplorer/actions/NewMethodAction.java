@@ -360,9 +360,19 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 										{
 											JSONObject parameter = parameters.getJSONObject(i);
 											String argumentType = parameter.optString("type");
+											boolean isArray = false;
+											if (argumentType.endsWith("[]"))
+											{
+												argumentType = argumentType.substring(0, argumentType.length() - 2);
+												isArray = true;
+											}
 											if (spec.getDeclaredCustomObjectTypes().containsKey(argumentType))
 											{
 												argumentType = spec.getName() + "." + argumentType;
+											}
+											if (isArray)
+											{
+												argumentType = "Array<" + argumentType + ">";
 											}
 											arguments.add(new MethodArgument(parameter.optString("name"), ArgumentType.valueOf(argumentType),
 												parameter.optString("description", ""), parameter.optBoolean("optional", false)));
