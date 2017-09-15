@@ -27,16 +27,18 @@ import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.ColumnWrapper;
+import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * Textual representation for {@link IDataProvider}.
  * <p>
  * dataProvider may be IDataProvider or String.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class DataProviderLabelProvider extends LabelProvider implements IFontProvider, IPersistLabelProvider
 {
@@ -74,6 +76,11 @@ public class DataProviderLabelProvider extends LabelProvider implements IFontPro
 			return ((ColumnWrapper)dataProvider).getColumn().getDataProviderID();
 		}
 
+		if (hidePrefix && dataProvider instanceof EnumDataProvider)
+		{
+			return ScopesUtils.getVariableScope(((EnumDataProvider)dataProvider).getDataProviderID()).getRight();
+		}
+
 		if (dataProvider instanceof IDataProvider)
 		{
 			return hidePrefix(((IDataProvider)dataProvider).getDataProviderID());
@@ -84,7 +91,7 @@ public class DataProviderLabelProvider extends LabelProvider implements IFontPro
 
 	/**
 	 * Hide the prefix (everything before the last dot) if requested.
-	 * 
+	 *
 	 * @param text
 	 * @return
 	 */

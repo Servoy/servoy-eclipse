@@ -60,8 +60,10 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
@@ -85,6 +87,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRootObject;
@@ -92,8 +95,10 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.SortedList;
 
 public class ColumnAutoEnterComposite extends Composite implements SelectionListener
@@ -125,7 +130,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 	 * @param parent
 	 * @param style
 	 */
-	public ColumnAutoEnterComposite(Composite parent, FlattenedSolution flattenedSolution, int style)
+	public ColumnAutoEnterComposite(Composite parent, final FlattenedSolution flattenedSolution, int style)
 	{
 		super(parent, style);
 		this.flattenedSolution = flattenedSolution;
@@ -229,6 +234,29 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 							}
 						}
+						if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).scope != null &&
+							((DataProviderNodeWrapper)parentElement).type == DataProviderTreeViewer.VARIABLES && flattenedSolution != null)
+						{
+							Iterator<ScriptVariable> scopeVars = flattenedSolution.getScriptVariables(((DataProviderNodeWrapper)parentElement).scope.getName(),
+								true);
+							List<Object> children = new ArrayList<Object>();
+							while (scopeVars.hasNext())
+							{
+								ScriptVariable sv = scopeVars.next();
+								if (!sv.isPrivate())
+								{
+									if (sv.isEnum())
+									{
+										children.addAll(ScriptingUtils.getEnumDataProviders(sv));
+									}
+									else
+									{
+										children.add(sv);
+									}
+								}
+							}
+							return children.toArray();
+						}
 						return super.getChildren(parentElement);
 					}
 
@@ -245,6 +273,23 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 							((DataProviderNodeWrapper)value).type == DataProviderTreeViewer.METHODS)
 						{
 							return new DataProviderNodeWrapper(DataProviderTreeViewer.SCOPE_METHODS, (ScopeWithContext)null);
+						}
+						if (value instanceof EnumDataProvider)
+						{
+							Pair<String, String> scopePair = ScopesUtils.getVariableScope(((EnumDataProvider)value).getDataProviderID());
+							Collection<Pair<String, IRootObject>> scopes = flattenedSolution.getScopes();
+							ScopeWithContext scope = null;
+							Iterator<Pair<String, IRootObject>> it = scopes.iterator();
+							while (it.hasNext())
+							{
+								Pair<String, IRootObject> sc = it.next();
+								if (sc.getLeft().equals(scopePair.getLeft()))
+								{
+									scope = new ScopeWithContext(sc.getLeft(), sc.getRight());
+									break;
+								}
+							}
+							return new DataProviderNodeWrapper(scopePair.getLeft(), scope, DataProviderTreeViewer.VARIABLES);
 						}
 						return super.getParent(value);
 					}
@@ -600,7 +645,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						if (ColumnInfo.getSeqDisplayTypeString(element).equals(type))
 						{
 							column.setSequenceType(element);
-							columnInfo.setFlag(Column.UUID_COLUMN, element == ColumnInfo.UUID_GENERATOR);
+							columnInfo.setFlag(IBaseColumn.UUID_COLUMN, element == ColumnInfo.UUID_GENERATOR);
 							changeSupport.fireEvent(new ChangeEvent(observable));
 							break;
 						}
@@ -730,7 +775,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 					if (ColumnInfo.getSeqDisplayTypeString(element).equals(type))
 					{
 						columnInfo.setAutoEnterSubType(element);
-						columnInfo.setFlag(Column.UUID_COLUMN, element == ColumnInfo.UUID_GENERATOR);
+						columnInfo.setFlag(IBaseColumn.UUID_COLUMN, element == ColumnInfo.UUID_GENERATOR);
 						changeSupport.fireEvent(new ChangeEvent(observable));
 						if (element == ColumnInfo.SERVOY_SEQUENCE)
 						{
