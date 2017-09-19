@@ -101,7 +101,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature"/>
+      <feature id="com.servoy.eclipse.feature" version="8.3.0.3200_b1"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -126,6 +126,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
+      <property name="org.eclipse.update.reconcile property" value="false" />
    </configurations>
 
    <preferencesInfo>
