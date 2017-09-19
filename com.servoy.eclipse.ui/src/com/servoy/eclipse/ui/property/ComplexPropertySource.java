@@ -75,7 +75,7 @@ public abstract class ComplexPropertySource<T> implements IPropertySource
 		return null;
 	}
 
-	public final boolean isPropertySet(Object id)
+	public boolean isPropertySet(Object id)
 	{
 		if (complexProperty != null)
 		{
