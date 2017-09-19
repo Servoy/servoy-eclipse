@@ -100,6 +100,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public String getWebXMLFileName()
+		{
+			return configuration.getWebXMLFileName();
+		}
+
+		@Override
 		public ServerConfiguration getServerConfiguration(String serverName)
 		{
 			return null;
