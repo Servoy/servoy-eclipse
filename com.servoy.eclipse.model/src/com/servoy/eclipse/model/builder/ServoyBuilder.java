@@ -901,20 +901,28 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		if (o instanceof WebComponent)
 		{
-			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
+			String typeName = ((WebComponent)o).getTypeName();
+			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeName);
 			if (spec == null)
 			{
-				String[] webcomponentNameAndSpec = ((WebComponent)o).getTypeName().split("-");
-				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", webcomponentNameAndSpec[webcomponentNameAndSpec.length - 1],
-					webcomponentNameAndSpec[0]);
-				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
-				try
+				if (typeName != null)
 				{
-					marker.setAttribute("packageName", webcomponentNameAndSpec[0]);
+					String[] webcomponentNameAndSpec = typeName.split("-");
+					ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", webcomponentNameAndSpec[webcomponentNameAndSpec.length - 1],
+						webcomponentNameAndSpec[0]);
+					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+					try
+					{
+						marker.setAttribute("packageName", webcomponentNameAndSpec[0]);
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
-				catch (CoreException e)
+				else
 				{
-					ServoyLog.logError(e);
+					ServoyLog.logError("Type name not found for webcomponent " + ((WebComponent)o).getName(), null);
 				}
 			}
 		}
