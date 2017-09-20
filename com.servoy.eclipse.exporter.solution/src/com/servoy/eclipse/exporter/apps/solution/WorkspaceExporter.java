@@ -18,15 +18,12 @@
 package com.servoy.eclipse.exporter.apps.solution;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.json.JSONException;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -88,20 +85,12 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 					defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(solution, configuration.shouldExportModules(),
 						configuration.shouldExportI18NData(), configuration.getExportAllTablesFromReferencedServers(), configuration.shouldExportMetaData());
 				}
-				catch (CoreException e)
+				catch (Exception e)
 				{
 					Debug.error(e);
-					defManagers = null;
-				}
-				catch (JSONException e)
-				{
-					Debug.error(e);
-					defManagers = null;
-				}
-				catch (IOException e)
-				{
-					Debug.error(e);
-					defManagers = null;
+					exitCode = EXIT_EXPORT_FAILED;
+					outputError("Exception while exporting solution tables from DBI files. EXPORT FAILED for this solution. Check workspace log.");
+					return;
 				}
 				if (defManagers != null)
 				{
