@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.property;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 
@@ -48,33 +49,67 @@ public class PseudoPropertyHandler implements IPropertyHandler
 
 	// null type: use property controller internally
 	public static final PropertyDescription DESIGN_PROPERTIES_DESCRIPTION = new PropertyDescription("designTimeProperties", null,
-		new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
-			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class), null),
-			"designTimeProperties")
-		{
-			@Override
-			public Map<String, Object> getProperty(PersistPropertySource propSource)
+		new CustomPropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
+			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class), null)
 			{
-				IPersist persist = propSource.getPersist();
-				if (persist instanceof AbstractBase)
+				@Override
+				protected ComplexPropertyConverter<Map<String, Object>> createConverter()
 				{
-					return ((AbstractBase)persist).getMergedCustomDesignTimeProperties(); // returns non-null map with copied/merged values, may be written to
+					return new ComplexProperty.ComplexPropertyConverter<Map<String, Object>>()
+					{
+						@Override
+						public Object convertProperty(final Object id, Map<String, Object> value)
+						{
+							final IPersist p = (IPersist)value.get("persist");
+							@SuppressWarnings("unchecked")
+							Map<String, Object> v = (Map<String, Object>)value.get("values");
+							return new ComplexProperty<Map<String, Object>>(v)
+							{
+								@Override
+								public IPropertySource getPropertySource()
+								{
+									return new PersistMapPropertySourceWithOverrideSupport(p, this)
+									{
+										@SuppressWarnings("unchecked")
+										@Override
+										public Map<String, Object> getPersistMap(IPersist persist)
+										{
+											return (Map<String, Object>)((AbstractBase)persist).getCustomPropertyNonFlattened(
+												new String[] { IContentSpecConstants.PROPERTY_DESIGNTIME });
+										}
+									};
+								}
+							};
+						}
+					};
+				}
+
+			}, "designTimeProperties", IContentSpecConstants.PROPERTY_DESIGNTIME)
+		{
+
+			@Override
+			public Map<String, ? > getMergedProperties(IPersist p)
+			{
+				if (p instanceof AbstractBase)
+				{
+					return ((AbstractBase)p).getMergedCustomDesignTimeProperties();
 				}
 				return null;
 			}
 
-			public void setProperty(PersistPropertySource propSource, Map<String, Object> value)
+			@SuppressWarnings("unchecked")
+			@Override
+			public void setMergedProperties(IPersist p, Map<String, ? > value)
 			{
-				IPersist persist = propSource.getPersist();
-				if (persist instanceof AbstractBase)
+				if (p instanceof AbstractBase)
 				{
-					((AbstractBase)persist).setUnmergedCustomDesignTimeProperties(value);
+					((AbstractBase)p).setUnmergedCustomDesignTimeProperties((Map<String, Object>)value);
 				}
 			}
 		});
 
 	public static final PropertyDescription ATTRIBUTES_PROPERTY_DESCRIPTION = new PropertyDescription(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null,
-		new PropertySetterDelegatePropertyController<Map<String, String>, PersistPropertySource>(
+		new CustomPropertySetterDelegatePropertyController<Map<String, ? >, PersistPropertySource>(
 			new MapEntriesPropertyController(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null)
 			{
 
@@ -86,13 +121,24 @@ public class PseudoPropertyHandler implements IPropertyHandler
 						@Override
 						public Object convertProperty(final Object id, Map<String, Object> value)
 						{
-							return new ComplexProperty<Map<String, Object>>(value)
+							final IPersist p = (IPersist)value.get("persist");
+							@SuppressWarnings("unchecked")
+							Map<String, Object> v = (Map<String, Object>)value.get("values");
+							return new ComplexProperty<Map<String, Object>>(v)
 							{
 								@Override
 								public IPropertySource getPropertySource()
 								{
-									return new MapPropertySource(this)
+									return new PersistMapPropertySourceWithOverrideSupport(p, this)
 									{
+										@SuppressWarnings("unchecked")
+										@Override
+										public Map<String, String> getPersistMap(IPersist persist)
+										{
+											return (Map<String, String>)((AbstractBase)persist).getCustomPropertyNonFlattened(
+												new String[] { IContentSpecConstants.PROPERTY_ATTRIBUTES });
+										}
+
 										@Override
 										protected String toJSExpression(Object v)
 										{
@@ -114,28 +160,98 @@ public class PseudoPropertyHandler implements IPropertyHandler
 					};
 				}
 
-			}, StaticContentSpecLoader.PROPERTY_ATTRIBUTES)
+			}, StaticContentSpecLoader.PROPERTY_ATTRIBUTES, IContentSpecConstants.PROPERTY_ATTRIBUTES)
 		{
+
 			@Override
-			public Map<String, String> getProperty(PersistPropertySource propSource)
+			public Map<String, ? > getMergedProperties(IPersist p)
 			{
-				IPersist persist = propSource.getPersist();
-				if (persist instanceof BaseComponent)
+				if (p instanceof BaseComponent)
 				{
-					return new HashMap<String, String>(((BaseComponent)persist).getAttributes());
+					return new HashMap<String, String>(((BaseComponent)p).getMergedAttributes());
 				}
 				return null;
 			}
 
-			public void setProperty(PersistPropertySource propSource, Map<String, String> value)
+			@SuppressWarnings("unchecked")
+			@Override
+			public void setMergedProperties(IPersist p, Map<String, ? > value)
 			{
-				IPersist persist = propSource.getPersist();
-				if (persist instanceof BaseComponent)
+				if (p instanceof BaseComponent)
 				{
-					((BaseComponent)persist).putAttributes(value);
+					((BaseComponent)p).putUnmergedAttributes((Map<String, String>)value);
 				}
 			}
 		});
+
+
+	public static abstract class CustomPropertySetterDelegatePropertyController<P extends Map<String, ? >, S extends PersistPropertySource>
+		extends PropertySetterDelegatePropertyController<P, S>
+	{
+		private final String customType;
+
+		/**
+		 * @param propertyDescriptor
+		 * @param id
+		 */
+		public CustomPropertySetterDelegatePropertyController(IPropertyDescriptor propertyDescriptor, Object id, String customType)
+		{
+			super(propertyDescriptor, id);
+			this.customType = customType;
+		}
+
+		public abstract Map<String, ? > getMergedProperties(IPersist p);
+
+		public abstract void setMergedProperties(IPersist p, Map<String, ? > value);
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public P getProperty(PersistPropertySource propSource)
+		{
+			IPersist persist = propSource.getPersist();
+			Map<String, Object> mergedCustomDesignProperties = (Map<String, Object>)getMergedProperties(persist);
+			if (mergedCustomDesignProperties != null)
+			{
+				Map<String, Object> mapWithPersistAndValues = new HashMap<>();
+				mapWithPersistAndValues.put("persist", persist);
+				mapWithPersistAndValues.put("values", mergedCustomDesignProperties);
+				return (P)mapWithPersistAndValues;
+			}
+			return null;
+		}
+
+		public void setProperty(PersistPropertySource propSource, P value)
+		{
+			IPersist persist = propSource.getPersist();
+			setMergedProperties(persist, value);
+			if (!isPropertySet(propSource))
+			{
+				((AbstractBase)persist).clearCustomProperty(new String[] { customType });
+			}
+		}
+
+		@Override
+		public void resetPropertyValue(PersistPropertySource propSource)
+		{
+			setProperty(propSource, null);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public boolean isPropertySet(PersistPropertySource propSource)
+		{
+			IPersist persist = propSource.getPersist();
+			if (persist instanceof AbstractBase)
+			{
+				Map<String, String> attributes = (Map<String, String>)((AbstractBase)persist).getCustomPropertyNonFlattened(new String[] { customType });
+
+				return attributes != null && attributes.size() > 0;
+			}
+
+			return false;
+		}
+
+	}
 
 
 	private final String name;

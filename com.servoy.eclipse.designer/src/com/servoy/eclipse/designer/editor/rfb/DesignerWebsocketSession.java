@@ -481,7 +481,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (LayoutContainer container : containersList)
 			{
 				// TODO what the send over, if new then just the id? but what about the properties?
-				Map<String, String> attributes = container.getAttributes();
+				Map<String, String> attributes = container.getMergedAttributes();
 				writer.object();
 				writer.key("uuid");
 				writer.value(container.getUUID().toString());

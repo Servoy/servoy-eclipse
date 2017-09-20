@@ -1033,8 +1033,26 @@ public class WarExporter
 	{
 		// copy war web.xml
 		File webXMLFile = new File(tmpWarDir, "WEB-INF/web.xml");
-		try (InputStream webXmlIS = WarExporter.class.getResourceAsStream("resources/web.xml");
-			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
+		String name = exportModel.getWebXMLFileName();
+		InputStream webXmlIS = null;
+		if (name == null)
+		{
+			webXmlIS = WarExporter.class.getResourceAsStream("resources/web.xml");
+		}
+		else try
+		{
+			String message = exportModel.checkWebXML();
+			if (message != null)
+			{
+				throw new ExportException(message);
+			}
+			webXmlIS = new FileInputStream(name);
+		}
+		catch (FileNotFoundException fnfe)
+		{
+			throw new ExportException("Can't create the web.xml file, couldn't read" + name, fnfe);
+		}
+		try (InputStream is = webXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
 		{
 			byte[] buffer = new byte[8096];
 			int read = webXmlIS.read(buffer);

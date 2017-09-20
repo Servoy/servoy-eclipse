@@ -5,7 +5,8 @@
   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
   version="3.0">
-
+  <!--  this version below should be upped if servoy makes changes to this file! -->
+  <!--  servoy web.xml version:1 -->
   <!-- Servoy related servlets -->
   
   <absolute-ordering>

@@ -32,11 +32,14 @@ import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
+import com.servoy.eclipse.ui.property.PseudoPropertyHandler.CustomPropertySetterDelegatePropertyController;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportAttributes;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.WebComponent;
@@ -91,9 +94,10 @@ public class PDPropertySource extends PersistPropertySource
 		}
 		if (persistContext.getPersist() instanceof LayoutContainer || persistContext.getPersist() instanceof WebComponent)
 		{
-			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription("attributes", null,
-				new PropertySetterDelegatePropertyController<Map<String, String>, PersistPropertySource>(
-					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class),
+			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(
+				new PropertyDescription(IContentSpecConstants.PROPERTY_ATTRIBUTES, null,
+					new CustomPropertySetterDelegatePropertyController<Map<String, ? >, PersistPropertySource>(new MapEntriesPropertyController(
+						IContentSpecConstants.PROPERTY_ATTRIBUTES, RepositoryHelper.getDisplayName(IContentSpecConstants.PROPERTY_ATTRIBUTES, Form.class),
 						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null)
 					{ /*
 						 * (non-Javadoc)
@@ -108,13 +112,24 @@ public class PDPropertySource extends PersistPropertySource
 								@Override
 								public Object convertProperty(final Object id, Map<String, Object> value)
 								{
-									return new ComplexProperty<Map<String, Object>>(value)
+									final IPersist p = (IPersist)value.get("persist");
+									@SuppressWarnings("unchecked")
+									Map<String, Object> v = (Map<String, Object>)value.get("values");
+									return new ComplexProperty<Map<String, Object>>(v)
 									{
 										@Override
 										public IPropertySource getPropertySource()
 										{
-											return new MapPropertySource(this)
+											return new PersistMapPropertySourceWithOverrideSupport(p, this)
 											{
+												@SuppressWarnings("unchecked")
+												@Override
+												public Map<String, String> getPersistMap(IPersist persist)
+												{
+													return (Map<String, String>)((AbstractBase)persist).getCustomPropertyNonFlattened(
+														new String[] { IContentSpecConstants.PROPERTY_ATTRIBUTES });
+												}
+
 												@Override
 												public IPropertyDescriptor[] createPropertyDescriptors()
 												{
@@ -158,29 +173,29 @@ public class PDPropertySource extends PersistPropertySource
 							};
 						}
 
-					}, "attributes")
-				{
-					@SuppressWarnings("unchecked")
-					@Override
-					public Map<String, String> getProperty(PersistPropertySource propSource)
+					}, IContentSpecConstants.PROPERTY_ATTRIBUTES, IContentSpecConstants.PROPERTY_ATTRIBUTES)
 					{
-						IPersist persist = propSource.getPersist();
-						if (persist instanceof ISupportAttributes)
-						{
-							return new HashMap<String, String>(((ISupportAttributes)persist).getAttributes()); // returns non-null map with copied/merged values, may be written to
-						}
-						return null;
-					}
 
-					public void setProperty(PersistPropertySource propSource, Map<String, String> value)
-					{
-						IPersist persist = propSource.getPersist();
-						if (persist instanceof ISupportAttributes)
+						@Override
+						public Map<String, ? > getMergedProperties(IPersist p)
 						{
-							((ISupportAttributes)persist).putAttributes(value);
+							if (p instanceof BaseComponent)
+							{
+								return new HashMap<String, String>(((BaseComponent)p).getMergedAttributes());
+							}
+							return null;
 						}
-					}
-				}));
+
+						@SuppressWarnings("unchecked")
+						@Override
+						public void setMergedProperties(IPersist p, Map<String, ? > value)
+						{
+							if (p instanceof BaseComponent)
+							{
+								((BaseComponent)p).putUnmergedAttributes((Map<String, String>)value);
+							}
+						}
+					}));
 			props.add(attributesPropertyHandler);
 		}
 		if (persistContext.getPersist() instanceof WebComponent)
