@@ -1207,7 +1207,7 @@ public class ProfilerView extends ViewPart
 		};
 		toggleAggregateView.setText("Aggregate View");
 		toggleAggregateView.setToolTipText("Aggregate View");
-		toggleAggregateView.setImageDescriptor(Activator.getImageDescriptor("icons/aggregates.gif"));
+		toggleAggregateView.setImageDescriptor(Activator.getImageDescriptor("icons/aggregates.png"));
 
 		toggleProfile = new Action("Start profiling", IAction.AS_CHECK_BOX)
 		{
