@@ -275,8 +275,17 @@ public class WarExporter
 			File wroPropertiesFile = new File(tmpWarDir, "wro.properties");
 			FileUtils.copyInputStreamToFile(WarExporter.class.getResource("resources/wro.properties").openStream(), wroPropertiesFile);
 
+			String pathSeparator = System.getProperty("file.separator");
+			String java = System.getProperty("java.home") + pathSeparator + "bin" + pathSeparator + "java";
+			File javaFile = new File(java);
+			if (!javaFile.exists())
+			{
+				javaFile = new File(java + ".exe");//windows
+				java = javaFile.exists() ? java + ".exe" : "java";
+			}
+
 			List<String> args = new ArrayList<String>();
-			args.add("java");
+			args.add(java);
 			args.add("-jar");
 			args.add(jarFile.getAbsolutePath());
 			args.add("--contextFolder");
