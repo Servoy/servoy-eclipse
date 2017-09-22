@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -45,8 +46,13 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
 
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -107,7 +113,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 
 	protected class MapPropertySource extends ComplexPropertySourceWithStandardReset<Map<String, Object>>
 	{
-		private static final String REMOVE_VALUE = "<removed>&*^&^%&$#@^%$&%%^#$*$($";
+		protected static final String REMOVE_VALUE = "<removed>&*^&^%&$#@^%$&%%^#$*$($";
 
 		public MapPropertySource(ComplexProperty<Map<String, Object>> complexProperty)
 		{
@@ -123,11 +129,11 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 				return IPropertyController.NO_DESCRIPTORS;
 			}
 
-			IPropertyDescriptor[] descs = new IPropertyDescriptor[map.size()];
+			TextPropertyDescriptor[] descs = new TextPropertyDescriptor[map.size()];
 			int i = 0;
 			for (final String key : map.keySet())
 			{
-				descs[i++] = new TextPropertyDescriptor(key, key)
+				descs[i] = new TextPropertyDescriptor(key, key)
 				{
 					@Override
 					public CellEditor createPropertyEditor(Composite parent)
@@ -199,9 +205,21 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 						}
 					}
 				};
+
+				ILabelProvider labelProvider = createLabelProvider(key);
+				if (labelProvider != null)
+				{
+					descs[i].setLabelProvider(labelProvider);
+				}
+				i++;
 			}
 
 			return descs;
+		}
+
+		protected ILabelProvider createLabelProvider(@SuppressWarnings("unused") String mapKey)
+		{
+			return null;
 		}
 
 		@Override
@@ -265,6 +283,79 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 			}
 			return value;
 		}
+	}
+
+	protected abstract class PersistMapPropertySourceWithOverrideSupport extends MapPropertySource
+	{
+		protected final IPersist p;
+
+		/**
+		 * @param complexProperty
+		 */
+		public PersistMapPropertySourceWithOverrideSupport(IPersist p, ComplexProperty<Map<String, Object>> complexProperty)
+		{
+			super(complexProperty);
+			this.p = p;
+		}
+
+		public boolean isOverriden(String mapKey)
+		{
+			if (p instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)p))
+			{
+				Map<String, ? > attributes = getPersistMap(p);
+				if (attributes != null && attributes.containsKey(mapKey))
+				{
+					List<AbstractBase> pOverrideHierarchy = PersistHelper.getOverrideHierarchy((ISupportExtendsID)p);
+					if (pOverrideHierarchy.size() > 1)
+					{
+						for (int i = 1; i < pOverrideHierarchy.size(); i++)
+						{
+							attributes = getPersistMap(pOverrideHierarchy.get(i));
+							if (attributes != null && attributes.containsKey(mapKey))
+							{
+								return true;
+							}
+						}
+					}
+
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean isPropertySet(Object id)
+		{
+			Map<String, ? > persistMap = getPersistMap(p);
+			return persistMap != null && persistMap.containsKey(id);
+		}
+
+		public abstract Map<String, ? > getPersistMap(IPersist persist);
+
+		@Override
+		protected ILabelProvider createLabelProvider(final String mapKey)
+		{
+			return new LabelProvider()
+			{
+				@Override
+				public String getText(Object element)
+				{
+					String labelText = (String)element;
+					if (isOverriden(mapKey))
+					{
+						labelText = (labelText != null ? labelText : "") + " (" + Messages.LabelOverride + ')';
+					}
+					return labelText;
+				}
+			};
+		}
+
+		@Override
+		protected Map<String, Object> setComplexPropertyValue(Object cpid, Object cpv)
+		{
+			return super.setComplexPropertyValue(cpid, cpv == null && isOverriden((String)cpid) ? REMOVE_VALUE : cpv);
+		}
+
 	}
 
 	protected abstract class AbstractAddEntryCellEditor extends CellEditor

@@ -84,6 +84,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String overwriteDBServerProperties = "overwriteDBServerProperties";
 	private static final String overwriteAllProperties = "overwriteAllProperties";
 
+	private static final String webXmlFileName = "webXmlFileName";
+
 	private HashMap<String, String> argumentsMap;
 	private Map<String, License> licenseMap = new HashMap<>();
 
@@ -197,7 +199,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + overwriteDBServerProperties + " overwrite  the  DB  server   properties  of an  already\n"
 			+ "             deployed app. by using the DB servers from the servoy.properties of the war.\n"
 			+ "        -" + overwriteAllProperties + " overwrite all properties of  an already deployed application\n"
-			+ "             by using the values from the servoy.properties of the war.\n";
+			+ "             by using the values from the servoy.properties of the war.\n"
+		+ "        -" + webXmlFileName + " a path to a web.xml that should be included instead of the default one\n"
+		+ "             should be a web.xml that is generated first by a Servoy WAR export\n";
 		// @formatter:on
 	}
 
@@ -230,6 +234,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (argsMap.containsKey("users")) exportUsers = true;
 		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
 		if (argsMap.containsKey("warFileName")) warFileName = parseArg("warFileName", null, argsMap, false);
+		parseArg(webXmlFileName, null, argsMap, false);
 
 		parseArg("defaultAdminUser", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
 		parseArg("defaultAdminPassword", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
@@ -512,5 +517,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String getUserHome()
 	{
 		return argumentsMap.get(userHomeDirectory);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getWebXMLFileName()
+	{
+		return argumentsMap.get(webXmlFileName);
 	}
 }

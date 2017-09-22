@@ -10,10 +10,11 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  com.servoy.eclipse.model,
- org.eclipse.ui.forms
+ org.eclipse.ui.forms,
+ org.slf4j.api,
+ commons-lang3
 Export-Package: com.servoy.eclipse.notification.rss
 Bundle-ClassPath: .,
  lib/rome-1.7.5-SNAPSHOT.jar,
  lib/jdom2-2.0.6.jar,
- lib/slf4j-api-1.7.21.jar,
  lib/rome-utils-1.7.5-SNAPSHOT.jar

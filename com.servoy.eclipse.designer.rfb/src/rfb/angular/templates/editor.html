@@ -23,13 +23,14 @@
 			    	<div id="lasso"></div>
 			    	<div id="highlight"></div>
 					<!--Decorators-->
+						<div id="ghost-dnd-placeholder" class="ghost-dnd-placeholder ghost-dnd-mode ghost label"><i class="fa fa-anchor" aria-hidden="true"></i></div>
 						<decorator></decorator>
 						<div  class="ghostcontainer" ng-repeat="container in ghosts.ghostContainers" ng-style="getGhostContainerStyle(container)" style="display:none">
 							<div class="ghost label" ng-repeat="ghost in container.ghosts track by $index" ng-style="getGhostStyle(ghost)" svy-id="{{ghost.uuid}}" svy-types="[{{ghost.propertyType}}]" ng-dblclick="openContainedForm(ghost)">
 								<hr ng-style="getGhostHRStyle(ghost)">{{ghost.text}}&nbsp;
 							</div>
 						</div>
-			    </div> <!--  -->
+			    </div>
 				<div class="content" ng-style="contentStyle">
 					<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
 					<iframe class="contentframe" ng-src="{{contentframe}}"></iframe>

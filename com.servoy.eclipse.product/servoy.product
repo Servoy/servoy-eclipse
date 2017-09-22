@@ -21,10 +21,7 @@ and will be prosecuted to the maximum extent possible under law.
    </aboutInfo>
 
    <configIni use="default">
-      <linux>/com.servoy.eclipse.product/config.ini</linux>
-      <macosx>/com.servoy.eclipse.product/config.ini</macosx>
       <solaris>/com.servoy.eclipse.product/config.ini</solaris>
-      <win32>/com.servoy.eclipse.product/config.ini</win32>
    </configIni>
 
    <launcherArgs>
@@ -69,7 +66,7 @@ internal testing and evaluation by such company only subject to these terms and 
 limited use cannot be transferred nor sub-licensed. No commercial and/or productive use in
 whatever way is permitted. These terms and conditions are applicable as to use of this demo copy
 provided that Servoy does not provide any (level of) Support nor Services. Servoy provides the
-demo copy of the Servoy Software “as is” and makes no representation, guarantee or warranty of
+demo copy of the Servoy Software &quot;as is&quot; and makes no representation, guarantee or warranty of
 any kind concerning the same. In no event shall Servoy be liable for any loss, direct and/or indirect
 damage/expense whatsoever including, without limitation, time, money or goodwill arising from or
 in connection with the use, performance or non-performance or inability to use, and operation of
@@ -78,7 +75,7 @@ the Servoy Software. Servoy is not liable for any loss/damage of data.
 
 Article 1. Definitions.
 
-1.1 Servoy Software shall mean the present and future standard proprietary computer business application platform software of Servoy which is generally commercially available and marketed under the name “SERVOY” including the related Software Product Description and the subsequent Releases. The factual description of related Servoy Software products indicated by Release number etc. as actually licensed to End-User is indicated in the Product Order Form.
+1.1 Servoy Software shall mean the present and future standard proprietary computer business application platform software of Servoy which is generally commercially available and marketed under the name &quot;SERVOY&quot; including the related Software Product Description and the subsequent Releases. The factual description of related Servoy Software products indicated by Release number etc. as actually licensed to End-User is indicated in the Product Order Form.
 
 1.2 Software Product Description shall mean the on-line help text/manual being part of the Servoy Software and/or the Servoy standard user manual related to the Release concerned; contents of which can be found at: https://wiki.servoy.com/display/public/Documentation/Servoy+Documentation
 
@@ -104,7 +101,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature"/>
+      <feature id="com.servoy.eclipse.feature" version="8.3.0.3200_b1"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -129,8 +126,9 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
-      <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="0" />
+      <property name="org.eclipse.update.reconcile property" value="false" />
    </configurations>
 
    <preferencesInfo>

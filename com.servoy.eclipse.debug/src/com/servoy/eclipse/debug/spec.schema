@@ -189,6 +189,9 @@
 								"displayTagsPropertyName": {
 									"type": "string"
 								},
+								"resolveValuelist": {
+									"type": "boolean"
+								},
 								"oppositeOf": {
 									"type": "string"
 								},
@@ -498,6 +501,9 @@
 										},
 										"forFoundset": {
 											"type": "string"
+										},
+										"resolveValuelist": {
+											"type": "boolean"
 										},
 										"for": {
 											"oneOf": [

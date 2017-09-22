@@ -67,6 +67,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -442,19 +443,36 @@ public class WarExporter
 	private void addGroupElement(Document doc, Element group, File tmpWarDir, String relativePath, String suffix)
 	{
 		String path = relativePath;
-		String minSuffix = ".min." + suffix;
-		if (!path.endsWith(minSuffix) && path.contains("."))
+		boolean minFound = false;
+		if (path.contains("."))
 		{
-			//the minified version is preferred if it exists
-			File f = new File(tmpWarDir, path.substring(0, path.lastIndexOf("." + suffix)) + minSuffix);
-			if (f.exists()) path = f.getAbsolutePath().replace(tmpWarDir.getAbsolutePath(), "").replaceAll("\\\\", "/");
+			String currentSuffix = path.substring(path.lastIndexOf("."));
+			String minSuffix = (".min" + currentSuffix).toLowerCase();
+			minFound = path.toLowerCase().endsWith(minSuffix);
+			if (!minFound)
+			{
+				//the minified version is preferred if it exists
+				File file = new File(tmpWarDir, path);
+				File parent = file.getParentFile();
+				String[] list = parent.list(new WildcardFileFilter(file.getName().substring(0, file.getName().lastIndexOf(".") + 1) + "*", IOCase.INSENSITIVE));
+				for (String name : list)
+				{
+					if (name.toLowerCase().endsWith(minSuffix))
+					{
+						minFound = true;
+						File f = new File(parent, name);
+						path = f.getAbsolutePath().replace(tmpWarDir.getAbsolutePath(), "").replaceAll("\\\\", "/");
+						break;
+					}
+				}
+			}
 		}
 		Attr attr;
 		Element element = doc.createElement(suffix);
 		group.appendChild(element);
 		element.setTextContent(path);
 		attr = doc.createAttribute("minimize");
-		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && !path.endsWith(minSuffix)));
+		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && !minFound));
 		element.setAttributeNode(attr);
 	}
 
@@ -1016,8 +1034,26 @@ public class WarExporter
 	{
 		// copy war web.xml
 		File webXMLFile = new File(tmpWarDir, "WEB-INF/web.xml");
-		try (InputStream webXmlIS = WarExporter.class.getResourceAsStream("resources/web.xml");
-			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
+		String name = exportModel.getWebXMLFileName();
+		InputStream webXmlIS = null;
+		if (name == null)
+		{
+			webXmlIS = WarExporter.class.getResourceAsStream("resources/web.xml");
+		}
+		else try
+		{
+			String message = exportModel.checkWebXML();
+			if (message != null)
+			{
+				throw new ExportException(message);
+			}
+			webXmlIS = new FileInputStream(name);
+		}
+		catch (FileNotFoundException fnfe)
+		{
+			throw new ExportException("Can't create the web.xml file, couldn't read" + name, fnfe);
+		}
+		try (InputStream is = webXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
 		{
 			byte[] buffer = new byte[8096];
 			int read = webXmlIS.read(buffer);

@@ -120,4 +120,8 @@ public interface IWarExportModel extends IExportSolutionModel
 	public void setOverwriteDeployedServoyProperties(boolean isOverwriteDeployedServoyProperties);
 
 	public boolean isOverwriteDeployedServoyProperties();
+
+	public String getWebXMLFileName();
+
+	public String checkWebXML();
 }

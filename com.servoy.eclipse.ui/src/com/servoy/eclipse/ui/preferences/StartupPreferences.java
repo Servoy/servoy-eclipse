@@ -105,10 +105,10 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		settingsFileLabel = new Label(nativeLaunchers, SWT.NONE);
 		settingsFileLabel.setText("Properties file");
 		settingsFileLabel.setToolTipText(
-			"Set properties file (by default servoy.properties) from application server directory to be used for this workspace. After change, restart is required.");
+			"Set properties file (by default servoy.properties) from application server directory, so a relative to that dir,  to be used for this workspace. After change, restart is required.");
 		settingsFileText = new Text(nativeLaunchers, SWT.BORDER);
 		settingsFileText.setToolTipText(
-			"Set properties file (by default servoy.properties) from application server directory to be used for this workspace. After change, restart is required.");
+			"Set properties file (by default servoy.properties) from application server directory, so a relative to that dir,  to be used for this workspace. After change, restart is required.");
 
 		Label retriesLabel;
 		retriesLabel = new Label(settings, SWT.NONE);

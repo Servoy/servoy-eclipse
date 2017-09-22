@@ -20,6 +20,7 @@ package com.servoy.eclipse.model.war.exporter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -447,5 +448,58 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	public void setOverwriteDeployedServoyProperties(boolean isOverwriteDeployedServoyProperties)
 	{
 		this.isOverwriteDeployedServoyProperties = isOverwriteDeployedServoyProperties;
+	}
+
+
+	public String checkWebXML()
+	{
+		String message = null;
+		if (getWebXMLFileName() != null)
+		{
+			File f = new File(getWebXMLFileName());
+			if (!f.exists())
+			{
+				message = "Specified web.xml  file doesn't exist.";
+			}
+			else if (f.isDirectory())
+			{
+				message = "Specified web.xml  file is a folder.";
+			}
+			else
+			{
+				String content = Utils.getTXTFileContent(f, Charset.forName("UTF8"));
+				if (content == null || content.trim().length() == 0)
+				{
+					message = "Specified web.xml file has no content";
+				}
+				else
+				{
+					final String VERSION_STRING = "servoy web.xml version:";
+					int index = content.indexOf(VERSION_STRING);
+					if (index == -1)
+					{
+						message = "Specified web.xml file is not a valid servoy web,xml file (doesn't contain he servoy version comment)";
+					}
+					else
+					{
+						int index2 = content.indexOf("-->", index);
+						int version = Utils.getAsInteger(content.substring(index + VERSION_STRING.length(), index2).trim(), 0);
+
+						String currentWebXml = Utils.getTXTFileContent(WarExporter.class.getResourceAsStream("resources/web.xml"), Charset.forName("UTF8"),
+							true);
+						int currentWebXmlIndex = currentWebXml.indexOf(VERSION_STRING);
+						int currentWebXmlIndex2 = currentWebXml.indexOf("-->", currentWebXmlIndex);
+						int currentWebXmlVersion = Utils.getAsInteger(
+							currentWebXml.substring(currentWebXmlIndex + VERSION_STRING.length(), currentWebXmlIndex2).trim(), 0);
+						if (version != currentWebXmlVersion)
+						{
+							message = "Specified web.xml file is has a different version (" + version + ") then what is current shipped in servoy (" +
+								currentWebXmlVersion + ") please regenerate the web.xml first";
+						}
+					}
+				}
+			}
+		}
+		return message;
 	}
 }

@@ -105,6 +105,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean ready = false;
 	private boolean useAsRealAdminUser;
 	private boolean searchProblem = false;
+	private String webXMLFileName;
 
 	/**
 	 * @param isNGExport
@@ -155,6 +156,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 
 		warFileName = settings.get("export.warfilename");
+		webXMLFileName = settings.get("export.webxmlfilename");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
@@ -342,6 +344,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 
 		settings.put("export.warfilename", warFileName);
+		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.exportActiveSolution", exportActiveSolution);
 		settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
 
@@ -1175,5 +1178,25 @@ public class ExportWarModel extends AbstractWarExportModel
 	public boolean hasSearchError()
 	{
 		return searchProblem;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getWebXMLFileName()
+	{
+		return webXMLFileName;
+	}
+
+	/**
+	 * @param webXMLFileName
+	 */
+	public void setWebXMLFileName(String webXMLFileName)
+	{
+		this.webXMLFileName = webXMLFileName;
+		if (this.webXMLFileName != null && this.webXMLFileName.trim().length() == 0)
+		{
+			this.webXMLFileName = null;
+		}
 	}
 }

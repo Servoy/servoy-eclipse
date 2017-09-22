@@ -115,7 +115,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 				LayoutContainer layout = (LayoutContainer)((PersistContext)element).getPersist();
 				StringBuilder tag = new StringBuilder("<");
 				tag.append(layout.getTagType());
-				Map<String, String> attributes = layout.getAttributes();
+				Map<String, String> attributes = layout.getMergedAttributes();
 				for (Entry<String, String> entry : attributes.entrySet())
 				{
 					tag.append(" ");
