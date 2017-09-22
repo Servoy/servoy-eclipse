@@ -252,7 +252,7 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/elcl16/filter_ps.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/filter.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/dlcl16/filter_ps.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/filter-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/filter-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/eview16/bkmrk_nav.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/bookmarks.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/eview16/bkmrk_nav.png"),
@@ -555,13 +555,13 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_dir.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/obj16/importpref_obj.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_preferences.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.equinox.p2.ui.importexport/icons/install_wiz.gif"),
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.equinox.p2.ui.importexport/icons/wizban/install_wiz.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/install_wiz.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/import_brkpts.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_breakpoints.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/import_config_obj.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_launch_config.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.team.ui/$nl$/icons/full/obj/import_projectset.gif"),
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.team.ui/$nl$/icons/full/obj/import_projectset.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_projectset.png"));
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
