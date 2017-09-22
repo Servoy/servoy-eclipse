@@ -533,36 +533,22 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/file_obj.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/icons/full/obj16/file_obj.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/file_obj.png"));
-//TODO			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/importzip_wiz.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_zip.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/newprj_wiz.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/new_project.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/importdir_wiz.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_dir.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/obj16/importpref_obj.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_preferences.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.equinox.p2.ui.importexport/icons/install_wiz.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/install_wiz.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/import_brkpts.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_breakpoints.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/import_config_obj.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_launch_config.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.team.ui/$nl$/icons/full/obj/import_projectset.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_projectset.png"));
-			//the minimize, maximize and view menu icons replacement does not work even though the names seem correct, perhaps on eclipse upgrade-->
-			//http://git.eclipse.org/c/platform/eclipse.platform.ui.git/plain/bundles/org.eclipse.ui/icons/full/elcl16/thin_min_view.png-->
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/elcl16/thin_min_view.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/minimize.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/elcl16/thin_min_view.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/minimize.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/elcl16/thin_max_view.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/maximize.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/elcl16/thin_max_view.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/maximize.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/$nl$/icons/full/elcl16/thin_view_menu.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/more.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/elcl16/thin_view_menu.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/more.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/importzip_wiz.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_zip.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/newprj_wiz.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/new_project.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/importdir_wiz.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_dir.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/obj16/importpref_obj.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_preferences.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.equinox.p2.ui.importexport/icons/install_wiz.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/install_wiz.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/import_brkpts.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_breakpoints.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/import_config_obj.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_launch_config.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.team.ui/$nl$/icons/full/obj/import_projectset.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_projectset.png"));
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/designer.png"));
