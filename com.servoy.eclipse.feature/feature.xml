@@ -342,13 +342,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="log4j"
-         download-size="0"
-         install-size="0"
-         version="1.2.17"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.james.apache-mime4j"
          download-size="0"
          install-size="0"
@@ -494,6 +487,20 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="8.3.0.3200"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.logging.log4j.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.logging.log4j.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>
