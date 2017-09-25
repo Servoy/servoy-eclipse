@@ -21,7 +21,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -42,6 +41,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -68,6 +68,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -148,6 +149,7 @@ public class WarExporter
 	private final IWarExportModel exportModel;
 	private SpecProviderState componentsSpecProviderState;
 	private SpecProviderState servicesSpecProviderState;
+	private Set<File> pluginFiles = new HashSet<>();
 
 	public WarExporter(IWarExportModel exportModel)
 	{
@@ -641,71 +643,21 @@ public class WarExporter
 	 */
 	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
 	{
-		List<String> pluginLocations = new ArrayList<String>();
-		File eclipseParent = null;
-		File userDir = new File(System.getProperty("user.dir"));
-		if (System.getProperty("eclipse.home.location") != null)
+		if (pluginFiles.isEmpty())
 		{
-			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
-			if (eclipseParent.exists())
-			{
-				//first check the plugins folder of eclipse home
-				pluginLocations.add(new File(eclipseParent, "/plugins").getAbsolutePath().toString());
-			}
+			String notFound = searchExportedPlugins();
+			if (notFound != null) throw new ExportException(notFound + " was not found. Please specify location");
 		}
-		pluginLocations.addAll(exportModel.getPluginLocations());
-		for (String libName : NG_LIBS)
+		for (File file : pluginFiles)
 		{
-			int i = 0;
-			boolean found = false;
-			while (!found && i < pluginLocations.size())
+			if (file.getName().contains("servoy_ngclient"))
 			{
-				File pluginLocation = new File(pluginLocations.get(i));
-				if (!pluginLocation.exists())
-				{
-					if (!pluginLocation.isAbsolute() && !pluginLocation.exists())
-					{
-						pluginLocation = new File(userDir, pluginLocations.get(i));
-					}
-					if (!pluginLocation.exists())
-					{
-						System.err.println("Trying userDir" + userDir + " as parent for " + pluginLocations.get(i) + " but is not found");
-					}
-				}
-				FileFilter filter = new WildcardFileFilter(libName);
-				try
-				{
-					File[] libs = pluginLocation.listFiles(filter);
-
-					if (libs == null)
-					{
-						System.err.println(pluginLocation.toString() + " is directory " + pluginLocation.isDirectory());
-						System.err.println("missing lib name: " + libName);
-						System.err.println("missing filter: " + filter.toString());
-						System.out.println(pluginLocation.listFiles());
-					}
-
-					if (libs != null && libs.length > 0)
-					{
-						File file = libs[0];
-						if (libName.contains("servoy_ngclient"))
-						{
-							copyNGClientJar(file, targetLibDir);
-						}
-						else
-						{
-							copyFile(file, new File(targetLibDir, file.getName()));
-						}
-						found = true;
-					}
-					i++;
-				}
-				catch (IOException e)
-				{
-					Debug.error(e);
-				}
+				copyNGClientJar(file, targetLibDir);
 			}
-			if (!found) throw new ExportException(libName + " was not found. Please specify location");
+			else
+			{
+				copyFile(file, new File(targetLibDir, file.getName()));
+			}
 		}
 	}
 
@@ -1797,11 +1749,20 @@ public class WarExporter
 	 */
 	public String searchExportedPlugins()
 	{
-		List<String> pluginLocations = exportModel.getPluginLocations();
+		pluginFiles = new HashSet<File>();
+		List<String> pluginLocations = new ArrayList<String>();
 		File eclipseParent = null;
 		File userDir = new File(System.getProperty("user.dir"));
 		if (System.getProperty("eclipse.home.location") != null)
+		{
 			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
+			if (eclipseParent.exists())
+			{
+				//first check the plugins folder of eclipse home
+				pluginLocations.add(new File(eclipseParent, "/plugins").getAbsolutePath().toString());
+			}
+		}
+		pluginLocations.addAll(exportModel.getPluginLocations());
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -1811,24 +1772,29 @@ public class WarExporter
 				File pluginLocation = new File(pluginLocations.get(i));
 				if (!pluginLocation.exists())
 				{
-					if (eclipseParent != null)
-					{
-						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
-					}
-					if (!pluginLocation.exists())
+					if (!pluginLocation.isAbsolute() && !pluginLocation.exists())
 					{
 						pluginLocation = new File(userDir, pluginLocations.get(i));
 					}
 					if (!pluginLocation.exists())
 					{
-						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
-							" none are found");
+						System.err.println("Trying userDir " + userDir + " as parent for " + pluginLocations.get(i) + " but is not found");
 					}
 				}
-				FileFilter filter = new WildcardFileFilter(libName);
-				File[] libs = pluginLocation.listFiles(filter);
-				if (libs != null && libs.length > 0)
+
+				Collection<File> libs = FileUtils.listFiles(pluginLocation, new WildcardFileFilter(libName), TrueFileFilter.INSTANCE);
+				Iterator<File> iterator = libs.iterator();
+				if (libs != null && libs.size() > 0)
 				{
+					File f = iterator.next();
+					if (libs.size() == 1)
+					{
+						pluginFiles.add(f);
+					}
+					else
+					{
+						ServoyLog.logInfo("WAR EXPORT: More versions of lib " + libName + " found, will copy " + f.getAbsolutePath() + " to the war file.");
+					}
 					found = true;
 					break;
 				}
