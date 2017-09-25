@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Debug Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.debug;singleton:=true
-Bundle-Version: 8.2.1.3104_rc
+Bundle-Version: 8.2.1.3105
 Bundle-Activator: com.servoy.eclipse.debug.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.runtime,
