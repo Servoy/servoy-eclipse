@@ -77,6 +77,7 @@ public class ProjectLocationComposite extends Composite
 			public void widgetSelected(SelectionEvent e)
 			{
 				locationText.setEditable(!useDefaultLocationButton.getSelection());
+				locationText.setEnabled(!useDefaultLocationButton.getSelection());
 				browseButton.setEnabled(!useDefaultLocationButton.getSelection());
 				useDefaultLocation = useDefaultLocationButton.getSelection();
 				preferences.putBoolean(prefix + ".useDefaultLocation", useDefaultLocation);
@@ -93,6 +94,7 @@ public class ProjectLocationComposite extends Composite
 		locationText = new Text(fileBrowsePanel, SWT.BORDER);
 		locationText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		locationText.setEditable(!useDefaultLocationButton.getSelection());
+		locationText.setEnabled(!useDefaultLocationButton.getSelection());
 		locationText.setText(location);
 		locationText.addListener(SWT.FocusOut, new Listener()
 		{
@@ -101,7 +103,7 @@ public class ProjectLocationComposite extends Composite
 			public void handleEvent(Event event)
 			{
 				File f = new File(locationText.getText());
-				if (!f.isDirectory())
+				if (!useDefaultLocationButton.getSelection() && !f.isDirectory())
 				{
 					locationText.setText("");
 					Display.getDefault().asyncExec(new Runnable()
