@@ -2730,23 +2730,27 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						{
 							table = dsm.getDataSource(foundsetValue);
 						}
-						else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
-						{
-							table = dsm.getDataSource(flattenedEditingSolution.getRelation(foundsetValue).getForeignDataSource());
-						}
 						else
 						{
-							try
+							Relation[] relations = flattenedEditingSolution.getRelationSequence(foundsetValue);
+							if (relations != null && relations.length > 0)
 							{
-								IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetValue);
-								if (foundset != null)
-								{
-									table = dsm.getDataSource(foundset.getDataSource());
-								}
+								table = dsm.getDataSource(relations[relations.length - 1].getForeignDataSource());
 							}
-							catch (Exception ex)
+							else
 							{
-								ServoyLog.logError(ex);
+								try
+								{
+									IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetValue);
+									if (foundset != null)
+									{
+										table = dsm.getDataSource(foundset.getDataSource());
+									}
+								}
+								catch (Exception ex)
+								{
+									ServoyLog.logError(ex);
+								}
 							}
 						}
 					}
