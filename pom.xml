@@ -7,7 +7,7 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>8.2.1.3104_rc</version>
+	<version>8.2.1.3105</version>
 
 	<properties>
 		<tycho.version>1.0.0</tycho.version>
@@ -201,6 +201,9 @@
 											match="${project.version}" replace="${newVersion}" byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
+											match="${project.version}" replace="${newVersion}" byline="true" />
+											<replaceregexp
+											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
 											match="${project.version}" replace="${newVersion}" byline="true" />
 									</target>
 								</configuration>
