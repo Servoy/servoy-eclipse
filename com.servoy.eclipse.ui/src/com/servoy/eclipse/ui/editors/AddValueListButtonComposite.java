@@ -24,12 +24,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.Pair;
 
 public class AddValueListButtonComposite extends Composite
 {
@@ -46,7 +48,7 @@ public class AddValueListButtonComposite extends Composite
 			@Override
 			public void widgetSelected(final SelectionEvent e)
 			{
-				ValueList valueList = createValueList(persist.getAncestor(IRepository.SOLUTIONS));
+				ValueList valueList = createValueList((Solution)persist.getAncestor(IRepository.SOLUTIONS));
 				if (valueList != null)
 				{
 					dialog.refreshTree();
@@ -68,13 +70,14 @@ public class AddValueListButtonComposite extends Composite
 		this.persist = persist;
 	}
 
-	private ValueList createValueList(IPersist editingSolution)
+	private ValueList createValueList(Solution editingSolution)
 	{
 		ValueList val = null;
-		String name = NewValueListAction.askValueListName(Display.getDefault().getActiveShell());
-		if (name != null && editingSolution instanceof Solution)
+		Pair<String, String> name = NewValueListAction.askValueListName(Display.getDefault().getActiveShell(), editingSolution.getName());
+		if (name != null)
 		{
-			val = NewValueListAction.createValueList(name, (Solution)editingSolution);
+			val = NewValueListAction.createValueList(name.getLeft(),
+				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name.getRight()).getEditingSolution());
 		}
 		return val;
 	}

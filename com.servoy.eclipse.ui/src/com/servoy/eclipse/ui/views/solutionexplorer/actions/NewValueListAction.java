@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,6 +30,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -44,6 +44,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -88,26 +89,31 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		if (node.getRealObject() instanceof IPersist)
 		{
-
 			Solution realSolution = (Solution)((IPersist)node.getRealObject()).getRootObject();
 
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(realSolution.getName());
-			Solution editingSolution = servoyProject.getEditingSolution();
-			if (editingSolution == null)
-			{
-				return;
-			}
-			String name = askValueListName(viewer.getViewSite().getShell());
+			Pair<String, String> name = askValueListName(viewer.getViewSite().getShell(), realSolution.getName());
 			if (name != null)
 			{
-				createValueList(name, editingSolution);
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name.getRight());
+				Solution editingSolution = servoyProject.getEditingSolution();
+				if (editingSolution == null)
+				{
+					return;
+				}
+				createValueList(name.getLeft(), editingSolution);
 			}
 		}
 	}
 
-	public static String askValueListName(Shell shell)
+	public static Pair<String, String> askValueListName(Shell shell, String solutionName)
 	{
-		InputDialog nameDialog = new InputDialog(shell, "Create value list", "Supply value list name", "", new IInputValidator()
+		ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+		String[] names = new String[projects.length];
+		for (int i = 0; i < projects.length; i++)
+		{
+			names[i] = projects[i].getProject().getName();
+		}
+		InputAndListDialog nameDialog = new InputAndListDialog(shell, "Create value list", "Supply value list name", "", new IInputValidator()
 		{
 			public String isValid(String newText)
 			{
@@ -134,12 +140,11 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 				}
 				return message;
 			}
-		});
+		}, names, solutionName, "Solution");
 		int res = nameDialog.open();
 		if (res == Window.OK)
 		{
-			String name = nameDialog.getValue();
-			return name;
+			return new Pair<String, String>(nameDialog.getValue(), nameDialog.getExtendedValue());
 		}
 		return null;
 	}
