@@ -5,8 +5,8 @@ Bundle-SymbolicName: com.servoy.eclipse.model.exporter.mobile;singleton:=true
 Bundle-Version: 8.3.0.3200_b1
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.runtime,
- servoy_base;bundle-version="[8.2.1,8.3.0)",
- servoy_shared;bundle-version="[8.2.1,8.3.0)",
+ servoy_base;bundle-version="[8.3.0,8.4.0)",
+ servoy_shared;bundle-version="[8.3.0,8.4.0)",
  com.servoy.eclipse.model
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
