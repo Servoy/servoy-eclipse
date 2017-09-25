@@ -3730,13 +3730,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												String fs = val.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
 												if (!"".equals(fs)) //Form foundset, no need to check
 												{
-													if ((fs.contains(".") || fs.contains(":")))
+													if (DataSourceUtils.isDatasourceUri(fs))
 													{
 														invalid = persistFlattenedSolution.getTable(fs) == null;
 													}
 													else
 													{
-														invalid = persistFlattenedSolution.getRelation(fs) == null;
+														invalid = persistFlattenedSolution.getRelationSequence(fs) == null;
 														if (invalid)
 														{
 															IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
@@ -4078,7 +4078,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										fs = f.getDataSource();
 									}
 									if (fs == null) break;
-									if (fs.contains(".") || fs.contains(":"))
+									if (DataSourceUtils.isDatasourceUri(fs))
 									{
 										ITable table = persistFlattenedSolution.getTable(fs);
 										if (table != null)
@@ -4088,9 +4088,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 									else
 									{
-										Relation r = persistFlattenedSolution.getRelation(fs);
-										if (r != null)
+										Relation[] relations = persistFlattenedSolution.getRelationSequence(fs);
+										if (relations != null)
 										{
+											Relation r = relations[relations.length - 1];
 											dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
 											if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
 										}
