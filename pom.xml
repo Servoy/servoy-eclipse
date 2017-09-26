@@ -194,18 +194,6 @@
 								</goals>
 								<configuration>
 									<target>
-										<macrodef name="stripVersion">
-											<attribute name="src" />
-											<attribute name="result" />
-											<sequential>
-												<script language="javascript">
-													var index = "@{src}".lastIndexOf(".")
-													project.setProperty(
-													"@{result}", "@{src}".substring(0,index)
-													);
-												</script>
-											</sequential>
-										</macrodef>
 										<replaceregexp file="${basedir}/com.servoy.eclipse.product/p2.inf"
 											match="${project.version}" replace="${newVersion}" byline="true" />
 										<replaceregexp
@@ -217,14 +205,6 @@
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
 											match="${project.version}" replace="${newVersion}" byline="true" />
-										<stripVersion src="${project.version}" result="stripProject" />
-										<stripVersion src="${newVersion}" result="stripNewVersion" />
-										<replaceregexp match="\[${stripProject}" replace="\[${stripNewVersion}"
-											byline="true">
-											<fileset dir="${basedir}">
-												<include name="**/*MANIFEST.MF" />
-											</fileset>
-										</replaceregexp>
 									</target>
 								</configuration>
 							</execution>
