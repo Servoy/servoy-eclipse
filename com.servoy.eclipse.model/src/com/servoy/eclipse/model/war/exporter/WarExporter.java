@@ -465,14 +465,17 @@ public class WarExporter
 				File file = new File(tmpWarDir, path);
 				File parent = file.getParentFile();
 				String[] list = parent.list(new WildcardFileFilter(file.getName().substring(0, file.getName().lastIndexOf(".") + 1) + "*", IOCase.INSENSITIVE));
-				for (String name : list)
+				if (list != null)
 				{
-					if (name.toLowerCase().endsWith(minSuffix))
+					for (String name : list)
 					{
-						minFound = true;
-						File f = new File(parent, name);
-						path = f.getAbsolutePath().replace(tmpWarDir.getAbsolutePath(), "").replaceAll("\\\\", "/");
-						break;
+						if (name.toLowerCase().endsWith(minSuffix))
+						{
+							minFound = true;
+							File f = new File(parent, name);
+							path = f.getAbsolutePath().replace(tmpWarDir.getAbsolutePath(), "").replaceAll("\\\\", "/");
+							break;
+						}
 					}
 				}
 			}
