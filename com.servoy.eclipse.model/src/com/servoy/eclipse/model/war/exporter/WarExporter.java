@@ -302,7 +302,7 @@ public class WarExporter
 			args.add("-m");
 			args.add("-c");
 			String processors = "semicolonAppender";
-			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,cssMin";
+			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,yuiCssMin";
 			processors += ",cssDataUri";
 			args.add(processors);
 
