@@ -142,7 +142,7 @@ public class SolutionDeserializer
 	private final IDeveloperRepository repository;
 	private final ErrorKeeper<File, String> errorKeeper;
 	private static final Map<UUID, HashSet<UUID>> alreadyUsedUUID = new HashMap<UUID, HashSet<UUID>>(16, 0.9f);
-	private static final Map<UUID, UUID> childToParentUUID = new HashMap<UUID, UUID>(16, 0.9f);
+	private static final Map<UUID, UUID> childToContainerUUID = new HashMap<UUID, UUID>(16, 0.9f);
 	private final File jsFile;
 	private final String jsContent;
 
@@ -325,8 +325,8 @@ public class SolutionDeserializer
 				try
 				{
 					// root metadata and medias are read elsewhere
-					if (dir.equals(solutionDir) &&
-						(file.equals(SolutionSerializer.MEDIAS_DIR) || file.equals(SolutionSerializer.MEDIAS_FILE) || file.equals(SolutionSerializer.ROOT_METADATA)))
+					if (dir.equals(solutionDir) && (file.equals(SolutionSerializer.MEDIAS_DIR) || file.equals(SolutionSerializer.MEDIAS_FILE) ||
+						file.equals(SolutionSerializer.ROOT_METADATA)))
 					{
 						continue;
 					}
@@ -368,8 +368,8 @@ public class SolutionDeserializer
 									}
 								}
 								File parentFile = f.getParentFile();
-								if (parentFile.getName().equals(SolutionSerializer.FORMS_DIR) ||
-									(parentFile.getParentFile() != null && parentFile.getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME)))
+								if (parentFile.getName().equals(SolutionSerializer.FORMS_DIR) || (parentFile.getParentFile() != null &&
+									parentFile.getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME)))
 								{
 									childrenJSObjectMap.put(f, scriptObjects);
 								}
@@ -551,8 +551,8 @@ public class SolutionDeserializer
 		ISupportChilds scriptParent = null;
 		if (jsFile.getParentFile().getName().equals(SolutionSerializer.FORMS_DIR))
 		{
-			jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.JS_FILE_EXTENSION.length()) +
-				SolutionSerializer.FORM_FILE_EXTENSION);
+			jsonFile = new File(jsFile.getParent(),
+				jsFileName.substring(0, jsFileName.length() - SolutionSerializer.JS_FILE_EXTENSION.length()) + SolutionSerializer.FORM_FILE_EXTENSION);
 		}
 		else if (jsFile.getParentFile().getParentFile() != null &&
 			jsFile.getParentFile().getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
@@ -569,15 +569,15 @@ public class SolutionDeserializer
 			// if (jsFileName.endsWith(SolutionSerializer.FOUNDSET_POSTFIX))
 			{
 				// foundset methods
-				jsonFile = new File(jsFile.getParent(), jsFileName.substring(0, jsFileName.length() - SolutionSerializer.FOUNDSET_POSTFIX.length()) +
-					SolutionSerializer.TABLENODE_FILE_EXTENSION);
+				jsonFile = new File(jsFile.getParent(),
+					jsFileName.substring(0, jsFileName.length() - SolutionSerializer.FOUNDSET_POSTFIX.length()) + SolutionSerializer.TABLENODE_FILE_EXTENSION);
 			}
 			if (!jsonFile.exists() && parent != null)
 			{
 				// tbl file does not exist yet, create a table node
-				scriptParent = ((Solution)parent.getAncestor(IRepository.SOLUTIONS)).getOrCreateTableNode(DataSourceUtils.createDBTableDataSource(
-					jsFile.getParentFile().getName(),
-					jsonFile.getName().substring(0, jsonFile.getName().length() - SolutionSerializer.TABLENODE_FILE_EXTENSION.length())));
+				scriptParent = ((Solution)parent.getAncestor(IRepository.SOLUTIONS)).getOrCreateTableNode(
+					DataSourceUtils.createDBTableDataSource(jsFile.getParentFile().getName(),
+						jsonFile.getName().substring(0, jsonFile.getName().length() - SolutionSerializer.TABLENODE_FILE_EXTENSION.length())));
 			}
 		}
 
@@ -775,8 +775,9 @@ public class SolutionDeserializer
 	{
 		if (file.getName().endsWith(SolutionSerializer.FORM_FILE_EXTENSION))
 		{
-			return containsPath(file.getPath().substring(0, file.getPath().length() - SolutionSerializer.FORM_FILE_EXTENSION.length()) +
-				SolutionSerializer.JS_FILE_EXTENSION, files);
+			return containsPath(
+				file.getPath().substring(0, file.getPath().length() - SolutionSerializer.FORM_FILE_EXTENSION.length()) + SolutionSerializer.JS_FILE_EXTENSION,
+				files);
 		}
 
 		if (file.getName().endsWith(SolutionSerializer.TABLENODE_FILE_EXTENSION))
@@ -898,7 +899,8 @@ public class SolutionDeserializer
 										if (readAll || changed)
 										{
 											((Media)persist).setPermMediaData(Utils.getFileContent(mf));
-											if (obj.has(SolutionSerializer.PROP_MIME_TYPE)) ((Media)persist).setMimeType(obj.getString(SolutionSerializer.PROP_MIME_TYPE));
+											if (obj.has(SolutionSerializer.PROP_MIME_TYPE))
+												((Media)persist).setMimeType(obj.getString(SolutionSerializer.PROP_MIME_TYPE));
 											obj.put(CHANGED_JSON_ATTRIBUTE, changed);
 											if (changed)
 											{
@@ -998,13 +1000,15 @@ public class SolutionDeserializer
 				Debug.error(t);
 				Debug.error("Parse error with file: " + file +
 					", please check this file for deep recursion like large string concats! ( string + string + string, replace this with string \\ string)");
-				ServoyLog.logError("Parse error with file: " + file +
-					", please check this file for deep recursion like large string concats! ( string + string + string, replace this with string \\ string)", t);
+				ServoyLog.logError(
+					"Parse error with file: " + file +
+						", please check this file for deep recursion like large string concats! ( string + string + string, replace this with string \\ string)",
+					t);
 			}
 			if (problems.size() > 0)
 			{
-				if (Debug.tracing()) Debug.trace("Didn't update the Persist model Script and Variables objects because of problems " + problems + " in file: " +
-					file.getAbsolutePath());
+				if (Debug.tracing()) Debug.trace(
+					"Didn't update the Persist model Script and Variables objects because of problems " + problems + " in file: " + file.getAbsolutePath());
 				return Collections.<JSONObject> emptyList();
 			}
 			if (script == null)
@@ -1348,8 +1352,8 @@ public class SolutionDeserializer
 						{
 							int current = json.optInt(VARIABLE_TYPE_JSON_ATTRIBUTE, -1);
 							int servoyType = getServoyType(json.optString(JS_TYPE_JSON_ATTRIBUTE));
-							if (current == -1 ||
-								!((servoyType == IColumnTypes.NUMBER || servoyType == IColumnTypes.INTEGER) && (current == IColumnTypes.NUMBER || current == IColumnTypes.INTEGER)))
+							if (current == -1 || !((servoyType == IColumnTypes.NUMBER || servoyType == IColumnTypes.INTEGER) &&
+								(current == IColumnTypes.NUMBER || current == IColumnTypes.INTEGER)))
 							{
 								json.put(VARIABLE_TYPE_JSON_ATTRIBUTE, servoyType);
 							}
@@ -1651,9 +1655,13 @@ public class SolutionDeserializer
 			if (retval == null)
 			{
 				retval = createPersistInParent(parent, repository, obj, uuid);
-				if (persistUUIDNotFound && childToParentUUID.get(uuid) != null && !parent.getUUID().equals(childToParentUUID.get(uuid)))
+				if (persistUUIDNotFound && childToContainerUUID.get(uuid) != null &&
+					!Utils.equalObjects(getContainerUUID(retval), childToContainerUUID.get(uuid)))
 				{
 					((AbstractBase)retval).resetUUID();
+				}
+				if (persistUUIDNotFound && solutionUUIDs.contains(uuid))
+				{
 					((AbstractBase)retval).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
 				}
 			}
@@ -1669,7 +1677,7 @@ public class SolutionDeserializer
 		}
 
 		solutionUUIDs.add(retval.getUUID());
-		childToParentUUID.put(retval.getUUID(), parent.getUUID());
+		childToContainerUUID.put(retval.getUUID(), getContainerUUID(retval));
 
 		if (file != null)
 		{
@@ -1721,6 +1729,20 @@ public class SolutionDeserializer
 
 		if (useFilesForDirtyMark) handleChanged(obj, retval);
 		return retval;
+	}
+
+	private static UUID getContainerUUID(IPersist persist)
+	{
+		Form form = (Form)persist.getAncestor(IRepository.FORMS);
+		if (form != null)
+		{
+			return form.getUUID();
+		}
+		if (persist.getRootObject() instanceof Solution)
+		{
+			return ((Solution)persist.getRootObject()).getUUID();
+		}
+		return persist.getParent().getUUID();
 	}
 
 	private static IPersist createPersistInParent(ISupportChilds parent, IDeveloperRepository repository, JSONObject obj, UUID uuid)
@@ -1815,12 +1837,14 @@ public class SolutionDeserializer
 								{
 									endBracketIdx++;
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
-									if (jsDocTagValue.length() > jsDocTagValue.indexOf("}}") + 2) description = jsDocTagValue.substring(jsDocTagValue.indexOf("}}") + 2);
+									if (jsDocTagValue.length() > jsDocTagValue.indexOf("}}") + 2)
+										description = jsDocTagValue.substring(jsDocTagValue.indexOf("}}") + 2);
 								}
 								else if (jsDocTagValue.startsWith("{") && (endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
 								{
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
-									if (jsDocTagValue.length() > jsDocTagValue.indexOf("}") + 2) description = jsDocTagValue.substring(jsDocTagValue.indexOf("}") + 2);
+									if (jsDocTagValue.length() > jsDocTagValue.indexOf("}") + 2)
+										description = jsDocTagValue.substring(jsDocTagValue.indexOf("}") + 2);
 								}
 
 								if (JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName))
