@@ -31,6 +31,8 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -101,7 +103,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		gridData.horizontalSpan = 2;
 		checkboxTableViewer.getTable().setLayoutData(gridData);
 		checkboxTableViewer.addCheckStateListener(this);
-		selectAllButtons = new SelectAllButtonsBar(this, container);
+		selectAllButtons = new SelectAllButtonsBar(this, container, true);
 		if (selectAll)
 		{
 			checkboxTableViewer.setAllChecked(true);
@@ -118,6 +120,17 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		{
 			selectAllButtons.enableAll();
 		}
+		selectAllButtons.addRestoreSelectionListener(new SelectionAdapter()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				checkboxTableViewer.setAllChecked(true);
+				selectAllButtons.enableAll();
+				selectAllButtons.disableSelectAll();
+			}
+		});
 	}
 
 

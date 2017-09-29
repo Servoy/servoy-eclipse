@@ -20,7 +20,9 @@ package com.servoy.eclipse.ui.wizards;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
@@ -30,15 +32,24 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class SelectAllButtonsBar
 {
-	private final Button selectAll;
-	private final Button deselectAll;
+	protected final Button selectAll;
+	protected final Button deselectAll;
+	protected final Composite container;
+	private Button restoreDefaults;
 
-	public SelectAllButtonsBar(final ICheckBoxView checkBoxView, Composite container)
+	public SelectAllButtonsBar(final ICheckBoxView checkBoxView, Composite parent)
 	{
+		this(checkBoxView, parent, false);
+	}
+
+	public SelectAllButtonsBar(final ICheckBoxView checkBoxView, Composite parent, boolean withRestoreButton)
+	{
+		container = new Composite(parent, SWT.NONE);
+		container.setLayout(new GridLayout(withRestoreButton ? 3 : 2, false));
+
 		selectAll = new Button(container, SWT.NONE);
-		GridData gridData = new GridData(SWT.BEGINNING);
-		selectAll.setLayoutData(gridData);
 		selectAll.setText("Select All");
+		selectAll.setLayoutData(new GridData(SWT.BEGINNING));
 		selectAll.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -48,13 +59,11 @@ public class SelectAllButtonsBar
 				selectAll.setEnabled(false);
 				checkBoxView.selectAll();
 			}
-
 		});
 
 		deselectAll = new Button(container, SWT.NONE);
-		GridData gridDataDeselectAll = new GridData(SWT.BEGINNING);
-		deselectAll.setLayoutData(gridDataDeselectAll);
 		deselectAll.setText("Deselect All");
+		deselectAll.setLayoutData(new GridData());
 		deselectAll.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -65,6 +74,13 @@ public class SelectAllButtonsBar
 				checkBoxView.deselectAll();
 			}
 		});
+
+		if (withRestoreButton)
+		{
+			restoreDefaults = new Button(container, SWT.PUSH);
+			restoreDefaults.setText("Restore Defaults");
+			restoreDefaults.setLayoutData(new GridData(SWT.END));
+		}
 	}
 
 	public void disableButtons()
@@ -89,5 +105,13 @@ public class SelectAllButtonsBar
 	{
 		selectAll.setEnabled(true);
 		deselectAll.setEnabled(true);
+	}
+
+	public void addRestoreSelectionListener(SelectionListener selectionListener)
+	{
+		if (restoreDefaults != null)
+		{
+			restoreDefaults.addSelectionListener(selectionListener);
+		}
 	}
 }

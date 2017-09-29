@@ -25,6 +25,7 @@ import java.util.Properties;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -103,6 +104,22 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		label.setText(
 			"\nNOTE: This must be a writable directory where Servoy application related files will be stored.\nIf you leave it empty, the system user home directory will be used.");
 
+		Button restoreDefaults = new Button(composite, SWT.PUSH);
+		restoreDefaults.setText("Restore Defaults");
+		restoreDefaults.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				overwriteDBServerPropertiesBtn.setSelection(true);
+				overwriteAllPropertiesBtn.setSelection(false);
+				userHomeText.setText("");
+
+				exportModel.setOverwriteDeployedDBServerProperties(true);
+				exportModel.setOverwriteDeployedServoyProperties(false);
+				exportModel.setUserHome(null);
+			}
+		});
 
 		setControl(composite);
 	}

@@ -1002,9 +1002,9 @@ public class ExportWarModel extends AbstractWarExportModel
 	 *
 	 * @see com.servoy.eclipse.model.war.exporter.AbstractWarExportModel#setAutomaticallyUpgradeRepository()
 	 */
-	public void setAutomaticallyUpgradeRepository()
+	public void setAutomaticallyUpgradeRepository(boolean upgrade)
 	{
-		upgradeRepository = true;
+		upgradeRepository = upgrade;
 	}
 
 	/*
