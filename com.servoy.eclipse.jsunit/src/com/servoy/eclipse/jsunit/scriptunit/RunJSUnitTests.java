@@ -69,12 +69,14 @@ public abstract class RunJSUnitTests implements Runnable
 	private RemoteScriptUnitRunnerClient scriptUnitRunnerClient;
 
 	private final IProgressMonitor monitor;
+	protected final boolean debugMode;
 
-	public RunJSUnitTests(TestTarget testTarget, ILaunch launch, IProgressMonitor monitor)
+	public RunJSUnitTests(TestTarget testTarget, ILaunch launch, IProgressMonitor monitor, boolean debugMode)
 	{
 		this.monitor = monitor;
 		this.testTarget = testTarget;
 		this.launch = launch;
+		this.debugMode = debugMode;
 		Display.getDefault().syncExec(new Runnable()
 		{
 			@Override
@@ -122,9 +124,7 @@ public abstract class RunJSUnitTests implements Runnable
 					{
 						public void run()
 						{
-							MessageDialog.openWarning(
-								window == null ? Display.getCurrent().getActiveShell() : window.getShell(),
-								"Unable to run unit tests",
+							MessageDialog.openWarning(window == null ? Display.getCurrent().getActiveShell() : window.getShell(), "Unable to run unit tests",
 								"Running unit tests for solutions that require authentication through a login/authenticator form/solution is not currently supported.\n\nTo run unit tests for such a solution, create a new solution that does not require authentication and add the solution that requires authentication to it as a module.\nThis way you will be able to run tests without authenticating.");
 						}
 					}, false);
@@ -206,7 +206,8 @@ public abstract class RunJSUnitTests implements Runnable
 		try
 		{
 			showTestRunnerViewPartInActivePage(200); // try to avoid JUnit view getting on top of a view stack by itself in case it was open by the user in the past - we still run the suite using JUnit implementation
-			SolutionRemoteTestRunner.main(new String[] { "-version", "3", "-port", String.valueOf(port), "-testLoaderClass", "org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader", "loaderpluginname", "org.eclipse.jdt.junit.runtime", "-classNames", suiteClass.getCanonicalName() });
+			SolutionRemoteTestRunner.main(new String[] { "-version", "3", "-port", String.valueOf(
+				port), "-testLoaderClass", "org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader", "loaderpluginname", "org.eclipse.jdt.junit.runtime", "-classNames", suiteClass.getCanonicalName() });
 			showTestRunnerViewPartInActivePage(200); // try to avoid JUnit view getting on top of a view stack by itself in case it was open by the user in the past - we still run the suite using JUnit implementation
 		}
 		catch (RuntimeException e)
@@ -328,9 +329,8 @@ public abstract class RunJSUnitTests implements Runnable
 			@Override
 			public void run()
 			{
-				DLTKTestingPlugin.getModel().addTestRunSession(
-					new org.eclipse.dltk.internal.testing.model.TestRunSession(launch, org.eclipse.dltk.core.DLTKCore.create(sp.getProject()),
-						scriptUnitRunnerClient = new RemoteScriptUnitRunnerClient()));
+				DLTKTestingPlugin.getModel().addTestRunSession(new org.eclipse.dltk.internal.testing.model.TestRunSession(launch,
+					org.eclipse.dltk.core.DLTKCore.create(sp.getProject()), scriptUnitRunnerClient = new RemoteScriptUnitRunnerClient()));
 			}
 		});
 	}

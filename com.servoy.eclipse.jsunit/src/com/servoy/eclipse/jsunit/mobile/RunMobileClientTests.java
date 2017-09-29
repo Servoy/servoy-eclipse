@@ -40,13 +40,13 @@ public class RunMobileClientTests extends RunJSUnitTests
 	private String password = null;
 
 	/**
-	 * @param builder 
+	 * @param builder
 	 * @param clientConnectTimeout (in seconds) -1 fallsback to default value.
 	 * @param monitor the monitor that can be used to check for stop requests before the tests start running.
 	 */
 	public RunMobileClientTests(TestTarget testTarget, ILaunch launch, int clientConnectTimeout, IProgressMonitor monitor)
 	{
-		super(testTarget, launch, monitor);
+		super(testTarget, launch, monitor, true);
 		this.clientConnectTimeout = clientConnectTimeout;
 	}
 

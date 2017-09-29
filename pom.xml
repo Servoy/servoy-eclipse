@@ -15,7 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
-		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.7-M-builds/M-4.7.1RC3-201709011220/</servoy-repo.url>
+		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.7/R-4.7.1-201709061700/</servoy-repo.url>
 		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/</servoy-shiplibs.url>
 	</properties>
 
@@ -189,6 +189,18 @@
 								</goals>
 								<configuration>
 									<target>
+										<macrodef name="stripVersion">
+											<attribute name="src" />
+											<attribute name="result" />
+											<sequential>
+												<script language="javascript">
+													var index = "@{src}".lastIndexOf(".")
+													project.setProperty(
+													"@{result}", "@{src}".substring(0,index)
+													);
+												</script>
+											</sequential>
+										</macrodef>
 										<replaceregexp file="${basedir}/com.servoy.eclipse.product/p2.inf"
 											match="${project.version}" replace="${newVersion}" byline="true" />
 										<replaceregexp
@@ -197,6 +209,17 @@
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
 											match="${project.version}" replace="${newVersion}" byline="true" />
+										<replaceregexp
+											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
+											match="${project.version}" replace="${newVersion}" byline="true" />
+										<stripVersion src="${project.version}" result="stripProject" />
+										<stripVersion src="${newVersion}" result="stripNewVersion" />
+										<replaceregexp match="\[${stripProject}" replace="\[${stripNewVersion}"
+											byline="true">
+											<fileset dir="${basedir}">
+												<include name="**/*MANIFEST.MF" />
+											</fileset>
+										</replaceregexp>
 									</target>
 								</configuration>
 							</execution>

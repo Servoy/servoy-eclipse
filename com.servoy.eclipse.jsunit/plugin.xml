@@ -113,7 +113,7 @@
       <launchConfigurationType
             delegate="com.servoy.eclipse.jsunit.launch.JSUnitLaunchConfigurationDelegate"
             id="com.servoy.eclipse.jsunit.launch"
-            modes="debug"
+            modes="run,debug"
             name=" Servoy JSunit"
             public="false">
       </launchConfigurationType>

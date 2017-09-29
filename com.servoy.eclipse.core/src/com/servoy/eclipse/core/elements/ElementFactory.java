@@ -695,6 +695,10 @@ public class ElementFactory
 					if (pair.getRight() instanceof WebObjectSpecification)
 					{
 						bc = createComponent(parent, (WebObjectSpecification)pair.getRight(), dp, loc);
+						if (bc instanceof Field)
+						{
+							((Field)bc).setEditable(dp.isEditable());
+						}
 					}
 					else if (pair.getRight() instanceof Template)
 					{

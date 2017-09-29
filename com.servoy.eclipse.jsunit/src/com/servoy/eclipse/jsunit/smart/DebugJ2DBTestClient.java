@@ -32,6 +32,8 @@ import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugJ2DBClient;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -46,6 +48,7 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 {
 	private final List<Runnable> events = new ArrayList<Runnable>();
 	private final IUserManager userManager;
+	private boolean debugMode = true;
 
 	public DebugJ2DBTestClient(DebugClientHandler debugClientHandler)
 	{
@@ -157,4 +160,22 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 		// don't do dummy authentication, just like regular test client for in sync behavior
 	}
 
+	@Override
+	public void setDebugMode(boolean debugMode)
+	{
+		this.debugMode = debugMode;
+	}
+
+	@Override
+	protected IExecutingEnviroment createScriptEngine()
+	{
+		if (debugMode)
+		{
+			return super.createScriptEngine();
+		}
+		else
+		{
+			return new ScriptEngine(this);
+		}
+	}
 }

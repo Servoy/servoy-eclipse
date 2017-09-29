@@ -13,6 +13,7 @@ Require-Bundle: org.eclipse.core.resources,
  j2db_server,
  com.servoy.eclipse.model.exporter.mobile,
  servoy_ngclient,
- sablo
+ sablo,
+ org.apache.commons.io
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

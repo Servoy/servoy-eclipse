@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -262,9 +265,10 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			if (configuration.shouldAggregateWorkspace())
 			{
 				// also import existing projects in subfolders
-				for (File f : wr.listFiles())
+				for (File f : FileUtils.listFilesAndDirs(wr, FalseFileFilter.INSTANCE, DirectoryFileFilter.DIRECTORY))
 				{
-					if (f.isDirectory()) importExistingAndOpenClosedProjects(f, workspaceRoot, importedProjects, existingClosedProjects);
+					if (f.getAbsolutePath().contains(".metadata")) continue;
+					importExistingAndOpenClosedProjects(f, workspaceRoot, importedProjects, existingClosedProjects);
 				}
 			}
 

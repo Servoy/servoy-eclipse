@@ -3713,7 +3713,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												for (String dp : links.dataProviderIDs)
 												{
-													checkDataProvider(o, context, dp);
+													checkDataProvider(o, context, dp, pd);
 												}
 											}
 											continue;
@@ -3730,13 +3730,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												String fs = val.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
 												if (!"".equals(fs)) //Form foundset, no need to check
 												{
-													if ((fs.contains(".") || fs.contains(":")))
+													if (DataSourceUtils.isDatasourceUri(fs))
 													{
 														invalid = persistFlattenedSolution.getTable(fs) == null;
 													}
 													else
 													{
-														invalid = persistFlattenedSolution.getRelation(fs) == null;
+														invalid = persistFlattenedSolution.getRelationSequence(fs) == null;
 														if (invalid)
 														{
 															IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
@@ -3768,22 +3768,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													JSONObject dataproviders = val.getJSONObject("dataproviders");
 													for (String dp : dataproviders.keySet())
 													{
-														checkDataProvider(o, context, dataproviders.optString(dp));
+														checkDataProvider(o, context, dataproviders.optString(dp), pd);
 													}
 												}
 											}
 										}
-										else checkDataProvider(o, context, (String)propertyValue);
+										else checkDataProvider(o, context, (String)propertyValue, pd);
 									}
 								}
 							}
 
 						}
-						checkDataProvider(o, context, id);
+						checkDataProvider(o, context, id, null);
 
 					}
 
-					private void checkDataProvider(final IPersist o, IPersist context, String id)
+					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd)
 					{
 						try
 						{
@@ -3985,7 +3985,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
 										}
-										if (parentForm.getDataSource() != null && dataProvider instanceof ColumnWrapper)
+
+										boolean checkIfDataproviderIsBasedOnFormTable = true;
+										if (o instanceof IBasicWebObject && pd != null)
+										{
+											String foundsetSelector = getWebBaseObjectPropertyFoundsetSelector((IBasicWebObject)o, pd);
+											if (!"".equals(foundsetSelector))
+											{
+												// it is not form foundset based
+												checkIfDataproviderIsBasedOnFormTable = false;
+											}
+										}
+
+										if (checkIfDataproviderIsBasedOnFormTable && parentForm.getDataSource() != null &&
+											dataProvider instanceof ColumnWrapper)
 										{
 											Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
 											if (relations != null && !relations[0].isGlobal() &&
@@ -4058,6 +4071,25 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 
+					private String getWebBaseObjectPropertyFoundsetSelector(IBasicWebObject webObject, PropertyDescription pd)
+					{
+						if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? >)
+						{
+							String forFoundset = ((FoundsetLinkedConfig)pd.getConfig()).getForFoundsetName();
+							IBasicWebObject parent = webObject;
+							while (parent.getParent() instanceof IBasicWebObject)
+							{
+								parent = (IBasicWebObject)parent.getParent();
+							}
+							Object forFoundsetValue = parent.getProperty(forFoundset);
+							if (forFoundsetValue instanceof JSONObject)
+							{
+								return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+							}
+						}
+						return "";
+					}
+
 					private IDataProvider checkComponentDataproviders(String id, FlattenedSolution persistFlattenedSolution, WebComponent component)
 						throws RepositoryException
 					{
@@ -4078,19 +4110,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										fs = f.getDataSource();
 									}
 									if (fs == null) break;
-									if (fs.contains(".") || fs.contains(":"))
+									if (DataSourceUtils.isDatasourceUri(fs))
 									{
 										ITable table = persistFlattenedSolution.getTable(fs);
 										if (table != null)
 										{
-											dataProvider = table.getColumn(id);
+											dataProvider = persistFlattenedSolution.getDataProviderForTable(table, id);
 										}
 									}
 									else
 									{
-										Relation r = persistFlattenedSolution.getRelation(fs);
-										if (r != null)
+										Relation[] relations = persistFlattenedSolution.getRelationSequence(fs);
+										if (relations != null)
 										{
+											Relation r = relations[relations.length - 1];
 											dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
 											if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
 										}

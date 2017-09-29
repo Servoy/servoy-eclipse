@@ -44,9 +44,9 @@ import com.servoy.j2db.persistence.Solution;
 
 /**
  * TestTargets are stored in launch configurations.
- * Launches jsunit test configurations . The test configuration is stored in {@link JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE} 
+ * Launches jsunit test configurations . The test configuration is stored in {@link JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE}
  * attribute as a string . TestTarget.fromString(str) deserializes the configuration.
- * 
+ *
  * @author obuligan
  *
  */
@@ -71,7 +71,7 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 
 		DLTKTestingPlugin.getModel().start();
 		final ITestingEngine engine = getTestingEngine(configuration);
-		//we don't run servoy js as an interpreter in eclipse context so first parameter  == null 
+		//we don't run servoy js as an interpreter in eclipse context so first parameter  == null
 		engine.configureLaunch(null, configuration, launch);
 		/* DO THE ACTUAL EXECUTION */
 		String testTargetStr = configuration.getAttribute(JSUnitLaunchConfigurationDelegate.LAUNCH_CONFIG_INSTANCE,
@@ -108,7 +108,7 @@ public class JSUnitLaunchConfigurationDelegate extends LaunchConfigurationDelega
 	{
 		TestTarget testTarget = prepareForLaunch(configuration, launch);
 
-		new RunSmartClientTests(testTarget, launch, monitor).run();
+		new RunSmartClientTests(testTarget, launch, monitor, !"run".equals(mode)).run();
 	}
 
 	public static void prepareLaunchConfigForTesting(ILaunchConfigurationWorkingCopy workingCopy)

@@ -176,8 +176,15 @@ public class ChangeParentCommand extends Command
 			}
 			else
 			{
-				insertIndex = sortedChildren.indexOf(targetChild);
-				if (insertIndex != -1 && insertAfterTarget) insertIndex++;
+				if (targetChild == null)
+				{
+					insertIndex = 0;
+				}
+				else
+				{
+					insertIndex = sortedChildren.indexOf(targetChild);
+					if (insertIndex != -1 && insertAfterTarget) insertIndex++;
+				}
 			}
 			if (insertIndex >= 0)
 			{

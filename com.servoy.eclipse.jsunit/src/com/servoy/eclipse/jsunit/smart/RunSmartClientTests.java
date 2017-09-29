@@ -51,9 +51,9 @@ public class RunSmartClientTests extends RunJSUnitTests
 	private IDebugJ2DBClient testApp;
 	private JSUnitUserManager testUserManager;
 
-	public RunSmartClientTests(TestTarget testTarget, ILaunch launch, IProgressMonitor monitor)
+	public RunSmartClientTests(TestTarget testTarget, ILaunch launch, IProgressMonitor monitor, boolean debugMode)
 	{
-		super(testTarget, launch, monitor);
+		super(testTarget, launch, monitor, debugMode);
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class RunSmartClientTests extends RunJSUnitTests
 				{
 					testApp.shutDown(true);
 					testApp.getClientInfo().clearUserInfo();
-
+					testApp.setDebugMode(debugMode);
 					final Job waitForSolutionToLoad = new Job("Running unit tests")
 					{
 						@Override
