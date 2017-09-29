@@ -188,6 +188,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 	{
 		// temporary set global app to jsunit app while running the unit tests
 		IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(staticSuiteApplication);
+		IServiceProvider threadLocal = J2DBGlobals.getThreadServiceProvider();
+		if (threadLocal != staticSuiteApplication) J2DBGlobals.setServiceProvider(staticSuiteApplication);
 		try
 		{
 			if (SwingUtilities.isEventDispatchThread())
@@ -220,6 +222,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 		finally
 		{
 			J2DBGlobals.setSingletonServiceProvider(prevServiceProvider);
+			J2DBGlobals.setServiceProvider(threadLocal);
 		}
 	}
 
