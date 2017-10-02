@@ -1199,4 +1199,9 @@ public class ExportWarModel extends AbstractWarExportModel
 			this.webXMLFileName = null;
 		}
 	}
+
+	public void clearLicenses()
+	{
+		licenses.clear();
+	}
 }

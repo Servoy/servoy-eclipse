@@ -242,6 +242,22 @@ public class LicensePage extends WizardPage
 				license.getCode(), license.getNumberOfLicenses());
 			ctrls.add(licenseComposite);
 		}
+		Button restoreDefaults = new Button(mainContainer, SWT.PUSH);
+		restoreDefaults.setText("Restore Defaults");
+		restoreDefaults.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				Control[] children = mainContainer.getChildren();
+				for (int i = 1; i < children.length; i++)
+				{
+					children[i].dispose();
+				}
+				mainContainer.update();
+				exportModel.clearLicenses();
+			}
+		});
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
