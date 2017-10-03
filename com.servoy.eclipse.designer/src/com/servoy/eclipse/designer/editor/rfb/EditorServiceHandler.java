@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.IPage;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
@@ -33,6 +34,7 @@ import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.VisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.commands.MoveDownCommand;
 import com.servoy.eclipse.designer.editor.commands.MoveUpCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.GroupCommand;
@@ -55,6 +57,8 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SpacingCentersPac
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositioner;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
+import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -263,6 +267,29 @@ public class EditorServiceHandler implements IServerService
 
 		configuredHandlers.put("responsive_move_up", new MoveUpCommand(editorPart, selectionProvider));
 		configuredHandlers.put("responsive_move_down", new MoveDownCommand(editorPart, selectionProvider));
+
+		configuredHandlers.put("toggleHideInherited", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
+				Boolean hideInherited = Boolean.valueOf(rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED));
+				rfbVisualFormEditorDesignPage.setPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED,
+					Boolean.toString(!hideInherited.booleanValue()));
+				if (DesignerUtil.getContentOutline() != null)
+				{
+					IPage outline = DesignerUtil.getContentOutline().getCurrentPage();
+					if (outline instanceof FormOutlinePage)
+					{
+						((FormOutlinePage)outline).refresh();
+					}
+				}
+				return null;
+			}
+		});
+
 	}
 
 	@Override

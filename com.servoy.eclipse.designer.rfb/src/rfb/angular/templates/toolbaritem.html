@@ -1,5 +1,5 @@
 <div class="btn-group">
-	<button type="button" class="btn btn-xs" style="padding-bottom: 3px"  ng-click="model.onclick()" ng-disabled="!model.enabled">
+	<button type="button" class="btn btn-xs" style="padding-bottom: 3px"  ng-click="model.onclick()" ng-disabled="!model.enabled" ng-style="model.style">
 		<img ng-src="js/modules/{{!model.enabled && model.disabledIcon ?  model.disabledIcon : model.icon}}" alt="{{model.text}}" title="{{model.text}}"/>
 	</button>
 </div>
