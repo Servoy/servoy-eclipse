@@ -16,6 +16,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			btnPlaceAccordion.hide = true;
 			btnTabSequence.hide = true;
 			btnClassicEditor.hide = true;
+			btnHideInheritedElements.hide = true;
 		}
 		var promise = $editorService.isShowData();
 		promise.then(function(result) {
