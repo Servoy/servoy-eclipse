@@ -93,7 +93,6 @@ public class FileSelectionPage extends WizardPage implements Listener
 	private Button clearReferencesStopThreads;
 	private Button clearReferencesStopTimerThreads;
 	private Button minimizeJSAndCSS;
-	private Button restoreDefaults;
 
 	public FileSelectionPage(ExportWarModel exportModel)
 	{
@@ -622,7 +621,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 		hcGridLayout.marginRight = 0;
 		hcGridLayout.marginWidth = 0;
 		horizontalComposite.setLayout(hcGridLayout);
-		restoreDefaults = new Button(horizontalComposite, SWT.PUSH);
+		Button restoreDefaults = new Button(horizontalComposite, SWT.PUSH);
 		restoreDefaults.setText("Restore Defaults");
 		restoreDefaults.addSelectionListener(new SelectionAdapter()
 		{
