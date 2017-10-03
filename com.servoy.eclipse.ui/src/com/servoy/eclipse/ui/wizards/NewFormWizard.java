@@ -43,6 +43,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -50,6 +51,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
@@ -67,6 +69,7 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -323,7 +326,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 				if (!newFormWizardPage.isResponsiveLayout())
 				{
 					// create default form, most is already set in createNewForm
-					if (superForm == null) form.createNewPart(Part.BODY, 480/* height */); // else the form just inherits parts from super; no need to add body
+					if ((superForm == null || !superForm.getParts().hasNext()) && !newFormWizardPage.isAbstractForm())
+						form.createNewPart(Part.BODY, 480/* height */); // else the form just inherits parts from super; no need to add body
 
 					if (newFormWizardPage.getListForm())
 					{
@@ -449,7 +453,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		private Form superForm;
 
+		private Control typeFormControl;
+
 		private Button listFormCheck;
+
+		private Button bTypeAbstract, bTypeAnchored, bTypeResponsive;
 
 		/**
 		 * Creates a new form creation wizard page.
@@ -552,17 +560,22 @@ public class NewFormWizard extends Wizard implements INewWizard
 		 */
 		public boolean getListForm()
 		{
-			return listFormCheck.getSelection();
+			return listFormCheck != null && listFormCheck.getSelection();
 		}
 
 		public boolean isResponsiveLayout()
 		{
-			return listFormCheck.getSelection();
+			return bTypeResponsive != null && bTypeResponsive.getSelection();
 		}
 
 		public boolean isReferenceForm()
 		{
 			return defaultSettings != null ? defaultSettings.isReferenceForm() : false;
+		}
+
+		public boolean isAbstractForm()
+		{
+			return bTypeAbstract != null && bTypeAbstract.getSelection();
 		}
 
 		/**
@@ -721,14 +734,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 			});
 
 			boolean isNgClient = SolutionMetaData.isServoyNGSolution(getActiveSolution());
-			Label listFormLabel = new Label(topLevel, SWT.NONE);
-			listFormLabel.setText(isNgClient ? "&Responsive Layout" : "&Listform");
-			listFormLabel.setVisible(activeSolutionMobile || isNgClient);
+			Label typeFormLabel = new Label(topLevel, SWT.NONE);
+			typeFormLabel.setText(isNgClient ? "&Type" : "&Listform");
+			typeFormLabel.setVisible(activeSolutionMobile || isNgClient);
 
-			listFormCheck = new Button(topLevel, SWT.CHECK);
-			listFormCheck.setVisible(activeSolutionMobile || isNgClient);
-
-			listFormCheck.addSelectionListener(new SelectionListener()
+			SelectionListener typeSelectionListener = new SelectionListener()
 			{
 
 				@Override
@@ -741,15 +751,38 @@ public class NewFormWizard extends Wizard implements INewWizard
 				public void widgetDefaultSelected(SelectionEvent e)
 				{
 				}
-			});
+			};
 
+			if (isNgClient)
+			{
+				Group grpType = new Group(topLevel, SWT.SHADOW_IN);
+				grpType.setLayout(new RowLayout(SWT.VERTICAL));
+
+				bTypeAbstract = new Button(grpType, SWT.RADIO);
+				bTypeAbstract.setText("Abstract (no UI)");
+				bTypeAbstract.addSelectionListener(typeSelectionListener);
+				bTypeAnchored = new Button(grpType, SWT.RADIO);
+				bTypeAnchored.setText("Anchored");
+				bTypeAnchored.addSelectionListener(typeSelectionListener);
+				bTypeAnchored.setSelection(true);
+				bTypeResponsive = new Button(grpType, SWT.RADIO);
+				bTypeResponsive.setText("Responsive");
+				bTypeResponsive.addSelectionListener(typeSelectionListener);
+				typeFormControl = grpType;
+
+			}
+			else
+			{
+				typeFormControl = listFormCheck = new Button(topLevel, SWT.CHECK);
+				listFormCheck.setVisible(activeSolutionMobile);
+				listFormCheck.addSelectionListener(typeSelectionListener);
+			}
 
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
-					styleLabel).add(templateLabel).add(listFormLabel)).add(15,
-						15,
-						15).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(listFormCheck, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+					styleLabel).add(templateLabel).add(typeFormLabel)).add(15, 15, 15).add(
+						groupLayout.createParallelGroup(GroupLayout.LEADING).add(typeFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
 							projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
 								Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl,
 									GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
@@ -769,16 +802,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																		LayoutStyle.RELATED).add(
-																			groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
-																				listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																					LayoutStyle.RELATED).add(
-																						groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(
-																							100, Short.MAX_VALUE)));
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(typeFormLabel).add(
+																			typeFormControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																			GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																				groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(100,
+																					Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
-				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });
+				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, typeFormControl });
 
 			if (superForm != null)
 			{
@@ -902,7 +935,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		@Override
 		public IWizardPage getNextPage()
 		{
-			if (SolutionMetaData.isServoyNGSolution(getActiveSolution()) && (isResponsiveLayout() || isReferenceForm()))
+			if (SolutionMetaData.isServoyNGSolution(getActiveSolution()) && (isResponsiveLayout() || isReferenceForm() || isAbstractForm()))
 			{
 				return null;
 			}
@@ -981,9 +1014,37 @@ public class NewFormWizard extends Wizard implements INewWizard
 				styleNameCombo.setSelection(new StructuredSelection(superForm.getStyleName() == null ? "" : superForm.getStyleName()));
 			}
 
-			boolean isParentLogicalForm = superForm != null && !superForm.isResponsiveLayout() && !superForm.getParts().hasNext();
-			if (!isParentLogicalForm) listFormCheck.setSelection(superForm != null ? superForm.isResponsiveLayout() : false);
-			listFormCheck.setEnabled(superForm == null || isParentLogicalForm);
+			if (SolutionMetaData.isServoyNGSolution(getActiveSolution()))
+			{
+				if (superForm != null)
+				{
+					boolean isParentLogicalForm = !superForm.isResponsiveLayout() && !superForm.getParts().hasNext();
+					if (!isParentLogicalForm)
+					{
+						if (superForm.isResponsiveLayout())
+						{
+							setTypeButtonSelection(bTypeResponsive);
+						}
+						else
+						{
+							setTypeButtonSelection(bTypeAnchored);
+						}
+					}
+					else
+					{
+						setTypeButtonSelection(bTypeAbstract);
+					}
+					setTypeButtonsEnabled(isParentLogicalForm);
+					typeFormControl.setEnabled(isParentLogicalForm);
+
+				}
+				else
+				{
+					setTypeButtonSelection(bTypeAnchored);
+					setTypeButtonsEnabled(true);
+					typeFormControl.setEnabled(true);
+				}
+			}
 			dataSourceViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
 			setPageComplete(validatePage());
 		}
@@ -1041,7 +1102,45 @@ public class NewFormWizard extends Wizard implements INewWizard
 							formObject.getString(StaticContentSpecLoader.PROPERTY_STYLENAME.getPropertyName()), IRepository.STYLES);
 					}
 					styleNameCombo.setSelection(new StructuredSelection(templateStyle == null ? Messages.LabelDefault : templateStyle));
+
+
+					// type
+					if (SolutionMetaData.isServoyNGSolution(getActiveSolution()))
+					{
+						boolean isResponsive = false, isAbstract = false;
+						if (json.has(Template.PROP_LAYOUT))
+						{
+							isResponsive = Template.LAYOUT_TYPE_RESPONSIVE.equals(json.getString(Template.PROP_LAYOUT));
+							if (!isResponsive)
+							{
+								isAbstract = !formObject.has(SolutionSerializer.PROP_ITEMS);
+							}
+						}
+
+						if (isAbstract)
+						{
+							setTypeButtonSelection(bTypeAbstract);
+						}
+						else if (isResponsive)
+						{
+							setTypeButtonSelection(bTypeResponsive);
+						}
+						else
+						{
+							setTypeButtonSelection(bTypeAnchored);
+						}
+
+						setTypeButtonsEnabled(false);
+						typeFormControl.setEnabled(false);
+					}
 				}
+			}
+			else if (SolutionMetaData.isServoyNGSolution(getActiveSolution()))
+			{
+				// type is anchored if no template is selected
+				setTypeButtonSelection(bTypeAnchored);
+				setTypeButtonsEnabled(true);
+				typeFormControl.setEnabled(true);
 			}
 		}
 
@@ -1078,6 +1177,20 @@ public class NewFormWizard extends Wizard implements INewWizard
 			formName = formNameField.getText();
 			formNameTyped = formName != null && formName.trim().length() > 0;
 			setPageComplete(validatePage());
+		}
+
+		private void setTypeButtonSelection(Button b)
+		{
+			bTypeAbstract.setSelection(bTypeAbstract == b);
+			bTypeAnchored.setSelection(bTypeAnchored == b);
+			bTypeResponsive.setSelection(bTypeResponsive == b);
+		}
+
+		private void setTypeButtonsEnabled(boolean enabled)
+		{
+			bTypeAbstract.setEnabled(enabled);
+			bTypeAnchored.setEnabled(enabled);
+			bTypeResponsive.setEnabled(enabled);
 		}
 
 		private void setFormName(String text)
