@@ -488,7 +488,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				var node;
 				var beanModel;
 				if (!dragging) {
-					if (Math.abs(dragStartEvent.screenX - event.screenX) > 5 || Math.abs(dragStartEvent.screenY - event.screenY) > 5) {
+					if (Math.abs(dragStartEvent.clientX - event.clientX) > 5 || Math.abs(dragStartEvent.clientY - event.clientY) > 5) {
 						prepareForDragging(event);
 					} else return;
 				}
@@ -601,8 +601,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								}, 200);
 							}
 					} else {
-						var changeX = event.screenX- dragStartEvent.screenX;
-						var changeY = event.screenY- dragStartEvent.screenY;
+						var changeX = event.clientX- dragStartEvent.clientX;
+						var changeY = event.clientY- dragStartEvent.clientY;
 						
 						//make sure no element goes offscreen
 						var canMove = true;
