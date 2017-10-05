@@ -67,6 +67,8 @@ public class LicensePage extends WizardPage
 		private final Text companyText;
 		private final Text licenseText;
 		private final Text noOfLicensesText;
+		private final Button licenseButton;
+		private final Button deleteButton;
 
 		public LicenseFieldsComposite(final Composite container, int style, String company, String license, String licensesNo)
 		{
@@ -87,10 +89,10 @@ public class LicensePage extends WizardPage
 			noOfLicensesText = new Text(container, SWT.BORDER);
 			licenseText = new Text(container, SWT.BORDER);
 
-			final Button licenseButton = new Button(container, SWT.NONE);
+			licenseButton = new Button(container, SWT.NONE);
 			licenseButton.setText("Save license");
 
-			final Button deleteButton = new Button(container, SWT.NONE);
+			deleteButton = new Button(container, SWT.NONE);
 			deleteButton.setText("Delete license");
 
 			final GroupLayout groupLayout = new GroupLayout(container);
@@ -180,6 +182,14 @@ public class LicensePage extends WizardPage
 			deleteButton.setEnabled(enableButtons);
 		}
 
+		public void clear()
+		{
+			companyText.setText("");
+			licenseText.setText("");
+			noOfLicensesText.setText("");
+			setEnabledButtons(licenseButton, deleteButton);
+		}
+
 	}
 
 	private void checkLicense(Composite container, String companyText, String licenseText, String noOfLicensesText)
@@ -250,10 +260,11 @@ public class LicensePage extends WizardPage
 			public void widgetSelected(SelectionEvent e)
 			{
 				Control[] children = mainContainer.getChildren();
-				for (int i = 1; i < children.length; i++)
+				for (int i = 1; i < children.length - 1; i++)
 				{
 					children[i].dispose();
 				}
+				((LicenseFieldsComposite)((Composite)children[0]).getChildren()[0]).clear();
 				mainContainer.update();
 				exportModel.clearLicenses();
 			}
