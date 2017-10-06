@@ -198,7 +198,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 						{
 							values[z] = urlPropertiesFields.get(z).getText();
 						}
-						String newUrl = serverTemplateDefinition.getUrlForValues(values);
+						String newUrl = serverTemplateDefinition.getUrlForValues(values, serverConfigObservable.getObject().getServerUrl());
 						if (newUrl != null)
 						{
 							urlField.setText(newUrl);
