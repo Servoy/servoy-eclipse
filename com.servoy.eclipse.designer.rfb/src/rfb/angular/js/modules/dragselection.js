@@ -264,6 +264,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		}
 
 		var updateAbsoluteLayoutComponentsLocations = function (editorScope, draggedSelection, changeX, changeY, minX, minY) {
+			var updated = new Set();
 			for(var i=0;i< draggedSelection.length;i++) {
 				var node = draggedSelection[i];
 				if (node[0] && node[0].getAttribute('cloneuuid')){
@@ -280,7 +281,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				else {
 					var css;
 					var beanModel = editorScope.getBeanModel(node);
-					var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+					var uuid = node.getAttribute("svy-id");
+					var ghostObject = editorScope.getGhost(uuid);
 					if (beanModel)
 					{	
 						if(minY == undefined || beanModel.location.y + changeY >= minY) beanModel.location.y = beanModel.location.y + changeY;
@@ -288,12 +290,13 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						
 					    //it can happen that we have the node in the bean model but it is outside the form
 					    //in this case do not update the css as that will be done in the 'if (ghostObject) {...}'
-						if (!ghostObject) { 
+						if (!ghostObject && !updated.has(uuid)) { 
         						css = { top: beanModel.location.y, left: beanModel.location.x }
         						angular.element(node).css(css);
+        						updated.add(uuid)
 						}
 					}
-					if (ghostObject) {
+					if (ghostObject && !updated.has(uuid)) {
 						if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
 						{
 							var groupElements = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[group-id='"+ghostObject.uuid+"']"));
@@ -312,6 +315,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							}
 						}
 						editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
+						updated.add(uuid)
 					}	
 				}
 			}
@@ -607,13 +611,9 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						//make sure no element goes offscreen
 						var canMove = true;
 						var selection = editorScope.selectionToDrag;
-						//depending if the cursor is inside or outside the form area we want to remove from the selection 
-						//the ghosts which have also bean model, or respectively the elements which also have ghosts 
-						var toRemove = [];
 						var formSize = editorScope.getContentSize();
 						var formWidth = parseInt(formSize.width);
 						var formHeight = parseInt(formSize.height);
-						var removeGhosts = event.screenX > formWidth || event.screenY > formHeight;
 						for (var i = 0; i < selection.length; i++)
 						{
 							var node = selection[i].nodeType === Node.ELEMENT_NODE ? selection[i] : selection[i][0];
@@ -621,10 +621,6 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							var svy_id = node.getAttribute("svy-id");
 							var ghost = editorScope.getGhost(svy_id);	
 							if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) continue;
-							if (beanModel && ghost && toRemove.indexOf(svy_id) == -1)
-							{
-								toRemove.push(svy_id);
-							}
 							if (!beanModel) beanModel = ghost;
 							if (beanModel && beanModel.location && (beanModel.location.y + changeY < 0 || beanModel.location.x + changeX < 0) )
 							{
@@ -635,21 +631,6 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						
 						if (canMove)
 						{
-							for (var i = 0; i < toRemove.length; i++)
-							{
-								for (var j = 0; j < editorScope.selectionToDrag.length; j++)
-								{
-									var node = editorScope.selectionToDrag[j].nodeType === Node.ELEMENT_NODE ? editorScope.selectionToDrag[j] : editorScope.selectionToDrag[j][0];
-									if (node.getAttribute("svy-id") == toRemove[i])
-									{
-										if (removeGhosts && node.classList.contains("ghost") || !removeGhosts && node.classList.contains("svy-wrapper"))
-										{
-											editorScope.selectionToDrag.splice(j,1);
-											break;
-										}
-									}
-								}
-							}
 							updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
 						}
 						dragStartEvent = event;
