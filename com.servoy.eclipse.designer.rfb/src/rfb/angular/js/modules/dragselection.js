@@ -19,7 +19,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 			if (event.button == 0 && dragNode) {
 				dragStartEvent = event;
 				initialParent = null;
-				if(!editorScope.isAbsoluteFormLayout()){
+				
+				var ghostObject = editorScope.getGhost(dragNode.getAttribute("svy-id"));
+				
+				if (!editorScope.isAbsoluteFormLayout() && !ghostObject) {
 					if (angular.element(dragNode).hasClass("formComponentChild")) {//do not grab if this is a form component element
 						dragStartEvent = null;
 					}
@@ -64,14 +67,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				editorScope.getEditorContentRootScope().drag_highlight = null;
 				editorScope.getEditorContentRootScope().$apply();
 				if (dragging) {
+					updateConfigObjectGhostsAndDropTargetWhileDragging(event, true);
 
 					dragging = false;
 					autoscrollElementClientBounds = undefined;
-					if (configGhostDragState) {
-						configGhostDragState.dropTargetGhostElement.css("display", "none");
-						configGhostDragState.dropTargetGhostElement.css("left", "");
-						configGhostDragState = undefined;
-					}
 
 					// store the position changes
 					var i = 0;
@@ -84,15 +83,16 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					var layoutName = null;
 					var key;
 
-					if (!editorScope.isAbsoluteFormLayout()) {
+					node = editorScope.selectionToDrag[i];
+					if(node[0]) node = node[0];
+					ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+					
+					if (!editorScope.isAbsoluteFormLayout() && !ghostObject) {
 						obj = (event.ctrlKey||event.metaKey) ? [] : {};
 						for (i = 0; i < editorScope.selectionToDrag.length; i++) {
-							node = editorScope.selectionToDrag[i];
-							if(node[0]) node = node[0];
 							type = "component";
 							layoutName = node.getAttribute("svy-layoutname");
 							if (layoutName) type = "layout"
-							ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 							if (ghostObject)
 								type = ghostObject.propertyType;
 							canDrop = getDropNode(type, topContainer, layoutName, event, node.getAttribute("svy-id"));
@@ -120,15 +120,12 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								editorScope.selectionToDrag[i].remove();
 							}
 
-							//support for reordering ghosts in responsive layout - if this is a ghost then only allow dropping on top of a sibling ghost
-							if (!ghostObject || (angular.element(canDrop.dropTarget).parent() !== angular.element(node).parent)) {
-								if (canDrop.dropTarget) {
-									obj[key].dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
-								}
+							if (canDrop.dropTarget) {
+								obj[key].dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
+							}
 
-								if (canDrop.beforeChild) {
-									obj[key].rightSibling = canDrop.beforeChild.getAttribute("svy-id");
-								}
+							if (canDrop.beforeChild) {
+								obj[key].rightSibling = canDrop.beforeChild.getAttribute("svy-id");
 							}
 						}
 						if((event.ctrlKey||event.metaKey)) {
@@ -157,8 +154,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							if (size > 0) $editorService.createComponents({
 								"components": components
 							});
-						}
-						else {
+						} else {
 							obj = {};
 							for (i = 0; i < editorScope.selectionToDrag.length; i++) {
 								node = editorScope.selectionToDrag[i];
@@ -170,11 +166,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 									}
 								} else {
 									var beanModel = editorScope.getBeanModel(node);
-									if (beanModel) {
-										// TODO the following two lines can be removed right?
-										beanModel.location.y;
-										beanModel.location.x
-										
+									if (beanModel) {										
 										obj[node.getAttribute("svy-id")] = {
 												x: beanModel.location.x,
 												y: beanModel.location.y
@@ -182,8 +174,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 									} else {
 										ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 										if (ghostObject) {
-											if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
-											{
+											if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP) {
 												var groupElements = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[group-id='"+ghostObject.uuid+"']"));
 												for (var i = 0; i < groupElements.length; i++)
 												{
@@ -196,9 +187,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 														}
 													}
 												}
-											}
-											else
-											{
+											} else {
 												obj[node.getAttribute("svy-id")] = {
 														x: ghostObject.location.x,
 														y: ghostObject.location.y
@@ -213,6 +202,24 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 									}
 								}
 							}
+
+							if (configGhostDragState && configGhostDragState.ghostElementsInContainer) {
+								// so a config obj. ghost drag operation finished; in "ghostElementsInContainer" we have the siblings of the dragged ghost(s)
+								// or null for indexes of ghosts that were dragged; those need to be updated on server (in developer persist model) as well
+								var ghostElements = configGhostDragState.ghostElementsInContainer;
+								for (var i in ghostElements) {
+									if (ghostElements[i]) {
+										var svyID = ghostElements[i][0].getAttribute("svy-id");
+										var ghostObject = editorScope.getGhost(svyID);
+
+										obj[svyID] = {
+												x: ghostObject.location.x,
+												y: ghostObject.location.y
+										}
+									}
+								}
+							}
+
 							editorScope.refreshEditorContent();
 							$editorService.sendChanges(obj);
 							$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, editorScope.selectionToDrag);
@@ -258,8 +265,14 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					editorScope.reduceSelection(nodesToRemove);
 				}
 				
+				// drag operation ended; clean up 
 				editorScope.selectionToDrag = null;
 				editorScope.glasspane.style.cursor = "";
+				if (configGhostDragState) {
+					configGhostDragState.dropTargetGhostElement.css("display", "none");
+					configGhostDragState.dropTargetGhostElement.css("left", "");
+					configGhostDragState = undefined;
+				}
 			}
 		}
 
@@ -359,6 +372,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		}
 		
 		function isInsideAutoscrollElementClientBounds(clientX, clientY) {
+			if (!autoscrollElementClientBounds) return false;
+			
 			var inside = false;
 			var i = 0;
 			while (!inside && i < 4) { // 4 == autoscrollElementClientBounds.length always
@@ -369,18 +384,18 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 			return inside;
 		}
 
-		function updateConfigObjectGhostsAndDropTargetWhileDragging(mouseEvent) {
+		function updateConfigObjectGhostsAndDropTargetWhileDragging(mouseEvent, prepareForDropping) {
 			// "configGhostDragState" is already computed here; update the positions of siblings and drop target as needed
 			// to make it clear to the developer where the ghost(s) that he drags will get dropped
-			// configGhostDragState = { "parentGhostContainer": ..., "selectionGhosts": ..., "dropTargetGhostElement": ..., ghostElementsInContainer: ..., startX: ... };
+			// configGhostDragState = { "parentGhostContainer": ..., "dropTargetGhostElement": ..., "ghostElementsInContainer": ..., "startX": ..., "selectionGhosts": ... };
 
 			if (!configGhostDragState) return;
 
 			// allow for any pending drop target animations to finish
 			var currentMs = new Date().getTime();
-			if (configGhostDragState.lastUpdateMs && currentMs - configGhostDragState.lastUpdateMs < 255) {
+			if (!prepareForDropping && configGhostDragState.lastUpdateMs && currentMs - configGhostDragState.lastUpdateMs < 255) {
 				if (configGhostDragState.timeout) clearTimeout(configGhostDragState.timeout);
-				configGhostDragState.timeout = setTimeout(updateConfigObjectGhostsAndDropTargetWhileDragging, 255 + configGhostDragState.lastUpdateMs - currentMs, mouseEvent);
+				configGhostDragState.timeout = setTimeout(updateConfigObjectGhostsAndDropTargetWhileDragging, 255 + configGhostDragState.lastUpdateMs - currentMs, mouseEvent, false);
 				return;
 			} else {
 				if (configGhostDragState.timeout) {
@@ -392,39 +407,82 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 			var foundDropSpot = false;
 			var ghostElements = configGhostDragState.ghostElementsInContainer;
-			var x = configGhostDragState.startX, y = configGhostDragState.startY;
+			
+			// we calculate both the visual DOM positions as well as the ghost.location. positions (that will be used at the end when dropping to be sent to server)
+			var x = configGhostDragState.startX, ghostX = configGhostDragState.startGhostX;
+			var y = configGhostDragState.startY, ghostY = configGhostDragState.startGhostY;
+			
+			// these 2 are useful in case the ghosts being dragged are from the beginning of the ghostContainer and we need to compute the first x position even though those are being moved
+			var selJ = 0;
+			var selWidthBeforeNonDraggedSibling = 0, selGhostWidthBeforeNonDraggedSibling = 0; 
 
 			// first try to find the first x position of the ghost elements;
-			if (!x && ghostElements.length > 0 && ghostElements[0]) x = configGhostDragState.startX = ghostElements[0].offset().left; // elements in the array could be null (if those ghosts are really the ones being dragged right now)
+			if (!x && ghostElements.length > 0 && ghostElements[0]) {
+				x = configGhostDragState.startX = ghostElements[0].offset().left; // elements in the array could be null (if those ghosts are really the ones being dragged right now)
+				ghostX = configGhostDragState.startGhostX = configGhostDragState.parentGhostContainer.ghosts[0].location.x;
+			}
 
 			var i = 0;
-			var droptTargetElementLeft = configGhostDragState.dropTargetGhostElement.offset().left;
-			var selJ = 0, selWidthBeforeNonDraggedSibling = 0; // these are useful in case the ghosts being dragged are from the beginning of the ghostContainer and we need to compute the first x position even though those are being moved
+			var dropTargetElementLeft = configGhostDragState.dropTargetGhostElement.offset().left;
 			while (i < ghostElements.length) {
 				if (ghostElements[i]) {
 					var ghostElLeft = ghostElements[i].offset().left;
-					if (angular.isUndefined(y)) y = configGhostDragState.startY = ghostElements[i].offset().top;
-					if (angular.isUndefined(x)) x = configGhostDragState.startX = ghostElLeft - selWidthBeforeNonDraggedSibling;
-					if (!foundDropSpot && ghostElLeft + (droptTargetElementLeft > ghostElLeft ? ghostElements[i].outerWidth() : 0) > mouseEvent.clientX) {
+					if (angular.isUndefined(y)) {
+						y = configGhostDragState.startY = ghostElements[i].offset().top;
+						ghostY = configGhostDragState.startGhostY = configGhostDragState.parentGhostContainer.ghosts[i].location.y;
+					}
+					if (angular.isUndefined(x)) {
+						x = configGhostDragState.startX = ghostElLeft - selWidthBeforeNonDraggedSibling;
+						ghostX = configGhostDragState.startGhostX = configGhostDragState.parentGhostContainer.ghosts[i].location.x - selGhostWidthBeforeNonDraggedSibling;
+					}
+					if (!foundDropSpot && ghostElLeft + (dropTargetElementLeft > ghostElLeft ? ghostElements[i].outerWidth() : 0) > mouseEvent.clientX) {
 						// we just found where to put the drop target
 						configGhostDragState.dropTargetGhostElement.css("display", "inline");
+						
 						configGhostDragState.dropTargetGhostElement.offset({ left: x, top: y });
-						x += configGhostDragState.dropTargetGhostElement.outerWidth();
+						configGhostDragState.dropTargetGhostX = ghostX;
+						
+						x += configGhostDragState.dropTargetGhostElement.outerWidth(); // this width is computed initially in prepareForDragging(...)
+						ghostX += configGhostDragState.dragPlaceholderGhostWidth;
+							
 						foundDropSpot = true;
 					}
 
 					// set the new positions for sibling ghosts starting at "x" (might or might not be the same as before)
-					ghostElements[i].offset({ left: x });
+					var ghost = configGhostDragState.parentGhostContainer.ghosts[i];
+					
+					ghost.location.x = ghostX; // keep ghost obj. location up-to date
+					ghostElements[i].offset({ left: x }); // set new location of ghost element
+					
 					x += ghostElements[i].outerWidth();
-				} else if (angular.isUndefined(x)) { // null entry in ghostElements means that that particular ghost is being dragged right now
-					selWidthBeforeNonDraggedSibling += $(editorScope.getSelection()[selJ++]).outerWidth();
+					ghostX += ghost.size.width;
+				} else if (angular.isUndefined(x)) { // null entry in ghostElements means that that particular ghost is being dragged right now; we only care about when x is not defined (to determine initial first ghost x)
+					selWidthBeforeNonDraggedSibling += $('[svy-id=' + configGhostDragState.selectionGhosts[selJ].uuid + ']').outerWidth();
+					selGhostWidthBeforeNonDraggedSibling += configGhostDragState.selectionGhosts[selJ].size.width;
+					selJ++;
 				}
 				i++;
 			}
 			if (!foundDropSpot && angular.isDefined(x) && angular.isDefined(y)) {
-				// we just found where to put the drop target
 				configGhostDragState.dropTargetGhostElement.css("display", "inline");
 				configGhostDragState.dropTargetGhostElement.offset({ left: x, top: y });
+				configGhostDragState.dropTargetGhostX = ghostX;
+			}
+			
+			if (prepareForDropping) {
+				// really position the selected/being dragged ghosts where they should be - in the drop target location; that way we make sure when multiple ghosts are being dragged at once
+				// that they drop in the right place - and get sent to server correctly (as depending on where the mouse 'grabbed' the selection, some ghost's x positions might be outside the drop target zone)
+				var dropZoneOffsetX = configGhostDragState.dropTargetGhostElement.offset().left;
+				var dropZoneGhostX = configGhostDragState.dropTargetGhostX;
+				var dropOffsetY = configGhostDragState.dropTargetGhostElement.offset().top;
+				for (i = 0; i < configGhostDragState.selectionGhosts.length; i++) {
+					var selGhostEl = $('[svy-id=' + configGhostDragState.selectionGhosts[i].uuid + ']');
+					configGhostDragState.selectionGhosts[i].location.x = dropZoneGhostX;
+					configGhostDragState.selectionGhosts[i].location.y = configGhostDragState.startGhostY;
+					selGhostEl.offset({ left: dropZoneOffsetX, top: dropOffsetY });
+					dropZoneOffsetX += selGhostEl.outerWidth();
+					dropZoneGhostX += configGhostDragState.selectionGhosts[i].size.width;
+				}
 			}
 		}
 
@@ -440,7 +498,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 			// ghosts (add "ghost-dnd-mode" class) in that array for dragging/reordering and show the drop placeholder for
 			// nice drag feedback; same has to be done for when dragging a new config obj. from palette, but then we don't
 			// know the target yet; the target component/property will be prepared then later while moving the mouse
-			var dragPlaceholderWidth = 0;
+			var dragPlaceholderWidth = 0, dragPlaceholderGhostWidth = 0;
 
 			var selectionElements = editorScope.getSelection();
 			var parentGhostContainer, gc, selectionGhosts = [];
@@ -453,6 +511,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					if (!parentGhostContainer || (gc && parentGhostContainer == gc)) {
 						parentGhostContainer = gc;
 						dragPlaceholderWidth += $(selectionElements[i]).outerWidth();
+						dragPlaceholderGhostWidth += ghost.size.width;
 						selectionGhosts.push(ghost);
 					} else {
 						parentGhostContainer = undefined;
@@ -464,24 +523,42 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				}
 			}
 			if (parentGhostContainer) {
+				// in case of dragging multiple config ghosts that are not adjacent to each-other, move them close to each other while they follow the mouse
+				// first sort them by X as the user could have selected them in any order
+				selectionGhosts.sort(function (ghostA, ghostB) {
+					return ghostA.location.x - ghostB.location.x;
+				});
+				
+				var grabbedGhost = editorScope.getGhost(dragNode.getAttribute("svy-id")); // the one that is under the mouse cursor when drag starts
+				var grabbedIdx = selectionGhosts.indexOf(grabbedGhost);
+
+				if (grabbedIdx >= 0) {
+					// then put them one after the other, keeping the grabbed-with-mouse-ghost where it was
+					var i;
+					for (i = grabbedIdx + 1; i < selectionGhosts.length; i++)
+						selectionGhosts[i].location.x = selectionGhosts[i - 1].location.x + selectionGhosts[i - 1].size.width;
+					for (i = grabbedIdx - 1; i >= 0; i--)
+						selectionGhosts[i].location.x = selectionGhosts[i + 1].location.x - selectionGhosts[i].size.width;
+				}
+				
 				configGhostDragState = {
 					"parentGhostContainer": parentGhostContainer,
 					"selectionGhosts": selectionGhosts,
 					"dropTargetGhostElement": $("#ghost-dnd-placeholder"),
 					"ghostElementsInContainer": [] };
+				
 				// ok add the new class to the ghosts of the same parent but which are not part of the selection
 				for (var i = 0; i < parentGhostContainer.ghosts.length; i++) {
 					if (selectionGhosts.indexOf(parentGhostContainer.ghosts[i]) == -1) {
 						var el = $('[svy-id=' + parentGhostContainer.ghosts[i].uuid + ']');
 						configGhostDragState.ghostElementsInContainer.push(el);
 						el.addClass("ghost-dnd-mode");
-						parentGhostContainer.ghosts[i].dragSibling = true;
 					} else {
 						configGhostDragState.ghostElementsInContainer.push(null); // while dragging we do not touch the position of selected ghosts except for them following the mouse; I just put null here so that the indexes are in-sync with the ghostContainer.ghosts array
-						parentGhostContainer.ghosts[i].dragSibling = false;
 					}
 				}
 				configGhostDragState.dropTargetGhostElement.outerWidth(dragPlaceholderWidth);
+				configGhostDragState.dragPlaceholderGhostWidth = dragPlaceholderGhostWidth;
 			}
 		}
 		
@@ -496,10 +573,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						prepareForDragging(event);
 					} else return;
 				}
-				updateConfigObjectGhostsAndDropTargetWhileDragging(event);
+				updateConfigObjectGhostsAndDropTargetWhileDragging(event, false);
 
 				// enable auto-scroll areas only if current mouse event is outside of them (this way, when starting to drag from an auto-scroll area it will not immediately auto-scroll)
-				if (!autoscrollAreasEnabled && !isInsideAutoscrollElementClientBounds(event.clientX, event.clientY)) {
+				if (autoscrollElementClientBounds && !autoscrollAreasEnabled && !isInsideAutoscrollElementClientBounds(event.clientX, event.clientY)) {
 					autoscrollAreasEnabled = true;
 					
 					addAutoscrollListeners("BOTTOM_AUTOSCROLL")
@@ -548,7 +625,12 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				}
 
 				if (editorScope.selectionToDrag.length > 0) {
-					if (!editorScope.isAbsoluteFormLayout()) {
+					var firstSelectedNode = editorScope.selectionToDrag[0];
+					if (firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
+					ghostObject = editorScope.getGhost(firstSelectedNode.getAttribute("svy-id"));
+
+					if (!editorScope.isAbsoluteFormLayout() && !ghostObject) {
+						// so it is a d&d of a non-ghost object inside a responsive form
 						if (dragCloneDiv){
 							var css = editorScope.convertToContentPoint({
 								position: 'absolute',
@@ -560,8 +642,6 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							});
 							dragCloneDiv.css(css);
 						}
-						var firstSelectedNode = editorScope.selectionToDrag[0];
-						if(firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
 
 						var type = "component";
 						editorScope.getEditorContentRootScope().drop_highlight = type;
@@ -576,10 +656,6 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						editorScope.getEditorContentRootScope().$apply();
 
 						var topContainer = null;
-
-						ghostObject = editorScope.getGhost(firstSelectedNode.getAttribute("svy-id"));
-						if (ghostObject) return;
-
 
 						var canDrop = getDropNode(type, topContainer, layoutName, event);
 						if (!canDrop.dropAllowed) {
