@@ -1329,6 +1329,15 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		showMembersAction.clearSelection();
 		showMembersAction.setChecked(obj instanceof ScriptMethod);
+		if (obj instanceof IPersist)
+		{
+			Form form = (Form)(obj instanceof Form ? obj : (((IPersist)obj).getAncestor(IRepository.FORMS)));
+			if (!form.equals(selected))
+			{
+				selected = form;
+				tree.setInput(form);
+			}
+		}
 		setSelection(obj);
 	}
 }
