@@ -128,6 +128,12 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 					}
 				}
 				tag.append(">");
+				if (layout.getName() != null)
+				{
+					tag.append("[");
+					tag.append(layout.getName());
+					tag.append("]");
+				}
 				return tag.toString();
 			}
 			if (((PersistContext)element).getPersist() instanceof WebCustomType)
