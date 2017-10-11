@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2015 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2016 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -13,114 +13,102 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- */
+*/
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.gef.commands.Command;
-import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.WebCustomType;
 
 /**
- * @author gganea
+ * When, in a custom component, ghost config objects are reordered their {@link LocationCache} positions are updated using the {@link MoveCustomTypeCommand} and then
+ * this command is issued to update their indexes as needed.
  *
+ * @author gganea@servoy.com
  */
 public class ReorderCustomTypesCommand extends Command
 {
 
-	public ReorderCustomTypesCommand(WebCustomType inPlaceOf, WebCustomType dropped)
-	{
-		super("Reorder Parent");
-		this.inPlaceOf = inPlaceOf;
-		this.dropped = dropped;
-	}
-
-	private final WebCustomType inPlaceOf;
-	private final WebCustomType dropped;
-
+	private final WebCustomType source;
 	private IChildWebObject[] oldValue;
+
+	public ReorderCustomTypesCommand(WebCustomType source)
+	{
+		super("Reorder web custom types");
+		this.source = source;
+	}
 
 	@Override
 	public void execute()
 	{
-		IBasicWebObject parent = inPlaceOf.getParent();
-		reorder(parent);
+		// resort the array of WebCustomTypes that the given custom type is part of.
+		String jsonKey = source.getJsonKey();
+		Object prop = source.getParent().getProperty(jsonKey);
+
+		if (prop instanceof IChildWebObject[])
+		{
+			IChildWebObject[] property = (IChildWebObject[])prop;
+
+			ArrayList<IChildWebObject> oldValueAsList = new ArrayList<>();
+			Collections.addAll(oldValueAsList, property);
+			this.oldValue = oldValueAsList.toArray(new IChildWebObject[oldValueAsList.size()]); // to really save the old order, we need to create a new array
+
+			List<IChildWebObject> asList = Arrays.asList(property); // sorting the list means sorting the array in place, no need to set it back again
+			Collections.sort(asList, new Comparator<IChildWebObject>()
+			{
+				@Override
+				public int compare(IChildWebObject o1, IChildWebObject o2)
+				{
+					String o1key = o1.getUUID().toString();
+					String parentKey = o1.getParent().getUUID() + o1.getJsonKey();
+					String o2key = o2.getUUID().toString();
+					Point o1Location = LocationCache.getINSTANCE().getLocation(parentKey, o1key);
+					Point o2Location = LocationCache.getINSTANCE().getLocation(parentKey, o2key);
+					if (o1Location != null && o2Location != null) return PositionComparator.comparePoint(true, o1Location, o2Location);
+					return 0;
+				}
+			});
+
+			setIndexes(property);
+			source.getParent().setProperty(jsonKey, asList.toArray());
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
+		}
 	}
 
-
-	private WebCustomType reorder(IBasicWebObject parentBean)
+	/**
+	 * Sets the correct index in the array for each IChildWebObject
+	 */
+	private void setIndexes(IChildWebObject[] array)
 	{
-		int index = inPlaceOf.getIndex();
-		String propertyName = inPlaceOf.getJsonKey();
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(parentBean.getTypeName());
-		boolean isArray = spec.isArrayReturnType(propertyName);
-		PropertyDescription targetPD = spec.getProperty(propertyName);
-		IChildWebObject[] arrayValue = null;
-		if (isArray)
+		for (int i = 0; i < array.length; i++)
 		{
-			targetPD = ((ICustomType< ? >)targetPD.getType()).getCustomJSONTypeDefinition();
-			if (parentBean instanceof WebComponent)
-			{
-				arrayValue = (IChildWebObject[])((WebComponent)parentBean).getProperty(propertyName);
-			}
-			if (index == -1) index = arrayValue != null ? arrayValue.length : 0;
-
-			oldValue = arrayValue;
-			if (parentBean instanceof WebComponent)
-			{
-				if (index > -1)
-				{
-					ArrayList<IChildWebObject> arrayList = new ArrayList<IChildWebObject>();
-					arrayList.addAll(Arrays.asList(arrayValue));
-					arrayList.remove(dropped);
-					arrayList.add(index, dropped);
-					arrayValue = arrayList.toArray(new IChildWebObject[arrayList.size()]);
-				}
-				//don't forget to set the correct indexes.
-				for (int i = 0; i < arrayValue.length; i++)
-				{
-					arrayValue[i].setIndex(i);
-				}
-				((WebComponent)parentBean).setProperty(propertyName, arrayValue);
-			}
-			parentBean.updateJSON();
-			return dropped;
+			array[i].setIndex(i);
 		}
-		return null;
 	}
 
 	@Override
 	public void undo()
 	{
-		ArrayList<IPersist> changes = new ArrayList<IPersist>();
-		changes.add(dropped.getParent());
-		dropped.getParent().setProperty(dropped.getJsonKey(), oldValue);
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
+		setIndexes(oldValue);
+		source.getParent().setProperty(source.getJsonKey(), oldValue);
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.gef.commands.Command#redo()
-	 */
 	@Override
 	public void redo()
 	{
-		ArrayList<IPersist> changes = new ArrayList<IPersist>();
-		changes.add(dropped.getParent());
 		super.redo();
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
 	}
 }

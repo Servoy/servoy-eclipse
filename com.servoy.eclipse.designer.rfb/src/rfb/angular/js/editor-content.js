@@ -349,6 +349,9 @@ angular.module('editorContent',['servoyApp'])
 	},
 	trustAsHtml: function() {
 		return false;
+	},
+	isInAbsoluteLayout: function(){
+		return $scope.absoluteLayout;
 	}
   }
   $scope.servoyApi = function(name) {

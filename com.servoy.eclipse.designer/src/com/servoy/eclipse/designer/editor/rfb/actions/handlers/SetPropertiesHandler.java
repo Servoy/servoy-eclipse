@@ -67,6 +67,7 @@ public class SetPropertiesHandler implements IServerService
 			public void run()
 			{
 				CompoundCommand cc = new CompoundCommand();
+				ReorderCustomTypesCommand reorderCustomTypesCommand = null;
 				Iterator keys = args.keys();
 				while (keys.hasNext())
 				{
@@ -93,6 +94,7 @@ public class SetPropertiesHandler implements IServerService
 							{
 								if (persist instanceof WebCustomType)
 								{
+									if (reorderCustomTypesCommand == null) reorderCustomTypesCommand = new ReorderCustomTypesCommand((WebCustomType)persist);
 									cc.add(new MoveCustomTypeCommand((WebCustomType)persist, new Point(properties.optInt("x"), properties.optInt("y"))));
 								}
 								else
@@ -130,6 +132,9 @@ public class SetPropertiesHandler implements IServerService
 						}
 					}
 				}
+
+				if (reorderCustomTypesCommand != null) cc.add(reorderCustomTypesCommand);
+
 				if (!cc.isEmpty()) editorPart.getCommandStack().execute(cc);
 			}
 		});

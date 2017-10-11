@@ -29,10 +29,8 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportFormElements;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -73,46 +71,39 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 
 						ISupportFormElements parent = editorPart.getForm();
 						IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, dropTarget);
-						if (persist.getTypeID() == IRepository.WEBCUSTOMTYPES)
+
+						if (searchForPersist != null)
 						{
-							if (searchForPersist.getTypeID() == IRepository.WEBCUSTOMTYPES)
-								cc.add(new ReorderCustomTypesCommand((WebCustomType)searchForPersist, (WebCustomType)persist));
+							IPersist p = searchForPersist;
+							while (!(p instanceof ISupportFormElements) && p != null)
+							{
+								p = p.getParent();
+							}
+							if (p instanceof ISupportFormElements)
+							{
+								parent = (ISupportFormElements)p;
+							}
 						}
 						else
 						{
-							if (searchForPersist != null)
-							{
-								IPersist p = searchForPersist;
-								while (!(p instanceof ISupportFormElements) && p != null)
-								{
-									p = p.getParent();
-								}
-								if (p instanceof ISupportFormElements)
-								{
-									parent = (ISupportFormElements)p;
-								}
-							}
-							else
-							{
-								Debug.error("drop target with uuid: " + dropTarget + " not found in form: " + parent);
-							}
-
-							try
-							{
-								if (!persist.getParent().equals(parent) && (((ISupportExtendsID)persist).getExtendsID() > 0 ||
-									!persist.equals(ElementUtil.getOverridePersist(PersistContext.create(persist, editorPart.getForm())))))
-								{
-									//do not allow changing the parent for inherited elements
-									continue;
-								}
-							}
-							catch (Exception e)
-							{
-								Debug.error(e);
-							}
-							IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, rightSibling);
-							cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, editorPart.getForm(), false));
+							Debug.error("drop target with uuid: " + dropTarget + " not found in form: " + parent);
 						}
+
+						try
+						{
+							if (!persist.getParent().equals(parent) && (((ISupportExtendsID)persist).getExtendsID() > 0 ||
+								!persist.equals(ElementUtil.getOverridePersist(PersistContext.create(persist, editorPart.getForm())))))
+							{
+								//do not allow changing the parent for inherited elements
+								continue;
+							}
+						}
+						catch (Exception e)
+						{
+							Debug.error(e);
+						}
+						IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, rightSibling);
+						cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, editorPart.getForm(), false));
 					}
 				}
 				if (!cc.isEmpty()) editorPart.getCommandStack().execute(cc);
