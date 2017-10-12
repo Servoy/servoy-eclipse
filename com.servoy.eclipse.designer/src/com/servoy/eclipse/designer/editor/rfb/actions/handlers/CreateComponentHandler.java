@@ -576,7 +576,8 @@ public class CreateComponentHandler implements IServerService
 								}
 							}
 							List<IPersist> changes = new ArrayList<>();
-							if (initialDropTarget != null && !initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
+							if (editorPart.getForm().isResponsiveLayout() && initialDropTarget != null &&
+								!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
 							{
 								ISupportChilds parent = webComponent.getParent();
 								changes.add(webComponent.getParent());
