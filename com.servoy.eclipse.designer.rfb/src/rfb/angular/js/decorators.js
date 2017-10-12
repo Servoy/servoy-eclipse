@@ -120,12 +120,14 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 							if (!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
 								var target = $scope.nodes[0].node.get(0);
 								var targetRect = target.getBoundingClientRect();
+								var contentFrameRectTop = $(".contentframe").get(0).getBoundingClientRect().top;
 								var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;
 								var statusBarHeight = $(".statusbar-area").get(0).getBoundingClientRect().height;
-								var resizerRight = $(".sidebar-resizer").get(0).getBoundingClientRect().right;
 								
-								if ((targetRect.bottom < toolbarBottom + 5) || (targetRect.top > window.innerHeight - statusBarHeight - 5)
-										|| (targetRect.right < resizerRight + 5) || (targetRect.left > window.innerWidth - 5)) {
+								var top = targetRect.top + contentFrameRectTop;
+								var bottom = targetRect.bottom + contentFrameRectTop;
+								
+								if ((bottom < toolbarBottom) || (top > window.innerHeight - statusBarHeight)) {
 									target.scrollIntoView();
 								}
 							}
