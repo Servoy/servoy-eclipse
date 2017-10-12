@@ -120,14 +120,18 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 							if (!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
 								var target = $scope.nodes[0].node.get(0);
 								var targetRect = target.getBoundingClientRect();
-								var contentFrameRectTop = $(".contentframe").get(0).getBoundingClientRect().top;
 								var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;
 								var statusBarHeight = $(".statusbar-area").get(0).getBoundingClientRect().height;
+								var resizerRight = $(".sidebar-resizer").get(0).getBoundingClientRect().right;
+								var iframeOffsetTopIfPresent = 0, iframeOffsetLeftIfPresent = 0;
+								if (target.ownerDocument != window.document) {
+									var contentIFrameRect = $(".contentframe").get(0).getBoundingClientRect();
+									iframeOffsetTopIfPresent = contentIFrameRect.top;
+									iframeOffsetLeftIfPresent = contentIFrameRect.left;
+								}
 								
-								var top = targetRect.top + contentFrameRectTop;
-								var bottom = targetRect.bottom + contentFrameRectTop;
-								
-								if ((bottom < toolbarBottom) || (top > window.innerHeight - statusBarHeight)) {
+								if ((targetRect.bottom + iframeOffsetTopIfPresent < toolbarBottom + 5) || (targetRect.top + iframeOffsetTopIfPresent > window.innerHeight - statusBarHeight - 5)
+										|| (targetRect.right + iframeOffsetLeftIfPresent < resizerRight + 5) || (targetRect.left + iframeOffsetLeftIfPresent > window.innerWidth - 5)) {
 									target.scrollIntoView();
 								}
 							}
