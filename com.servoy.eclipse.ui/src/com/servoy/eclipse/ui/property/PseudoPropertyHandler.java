@@ -227,6 +227,7 @@ public class PseudoPropertyHandler implements IPropertyHandler
 			if (!isPropertySet(propSource))
 			{
 				((AbstractBase)persist).clearCustomProperty(new String[] { customType });
+				propSource.defaultResetProperty(getId());
 			}
 		}
 

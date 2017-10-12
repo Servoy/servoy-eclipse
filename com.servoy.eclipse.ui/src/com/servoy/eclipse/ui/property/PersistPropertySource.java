@@ -572,7 +572,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		throws RepositoryException
 	{
 		if (persistContext.getPersist() == propertyDescriptor.valueObject // for beans we show all
-		&& !shouldShow(propertyDescriptor))
+			&& !shouldShow(propertyDescriptor))
 		{
 			return;
 		}
@@ -719,7 +719,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-			throws RepositoryException
+		throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -729,7 +729,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
-		&& persistContext != null && persistContext.getPersist() != null &&
+			&& persistContext != null && persistContext.getPersist() != null &&
 			persistContext.getPersist().getAncestor(IRepository.FORMS) == persistContext.getContext() // only show overrides when element is shown in its 'own' form
 			&&
 			// skip some specific properties
@@ -2285,7 +2285,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 		try
 		{
-			createOverrideElementIfNeeded();
+			boolean isNewElementCreated = createOverrideElementIfNeeded();
 			init();
 
 			// recursively process a.b.c properties
@@ -2317,6 +2317,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				propertyDescriptor = hiddenPropertyDescriptors.get(id);
 			}
 			adjustPropertyValueAndSet(id, val, propertyDescriptor, this);
+			if (isNewElementCreated && getPropertyDescriptorFromDelegate(propertyDescriptor) instanceof IPropertySetter)
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, getPersist(), false);
+			}
 		}
 		catch (Exception e)
 		{
@@ -2325,8 +2329,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 	}
 
-	public static void adjustPropertyValueAndSet(Object id, Object val, IPropertyDescriptor propertyDescriptor, ISetterAwarePropertySource source)
+	private static IPropertyDescriptor getPropertyDescriptorFromDelegate(IPropertyDescriptor possibleDelegatePropertyDescriptor)
 	{
+		IPropertyDescriptor propertyDescriptor = possibleDelegatePropertyDescriptor;
 		while (propertyDescriptor instanceof IDelegate && !(propertyDescriptor instanceof IPropertySetter))
 		{
 			Object delegate = ((IDelegate)propertyDescriptor).getDelegate();
@@ -2339,10 +2344,16 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				break;
 			}
 		}
-		Object convertedValue = convertSetPropertyValue(id, propertyDescriptor, val);
-		if (propertyDescriptor instanceof IPropertySetter)
+		return propertyDescriptor;
+	}
+
+	public static void adjustPropertyValueAndSet(Object id, Object val, IPropertyDescriptor propertyDescriptor, ISetterAwarePropertySource source)
+	{
+		IPropertyDescriptor pd = getPropertyDescriptorFromDelegate(propertyDescriptor);
+		Object convertedValue = convertSetPropertyValue(id, pd, val);
+		if (pd instanceof IPropertySetter)
 		{
-			((IPropertySetter)propertyDescriptor).setProperty(source, convertedValue);
+			((IPropertySetter)pd).setProperty(source, convertedValue);
 		}
 		else
 		{
@@ -2590,7 +2601,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
