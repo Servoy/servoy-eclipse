@@ -44,8 +44,8 @@ import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.util.JarManager;
-import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.JarManager.Extension;
+import com.servoy.j2db.util.JarManager.ExtensionResource;
 
 public class XMLScriptObjectAdapterLoader
 {
@@ -64,12 +64,19 @@ public class XMLScriptObjectAdapterLoader
 		if (!coreLoaded)
 		{
 			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc.xml");
-			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
-			if (documentationManagerProvider != null)
+			try
 			{
-				docManager = documentationManagerProvider.fromXML(url, null);
+				IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
+				if (documentationManagerProvider != null)
+				{
+					docManager = documentationManagerProvider.fromXML(url, null);
+				}
+				loadDocumentationFromXML(XMLScriptObjectAdapterLoader.class.getClassLoader(), docManager);
 			}
-			loadDocumentationFromXML(XMLScriptObjectAdapterLoader.class.getClassLoader(), docManager);
+			catch (Throwable t)
+			{
+				ServoyLog.logError("Error reading documentation from " + url, t);
+			}
 			coreLoaded = true;
 		}
 	}
