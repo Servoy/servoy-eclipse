@@ -27,6 +27,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -106,6 +108,23 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		browseWebXmlButton = new Button(composite, SWT.PUSH);
 		browseWebXmlButton.setText("Browse...");
 		browseWebXmlButton.addListener(SWT.Selection, this);
+
+		Button restoreDefaults = new Button(composite, SWT.PUSH);
+		restoreDefaults.setText("Restore Defaults");
+		restoreDefaults.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				fileNameText.setText("");
+				fileWebXmlNameText.setText("");
+				exportModel.setServoyPropertiesFileName(null);
+				exportModel.setWebXMLFileName(null);
+				canFlipToNextPage();
+				getWizard().getContainer().updateButtons();
+				getWizard().getContainer().updateMessage();
+			}
+		});
 
 		setControl(composite);
 	}

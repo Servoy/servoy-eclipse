@@ -66,13 +66,13 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 					event.preventDefault();
 					event.stopPropagation();
 					var lastresizeStartPosition = {
-							x: event.screenX,
-							y: event.screenY
+							x: event.clientX,
+							y: event.clientY
 						}
 					var resizeSelection = function(ev){					
 						var selection = $scope.getSelection();
-						var deltaX = ev.screenX - lastresizeStartPosition.x;
-						var deltaY = ev.screenY - lastresizeStartPosition.y;
+						var deltaX = ev.clientX - lastresizeStartPosition.x;
+						var deltaY = ev.clientY - lastresizeStartPosition.y;
 						for(var i=0;i<selection.length;i++) {
 							var node = selection[i];
 							var beanModel = $scope.getBeanModel(node);
@@ -103,8 +103,8 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 						}
 						$scope.refreshEditorContent();
 						lastresizeStartPosition = {
-								x: ev.screenX,
-								y: ev.screenY
+								x: ev.clientX,
+								y: ev.clientY
 						}
 					}
 					

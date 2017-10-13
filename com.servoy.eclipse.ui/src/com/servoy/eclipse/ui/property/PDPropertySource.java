@@ -35,11 +35,11 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.PseudoPropertyHandler.CustomPropertySetterDelegatePropertyController;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportAttributes;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.WebComponent;
@@ -179,9 +179,9 @@ public class PDPropertySource extends PersistPropertySource
 						@Override
 						public Map<String, ? > getMergedProperties(IPersist p)
 						{
-							if (p instanceof BaseComponent)
+							if (p instanceof ISupportAttributes)
 							{
-								return new HashMap<String, String>(((BaseComponent)p).getMergedAttributes());
+								return new HashMap<String, String>(((ISupportAttributes)p).getMergedAttributes());
 							}
 							return null;
 						}
@@ -190,9 +190,9 @@ public class PDPropertySource extends PersistPropertySource
 						@Override
 						public void setMergedProperties(IPersist p, Map<String, ? > value)
 						{
-							if (p instanceof BaseComponent)
+							if (p instanceof ISupportAttributes)
 							{
-								((BaseComponent)p).putUnmergedAttributes((Map<String, String>)value);
+								((ISupportAttributes)p).putUnmergedAttributes((Map<String, String>)value);
 							}
 						}
 					}));

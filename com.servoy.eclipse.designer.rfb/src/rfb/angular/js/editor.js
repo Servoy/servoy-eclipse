@@ -171,12 +171,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 			
 			$scope.getAutoscrollElementClientBounds = function() {
-				var autoscrollElementClientBounds = [];
-				autoscrollElementClientBounds[0] = $element.find('.bottomAutoscrollArea')[0].getBoundingClientRect();
-				autoscrollElementClientBounds[1] = $element.find('.rightAutoscrollArea')[0].getBoundingClientRect();
-				autoscrollElementClientBounds[2] = $element.find('.leftAutoscrollArea')[0].getBoundingClientRect();
-				autoscrollElementClientBounds[3] = $element.find('.topAutoscrollArea')[0].getBoundingClientRect();
-				return autoscrollElementClientBounds;
+				var bottomAutoscrollArea = $element.find('.bottomAutoscrollArea')[0];
+				
+				var autoscrollElementClientBounds;
+				if (bottomAutoscrollArea) {
+					autoscrollElementClientBounds = [];
+					autoscrollElementClientBounds[0] = bottomAutoscrollArea.getBoundingClientRect();
+					autoscrollElementClientBounds[1] = $element.find('.rightAutoscrollArea')[0].getBoundingClientRect();
+					autoscrollElementClientBounds[2] = $element.find('.leftAutoscrollArea')[0].getBoundingClientRect();
+					autoscrollElementClientBounds[3] = $element.find('.topAutoscrollArea')[0].getBoundingClientRect();
+				}
+				return autoscrollElementClientBounds; // else it's probably a responsive form
 			}
 			
 			$scope.unregisterDOMEvent = function(eventType, target, callback) {

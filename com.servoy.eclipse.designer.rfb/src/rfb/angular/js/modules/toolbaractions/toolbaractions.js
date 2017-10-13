@@ -16,6 +16,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			btnPlaceAccordion.hide = true;
 			btnTabSequence.hide = true;
 			btnClassicEditor.hide = true;
+			btnHideInheritedElements.hide = true;
 		}
 		var promise = $editorService.isShowData();
 		promise.then(function(result) {
@@ -168,9 +169,14 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			});
 			if (showingInheritedElements) {
 				showingInheritedElements = false;
+				this.style = {'background-color':'#dcdcdc'};
+				this.text = "Show inherited elements";
 			} else {
 				showingInheritedElements = true;
+				this.style = {};
+				this.text = "Hide inherited elements"
 			}
+			$editorService.executeAction('toggleHideInherited');
 		},
 	};
 

@@ -1804,6 +1804,13 @@ public class WarExporter
 					}
 				}
 
+				if (!pluginLocation.isDirectory())
+				{
+					System.err.println(pluginLocation.getAbsolutePath() + " is not a directory.");
+					i++;
+					continue;
+				}
+
 				Collection<File> libs = FileUtils.listFiles(pluginLocation, new WildcardFileFilter(libName), TrueFileFilter.INSTANCE);
 				Iterator<File> iterator = libs.iterator();
 				if (libs != null && libs.size() > 0)

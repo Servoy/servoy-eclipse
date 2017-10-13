@@ -98,7 +98,7 @@ public class FormContentProvider implements ITreeContentProvider
 					while (forms.hasNext())
 					{
 						Form possibleParentForm = forms.next();
-						if (form.isResponsiveLayout() == possibleParentForm.isResponsiveLayout() &&
+						if ((form.isResponsiveLayout() == possibleParentForm.isResponsiveLayout() || !possibleParentForm.getParts().hasNext()) &&
 							(form.getDataSource() == null || possibleParentForm.getDataSource() == null ||
 								form.getDataSource().equals(possibleParentForm.getDataSource())) &&
 							!PersistEncapsulation.isModuleScope(possibleParentForm, flattenedSolution.getSolution()))

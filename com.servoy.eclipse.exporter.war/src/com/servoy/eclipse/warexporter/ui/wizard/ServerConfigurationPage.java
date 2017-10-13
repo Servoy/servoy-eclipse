@@ -31,6 +31,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -190,12 +192,36 @@ public class ServerConfigurationPage extends WizardPage
 		Label lblNewLabel_12 = new Label(container, SWT.NONE);
 		lblNewLabel_12.setText("Password");
 
+		Button restoreDefaults = new Button(container, SWT.PUSH);
+		restoreDefaults.setText("Restore Defaults");
+		restoreDefaults.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				url.setText("jdbc:postgresql://localhost:5432/" + config.getName());
+				driver.setText("org.postgresql.Driver");
+				username.setText("DBA");
+				password.setText("");
+				catalog.setText("<none>");
+				schema.setText("<none>");
+				maxActive.setText(String.valueOf(ServerConfig.MAX_ACTIVE_DEFAULT));
+				maxIdle.setText(String.valueOf(ServerConfig.MAX_IDLE_DEFAULT));
+				statementsIdle.setText(String.valueOf(ServerConfig.MAX_PREPSTATEMENT_IDLE_DEFAULT));
+				validationType.select(ServerConfig.VALIDATION_TYPE_DEFAULT);
+				validationQuery.setText("");
+				clone.setItems(selectedServerNames.toArray(new String[selectedServerNames.size()]));//can't set to empty value otherwise
+				skip.setSelection(false);
+			}
+		});
+
 		password = new Text(container, SWT.BORDER | SWT.PASSWORD);
+
 		GroupLayout gl_container = new GroupLayout(container);
 		gl_container.setHorizontalGroup(gl_container.createParallelGroup(GroupLayout.LEADING).add(gl_container.createSequentialGroup().addContainerGap().add(
 			gl_container.createParallelGroup(GroupLayout.LEADING).add(lblNewLabel_7).add(lblNewLabel_6).add(lblNewLabel_5).add(lblNewLabel_4).add(
 				lblNewLabel_3).add(lblNewLabel_2).add(lblNewLabel_1).add(lblNewLabel).add(lblNewLabel_8).add(lblNewLabel_9).add(lblNewLabel_10).add(
-					lblNewLabel_11).add(lblNewLabel_12)).add(18).add(
+					lblNewLabel_11).add(restoreDefaults).add(18).add(lblNewLabel_12)).add(18).add(
 						gl_container.createParallelGroup(GroupLayout.LEADING).add(skip).add(statementsIdle, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(
 							url, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(driver, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(username,
 								GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(catalog, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(schema,
@@ -239,8 +265,10 @@ public class ServerConfigurationPage extends WizardPage
 																																		gl_container.createParallelGroup(
 																																			GroupLayout.BASELINE).add(
 																																				lblNewLabel_11).add(
-																																					skip)).addContainerGap(
-																																						GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+																																					skip)).add(
+																																						gl_container.createParallelGroup().add(
+																																							restoreDefaults)).addContainerGap(
+																																								GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		container.setLayout(gl_container);
 		container.setTabList(
 			new Control[] { url, driver, username, password, catalog, schema, maxActive, maxIdle, statementsIdle, validationType, validationQuery, clone, skip });

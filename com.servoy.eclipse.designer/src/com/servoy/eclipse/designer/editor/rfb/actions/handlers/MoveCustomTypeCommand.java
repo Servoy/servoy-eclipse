@@ -18,34 +18,25 @@
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import org.eclipse.gef.commands.Command;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.persistence.IChildWebObject;
-import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.WebCustomType;
 
 /**
- * @author gganea@servoy.com
+ * When, in a custom component, ghost config objects are reordered their {@link LocationCache} positions get updated via a sequence of commands of this type; after this all sibling commands run it is mandatory
+ * to reorder the persist indexes based on their new LocationCache positions by issuing a {@link ReorderCustomTypesCommand}.
  *
+ * @author gganea@servoy.com
  */
 public class MoveCustomTypeCommand extends Command
 {
-
 
 	private final WebCustomType source;
 	private final Object value;
 	private IChildWebObject[] oldValue;
 
-	/**
-	 * @param label
-	 */
 	public MoveCustomTypeCommand(WebCustomType source, Object value)
 	{
 		super("Move web custom type");
@@ -53,87 +44,16 @@ public class MoveCustomTypeCommand extends Command
 		this.value = value;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.gef.commands.Command#execute()
-	 */
 	@Override
 	public void execute()
 	{
 		LocationCache.getINSTANCE().putLocation(source.getParent().getUUID() + source.getJsonKey(), source.getUUID().toString(), (Point)value);
-		reSortCustomTypes();
 	}
 
-	/**
-	 * Resort the array of webcustomtypes that the given custom type is part of.
-	 * @param parent
-	 * @param source
-	 */
-	private void reSortCustomTypes()
-	{
-		String jsonKey = source.getJsonKey();
-		IChildWebObject[] property = (IChildWebObject[])source.getParent().getProperty(jsonKey);
-
-
-		ArrayList<IChildWebObject> oldValueAsList = new ArrayList<>();
-		Collections.addAll(oldValueAsList, property);
-		this.oldValue = oldValueAsList.toArray(new IChildWebObject[oldValueAsList.size()]); // to really save the old order, we need to create a new array
-
-		List<IChildWebObject> asList = Arrays.asList(property);//sorting the list means sorting the array in place, no need to set it back again
-		Collections.sort(asList, new Comparator<IChildWebObject>()
-		{
-			@Override
-			public int compare(IChildWebObject o1, IChildWebObject o2)
-			{
-				String o1key = o1.getUUID().toString();
-				String parentKey = o1.getParent().getUUID() + o1.getJsonKey();
-				String o2key = o2.getUUID().toString();
-				Point o1Location = LocationCache.getINSTANCE().getLocation(parentKey, o1key);
-				Point o2Location = LocationCache.getINSTANCE().getLocation(parentKey, o2key);
-				if (o1Location != null && o2Location != null) return PositionComparator.comparePoint(true, o1Location, o2Location);
-				return 0;
-			}
-		});
-
-		setIndexes(property);
-		source.getParent().setProperty(jsonKey, asList.toArray());
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
-	}
-
-	/** Sets the correct index in the array for each IChildWebObject
-	 * @param newValue2
-	 */
-	private void setIndexes(IChildWebObject[] array)
-	{
-		for (int i = 0; i < array.length; i++)
-		{
-			array[i].setIndex(i);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.gef.commands.Command#undo()
-	 */
 	@Override
 	public void undo()
 	{
-		setIndexes(oldValue);
-		source.getParent().setProperty(source.getJsonKey(), oldValue);
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
+		// nothing to undo; the LocationCache is update anyway each time config object (WebCustomType) ghosts get resent to client
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.gef.commands.Command#redo()
-	 */
-	@Override
-	public void redo()
-	{
-		super.redo();
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
-	}
 }

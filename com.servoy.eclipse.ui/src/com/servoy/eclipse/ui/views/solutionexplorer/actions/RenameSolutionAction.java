@@ -167,7 +167,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 									{
 										jobManager.join(ResourcesPlugin.FAMILY_MANUAL_BUILD, new NullProgressMonitor());
 										jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD, new NullProgressMonitor());
-										ServoyModel.getDeveloperRepository().flushAllCachedData();
+										repository.flush();
 										servoyModel = (ServoyModel)servoyModel.refreshServoyProjects();
 										ServoyProject svyProject = activeProject.getEditingSolution().getName().equals(name)
 											? servoyModel.getServoyProject(name) : servoyModel.getServoyProject(activeProject.getProject().getName());

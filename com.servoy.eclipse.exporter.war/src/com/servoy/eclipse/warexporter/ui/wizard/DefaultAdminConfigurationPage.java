@@ -19,6 +19,8 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -104,6 +106,27 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		gd.horizontalSpan = 4;
 		label.setLayoutData(gd);
 		label.setText("\nThe default administrator user will give access to the servoy-admin page, as long as no admin user is created in the server.");
+
+		Button restoreDefaults = new Button(composite, SWT.PUSH);
+		restoreDefaults.setText("Restore Defaults");
+		restoreDefaults.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				defaultAdminUserText.setText("");
+				defaultAdminPasswordText.setText("");
+				defaultAdminPasswordText2.setText("");
+				useAsRealAdmin.setSelection(false);
+
+				exportModel.setDefaultAdminUser(null);
+				exportModel.setDefaultAdminPassword(null);
+				exportModel.setUseAsRealAdminUser(false);
+
+				getWizard().getContainer().updateButtons();
+				getWizard().getContainer().updateMessage();
+			}
+		});
 
 		setControl(composite);
 	}
