@@ -64,12 +64,19 @@ public class XMLScriptObjectAdapterLoader
 		if (!coreLoaded)
 		{
 			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc.xml");
-			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
-			if (documentationManagerProvider != null && url != null)
+			try
 			{
-				docManager = documentationManagerProvider.fromXML(url, null);
+				IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
+				if (documentationManagerProvider != null && url != null)
+				{
+					docManager = documentationManagerProvider.fromXML(url, null);
+				}
+				loadDocumentationFromXML(XMLScriptObjectAdapterLoader.class.getClassLoader(), docManager);
 			}
-			loadDocumentationFromXML(XMLScriptObjectAdapterLoader.class.getClassLoader(), docManager);
+			catch (Throwable t)
+			{
+				ServoyLog.logError("Error reading documentation from " + url, t);
+			}
 			coreLoaded = true;
 		}
 	}
