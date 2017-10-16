@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * Cell editor for numbers.
- * 
+ *
  * @author rgansevles
  */
 
@@ -59,11 +59,12 @@ public class NumberCellEditor extends ObjectCellEditor implements IExecutableExt
 
 	public static final int
 	// Type of number to be returned.
-		NUMBER = 0, // Whatever it produces
+	NUMBER = 0, // Whatever it produces
 		BYTE = 1, DOUBLE = 2, FLOAT = 3, INTEGER = 4, LONG = 5, SHORT = 6;
 
-	protected static final MinmaxValidator[] sMinMaxValidators = { null, new MinmaxValidator(MIN_BYTE, MAX_BYTE), new MinmaxValidator(MIN_DOUBLE, MAX_DOUBLE), new MinmaxValidator(
-		MIN_FLOAT, MAX_FLOAT), new MinmaxValidator(MIN_INTEGER, MAX_INTEGER), new MinmaxValidator(MIN_LONG, MAX_LONG), new MinmaxValidator(MIN_SHORT, MAX_SHORT) };
+	protected static final MinmaxValidator[] sMinMaxValidators = { null, new MinmaxValidator(MIN_BYTE, MAX_BYTE), new MinmaxValidator(MIN_DOUBLE,
+		MAX_DOUBLE), new MinmaxValidator(MIN_FLOAT,
+			MAX_FLOAT), new MinmaxValidator(MIN_INTEGER, MAX_INTEGER), new MinmaxValidator(MIN_LONG, MAX_LONG), new MinmaxValidator(MIN_SHORT, MAX_SHORT) };
 
 	protected static final String sNotNumberError, sNotIntegerError, sMinValue, sMaxValue;
 	static
@@ -90,7 +91,7 @@ public class NumberCellEditor extends ObjectCellEditor implements IExecutableExt
 
 	/**
 	 * This will only expect initData to be a string. The string should be the type, a) integer b) long c) etc.
-	 * 
+	 *
 	 * number is the default.
 	 */
 	public void setInitializationData(IConfigurationElement ce, String pName, Object initData)
@@ -98,18 +99,12 @@ public class NumberCellEditor extends ObjectCellEditor implements IExecutableExt
 		if (initData instanceof String)
 		{
 			String type = ((String)initData).trim();
-			if ("byte".equalsIgnoreCase(type))
-			setType(BYTE);
-			else if ("double".equalsIgnoreCase(type))
-			setType(DOUBLE);
-			else if ("float".equalsIgnoreCase(type))
-			setType(FLOAT);
-			else if ("integer".equalsIgnoreCase(type))
-			setType(INTEGER);
-			else if ("long".equalsIgnoreCase(type))
-			setType(LONG);
-			else if ("short".equalsIgnoreCase(type))
-			setType(SHORT);
+			if ("byte".equalsIgnoreCase(type)) setType(BYTE);
+			else if ("double".equalsIgnoreCase(type)) setType(DOUBLE);
+			else if ("float".equalsIgnoreCase(type)) setType(FLOAT);
+			else if ("integer".equalsIgnoreCase(type)) setType(INTEGER);
+			else if ("long".equalsIgnoreCase(type)) setType(LONG);
+			else if ("short".equalsIgnoreCase(type)) setType(SHORT);
 		}
 	}
 
@@ -145,6 +140,7 @@ public class NumberCellEditor extends ObjectCellEditor implements IExecutableExt
 	protected String isCorrectString(String value)
 	{
 		String text = value.trim();
+		if ("".equals(text)) return null;
 		if (sMinValue.equalsIgnoreCase(text) || sMaxValue.equalsIgnoreCase(text)) return null;
 
 		Number result = null;
