@@ -12,6 +12,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		var dragNode = null;
 		var autoscrollAreasEnabled = false;
 		var configGhostDragState;
+		var dragCopy = false; // whatever dragged elment is cloned, because of using ctrl+mouse move
 
 		function onmousedown(event) {
 			dragNode = utils.getNode(event);
@@ -137,7 +138,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							$editorService.moveResponsiveComponent(obj);	
 						}
 					} else {
-						if ((event.ctrlKey||event.metaKey)) {
+						if (dragCopy && (event.ctrlKey||event.metaKey)) {
 							var components = [];
 							var size = 0;
 							for (i = 0; i < editorScope.selectionToDrag.length; i++) {
@@ -273,6 +274,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					configGhostDragState.dropTargetGhostElement.css("left", "");
 					configGhostDragState = undefined;
 				}
+				dragCopy = false;
 			}
 		}
 
@@ -586,6 +588,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				}
 
 				if ((event.ctrlKey || event.metaKey) && editorScope.selectionToDrag == null) {
+					dragCopy = true;
 					editorScope.selectionToDrag = [];
 					var selection = editorScope.getSelection();
 					for (i = 0; i < selection.length; i++) {

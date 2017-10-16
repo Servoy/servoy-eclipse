@@ -79,8 +79,11 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 							if(beanModel) {
 								beanModel.location.y = beanModel.location.y + deltaY* resizeInfo.top;
 								beanModel.location.x = beanModel.location.x + deltaX* resizeInfo.left;
+
 								beanModel.size.width = beanModel.size.width + deltaX* resizeInfo.width;
+								if(beanModel.size.width < 0) beanModel.size.width = 0;
 								beanModel.size.height = beanModel.size.height + deltaY* resizeInfo.height;
+								if(beanModel.size.height < 0) beanModel.size.height = 0;
 								var css = { top: beanModel.location.y, left: beanModel.location.x, width: beanModel.size.width, height: beanModel.size.height}
 								$(node).css(css);
 								if(resizeInfo.position == 'l' || resizeInfo.position == 't' || resizeInfo.position == 'tl') {
