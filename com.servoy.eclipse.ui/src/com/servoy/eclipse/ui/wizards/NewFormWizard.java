@@ -392,6 +392,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
+			servoyProject.getEditingFlattenedSolution().flushAllCachedData();
 
 			if (servoyModel.getActiveResourcesProject() != null)
 			{
@@ -650,7 +651,20 @@ public class NewFormWizard extends Wizard implements INewWizard
 			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE);
 			extendsFormViewer.setTitleText("Select super form");
 
-			updateExtendsFormViewer(servoyProject.getEditingFlattenedSolution());
+			final FlattenedSolution flattenedSolution = servoyProject.getEditingFlattenedSolution();
+			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
+			extendsFormViewer.setLabelProvider(
+				new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
+			updateExtendsFormViewer(flattenedSolution);
+
+			if (superForm != null)
+			{
+				extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(superForm.getID())));
+			}
+			else
+			{
+				extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(Form.NAVIGATOR_NONE)));
+			}
 			extendsFormViewer.addStatusChangedListener(new IStatusChangedListener()
 			{
 				public void statusChanged(boolean valid)
@@ -812,15 +826,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
 				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, typeFormControl });
-
-			if (superForm != null)
-			{
-				extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(superForm.getID())));
-			}
-			else
-			{
-				extendsFormViewer.setSelection(new StructuredSelection(Integer.valueOf(Form.NAVIGATOR_NONE)));
-			}
 		}
 
 		/**
@@ -828,11 +833,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		 */
 		public void updateExtendsFormViewer(final FlattenedSolution flattenedSolution)
 		{
-			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
 			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false,
 				defaultSettings != null ? defaultSettings.isReferenceForm() : false, null));
-			extendsFormViewer.setLabelProvider(
-				new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
 		}
 
 		/*
@@ -1154,9 +1156,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 			if (servoyProject != null)
 			{
-				ISelection sel = extendsFormViewer.getSelection();
-				updateExtendsFormViewer(servoyProject.getEditingFlattenedSolution());
-				extendsFormViewer.setSelection(sel);
+				if (getShell().isVisible())//otherwise this is already done in createControl
+				{
+					ISelection sel = extendsFormViewer.getSelection();
+					FlattenedSolution flattenedSolution = servoyProject.getEditingFlattenedSolution();
+					extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
+					extendsFormViewer.setLabelProvider(
+						new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
+					updateExtendsFormViewer(flattenedSolution);
+					extendsFormViewer.setSelection(sel);
+				}
 			}
 			setPageComplete(validatePage());
 		}
@@ -1222,7 +1231,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 			else if (servoyProject == null)
 			{
-				error = "You must select a solution (the list contains the active solution and it's modules)";
+				error = "You must select a solution (the list contains the active solution and its modules)";
 			}
 			else
 			{
