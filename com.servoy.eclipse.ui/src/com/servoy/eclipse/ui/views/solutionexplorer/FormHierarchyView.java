@@ -850,12 +850,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 		if (object instanceof Form)
 		{
-			selected = (Form)object;
-			tree.setAutoExpandLevel(activeSolution.getFormHierarchy(selected).size() + 1);
-			tree.setInput(new Form[] { selected });
-			tree.setSelection(new StructuredSelection(selected));
-			tree.refresh();
-
+			setSelectionInTree(object);
 			list.setInput(selected);
 		}
 		else if (tree.getInput() == null)
@@ -871,6 +866,15 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 		list.refresh();
 		list.expandAll();
+	}
+
+	private void setSelectionInTree(Object object)
+	{
+		selected = (Form)object;
+		tree.setAutoExpandLevel(activeSolution.getFormHierarchy(selected).size() + 1);
+		tree.setInput(new Form[] { selected });
+		tree.setSelection(new StructuredSelection(selected));
+		tree.refresh();
 	}
 
 	private void showMembersInFormHierarchy(Object object, boolean refreshList)
@@ -1328,14 +1332,14 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public void open(Object obj)
 	{
 		showMembersAction.clearSelection();
-		showMembersAction.setChecked(obj instanceof ScriptMethod);
+		showMembersAction.setChecked(obj instanceof ScriptMethod || obj instanceof IFormElement);
 		if (obj instanceof IPersist)
 		{
 			Form form = (Form)(obj instanceof Form ? obj : (((IPersist)obj).getAncestor(IRepository.FORMS)));
 			if (!form.equals(selected))
 			{
 				selected = form;
-				tree.setInput(form);
+				setSelectionInTree(selected);
 			}
 		}
 		setSelection(obj);
