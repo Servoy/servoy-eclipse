@@ -278,14 +278,31 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return parent;
 			}
 
-			function getBounds(ghostContainer, parent) {
-				var bounds = parent.getBoundingClientRect();
-				ghostContainer.style.top = bounds.top;
-				ghostContainer.style.left = bounds.left;
-				ghostContainer.style.display = "block";
-			}
 			var realContainerPromise = null;
 			$scope.getGhostContainerStyle = function(ghostContainer) {
+				function showAndPositionGhostContainer(ghostContainer, parentCompBounds) {
+					if (!ghostContainer.style) ghostContainer.style = {};
+					
+					// add semi-transparent background with alternating color in case there are multiple ghost containers on the same component (multiple droppable properties on the same comp)
+					var odd = (ghostContainer.containerPositionInComp % 2);
+					ghostContainer.style['background-color'] = odd ? "rgba(150, 150, 150, 0.05)" : "rgba(0, 100, 80, 0.05)";
+					ghostContainer.style['color'] = odd ? "rgb(150, 150, 150)" : "rgb(0, 100, 80)";
+					if (odd) {
+						ghostContainer.style['border-top'] = ghostContainer.style['border-bottom'] = 'dashed 1px';
+					}
+					ghostContainer.style.visibility = "visible";
+					
+					var spaceForEachContainer = 62 /*(basicWebComponent.getSize().height / totalGhostContainersOfComp)*/;
+					var emptySpaceTopBeforGhosts = 0; // see if we have room to add some extra pixels to top location - it shows nicer on large components when space is available
+					if (parentCompBounds.height > ghostContainer.totalGhostContainersOfComp * spaceForEachContainer + 30) emptySpaceTopBeforGhosts = 30;
+					
+					// the 20 extra pixels on location left/top are to compensate for content area padding
+					ghostContainer.style.left = (parentCompBounds.left + 20) + "px";
+					ghostContainer.style.top = (parentCompBounds.top + ghostContainer.containerPositionInComp * spaceForEachContainer + emptySpaceTopBeforGhosts + 20) + "px";
+					ghostContainer.style.width = parentCompBounds.width + "px";
+					ghostContainer.style.height = spaceForEachContainer + "px";
+				}
+				
 				if (!$scope.isAbsoluteFormLayout()) {
 					if (realContainerPromise == null) {
 						var p = getRealContainerElement(ghostContainer.uuid);
@@ -293,17 +310,23 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							realContainerPromise = p;
 							p.then(function(parent) {
 								realContainerPromise = null;
-								getBounds(ghostContainer, parent);
+								showAndPositionGhostContainer(ghostContainer, parent.getBoundingClientRect());
+								ghostContainer.style.display = "block";
 							}, function() {
 								realContainerPromise = null;
 								ghostContainer.style.display = "none";
 							});
 						} else {
-							getBounds(ghostContainer, p);
+							showAndPositionGhostContainer(ghostContainer, p.getBoundingClientRect());
+							ghostContainer.style.display = "block";
 						}
 					}
 				} else {
-					if (ghostContainer.style == undefined) {
+					if (typeof ghostContainer.containerPositionInComp != "undefined") {
+						if (!ghostContainer.style) {
+							showAndPositionGhostContainer(ghostContainer, ghostContainer.parentCompBounds);
+						}
+					} else {
 						//TODO refactor out this 20px addition
 						return {
 							display: "block",
@@ -312,13 +335,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							width: $scope.contentStyle.width,
 							height: $scope.contentStyle.height
 						};
-					} else if (typeof ghostContainer.containerPositionInComp != "undefined") {
-						// add semi-transparent background with alternating color in case there are multiple ghost containers on the same component (multiple droppable properties on the same comp) 
-						ghostContainer.style['background-color'] = (ghostContainer.containerPositionInComp &&  ghostContainer.containerPositionInComp % 2) ? "rgba(0, 255, 0, 0.05)" : "rgba(0, 136, 0, 0.05)";
-						ghostContainer.style['color'] = (ghostContainer.containerPositionInComp &&  ghostContainer.containerPositionInComp % 2) ? "rgb(0, 255, 0)" : "rgb(0, 136, 0)";
-						ghostContainer.style.visibility = "visible";
 					}
-					ghostContainer.style.display = "block";
+					if (ghostContainer.style) ghostContainer.style.display = "block";
 				}
 				return ghostContainer.style;
 			}
@@ -1118,10 +1136,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				$scope.setGhosts(result);
 			});
 			
-			function isAllGhostContainersVisible() {
+			function areAllGhostContainersVisible() {
 				if ($scope.ghosts.ghostContainers) {
 					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
-						if(!$scope.ghosts.ghostContainers[i].style  || $scope.ghosts.ghostContainers[i].style.display !== "block") {
+						if (!$scope.ghosts.ghostContainers[i].style || $scope.ghosts.ghostContainers[i].style.display !== "block") {
 							return false;
 						}	
 					}
@@ -1133,7 +1151,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			var windowHeight = 0;
 			var windowWidth = 0;
 			$($window).resize(function() {
-				if (isAllGhostContainersVisible() && ($($window).height() != windowHeight || $($window).width() != windowWidth)) {
+				if (areAllGhostContainersVisible() && ($($window).height() != windowHeight || $($window).width() != windowWidth)) {
 					windowHeight = $($window).height();
 					windowWidth =  $($window).width();
 					$element.trigger('renderDecorators.content');

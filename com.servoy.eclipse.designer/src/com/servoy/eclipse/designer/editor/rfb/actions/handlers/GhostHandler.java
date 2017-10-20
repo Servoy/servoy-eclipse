@@ -261,20 +261,20 @@ public class GhostHandler implements IServerService
 				String propertyName, boolean isArray)
 			{
 				writer.object();
-				writer.key("style");
+				writer.key("parentCompBounds");
 				{
-					int spaceForEachContainer = /* (basicWebComponent.getSize().height / totalGhostContainersOfComp) */62;
+					// these will only be useful in anchor forms (in responsive the actual location of the parent component needs to be determined on client)
 					writer.object();
-					writer.key("left").value(basicWebComponent.getLocation().getX() + 20); // the 20 is for content area padding
-					writer.key("top").value(basicWebComponent.getLocation().getY() + propYCount * spaceForEachContainer + 20 + 30); // the 20 is for content area padding
+					writer.key("left").value(basicWebComponent.getLocation().getX());
+					writer.key("top").value(basicWebComponent.getLocation().getY());
 					writer.key("width").value(basicWebComponent.getSize().width);
-					writer.key("height").value(spaceForEachContainer);
+					writer.key("height").value(basicWebComponent.getSize().height);
 					writer.endObject();
 				}
 				writer.key("uuid").value(basicWebComponent.getUUID());
 
 				writer.key("containerPositionInComp").value(propYCount);
-//				writer.key("totalGhostContainersOfComp").value(totalGhostContainersOfComp);
+				writer.key("totalGhostContainersOfComp").value(totalGhostContainersOfComp);
 				writer.key("propertyName").value(propertyName);
 				writer.key("isArray").value(isArray);
 
