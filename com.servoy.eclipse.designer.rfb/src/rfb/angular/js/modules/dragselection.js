@@ -228,42 +228,6 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					}
 
 					utils.setDraggingFromPallete(null);
-					
-					var toRemove = [];
-					var formSize = editorScope.getContentSize();
-					var formWidth = parseInt(formSize.width);
-					var formHeight = parseInt(formSize.height);
-					var removeGhosts = event.screenX > formWidth || event.screenY > formHeight;
-					var selection = editorScope.getSelection();
-					for (var i = 0; i < selection.length; i++)
-					{
-						var beanModel = editorScope.getBeanModel(selection[i]);
-						var svy_id = selection[i].getAttribute("svy-id");
-						var ghost = editorScope.getGhost(svy_id);	
-						if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) continue;
-						if (beanModel && ghost && toRemove.indexOf(svy_id) == -1)
-						{
-							toRemove.push(svy_id);
-						}					
-					}
-					
-					var nodesToRemove = [];
-					for (var i = 0; i < toRemove.length; i++)
-					{
-						for (var j = 0; j < selection.length; j++)
-						{
-							var node = selection[j].nodeType === Node.ELEMENT_NODE ? selection[j] : selection[j][0];
-							if (node.getAttribute("svy-id") == toRemove[i])
-							{
-								if (removeGhosts && node.classList.contains("ghost") || !removeGhosts && node.classList.contains("svy-wrapper"))
-								{
-									nodesToRemove.push(selection[j]);
-									break;
-								}
-							}
-						}
-					}
-					editorScope.reduceSelection(nodesToRemove);
 				}
 				
 				// drag operation ended; clean up 
