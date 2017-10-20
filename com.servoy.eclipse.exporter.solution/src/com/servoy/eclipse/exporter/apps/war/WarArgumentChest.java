@@ -403,6 +403,11 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return warSettingsFile;
 	}
 
+	public boolean isOverrideSequenceTypes()
+	{
+		return argumentsMap.containsKey(overrideSequenceTypes);
+	}
+
 	public boolean isOverwriteGroups()
 	{
 		return argumentsMap.containsKey(overwriteGroups);

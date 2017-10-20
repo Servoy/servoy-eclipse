@@ -342,7 +342,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public boolean isOverrideSequenceTypes()
 		{
-			return configuration.isOverwriteGroups();
+			return configuration.isOverrideSequenceTypes();
 		}
 
 		@Override
