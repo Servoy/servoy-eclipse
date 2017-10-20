@@ -16,10 +16,6 @@
  */
 package com.servoy.eclipse.designer.outline;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,11 +25,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.IPropertyType;
 
+import com.servoy.eclipse.designer.util.DeveloperUtils;
 import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
@@ -43,13 +36,11 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -61,6 +52,7 @@ import com.servoy.j2db.util.Utils;
 
 public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPersistLabelProvider, IColorProvider
 {
+
 	public static final FormOutlineLabelprovider FORM_OUTLINE_LABEL_PROVIDER_INSTANCE = new FormOutlineLabelprovider();
 
 	@Override
@@ -140,56 +132,9 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 			{
 				WebCustomType webCustomType = ((WebCustomType)(((PersistContext)element).getPersist()));
 
-				String typeName = webCustomType.getTypeName();
-				String postFix = "";
-				String webComponentType = null;
-				WebComponent wc = (WebComponent)webCustomType.getAncestor(IRepository.WEBCOMPONENTS);
-				if (wc != null)
-				{
-					webComponentType = wc.getTypeName();
-				}
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(webComponentType);
-				if (spec != null)
-				{
-					IPropertyType< ? > iPropertyType = spec.getDeclaredCustomObjectTypes().get(typeName);
-					if (iPropertyType instanceof NGCustomJSONObjectType)
-					{
-						NGCustomJSONObjectType ngCustomJSONObjectType = (NGCustomJSONObjectType)iPropertyType;
-						Collection<PropertyDescription> taggedProperties = ngCustomJSONObjectType.getCustomJSONTypeDefinition().getTaggedProperties(
-							"showInOutlineView");
-
-						//we got an unsorted collection, add it to a list and sort it so that we show consistent labels
-						ArrayList<PropertyDescription> asList = new ArrayList<PropertyDescription>(taggedProperties);
-
-						Collections.sort(asList, new Comparator<PropertyDescription>()
-						{
-
-							@Override
-							public int compare(PropertyDescription o1, PropertyDescription o2)
-							{
-								return o1.getName().compareTo(o2.getName());
-							}
-
-						});
-						for (PropertyDescription propertyDescription : asList)
-						{
-							Object showInOutlineView = propertyDescription.getTag("showInOutlineView");
-							if (Boolean.valueOf(showInOutlineView.toString()).booleanValue())
-							{
-								if (webCustomType.getJson().has(propertyDescription.getName()))
-								{
-									Object property = webCustomType.getJson().get(propertyDescription.getName());
-									postFix += "_" + property;
-								}
-								else if (propertyDescription.hasDefault())
-								{
-									postFix += "_" + propertyDescription.getDefaultValue();
-								}
-							}
-						}
-					}
-				}
-				return typeName + postFix;
+				String captionFromSubProp = DeveloperUtils.getCustomObjectTypeCaptionFromTaggedSubproperties(webCustomType);
+				return webCustomType.getJsonKey() + (webCustomType.getIndex() >= 0 ? "[" + webCustomType.getIndex() + "]" : "") +
+					(captionFromSubProp != null ? " (" + captionFromSubProp + ")" : "");
 			}
 			if (((PersistContext)element).getPersist() instanceof WebFormComponentChildType)
 			{

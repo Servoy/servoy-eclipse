@@ -216,15 +216,21 @@ html, body
 }
 
 .ghostcontainer {
-	position:absolute;
+	position: absolute;
 	visibility: hidden;
 }
 
+.ghostContainerPropName {
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+}
+
 .ghost {
-	position:absolute;
-	height:30px;
-	width:30px;
-	border-style:solid;
+	position: absolute;
+	height: 30px;
+	width: 30px;
+	border-style: solid;
 	border-width: 1px;
 	border-color: black;
 	overflow: hidden;

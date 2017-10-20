@@ -312,6 +312,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							width: $scope.contentStyle.width,
 							height: $scope.contentStyle.height
 						};
+					} else if (typeof ghostContainer.containerPositionInComp != "undefined") {
+						// add semi-transparent background with alternating color in case there are multiple ghost containers on the same component (multiple droppable properties on the same comp) 
+						ghostContainer.style['background-color'] = (ghostContainer.containerPositionInComp &&  ghostContainer.containerPositionInComp % 2) ? "rgba(0, 255, 0, 0.05)" : "rgba(0, 136, 0, 0.05)";
+						ghostContainer.style['color'] = (ghostContainer.containerPositionInComp &&  ghostContainer.containerPositionInComp % 2) ? "rgb(0, 255, 0)" : "rgb(0, 136, 0)";
+						ghostContainer.style.visibility = "visible";
 					}
 					ghostContainer.style.display = "block";
 				}
@@ -787,14 +792,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			function equalGhosts(ghosts1, ghosts2) {
-				if(ghosts1 && ghosts1.ghostContainers && ghosts2 && ghosts2.ghostContainers && (ghosts1.ghostContainers.length == ghosts2.ghostContainers.length)) {
+				if (ghosts1 && ghosts1.ghostContainers && ghosts2 && ghosts2.ghostContainers && (ghosts1.ghostContainers.length == ghosts2.ghostContainers.length)) {
 					for (var i = 0; i < ghosts1.ghostContainers.length; i++) {
-						if(ghosts1.ghostContainers[i].uuid != ghosts2.ghostContainers[i].uuid ||
+						if (ghosts1.ghostContainers[i].uuid != ghosts2.ghostContainers[i].uuid ||
 							ghosts1.ghostContainers[i].ghosts.length != ghosts2.ghostContainers[i].ghosts.length) {
 							return false;
 						}
 						for (var j = 0; j < ghosts1.ghostContainers[i].ghosts.length; j++) {
-							if(ghosts1.ghostContainers[i].ghosts[j].uuid != ghosts2.ghostContainers[i].ghosts[j].uuid) {
+							if (ghosts1.ghostContainers[i].ghosts[j].uuid != ghosts2.ghostContainers[i].ghosts[j].uuid || ghosts1.ghostContainers[i].ghosts[j].text != ghosts2.ghostContainers[i].ghosts[j].text) {
 								return false;
 							}
 						}
