@@ -805,9 +805,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return false;
 			}
 
-			function rearrangeGhosts(ghosts) {
+			function rearrangeGhosts(ghosts, attemptNo) {
 				// timeout is needed here because new ghost content needs to get rendered after angular digest cycle updates their inline style
 				$timeout(function() {
+					var tryAgain = false;
 					var overflow = 0;
 					for (var i = 0; i < ghosts.length; i++) {
 						var ghost = ghosts[i];
@@ -815,20 +816,24 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
 							// note: initially, all config ghosts sent from server have a default width of 80px
 							// allow longer content in ghosts
-							if ($('[svy-id="' + ghost.uuid + '"]')[0]) {
-								var element = $('[svy-id="' + ghost.uuid + '"]')[0];
-								var width = Math.min(element.scrollWidth, 200); // just do limit it to some high enough value (2.5 x default)
+							var jqElement = $('[svy-id="' + ghost.uuid + '"]');
+							if (jqElement.length > 0) {
+								var width = Math.min(jqElement[0].scrollWidth, 200); // just do limit it to some high enough value (2.5 x default)
 								if (prevGhost != undefined && ghost.location.y == prevGhost.location.y) {
 									ghost.location.x += overflow;
 								}
 								if (width > ghost.size.width) {
 									overflow += width - ghost.size.width;
 									ghost.size.width = width;
-								}
-							}
+								} else if (width <= 0) tryAgain = true; // not rendered yet?
+							} else tryAgain = true; // not rendered yet?
 						}
 					}
-				}, 0);
+					
+					// as responsive draws it's ghosts much later then anchored/absolute, we try to wait until we get valid values for ghost element widths from browser
+					// we give up after 5 sec just in case the ghost is not appearing at all for some reason; we don't want to execute timeouts forever
+					if (tryAgain && attemptNo < 51) rearrangeGhosts(ghosts, attemptNo + 1);
+				}, attemptNo == 1 ? 0 : 100);
 			}
 
 			$scope.setGhosts = function(ghosts) {
@@ -840,7 +845,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
 							for (j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
 								if ($scope.ghosts.ghostContainers[i].ghosts[j].type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
-									rearrangeGhosts($scope.ghosts.ghostContainers[i].ghosts);
+									rearrangeGhosts($scope.ghosts.ghostContainers[i].ghosts, 1);
 									break;
 								}
 							}
