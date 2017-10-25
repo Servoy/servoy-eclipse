@@ -388,7 +388,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
-			servoyProject.getEditingFlattenedSolution().flushAllCachedData();
 
 			if (servoyModel.getActiveResourcesProject() != null)
 			{
