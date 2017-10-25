@@ -357,6 +357,7 @@ public class GhostHandler implements IServerService
 						{
 							writer.array();
 							Iterator<IPersist> tabIterator = panel.getTabs();
+							int i = 0;
 							while (tabIterator.hasNext())
 							{
 								Tab tab = (Tab)tabIterator.next();
@@ -365,7 +366,8 @@ public class GhostHandler implements IServerService
 								writer.object();
 								writer.key("uuid").value(tab.getUUID());
 								writer.key("type").value(GHOST_TYPE_CONFIGURATION);
-								writer.key("text").value(tab.getText());
+								String text = tab.getText();
+								writer.key("text").value(text != null && text.trim().length() > 0 ? text : "tabs[" + i + "]");
 								writer.key("location");
 								writer.object();
 								writer.key("x").value(x);
@@ -377,6 +379,7 @@ public class GhostHandler implements IServerService
 								writer.key("height").value(tab.getSize().height);
 								writer.endObject();
 								writer.endObject();
+								i++;
 							}
 							writer.endArray();
 						}
@@ -434,7 +437,7 @@ public class GhostHandler implements IServerService
 									int y = baseComponent.getLocation().y;
 									writer.key("uuid").value(persists.get(i).getUUID());
 									writer.key("type").value(GHOST_TYPE_COMPONENT);
-									Object label = getGhostLabel(baseComponent);
+									Object label = getGhostLabel(baseComponent, "col" + i);
 									writer.key("text").value(label);
 
 									writer.key("location");
@@ -652,7 +655,7 @@ public class GhostHandler implements IServerService
 			writer.object();
 			writer.key("uuid").value(persist.getUUID());
 			writer.key("type").value(type);
-			writer.key("text").value(getGhostLabel(persist));
+			writer.key("text").value(getGhostLabel(persist, "element"));
 			writer.key("location");
 			writer.object();
 			writer.key("x").value(persist.getLocation().x);
@@ -667,7 +670,7 @@ public class GhostHandler implements IServerService
 		}
 	}
 
-	private String getGhostLabel(IPersist next)
+	private String getGhostLabel(IPersist next, String defaultLabel)
 	{
 		if (next instanceof ISupportName)
 		{
@@ -688,7 +691,7 @@ public class GhostHandler implements IServerService
 			String dp = ((ISupportDataProviderID)next).getDataProviderID();
 			if (dp != null) return dp;
 		}
-		return "";
+		return defaultLabel;
 	}
 
 	public static boolean isDroppable(PropertyDescription propertyDescription, Object rootPropConfigObject)
