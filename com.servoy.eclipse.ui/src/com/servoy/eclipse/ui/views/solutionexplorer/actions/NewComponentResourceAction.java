@@ -50,7 +50,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 {
 
 	private final Shell shell;
-	private WebObjectSpecification spec;
+	private SimpleUserNode selectedNode;
 
 	public NewComponentResourceAction(Shell shell)
 	{
@@ -62,26 +62,35 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		spec = null;
+		selectedNode = null;
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		boolean state = (sel.size() == 1);
 		if (state)
 		{
-			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			state = (type == UserNodeType.COMPONENT) || (type == UserNodeType.SERVICE);
+			selectedNode = ((SimpleUserNode)sel.getFirstElement());
+			UserNodeType type = selectedNode.getType();
+			state = (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT || type == UserNodeType.WEB_OBJECT_FOLDER);
 			if (state)
 			{
-				spec = ((WebObjectSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject());
-				state = "file".equals(spec.getSpecURL().getProtocol());
+				if (type == UserNodeType.WEB_OBJECT_FOLDER)
+				{
+					state = true;
+				}
+				else
+				{
+					WebObjectSpecification spec = ((WebObjectSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject());
+					state = "file".equals(spec.getSpecURL().getProtocol());
+				}
 			}
 		}
 		setEnabled(state);
+		if (!isEnabled()) selectedNode = null;
 	}
 
 	@Override
 	public void run()
 	{
-		if (spec != null)
+		if (selectedNode != null)
 		{
 			String newFileName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide a file name.");
 			if (newFileName == null) return;
@@ -90,39 +99,49 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 			ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
 			IProject project = resourcesProject.getProject();
 
-			try
+			IFolder folder = null;
+			if (selectedNode.getType() == UserNodeType.WEB_OBJECT_FOLDER)
 			{
-				IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-				if (specFile.length == 1)
+				folder = (IFolder)selectedNode.getRealObject();
+			}
+			else
+			{
+				try
 				{
-					IFolder folder = (IFolder)specFile[0].getParent();
-					IFile file = folder.getFile(newFileName);
-					if (!file.exists())
+					IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(
+						((WebObjectSpecification)selectedNode.getRealObject()).getSpecURL().toURI());
+					if (specFile.length == 1)
 					{
-						try
-						{
-							file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
-							EditorUtil.openFileEditor(file);
-						}
-						catch (CoreException e)
-						{
-							MessageDialog.openError(shell, getText(), "Could not create file.");
-							ServoyLog.logError(e);
-						}
+						folder = (IFolder)specFile[0].getParent();
 					}
 					else
 					{
-						MessageDialog.openError(shell, getText(), "The file " + newFileName + " already exists.");
+						MessageDialog.openError(shell, getText(), "Could not create file. Spec file location incorrect.");
 					}
 				}
-				else
+				catch (URISyntaxException e)
 				{
-					MessageDialog.openError(shell, getText(), "Could not create file. Spec file location incorrect.");
+					ServoyLog.logError(e);
 				}
 			}
-			catch (URISyntaxException e)
+
+			IFile file = folder.getFile(newFileName);
+			if (!file.exists())
 			{
-				ServoyLog.logError(e);
+				try
+				{
+					file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
+					EditorUtil.openFileEditor(file);
+				}
+				catch (CoreException e)
+				{
+					MessageDialog.openError(shell, getText(), "Could not create file.");
+					ServoyLog.logError(e);
+				}
+			}
+			else
+			{
+				MessageDialog.openError(shell, getText(), "The file " + newFileName + " already exists.");
 			}
 		}
 	}

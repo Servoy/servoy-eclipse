@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,10 +38,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.wicket.util.io.IOUtils;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -415,6 +419,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				lm = createComponentFileList(un);
 				key = null;
 			}
+			else if (type == UserNodeType.WEB_OBJECT_FOLDER)
+			{
+				lm = createWebObjectFileList(un);
+				key = null;
+			}
 			else if (type == UserNodeType.TEMPLATES)
 			{
 				un.setRealObject(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
@@ -753,6 +762,71 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				ServoyLog.logError(e);
 			}
 		}
+		else
+		{
+			String component = spec.getName().split("-")[1] + "/";
+			List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
+			try (ZipFile zip = new ZipFile(spec.getSpecURL().getFile().substring(6, spec.getSpecURL().getFile().lastIndexOf("!"))))
+			{
+				Enumeration< ? extends ZipEntry> e = zip.entries();
+				while (e.hasMoreElements())
+				{
+					ZipEntry entry = e.nextElement();
+					if (entry.getName().startsWith(component) && !entry.isDirectory())
+					{
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getName().replaceFirst(component, ""), UserNodeType.ZIP_RESOURCE, null,
+							getIcon(entry.getName()));
+						list.add(node);
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+			}
+			return list.toArray(new SimpleUserNode[list.size()]);
+		}
+		return new SimpleUserNode[0];
+	}
+
+	private Image getIcon(String name)
+	{
+		if (name == null) return null;
+		String suffix = name.substring(name.lastIndexOf("."));
+		if (suffix.toLowerCase().endsWith("js"))
+		{
+			return uiActivator.loadImageFromBundle("js.png");
+		}
+		if (suffix.toLowerCase().endsWith("css"))
+		{
+			return uiActivator.loadImageFromBundle("style.png");
+		}
+		if (suffix.toLowerCase().endsWith("png") || suffix.toLowerCase().endsWith("jpeg") || suffix.toLowerCase().endsWith("gif"))
+		{
+			return uiActivator.loadImageFromBundle("media.png");
+		}
+		return uiActivator.loadImageFromBundle("file_obj.png");
+	}
+
+	private SimpleUserNode[] createWebObjectFileList(SimpleUserNode un)
+	{
+		IFolder folder = (IFolder)un.getRealObject();
+		List<SimpleUserNode> children = new ArrayList<>();
+		try
+		{
+			for (IResource res : folder.members(false))
+			{
+				if (res instanceof IFile)
+				{
+					children.add(new PlatformSimpleUserNode(res.getName(), UserNodeType.COMPONENT_RESOURCE, res, getIcon(res.getName())));
+				}
+			}
+			return children.toArray(new PlatformSimpleUserNode[children.size()]);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
 		return new SimpleUserNode[0];
 	}
 
@@ -771,14 +845,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			for (IResource resource : members)
 			{
 				if (resource.isHidden() || resource.isTeamPrivateMember() || resource.isDerived()) continue;
-				String name = resource.getName();
-				if (resource.getType() == IResource.FOLDER)
+				if (resource.getType() == IResource.FILE)
 				{
-					list.addAll(createComponentList(path + name + "/", (IContainer)resource));
-				}
-				else
-				{
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + name, UserNodeType.COMPONENT_RESOURCE, resource,
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + resource.getName(), UserNodeType.COMPONENT_RESOURCE, resource,
 						uiActivator.loadImageFromBundle("js.png"));
 					list.add(node);
 				}
