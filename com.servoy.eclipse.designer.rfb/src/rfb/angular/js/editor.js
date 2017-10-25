@@ -415,28 +415,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 			}
 
-			$scope.rearrangeGhosts = function(ghosts) {
-				var overflow = 0;
-				for (var i = 0; i < ghosts.length; i++) {
-					var ghost = ghosts[i];
-					var prevGhost = i > 0 ? ghosts[i - 1] : undefined;
-					if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
-						if ($('[svy-id="' + ghost.uuid + '"]')[0]) {
-							var element = $('[svy-id="' + ghost.uuid + '"]')[0];
-							var width = element.scrollWidth;
-							if (prevGhost != undefined && ghost.location.y == prevGhost.location.y) {
-								ghost.location.x += overflow;
-							}
-							if (width > ghost.size.width) {
-								overflow += width - ghost.size.width;
-								ghost.size.width = width;
-							}
-						}
-					}
-				}
-				return true;
-			}
-
 			$scope.openContainedForm = function(ghost) {
 				if (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART) {
 					$editorService.openContainedForm(ghost);
@@ -827,6 +805,32 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return false;
 			}
 
+			function rearrangeGhosts(ghosts) {
+				// timeout is needed here because new ghost content needs to get rendered after angular digest cycle updates their inline style
+				$timeout(function() {
+					var overflow = 0;
+					for (var i = 0; i < ghosts.length; i++) {
+						var ghost = ghosts[i];
+						var prevGhost = i > 0 ? ghosts[i - 1] : undefined;
+						if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
+							// note: initially, all config ghosts sent from server have a default width of 80px
+							// allow longer content in ghosts
+							if ($('[svy-id="' + ghost.uuid + '"]')[0]) {
+								var element = $('[svy-id="' + ghost.uuid + '"]')[0];
+								var width = Math.min(element.scrollWidth, 200); // just do limit it to some high enough value (2.5 x default)
+								if (prevGhost != undefined && ghost.location.y == prevGhost.location.y) {
+									ghost.location.x += overflow;
+								}
+								if (width > ghost.size.width) {
+									overflow += width - ghost.size.width;
+									ghost.size.width = width;
+								}
+							}
+						}
+					}
+				}, 0);
+			}
+
 			$scope.setGhosts = function(ghosts) {
 				if (!equalGhosts($scope.ghosts, ghosts)) {
 					$scope.ghosts = ghosts;
@@ -836,10 +840,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
 							for (j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
 								if ($scope.ghosts.ghostContainers[i].ghosts[j].type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
-									var changedGhosts = $scope.ghosts.ghostContainers[i].ghosts;
-									$timeout(function() {
-										$scope.rearrangeGhosts(changedGhosts)
-									}, 0);
+									rearrangeGhosts($scope.ghosts.ghostContainers[i].ghosts);
 									break;
 								}
 							}

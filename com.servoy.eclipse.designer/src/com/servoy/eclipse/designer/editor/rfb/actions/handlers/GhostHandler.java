@@ -243,14 +243,17 @@ public class GhostHandler implements IServerService
 
 				PropertyDescription spec = ((WebObjectImpl)webComponent.getImplementation()).getPropertyDescription();
 
-				Iterator<Entry<String, PropertyDescription>> propIt = spec.getProperties().entrySet().iterator();
-				while (propIt.hasNext())
+				if (spec != null) // can be null if the developer introduced a syntax error for example in the spec file while editing it
 				{
-					Entry<String, PropertyDescription> propEntry = propIt.next();
-
-					if (isDroppable(propEntry.getValue(), propEntry.getValue().getConfig()))
+					Iterator<Entry<String, PropertyDescription>> propIt = spec.getProperties().entrySet().iterator();
+					while (propIt.hasNext())
 					{
-						sortedAndDroppableProps.put(propEntry.getKey(), webComponent.getProperty(propEntry.getKey()));
+						Entry<String, PropertyDescription> propEntry = propIt.next();
+
+						if (isDroppable(propEntry.getValue(), propEntry.getValue().getConfig()))
+						{
+							sortedAndDroppableProps.put(propEntry.getKey(), webComponent.getProperty(propEntry.getKey()));
+						}
 					}
 				}
 
