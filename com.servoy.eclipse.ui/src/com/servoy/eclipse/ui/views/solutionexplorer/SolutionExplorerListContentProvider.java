@@ -791,7 +791,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private Image getIcon(String name)
 	{
-		if (name == null) return null;
+		if (name == null || !name.contains(".")) return null;
 		String suffix = name.substring(name.lastIndexOf("."));
 		if (suffix.toLowerCase().endsWith("js"))
 		{
