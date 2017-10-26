@@ -24,6 +24,13 @@
             id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
             name="Form Hierarchy">
       </view>
+      <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.FavoritesView"
+            icon="icons/favorites/favorite.png"
+            id="com.servoy.eclipse.ui.views.FavoritesView"
+            name="Favorites">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -42,6 +49,14 @@
                id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
                relationship="stack"
                relative="com.servoy.eclipse.ui.views.SolutionExplorerView">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <view
+               id="com.servoy.eclipse.ui.views.FavoritesView"
+               relationship="stack"
+               relative="org.eclipse.ui.views.ContentOutline">
          </view>
       </perspectiveExtension>
       <perspectiveExtension
