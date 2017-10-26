@@ -23,8 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -44,87 +49,29 @@ import com.servoy.j2db.util.Utils;
 public class FormContentProvider implements ITreeContentProvider
 {
 	private final FlattenedSolution flattenedSolution;
-	private final Form form;
+	private final Form childForm;
 	private final Map<String, List<Integer>> workingSetForms = new HashMap<String, List<Integer>>();
+	private Object[] formIdsAndWorkingSets = new Object[] { new Integer(-1) };
+	private FormListOptions options;
 
 	public FormContentProvider(FlattenedSolution flattenedSolution, Form form)
 	{
 		this.flattenedSolution = flattenedSolution;
-		this.form = form;
+		this.childForm = form;
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement)
 	{
-		if (inputElement instanceof FormListOptions)
-		{
-			ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-			List<String> workingSets = null;
-			String[] solutionNames = flattenedSolution.getSolutionNames();
-			if (activeProject != null)
-			{
-				workingSets = activeProject.getServoyWorkingSets(solutionNames);
-			}
-			FormListOptions options = (FormListOptions)inputElement;
-
-			List<Object> formIdsAndWorkingSets = new ArrayList<Object>();
-			if (options.includeNone) formIdsAndWorkingSets.add(new Integer(Form.NAVIGATOR_NONE));
-			if (options.includeDefault) formIdsAndWorkingSets.add(new Integer(Form.NAVIGATOR_DEFAULT));
-			if (options.includeIgnore) formIdsAndWorkingSets.add(new Integer(Form.NAVIGATOR_IGNORE));
-			if (workingSets != null)
-			{
-				formIdsAndWorkingSets.addAll(workingSets);
-			}
-			switch (options.type)
-			{
-				case FORMS :
-					Iterator<Form> forms = flattenedSolution.getForms(true);
-					while (forms.hasNext())
-					{
-						Form obj = forms.next();
-						if (((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) &&
-							(options.showTemplates == Utils.getAsBoolean(obj.isFormComponent())) &&
-							((options.datasource == null || obj.getDataSource() == null || Utils.equalObjects(options.datasource, obj.getDataSource())))) &&
-							form != obj && !PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
-						{
-							addFormInList(activeProject, obj, solutionNames, formIdsAndWorkingSets);
-						}
-					}
-					break;
-
-				case HIERARCHY :
-					forms = flattenedSolution.getForms(false);
-					Map<Form, Integer> possibleParentForms = new TreeMap<Form, Integer>(NameComparator.INSTANCE);
-					while (forms.hasNext())
-					{
-						Form possibleParentForm = forms.next();
-						if ((form.isResponsiveLayout() == possibleParentForm.isResponsiveLayout() || !possibleParentForm.getParts().hasNext()) &&
-							(form.getDataSource() == null || possibleParentForm.getDataSource() == null ||
-								form.getDataSource().equals(possibleParentForm.getDataSource())) &&
-							!PersistEncapsulation.isModuleScope(possibleParentForm, flattenedSolution.getSolution()))
-						{
-							// do not add the form if it is already a sub-form, to prevent cycles
-							if (!flattenedSolution.getFormHierarchy(possibleParentForm).contains(form))
-							{
-								addFormInList(activeProject, possibleParentForm, solutionNames, formIdsAndWorkingSets);
-							}
-						}
-					}
-
-					formIdsAndWorkingSets.addAll(possibleParentForms.values());
-					break;
-			}
-			return formIdsAndWorkingSets.toArray();
-		}
-		return null;
+		return formIdsAndWorkingSets;
 	}
 
-	private void addFormInList(ServoyResourcesProject activeProject, Form form, String[] solutionNames, List<Object> formIdsAndWorkingSets)
+	private void addFormInList(ServoyResourcesProject activeProject, Form f, String[] solutionNames, ArrayList<Object> list)
 	{
-		String workingSetName = activeProject != null ? activeProject.getContainingWorkingSet(form.getName(), solutionNames) : null;
+		String workingSetName = activeProject != null ? activeProject.getContainingWorkingSet(f.getName(), solutionNames) : null;
 		if (workingSetName == null)
 		{
-			formIdsAndWorkingSets.add(new Integer(form.getID()));
+			list.add(new Integer(f.getID()));
 		}
 		else
 		{
@@ -134,9 +81,9 @@ public class FormContentProvider implements ITreeContentProvider
 				listForm = new ArrayList<Integer>();
 				workingSetForms.put(workingSetName, listForm);
 			}
-			if (!listForm.contains(Integer.valueOf(form.getID())))
+			if (!listForm.contains(Integer.valueOf(f.getID())))
 			{
-				listForm.add(Integer.valueOf(form.getID()));
+				listForm.add(Integer.valueOf(f.getID()));
 			}
 		}
 	}
@@ -167,6 +114,20 @@ public class FormContentProvider implements ITreeContentProvider
 			this.showTemplates = showTemplates;
 			this.datasource = datasource;
 		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (obj instanceof FormListOptions)
+			{
+				FormListOptions opt = (FormListOptions)obj;
+				return (type == null && opt.type == null || type != null && type.equals((opt).type)) &&
+					(showInMenu == null && opt.showInMenu == null || showInMenu != null && showInMenu.equals(opt.showInMenu)) &&
+					includeNone == opt.includeNone && includeIgnore == opt.includeIgnore && showTemplates == opt.showTemplates &&
+					(datasource == null && opt.datasource == null || datasource != null && datasource.equals(opt.datasource));
+			}
+			return false;
+		}
 	}
 
 	@Override
@@ -176,9 +137,82 @@ public class FormContentProvider implements ITreeContentProvider
 	}
 
 	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+	public void inputChanged(final Viewer viewer, Object oldInput, final Object inputElement)
 	{
+		if (inputElement instanceof FormListOptions && !inputElement.equals(options))
+		{
+			Job job = new Job("Searching possible parent forms")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+					List<String> workingSets = null;
+					String[] solutionNames = flattenedSolution.getSolutionNames();
+					if (activeProject != null)
+					{
+						workingSets = activeProject.getServoyWorkingSets(solutionNames);
+					}
+					options = (FormListOptions)inputElement;
 
+					ArrayList<Object> list = new ArrayList<Object>();
+					if (options.includeNone) list.add(new Integer(Form.NAVIGATOR_NONE));
+					if (options.includeDefault) list.add(new Integer(Form.NAVIGATOR_DEFAULT));
+					if (options.includeIgnore) list.add(new Integer(Form.NAVIGATOR_IGNORE));
+					if (workingSets != null)
+					{
+						list.addAll(workingSets);
+					}
+					switch (options.type)
+					{
+						case FORMS :
+							Iterator<Form> forms = flattenedSolution.getForms(options.datasource).iterator();
+							while (forms.hasNext())
+							{
+								Form obj = forms.next();
+								if ((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) &&
+									(options.showTemplates == Utils.getAsBoolean(obj.isFormComponent())) && childForm != obj &&
+									!PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
+								{
+									addFormInList(activeProject, obj, solutionNames, list);
+								}
+							}
+							break;
+
+						case HIERARCHY :
+							forms = flattenedSolution.getForms(childForm.getDataSource()).iterator();
+							Map<Form, Integer> possibleParentForms = new TreeMap<Form, Integer>(NameComparator.INSTANCE);
+							while (forms.hasNext())
+							{
+								Form possibleParentForm = forms.next();
+								if ((childForm.isResponsiveLayout() == possibleParentForm.isResponsiveLayout() || !possibleParentForm.getParts().hasNext()) &&
+									!PersistEncapsulation.isModuleScope(possibleParentForm, flattenedSolution.getSolution()))
+								{
+									// do not add the form if it is already a sub-form, to prevent cycles
+									if (!flattenedSolution.getFormHierarchy(possibleParentForm).contains(childForm))
+									{
+										addFormInList(activeProject, possibleParentForm, solutionNames, list);
+									}
+								}
+							}
+
+							list.addAll(possibleParentForms.values());
+							break;
+					}
+					formIdsAndWorkingSets = list.toArray();
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							viewer.refresh();
+						}
+					});
+					return Status.OK_STATUS;
+				}
+			};
+			job.schedule();
+		}
 	}
 
 	@Override

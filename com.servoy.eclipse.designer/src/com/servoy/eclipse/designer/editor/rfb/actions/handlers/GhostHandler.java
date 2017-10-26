@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,6 +44,7 @@ import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.util.DeveloperUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -59,6 +63,7 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
@@ -96,135 +101,195 @@ public class GhostHandler implements IServerService
 		ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).acceptVisitor(new IPersistVisitor()
 		{
 
-			private void writeGhostsForWebcomponentBeans(IBasicWebComponent bean)
+			private void writeGhostsForWebcomponentBeans(IBasicWebComponent basicWebComponent)
 			{
-				if (FormTemplateGenerator.isWebcomponentBean(bean))
+				if (FormTemplateGenerator.isWebcomponentBean(basicWebComponent))
 				{
 					SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-					WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(bean.getTypeName());
+					WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(basicWebComponent.getTypeName());
 					if (spec == null)
 					{
 						//error bean
 						spec = componentsSpecProviderState.getWebComponentSpecification(FormElement.ERROR_BEAN);
 					}
 					Map<String, PropertyDescription> properties = spec.getProperties();
-					if (bean instanceof WebComponent && !FormElement.ERROR_BEAN.equals(spec.getName())) // could be legacy Bean (was used in alphas/betas) - that is unlikely though
+					if (basicWebComponent instanceof WebComponent && !FormElement.ERROR_BEAN.equals(spec.getName())) // could be legacy Bean (was used in alphas/betas) - that is unlikely though
 					{
 						for (String key : properties.keySet())
 						{
-							if (((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().isArrayReturnType(key))
+							if (((WebObjectImpl)((WebComponent)basicWebComponent).getImplementation()).getPropertyDescription().isArrayReturnType(key))
 							{
-								LocationCache.getINSTANCE().clearParent(bean.getUUID() + key);
+								LocationCache.getINSTANCE().clearParent(basicWebComponent.getUUID() + key);
 							}
 						}
 					}
 
-					boolean hasGhosts = (bean instanceof WebComponent && ((WebComponent)bean).getAllPersistMappedProperties().size() > 0) ||
-						(bean instanceof Bean && ((Bean)bean).getBeanXML() != null);
-					if (hasGhosts)
+					if (basicWebComponent instanceof Bean && ((Bean)basicWebComponent).getBeanXML() != null)
 					{
+						// these things (Bean instead of WebComponent) are deprecated right?
+						startNewGhostContainer(writer, basicWebComponent, 0, 1, "", true);
+
 						try
 						{
-							writer.object();
-							writer.key("style");
+							JSONObject webComponentModelJson = new JSONObject(((Bean)basicWebComponent).getBeanXML());
+							for (PropertyDescription pd : properties.values())
 							{
-								writer.object();
-								writer.key("left").value(bean.getLocation().getX());
-								writer.key("top").value(bean.getLocation().getY());
-								writer.endObject();
-							}
-							writer.key("uuid").value(bean.getUUID());
-							writer.key("ghosts");
-							{
-								writer.array();
-								if (bean instanceof WebComponent)
+								String simpleTypeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(pd.getType());
+								if (webComponentModelJson.has(pd.getName()))
 								{
-									for (IChildWebObject p : ((WebComponent)bean).getAllPersistMappedProperties())
+									Object configObject = pd.getConfig();
+									if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
 									{
-										if (p == null) continue;
-										String text = p.getJsonKey() + (p.getIndex() >= 0 ? "[" + p.getIndex() + "]" : "");
-
-										// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
-										// TODO make this generic - spec should be able to tell what to show in the ghost caption in editor; maybe other components what other properties
-										if (p.getProperty("json") != null)
+										if (pd.getType() instanceof ComponentPropertyType ||
+											(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 										{
-											JSONObject json = (JSONObject)p.getProperty("json");
-											if (json.has("text")) text = json.getString("text");
-										}
-
-										Object configObject;
-										if (p.getIndex() >= 0)
-										{
-											PropertyDescription pd = ((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription();
-											if (pd != null) configObject = pd.getProperty(p.getJsonKey()).getConfig();
-											else configObject = null;
-										}
-										else configObject = p.getPropertyDescription().getConfig();
-
-										if (isDroppable(p.getPropertyDescription(), configObject))
-										{
-											String parentKey = bean.getUUID() + p.getJsonKey();
-											writeGhostToJSON(parentKey, writer, text, p.getUUID().toString(), p.getIndex(), p.getTypeName());
+											writeGhostToJSON(basicWebComponent.getUUID() + pd.getName(), pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
 										}
 									}
-								}
-								else if (bean instanceof Bean)
-								{
-									try
+									else if (PropertyUtils.isCustomJSONArrayPropertyType(pd.getType()))
 									{
-										if (((Bean)bean).getBeanXML() != null)
+										JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
+										for (int i = 0; i < jsonArray.length(); i++)
 										{
-											JSONObject webComponentModelJson = new JSONObject(((Bean)bean).getBeanXML());
-											for (PropertyDescription pd : properties.values())
+											if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
+												(configObject instanceof JSONObject &&
+													Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 											{
-												String simpleTypeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(pd.getType());
-												if (webComponentModelJson.has(pd.getName()))
-												{
-													Object configObject = pd.getConfig();
-													if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
-													{
-														if (pd.getType() instanceof ComponentPropertyType || (configObject instanceof JSONObject &&
-															Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
-														{
-															writeGhostToJSON(bean.getUUID() + pd.getName(), pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
-														}
-													}
-													else if (PropertyUtils.isCustomJSONArrayPropertyType(pd.getType()))
-													{
-														JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
-														for (int i = 0; i < jsonArray.length(); i++)
-														{
-															if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
-																(configObject instanceof JSONObject &&
-																	Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
-															{
-																writeGhostToJSON(bean.getUUID() + pd.getName(), writer,
-																	pd.getName() + (i >= 0 ? "[" + i + "]" : ""), UUID.randomUUID().toString(), i,
-																	simpleTypeName);
-															}
-														}
-													}
-												}
+												writeGhostToJSON(basicWebComponent.getUUID() + pd.getName(), writer,
+													pd.getName() + (i >= 0 ? "[" + i + "]" : ""), UUID.randomUUID().toString(), i, simpleTypeName);
 											}
 										}
 									}
-									catch (JSONException e)
+								}
+							}
+						}
+						catch (JSONException e)
+						{
+							Debug.error(e);
+						}
+						endGhostContainer(writer);
+					}
+					else if (basicWebComponent instanceof WebComponent)
+					{
+						SortedMap<String, Object> sortedDroppableProperties = filterAndSortDroppableProperties((WebComponent)basicWebComponent);
+
+						Iterator<Entry<String, Object>> droppablePropIt = sortedDroppableProperties.entrySet().iterator();
+						int droppablePropCount = sortedDroppableProperties.size(), i = 0;
+
+						while (droppablePropIt.hasNext())
+						{
+							Entry<String, Object> dropPropEntry = droppablePropIt.next();
+							PropertyDescription propertyPD = spec.getProperty(dropPropEntry.getKey());
+
+							startNewGhostContainer(writer, basicWebComponent, i++, droppablePropCount, dropPropEntry.getKey(),
+								PropertyUtils.isCustomJSONArrayPropertyType(propertyPD.getType()));
+
+							if (dropPropEntry.getValue() != null)
+							{
+								// the value is either an IChildWebObject or an array of IChildWebObjects; we have to send all of them anyway
+								IChildWebObject[] ghostsOfThisProp = (IChildWebObject[])(dropPropEntry.getValue() instanceof IChildWebObject[]
+									? dropPropEntry.getValue() : new IChildWebObject[] { (IChildWebObject)dropPropEntry.getValue() });
+
+								for (IChildWebObject ghostWebObject : ghostsOfThisProp)
+								{
+									String ghostCaptionText = null;
+
+									if (ghostWebObject instanceof WebCustomType)
 									{
-										Debug.error(e);
+										ghostCaptionText = DeveloperUtils.getCustomObjectTypeCaptionFromTaggedSubproperties((WebCustomType)ghostWebObject);
+									}
+
+									if (ghostCaptionText == null)
+									{
+										ghostCaptionText = dropPropEntry.getKey() +
+											(ghostWebObject.getIndex() >= 0 ? "[" + ghostWebObject.getIndex() + "]" : "");
+
+										// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
+										if (ghostWebObject instanceof WebCustomType && ghostWebObject.hasProperty("text"))
+										{
+											Object val = ghostWebObject.getProperty("text");
+											if (val instanceof String && ((String)val).trim().length() > 0) ghostCaptionText = (String)val;
+										}
+									}
+
+									try
+									{
+										String parentKey = basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
+										writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostWebObject.getUUID().toString(), ghostWebObject.getIndex(),
+											ghostWebObject.getTypeName());
+									}
+									catch (JSONException e1)
+									{
+										Debug.error(e1);
 									}
 								}
-								writer.endArray();
 							}
-							writer.endObject();
-						}
-						catch (JSONException e1)
-						{
-							Debug.error(e1);
+
+							endGhostContainer(writer);
 						}
 					}
 				}
 			}
 
+			/**
+			 * Creates a sorted map out of all droppable properties for this web component. These will be used to generate a ghost container for each such property of the web component.
+			 *
+			 * @return a map with root prop. name and value being either a IChildWebObject or an array of IChildWebObject.
+			 */
+			private SortedMap<String, Object> filterAndSortDroppableProperties(WebComponent webComponent)
+			{
+//				Iterator<Entry<String, Object>> childPersistMappedPropertiesIterator = webComponent.getPersistMappedPropertiesReadOnly().entrySet().iterator();
+				TreeMap<String, Object> sortedAndDroppableProps = new TreeMap<>();
+
+				PropertyDescription spec = ((WebObjectImpl)webComponent.getImplementation()).getPropertyDescription();
+
+				if (spec != null) // can be null if the developer introduced a syntax error for example in the spec file while editing it
+				{
+					Iterator<Entry<String, PropertyDescription>> propIt = spec.getProperties().entrySet().iterator();
+					while (propIt.hasNext())
+					{
+						Entry<String, PropertyDescription> propEntry = propIt.next();
+
+						if (isDroppable(propEntry.getValue(), propEntry.getValue().getConfig()))
+						{
+							sortedAndDroppableProps.put(propEntry.getKey(), webComponent.getProperty(propEntry.getKey()));
+						}
+					}
+				}
+
+				return sortedAndDroppableProps;
+			}
+
+			private void startNewGhostContainer(final JSONWriter writer, IBasicWebComponent basicWebComponent, int propYCount, int totalGhostContainersOfComp,
+				String propertyName, boolean isArray)
+			{
+				writer.object();
+				writer.key("parentCompBounds");
+				{
+					// these will only be useful in anchor forms (in responsive the actual location of the parent component needs to be determined on client)
+					writer.object();
+					writer.key("left").value(basicWebComponent.getLocation().getX());
+					writer.key("top").value(basicWebComponent.getLocation().getY());
+					writer.key("width").value(basicWebComponent.getSize().width);
+					writer.key("height").value(basicWebComponent.getSize().height);
+					writer.endObject();
+				}
+				writer.key("uuid").value(basicWebComponent.getUUID());
+
+				writer.key("containerPositionInComp").value(propYCount);
+				writer.key("totalGhostContainersOfComp").value(totalGhostContainersOfComp);
+				writer.key("propertyName").value(propertyName);
+				writer.key("isArray").value(isArray);
+
+				writer.key("ghosts");
+				writer.array();
+			}
+
+			private void endGhostContainer(final JSONWriter writer)
+			{
+				writer.endArray();
+				writer.endObject();
+			}
 
 			private void writeGhostToJSON(String parentKey, PropertyDescription pd, String simpleTypeName, int indexForPositioning) throws JSONException
 			{
@@ -263,12 +328,12 @@ public class GhostHandler implements IServerService
 
 			private int computeX(int index)
 			{
-				return 15 + index * 80;
+				return 0 + index * 80;
 			}
 
 			private int computeY(int index)
 			{
-				return 50;
+				return 0;
 			}
 
 			@Override
@@ -292,6 +357,7 @@ public class GhostHandler implements IServerService
 						{
 							writer.array();
 							Iterator<IPersist> tabIterator = panel.getTabs();
+							int i = 0;
 							while (tabIterator.hasNext())
 							{
 								Tab tab = (Tab)tabIterator.next();
@@ -300,7 +366,8 @@ public class GhostHandler implements IServerService
 								writer.object();
 								writer.key("uuid").value(tab.getUUID());
 								writer.key("type").value(GHOST_TYPE_CONFIGURATION);
-								writer.key("text").value(tab.getText());
+								String text = tab.getText();
+								writer.key("text").value(text != null && text.trim().length() > 0 ? text : "tabs[" + i + "]");
 								writer.key("location");
 								writer.object();
 								writer.key("x").value(x);
@@ -312,6 +379,7 @@ public class GhostHandler implements IServerService
 								writer.key("height").value(tab.getSize().height);
 								writer.endObject();
 								writer.endObject();
+								i++;
 							}
 							writer.endArray();
 						}
@@ -369,7 +437,7 @@ public class GhostHandler implements IServerService
 									int y = baseComponent.getLocation().y;
 									writer.key("uuid").value(persists.get(i).getUUID());
 									writer.key("type").value(GHOST_TYPE_COMPONENT);
-									Object label = getGhostLabel(baseComponent);
+									Object label = getGhostLabel(baseComponent, "col" + i);
 									writer.key("text").value(label);
 
 									writer.key("location");
@@ -390,8 +458,7 @@ public class GhostHandler implements IServerService
 								writer.endObject();
 							}
 						}
-						writer.endArray();
-						writer.endObject();
+						endGhostContainer(writer);
 					}
 					catch (IllegalArgumentException e)
 					{
@@ -580,12 +647,6 @@ public class GhostHandler implements IServerService
 		return visible;
 	}
 
-	/**
-	 * @param writer
-	 * @param elementsIterator
-	 * @param type
-	 * @throws JSONException
-	 */
 	private void printGhostFormElements(final JSONWriter writer, Iterator<IFormElement> elementsIterator, String type) throws JSONException
 	{
 		while (elementsIterator.hasNext())
@@ -594,7 +655,7 @@ public class GhostHandler implements IServerService
 			writer.object();
 			writer.key("uuid").value(persist.getUUID());
 			writer.key("type").value(type);
-			writer.key("text").value(getGhostLabel(persist));
+			writer.key("text").value(getGhostLabel(persist, "element"));
 			writer.key("location");
 			writer.object();
 			writer.key("x").value(persist.getLocation().x);
@@ -609,7 +670,7 @@ public class GhostHandler implements IServerService
 		}
 	}
 
-	private String getGhostLabel(IPersist next)
+	private String getGhostLabel(IPersist next, String defaultLabel)
 	{
 		if (next instanceof ISupportName)
 		{
@@ -630,15 +691,22 @@ public class GhostHandler implements IServerService
 			String dp = ((ISupportDataProviderID)next).getDataProviderID();
 			if (dp != null) return dp;
 		}
-		return "";
+		return defaultLabel;
 	}
 
-	public static boolean isDroppable(PropertyDescription propertyDescription, Object configObject)
+	public static boolean isDroppable(PropertyDescription propertyDescription, Object rootPropConfigObject)
 	{
 		IPropertyType< ? > type = propertyDescription.getType();
-		return propertyDescription instanceof WebObjectSpecification || type instanceof ComponentPropertyType ||
-			(PropertyUtils.isCustomJSONArrayPropertyType(type) &&
-				((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType) ||
-			(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE)));
+		return PropertyUtils.isCustomJSONArrayPropertyType(type)
+			? isDroppableElement(((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition(), rootPropConfigObject)
+			: isDroppableElement(propertyDescription, rootPropConfigObject);
 	}
+
+	public static boolean isDroppableElement(PropertyDescription propertyDescription, Object rootPropConfigObject)
+	{
+		IPropertyType< ? > type = propertyDescription.getType();
+		return propertyDescription instanceof WebObjectSpecification || type instanceof ComponentPropertyType || (rootPropConfigObject instanceof JSONObject &&
+			Boolean.TRUE.equals(((JSONObject)rootPropConfigObject).opt(FormElement.DROPPABLE)) && PropertyUtils.isCustomJSONObjectProperty(type));
+	}
+
 }

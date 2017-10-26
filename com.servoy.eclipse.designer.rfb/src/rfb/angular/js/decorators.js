@@ -123,9 +123,15 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 								var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;
 								var statusBarHeight = $(".statusbar-area").get(0).getBoundingClientRect().height;
 								var resizerRight = $(".sidebar-resizer").get(0).getBoundingClientRect().right;
+								var iframeOffsetTopIfPresent = 0, iframeOffsetLeftIfPresent = 0;
+								if (target.ownerDocument != window.document) {
+									var contentIFrameRect = $(".contentframe").get(0).getBoundingClientRect();
+									iframeOffsetTopIfPresent = contentIFrameRect.top;
+									iframeOffsetLeftIfPresent = contentIFrameRect.left;
+								}
 								
-								if ((targetRect.bottom < toolbarBottom + 5) || (targetRect.top > window.innerHeight - statusBarHeight - 5)
-										|| (targetRect.right < resizerRight + 5) || (targetRect.left > window.innerWidth - 5)) {
+								if ((targetRect.bottom + iframeOffsetTopIfPresent < toolbarBottom + 5) || (targetRect.top + iframeOffsetTopIfPresent > window.innerHeight - statusBarHeight - 5)
+										|| (targetRect.right + iframeOffsetLeftIfPresent < resizerRight + 5) || (targetRect.left + iframeOffsetLeftIfPresent > window.innerWidth - 5)) {
 									target.scrollIntoView();
 								}
 							}

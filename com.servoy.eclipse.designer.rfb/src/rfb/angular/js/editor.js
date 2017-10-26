@@ -278,14 +278,31 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return parent;
 			}
 
-			function getBounds(ghostContainer, parent) {
-				var bounds = parent.getBoundingClientRect();
-				ghostContainer.style.top = bounds.top;
-				ghostContainer.style.left = bounds.left;
-				ghostContainer.style.display = "block";
-			}
 			var realContainerPromise = null;
 			$scope.getGhostContainerStyle = function(ghostContainer) {
+				function showAndPositionGhostContainer(ghostContainer, parentCompBounds) {
+					if (!ghostContainer.style) ghostContainer.style = {};
+					
+					// add semi-transparent background with alternating color in case there are multiple ghost containers on the same component (multiple droppable properties on the same comp)
+					var odd = (ghostContainer.containerPositionInComp % 2);
+					ghostContainer.style['background-color'] = odd ? "rgba(150, 150, 150, 0.05)" : "rgba(0, 100, 80, 0.05)";
+					ghostContainer.style['color'] = odd ? "rgb(150, 150, 150)" : "rgb(0, 100, 80)";
+					if (odd) {
+						ghostContainer.style['border-top'] = ghostContainer.style['border-bottom'] = 'dashed 1px';
+					}
+					ghostContainer.style.visibility = "visible";
+					
+					var spaceForEachContainer = 62 /*(basicWebComponent.getSize().height / totalGhostContainersOfComp)*/;
+					var emptySpaceTopBeforGhosts = 0; // see if we have room to add some extra pixels to top location - it shows nicer on large components when space is available
+					if (parentCompBounds.height > ghostContainer.totalGhostContainersOfComp * spaceForEachContainer + 30) emptySpaceTopBeforGhosts = 30;
+					
+					// the 20 extra pixels on location left/top are to compensate for content area padding
+					ghostContainer.style.left = (parentCompBounds.left + 20) + "px";
+					ghostContainer.style.top = (parentCompBounds.top + ghostContainer.containerPositionInComp * spaceForEachContainer + emptySpaceTopBeforGhosts + 20) + "px";
+					ghostContainer.style.width = parentCompBounds.width + "px";
+					ghostContainer.style.height = spaceForEachContainer + "px";
+				}
+				
 				if (!$scope.isAbsoluteFormLayout()) {
 					if (realContainerPromise == null) {
 						var p = getRealContainerElement(ghostContainer.uuid);
@@ -293,17 +310,23 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							realContainerPromise = p;
 							p.then(function(parent) {
 								realContainerPromise = null;
-								getBounds(ghostContainer, parent);
+								showAndPositionGhostContainer(ghostContainer, parent.getBoundingClientRect());
+								ghostContainer.style.display = "block";
 							}, function() {
 								realContainerPromise = null;
 								ghostContainer.style.display = "none";
 							});
 						} else {
-							getBounds(ghostContainer, p);
+							showAndPositionGhostContainer(ghostContainer, p.getBoundingClientRect());
+							ghostContainer.style.display = "block";
 						}
 					}
 				} else {
-					if (ghostContainer.style == undefined) {
+					if (typeof ghostContainer.containerPositionInComp != "undefined") {
+						if (!ghostContainer.style) {
+							showAndPositionGhostContainer(ghostContainer, ghostContainer.parentCompBounds);
+						}
+					} else {
 						//TODO refactor out this 20px addition
 						return {
 							display: "block",
@@ -313,7 +336,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							height: $scope.contentStyle.height
 						};
 					}
-					ghostContainer.style.display = "block";
+					if (ghostContainer.style) ghostContainer.style.display = "block";
 				}
 				return ghostContainer.style;
 			}
@@ -392,28 +415,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 			}
 
-			$scope.rearrangeGhosts = function(ghosts) {
-				var overflow = 0;
-				for (var i = 0; i < ghosts.length; i++) {
-					var ghost = ghosts[i];
-					var prevGhost = i > 0 ? ghosts[i - 1] : undefined;
-					if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
-						if ($('[svy-id="' + ghost.uuid + '"]')[0]) {
-							var element = $('[svy-id="' + ghost.uuid + '"]')[0];
-							var width = element.scrollWidth;
-							if (prevGhost != undefined && ghost.location.y == prevGhost.location.y) {
-								ghost.location.x += overflow;
-							}
-							if (width > ghost.size.width) {
-								overflow += width - ghost.size.width;
-								ghost.size.width = width;
-							}
-						}
-					}
-				}
-				return true;
-			}
-
 			$scope.openContainedForm = function(ghost) {
 				if (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART) {
 					$editorService.openContainedForm(ghost);
@@ -479,7 +480,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					// nop
 				} else {
 					ghost.size.height = ghost.size.height + deltaHeight;
+					if(ghost.size.height < 0) ghost.size.height = 0;
 					ghost.size.width = ghost.size.width + deltaWidth;
+					if(ghost.size.width < 0) ghost.size.width = 0;
 				}
 			}
 
@@ -785,14 +788,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			function equalGhosts(ghosts1, ghosts2) {
-				if(ghosts1 && ghosts1.ghostContainers && ghosts2 && ghosts2.ghostContainers && (ghosts1.ghostContainers.length == ghosts2.ghostContainers.length)) {
+				if (ghosts1 && ghosts1.ghostContainers && ghosts2 && ghosts2.ghostContainers && (ghosts1.ghostContainers.length == ghosts2.ghostContainers.length)) {
 					for (var i = 0; i < ghosts1.ghostContainers.length; i++) {
-						if(ghosts1.ghostContainers[i].uuid != ghosts2.ghostContainers[i].uuid ||
+						if (ghosts1.ghostContainers[i].uuid != ghosts2.ghostContainers[i].uuid ||
 							ghosts1.ghostContainers[i].ghosts.length != ghosts2.ghostContainers[i].ghosts.length) {
 							return false;
 						}
 						for (var j = 0; j < ghosts1.ghostContainers[i].ghosts.length; j++) {
-							if(ghosts1.ghostContainers[i].ghosts[j].uuid != ghosts2.ghostContainers[i].ghosts[j].uuid) {
+							if (ghosts1.ghostContainers[i].ghosts[j].uuid != ghosts2.ghostContainers[i].ghosts[j].uuid || ghosts1.ghostContainers[i].ghosts[j].text != ghosts2.ghostContainers[i].ghosts[j].text) {
 								return false;
 							}
 						}
@@ -800,6 +803,37 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					return true;
 				}
 				return false;
+			}
+
+			function rearrangeGhosts(ghosts, attemptNo) {
+				// timeout is needed here because new ghost content needs to get rendered after angular digest cycle updates their inline style
+				$timeout(function() {
+					var tryAgain = false;
+					var overflow = 0;
+					for (var i = 0; i < ghosts.length; i++) {
+						var ghost = ghosts[i];
+						var prevGhost = i > 0 ? ghosts[i - 1] : undefined;
+						if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
+							// note: initially, all config ghosts sent from server have a default width of 80px
+							// allow longer content in ghosts
+							var jqElement = $('[svy-id="' + ghost.uuid + '"]');
+							if (jqElement.length > 0) {
+								var width = Math.min(jqElement[0].scrollWidth, 200); // just do limit it to some high enough value (2.5 x default)
+								if (prevGhost != undefined && ghost.location.y == prevGhost.location.y) {
+									ghost.location.x += overflow;
+								}
+								if (width > ghost.size.width) {
+									overflow += width - ghost.size.width;
+									ghost.size.width = width;
+								} else if (width <= 0) tryAgain = true; // not rendered yet?
+							} else tryAgain = true; // not rendered yet?
+						}
+					}
+					
+					// as responsive draws it's ghosts much later then anchored/absolute, we try to wait until we get valid values for ghost element widths from browser
+					// we give up after 5 sec just in case the ghost is not appearing at all for some reason; we don't want to execute timeouts forever
+					if (tryAgain && attemptNo < 51) rearrangeGhosts(ghosts, attemptNo + 1);
+				}, attemptNo == 1 ? 0 : 100);
 			}
 
 			$scope.setGhosts = function(ghosts) {
@@ -811,10 +845,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
 							for (j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
 								if ($scope.ghosts.ghostContainers[i].ghosts[j].type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
-									var changedGhosts = $scope.ghosts.ghostContainers[i].ghosts;
-									$timeout(function() {
-										$scope.rearrangeGhosts(changedGhosts)
-									}, 0);
+									rearrangeGhosts($scope.ghosts.ghostContainers[i].ghosts, 1);
 									break;
 								}
 							}
@@ -1111,10 +1142,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				$scope.setGhosts(result);
 			});
 			
-			function isAllGhostContainersVisible() {
+			function areAllGhostContainersVisible() {
 				if ($scope.ghosts.ghostContainers) {
 					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
-						if(!$scope.ghosts.ghostContainers[i].style  || $scope.ghosts.ghostContainers[i].style.display !== "block") {
+						if (!$scope.ghosts.ghostContainers[i].style || $scope.ghosts.ghostContainers[i].style.display !== "block") {
 							return false;
 						}	
 					}
@@ -1126,7 +1157,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			var windowHeight = 0;
 			var windowWidth = 0;
 			$($window).resize(function() {
-				if (isAllGhostContainersVisible() && ($($window).height() != windowHeight || $($window).width() != windowWidth)) {
+				if (areAllGhostContainersVisible() && ($($window).height() != windowHeight || $($window).width() != windowWidth)) {
 					windowHeight = $($window).height();
 					windowWidth =  $($window).width();
 					$element.trigger('renderDecorators.content');

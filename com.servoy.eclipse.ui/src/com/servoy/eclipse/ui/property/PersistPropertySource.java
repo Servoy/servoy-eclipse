@@ -1461,7 +1461,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 			if (type != -1)
 			{
-				return new PropertyDescriptor(id, displayName)
+				PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
 				{
 					@Override
 					public CellEditor createPropertyEditor(Composite parent)
@@ -1471,6 +1471,15 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						return editor;
 					}
 				};
+				pd.setLabelProvider(new LabelProvider()
+				{
+					@Override
+					public String getText(Object element)
+					{
+						return element == null ? "0" : element.toString();
+					};
+				});
+				return pd;
 			}
 		}
 		return null;

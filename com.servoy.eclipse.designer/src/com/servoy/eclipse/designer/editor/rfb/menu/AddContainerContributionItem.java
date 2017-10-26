@@ -132,8 +132,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof WebComponent)
 		{
-			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
-				((WebComponent)persist).getTypeName());
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((WebComponent)persist).getTypeName());
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			for (PropertyDescription propertyDescription : properties.values())
 			{
@@ -141,6 +140,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 				{
 					addMenuItem(list, null, propertyDescription.getName(),
 						PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType()) + " -> " + propertyDescription.getName());
+					// FIXME we should no longer use name in palette if we know the name from drop target (to be added) in browser ghost containers
 				}
 			}
 		}

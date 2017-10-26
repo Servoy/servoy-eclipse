@@ -18,4 +18,5 @@ Require-Bundle: javax.servlet,
  org.eclipse.ui.workbench,
  org.eclipse.ui,
  org.eclipse.core.expressions,
- com.servoy.eclipse.ui
+ com.servoy.eclipse.ui,
+ org.eclipse.ui.intro

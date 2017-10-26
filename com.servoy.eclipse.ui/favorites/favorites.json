@@ -1,0 +1,22 @@
+[
+{
+	"name":"Store",
+	"icon":"favorites/store.png",
+	"action":"http://org.eclipse.ui.intro/runAction?pluginId=com.servoy.eclipse.designer.wpm&class=com.servoy.eclipse.designer.webpackage.open.OpenWebPackageManagerCommandHandler"
+},
+{
+	"name":"Wiki",
+	"icon":"favorites/wiki.png",
+	"action":"https://wiki.servoy.com/"
+},
+{
+	"name":"Videos",
+	"icon":"favorites/videos.png",
+	"action":"http://www.servoyuniversity.com/"
+},
+{
+	"name":"Community",
+	"icon":"favorites/community.png",
+	"action":"https://forum.servoy.com/"
+}
+]

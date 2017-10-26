@@ -1103,6 +1103,24 @@ public class SolutionExplorerTreeContentProvider
 						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
+					else if (un.getType() == UserNodeType.COMPONENT || un.getType() == UserNodeType.SERVICE || un.getType() == UserNodeType.LAYOUT)
+					{
+						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
+						WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
+						String componentName = spec.getName().contains("-") ? spec.getName().split("-")[1] : null;
+						if (componentName != null)
+						{
+							searchFolderChildren(un, project.getFolder(componentName));
+						}
+						else
+						{
+							ServoyLog.logInfo("cannot find web object name from " + spec.getName());
+						}
+					}
+					else if (un.getType() == UserNodeType.WEB_OBJECT_FOLDER)
+					{
+						searchFolderChildren(un, (IFolder)un.getRealObject());
+					}
 					if (un.children == null)
 					{
 						un.children = new PlatformSimpleUserNode[0];
@@ -1116,6 +1134,26 @@ public class SolutionExplorerTreeContentProvider
 			return un.children;
 		}
 		return new Object[0];
+	}
+
+	private void searchFolderChildren(PlatformSimpleUserNode un, IFolder f)
+	{
+		List<SimpleUserNode> children = new ArrayList<>();
+		try
+		{
+			for (IResource res : f.members(false))
+			{
+				if (res instanceof IFolder)
+				{
+					children.add(new PlatformSimpleUserNode(res.getName(), UserNodeType.WEB_OBJECT_FOLDER, res, uiActivator.loadImageFromBundle("folder.png")));
+				}
+			}
+			un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 	/**
@@ -1556,6 +1594,28 @@ public class SolutionExplorerTreeContentProvider
 					PackageSpecification<WebObjectSpecification> services = provider.getWebObjectSpecifications().get(getPackageName(un));
 					return services != null && !services.getSpecifications().isEmpty();
 				}
+				else if (un.getType() == UserNodeType.COMPONENT || un.getType() == UserNodeType.SERVICE || un.getType() == UserNodeType.LAYOUT)
+				{
+					WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
+					if ("file".equals(spec.getSpecURL().getProtocol()))
+					{
+						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
+						String componentName = spec.getName().contains("-") ? spec.getName().split("-")[1] : null;
+						if (componentName != null)
+						{
+							return hasChildren(project.getFolder(componentName));
+						}
+						else
+						{
+							ServoyLog.logInfo("cannot find web object name from " + spec.getName());
+						}
+					}
+					return false;
+				}
+				else if (un.getType() == UserNodeType.WEB_OBJECT_FOLDER)
+				{
+					return hasChildren((IFolder)un.getRealObject());
+				}
 			}
 			else if (un.children.length > 0)
 			{
@@ -1566,6 +1626,25 @@ public class SolutionExplorerTreeContentProvider
 		else if (parent instanceof UserNode &&
 			(((UserNode)parent).getType() == UserNodeType.TABLE || ((UserNode)parent).getType() == UserNodeType.INMEMORY_DATASOURCE)) return false;
 		return true;
+	}
+
+	private boolean hasChildren(IFolder f)
+	{
+		try
+		{
+			for (IResource res : f.members(false))
+			{
+				if (res instanceof IFolder)
+				{
+					return true;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+		return false;
 	}
 
 

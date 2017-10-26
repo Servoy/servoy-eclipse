@@ -139,7 +139,25 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 				var p2 = lassoMouseSelectPosition;
 				if (Math.abs(p1.left - p2.left) > 1 && Math.abs(p1.top - p2.top) > 1) {
 					var selectedElements = utils.getElementsByRectangle(p1, p2, 100, true, true);
-					editorScope.setSelection(selectedElements);
+					
+					//remove the duplicates if we have both ghost and bean for the same element
+					var selection = selectedElements.slice();
+					for (var i = selectedElements.length -1; i >= 0 ; i--)
+					{
+						if(selectedElements[i].classList.contains("svy-wrapper"))
+						{
+							var beanModel = editorScope.getBeanModel(selectedElements[i]);
+							var svy_id = selectedElements[i].getAttribute("svy-id");
+							var ghost = editorScope.getGhost(svy_id);	
+							if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) continue;
+							if (beanModel && ghost)
+							{
+								selection.splice(i,1)
+							}	
+						}
+					}
+					
+					editorScope.setSelection(selection);
 				}
 				lassoStarted = false;
 				lassoDiv.style.display = 'none';
@@ -358,8 +376,8 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						xMouseDown = event.clientX;
 						yMouseDown = event.clientY;
 					}
-					if (lassoStarted || hasClass(event.target, "contentframe-overlay") || hasClass(event.target, "ghost") ||
-						hasClass(event.target, "knob") || event.target.id == "highlight") {
+					if (lassoStarted || hasClass(event.target, "contentframe-overlay") || hasClass(event.target, "ghostcontainer")
+							|| hasClass(event.target, "ghostContainerPropName") || hasClass(event.target, "ghost") || hasClass(event.target, "knob") || event.target.id == "highlight") {
 						xMouseDown -= editorScope.glasspane.parentElement.offsetLeft;
 						yMouseDown -= editorScope.glasspane.parentElement.offsetTop;
 						xMouseDown += editorScope.glasspane.parentElement.scrollLeft;

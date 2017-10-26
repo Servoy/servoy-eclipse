@@ -338,8 +338,9 @@ public class LinkWithEditorAction extends Action
 
 	private void setProperWebObjectSelection(IFile file, SolutionExplorerTreeContentProvider treeContentProvider)
 	{
-		String packageName = file.getParent().getParent().getName();
-		String webObjectName = file.getName().endsWith(".MF") ? null : file.getParent().getName();
+		String packageName = file.getProject() != null ? file.getProject().getName() : file.getParent().getParent().getName();
+		String webObjectName = file.getProject() != null ? file.getProjectRelativePath().segment(0)
+			: (file.getName().endsWith(".MF") ? null : file.getParent().getName());
 
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		Solution activeSolution = activeProject != null ? activeProject.getSolution() : null;
@@ -394,6 +395,30 @@ public class LinkWithEditorAction extends Action
 								if (n.length == 2 && webObjectName.equals(n[1]))
 								{
 									tree.setSelection(new StructuredSelection(webObjectNode), true);
+									tree.setExpandedState(webObjectNode, true);
+									String[] segments = file.getProjectRelativePath().segments();
+									if (segments.length > 2)
+									{
+										SimpleUserNode treeSelection = webObjectNode;
+										outer : for (int i = 1; i < segments.length - 1; i++)
+										{
+											String segment = segments[i];
+											if (treeContentProvider.getChildren(treeSelection).length > 0)
+											{
+												for (Object c : treeContentProvider.getChildren(treeSelection))
+												{
+													SimpleUserNode child = (SimpleUserNode)c;
+													if (child.getName().equals(segment))
+													{
+														tree.setSelection(new StructuredSelection(child), true);
+														tree.setExpandedState(child, true);
+														treeSelection = child;
+														continue outer;
+													}
+												}
+											}
+										}
+									}
 									Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
 									if (elements != null)
 									{
