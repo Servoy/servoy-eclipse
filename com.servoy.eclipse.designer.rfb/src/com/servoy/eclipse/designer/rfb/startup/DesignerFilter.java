@@ -29,7 +29,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.jar.Manifest;
 
 import javax.servlet.Filter;
@@ -75,6 +77,7 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.SortedList;
 
 /**
  * Filter for designer editor
@@ -543,18 +546,31 @@ public class DesignerFilter implements Filter
 	{
 		List<JSONObject> result = new ArrayList<JSONObject>();
 		Map<String, PropertyDescription> properties = spec.getProperties();
+		Map<String, List<String>> droppableTypesToPropertyNames = new TreeMap<>();
 		for (PropertyDescription propertyDescription : properties.values())
 		{
 			Object configObject = propertyDescription.getConfig();
-			if (configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE)))
+			if (RFBDesignerUtils.isDroppable(propertyDescription, configObject, true))
 			{
-				if (PropertyUtils.isCustomJSONProperty(propertyDescription.getType()))
+				String type = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType());
+				List<String> colunsWithThatType = droppableTypesToPropertyNames.get(type);
+				if (colunsWithThatType == null)
 				{
-					JSONObject json = new JSONObject();
-					json.put("type", PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType()));
-					json.put("propertyName", propertyDescription.getName());
-					result.add(json);
+					colunsWithThatType = new SortedList<>();
+					droppableTypesToPropertyNames.put(type, colunsWithThatType);
 				}
+				colunsWithThatType.add(propertyDescription.getName());
+			}
+		}
+		for (Entry<String, List<String>> e : droppableTypesToPropertyNames.entrySet())
+		{
+			for (String propertyName : e.getValue())
+			{
+				JSONObject json = new JSONObject();
+				if (e.getValue().size() > 1) json.put("multiple", true);
+				json.put("type", e.getKey());
+				json.put("propertyName", propertyName);
+				result.add(json);
 			}
 		}
 		return result;

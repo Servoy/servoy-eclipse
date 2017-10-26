@@ -59,9 +59,9 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 			$pluginRegistry.registerPlugin(function(scope) {
 				editorScope = scope;
 				if (scope.isAbsoluteFormLayout())
-				layoutType = "Absolute-Layout"; // TODO extract as constant, this is a key in the main attributes of the manifest
+					layoutType = "Absolute-Layout"; // TODO extract as constant, this is a key in the main attributes of the manifest
 				else
-				layoutType = "Responsive-Layout";
+					layoutType = "Responsive-Layout";
 				formName = scope.getFormName();
 				loadPalette(formName);
 			});
@@ -73,8 +73,9 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 			};
 
 			/**
+			 * TODO refactor this; currently it is extremely ambiguous
 			* enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.topContainer,layoutName)  for new components from the palette
-			* enterDragMode($event,ghost,null,null,null,ghost,null) for a ghost
+			* enterDragMode($event,ghost.type,null,null,null,ghost.type,null,null,propertyName) for a ghost
 			*/
 			$scope.enterDragMode = function(event, componentName, packageName, tagName, model, type, topContainer,
 				layoutName, propertyName) {
@@ -96,6 +97,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						if (dragClone) {
 						    if (layoutName)
 						   	    editorScope.getEditorContentRootScope().drop_highlight = packageName + "." + layoutName;
+						   	else if (propertyName)
+						   	    editorScope.getEditorContentRootScope().drop_highlight = componentName + "." + type;
 						   	else
 						   	    editorScope.getEditorContentRootScope().drop_highlight = packageName + "." + type;
 						   	editorScope.getEditorContentRootScope().$apply();
