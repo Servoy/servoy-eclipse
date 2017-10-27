@@ -17,8 +17,10 @@
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.swing.Icon;
 
@@ -925,7 +929,7 @@ public class SolutionExplorerTreeContentProvider
 							for (String component : components)
 							{
 								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
-								Image img = loadImageFromFolder(folder, spec.getIcon());
+								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
 								node.parent = un;
@@ -960,12 +964,11 @@ public class SolutionExplorerTreeContentProvider
 						if (components.size() > 0)
 						{
 							Collections.sort(components);
-							IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(packageName);
 							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
 								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
-								Image img = loadImageFromProject(project, spec.getIcon());
+								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
 								node.parent = un;
@@ -976,13 +979,12 @@ public class SolutionExplorerTreeContentProvider
 						if (layouts.size() > 0)
 						{
 							Collections.sort(layouts);
-							IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(packageName);
 							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
-								Image img = loadImageFromProject(project, spec.getIcon());
+								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
 								node.parent = un;
@@ -1031,13 +1033,11 @@ public class SolutionExplorerTreeContentProvider
 							{
 								List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
 								Collections.sort(services);
-								IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
-									SolutionSerializer.SERVICES_DIR_NAME);
 								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
 								for (String component : services)
 								{
 									WebObjectSpecification spec = provider.getWebComponentSpecification(component);
-									Image img = loadImageFromFolder(folder, spec.getIcon());
+									Image img = getIconFromSpec(spec, true);
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 										img != null ? img : serviceDefaultIcon);
 									node.parent = un;
@@ -1059,12 +1059,11 @@ public class SolutionExplorerTreeContentProvider
 							{
 								List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
 								Collections.sort(services);
-								IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(packageName);
 								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
 								for (String component : services)
 								{
 									WebObjectSpecification spec = provider.getWebComponentSpecification(component);
-									Image img = loadImageFromProject(project, spec.getIcon());
+									Image img = getIconFromSpec(spec, true);
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 										img != null ? img : serviceDefaultIcon);
 									node.parent = un;
@@ -1387,8 +1386,27 @@ public class SolutionExplorerTreeContentProvider
 			Display display = Display.getCurrent();
 			try
 			{
-				img = new Image(display, new ImageData(is));
+				img = new Image(display, new ImageData(is).scaledTo(16, 16));
 				if (img != null) imageCache.put(iconFile.getFullPath(), img);
+			}
+			catch (SWTException e)
+			{
+				Debug.log(e);
+			}
+		}
+		return img;
+	}
+
+	private Image loadImageFromInputStream(InputStream is, IPath path)
+	{
+		Image img = imageCache.get(path);
+		if (img == null)
+		{
+			Display display = Display.getCurrent();
+			try
+			{
+				img = new Image(display, new ImageData(is).scaledTo(16, 16));
+				if (img != null) imageCache.put(path, img);
 			}
 			catch (SWTException e)
 			{
@@ -1926,8 +1944,9 @@ public class SolutionExplorerTreeContentProvider
 			{
 				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 				{
+					Image icon = getIconFromSpec(spec, true);
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
-						uiActivator.loadImageFromBundle("plugin.png"), WebServiceScriptable.class);
+						icon != null ? icon : uiActivator.loadImageFromBundle("plugin.png"), WebServiceScriptable.class);
 					plugins.add(node);
 					node.parent = pluginNode;
 				}
@@ -1938,6 +1957,60 @@ public class SolutionExplorerTreeContentProvider
 			else pluginNode.unhide();
 			view.refreshTreeNodeFromModel(pluginNode);
 		}
+	}
+
+	private Image getIconFromSpec(WebObjectSpecification spec, boolean isService)
+	{
+		Image icon = null;
+		if (spec.getIcon() != null)
+		{
+			try
+			{
+				if (!"file".equals(spec.getSpecURL().getProtocol()))
+				{
+					SpecProviderState specProvider = isService ? getServicesSpecProviderState() : getComponentsSpecProviderState();
+					IPackageReader reader = specProvider.getPackageReader(spec.getPackageName());
+					String iconPath = spec.getIcon().replaceFirst(spec.getPackageName() + "/", "");
+					IPath path = new Path(reader.getUrlForPath(iconPath).toURI().toString());
+					icon = imageCache.get(path);
+					if (icon == null)
+					{
+						URI u = reader.getResource().toURI();
+						try (ZipFile zip = new ZipFile(u.toURL().getFile()))
+						{
+							ZipEntry entry = zip.getEntry(iconPath);
+							try (InputStream is = zip.getInputStream(entry))
+							{
+								icon = loadImageFromInputStream(is, path);
+							}
+						}
+						catch (IOException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				else
+				{
+					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(spec.getPackageName());
+					if (project != null)
+					{
+						icon = loadImageFromProject(project, spec.getIcon().replaceFirst(spec.getPackageName(), ""));
+					}
+					else
+					{
+						IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
+							isService ? SolutionSerializer.SERVICES_DIR_NAME : SolutionSerializer.COMPONENTS_DIR_NAME);
+						icon = loadImageFromFolder(folder, spec.getIcon());
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return icon;
 	}
 
 	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss)
