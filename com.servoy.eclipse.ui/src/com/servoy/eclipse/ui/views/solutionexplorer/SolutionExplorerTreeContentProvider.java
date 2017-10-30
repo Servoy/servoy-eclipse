@@ -1409,7 +1409,7 @@ public class SolutionExplorerTreeContentProvider
 			Display display = Display.getCurrent();
 			try
 			{
-				int px = 16 * display.getDPI().y / 96;
+				int px = Math.round(16 * display.getDPI().y / 96f);
 				img = new Image(display, new ImageData(is).scaledTo(px, px));
 				if (img != null) imageCache.put(path, img);
 			}
