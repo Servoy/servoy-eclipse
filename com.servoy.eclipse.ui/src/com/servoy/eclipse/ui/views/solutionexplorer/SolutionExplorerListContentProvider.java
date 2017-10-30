@@ -1586,14 +1586,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (comment == null) return null;
 		String c = comment.replaceAll("/\\*\\*|\\*/", "");
 		c = c.replaceAll("(\\s*)\\*", "$1").trim();
-		c = c.replaceAll(System.getProperty("line.separator"), "<br/>");
+		if (!toHTML) c = c.replaceAll(System.getProperty("line.separator"), "<br/>");
 		if (elementName != null) c = c.replaceAll("%%elementName%%", elementName);
 		if (!toHTML) return c;
 
 		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c));
 		try
 		{
-			return reader.getString();
+			return reader.getString().replaceAll(System.getProperty("line.separator"), "<br/>");
 		}
 		catch (IOException e)
 		{
