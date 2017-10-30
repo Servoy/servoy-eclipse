@@ -178,7 +178,7 @@ public class ChangeParentCommand extends Command
 			{
 				if (targetChild == null)
 				{
-					insertIndex = 0;
+					insertIndex = sortedChildren.size() > 0 ? sortedChildren.size() : 0;
 				}
 				else
 				{
