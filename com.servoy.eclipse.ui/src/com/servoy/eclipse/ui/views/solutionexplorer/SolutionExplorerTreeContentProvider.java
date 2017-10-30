@@ -410,7 +410,14 @@ public class SolutionExplorerTreeContentProvider
 					{
 					}
 				}
-				addPluginsNodeChildren(plugins);
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						addPluginsNodeChildren(plugins);
+					}
+				});
 				return Status.OK_STATUS;
 			}
 		};
@@ -1382,16 +1389,13 @@ public class SolutionExplorerTreeContentProvider
 		Image img = imageCache.get(iconFile.getFullPath());
 		if (img == null && iconFile.exists())
 		{
-			InputStream is = iconFile.getContents();
-			Display display = Display.getCurrent();
-			try
+			try (InputStream is = iconFile.getContents())
 			{
-				img = new Image(display, new ImageData(is).scaledTo(16, 16));
-				if (img != null) imageCache.put(iconFile.getFullPath(), img);
+				img = loadImageFromInputStream(is, iconFile.getFullPath());
 			}
-			catch (SWTException e)
+			catch (IOException ex)
 			{
-				Debug.log(e);
+				Debug.log(ex);
 			}
 		}
 		return img;
@@ -1405,7 +1409,8 @@ public class SolutionExplorerTreeContentProvider
 			Display display = Display.getCurrent();
 			try
 			{
-				img = new Image(display, new ImageData(is).scaledTo(16, 16));
+				int px = 16 * display.getDPI().y / 96;
+				img = new Image(display, new ImageData(is).scaledTo(px, px));
 				if (img != null) imageCache.put(path, img);
 			}
 			catch (SWTException e)
