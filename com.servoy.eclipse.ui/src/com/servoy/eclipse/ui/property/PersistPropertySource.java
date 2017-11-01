@@ -2789,12 +2789,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			try
 			{
 				Object object = null;
-				if (persistContainingFoundsetProperty instanceof IBasicWebObject)
+				if (persistContainingFoundsetProperty instanceof IBasicWebComponent)
 				{
-					IBasicWebObject webObjectContainingFoundsetProperty = (IBasicWebObject)persistContainingFoundsetProperty;
+					IBasicWebComponent webObjectContainingFoundsetProperty = (IBasicWebComponent)persistContainingFoundsetProperty;
 					if (webObjectContainingFoundsetProperty.hasProperty(forFoundsetName))
-						object = ((IBasicWebComponent)persistContainingFoundsetProperty).getProperty(forFoundsetName);
-					else object = ((IBasicWebComponent)persistContainingFoundsetProperty).getPropertyDefaultValueClone(forFoundsetName);
+						object = webObjectContainingFoundsetProperty.getProperty(forFoundsetName);
+					else object = webObjectContainingFoundsetProperty.getPropertyDefaultValueClone(forFoundsetName);
 				}
 				String foundsetValue = null; // default no table
 				if (object instanceof JSONObject)
