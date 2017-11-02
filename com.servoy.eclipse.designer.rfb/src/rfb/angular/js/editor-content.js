@@ -266,7 +266,7 @@ angular.module('editorContent',['servoyApp'])
 	  	  var drop = $scope.drop_highlight.split(".");
 	  	  if (arguments.length == 2 && arguments[1] instanceof Array)
 	  	  {
-	  		  return arguments[1].indexOf(drop[1]) >= 0 ;
+	  		  return arguments[1].indexOf(drop[1]) >= 0 && arguments[0] == drop[0];
 	  	  }	  
 	  	  var allowedChildren = $rootScope.allowedChildren[arguments[0]];
 	  	  if (allowedChildren.indexOf(drop[1]) >= 0) return true; //component

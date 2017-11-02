@@ -70,10 +70,12 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
@@ -764,9 +766,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		else
 		{
-			String component = spec.getName().split("-")[1] + "/";
+			String component = (spec.getName().contains("-") ? spec.getName().split("-")[1] : spec.getDefinition().split("/")[0]) + "/";
 			List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
-			try (ZipFile zip = new ZipFile(spec.getSpecURL().getFile().substring(6, spec.getSpecURL().getFile().lastIndexOf("!"))))
+			IPackageReader reader = WebComponentSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
+			if (reader == null) reader = WebServiceSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
+			try (ZipFile zip = new ZipFile(reader.getResource().toURI().toURL().getFile()))
 			{
 				Enumeration< ? extends ZipEntry> e = zip.entries();
 				while (e.hasMoreElements())
@@ -848,7 +852,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (resource.getType() == IResource.FILE)
 				{
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + resource.getName(), UserNodeType.COMPONENT_RESOURCE, resource,
-						uiActivator.loadImageFromBundle("js.png"));
+						getIcon(resource.getName()));
 					list.add(node);
 				}
 			}
@@ -1655,14 +1659,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (comment == null) return null;
 		String c = comment.replaceAll("/\\*\\*|\\*/", "");
 		c = c.replaceAll("(\\s*)\\*", "$1").trim();
-		c = c.replaceAll(System.getProperty("line.separator"), "<br/>");
+		if (!toHTML) c = c.replaceAll(System.getProperty("line.separator"), "<br/>");
 		if (elementName != null) c = c.replaceAll("%%elementName%%", elementName);
 		if (!toHTML) return c;
 
 		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c));
 		try
 		{
-			return reader.getString();
+			return reader.getString().replaceAll(System.getProperty("line.separator"), "<br/>");
 		}
 		catch (IOException e)
 		{

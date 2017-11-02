@@ -38,12 +38,12 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
-import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.VisiblePropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.rfb.startup.RFBDesignerUtils;
 import com.servoy.eclipse.designer.util.DeveloperUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -696,17 +696,7 @@ public class GhostHandler implements IServerService
 
 	public static boolean isDroppable(PropertyDescription propertyDescription, Object rootPropConfigObject)
 	{
-		IPropertyType< ? > type = propertyDescription.getType();
-		return PropertyUtils.isCustomJSONArrayPropertyType(type)
-			? isDroppableElement(((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition(), rootPropConfigObject)
-			: isDroppableElement(propertyDescription, rootPropConfigObject);
-	}
-
-	public static boolean isDroppableElement(PropertyDescription propertyDescription, Object rootPropConfigObject)
-	{
-		IPropertyType< ? > type = propertyDescription.getType();
-		return propertyDescription instanceof WebObjectSpecification || type instanceof ComponentPropertyType || (rootPropConfigObject instanceof JSONObject &&
-			Boolean.TRUE.equals(((JSONObject)rootPropConfigObject).opt(FormElement.DROPPABLE)) && PropertyUtils.isCustomJSONObjectProperty(type));
+		return RFBDesignerUtils.isDroppable(propertyDescription, rootPropConfigObject);
 	}
 
 }

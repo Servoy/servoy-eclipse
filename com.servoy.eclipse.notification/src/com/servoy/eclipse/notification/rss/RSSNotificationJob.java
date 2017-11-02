@@ -48,7 +48,7 @@ public class RSSNotificationJob extends Job
 {
 	private static final long CHECK_INTERVAL = 60000 * 30; // 30 min
 	
-	private static final String RSS = "http://developer.servoy.com/servoy.rss";
+	private static final String RSS = "https://servoy.com/category/developer-news/feed/";
 	
 	private boolean running = true;
 	

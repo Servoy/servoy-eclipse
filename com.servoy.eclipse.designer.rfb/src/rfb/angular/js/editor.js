@@ -480,9 +480,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					// nop
 				} else {
 					ghost.size.height = ghost.size.height + deltaHeight;
-					if(ghost.size.height < 0) ghost.size.height = 0;
+					if(ghost.size.height < 1) ghost.size.height = 1;
 					ghost.size.width = ghost.size.width + deltaWidth;
-					if(ghost.size.width < 0) ghost.size.width = 0;
+					if(ghost.size.width < 1) ghost.size.width = 1;
 				}
 			}
 

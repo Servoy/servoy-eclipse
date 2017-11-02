@@ -1,5 +1,5 @@
 angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginRegistry, $selectionUtils,
-	EDITOR_CONSTANTS) {
+	EDITOR_CONSTANTS, $editorService) {
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var selectedNodeMouseEvent;
 		var lassoStarted = false;
@@ -81,7 +81,22 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 		}
 
 		function onmousedown(event) {
-			var node = utils.getNode(event);
+			var node = utils.getNode(event, false, false, true);
+			var nonSelectableNode;
+			if(node instanceof Array) {
+				nonSelectableNode = node[1]
+				node = node[0];
+			}
+			if(nonSelectableNode) {
+				var message = nonSelectableNode.getAttribute("svy-non-selectable");
+				if(message == "noname") {
+					$editorService.setStatusBarText("Can't select a component without a name.");
+					node = null;
+				}
+			}
+			else {
+				$editorService.setStatusBarText(null);
+			}
 			if (node) {
 				if (editorScope.getSelection().indexOf(node) !== -1) {
 					// its in the current selection, remember this for mouse up.
@@ -391,7 +406,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						"top": yMouseDown
 					};
 				},
-				getNode: function(event, skipGlass, skipNodeId) {
+				getNode: function(event, skipGlass, skipNodeId, returnNonSelectable) {
 					var glassPaneMousePosition = this.getMousePosition(event);
 					var glassPaneMousePosition1 = {
 						top: glassPaneMousePosition.top + 1,
@@ -401,17 +416,24 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						top: glassPaneMousePosition.top - 1,
 						left: glassPaneMousePosition.left - 1
 					};
+					var nonSelectableNode;
 					var elements = this.getElementsByRectangle(glassPaneMousePosition1, glassPaneMousePosition2, 0.000001, true, !skipGlass, skipNodeId);
 
 					if (elements.length == 1) {
 						if (!(angular.element(elements[0]).is("[svy-non-selectable]")))
 							return elements[0];
+						else {
+							nonSelectableNode = elements[0]; 
+						}
 					}
 					else if (elements.length > 1) {
 						var node = elements[elements.length - 1];
 						var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM && !(angular.element(elements[elements.length - 2]).is("[svy-non-selectable]"))) {
 							return elements[elements.length - 2];
+						}
+						else {
+							nonSelectableNode = elements[elements.length - 2];
 						}
 						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
 						{
@@ -452,18 +474,28 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 							}
 							if (maxElemIndex > minGroupIndex)
 							{
-								return elements[idx];
+								if(returnNonSelectable && nonSelectableNode) {
+									return [elements[idx], nonSelectableNode];
+								}
+								else return elements[idx];
 							}
 						}
 							
 						// always return the one on top (visible); this is due to formIndex implementation
 						for (var i=elements.length;--i;) {
-							if (!(angular.element(elements[i]).is("[svy-non-selectable]")))
-								return elements[i];
+							if (!(angular.element(elements[i]).is("[svy-non-selectable]"))) {
+								if(returnNonSelectable && nonSelectableNode) {
+									return [elements[i], nonSelectableNode];
+								}
+								else return elements[i];
+							}
+							else {
+								nonSelectableNode = elements[i];
+							}
 						}
 					}
 
-					return null;
+					return (returnNonSelectable && nonSelectableNodenull) ? [null, nonSelectableNode] : null;
 				},
 				
 				isUnknownElement: function(element) {

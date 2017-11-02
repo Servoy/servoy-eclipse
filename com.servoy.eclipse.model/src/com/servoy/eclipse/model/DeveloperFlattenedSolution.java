@@ -20,16 +20,22 @@ package com.servoy.eclipse.model;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.EnumDataProvider;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -48,6 +54,10 @@ import com.servoy.j2db.util.Utils;
  */
 public class DeveloperFlattenedSolution extends FlattenedSolution
 {
+	private volatile Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
+	private volatile Map<Form, String> formToDataSource = new HashMap<>();
+	private static final String DATASOURCE_NULL = "";
+
 	public DeveloperFlattenedSolution(boolean cacheFlattenedForms)
 	{
 		super(cacheFlattenedForms);
@@ -148,5 +158,87 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	public IServer getServer(String dataSource)
 	{
 		return (IServer)ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(dataSource);
+	}
+
+	@Override
+	public synchronized void flushAllCachedData()
+	{
+		super.flushAllCachedData();
+		formCacheByDataSource.put(DATASOURCE_NULL, null);
+	}
+
+	@Override
+	public void itemChanged(IPersist persist)
+	{
+		super.itemChanged(persist);
+		if (persist instanceof Form)
+		{
+			updateDataSourceCache((Form)persist);
+		}
+	}
+
+	private void updateDataSourceCache(Form form)
+	{
+		String oldDataSource = formToDataSource.get(form);
+		String newDataSource = form.getDataSource();
+		if (oldDataSource != null && !oldDataSource.equals(newDataSource) || oldDataSource == null && newDataSource != null)
+		{
+			getForms(oldDataSource).remove(form);
+			getForms(newDataSource).add(form);
+			formToDataSource.put(form, newDataSource);
+		}
+		getForms(null).add(form);
+	}
+
+	@Override
+	public Set<Form> getForms(String datasource)
+	{
+		String ds = datasource == null ? DATASOURCE_NULL : datasource;
+		if (formCacheByDataSource.get(ds) == null)
+		{
+			formCacheByDataSource.put(ds, super.getForms(datasource));
+		}
+		return formCacheByDataSource.get(ds);
+	}
+
+	@Override
+	public void itemCreated(IPersist persist)
+	{
+		super.itemCreated(persist);
+		if (persist instanceof Form)
+		{
+			Form form = (Form)persist;
+			getForms(null).add(form);
+			getForms(form.getDataSource()).add(form);
+		}
+	}
+
+	@Override
+	public void itemRemoved(IPersist persist)
+	{
+		super.itemRemoved(persist);
+		if (persist instanceof Form)
+		{
+			getForms(null).remove(persist);
+			getForms(((Form)persist).getDataSource()).remove(persist);
+		}
+	}
+
+	@Override
+	protected void fillFormCaches()
+	{
+		super.fillFormCaches();
+		if (formCacheByDataSource.get(DATASOURCE_NULL) == null) //cache all forms
+		{
+			Set<Form> allforms = new TreeSet<Form>(NameComparator.INSTANCE);
+			Iterator<Form> it = Solution.getForms(getAllObjectsAsList(), null, true);
+			while (it.hasNext())
+			{
+				Form f = it.next();
+				allforms.add(f);
+				formToDataSource.put(f, f.getDataSource());
+			}
+			formCacheByDataSource.put(DATASOURCE_NULL, allforms);
+		}
 	}
 }
