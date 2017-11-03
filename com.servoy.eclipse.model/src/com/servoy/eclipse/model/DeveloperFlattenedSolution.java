@@ -56,7 +56,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 {
 	private volatile Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
 	private volatile Map<Form, String> formToDataSource = new HashMap<>();
-	private static final String DATASOURCE_NULL = "";
+	private static final String ALL_FORMS = "";
 
 	public DeveloperFlattenedSolution(boolean cacheFlattenedForms)
 	{
@@ -164,7 +164,8 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	public synchronized void flushAllCachedData()
 	{
 		super.flushAllCachedData();
-		formCacheByDataSource.put(DATASOURCE_NULL, null);
+		formCacheByDataSource.clear();
+		formToDataSource.clear();
 	}
 
 	@Override
@@ -193,7 +194,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	@Override
 	public Set<Form> getForms(String datasource)
 	{
-		String ds = datasource == null ? DATASOURCE_NULL : datasource;
+		String ds = datasource == null ? ALL_FORMS : datasource;
 		if (formCacheByDataSource.get(ds) == null)
 		{
 			formCacheByDataSource.put(ds, super.getForms(datasource));
@@ -209,6 +210,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 		{
 			Form form = (Form)persist;
 			getForms(null).add(form);
+			formToDataSource.put(form, form.getDataSource());
 			getForms(form.getDataSource()).add(form);
 		}
 	}
@@ -220,6 +222,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 		if (persist instanceof Form)
 		{
 			getForms(null).remove(persist);
+			formToDataSource.remove(persist);
 			getForms(((Form)persist).getDataSource()).remove(persist);
 		}
 	}
@@ -228,7 +231,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	protected void fillFormCaches()
 	{
 		super.fillFormCaches();
-		if (formCacheByDataSource.get(DATASOURCE_NULL) == null) //cache all forms
+		if (formCacheByDataSource.get(ALL_FORMS) == null) //cache all forms
 		{
 			Set<Form> allforms = new TreeSet<Form>(NameComparator.INSTANCE);
 			Iterator<Form> it = Solution.getForms(getAllObjectsAsList(), null, true);
@@ -238,7 +241,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 				allforms.add(f);
 				formToDataSource.put(f, f.getDataSource());
 			}
-			formCacheByDataSource.put(DATASOURCE_NULL, allforms);
+			formCacheByDataSource.put(ALL_FORMS, allforms);
 		}
 	}
 }
