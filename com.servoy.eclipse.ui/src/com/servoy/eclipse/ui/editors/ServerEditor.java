@@ -646,9 +646,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		wikiLinkWrapper.setExtraWidth(10); // workaround for a SWT-native bug on Mac where the FormText reports less preferred width then it actually needs and then when painting it wraps
 		FormText wikiLink = wikiLinkWrapper.getWrappedControl();
 		wikiLink.setHyperlinkSettings(hyperlinkSettings);
-		wikiLink.setText(
-			"<form><p>See <a href='https://wiki.servoy.com/display/public/DOCS/Database+Connections'>wiki page</a> for more information...</p></form>", true,
-			true);
+		wikiLink.setText("<form><p>See <a href='https://wiki.servoy.com/display/DOCS/Database+Connections'>wiki page</a> for more information...</p></form>",
+			true, true);
 		wikiLink.addHyperlinkListener(hyperLinkNativeOpenHandler);
 
 		enableButtons();
