@@ -317,6 +317,14 @@ public class ElementResolver implements IElementResolver
 	@SuppressWarnings("restriction")
 	public Member resolveElement(ITypeInfoContext context, String name)
 	{
+		Set<Member> members = resolveElements(context, name);
+		return members != null && !members.isEmpty() ? members.iterator().next() : null;
+	}
+
+	@Override
+	public Set<Member> resolveElements(ITypeInfoContext context, String name)
+	{
+		Set<Member> members = new HashSet<Member>();
 		if (TypeCreator.BASE_TYPES.contains(name)) return null;
 
 		FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
@@ -331,7 +339,7 @@ public class ElementResolver implements IElementResolver
 			property.setReadOnly(true);
 			property.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.GLOBALS);
 			property.setType(context.getTypeRef("Scope<" + fs.getSolution().getName() + "/globals>"));
-			return property;
+			members.add(property);
 		}
 
 		if ("_super".equals(name))
@@ -347,7 +355,7 @@ public class ElementResolver implements IElementResolver
 					property.setDescription(TypeCreator.getDoc("_super", com.servoy.j2db.documentation.scripting.docs.Form.class, null));
 					property.setAttribute(TypeCreator.LAZY_VALUECOLLECTION, superForm);
 					property.setAttribute(ValueCollectionProvider.SUPER_SCOPE, Boolean.TRUE);
-					return property;
+					members.add(property);
 				}
 			}
 			return null;
@@ -359,7 +367,7 @@ public class ElementResolver implements IElementResolver
 			property.setName(name);
 			property.setReadOnly(true);
 			property.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
-			return property;
+			members.add(property);
 		}
 		else if ("$".equals(name))
 		{
@@ -369,7 +377,7 @@ public class ElementResolver implements IElementResolver
 			method.getParameters().add(param);
 			method.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
 			method.setName("$");
-			return method;
+			members.add(method);
 		}
 
 		// try to resolve first based on existing types as defined by TypeCreator (so that deprecated & other things are in sync)
@@ -382,8 +390,7 @@ public class ElementResolver implements IElementResolver
 				// globals.js (or other scope)
 				Type type = context.getType("Scope<" + fs.getSolution().getName() + "/" +
 					path.segment(0).substring(0, path.segment(0).length() - SolutionSerializer.JS_FILE_EXTENSION.length()) + '>');
-				Member m = TypeCreator.getMember(name, type);
-				if (m != null) return m;
+				members.addAll(TypeCreator.getMembers(name, type));
 			}
 			else if (path.segmentCount() == 2 && path.segment(0).equals(SolutionSerializer.FORMS_DIR))
 			{
@@ -392,28 +399,31 @@ public class ElementResolver implements IElementResolver
 				if (form != null)
 				{
 					Type type = context.getType("RuntimeForm<" + form.getName() + '>');
-					Member m = TypeCreator.getMember(name, type);
-					if (m != null)
+					Set<Member> set = TypeCreator.getMembers(name, type);
+					for (Member m : set)
 					{
-						boolean memberTypeVisible = true;
-						JSType memberType = m.getType();
-						if (memberType instanceof SimpleType)
+						if (m != null)
 						{
-							memberTypeVisible = ((SimpleType)memberType).getTarget().isVisible();
+							boolean memberTypeVisible = true;
+							JSType memberType = m.getType();
+							if (memberType instanceof SimpleType)
+							{
+								memberTypeVisible = ((SimpleType)memberType).getTarget().isVisible();
+							}
+							if (!m.isVisible() && memberTypeVisible)
+							{
+								m = TypeCreator.clone(m, null);
+								m.setVisible(true);
+								m.setVisibility(Visibility.PUBLIC);
+							}
+							else if (!memberTypeVisible && m.isVisible())
+							{
+								m = TypeCreator.clone(m, null);
+								m.setVisible(false);
+								m.setVisibility(Visibility.INTERNAL);
+							}
+							members.add(m);
 						}
-						if (!m.isVisible() && memberTypeVisible)
-						{
-							m = TypeCreator.clone(m, null);
-							m.setVisible(true);
-							m.setVisibility(Visibility.PUBLIC);
-						}
-						else if (!memberTypeVisible && m.isVisible())
-						{
-							m = TypeCreator.clone(m, null);
-							m.setVisible(false);
-							m.setVisibility(Visibility.INTERNAL);
-						}
-						return m;
 					}
 				}
 			}
@@ -429,8 +439,7 @@ public class ElementResolver implements IElementResolver
 						Type type = context.getType(FoundSet.JS_FOUNDSET + '<' + table.getDataSource() + '>');
 						if (type != null)
 						{
-							Member m = TypeCreator.getMember(name, type);
-							if (m != null) return m;
+							members.addAll(TypeCreator.getMembers(name, type));
 						}
 					}
 				}
@@ -551,7 +560,7 @@ public class ElementResolver implements IElementResolver
 								// for now type can be null for media
 								Property property = TypeCreator.createProperty(name, readOnly, (JSType)null, null, image, resource);
 								property.setHideAllowed(hideAllowed);
-								return property;
+								members.add(property);
 							}
 						}
 						else if (isCalculationResource(context) && name.equals("getDataSource"))
@@ -560,7 +569,7 @@ public class ElementResolver implements IElementResolver
 							method.setName(name);
 							method.setType(TypeUtil.ref(ITypeNames.STRING));
 							method.setAttribute(TypeCreator.IMAGE_DESCRIPTOR, TypeCreator.METHOD);
-							return method;
+							members.add(method);
 						}
 						else if (isFoundsetResource(context))
 						{
@@ -568,7 +577,7 @@ public class ElementResolver implements IElementResolver
 							Member member = new TypeMemberQuery(foundsetType).findMember(name);
 							if (member != null)
 							{
-								return member;
+								members.add(member);
 							}
 						}
 					}
@@ -606,9 +615,9 @@ public class ElementResolver implements IElementResolver
 				property.setDeprecated(type.isDeprecated());
 				property.setVisible(type.isVisible());
 			}
-			return property;
+			members.add(property);
 		}
-		return null;
+		return members;
 	}
 
 	/**
