@@ -766,29 +766,32 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		else
 		{
-			String component = (spec.getName().contains("-") ? spec.getName().split("-")[1] : spec.getDefinition().split("/")[0]) + "/";
-			List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
-			IPackageReader reader = WebComponentSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
-			if (reader == null) reader = WebServiceSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
-			try (ZipFile zip = new ZipFile(reader.getResource().toURI().toURL().getFile()))
+			String folderName = spec.getDefinition() != null && spec.getDefinition().split("/").length == 3 ? spec.getDefinition().split("/")[1] + "/" : null;
+			if (folderName != null)
 			{
-				Enumeration< ? extends ZipEntry> e = zip.entries();
-				while (e.hasMoreElements())
+				List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
+				IPackageReader reader = WebComponentSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
+				if (reader == null) reader = WebServiceSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
+				try (ZipFile zip = new ZipFile(reader.getResource().toURI().toURL().getFile()))
 				{
-					ZipEntry entry = e.nextElement();
-					if (entry.getName().startsWith(component) && !entry.isDirectory())
+					Enumeration< ? extends ZipEntry> e = zip.entries();
+					while (e.hasMoreElements())
 					{
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getName().replaceFirst(component, ""), UserNodeType.ZIP_RESOURCE, null,
-							getIcon(entry.getName()));
-						list.add(node);
+						ZipEntry entry = e.nextElement();
+						if (entry.getName().startsWith(folderName) && !entry.isDirectory())
+						{
+							PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getName().replaceFirst(folderName, ""), UserNodeType.ZIP_RESOURCE,
+								null, getIcon(entry.getName()));
+							list.add(node);
+						}
 					}
 				}
+				catch (IOException e)
+				{
+					ServoyLog.logError(e);
+				}
+				return list.toArray(new SimpleUserNode[list.size()]);
 			}
-			catch (IOException e)
-			{
-				ServoyLog.logError(e);
-			}
-			return list.toArray(new SimpleUserNode[list.size()]);
 		}
 		return new SimpleUserNode[0];
 	}

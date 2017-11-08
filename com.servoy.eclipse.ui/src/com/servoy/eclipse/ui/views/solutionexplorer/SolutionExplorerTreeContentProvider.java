@@ -1113,10 +1113,10 @@ public class SolutionExplorerTreeContentProvider
 					{
 						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
 						WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
-						String componentName = spec.getName().contains("-") ? spec.getName().split("-")[1] : null;
-						if (componentName != null)
+						String folderName = spec.getDefinition()!= null && spec.getDefinition().split("/").length == 3 ?spec.getDefinition().split("/")[1] : null;
+						if (folderName != null)
 						{
-							searchFolderChildren(un, project.getFolder(componentName));
+							searchFolderChildren(un, project.getFolder(folderName));
 						}
 						else
 						{
@@ -1623,10 +1623,10 @@ public class SolutionExplorerTreeContentProvider
 					if ("file".equals(spec.getSpecURL().getProtocol()))
 					{
 						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
-						String componentName = spec.getName().contains("-") ? spec.getName().split("-")[1] : null;
-						if (componentName != null)
+						String folderName = spec.getDefinition()!= null && spec.getDefinition().split("/").length == 3 ?spec.getDefinition().split("/")[1] : null;
+						if (folderName != null)
 						{
-							return hasChildren(project.getFolder(componentName));
+							return hasChildren(project.getFolder(folderName));
 						}
 						else
 						{
@@ -1655,6 +1655,11 @@ public class SolutionExplorerTreeContentProvider
 	{
 		try
 		{
+			if (!f.exists())
+			{
+				ServoyLog.logInfo("Web object folder " + f.getFullPath().toString() + " does not exist");
+				return false;
+			}
 			for (IResource res : f.members(false))
 			{
 				if (res instanceof IFolder)
