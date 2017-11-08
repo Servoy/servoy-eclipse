@@ -1,0 +1,28 @@
+/* ------------ BEGIN: standard ngclient css; contains rules that will be helpful in most cases; they are here - in solution media - so that they can be altered/removed easier ------------ */
+
+/*
+ * In responsive layouts, when you nest multiple forms using tab panels or other types of container-components it may happen that a tab/child form that
+ * has in it directly "row" layout containers (so no root layout "container" or layout "container-fluid") shows unwanted scroll-bars.
+ * That happens because bootstrap requires that all 'row' divs must either be put in a 'container', a 'container-fluid' or in a 'column', while in the case of a tabpanel for example the parent dom Element
+ * is just some intermediate div.
+ *
+ * Because 'row' has negative margins of -15px and parent intermediate div might not have padding of 15px, the scrollbars can appear (if that div has overflow: auto). For example:
+ *
+ * container
+ *   row
+ *     column
+ *       div style="overflow: auto" // the intermediate div of container-component
+ *         row // results in a scrollbar because of margin -15px
+ *           columns
+ *
+ * The problem does not appear when a 'row' is inside a 'column', a 'container' or a 'container fluid' - because those have a padding of 15px defined. However, bootstrap doesn't allow nesting of containers
+ * in it's layout docs - so adding a container layout as root of child/contained form is not an option.
+ *
+ * But as the tabpanel might want to contain absolute forms as well (for example), that div cannot always set a 15px padding - as that might not be necessary... So we just need to change the margins of such rows.
+ */
+div:not(.container):not(.container-fluid):not([class^="col-xs-"]):not([class^="col-sm-"]):not([class^="col-md-"]):not([class^="col-lg-"]) > .row {
+	margin-right: 0;
+	margin-left: 0;
+}
+
+/* ------------ END: standard ngclient css ------------ */

@@ -65,6 +65,9 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class NewStylesheetWizard extends Wizard implements INewWizard
 {
+
+	private static final String IMPORT_STANDARD_NGCLIENT_CSS = "@import \"standard_ngclient.css\";\n\n";
+
 	public static final String ID = "com.servoy.eclipse.ui.NewStyleheetWizard";
 
 	private NewStyleWizardPage page1;
@@ -151,9 +154,18 @@ public class NewStylesheetWizard extends Wizard implements INewWizard
 		}
 	}
 
-	public InputStream getSampleStyleContent()
+	protected String getSampleStyleContent()
 	{
-		return this.getClass().getResourceAsStream("default_ngstyle.css");
+		// TODO is defaultCharset always right here?
+		return Utils.getTXTFileContent(this.getClass().getResourceAsStream("sample_ngstyle.css"), Charset.defaultCharset());
+	}
+
+	protected String getStandardStyleContent()
+	{
+		// rules that all should have but they are not in servoy css directly to make them easier to change by developers as needed
+
+		// TODO is defaultCharset always right here?
+		return Utils.getTXTFileContent(this.getClass().getResourceAsStream("standard_ngstyle.css"), Charset.defaultCharset());
 	}
 
 	@Override
@@ -165,14 +177,30 @@ public class NewStylesheetWizard extends Wizard implements INewWizard
 			String mediaPath = page1.solution + "/" + SolutionSerializer.MEDIAS_DIR + "/" + page1.path;
 			if (page1.path.length() > 0) mediaPath += "/";
 			wsa.createFolder(mediaPath);
-			IPath path = new Path(mediaPath + page1.styleName + ".css");
-			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-			if (file != null && !file.exists())
+			IPath solutionCSSPath = new Path(mediaPath + page1.styleName + ".css");
+			IFile solutionCSSFile = ResourcesPlugin.getWorkspace().getRoot().getFile(solutionCSSPath);
+			if (solutionCSSFile != null && !solutionCSSFile.exists())
 			{
-				InputStream inputStream = page2.useSampleContent ? getSampleStyleContent() : new ByteArrayInputStream(new byte[0]);
-				file.create(inputStream, false, null);
+				String cssContent = page2.useSampleContent ? getSampleStyleContent() : "";
+				if (page2.useStandardContent)
+				{
+					// import standard css in solution css
+					cssContent = IMPORT_STANDARD_NGCLIENT_CSS + cssContent;
+
+					// write standard css in solution if not already present, next to the solution css
+					IPath standardCSSPath = new Path(mediaPath + "standard_ngclient.css");
+					IFile standardCSSFile = ResourcesPlugin.getWorkspace().getRoot().getFile(standardCSSPath);
+					if (standardCSSFile != null && !standardCSSFile.exists())
+					{
+						InputStream inputStream = new ByteArrayInputStream(getStandardStyleContent().getBytes()); // uses default charset
+						standardCSSFile.create(inputStream, false, null);
+						inputStream.close();
+					}
+				}
+				InputStream inputStream = new ByteArrayInputStream(cssContent.getBytes()); // uses default charset
+				solutionCSSFile.create(inputStream, false, null);
 				inputStream.close();
-				EditorUtil.openFileEditor(file);
+				EditorUtil.openFileEditor(solutionCSSFile);
 			}
 		}
 		catch (Exception e)
@@ -387,7 +415,11 @@ public class NewStylesheetWizard extends Wizard implements INewWizard
 	{
 
 		private boolean useSampleContent = true;
-		private Button useOrNot;
+		private Button useSampleContentButton;
+
+		private boolean useStandardContent = true;
+		private Button useStandardContentButton;
+
 		private Text textArea;
 
 		/**
@@ -402,18 +434,6 @@ public class NewStylesheetWizard extends Wizard implements INewWizard
 			setDescription("- choose the initial content of the new stylesheet");
 		}
 
-		public String getInitialStyleContent()
-		{
-			if (useSampleContent)
-			{
-				return Utils.getTXTFileContent(getSampleStyleContent(), Charset.defaultCharset());
-			}
-			else
-			{
-				return "";
-			}
-		}
-
 		public void createControl(Composite parent)
 		{
 			initializeDialogUnits(parent);
@@ -423,22 +443,37 @@ public class NewStylesheetWizard extends Wizard implements INewWizard
 			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 			setControl(topLevel);
 
-			// check box
-			useOrNot = new Button(topLevel, SWT.CHECK);
-			useOrNot.setText("Fill new stylesheet with sample content");
-			useOrNot.setSelection(true);
-			useOrNot.addSelectionListener(new SelectionAdapter()
+			// use sample check box
+			useSampleContentButton = new Button(topLevel, SWT.CHECK);
+			useSampleContentButton.setText("Fill new stylesheet with sample content");
+			useSampleContentButton.setSelection(true);
+			useSampleContentButton.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					checkboxChanged();
+					sampleCheckboxChanged();
+				}
+			});
+
+			// use standard check box
+			useStandardContentButton = new Button(topLevel, SWT.CHECK);
+			useStandardContentButton.setText("Create (if needed) and reference 'standard_ngclient.css' it in new stylesheet");
+			useStandardContentButton.setToolTipText(
+				"Rules that will be helpful in most cases are set in 'standard_ngclient.css'.\nThey are set here and not in a predefined css file so that they can be edited/removed easier.\nLeave this checked if you are unsure what to do.");
+			useStandardContentButton.setSelection(true);
+			useStandardContentButton.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					standardCheckboxChanged();
 				}
 			});
 
 			// text area
 			textArea = new Text(topLevel, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-			textArea.setText(Utils.getTXTFileContent(getSampleStyleContent(), Charset.defaultCharset()));
+			updateTextArea();
 			textArea.setEditable(false);
 
 			// layout of the page
@@ -450,21 +485,42 @@ public class NewStylesheetWizard extends Wizard implements INewWizard
 			FormData formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.top = new FormAttachment(0, 0);
-			useOrNot.setLayoutData(formData);
+			useSampleContentButton.setLayoutData(formData);
 
 			formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
-			formData.top = new FormAttachment(useOrNot, 0);
-			formData.bottom = new FormAttachment(100, 0);
+			formData.top = new FormAttachment(useSampleContentButton, 0);
+			formData.bottom = new FormAttachment(useStandardContentButton, 0);
 			formData.right = new FormAttachment(100, 0);
 			formData.height = 100;
 			textArea.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.bottom = new FormAttachment(100, 0);
+			useStandardContentButton.setLayoutData(formData);
 		}
 
-		protected void checkboxChanged()
+		protected void sampleCheckboxChanged()
 		{
-			useSampleContent = useOrNot.getSelection();
-			textArea.setEnabled(useSampleContent);
+			useSampleContent = useSampleContentButton.getSelection();
+			updateTextArea();
+		}
+
+		protected void standardCheckboxChanged()
+		{
+			useStandardContent = useStandardContentButton.getSelection();
+			updateTextArea();
+		}
+
+		private void updateTextArea()
+		{
+			textArea.setEnabled(useSampleContent || useStandardContent);
+			StringBuffer sb = new StringBuffer();
+			if (useStandardContent) sb.append(IMPORT_STANDARD_NGCLIENT_CSS);
+			if (useSampleContent) sb.append(getSampleStyleContent());
+
+			textArea.setText(sb.toString());
 		}
 
 		@Override
@@ -473,7 +529,7 @@ public class NewStylesheetWizard extends Wizard implements INewWizard
 			super.setVisible(visible);
 			if (visible)
 			{
-				useOrNot.setFocus();
+				useSampleContentButton.setFocus();
 				setPageComplete(true);
 			}
 		}
