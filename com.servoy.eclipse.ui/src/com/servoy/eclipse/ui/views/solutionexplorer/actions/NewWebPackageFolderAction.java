@@ -107,10 +107,10 @@ public class NewWebPackageFolderAction extends Action implements ISelectionChang
 			{
 				IProject project = (IProject)SolutionExplorerTreeContentProvider.getResource((IPackageReader)selectedFolder.parent.getRealObject());
 				WebObjectSpecification spec = (WebObjectSpecification)selectedFolder.getRealObject();
-				String componentName = spec.getName().contains("-") ? spec.getName().split("-")[1] : null;
-				if (componentName != null)
+				String folderName = spec.getDefinition() != null && spec.getDefinition().split("/").length == 3 ? spec.getDefinition().split("/")[1] : null;
+				if (folderName != null)
 				{
-					f = project.getFolder(componentName);
+					f = project.getFolder(folderName);
 				}
 				else
 				{
