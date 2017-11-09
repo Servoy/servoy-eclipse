@@ -163,7 +163,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		new ValuesConfig().setValues(
 			new Integer[] { Integer.valueOf(IForm.RECORD_VIEW), Integer.valueOf(IForm.LIST_VIEW), Integer.valueOf(IForm.LOCKED_RECORD_VIEW), Integer.valueOf(
 				FormController.LOCKED_LIST_VIEW), Integer.valueOf(FormController.LOCKED_TABLE_VIEW) },
-		new String[] { "Record view", "List view", "Record view (locked)", "List view (locked)", "Table view (locked)" }));
+			new String[] { "Record view", "List view", "Record view (locked)", "List view (locked)", "Table view (locked)" }));
 
 	public static final PropertyDescription SELECTION_MODE_VALUES = new PropertyDescription("selectionMode", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(new Integer[] { Integer.valueOf(IForm.SELECTION_MODE_SINGLE), Integer.valueOf(IForm.SELECTION_MODE_MULTI) },
@@ -177,15 +177,15 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		new ValuesConfig().setValues(
 			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.RTF_AREA), Integer.valueOf(
 				Field.HTML_AREA), Integer.valueOf(Field.TYPE_AHEAD), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(
-					Field.CHECKS), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.IMAGE_MEDIA), Integer.valueOf(Field.PASSWORD), Integer.valueOf(
-						Field.LIST_BOX), Integer.valueOf(Field.MULTISELECT_LISTBOX), Integer.valueOf(Field.SPINNER) },
+					Field.CHECKS), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.IMAGE_MEDIA), Integer.valueOf(
+						Field.PASSWORD), Integer.valueOf(Field.LIST_BOX), Integer.valueOf(Field.MULTISELECT_LISTBOX), Integer.valueOf(Field.SPINNER) },
 			new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD", "LISTBOX", "MULTISELECT_LISTBOX", "SPINNER" }));
 
 	public static final PropertyDescription TAB_ORIENTATION_VALUES = new PropertyDescription("tabOrientation", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(
 			new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(SwingConstants.BOTTOM), Integer.valueOf(
-				SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(
-					TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
+				SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(
+					TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
 			new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }).addDefault(
 				Integer.valueOf(TabPanel.DEFAULT_ORIENTATION), null));
 
@@ -522,6 +522,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						@Override
 						protected Object openDialogBox(Control cellEditorWindow)
 						{
+							super.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY, null, true, false, false,
+								form.isFormComponent(), form.getDataSource()));
 							Object returnValue = super.openDialogBox(cellEditorWindow);
 							if (returnValue != null)
 							{
@@ -924,6 +926,11 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		}
 
 		super.setValue(obj, value, persistContext);
+
+		if (propertyDescriptor.getName().equals("dataSource"))
+		{
+			ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()).getSolution().getChangeHandler().fireIPersistChanged((IPersist)obj);
+		}
 	}
 
 }
