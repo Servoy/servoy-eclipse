@@ -42,7 +42,7 @@ import com.servoy.eclipse.ui.util.IControlFactory;
  */
 public class ListSelectCellEditor extends DialogCellEditor
 {
-	private final Object input;
+	private Object input;
 	private final String title;
 	private final String name;
 	private final int treeStyle;
@@ -95,6 +95,11 @@ public class ListSelectCellEditor extends DialogCellEditor
 		this.treeStyle = treeStyle;
 		this.controlFactory = controlFactory;
 		this.optionalMessage = optionalMessage;
+	}
+	
+	public void setInput(Object input)
+	{
+		this.input = input;
 	}
 
 	public void setShowFilterMenu(boolean showFilterMenu)
