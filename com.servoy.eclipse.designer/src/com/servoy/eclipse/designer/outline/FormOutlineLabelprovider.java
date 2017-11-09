@@ -42,6 +42,7 @@ import com.servoy.eclipse.ui.labelproviders.SupportNameLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
@@ -137,7 +138,20 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 				String typeName = webCustomType.getTypeName();
 				String postFix = "";
 				String webComponentType = null;
-				WebComponent wc = (WebComponent)webCustomType.getAncestor(IRepository.WEBCOMPONENTS);
+				WebComponent wc = null;
+				if (webCustomType.getParent() instanceof WebFormComponentChildType)
+				{
+					IFormElement fe = ((WebFormComponentChildType)webCustomType.getParent()).getElement();
+					if (fe instanceof WebComponent)
+					{
+						wc = (WebComponent)fe;
+					}
+				}
+				else
+				{
+					wc = (WebComponent)webCustomType.getAncestor(IRepository.WEBCOMPONENTS);
+				}
+
 				if (wc != null)
 				{
 					webComponentType = wc.getTypeName();

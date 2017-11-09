@@ -21,6 +21,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -61,7 +63,10 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
@@ -96,7 +101,21 @@ public class GhostHandler implements IServerService
 		ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).acceptVisitor(new IPersistVisitor()
 		{
 
-			private void writeGhostsForWebcomponentBeans(IBasicWebComponent bean)
+			private Point getGhostContainerLocation(IBasicWebComponent bean, ArrayList<IBasicWebComponent> parentFormComponentPath)
+			{
+				Point location = bean.getLocation();
+				if (parentFormComponentPath != null)
+				{
+					for (IBasicWebComponent parentFormComponent : parentFormComponentPath)
+					{
+						location.setLocation(location.getX() + parentFormComponent.getLocation().getX(),
+							location.getY() + parentFormComponent.getLocation().getY());
+					}
+				}
+				return location;
+			}
+
+			private void writeGhostsForWebcomponentBeans(IBasicWebComponent bean, String parentID, ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(bean))
 				{
@@ -128,9 +147,10 @@ public class GhostHandler implements IServerService
 							writer.object();
 							writer.key("style");
 							{
+								Point ghostContainerLocation = getGhostContainerLocation(bean, parentFormComponentPath);
 								writer.object();
-								writer.key("left").value(bean.getLocation().getX());
-								writer.key("top").value(bean.getLocation().getY());
+								writer.key("left").value(ghostContainerLocation.getX());
+								writer.key("top").value(ghostContainerLocation.getY());
 								writer.endObject();
 							}
 							writer.key("uuid").value(bean.getUUID());
@@ -163,8 +183,9 @@ public class GhostHandler implements IServerService
 
 										if (isDroppable(p.getPropertyDescription(), configObject))
 										{
-											String parentKey = bean.getUUID() + p.getJsonKey();
-											writeGhostToJSON(parentKey, writer, text, p.getUUID().toString(), p.getIndex(), p.getTypeName());
+											String parentKey = parentID != null ? parentID + p.getJsonKey() : bean.getUUID() + p.getJsonKey();
+											String ghostID = parentID != null ? parentID + "#" + p.getUUID() : p.getUUID().toString();
+											writeGhostToJSON(parentKey, writer, text, ghostID, p.getIndex(), p.getTypeName());
 										}
 									}
 								}
@@ -271,8 +292,12 @@ public class GhostHandler implements IServerService
 				return 50;
 			}
 
-			@Override
-			public Object visit(IPersist o)
+			private void writeGhostForPersist(IPersist o)
+			{
+				writeGhostForPersist(o, null, null);
+			}
+
+			private void writeGhostForPersist(IPersist o, String parentID, ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
 				if (o instanceof TabPanel)
 				{
@@ -404,9 +429,52 @@ public class GhostHandler implements IServerService
 				}
 				else if (o instanceof IBasicWebComponent)
 				{
-					writeGhostsForWebcomponentBeans((IBasicWebComponent)o);
-				}
+					writeGhostsForWebcomponentBeans((IBasicWebComponent)o, parentID, parentFormComponentPath);
 
+					String componentType = FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)o);
+					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentType);
+					if (specification != null)
+					{
+						Collection<PropertyDescription> properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
+						if (properties.size() > 0)
+						{
+							FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editorPart.getForm());
+							FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((IBasicWebComponent)o, fs, null, true);
+							for (PropertyDescription pd : properties)
+							{
+								Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+								Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+								if (frm == null) continue;
+								FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
+									fs);
+								ArrayList<IBasicWebComponent> newParentFormComponentPath;
+								if (parentFormComponentPath == null)
+								{
+									newParentFormComponentPath = new ArrayList<IBasicWebComponent>();
+								}
+								else
+								{
+									newParentFormComponentPath = parentFormComponentPath;
+								}
+								newParentFormComponentPath.add((IBasicWebComponent)o);
+								for (FormElement element : cache.getFormComponentElements())
+								{
+									IPersist p = element.getPersistIfAvailable();
+									if (p instanceof IFormElement)
+									{
+										writeGhostForPersist(p, ((IFormElement)p).getName(), newParentFormComponentPath);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			@Override
+			public Object visit(IPersist o)
+			{
+				writeGhostForPersist(o);
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
 
