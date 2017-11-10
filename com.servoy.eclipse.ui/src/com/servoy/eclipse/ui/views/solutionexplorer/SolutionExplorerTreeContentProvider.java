@@ -1111,12 +1111,11 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (un.getType() == UserNodeType.COMPONENT || un.getType() == UserNodeType.SERVICE || un.getType() == UserNodeType.LAYOUT)
 					{
-						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
 						WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
-						String folderName = spec.getDefinition()!= null && spec.getDefinition().split("/").length == 3 ?spec.getDefinition().split("/")[1] : null;
-						if (folderName != null)
+						IFolder folder = getFolderFromSpec((IProject)getResource((IPackageReader)un.parent.getRealObject()), spec);
+						if (folder != null)
 						{
-							searchFolderChildren(un, project.getFolder(folderName));
+							searchFolderChildren(un, folder);
 						}
 						else
 						{
@@ -1140,6 +1139,42 @@ public class SolutionExplorerTreeContentProvider
 			return un.children;
 		}
 		return new Object[0];
+	}
+
+	public static String getFolderNameFromSpec(WebObjectSpecification spec)
+	{
+		IPath path = new Path(spec.getSpecURL().toExternalForm());
+		if (path.segmentCount() > 1)//it should contain at least 1 folder
+		{
+			return path.segment(path.segmentCount() - 2);
+		}
+		return null;
+	}
+
+	public static IFolder getFolderFromSpec(IProject project, WebObjectSpecification spec)
+	{
+		String folderName = getFolderNameFromSpec(spec);
+		IFolder folder = null;
+		if (folderName != null && project != null)
+		{
+			folder = project.getFolder(folderName);
+			if (folder == null || !folder.exists())
+			{
+				try
+				{
+					IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+					if (specFile.length == 1)
+					{
+						folder = (IFolder)specFile[0].getParent();
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Could not get folder from spec for web object " + spec.getName(), e);
+				}
+			}
+		}
+		return folder != null && folder.exists() ? folder : null;
 	}
 
 	private void searchFolderChildren(PlatformSimpleUserNode un, IFolder f)
@@ -1623,7 +1658,8 @@ public class SolutionExplorerTreeContentProvider
 					if ("file".equals(spec.getSpecURL().getProtocol()))
 					{
 						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
-						String folderName = spec.getDefinition()!= null && spec.getDefinition().split("/").length == 3 ?spec.getDefinition().split("/")[1] : null;
+						String folderName = spec.getDefinition() != null && spec.getDefinition().split("/").length == 3 ? spec.getDefinition().split("/")[1]
+							: null;
 						if (folderName != null)
 						{
 							return hasChildren(project.getFolder(folderName));

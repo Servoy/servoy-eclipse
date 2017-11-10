@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
@@ -391,8 +392,9 @@ public class LinkWithEditorAction extends Action
 							if (webObjectNode.getRealObject() instanceof WebObjectSpecification)
 							{
 								WebObjectSpecification spec = ((WebObjectSpecification)webObjectNode.getRealObject());
-								String[] n = spec.getName().split("-");
-								if (n.length == 2 && webObjectName.equals(n[1]))
+								IFolder folder = SolutionExplorerTreeContentProvider.getFolderFromSpec(
+									ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject(), spec);
+								if (webObjectName.equals(folder.getName()))
 								{
 									tree.setSelection(new StructuredSelection(webObjectNode), true);
 									tree.setExpandedState(webObjectNode, true);

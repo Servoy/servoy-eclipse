@@ -766,9 +766,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		else
 		{
-			String folderName = spec.getDefinition() != null && spec.getDefinition().split("/").length == 3 ? spec.getDefinition().split("/")[1] + "/" : null;
+			String folderName = SolutionExplorerTreeContentProvider.getFolderNameFromSpec(spec);
 			if (folderName != null)
 			{
+				folderName += "/";
 				List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
 				IPackageReader reader = WebComponentSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
 				if (reader == null) reader = WebServiceSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());

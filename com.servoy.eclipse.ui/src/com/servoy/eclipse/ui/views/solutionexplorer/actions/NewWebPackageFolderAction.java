@@ -86,7 +86,7 @@ public class NewWebPackageFolderAction extends Action implements ISelectionChang
 				}
 				else if (newText.indexOf('\\') >= 0 || newText.indexOf('/') >= 0 || newText.indexOf(' ') >= 0)
 				{
-					return "Invalid new media name";
+					return "Invalid new folder name";
 				}
 
 				return null;
@@ -105,14 +105,10 @@ public class NewWebPackageFolderAction extends Action implements ISelectionChang
 			}
 			else
 			{
-				IProject project = (IProject)SolutionExplorerTreeContentProvider.getResource((IPackageReader)selectedFolder.parent.getRealObject());
 				WebObjectSpecification spec = (WebObjectSpecification)selectedFolder.getRealObject();
-				String folderName = spec.getDefinition() != null && spec.getDefinition().split("/").length == 3 ? spec.getDefinition().split("/")[1] : null;
-				if (folderName != null)
-				{
-					f = project.getFolder(folderName);
-				}
-				else
+				f = SolutionExplorerTreeContentProvider.getFolderFromSpec(
+					(IProject)SolutionExplorerTreeContentProvider.getResource((IPackageReader)selectedFolder.parent.getRealObject()), spec);
+				if (f == null)
 				{
 					ServoyLog.logInfo("cannot find web object name from " + spec.getName());
 				}
