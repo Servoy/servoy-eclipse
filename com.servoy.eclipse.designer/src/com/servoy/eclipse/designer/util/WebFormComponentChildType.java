@@ -388,9 +388,18 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 				parentObject.put(FormComponentPropertyType.SVY_FORM, superValue.get(FormComponentPropertyType.SVY_FORM));
 				// this set property will override the cloned from super parent json in the parent, if the parent has a super persist.
 				((IBasicWebObject)getParent()).setProperty(parentPropertyName, parentObject);
+				jsonObject = parentObject;
+			}
+			if (!flattened)
+			{
+				propertyValue = jsonObject.getJSONObject(parentPropertyName);
 			}
 		}
-		propertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(parentPropertyName);
+
+		if (propertyValue == null)
+		{
+			propertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(parentPropertyName);
+		}
 
 		for (String propertyName : rest)
 		{
