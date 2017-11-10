@@ -2779,7 +2779,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPersist persistContainingFoundsetProperty = persistContext.getPersist();
 		if (persistContainingFoundsetProperty instanceof WebCustomType)
 		{
-			persistContainingFoundsetProperty = ((WebCustomType)persistContainingFoundsetProperty).getParentComponent();
+			persistContainingFoundsetProperty = ((WebCustomType)persistContainingFoundsetProperty).getParent();
 		}
 		String forFoundsetName = differentFoundsetDueToProperty(propertyDescription);
 		if (forFoundsetName == null)
@@ -2800,9 +2800,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			try
 			{
 				Object object = null;
-				if (persistContainingFoundsetProperty instanceof IBasicWebComponent)
+				if (persistContainingFoundsetProperty instanceof IBasicWebObject)
 				{
-					IBasicWebComponent webObjectContainingFoundsetProperty = (IBasicWebComponent)persistContainingFoundsetProperty;
+					IBasicWebObject webObjectContainingFoundsetProperty = (IBasicWebObject)persistContainingFoundsetProperty;
 					if (webObjectContainingFoundsetProperty.hasProperty(forFoundsetName))
 						object = webObjectContainingFoundsetProperty.getProperty(forFoundsetName);
 					else object = webObjectContainingFoundsetProperty.getPropertyDefaultValueClone(forFoundsetName);
