@@ -28,6 +28,12 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			editorScope.getEditorContentRootScope().showWireframe = result;
 			editorScope.getEditorContentRootScope().$digest();
 		});
+		var highlightPromise = $editorService.isShowHighlight();
+		highlightPromise.then(function(result) {
+			btnHighlightWebcomponents.state = result;
+			editorScope.getEditorContentRootScope().design_highlight = result ? "highlight_element" : null;
+			editorScope.getEditorContentRootScope().$digest();
+		});
 	});
 	var btnPlaceField = {
 		text: "Place Field Wizard",
@@ -86,9 +92,15 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnHighlightWebcomponents = {
 		text: "Highlight webcomponents",
 		icon: "toolbaractions/icons/highlight.png",
+		state: true,
 		enabled: true,
 		onclick: function() {
-			$editorService.toggleHighlight();
+			var promise = $editorService.toggleHighlight();
+			promise.then(function(result) {
+				btnHighlightWebcomponents.state = result;
+				editorScope.getEditorContentRootScope().design_highlight = result ? "highlight_element" : null;
+				editorScope.getEditorContentRootScope().$apply();
+			})
 		},
 	};
 
@@ -112,7 +124,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnToggleDesignMode = {
 		text: "Wireframe",
-		icon: "toolbaractions/icons/edit.gif",
+		icon: "toolbaractions/icons/wireframe.png",
 		enabled: true,
 		state: false,
 		onclick: function() {

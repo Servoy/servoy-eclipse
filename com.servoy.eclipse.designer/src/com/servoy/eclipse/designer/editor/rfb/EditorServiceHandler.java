@@ -167,15 +167,19 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
-		configuredHandlers.put("toggleShowWireframe", new IServerService()
+		configuredHandlers.put("toggleShow", new IServerService()
 		{
-
 			@Override
 			public Object executeMethod(String methodName, JSONObject args) throws Exception
 			{
-				Activator.getDefault().toggleShowWireframe();
-				return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)
-					? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)) : Boolean.FALSE;
+				if (args != null && args.has("show"))
+				{
+					String showValue = args.getString("show");
+					Activator.getDefault().toggleShow(showValue);
+					return Activator.getDefault().getPreferenceStore().contains(showValue)
+						? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(showValue)) : Boolean.FALSE;
+				}
+				return Boolean.FALSE;
 			}
 
 		});
@@ -199,6 +203,12 @@ public class EditorServiceHandler implements IServerService
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER))
 							: Boolean.FALSE;
+					}
+					if (args.has("showHighlight"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER))
+							: Boolean.TRUE;
 					}
 
 				}

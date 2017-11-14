@@ -32,7 +32,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	    	  model: "=model",
 	      },
 	      link: function($scope, $element, $attrs) {
-	    	  $element.html($templateCache.get($scope.model.list ? "templates/toolbaritemdropdown.html" : "templates/toolbaritem.html"));
+			  $element.html($templateCache.get($scope.model.list ? "templates/toolbaritemdropdown.html" : "templates/toolbaritem.html"));
 	          $compile($element.contents())($scope);
 	          if($scope.model.list) {
 	        	  $scope.onselection = function(selection) {

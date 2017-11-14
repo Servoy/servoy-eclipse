@@ -1335,7 +1335,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		},
 
 		toggleShowWireframe: function() {
-			return wsSession.callService('formeditor', 'toggleShowWireframe', null, false)
+			return wsSession.callService('formeditor', 'toggleShow', {
+				"show" : "showWireframeInDesigner"
+			}, false)
 		},
 
 		createComponents: function(components) {
@@ -1443,11 +1445,15 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		},		
 
 		toggleHighlight: function() {
-			if (!editorScope.getEditorContentRootScope().design_highlight)
-				editorScope.getEditorContentRootScope().design_highlight = "highlight_element";
-			else editorScope.getEditorContentRootScope().design_highlight = null;
+			return wsSession.callService('formeditor', 'toggleShow', {
+				"show" : "showHighlightInDesigner"
+			}, false);
+		},
 
-			editorScope.getEditorContentRootScope().$apply();
+		isShowHighlight: function() {
+			return wsSession.callService('formeditor', 'getBooleanState', {
+				"showHighlight": true
+			}, false)
 		},
 
 		toggleShowData: function() {

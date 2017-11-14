@@ -52,6 +52,7 @@ public class Activator extends AbstractUIPlugin
 	public static final String PLUGIN_ID = "com.servoy.eclipse.designer";
 	public static final String SHOW_DATA_IN_ANGULAR_DESIGNER = "showDataInDesigner";
 	public static final String SHOW_WIREFRAME_IN_ANGULAR_DESIGNER = "showWireframeInDesigner";
+	public static final String SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER = "showHighlightInDesigner";
 
 	// The shared instance
 	private static Activator plugin;
@@ -59,8 +60,6 @@ public class Activator extends AbstractUIPlugin
 	private I18NChangeListener i18nChangeListener;
 
 	private final Map<String, ImageIcon> imageIcons = new HashMap<String, ImageIcon>();
-
-	private boolean showWireframe = false;
 
 	/**
 	 * The constructor
@@ -113,17 +112,14 @@ public class Activator extends AbstractUIPlugin
 				});
 			}
 		});
-
-
-		showWireframe = getPreferenceStore().contains(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)
-			? getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER) : false;
-
 	}
 
-	public void toggleShowWireframe()
+	public void toggleShow(String toggleShowType)
 	{
-		showWireframe = !showWireframe;
-		getPreferenceStore().putValue(SHOW_WIREFRAME_IN_ANGULAR_DESIGNER, String.valueOf(showWireframe));
+		boolean showToggle = getPreferenceStore().contains(toggleShowType) ? getPreferenceStore().getBoolean(toggleShowType) : false;
+		showToggle = !showToggle;
+
+		getPreferenceStore().putValue(toggleShowType, String.valueOf(showToggle));
 		try
 		{
 			((IPersistentPreferenceStore)getPreferenceStore()).save();
