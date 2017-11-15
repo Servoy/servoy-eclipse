@@ -57,10 +57,12 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONObject;
@@ -645,6 +647,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	@Override
 	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor progressMonitor) throws CoreException
 	{
+		// this is kind of a hack because you can listen to ResourceChangeEvent.PRE_BUILD and ResourceChangeEvent.POST_BUILD as workspace resource listeners
+		// because Eclipse does block the PRE_BUILD of the AutoBuildJob
+		// so this makes a job that has the workspace as the rule (so it waits for any workspace jobs to finish like the build job)
+		// then turns of the super persist cache of the PersistHelper that it always just enables when a build starts.
+		// This can't be enabled/disabled just in this method because a build creates multiply instances of this class. (1 for every project)
+		Job disableCache = Job.createSystem("clear cache", new ICoreRunnable()
+		{
+			@Override
+			public void run(IProgressMonitor monitor) throws CoreException
+			{
+				PersistHelper.enableSuperPersistCaching(false);
+			}
+		});
+		disableCache.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		disableCache.schedule();
+		PersistHelper.enableSuperPersistCaching(true);
 		// make sure the IServoyModel is initialized
 		getServoyModel();
 		referencedProjectsSet.clear();
