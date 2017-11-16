@@ -149,7 +149,17 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			return false;
 		}
 
+		@Override
+		public int hashCode()
+		{
+			return code.hashCode();
+		}
 
+	}
+
+	public boolean containsLicense(String code)
+	{
+		return licenses.containsKey(code);
 	}
 
 	private void findUsedComponents(ISupportChilds parent)
