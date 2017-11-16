@@ -127,7 +127,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			form)));
 		getTreeViewer().setInput(form);
 
-		if (form != null && form.isResponsiveLayout())
+		if (form != null)
 		{
 			final Map<String, Set<String>> allowedChildrenMap = DesignerUtil.getAllowedChildren();
 			getTreeViewer().addDragSupport(DND.DROP_MOVE, new Transfer[] { FormElementTransfer.getInstance() }, new DragSourceListener()
@@ -208,7 +208,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					{
 						IPersist inputPersist = ((PersistContext)input).getPersist();
 						ISupportChilds targetLayoutContainer = null;
-
+						if (!form.isResponsiveLayout() && !(inputPersist instanceof IChildWebObject))
+						{
+							// in absolute layout only drag ghost components
+							return false;
+						}
 						if (inputPersist instanceof IChildWebObject)
 						{
 							IBasicWebComponent customTypeParent = ((IChildWebObject)inputPersist).getParentComponent();
@@ -255,8 +259,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								{
 									try
 									{
-										if (!p.getParent().equals(targetLayoutContainer) && (((ISupportExtendsID)p).getExtendsID() > 0 ||
-											!p.equals(ElementUtil.getOverridePersist(PersistContext.create(p, form)))))
+										if (!p.getParent().equals(targetLayoutContainer) && p instanceof ISupportExtendsID &&
+											((((ISupportExtendsID)p).getExtendsID() > 0 ||
+												!p.equals(ElementUtil.getOverridePersist(PersistContext.create(p, form))))))
 										{
 											//do not allow changing the parent for inherited elements
 											return false;
@@ -394,11 +399,14 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				}
 
 			});
-			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
-		}
-		else
-		{
-			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
+			if (form.isResponsiveLayout())
+			{
+				getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
+			}
+			else
+			{
+				getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
+			}
 		}
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here

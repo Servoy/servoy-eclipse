@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
@@ -42,6 +43,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.PersistHelper;
 
 /**
@@ -209,6 +211,10 @@ public class ChangeParentCommand extends Command
 						((IChildWebObject)persist).setIndex(i);
 					}
 					changes.add(persist);
+				}
+				if (flattenedNewParent instanceof IBasicWebObject && child instanceof WebCustomType)
+				{
+					((IBasicWebObject)flattenedNewParent).setProperty(((WebCustomType)child).getJsonKey(), sortedChildren.toArray(new IChildWebObject[0]));
 				}
 			}
 		}
