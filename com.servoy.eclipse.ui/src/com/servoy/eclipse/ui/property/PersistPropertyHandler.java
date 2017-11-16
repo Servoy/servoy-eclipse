@@ -927,10 +927,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 		super.setValue(obj, value, persistContext);
 
-		if (propertyDescriptor.getName().equals("dataSource"))
-		{
-			ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()).getSolution().getChangeHandler().fireIPersistChanged((IPersist)obj);
-		}
+		//it is necessary to trigger itemChanged on the editing solution to update stuff like form datasource caches
+		ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()).getSolution().getChangeHandler().fireIPersistChanged((IPersist)obj);
 	}
 
 }
