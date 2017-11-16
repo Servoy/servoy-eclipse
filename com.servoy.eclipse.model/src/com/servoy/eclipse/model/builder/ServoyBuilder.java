@@ -1040,13 +1040,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ServoyLog.logError(e);
 						}
 					}
-					//import hook is not active, add error here as well
-					if (module != null && !servoyModel.isSolutionActive(module.getProject().getName()) &&
-						SolutionMetaData.isPreImportHook(module.getSolution()) && module.getSolution().getModulesNames() != null)
-					{
-						String message = "Module " + module.getSolution().getName() + " is a solution import hook, so it should not contain any modules.";
-						addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
-					}
 				}
 
 				// import hook modules should not contain other modules
@@ -4180,7 +4173,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				checkI18n(project);
 				checkLoginSolution(project);
 			}
-			else if (!servoyModel.isSolutionActiveImportHook(project.getName()) && servoyModel.shouldBeModuleOfActiveSolution(project.getName()))
+			else if (servoyModel.shouldBeModuleOfActiveSolution(project.getName()))
 			{
 				// so we have an actual Servoy project that is not active, but it should be active
 				addDeserializeProblemMarkersIfNeeded(servoyProject);
@@ -5938,7 +5931,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (activeProject != null && activeProject.getProject().getName().equals(project.getName()) && getServoyModel().getDataModelManager() != null)
 		{
 			final DataModelManager dm = getServoyModel().getDataModelManager();
-			ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProjectWithImportHooks();
+			ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 			final Map<String, MemTable> memTables = new HashMap<>();
 
 			IPersistVisitor visitor = new IPersistVisitor()

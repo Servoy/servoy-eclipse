@@ -814,7 +814,7 @@ public class WarExporter
 
 			File preImportFolder = new File(tmpWarDir, "WEB-INF/preImport");
 			File postImportFolder = new File(tmpWarDir, "WEB-INF/postImport");
-			for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProjectWithImportHooks())
+			for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
 			{
 				File destinationFolder = null;
 				if (SolutionMetaData.isPreImportHook(sp.getSolution()))

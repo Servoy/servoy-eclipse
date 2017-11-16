@@ -119,7 +119,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 							try
 							{
 								ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-								boolean isActive = servoyModel.isSolutionActiveImportHook(oldName) || servoyModel.isSolutionActive(oldName);
+								boolean isActive = servoyModel.isSolutionActive(oldName);
 								ServoyProject activeProject = servoyModel.getActiveProject();
 								if (isActive)
 								{

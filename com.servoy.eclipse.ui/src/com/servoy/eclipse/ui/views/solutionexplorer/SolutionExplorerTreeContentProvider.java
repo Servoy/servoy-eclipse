@@ -632,9 +632,6 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 
-		List<ServoyProject> importHookModules = new ArrayList<ServoyProject>();
-		servoyModel.addImportHookModules(servoyModel.getActiveProject(), importHookModules);
-
 		List<PlatformSimpleUserNode> modulesNodeChildren = new ArrayList<PlatformSimpleUserNode>();
 		List<PlatformSimpleUserNode> allSolutionChildren = new ArrayList<PlatformSimpleUserNode>();
 
@@ -718,12 +715,8 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else
 				{
-					// it's probably a non-active solution/module
-					// it can also be an import hook module of the active solution that is not part of the flattened solution - create an un-expandable "module" node as well in this case
-					boolean isActiveImportHookModule = importHookModules.contains(servoyProject);
-
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, servoyProject,
-						getServoyProjectImage(servoyProject, false, !isActiveImportHookModule));
+						getServoyProjectImage(servoyProject, false, true));
 					node.setEnabled(false);
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
@@ -734,15 +727,6 @@ public class SolutionExplorerTreeContentProvider
 					// do not load all solutions at startup by reading solution directly
 					node.setToolTipText(servoyProject.getProject().getName() + "(" + getSolutionTypeAsString(servoyProject) + ")");
 
-					if (isActiveImportHookModule)
-					{
-						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject,
-							getServoyProjectImage(servoyProject, true, false));
-						node.setToolTipText(Messages.TreeStrings_ImportHookTooltip);
-						node.setEnabled(false); // it is not expandable
-						modulesNodeChildren.add(node);
-						node.parent = modulesOfActiveSolution;
-					}
 				}
 			}
 		}

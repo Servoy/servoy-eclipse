@@ -143,11 +143,6 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 				"Cannot check for error markes in all listed modules; please make sure all listed modules (-modules ...) are actually modules of the exported solution.");
 		}
 
-		// don't check import hooks as those are not build with active solution in developer either!
-		ServoyProject[] importHooks = sm.getImportHookModulesOfActiveProject();
-		for (ServoyProject p : importHooks)
-			moduleNames.remove(p.getProject().getName());
-
 		ServoyProject[] toCheck = new ServoyProject[moduleNames.size() + 1];
 		toCheck[0] = activeProject;
 		for (int i = moduleNames.size() - 1; i >= 0; i--)

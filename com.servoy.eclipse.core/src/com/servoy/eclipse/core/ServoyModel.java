@@ -2790,30 +2790,13 @@ public class ServoyModel extends AbstractServoyModel
 				eclipseRepository.registerSolutionMetaData(solutionName);
 
 				boolean isPartOfActiveFlattenedSolution = isSolutionActive(solutionName);
-				boolean isImportHook = SolutionMetaData.isImportHook(solution.getSolutionMetaData());
-				if (isPartOfActiveFlattenedSolution && isImportHook)
+				if (isPartOfActiveFlattenedSolution)
 				{
-					// this means that an active solution/module's type might have changed to import hook - we show those but
-					// they should not be part of the flattened solution and should not be expandable in the tree; update these
 					modulesChanged = true;
 				}
-				else if (!isPartOfActiveFlattenedSolution && !isImportHook && shouldBeModuleOfActiveSolution(solutionName))
+				else if (!isPartOfActiveFlattenedSolution && shouldBeModuleOfActiveSolution(solutionName))
 				{
-					// if it was an import hook of the active solution before (so not part of flattened solution), and
-					// now it changed type to non-import hook, flattened solution and tree need to get updated...
 					modulesChanged = true;
-				}
-				else if (isPartOfActiveFlattenedSolution && !isImportHook && Utils.stringSafeEquals(solutionName, getActiveProject().getProject().getName()))
-				{
-					// something changed in the active solution; find the case when the active solution's solution type changed from import hook type
-					// to some other type - in this case import hook modules should change in the tree/flattened solution
-					ServoyProject[] importHooks = getImportHookModulesOfActiveProject();
-					if (importHooks.length > 0 && isSolutionActive(importHooks[0].getProject().getName()))
-					{
-						// so an import hook module is expandable although the active solution is not of import hook type; this means that the active solution
-						// just changed it's type to non-import hook
-						modulesChanged = true;
-					}
 				}
 
 				// fire these as well just in case something needs to update and only listens to persists
@@ -3448,16 +3431,6 @@ public class ServoyModel extends AbstractServoyModel
 		Set<IProject> allModuleProjects = new HashSet<IProject>();
 		ServoyProject[] modules = getModulesOfActiveProject();
 
-		List<ServoyProject> importHookModulesToBeIgnored = new ArrayList<ServoyProject>();
-		addImportHookModules(getActiveProject(), importHookModulesToBeIgnored);
-		if (importHookModulesToBeIgnored.contains(getActiveProject())) importHookModulesToBeIgnored.clear();
-
-		HashSet<String> importHookModuleNamesToBeIgnored = new HashSet<String>(importHookModulesToBeIgnored.size());
-		for (ServoyProject p : importHookModulesToBeIgnored)
-		{
-			importHookModuleNamesToBeIgnored.add(p.getProject().getName());
-		}
-
 		for (ServoyProject spm : modules)
 		{
 			Solution s = spm.getSolution();
@@ -3467,7 +3440,7 @@ public class ServoyModel extends AbstractServoyModel
 				for (String module : moduleNames)
 				{
 					IProject tmp = ResourcesPlugin.getWorkspace().getRoot().getProject(module);
-					if (tmp != null && !importHookModuleNamesToBeIgnored.contains(tmp.getName()))
+					if (tmp != null)
 					{
 						allModuleProjects.add(tmp);
 					}
