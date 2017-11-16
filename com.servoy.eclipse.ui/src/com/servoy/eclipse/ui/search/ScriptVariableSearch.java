@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.ISourceModule;
@@ -88,6 +89,14 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 	{
 		final TextSearchRequestor collector = getResultCollector();
 
+		// this is a hack for eclipse, at startup eclipse will suspend the job manager to resume it a bit later when it is started up.
+		// problem is that this can be triggered earlier by the script editor that is open when it starts up.
+		// so when we see that the job manager is suspended we just resume it right away, so that the JobGroup.join() that the TextSearchEngine calls does work
+		// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=527341
+		if (Job.getJobManager().isSuspended())
+		{
+			Job.getJobManager().resume();
+		}
 		if (variable.getParent() instanceof Solution)
 		{
 			FileTextSearchScope scope = FileTextSearchScope.newSearchScope(getAllScopesAndActiveResourceProject(), new String[] { "*.frm", "*.rel", "*.dbi" },
