@@ -2911,6 +2911,7 @@ public class SolutionExplorerView extends ViewPart
 		NewWebPackageFolderAction newServiceFolderInWebPackageAction = new NewWebPackageFolderAction(this, "Create new folder in service");
 		NewWebPackageFolderAction newLayoutFolderInWebPackageAction = new NewWebPackageFolderAction(this, "Create new folder in layout");
 		NewWebPackageFolderAction newFolderInWebFolderAction = new NewWebPackageFolderAction(this, "Create new folder");
+		NewComponentResourceAction newComponentResource = new NewComponentResourceAction(shell);
 
 		newActionInTreePrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInTreePrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
@@ -2948,6 +2949,9 @@ public class SolutionExplorerView extends ViewPart
 
 		newActionInTreeSecondary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newLayoutPackageProjectAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newLayoutPackageProjectAction);
+		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentResource);
+		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newComponentResource);
+		newActionInTreeSecondary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newComponentResource);
 
 		createActionInTree.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, newComponentPackageAction);
 		createActionInTree.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, newServicePackageAction);
@@ -2957,6 +2961,9 @@ public class SolutionExplorerView extends ViewPart
 		createActionInTree.registerAction(UserNodeType.SERVICE, newServiceFolderInWebPackageAction);
 		createActionInTree.registerAction(UserNodeType.LAYOUT, newLayoutFolderInWebPackageAction);
 		createActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newFolderInWebFolderAction);
+		createActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentFolderInWebPackageAction);
+		createActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceFolderInWebPackageAction);
+		createActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutFolderInWebPackageAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -2978,7 +2985,6 @@ public class SolutionExplorerView extends ViewPart
 		newForm = new OpenNewFormWizardAction();
 		newScope = new NewScopeAction(this);
 		newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
-		NewComponentResourceAction newComponentResource = new NewComponentResourceAction(shell);
 		newActionInListPrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBALS_ITEM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBAL_VARIABLES, newVariable);
@@ -3030,7 +3036,8 @@ public class SolutionExplorerView extends ViewPart
 		openAction.registerAction(UserNodeType.RELATION, new OpenRelationAction());
 		openAction.registerAction(UserNodeType.MEDIA_IMAGE, new OpenMediaAction());
 		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, new OpenI18NAction(this));
-		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, new OpenComponentResourceAction());
+		OpenComponentResourceAction openComponentResource = new OpenComponentResourceAction();
+		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
 
 		addComponentIcon = new ContextAction(this, null, "Add Icon");
 		IAction addComponentIconAction = new AddComponentIconResourceAction(this);
@@ -3063,7 +3070,8 @@ public class SolutionExplorerView extends ViewPart
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
 		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project",
 			UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE);
-		DeleteWebPackageFolder deleteWebPackageFolder = new DeleteWebPackageFolder(this, shell, "Delete folder");
+		DeleteComponentOrServiceOrPackageResourceAction deleteWebObjectFolder = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete folder",
+			UserNodeType.WEB_OBJECT_FOLDER);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 
@@ -3114,6 +3122,7 @@ public class SolutionExplorerView extends ViewPart
 		openActionInTree.registerAction(UserNodeType.TABLE, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.VIEW, openTableInTree);
+		openActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
 
 		deleteActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteForm = new DeletePersistAction(UserNodeType.FORM, "Delete form");
@@ -3140,7 +3149,8 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
-		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebPackageFolder);
+		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebObjectFolder);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
 
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
@@ -3237,7 +3247,8 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(newComponentFolderInWebPackageAction);
 		addTreeSelectionChangedListener(newServiceFolderInWebPackageAction);
 		addTreeSelectionChangedListener(newLayoutFolderInWebPackageAction);
-		addTreeSelectionChangedListener(deleteWebPackageFolder);
+		addTreeSelectionChangedListener(deleteWebObjectFolder);
+		addTreeSelectionChangedListener(newComponentResource);
 
 		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);

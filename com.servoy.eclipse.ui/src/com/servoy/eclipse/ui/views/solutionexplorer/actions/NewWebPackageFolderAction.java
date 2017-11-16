@@ -19,7 +19,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.IOException;
 
-import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
@@ -32,6 +32,7 @@ import org.eclipse.jface.window.Window;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -46,7 +47,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 public class NewWebPackageFolderAction extends Action implements ISelectionChangedListener
 {
 	private final SolutionExplorerView viewer;
-	private SimpleUserNode selectedFolder;
+	private SimpleUserNode selectedNode;
 
 	public NewWebPackageFolderAction(SolutionExplorerView viewer, String text)
 	{
@@ -58,23 +59,29 @@ public class NewWebPackageFolderAction extends Action implements ISelectionChang
 	public void selectionChanged(SelectionChangedEvent event)
 	{
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
-		selectedFolder = null;
+		selectedNode = null;
 		if (sel.size() == 1)
 		{
 			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			if (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT || type == UserNodeType.WEB_OBJECT_FOLDER)
+			if (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT || type == UserNodeType.WEB_OBJECT_FOLDER ||
+				type == UserNodeType.COMPONENTS_PROJECT_PACKAGE || type == UserNodeType.SERVICES_PROJECT_PACKAGE || type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 			{
-				selectedFolder = (SimpleUserNode)(sel.getFirstElement());
+				selectedNode = (SimpleUserNode)(sel.getFirstElement());
 			}
+			setEnabled(selectedNode != null && ((type == UserNodeType.WEB_OBJECT_FOLDER || type == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
+				type == UserNodeType.SERVICES_PROJECT_PACKAGE || type == UserNodeType.LAYOUT_PROJECT_PACKAGE) ||
+				"file".equals(((WebObjectSpecification)selectedNode.getRealObject()).getSpecURL().getProtocol())));
 		}
-		setEnabled(selectedFolder != null && (selectedFolder.getType() == UserNodeType.WEB_OBJECT_FOLDER ||
-			"file".equals(((WebObjectSpecification)selectedFolder.getRealObject()).getSpecURL().getProtocol())));
+		else
+		{
+			setEnabled(false);
+		}
 	}
 
 	@Override
 	public void run()
 	{
-		if (selectedFolder == null) return;
+		if (selectedNode == null) return;
 
 		InputDialog newFolderNameDlg = new InputDialog(viewer.getSite().getShell(), "New folder", "Specify a folder name", "", new IInputValidator()
 		{
@@ -98,16 +105,22 @@ public class NewWebPackageFolderAction extends Action implements ISelectionChang
 		if (newFolderNameDlg.getReturnCode() == Window.OK)
 		{
 			WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-			IFolder f = null;
-			if (selectedFolder.getType() == UserNodeType.WEB_OBJECT_FOLDER)
+			IContainer f = null;
+			UserNodeType type = selectedNode.getType();
+			if (type == UserNodeType.WEB_OBJECT_FOLDER)
 			{
-				f = (IFolder)selectedFolder.getRealObject();
+				f = (IContainer)selectedNode.getRealObject();
+			}
+			else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE || type == UserNodeType.SERVICES_PROJECT_PACKAGE ||
+				type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
+			{
+				f = ServoyModel.getWorkspace().getRoot().getProject(((IPackageReader)selectedNode.getRealObject()).getPackageName());
 			}
 			else
 			{
-				WebObjectSpecification spec = (WebObjectSpecification)selectedFolder.getRealObject();
+				WebObjectSpecification spec = (WebObjectSpecification)selectedNode.getRealObject();
 				f = SolutionExplorerTreeContentProvider.getFolderFromSpec(
-					(IProject)SolutionExplorerTreeContentProvider.getResource((IPackageReader)selectedFolder.parent.getRealObject()), spec);
+					(IProject)SolutionExplorerTreeContentProvider.getResource((IPackageReader)selectedNode.parent.getRealObject()), spec);
 				if (f == null)
 				{
 					ServoyLog.logInfo("cannot find web object name from " + spec.getName());

@@ -39,6 +39,7 @@ import java.util.zip.ZipFile;
 
 import javax.swing.Icon;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -966,6 +967,7 @@ public class SolutionExplorerTreeContentProvider
 					else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE || type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 					{
 						String packageName = getPackageName(un);
+						Set<String> folderNames = new HashSet<String>();
 						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getComponentsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
@@ -980,6 +982,7 @@ public class SolutionExplorerTreeContentProvider
 									img != null ? img : componentIcon);
 								node.parent = un;
 								children.add(node);
+								folderNames.add(getFolderNameFromSpec(spec));
 							}
 						}
 						List<String> layouts = new ArrayList<>(getComponentsSpecProviderState().getLayoutsInPackage(packageName));
@@ -991,12 +994,53 @@ public class SolutionExplorerTreeContentProvider
 							{
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
-								Image img = getIconFromSpec(spec, false);
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
-									img != null ? img : componentIcon);
-								node.parent = un;
-								children.add(node);
+								String folderName = getFolderNameFromSpec(spec);
+								if (!packageName.equals(folderName))
+								{
+									Image img = getIconFromSpec(spec, false);
+									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
+										img != null ? img : componentIcon);
+									node.parent = un;
+									children.add(node);
+									folderNames.add(folderName);
+								}
 							}
+						}
+						IContainer packageFolder = (IContainer)getResource((IPackageReader)un.getRealObject());
+						Comparator<IResource> comparator = new Comparator<IResource>()
+						{
+							@Override
+							public int compare(IResource arg0, IResource arg1)
+							{
+								return arg0.getName().compareTo(arg1.getName());
+							}
+						};
+						Set<IResource> folders = new TreeSet<IResource>(comparator);
+						Set<IResource> files = new TreeSet<IResource>(comparator);
+						for (IResource res : packageFolder.members())
+						{
+							if (res instanceof IFolder)
+							{
+								if (!folderNames.contains(res.getName())) folders.add(res);
+							}
+							else
+							{
+								if (!".project".equals(res.getName())) files.add(res);
+							}
+						}
+						for (IResource res : folders)
+						{
+							PlatformSimpleUserNode node = new PlatformSimpleUserNode(res.getName(), UserNodeType.WEB_OBJECT_FOLDER, res,
+								uiActivator.loadImageFromBundle("folder.png"));
+							node.parent = un;
+							children.add(node);
+						}
+						for (IResource res : files)
+						{
+							PlatformSimpleUserNode node = new PlatformSimpleUserNode(res.getName(), UserNodeType.COMPONENT_RESOURCE, res,
+								SolutionExplorerListContentProvider.getIcon(res.getName()));
+							node.parent = un;
+							children.add(node);
 						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
@@ -1657,16 +1701,14 @@ public class SolutionExplorerTreeContentProvider
 					WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
 					if ("file".equals(spec.getSpecURL().getProtocol()))
 					{
-						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
-						String folderName = spec.getDefinition() != null && spec.getDefinition().split("/").length == 3 ? spec.getDefinition().split("/")[1]
-							: null;
-						if (folderName != null)
+						IFolder folder = getFolderFromSpec((IProject)getResource((IPackageReader)un.parent.getRealObject()), spec);
+						if (folder != null)
 						{
-							return hasChildren(project.getFolder(folderName));
+							return hasChildren(folder);
 						}
 						else
 						{
-							ServoyLog.logInfo("cannot find web object name from " + spec.getName());
+							ServoyLog.logInfo("cannot find web object folder from " + spec.getName());
 						}
 					}
 					return false;

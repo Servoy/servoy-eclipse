@@ -196,7 +196,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static Set<String> ignoreMethodsFromPrefixedConstants = new TreeSet<String>();
 
-	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
+	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private final Image propertiesIcon;
 	private final Image specialPropertiesIcon;
@@ -797,21 +797,23 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return new SimpleUserNode[0];
 	}
 
-	private Image getIcon(String name)
+	public static Image getIcon(String name)
 	{
-		if (name == null || !name.contains(".")) return null;
-		String suffix = name.substring(name.lastIndexOf("."));
-		if (suffix.toLowerCase().endsWith("js"))
+		if (name != null && name.contains("."))
 		{
-			return uiActivator.loadImageFromBundle("js.png");
-		}
-		if (suffix.toLowerCase().endsWith("css"))
-		{
-			return uiActivator.loadImageFromBundle("style.png");
-		}
-		if (suffix.toLowerCase().endsWith("png") || suffix.toLowerCase().endsWith("jpeg") || suffix.toLowerCase().endsWith("gif"))
-		{
-			return uiActivator.loadImageFromBundle("media.png");
+			String suffix = name.substring(name.lastIndexOf("."));
+			if (suffix.toLowerCase().endsWith("js"))
+			{
+				return uiActivator.loadImageFromBundle("js.png");
+			}
+			if (suffix.toLowerCase().endsWith("css"))
+			{
+				return uiActivator.loadImageFromBundle("style.png");
+			}
+			if (suffix.toLowerCase().endsWith("png") || suffix.toLowerCase().endsWith("jpeg") || suffix.toLowerCase().endsWith("gif"))
+			{
+				return uiActivator.loadImageFromBundle("media.png");
+			}
 		}
 		return uiActivator.loadImageFromBundle("file_obj.png");
 	}
