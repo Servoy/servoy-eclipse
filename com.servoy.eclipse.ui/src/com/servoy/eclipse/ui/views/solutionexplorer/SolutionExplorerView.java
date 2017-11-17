@@ -291,6 +291,8 @@ public class SolutionExplorerView extends ViewPart
 
 	public static final String USE_OPEN_AS_DEFAULT = "SolutionExplorerView.useOpenAsDefaultAction";
 
+	public static final String SHOW_INHERITED_METHODS = "SolutionExplorerView.showInheritedMethods";
+
 	public static final String INCLUDE_ENTRIES_FROM_MODULES = "SolutionExplorerView.includeEntriedFromModules";
 
 	public static final String DIALOGSTORE_CONTEXT_MENU_NAVIGATION = "SolutionExplorerView.contextMenuNavigation";
@@ -451,6 +453,8 @@ public class SolutionExplorerView extends ViewPart
 	private ViewLabelDecorator labelDecorator;
 
 	private MenuItem openModeToggleButton;
+
+	private MenuItem showInheritedMethodsToggleButton;
 
 	private MenuItem includeModulesToggleButton;
 
@@ -1317,6 +1321,7 @@ public class SolutionExplorerView extends ViewPart
 		saveSplitterRatio();
 		fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, fCurrentOrientation);
 		fDialogSettings.put(USE_OPEN_AS_DEFAULT, openModeToggleButton.getSelection());
+		fDialogSettings.put(SHOW_INHERITED_METHODS, showInheritedMethodsToggleButton.getSelection());
 		fDialogSettings.put(INCLUDE_ENTRIES_FROM_MODULES, includeModulesToggleButton.getSelection());
 	}
 
@@ -2350,6 +2355,23 @@ public class SolutionExplorerView extends ViewPart
 			public void widgetSelected(SelectionEvent e)
 			{
 				fDialogSettings.put(USE_OPEN_AS_DEFAULT, openModeToggleButton.getSelection());
+			}
+		});
+
+		showInheritedMethodsToggleButton = new MenuItem(lowertbmenu, SWT.CHECK);
+		showInheritedMethodsToggleButton.setText("Show inherited methods");
+		showInheritedMethodsToggleButton.setSelection(
+			fDialogSettings.get(SHOW_INHERITED_METHODS) == null ? true : fDialogSettings.getBoolean(SHOW_INHERITED_METHODS));
+		((SolutionExplorerListContentProvider)list.getContentProvider()).setShowInheritedMethods(showInheritedMethodsToggleButton.getSelection());
+		showInheritedMethodsToggleButton.addSelectionListener(new SelectionListener()
+		{
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+			}
+
+			public void widgetSelected(SelectionEvent e)
+			{
+				setShowInheritedMethods(showInheritedMethodsToggleButton.getSelection());
 			}
 		});
 
@@ -3868,6 +3890,15 @@ public class SolutionExplorerView extends ViewPart
 	public void setOpenAsDefaultOption(boolean openAsdefaultOptionStatus)
 	{
 		openModeToggleButton.setSelection(openAsdefaultOptionStatus);
+	}
+
+	public void setShowInheritedMethods(boolean showInheritedMethodsOptionStatus)
+	{
+		if (showInheritedMethodsToggleButton.getSelection() != showInheritedMethodsOptionStatus)
+			showInheritedMethodsToggleButton.setSelection(showInheritedMethodsOptionStatus);
+		fDialogSettings.put(SHOW_INHERITED_METHODS, showInheritedMethodsToggleButton.getSelection());
+		((SolutionExplorerListContentProvider)list.getContentProvider()).setShowInheritedMethods(showInheritedMethodsToggleButton.getSelection());
+		refreshList();
 	}
 
 	public void enablePostgresDBCreation()

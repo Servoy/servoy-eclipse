@@ -50,6 +50,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	private Button navigationContextMenu;
 	private Button treeHandlingContextMenu;
 	private Button chOpenAsDefaultAction;
+	private Button chShowInheritedMethods;
 	private Button chIncludeModules;
 
 	public static final String FORM_DOUBLE_CLICK_ACTION = "formDblClickAction";
@@ -192,13 +193,16 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		solexListViewerGroup.setLayout(new GridLayout(1, true));
 
 		boolean listViewOption = solexDialogSettings.getBoolean(SolutionExplorerView.USE_OPEN_AS_DEFAULT);
-
 		chOpenAsDefaultAction = new Button(solexListViewerGroup, SWT.CHECK);
 		chOpenAsDefaultAction.setText("Use 'open' as default action");
 		chOpenAsDefaultAction.setSelection(listViewOption);
 
-		listViewOption = solexDialogSettings.getBoolean(SolutionExplorerView.INCLUDE_ENTRIES_FROM_MODULES);
+		listViewOption = solexDialogSettings.getBoolean(SolutionExplorerView.SHOW_INHERITED_METHODS);
+		chShowInheritedMethods = new Button(solexListViewerGroup, SWT.CHECK);
+		chShowInheritedMethods.setText("Show inherited methods");
+		chShowInheritedMethods.setSelection(listViewOption);
 
+		listViewOption = solexDialogSettings.getBoolean(SolutionExplorerView.INCLUDE_ENTRIES_FROM_MODULES);
 		chIncludeModules = new Button(solexListViewerGroup, SWT.CHECK);
 		chIncludeModules.setText("Include modules");
 		chIncludeModules.setSelection(listViewOption);
@@ -316,6 +320,15 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 
 		if (solexView != null)
 		{
+			solexView.setShowInheritedMethods(chShowInheritedMethods.getSelection());
+		}
+		else
+		{
+			solexDialogSettings.put(SolutionExplorerView.SHOW_INHERITED_METHODS, chShowInheritedMethods.getSelection());
+		}
+
+		if (solexView != null)
+		{
 			solexView.setIncludeModulesOption(chIncludeModules.getSelection());
 		}
 		else
@@ -352,6 +365,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 			solexView = (SolutionExplorerView)solexRef.getView(false);
 			solexView.setOrientation(SolutionExplorerView.VIEW_ORIENTATION_AUTOMATIC);
 			solexView.setOpenAsDefaultOption(true);
+			solexView.setShowInheritedMethods(true);
 			solexView.setIncludeModulesOption(false);
 			solexView.showContextMenuNavigationGroup(false);
 			solexView.showContextMenuTreeHandling(false);

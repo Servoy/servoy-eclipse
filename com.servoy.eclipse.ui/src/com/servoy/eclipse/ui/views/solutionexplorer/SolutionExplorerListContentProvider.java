@@ -203,6 +203,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private final Image functionIcon;
 
 	private boolean includeModules = false;
+	private boolean showInheritedMethods = true;
 
 	private final Map<ITable, List<Object>> usedTables = new HashMap<ITable, List<Object>>();
 
@@ -1309,7 +1310,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					if (sm.isPrivate()) continue;
+					if (sm.isPrivate() || !showInheritedMethods) continue;
 
 					nodeText = getScriptMethodSignature(sm, null, false, true, true, true) + " [" + ((Form)sm.getParent()).getName() + "]";
 				}
@@ -1820,9 +1821,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logWarning(
-					"Class " + clz +
-						" did implement IScriptObject but doesnt have a default constructor, it should have that or use ScriptObjectRegistry.registerScriptObjectForClass()",
+				ServoyLog.logWarning("Class " + clz +
+					" did implement IScriptObject but doesnt have a default constructor, it should have that or use ScriptObjectRegistry.registerScriptObjectForClass()",
 					e);
 			}
 		}
@@ -2195,6 +2195,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (this.includeModules != includeModules)
 		{
 			this.includeModules = includeModules;
+			leafList.clear();
+		}
+	}
+
+	public void setShowInheritedMethods(boolean showInheritedMethods)
+	{
+		if (this.showInheritedMethods != showInheritedMethods)
+		{
+			this.showInheritedMethods = showInheritedMethods;
 			leafList.clear();
 		}
 	}
