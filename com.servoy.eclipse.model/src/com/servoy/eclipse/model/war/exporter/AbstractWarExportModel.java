@@ -138,24 +138,41 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			this.numberOfLicenses = numberOfLicenses;
 		}
 
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((code == null) ? 0 : code.hashCode());
+			result = prime * result + ((companyKey == null) ? 0 : companyKey.hashCode());
+			result = prime * result + ((numberOfLicenses == null) ? 0 : numberOfLicenses.hashCode());
+			return result;
+		}
 
 		@Override
 		public boolean equals(Object obj)
 		{
-			if (obj instanceof License)
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			License other = (License)obj;
+			if (code == null)
 			{
-				License l = (License)obj;
-				return code.equals(l.code) && companyKey.equals(l.companyKey) && numberOfLicenses == l.numberOfLicenses;
+				if (other.code != null) return false;
 			}
-			return false;
+			else if (!code.equals(other.code)) return false;
+			if (companyKey == null)
+			{
+				if (other.companyKey != null) return false;
+			}
+			else if (!companyKey.equals(other.companyKey)) return false;
+			if (numberOfLicenses == null)
+			{
+				if (other.numberOfLicenses != null) return false;
+			}
+			else if (!numberOfLicenses.equals(other.numberOfLicenses)) return false;
+			return true;
 		}
-
-		@Override
-		public int hashCode()
-		{
-			return code.hashCode();
-		}
-
 	}
 
 	public boolean containsLicense(String code)
