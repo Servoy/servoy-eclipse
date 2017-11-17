@@ -957,17 +957,8 @@ public class SolutionExplorerTreeContentProvider
 						if (components.size() > 0)
 						{
 							Collections.sort(components);
-							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
-							for (String component : components)
-							{
-								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
-								Image img = getIconFromSpec(spec, false);
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
-									img != null ? img : componentIcon);
-								node.parent = un;
-								children.add(node);
-								folderNames.add(getFolderNameFromSpec(spec));
-							}
+							createWebPackageProjectChildren(un, getComponentsSpecProviderState(), packageName, folderNames, children, components,
+								uiActivator.loadImageFromBundle("ng_component.png"));
 						}
 						List<String> layouts = new ArrayList<>(getComponentsSpecProviderState().getLayoutsInPackage(packageName));
 						if (layouts.size() > 0)
@@ -990,42 +981,7 @@ public class SolutionExplorerTreeContentProvider
 								}
 							}
 						}
-						IContainer packageFolder = (IContainer)getResource((IPackageReader)un.getRealObject());
-						Comparator<IResource> comparator = new Comparator<IResource>()
-						{
-							@Override
-							public int compare(IResource arg0, IResource arg1)
-							{
-								return arg0.getName().compareTo(arg1.getName());
-							}
-						};
-						Set<IResource> folders = new TreeSet<IResource>(comparator);
-						Set<IResource> files = new TreeSet<IResource>(comparator);
-						for (IResource res : packageFolder.members())
-						{
-							if (res instanceof IFolder)
-							{
-								if (!folderNames.contains(res.getName())) folders.add(res);
-							}
-							else
-							{
-								if (!".project".equals(res.getName())) files.add(res);
-							}
-						}
-						for (IResource res : folders)
-						{
-							PlatformSimpleUserNode node = new PlatformSimpleUserNode(res.getName(), UserNodeType.WEB_OBJECT_FOLDER, res,
-								uiActivator.loadImageFromBundle("folder.png"));
-							node.parent = un;
-							children.add(node);
-						}
-						for (IResource res : files)
-						{
-							PlatformSimpleUserNode node = new PlatformSimpleUserNode(res.getName(), UserNodeType.COMPONENT_RESOURCE, res,
-								SolutionExplorerListContentProvider.getIcon(res.getName()));
-							node.parent = un;
-							children.add(node);
-						}
+						children.addAll(addOtherPackageResources(un, folderNames));
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					else if (type == UserNodeType.SERVICES_FROM_RESOURCES)
@@ -1088,23 +1044,17 @@ public class SolutionExplorerTreeContentProvider
 						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
 							String packageName = getPackageName(un);
+							Set<String> folderNames = new HashSet<String>();
 							PackageSpecification<WebObjectSpecification> servicesPackage = provider.getWebObjectSpecifications().get(packageName);
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							if (servicesPackage != null)
 							{
 								List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
 								Collections.sort(services);
-								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
-								for (String component : services)
-								{
-									WebObjectSpecification spec = provider.getWebComponentSpecification(component);
-									Image img = getIconFromSpec(spec, true);
-									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
-										img != null ? img : serviceDefaultIcon);
-									node.parent = un;
-									children.add(node);
-								}
+								Image defaultIcon = uiActivator.loadImageFromBundle("service.png");
+								createWebPackageProjectChildren(un, provider, packageName, folderNames, children, services, defaultIcon);
 							}
+							children.addAll(addOtherPackageResources(un, folderNames));
 							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
 					}
@@ -1167,6 +1117,66 @@ public class SolutionExplorerTreeContentProvider
 			return un.children;
 		}
 		return new Object[0];
+	}
+
+	private void createWebPackageProjectChildren(PlatformSimpleUserNode un, SpecProviderState provider, String packageName, Set<String> folderNames,
+		List<PlatformSimpleUserNode> children, List<String> services, Image defaultIcon)
+	{
+		for (String component : services)
+		{
+			WebObjectSpecification spec = provider.getWebComponentSpecification(component);
+			String folderName = getFolderNameFromSpec(spec);
+			if (!packageName.equals(folderName))
+			{
+				Image img = getIconFromSpec(spec, false);
+				PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, img != null ? img : defaultIcon);
+				node.parent = un;
+				children.add(node);
+				folderNames.add(folderName);
+			}
+		}
+	}
+
+	private List<PlatformSimpleUserNode> addOtherPackageResources(PlatformSimpleUserNode un, Set<String> folderNames) throws CoreException
+	{
+		List<PlatformSimpleUserNode> children = new ArrayList<>();
+		IContainer packageFolder = (IContainer)getResource((IPackageReader)un.getRealObject());
+		Comparator<IResource> comparator = new Comparator<IResource>()
+		{
+			@Override
+			public int compare(IResource arg0, IResource arg1)
+			{
+				return arg0.getName().compareTo(arg1.getName());
+			}
+		};
+		Set<IResource> folders = new TreeSet<IResource>(comparator);
+		Set<IResource> files = new TreeSet<IResource>(comparator);
+		for (IResource res : packageFolder.members())
+		{
+			if (res instanceof IFolder)
+			{
+				if (!folderNames.contains(res.getName())) folders.add(res);
+			}
+			else
+			{
+				if (!".project".equals(res.getName())) files.add(res);
+			}
+		}
+		for (IResource res : folders)
+		{
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(res.getName(), UserNodeType.WEB_OBJECT_FOLDER, res,
+				uiActivator.loadImageFromBundle("folder.png"));
+			node.parent = un;
+			children.add(node);
+		}
+		for (IResource res : files)
+		{
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(res.getName(), UserNodeType.COMPONENT_RESOURCE, res,
+				SolutionExplorerListContentProvider.getIcon(res.getName()));
+			node.parent = un;
+			children.add(node);
+		}
+		return children;
 	}
 
 	public static String getFolderNameFromSpec(WebObjectSpecification spec)

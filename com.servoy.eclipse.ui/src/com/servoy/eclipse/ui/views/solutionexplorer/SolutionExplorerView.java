@@ -2960,6 +2960,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, newServiceAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceAction);
+		newActionInTreePrimary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutAction);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS,
@@ -2967,7 +2968,6 @@ public class SolutionExplorerView extends ViewPart
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
-		newActionInTreeSecondary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newLayoutPackageProjectAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newLayoutPackageProjectAction);
