@@ -123,5 +123,9 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public String getWebXMLFileName();
 
+	public String getLog4jXMLFileName();
+
 	public String checkWebXML();
+
+	public String checkLog4jXML();
 }

@@ -106,6 +106,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean useAsRealAdminUser;
 	private boolean searchProblem = false;
 	private String webXMLFileName;
+	private String log4jXMLFileName;
 
 	/**
 	 * @param isNGExport
@@ -157,6 +158,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		warFileName = settings.get("export.warfilename");
 		webXMLFileName = settings.get("export.webxmlfilename");
+		log4jXMLFileName = settings.get("export.log4jxmlfilename");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
@@ -345,6 +347,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		settings.put("export.warfilename", warFileName);
 		settings.put("export.webxmlfilename", webXMLFileName);
+		settings.put("export.log4jxmlfilename", log4jXMLFileName);
 		settings.put("export.exportActiveSolution", exportActiveSolution);
 		settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
 
@@ -535,11 +538,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	 */
 	public void setServoyPropertiesFileName(String servoyPropertiesFileName)
 	{
-		this.servoyPropertiesFileName = servoyPropertiesFileName;
-		if (this.servoyPropertiesFileName != null && this.servoyPropertiesFileName.trim().length() == 0)
-		{
-			this.servoyPropertiesFileName = null;
-		}
+		this.servoyPropertiesFileName = nonEmpty(servoyPropertiesFileName);
 	}
 
 
@@ -1193,15 +1192,37 @@ public class ExportWarModel extends AbstractWarExportModel
 	 */
 	public void setWebXMLFileName(String webXMLFileName)
 	{
-		this.webXMLFileName = webXMLFileName;
-		if (this.webXMLFileName != null && this.webXMLFileName.trim().length() == 0)
-		{
-			this.webXMLFileName = null;
-		}
+		this.webXMLFileName = nonEmpty(webXMLFileName);
+	}
+
+	/**
+	 * @return the log4jXMLFileName
+	 */
+	public String getLog4jXMLFileName()
+	{
+		return log4jXMLFileName;
+	}
+
+	/**
+	 * @param log4jXMLFileName the log4jXMLFileName to set
+	 */
+	public void setLog4jXMLFileName(String log4jXMLFileName)
+	{
+		this.log4jXMLFileName = log4jXMLFileName;
 	}
 
 	public void clearLicenses()
 	{
 		licenses.clear();
 	}
+
+	private static String nonEmpty(String name)
+	{
+		if (name != null && name.trim().length() == 0)
+		{
+			return null;
+		}
+		return name;
+	}
+
 }

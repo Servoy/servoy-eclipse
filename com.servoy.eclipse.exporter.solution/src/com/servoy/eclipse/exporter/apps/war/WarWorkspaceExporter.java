@@ -106,6 +106,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public String getLog4jXMLFileName()
+		{
+			return configuration.getLog4jXMLFileName();
+		}
+
+		@Override
 		public ServerConfiguration getServerConfiguration(String serverName)
 		{
 			return null;

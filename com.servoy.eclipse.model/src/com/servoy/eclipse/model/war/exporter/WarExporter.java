@@ -140,8 +140,7 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
 public class WarExporter
 {
 	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
-	// RAGTEST log4j
-	private static final String[] NG_LIBS = new String[] { "org.slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "servoy_ngclient_" +
+	private static final String[] NG_LIBS = new String[] { "slf4j.api_*.jar", "org.apache.logging.log4j.*.jar", "org.freemarker*.jar", "servoy_ngclient_" +
 		ClientVersion.getBundleVersionWithPostFix() +
 		".jar", "sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
 
@@ -170,7 +169,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 37);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 39);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -201,6 +200,9 @@ public class WarExporter
 		monitor.worked(2);
 		monitor.subTask("Creating web.xml");
 		copyWebXml(tmpWarDir);
+		monitor.worked(2);
+		monitor.subTask("Creating log4j.xml");
+		copyLog4jXml(tmpWarDir);
 		monitor.worked(2);
 		monitor.subTask("Creating context.xml");
 		createTomcatContextXML(tmpWarDir);
@@ -1030,6 +1032,45 @@ public class WarExporter
 		catch (Exception e)
 		{
 			throw new ExportException("Can't create the web.xml file: " + webXMLFile.getAbsolutePath(), e);
+		}
+	}
+
+	private void copyLog4jXml(File tmpWarDir) throws ExportException
+	{
+		// copy war log4j.xml
+		File log4jXMLFile = new File(tmpWarDir, "WEB-INF/log4j.xml");
+		String name = exportModel.getLog4jXMLFileName();
+		InputStream logXmlIS = null;
+		if (name == null)
+		{
+			logXmlIS = WarExporter.class.getResourceAsStream("resources/log4j.xml");
+		}
+		else try
+		{
+			String message = exportModel.checkLog4jXML();
+			if (message != null)
+			{
+				throw new ExportException(message);
+			}
+			logXmlIS = new FileInputStream(name);
+		}
+		catch (FileNotFoundException fnfe)
+		{
+			throw new ExportException("Can't create the log4j.xml file, couldn't read" + name, fnfe);
+		}
+		try (InputStream is = logXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(log4jXMLFile)))
+		{
+			byte[] buffer = new byte[8096];
+			int read = is.read(buffer);
+			while (read != -1)
+			{
+				bos.write(buffer, 0, read);
+				read = is.read(buffer);
+			}
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Can't create the log4j.xml file: " + log4jXMLFile.getAbsolutePath(), e);
 		}
 	}
 

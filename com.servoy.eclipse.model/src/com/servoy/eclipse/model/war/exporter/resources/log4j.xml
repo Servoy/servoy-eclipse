@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration
+	status="INFO"
+	packages="com.servoy.j2db.server.util">
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+			/>
+		</Console>
+		<SlidingWindow name="configservlet"
+			windowSize="100"
+			dateTimeFormat="yyyy-MM-dd HH:mm"
+		/>
+		<File name="servoy_log"
+			fileName="${sys:servoy.application_server.dir}/servoy_log.txt"
+			immediateFlush="true"
+			append="true">
+			<PatternLayout
+				pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+			/>
+		</File>
+	</Appenders>
+	<Loggers>
+		<Root level="debug">
+			<AppenderRef ref="console"/>
+			<AppenderRef ref="configservlet"/>
+			<AppenderRef ref="servoy_log"/>
+		</Root>
+	</Loggers>
+</Configuration>

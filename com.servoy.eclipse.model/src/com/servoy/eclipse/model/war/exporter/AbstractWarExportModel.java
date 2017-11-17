@@ -459,11 +459,11 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			File f = new File(getWebXMLFileName());
 			if (!f.exists())
 			{
-				message = "Specified web.xml  file doesn't exist.";
+				message = "Specified web.xml file doesn't exist.";
 			}
 			else if (f.isDirectory())
 			{
-				message = "Specified web.xml  file is a folder.";
+				message = "Specified web.xml file is a folder.";
 			}
 			else
 			{
@@ -478,7 +478,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 					int index = content.indexOf(VERSION_STRING);
 					if (index == -1)
 					{
-						message = "Specified web.xml file is not a valid servoy web,xml file (doesn't contain he servoy version comment)";
+						message = "Specified web.xml file is not a valid servoy web.xml file (doesn't contain he servoy version comment)";
 					}
 					else
 					{
@@ -497,6 +497,33 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 								currentWebXmlVersion + ") please regenerate the web.xml first";
 						}
 					}
+				}
+			}
+		}
+		return message;
+	}
+
+	@Override
+	public String checkLog4jXML()
+	{
+		String message = null;
+		if (getLog4jXMLFileName() != null)
+		{
+			File f = new File(getLog4jXMLFileName());
+			if (!f.exists())
+			{
+				message = "Specified log4j.xml file doesn't exist.";
+			}
+			else if (f.isDirectory())
+			{
+				message = "Specified log4j.xml file is a folder.";
+			}
+			else
+			{
+				String content = Utils.getTXTFileContent(f, Charset.forName("UTF8"));
+				if (content == null || content.trim().length() == 0)
+				{
+					message = "Specified log4j.xml file has no content";
 				}
 			}
 		}
