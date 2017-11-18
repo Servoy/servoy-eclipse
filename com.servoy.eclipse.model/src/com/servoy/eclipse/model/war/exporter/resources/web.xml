@@ -12,9 +12,8 @@
   <absolute-ordering>
     <name>log4j</name>
     <name>servoy_ngclient</name>
-    <name>j2dbdev</name>
   </absolute-ordering>
-  
+   
    <context-param>
         <param-name>log4jConfiguration</param-name>
         <param-value>/WEB-INF/log4j.xml</param-value>
