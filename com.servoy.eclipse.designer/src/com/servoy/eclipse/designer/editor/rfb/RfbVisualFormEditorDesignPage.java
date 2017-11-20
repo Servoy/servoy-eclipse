@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.gef.ui.actions.SelectAllAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -251,17 +255,42 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		{
 			layout = newLayout;
 			Dimension formSize = flattenedForm.getSize();
-			String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
+			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&editorid=" + editorId + "&c_sessionid=" + clientId;
-			try
+			final Runnable runnable = new Runnable()
 			{
-				ServoyLog.logInfo("Browser url for editor: " + url);
-				browser.setUrl(url + "&replacewebsocket=true");
+				public void run()
+				{
+					try
+					{
+						ServoyLog.logInfo("Browser url for editor: " + url);
+						browser.setUrl(url + "&replacewebsocket=true");
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError("couldn't load the editor: " + url, ex);
+					}
+				}
+			};
+			if ("true".equals(System.getProperty("svy.tomcat.started")))
+			{
+				runnable.run();
 			}
-			catch (Exception ex)
+			else
 			{
-				ServoyLog.logError("couldn't load the editor: " + url, ex);
+				// tomcat not yet started, delay a bit set url
+				Job urlSetter = new Job("Set browser url")
+				{
+					@Override
+					protected IStatus run(IProgressMonitor monitor)
+					{
+						Display.getDefault().asyncExec(runnable);
+						return Status.OK_STATUS;
+					}
+				};
+				urlSetter.setPriority(Job.LONG);
+				urlSetter.schedule();
 			}
 		}
 	}
