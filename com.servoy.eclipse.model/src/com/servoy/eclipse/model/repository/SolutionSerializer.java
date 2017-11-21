@@ -90,6 +90,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -1632,7 +1633,12 @@ public class SolutionSerializer
 		while (itm.hasNext())
 		{
 			Media media = (Media)itm.next();
-			media.getMediaData();//make sure its loaded (lazy loaded normally)
+			byte[] mediaData = media.getMediaData();//make sure its loaded (lazy loaded normally)
+			if (MimeTypes.CSS.equals(media.getMimeType()))
+			{
+
+			}
+
 			media.makeBlobPermanent();
 		}
 
