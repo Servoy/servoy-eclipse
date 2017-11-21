@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -91,6 +92,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -1638,6 +1640,14 @@ public class SolutionSerializer
 		while (itm.hasNext())
 		{
 			Media media = (Media)itm.next();
+			if (MimeTypes.CSS.equals(media.getMimeType()))
+			{
+				String cssAsString = new String(media.getMediaData(), Charset.forName("UTF8"));
+				cssAsString = cssAsString.replaceAll("##last-changed-timestamp##",
+					Long.toHexString(media.getLastModifiedTime() != -1 ? media.getLastModifiedTime() : solution.getLastModifiedTime()));
+				byte[] mediaData = cssAsString.getBytes();
+				media.setPermMediaData(mediaData);
+			}
 			media.getMediaData();//make sure its loaded (lazy loaded normally)
 			media.makeBlobPermanent();
 		}
