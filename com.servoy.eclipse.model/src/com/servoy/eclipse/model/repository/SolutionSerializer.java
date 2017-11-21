@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -1633,12 +1634,15 @@ public class SolutionSerializer
 		while (itm.hasNext())
 		{
 			Media media = (Media)itm.next();
-			byte[] mediaData = media.getMediaData();//make sure its loaded (lazy loaded normally)
 			if (MimeTypes.CSS.equals(media.getMimeType()))
 			{
-
+				String cssAsString = new String(media.getMediaData(), Charset.forName("UTF8"));
+				cssAsString = cssAsString.replaceAll("##last-changed-timestamp##",
+					Long.toHexString(media.getLastModifiedTime() != -1 ? media.getLastModifiedTime() : solution.getLastModifiedTime()));
+				byte[] mediaData = cssAsString.getBytes();
+				media.setPermMediaData(mediaData);
 			}
-
+			media.getMediaData();//make sure its loaded (lazy loaded normally)
 			media.makeBlobPermanent();
 		}
 
