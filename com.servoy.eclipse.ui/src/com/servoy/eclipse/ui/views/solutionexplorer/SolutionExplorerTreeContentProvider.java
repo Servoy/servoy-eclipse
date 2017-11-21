@@ -1126,13 +1126,26 @@ public class SolutionExplorerTreeContentProvider
 		{
 			WebObjectSpecification spec = provider.getWebComponentSpecification(component);
 			String folderName = getFolderNameFromSpec(spec);
-			if (!packageName.equals(folderName))
+			try
 			{
-				Image img = getIconFromSpec(spec, false);
-				PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, img != null ? img : defaultIcon);
-				node.parent = un;
-				children.add(node);
-				folderNames.add(folderName);
+				IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+				if (files.length == 1)
+				{
+					IFile f = files[0];
+					if (f.getProjectRelativePath().segmentCount() > 1)
+					{
+						Image img = getIconFromSpec(spec, false);
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
+							img != null ? img : defaultIcon);
+						node.parent = un;
+						children.add(node);
+						folderNames.add(folderName);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
 			}
 		}
 	}
@@ -2053,6 +2066,12 @@ public class SolutionExplorerTreeContentProvider
 					SpecProviderState specProvider = isService ? getServicesSpecProviderState() : getComponentsSpecProviderState();
 					IPackageReader reader = specProvider.getPackageReader(spec.getPackageName());
 					String iconPath = spec.getIcon().replaceFirst(spec.getPackageName() + "/", "");
+					if (reader == null || reader.getUrlForPath(iconPath) == null)
+					{
+						ServoyLog.logError("Cannot get icon " + spec.getIcon() + " for " + spec.getName(), null);
+						return null;
+					}
+
 					IPath path = new Path(reader.getUrlForPath(iconPath).toURI().toString());
 					icon = imageCache.get(path);
 					if (icon == null)

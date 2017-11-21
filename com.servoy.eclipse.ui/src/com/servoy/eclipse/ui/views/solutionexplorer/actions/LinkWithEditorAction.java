@@ -182,26 +182,29 @@ public class LinkWithEditorAction extends Action
 						String name = file.getName().substring(0, file.getName().indexOf('.'));
 						// globals or scope
 						PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)treeContentProvider).getSolutionNode(parent.getName());
-						if (solutionNode.children == null)
+						if (solutionNode != null)
 						{
-							// subtree is lazy loaded and currently oppened js file in editor might not be loaded in the Solex tree
-							// load modules subtree
-							((SolutionExplorerTreeContentProvider)treeContentProvider).getChildren(solutionNode);
-						}
-						for (SimpleUserNode node : solutionNode.children)
-						{
-							if (node.getName().equals(Messages.TreeStrings_Scopes))
+							if (solutionNode.children == null)
 							{
-
-								for (SimpleUserNode scopeChild : node.children)
+								// subtree is lazy loaded and currently opened js file in editor might not be loaded in the Solex tree
+								// load modules subtree
+								((SolutionExplorerTreeContentProvider)treeContentProvider).getChildren(solutionNode);
+							}
+							for (SimpleUserNode node : solutionNode.children)
+							{
+								if (node.getName().equals(Messages.TreeStrings_Scopes))
 								{
-									if (scopeChild.getName().equals(name))
+
+									for (SimpleUserNode scopeChild : node.children)
 									{
-										tree.setSelection(new StructuredSelection(new Object[] { scopeChild }), true);
-										break;
+										if (scopeChild.getName().equals(name))
+										{
+											tree.setSelection(new StructuredSelection(new Object[] { scopeChild }), true);
+											break;
+										}
 									}
+									break;
 								}
-								break;
 							}
 						}
 					}
@@ -226,14 +229,7 @@ public class LinkWithEditorAction extends Action
 					}
 				}
 				if (file.getName().endsWith(".spec") || file.getName().endsWith(".js") || file.getName().endsWith(".html") ||
-					file.getName().endsWith(".json") || file.getName().endsWith(".css"))
-				{
-					if (file.getParent() != null && file.getParent().getParent() != null)
-					{
-						setProperWebObjectSelection(file, (SolutionExplorerTreeContentProvider)treeContentProvider);
-					}
-				}
-				if ("MANIFEST.MF".equals(file.getName()) && file.getParent() != null && file.getParent().getParent() != null)
+					file.getName().endsWith(".json") || file.getName().endsWith(".css") || "MANIFEST.MF".equals(file.getName()))
 				{
 					setProperWebObjectSelection(file, (SolutionExplorerTreeContentProvider)treeContentProvider);
 				}
@@ -339,13 +335,12 @@ public class LinkWithEditorAction extends Action
 
 	private void setProperWebObjectSelection(IFile file, SolutionExplorerTreeContentProvider treeContentProvider)
 	{
-		String packageName = file.getProject() != null ? file.getProject().getName() : file.getParent().getParent().getName();
-		String webObjectName = file.getProject() != null ? file.getProjectRelativePath().segment(0)
-			: (file.getName().endsWith(".MF") ? null : file.getParent().getName());
+		if (file.getProject() == null) return;
+		String packageName = file.getProject().getName();
+		String webObjectName = file.getProjectRelativePath().segment(0);
 
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		Solution activeSolution = activeProject != null ? activeProject.getSolution() : null;
-
 		boolean selected = false;
 		if (activeSolution != null)
 		{
@@ -384,6 +379,15 @@ public class LinkWithEditorAction extends Action
 						tree.setSelection(new StructuredSelection(packageNode), true);
 						return true;
 					}
+					if (file.getProjectRelativePath().segmentCount() == 1)
+					{
+						//it is a file in the package project root
+						tree.setSelection(new StructuredSelection(packageNode), true);
+						tree.setExpandedState(packageNode, true);
+						String[] segments = file.getProjectRelativePath().segments();
+						findTreeNode(treeContentProvider, packageNode, segments);
+						return true;
+					}
 					for (Object ob : treeContentProvider.getChildren(packageNode))
 					{
 						if (ob instanceof PlatformSimpleUserNode)
@@ -396,47 +400,15 @@ public class LinkWithEditorAction extends Action
 									ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject(), spec);
 								if (webObjectName.equals(folder.getName()))
 								{
-									tree.setSelection(new StructuredSelection(webObjectNode), true);
-									tree.setExpandedState(webObjectNode, true);
-									String[] segments = file.getProjectRelativePath().segments();
-									if (segments.length > 2)
-									{
-										SimpleUserNode treeSelection = webObjectNode;
-										outer : for (int i = 1; i < segments.length - 1; i++)
-										{
-											String segment = segments[i];
-											if (treeContentProvider.getChildren(treeSelection).length > 0)
-											{
-												for (Object c : treeContentProvider.getChildren(treeSelection))
-												{
-													SimpleUserNode child = (SimpleUserNode)c;
-													if (child.getName().equals(segment))
-													{
-														tree.setSelection(new StructuredSelection(child), true);
-														tree.setExpandedState(child, true);
-														treeSelection = child;
-														continue outer;
-													}
-												}
-											}
-										}
-									}
-									Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
-									if (elements != null)
-									{
-										for (int i = 0; i < elements.length; i++)
-										{
-											Object element = elements[i];
-											if (((SimpleUserNode)element).getName().equals(file.getName()))
-											{
-												list.getTable().setSelection(new int[] { i });
-												list.getTable().showSelection();
-												break;
-											}
-										}
-									}
+									setWebObjectFileSelection(treeContentProvider, file, webObjectNode);
 									return true;
 								}
+							}
+							else if (webObjectNode.getRealObject() instanceof IFolder &&
+								file.getProjectRelativePath().toString().startsWith(((IFolder)(webObjectNode.getRealObject())).getName()))
+							{
+								setWebObjectFileSelection(treeContentProvider, file, webObjectNode);
+								return true;
 							}
 						}
 					}
@@ -444,6 +416,60 @@ public class LinkWithEditorAction extends Action
 			}
 		}
 		return false;
+	}
+
+	private void setWebObjectFileSelection(SolutionExplorerTreeContentProvider treeContentProvider, IFile file, PlatformSimpleUserNode webObjectNode)
+	{
+		tree.setSelection(new StructuredSelection(webObjectNode), true);
+		tree.setExpandedState(webObjectNode, true);
+		String[] segments = file.getProjectRelativePath().segments();
+		findTreeNode(treeContentProvider, webObjectNode, segments);
+		findListNode(file);
+	}
+
+	private void findListNode(IFile file)
+	{
+		Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
+		if (elements != null)
+		{
+			for (int i = 0; i < elements.length; i++)
+			{
+				Object element = elements[i];
+				if (((SimpleUserNode)element).getName().equals(file.getName()))
+				{
+					list.getTable().setSelection(new int[] { i });
+					list.getTable().showSelection();
+					break;
+				}
+			}
+		}
+	}
+
+	private void findTreeNode(SolutionExplorerTreeContentProvider treeContentProvider, PlatformSimpleUserNode webObjectNode, String[] segments)
+	{
+		if (segments.length > 0)
+		{
+			PlatformSimpleUserNode treeSelection = webObjectNode;
+			PlatformSimpleUserNode child = null;
+			outer : for (int i = 0; i < segments.length; i++)
+			{
+				String segment = segments[i];
+				if (treeContentProvider.getChildren(treeSelection).length > 0)
+				{
+					for (Object c : treeContentProvider.getChildren(treeSelection))
+					{
+						child = (PlatformSimpleUserNode)c;
+						if (child.getName().equals(segment))
+						{
+							tree.setSelection(new StructuredSelection(child), true);
+							tree.setExpandedState(child, true);
+							treeSelection = child;
+							continue outer;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void setProperSelection(IPersist persist, UserNodeType persistType, IContentProvider contentProvider)
