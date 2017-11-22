@@ -1635,22 +1635,7 @@ public class SolutionSerializer
 			ois.writeObject(properties);
 		}
 
-		//load all blobs permanently in the solution
-		Iterator itm = solution.getMedias(false);
-		while (itm.hasNext())
-		{
-			Media media = (Media)itm.next();
-			if (MimeTypes.CSS.equals(media.getMimeType()))
-			{
-				String cssAsString = new String(media.getMediaData(), Charset.forName("UTF8"));
-				cssAsString = cssAsString.replaceAll("##last-changed-timestamp##",
-					Long.toHexString(media.getLastModifiedTime() != -1 ? media.getLastModifiedTime() : solution.getLastModifiedTime()));
-				byte[] mediaData = cssAsString.getBytes();
-				media.setPermMediaData(mediaData);
-			}
-			media.getMediaData();//make sure its loaded (lazy loaded normally)
-			media.makeBlobPermanent();
-		}
+		List<Pair<Media, byte[]>> changedMedias = makeMediaPermanent(solution);
 
 		//load all styles permanently in the solution
 		Iterator solutionFormsIte = solution.getForms(null, false);
@@ -1715,13 +1700,7 @@ public class SolutionSerializer
 				element.setSerializableRuntimeProperty(Solution.PRE_LOADED_STYLES, all_styles);
 
 				//load all blobs permanently in the module
-				Iterator moduleMediaIte = element.getMedias(false);
-				while (moduleMediaIte.hasNext())
-				{
-					Media media = (Media)moduleMediaIte.next();
-					media.getMediaData();//make sure its loaded (lazy loaded normally)
-					media.makeBlobPermanent();
-				}
+				changedMedias.addAll(makeMediaPermanent(element));
 
 				tmpModuleServerProxies[i] = element.getServerProxies();
 				tmpModuleRepositories[i] = element.getRepository();
@@ -1738,8 +1717,40 @@ public class SolutionSerializer
 				mods[i].setServerProxies(tmpModuleServerProxies[i]);
 				mods[i].setRepository(tmpModuleRepositories[i]);
 			}
+			for (Pair<Media, byte[]> changedMedia : changedMedias)
+			{
+				changedMedia.getLeft().setPermMediaData(changedMedia.getRight());
+			}
 		}
 		ois.close();
+	}
+
+	/**
+	 * @param solution
+	 */
+	private static List<Pair<Media, byte[]>> makeMediaPermanent(Solution solution)
+	{
+		ArrayList<Pair<Media, byte[]>> changedMedias = new ArrayList<>();
+		//load all blobs permanently in the solution
+		Iterator<Media> itm = solution.getMedias(false);
+		while (itm.hasNext())
+		{
+			Media media = itm.next();
+			byte[] mediaData = media.getMediaData();//make sure its loaded (lazy loaded normally)
+			if (MimeTypes.CSS.equals(media.getMimeType()))
+			{
+				String cssAsString = new String(mediaData, Charset.forName("UTF8"));
+				cssAsString = cssAsString.replaceAll("##last-changed-timestamp##",
+					Long.toHexString(media.getLastModifiedTime() != -1 ? media.getLastModifiedTime() : solution.getLastModifiedTime()));
+				media.setPermMediaData(cssAsString.getBytes(Charset.forName("UTF8")));
+				changedMedias.add(new Pair<Media, byte[]>(media, mediaData));
+			}
+			else
+			{
+				media.makeBlobPermanent();
+			}
+		}
+		return changedMedias;
 	}
 
 }

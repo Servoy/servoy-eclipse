@@ -138,7 +138,7 @@ public class JSDeveloperSolutionModel
 							}
 							else continue;
 
-							objectsToSave.add(solutionCopy.getOrCreateTableNode(dataSourceName));
+							objectsToSave.add(servoyProject.getEditingSolution().getOrCreateTableNode(dataSourceName));
 
 						}
 					}
