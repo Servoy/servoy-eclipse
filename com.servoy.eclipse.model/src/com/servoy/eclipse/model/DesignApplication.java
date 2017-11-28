@@ -822,6 +822,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return getClient().getUserUID();
 	}
 
+	@Override
+	public Object getTenantValue()
+	{
+		return getClientInfo().getTenantValue();
+	}
+
 	public void handleException(String servoyMsg, Exception e)
 	{
 		getClient().handleException(servoyMsg, e);

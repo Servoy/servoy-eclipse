@@ -395,6 +395,8 @@ public class SolutionExplorerView extends ViewPart
 	private DuplicateServerAction duplicateServer;
 	private EnableServerAction enableServer;
 
+	private FlagTenantColumnAction flagTenantColumn;
+
 	private RefreshAction fRefreshAction;
 
 	private EditVariableAction editVariableAction;
@@ -2526,6 +2528,7 @@ public class SolutionExplorerView extends ViewPart
 		if (reloadTablesOfServerAction.isEnabled()) manager.add(reloadTablesOfServerAction);
 		if (updateServoySequencesAction.isEnabled()) manager.add(updateServoySequencesAction);
 		if (loadRelationsAction.isEnabled()) manager.add(loadRelationsAction);
+		if (flagTenantColumn.isEnabled()) manager.add(flagTenantColumn);
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION && exportActiveSolutionAction.isEnabled() &&
 			selectedTreeNode.getRealObject() != null)
@@ -2873,6 +2876,7 @@ public class SolutionExplorerView extends ViewPart
 		ServoyModel.getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(shell);
+		flagTenantColumn = new FlagTenantColumnAction(this);
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
 		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
 		referenceToRegularFormAction = new ReferenceToRegularFormAction(this);
@@ -3255,6 +3259,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(updateServoySequencesAction);
 		addTreeSelectionChangedListener(duplicateServer);
 		addTreeSelectionChangedListener(enableServer);
+		addTreeSelectionChangedListener(flagTenantColumn);
 		addTreeSelectionChangedListener(toggleFormCommandsActions);
 		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);

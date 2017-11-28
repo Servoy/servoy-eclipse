@@ -16,13 +16,13 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import com.servoy.j2db.persistence.Column;
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.j2db.persistence.ColumnInfo;
 
 /**
- * 
+ *
  * @author asisu
- * 
+ *
  */
 public class ColumnInfoBean
 {
@@ -303,24 +303,36 @@ public class ColumnInfoBean
 
 	public boolean getExcludedFlag()
 	{
-		return (columnInfo.getFlags() & Column.EXCLUDED_COLUMN) == Column.EXCLUDED_COLUMN;
+		return (columnInfo.getFlags() & IBaseColumn.EXCLUDED_COLUMN) == IBaseColumn.EXCLUDED_COLUMN;
 	}
 
 	public void setExcludedFlag(boolean excluded)
 	{
-		columnInfo.setFlag(Column.EXCLUDED_COLUMN, excluded);
+		columnInfo.setFlag(IBaseColumn.EXCLUDED_COLUMN, excluded);
 		columnInfo.flagChanged();
 	}
 
 	public boolean getUuidFlag()
 	{
-		return (columnInfo.getFlags() & Column.UUID_COLUMN) == Column.UUID_COLUMN;
+		return (columnInfo.getFlags() & IBaseColumn.UUID_COLUMN) == IBaseColumn.UUID_COLUMN;
 	}
 
 	public void setUuidFlag(boolean uuid)
 	{
-		columnInfo.setFlag(Column.UUID_COLUMN, uuid);
+		columnInfo.setFlag(IBaseColumn.UUID_COLUMN, uuid);
 		columnInfo.flagChanged();
 	}
+
+	public boolean getTenantFlag()
+	{
+		return (columnInfo.getFlags() & IBaseColumn.TENANT_COLUMN) == IBaseColumn.TENANT_COLUMN;
+	}
+
+	public void setTenantFlag(boolean tenant)
+	{
+		columnInfo.setFlag(IBaseColumn.TENANT_COLUMN, tenant);
+		columnInfo.flagChanged();
+	}
+
 
 }
