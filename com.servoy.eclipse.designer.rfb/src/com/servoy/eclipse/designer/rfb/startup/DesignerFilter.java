@@ -75,6 +75,7 @@ import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.SortedList;
@@ -268,6 +269,7 @@ public class DesignerFilter implements Filter
 							PackageSpecification<WebLayoutSpecification> entry = componentsSpecProviderState.getLayoutSpecifications().get(key);
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
+								if (NGUtils.isAbsoluteLayoutDiv(spec)) continue; // not supported in designer
 								JSONObject layoutJson = new JSONObject();
 								layoutJson.put("name", spec.getName());
 								if (spec.getConfig() != null)
