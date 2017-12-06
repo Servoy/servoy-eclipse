@@ -80,6 +80,7 @@ import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -1279,6 +1280,7 @@ public class ElementFactory
 
 		for (IPersist persist : array)
 		{
+			if (persist instanceof IFlattenedPersistWrapper) persist = ((IFlattenedPersistWrapper)persist).getWrappedPersist();
 			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, true, repository, false, null);
 			if (persist instanceof ISupportSize) // some objects have default size programmed in the getter
 			{
