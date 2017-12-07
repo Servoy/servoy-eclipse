@@ -957,7 +957,7 @@ public class SolutionExplorerTreeContentProvider
 						if (components.size() > 0)
 						{
 							Collections.sort(components);
-							createWebPackageProjectChildren(un, getComponentsSpecProviderState(), packageName, folderNames, children, components,
+							createWebPackageProjectChildren(un, getComponentsSpecProviderState(), UserNodeType.COMPONENT, folderNames, children, components,
 								uiActivator.loadImageFromBundle("ng_component.png"));
 						}
 						List<String> layouts = new ArrayList<>(getComponentsSpecProviderState().getLayoutsInPackage(packageName));
@@ -1052,7 +1052,7 @@ public class SolutionExplorerTreeContentProvider
 								List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
 								Collections.sort(services);
 								Image defaultIcon = uiActivator.loadImageFromBundle("service.png");
-								createWebPackageProjectChildren(un, provider, packageName, folderNames, children, services, defaultIcon);
+								createWebPackageProjectChildren(un, provider, UserNodeType.SERVICE, folderNames, children, services, defaultIcon);
 							}
 							children.addAll(addOtherPackageResources(un, folderNames));
 							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
@@ -1119,7 +1119,7 @@ public class SolutionExplorerTreeContentProvider
 		return new Object[0];
 	}
 
-	private void createWebPackageProjectChildren(PlatformSimpleUserNode un, SpecProviderState provider, String packageName, Set<String> folderNames,
+	private void createWebPackageProjectChildren(PlatformSimpleUserNode un, SpecProviderState provider, UserNodeType type, Set<String> folderNames,
 		List<PlatformSimpleUserNode> children, List<String> services, Image defaultIcon)
 	{
 		for (String component : services)
@@ -1135,8 +1135,7 @@ public class SolutionExplorerTreeContentProvider
 					if (f.getProjectRelativePath().segmentCount() > 1)
 					{
 						Image img = getIconFromSpec(spec, false);
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
-							img != null ? img : defaultIcon);
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), type, spec, img != null ? img : defaultIcon);
 						node.parent = un;
 						children.add(node);
 						folderNames.add(folderName);
