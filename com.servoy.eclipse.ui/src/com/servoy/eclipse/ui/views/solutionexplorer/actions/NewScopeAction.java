@@ -40,6 +40,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -128,7 +129,12 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 					return "Invalid scope name";
 				}
 				Collection<String> scopeNames = null;
-				if (ScriptVariable.GLOBAL_SCOPE.equals(newText))
+				if (project.getSolution().getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK ||
+					project.getSolution().getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK)
+				{
+					scopeNames = project.getSolution().getScopeNames();
+				}
+				else if (ScriptVariable.GLOBAL_SCOPE.equals(newText))
 				{
 					scopeNames = project.getGlobalScopenames();
 				}

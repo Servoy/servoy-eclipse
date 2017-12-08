@@ -1100,7 +1100,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					String otherFile = scope.getRight().getName() + '/' + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION;
 					IFile file = scriptFile.getWorkspace().getRoot().getFile(Path.fromPortableString(otherFile));
-					if (scriptFile.exists())
+					if (scriptFile.exists() &&
+						!isParentImportHook(getServoyModel().getServoyProject(scriptFile.getProject().getName()).getSolution(), (Solution)scope.getRight()))
 					{
 						// duplicate found
 						ServoyMarker mk = MarkerMessages.DuplicateScopeFound.fill(scope.getLeft(), scope.getRight().getName());
@@ -1198,7 +1199,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					String otherChildsType = "method";
 					for (IPersist child : Utils.iterate(duplicatedParent.getRight().getAllObjects()))
 					{
-						if ((child instanceof IScriptProvider || child instanceof ScriptVariable) && ((ISupportName)child).getName().equals(name))
+						if ((child instanceof IScriptProvider || child instanceof ScriptVariable) && ((ISupportName)child).getName().equals(name) &&
+							!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight()))
 						{
 							int lineNumber;
 							if (child instanceof IScriptElement)
@@ -1220,18 +1222,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							break;
 						}
 					}
-					int lineNumber;
-					if (persist instanceof IScriptElement)
+					if (!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight()))
 					{
-						if (persist instanceof ScriptVariable)
+						int lineNumber;
+						if (persist instanceof IScriptElement)
 						{
-							otherChildsType = "variable";
+							if (persist instanceof ScriptVariable)
+							{
+								otherChildsType = "variable";
+							}
+							lineNumber = ((IScriptElement)persist).getLineNumberOffset();
 						}
-						lineNumber = ((IScriptElement)persist).getLineNumberOffset();
+						else lineNumber = 0;
+						ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, name, duplicateParentsName);
+						addMarker(project, mk.getType(), mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 					}
-					else lineNumber = 0;
-					ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, name, duplicateParentsName);
-					addMarker(project, mk.getType(), mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 
 				}
 				Set<Pair<String, ISupportChilds>> parents = parentScopeSet;
@@ -1549,6 +1554,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 		}
+	}
+
+	private boolean isParentImportHook(Solution persistParent, Solution dupParent)
+	{
+		if (!dupParent.equals(persistParent) &&
+			(persistParent.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || persistParent.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	private void checkPersistDuplication()
