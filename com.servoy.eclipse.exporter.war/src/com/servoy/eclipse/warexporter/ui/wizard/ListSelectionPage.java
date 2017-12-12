@@ -25,8 +25,6 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -39,7 +37,7 @@ import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
  * @author jcompagner
  * @since 6.1
  */
-public class ListSelectionPage extends WizardPage implements ICheckStateListener, ICheckBoxView
+public class ListSelectionPage extends WizardPage implements ICheckStateListener, ICheckBoxView, IRestoreDefaultPage
 {
 	public static final String REQUIRED_LABEL = " (required)";
 
@@ -85,7 +83,7 @@ public class ListSelectionPage extends WizardPage implements ICheckStateListener
 		gridData.horizontalSpan = 2;
 		checkboxTableViewer.getTable().setLayoutData(gridData);
 		checkboxTableViewer.addCheckStateListener(this);
-		selectAllButtons = new SelectAllButtonsBar(this, container, true);
+		selectAllButtons = new SelectAllButtonsBar(this, container, false);
 		if (selectAll)
 		{
 			checkboxTableViewer.setAllChecked(true);
@@ -102,17 +100,6 @@ public class ListSelectionPage extends WizardPage implements ICheckStateListener
 		{
 			selectAllButtons.enableAll();
 		}
-		selectAllButtons.addRestoreSelectionListener(new SelectionAdapter()
-		{
-
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				checkboxTableViewer.setAllChecked(true);
-				selectAllButtons.enableAll();
-				selectAllButtons.disableSelectAll();
-			}
-		});
 	}
 
 
@@ -154,5 +141,13 @@ public class ListSelectionPage extends WizardPage implements ICheckStateListener
 	public void deselectAll()
 	{
 		checkboxTableViewer.setAllChecked(false);
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		checkboxTableViewer.setAllChecked(false);
+		selectAllButtons.enableAll();
+		selectAllButtons.disableDeselectAll();
 	}
 }
