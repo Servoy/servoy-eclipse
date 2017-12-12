@@ -82,6 +82,8 @@ public class OpenWizardAction extends Action
 			// Instantiates the wizard container with the wizard and opens it
 			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
 			{
+				private Button restoreDefault = null;
+
 				@Override
 				protected IDialogSettings getDialogBoundsSettings()
 				{
@@ -93,8 +95,8 @@ public class OpenWizardAction extends Action
 				{
 					if (wizard instanceof IRestoreDefaultWizard)
 					{
-						Button button = createButton(parent, 1, "Restore Defaults", false);
-						button.addSelectionListener(new SelectionListener()
+						restoreDefault = createButton(parent, 1, "Restore Defaults", false);
+						restoreDefault.addSelectionListener(new SelectionListener()
 						{
 
 							@Override
@@ -111,6 +113,15 @@ public class OpenWizardAction extends Action
 					}
 					super.createButtonsForButtonBar(parent);
 				}
+
+				@Override
+				protected void finishPressed()
+				{
+					if (restoreDefault != null) restoreDefault.setEnabled(false);
+					super.finishPressed();
+					if (restoreDefault != null && getReturnCode() != OK) restoreDefault.setEnabled(true);
+				}
+
 			};
 			if (wizard instanceof IPageChangedListener)
 			{

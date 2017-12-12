@@ -401,7 +401,10 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 	@Override
 	public void restoreDefaults()
 	{
-		((IRestoreDefaultPage)getContainer().getCurrentPage()).restoreDefaults();
+		if (getContainer().getCurrentPage() instanceof IRestoreDefaultPage)
+		{
+			((IRestoreDefaultPage)getContainer().getCurrentPage()).restoreDefaults();
+		}
 	}
 
 }
