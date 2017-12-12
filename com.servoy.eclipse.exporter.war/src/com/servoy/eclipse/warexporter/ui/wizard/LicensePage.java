@@ -47,7 +47,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * Allows exporting client licenses into the war.
  * @author emera
  */
-public class LicensePage extends WizardPage
+public class LicensePage extends WizardPage implements IRestoreDefaultPage
 {
 
 	final ExportWarModel exportModel;
@@ -267,27 +267,23 @@ public class LicensePage extends WizardPage
 				license.getCode(), license.getNumberOfLicenses());
 			ctrls.add(licenseComposite);
 		}
-		Button restoreDefaults = new Button(mainContainer, SWT.PUSH);
-		restoreDefaults.setText("Restore Defaults");
-		restoreDefaults.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				Control[] children = mainContainer.getChildren();
-				for (int i = 1; i < children.length - 1; i++)
-				{
-					children[i].dispose();
-				}
-				((LicenseFieldsComposite)((Composite)children[0]).getChildren()[0]).clear();
-				mainContainer.update();
-				exportModel.clearLicenses();
-			}
-		});
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		mainContainer.layout();
 		sc.layout();
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		Control[] children = mainContainer.getChildren();
+		for (int i = 1; i < children.length - 1; i++)
+		{
+			children[i].dispose();
+		}
+		((LicenseFieldsComposite)((Composite)children[0]).getChildren()[0]).clear();
+		mainContainer.update();
+		exportModel.clearLicenses();
 	}
 }

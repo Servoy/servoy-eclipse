@@ -19,7 +19,6 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -40,7 +39,7 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
  * @author acostache
  *
  */
-public class ServoyPropertiesConfigurationPage extends WizardPage implements Listener
+public class ServoyPropertiesConfigurationPage extends WizardPage implements Listener, IRestoreDefaultPage
 {
 	private final ExportWarModel exportModel;
 	private Button useRMI;
@@ -105,22 +104,6 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		label.setText(
 			"\nNOTE: If running of smart clients is enabled, please take in consideration\nthat on each restart of the application context in the web container,\nRMI related classes cannot be GC and that may lead to out-of-memory errors.");
 
-		Button restoreDefaults = new Button(composite, SWT.PUSH);
-		restoreDefaults.setText("Restore Defaults");
-		restoreDefaults.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				useRMI.setSelection(true);
-				startRMIPortText.setText("1099");
-				startRMIPortText.setEnabled(true);
-
-				exportModel.setStartRMI(true);
-				exportModel.setStartRMIPort("1099");
-			}
-		});
-
 		setControl(composite);
 	}
 
@@ -140,5 +123,16 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 	public boolean canFlipToNextPage()
 	{
 		return !useRMI.getSelection() || (startRMIPortText.getText() != null && startRMIPortText.getText().length() > 0);
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		useRMI.setSelection(true);
+		startRMIPortText.setText("1099");
+		startRMIPortText.setEnabled(true);
+
+		exportModel.setStartRMI(true);
+		exportModel.setStartRMIPort("1099");
 	}
 }

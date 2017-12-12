@@ -25,7 +25,6 @@ import java.util.Properties;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -46,7 +45,7 @@ import com.servoy.j2db.util.SortedProperties;
  * @author gboros
  *
  */
-public class DeployConfigurationPage extends WizardPage implements Listener, SelectionListener
+public class DeployConfigurationPage extends WizardPage implements Listener, SelectionListener, IRestoreDefaultPage
 {
 	private final ExportWarModel exportModel;
 	private Button overwriteDBServerPropertiesBtn;
@@ -103,23 +102,6 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		label.setLayoutData(gd);
 		label.setText(
 			"\nNOTE: This must be a writable directory where Servoy application related files will be stored.\nIf you leave it empty, the system user home directory will be used.");
-
-		Button restoreDefaults = new Button(composite, SWT.PUSH);
-		restoreDefaults.setText("Restore Defaults");
-		restoreDefaults.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				overwriteDBServerPropertiesBtn.setSelection(true);
-				overwriteAllPropertiesBtn.setSelection(false);
-				userHomeText.setText("");
-
-				exportModel.setOverwriteDeployedDBServerProperties(true);
-				exportModel.setOverwriteDeployedServoyProperties(false);
-				exportModel.setUserHome(null);
-			}
-		});
 
 		setControl(composite);
 	}
@@ -193,5 +175,19 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 	public void widgetDefaultSelected(SelectionEvent e)
 	{
 		// TODO Auto-generated method stub
+	}
+
+
+	@Override
+	public void restoreDefaults()
+	{
+		overwriteDBServerPropertiesBtn.setSelection(true);
+		overwriteAllPropertiesBtn.setSelection(false);
+		userHomeText.setText("");
+
+		exportModel.setOverwriteDeployedDBServerProperties(true);
+		exportModel.setOverwriteDeployedServoyProperties(false);
+		exportModel.setUserHome(null);
+
 	}
 }

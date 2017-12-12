@@ -48,6 +48,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
@@ -61,7 +62,7 @@ import com.servoy.j2db.util.Debug;
  * @author jcompagner
  * @since 6.1
  */
-public class ExportWarWizard extends Wizard implements IExportWizard
+public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDefaultWizard
 {
 
 	private FileSelectionPage fileSelectionPage;
@@ -367,6 +368,12 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	public IWizardPage getLastPage()
 	{
 		return userHomeSelectionPage;
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		((IRestoreDefaultPage)getContainer().getCurrentPage()).restoreDefaults();
 	}
 
 }

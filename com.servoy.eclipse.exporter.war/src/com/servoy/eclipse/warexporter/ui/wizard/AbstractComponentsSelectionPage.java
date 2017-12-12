@@ -42,7 +42,7 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
  * Page which shows the list of used components and services and allows the user to select additional components/services.
  * @author emera
  */
-public abstract class AbstractComponentsSelectionPage extends WizardPage
+public abstract class AbstractComponentsSelectionPage extends WizardPage implements IRestoreDefaultPage
 {
 
 	protected Set<String> componentsUsed;
@@ -212,37 +212,24 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 			}
 		});
 
-		Button restoreDefaults = new Button(container, SWT.PUSH);
-		restoreDefaults.setText("Restore Defaults");
-		restoreDefaults.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				restoreDefaults();
-			}
-		});
-
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup().add(exportedLabel).add(availableComponentsList,
 			GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.UNRELATED).add(
 				groupLayout.createParallelGroup().add(btnSelect, GroupLayout.PREFERRED_SIZE, 50, Short.MAX_VALUE).add(btnRemove, GroupLayout.PREFERRED_SIZE, 50,
-					Short.MAX_VALUE).add(btnSelectAll, GroupLayout.PREFERRED_SIZE, 50, Short.MAX_VALUE).add(restoreDefaults, GroupLayout.PREFERRED_SIZE, 50,
-						Short.MAX_VALUE)).addPreferredGap(LayoutStyle.UNRELATED).add(
-							groupLayout.createParallelGroup().add(availableLabel).add(selectedComponentsList, GroupLayout.PREFERRED_SIZE, 150,
-								Short.MAX_VALUE)));
+					Short.MAX_VALUE).add(btnSelectAll, GroupLayout.PREFERRED_SIZE, 50, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.UNRELATED).add(
+						groupLayout.createParallelGroup().add(availableLabel).add(selectedComponentsList, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)));
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup().add(groupLayout.createSequentialGroup().add(exportedLabel).addPreferredGap(LayoutStyle.RELATED).add(
 				availableComponentsList, GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)).add(
 					groupLayout.createSequentialGroup().add(50).add(btnSelect).addPreferredGap(LayoutStyle.RELATED).add(btnRemove).addPreferredGap(
-						LayoutStyle.RELATED).add(btnSelectAll).addPreferredGap(LayoutStyle.UNRELATED).add(restoreDefaults)).add(
+						LayoutStyle.RELATED).add(btnSelectAll)).add(
 							groupLayout.createSequentialGroup().add(availableLabel).addPreferredGap(LayoutStyle.RELATED).add(selectedComponentsList,
 								GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)));
 		container.setLayout(groupLayout);
 	}
 
-	private void restoreDefaults()
+	public void restoreDefaults()
 	{
 		componentsUsed = exportModel.getUsedComponents();
 		selectedComponents = new TreeSet<String>(componentsUsed);

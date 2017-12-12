@@ -32,8 +32,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -49,7 +47,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * @author jcompagner
  * @since 6.1
  */
-public class ServersSelectionPage extends WizardPage implements ICheckStateListener, ICheckBoxView
+public class ServersSelectionPage extends WizardPage implements ICheckStateListener, ICheckBoxView, IRestoreDefaultPage
 {
 	private final SortedSet<String> selectedServers;
 	private CheckboxTableViewer checkboxTableViewer;
@@ -95,7 +93,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		gridData.horizontalSpan = 2;
 		checkboxTableViewer.getTable().setLayoutData(gridData);
 		checkboxTableViewer.addCheckStateListener(this);
-		selectAllButtons = new SelectAllButtonsBar(this, container, true);
+		selectAllButtons = new SelectAllButtonsBar(this, container);
 		if (selectedServers.size() == 0)
 		{
 			checkboxTableViewer.setAllChecked(true);
@@ -112,16 +110,6 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		{
 			selectAllButtons.enableAll();
 		}
-		selectAllButtons.addRestoreSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				checkboxTableViewer.setAllChecked(true);
-				selectAllButtons.enableAll();
-				selectAllButtons.disableSelectAll();
-			}
-		});
 	}
 
 	private String[] appendRequiredLabel(Object[] serverNames)
@@ -261,5 +249,13 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 				if (requiredServer != null && requiredServers.length > 0)
 					checkboxTableViewer.setChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL, true);
 		}
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		checkboxTableViewer.setAllChecked(true);
+		selectAllButtons.enableAll();
+		selectAllButtons.disableSelectAll();
 	}
 }
