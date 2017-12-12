@@ -118,6 +118,21 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public boolean isExportNoneActiveSolutions()
+		{
+			return configuration.getNoneActiveSolutions() != null;
+		}
+
+		public List<String> getNoneActiveSolutions()
+		{
+			if (configuration.getNoneActiveSolutions() != null)
+			{
+				return Arrays.asList(configuration.getNoneActiveSolutions().split(" "));
+			}
+			return Collections.emptyList();
+		}
+
+		@Override
 		public List<String> getPlugins()
 		{
 			Set<String> names = null;
@@ -553,7 +568,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		catch (ExportException ex)
 		{
 			ServoyLog.logError("Failed to export solution.", ex);
-			outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
+			outputError("Exception while exporting solution: " + ex.getMessage() + ".  EXPORT FAILED for this solution. Check workspace log for more info.");
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}

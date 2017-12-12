@@ -39,7 +39,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String beans;
 	private String lafs;
 	private String drivers;
-	private boolean isExportActiveSolutionOnly;
+	private boolean isExportActiveSolution;
 	private String pluginLocations;
 	private String selectedComponents;
 	private String selectedServices;
@@ -85,6 +85,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String overwriteAllProperties = "overwriteAllProperties";
 
 	private static final String webXmlFileName = "webXmlFileName";
+
+	private static final String noneActiveSolutions = "nas";
 
 	private HashMap<String, String> argumentsMap;
 	private Map<String, License> licenseMap = new HashMap<>();
@@ -133,6 +135,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Can also use -pi <none> to not export any plugin\n"
 			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
+			+ "        -" + noneActiveSolutions+ "  ... the list of solutions that are must be exported but are not in the active solution modules\n"
+			+ "				Default: only active and its modules are exported\n"
 			+ "        -pluginLocations <ABSOLUTE paths to developer 'plugins' folder> ...  needed in  case\n"
 			+ "             you don't run the exporter from [servoy_install]/developer/exporter\n"
 			+ "             Default: '../plugins'.\n"
@@ -214,8 +218,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap, false);
 		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap, false);
 		drivers = parseArg("d", "Driver name(s) was(were) not specified after '-d' argument.", argsMap, false);
-		isExportActiveSolutionOnly = true;
-		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
+		isExportActiveSolution = true;
+		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
 		if (pluginLocations == null) pluginLocations = "../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
@@ -334,7 +338,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	public boolean isExportActiveSolutionOnly()
 	{
-		return isExportActiveSolutionOnly;
+		return isExportActiveSolution;
 	}
 
 	public String getPluginLocations()
@@ -530,5 +534,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String getWebXMLFileName()
 	{
 		return argumentsMap.get(webXmlFileName);
+	}
+
+	/**
+	 * @return
+	 */
+	public String getNoneActiveSolutions()
+	{
+		return argumentsMap.get(noneActiveSolutions);
 	}
 }

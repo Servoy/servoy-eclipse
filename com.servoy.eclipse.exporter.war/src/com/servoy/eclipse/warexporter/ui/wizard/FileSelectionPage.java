@@ -61,6 +61,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	private Text fileNameText;
 	private Button browseButton;
 	private Button exportActiveSolution;
+	private Button exportNoneActiveSolutions;
 	private Button allRowsRadioButton;
 	private Button exportI18NDataButton;
 	private Button exportUsersButton;
@@ -132,6 +133,18 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 				exportModel.setExportActiveSolution(exportActiveSolution.getSelection());
 
 				enableSolutionExportData();
+			}
+		});
+
+		exportNoneActiveSolutions = new Button(composite, SWT.CHECK);
+		exportNoneActiveSolutions.setText(" Include none active solutions.");
+		exportNoneActiveSolutions.setSelection(exportModel.isExportNoneActiveSolutions());
+		exportNoneActiveSolutions.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setExportNoneActiveSolutions(exportNoneActiveSolutions.getSelection());
 			}
 		});
 
@@ -658,6 +671,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	 */
 	private void enableSolutionExportData()
 	{
+		exportNoneActiveSolutions.setEnabled(exportActiveSolution.getSelection());
 		allowDataModelChangeButton.setEnabled(exportActiveSolution.getSelection());
 		exportAllTablesFromReferencedServers.setEnabled(exportActiveSolution.getSelection());
 		allowKeywordsButton.setEnabled(exportActiveSolution.getSelection());
@@ -792,6 +806,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	public void restoreDefaults()
 	{
 		fileNameText.setText("");
+		exportNoneActiveSolutions.setSelection(false);
 		exportModel.setFileName(null);
 		exportActiveSolution.setSelection(false);
 		exportModel.setExportActiveSolution(false);

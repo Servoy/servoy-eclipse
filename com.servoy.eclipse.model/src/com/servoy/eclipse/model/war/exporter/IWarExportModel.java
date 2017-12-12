@@ -124,4 +124,8 @@ public interface IWarExportModel extends IExportSolutionModel
 	public String getWebXMLFileName();
 
 	public String checkWebXML();
+
+	public List<String> getNoneActiveSolutions();
+
+	public boolean isExportNoneActiveSolutions();
 }

@@ -92,6 +92,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
@@ -807,14 +808,43 @@ public class WarExporter
 	{
 		try
 		{
-			FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+			FlattenedSolution solution = servoyModel.getFlattenedSolution();
+			Solution[] modules = solution.getModules();
+			if (exportModel.isExportNoneActiveSolutions() && !exportModel.getNoneActiveSolutions().isEmpty())
+			{
+				List<String> noneActiveSolutions = exportModel.getNoneActiveSolutions();
+				Solution[] copy = null;
+				int start = 0;
+				if (modules != null && modules.length > 0)
+				{
+					start = modules.length;
+					copy = new Solution[start + noneActiveSolutions.size()];
+					System.arraycopy(modules, 0, copy, 0, modules.length);
+				}
+				else
+				{
+					copy = new Solution[noneActiveSolutions.size()];
+				}
+				for (String name : noneActiveSolutions)
+				{
+					ServoyProject servoyProject = servoyModel.getServoyProject(name);
+					if (servoyProject == null || servoyProject.getSolution() == null)
+					{
+						throw new ExportException("Can't export none active soluton with the name: " + name +
+							" it couildn't be found in the workspace or the solution couldnt be loaded");
+					}
+					copy[start++] = servoyProject.getSolution();
+				}
+				modules = copy;
+			}
 			SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
-				ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
+				ApplicationServerRegistry.get().getDeveloperRepository(), modules);
 			exportSolution(monitor, tmpWarDir.getCanonicalPath(), solution.getSolution(), false);
 
 			File preImportFolder = new File(tmpWarDir, "WEB-INF/preImport");
 			File postImportFolder = new File(tmpWarDir, "WEB-INF/postImport");
-			for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProject())
+			for (ServoyProject sp : servoyModel.getModulesOfActiveProject())
 			{
 				File destinationFolder = null;
 				if (SolutionMetaData.isPreImportHook(sp.getSolution()))
@@ -835,6 +865,10 @@ public class WarExporter
 				}
 			}
 
+		}
+		catch (ExportException e)
+		{
+			throw e;
 		}
 		catch (Exception ex)
 		{
