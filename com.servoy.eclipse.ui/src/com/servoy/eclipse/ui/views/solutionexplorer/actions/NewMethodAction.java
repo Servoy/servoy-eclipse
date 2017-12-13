@@ -103,8 +103,10 @@ import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
@@ -266,7 +268,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				if (parent instanceof Solution)
 				{
 					// global method
-					met = ((Solution)parent).createNewGlobalScriptMethod(sm.getNameValidator(), scopeName, methodName);
+					met = ((Solution)parent).createNewGlobalScriptMethod(getValidator(parent), scopeName, methodName);
 				}
 				else if (parent instanceof Form)
 				{
@@ -580,7 +582,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 	private static String validateMethodName(final IPersist parent, String scopeName, String newText)
 	{
-		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+		IValidateName validator = getValidator(parent);
 		try
 		{
 			if (parent instanceof Solution)
@@ -611,6 +613,21 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		}
 		// valid
 		return null;
+	}
+
+	private static IValidateName getValidator(final IPersist parent)
+	{
+		IValidateName validator = null;
+		if (parent instanceof Solution && (((Solution)parent).getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK ||
+			((Solution)parent).getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK))
+		{
+			validator = new ScriptNameValidator(ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(parent));
+		}
+		else
+		{
+			validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+		}
+		return validator;
 	}
 
 	private static Pair<Pair<String, String>, Integer> askForMethodName(String methodType, final IPersist parent, String methodKey, Shell shell, int tagFilter,
