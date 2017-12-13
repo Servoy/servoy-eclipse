@@ -634,7 +634,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 			extendsLabel.setText("E&xtends");
 			extendsLabel.setEnabled(!activeSolutionMobile);
 
-			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE);
+			extendsFormViewer = new TreeSelectViewer(topLevel, SWT.NONE)
+			{
+				@Override
+				protected Object determineValue(String contents)
+				{
+					if ("-none-".equals(contents)) return Integer.valueOf(Form.NAVIGATOR_NONE);
+					Form form = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
+					return form != null ? new Integer(form.getID()) : null;
+				}
+			};
 			extendsFormViewer.setTitleText("Select super form");
 
 			final FlattenedSolution flattenedSolution = servoyProject.getEditingFlattenedSolution();
