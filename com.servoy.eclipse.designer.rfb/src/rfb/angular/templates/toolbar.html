@@ -43,7 +43,7 @@
     	<toolbar-switch ng-repeat="item in show_data" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	<div class="toolbar design_mode" ng-if="design_mode.length > 0">	
-    	<toolbar-switch ng-repeat="item in design_mode" ng-if="!item.hide" model="item" class="toolbar-action"/>
+    	<toolbar-item ng-repeat="item in design_mode" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	<div class="toolbar sticky" ng-if="sticky.length > 0">	
     	<toolbar-item ng-repeat="item in sticky" ng-if="!item.hide" model="item" class="toolbar-action"/>

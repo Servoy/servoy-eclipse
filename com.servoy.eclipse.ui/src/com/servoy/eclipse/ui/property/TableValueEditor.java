@@ -16,20 +16,11 @@
  */
 package com.servoy.eclipse.ui.property;
 
-/**
- * IValueEditor for tables, opens table editor.
- *
- * @author rgansevles
- */
-
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.ITable;
 
 public class TableValueEditor implements IValueEditor<Object>
 {
@@ -42,26 +33,14 @@ public class TableValueEditor implements IValueEditor<Object>
 
 	public boolean canEdit(Object value)
 	{
-		if (value instanceof TableWrapper)
+		if (value instanceof IDataSourceWrapper)
 		{
-			TableWrapper tw = (TableWrapper)value;
+			IDataSourceWrapper tw = (IDataSourceWrapper)value;
 
-			IServer server = ServoyModel.getServerManager().getServer(tw.getServerName(), true, true);
-			if (server != null)
+			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tw.getDataSource());
+			if (table != null)
 			{
-				try
-				{
-					if ((Table)server.getTable(tw.getTableName()) != null)
-					{
-						return true;
-					}
-				}
-				catch (Exception e)
-				{
-					String msg = "Could not find table " + tw.getServerName() + '/' + tw.getTableName();
-					ServoyLog.logError(msg, e);
-					throw new RuntimeException(msg + ": " + e.getMessage());
-				}
+				return true;
 			}
 		}
 

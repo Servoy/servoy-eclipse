@@ -77,8 +77,12 @@
 	padding: 0px;
 }
 
-.toolbar-action button{
+.toolbar-action button {
 	background-color: transparent;
+}
+
+.toolbar-action .toggle-on {
+    background: darkgray;
 }
 
 .toolbar-action:hover {

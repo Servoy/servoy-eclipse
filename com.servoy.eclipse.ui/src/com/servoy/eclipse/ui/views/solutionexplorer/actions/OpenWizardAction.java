@@ -24,11 +24,16 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 
 /**
  * Action for opening a wizard.
@@ -64,7 +69,7 @@ public class OpenWizardAction extends Action
 	{
 		try
 		{
-			IWorkbenchWizard wizard = wizardClass.newInstance();
+			final IWorkbenchWizard wizard = wizardClass.newInstance();
 
 			IStructuredSelection selection = StructuredSelection.EMPTY;
 			ISelection windowSelection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection();
@@ -77,11 +82,46 @@ public class OpenWizardAction extends Action
 			// Instantiates the wizard container with the wizard and opens it
 			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
 			{
+				private Button restoreDefault = null;
+
 				@Override
 				protected IDialogSettings getDialogBoundsSettings()
 				{
 					return EditorUtil.getDialogSettings(wizardClass.getSimpleName());
 				}
+
+				@Override
+				protected void createButtonsForButtonBar(Composite parent)
+				{
+					if (wizard instanceof IRestoreDefaultWizard)
+					{
+						restoreDefault = createButton(parent, 1, "Restore Defaults", false);
+						restoreDefault.addSelectionListener(new SelectionListener()
+						{
+
+							@Override
+							public void widgetSelected(SelectionEvent e)
+							{
+								((IRestoreDefaultWizard)wizard).restoreDefaults();
+							}
+
+							@Override
+							public void widgetDefaultSelected(SelectionEvent e)
+							{
+							}
+						});
+					}
+					super.createButtonsForButtonBar(parent);
+				}
+
+				@Override
+				protected void finishPressed()
+				{
+					if (restoreDefault != null) restoreDefault.setEnabled(false);
+					super.finishPressed();
+					if (restoreDefault != null && getReturnCode() != OK) restoreDefault.setEnabled(true);
+				}
+
 			};
 			if (wizard instanceof IPageChangedListener)
 			{

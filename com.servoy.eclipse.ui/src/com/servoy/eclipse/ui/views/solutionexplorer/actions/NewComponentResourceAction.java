@@ -20,19 +20,23 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.io.ByteArrayInputStream;
 import java.net.URISyntaxException;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -69,18 +73,15 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 		{
 			selectedNode = ((SimpleUserNode)sel.getFirstElement());
 			UserNodeType type = selectedNode.getType();
-			state = (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT || type == UserNodeType.WEB_OBJECT_FOLDER);
-			if (state)
+			if (type == UserNodeType.WEB_OBJECT_FOLDER || type == UserNodeType.COMPONENTS_PROJECT_PACKAGE || type == UserNodeType.SERVICES_PROJECT_PACKAGE ||
+				type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 			{
-				if (type == UserNodeType.WEB_OBJECT_FOLDER)
-				{
-					state = true;
-				}
-				else
-				{
-					WebObjectSpecification spec = ((WebObjectSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject());
-					state = "file".equals(spec.getSpecURL().getProtocol());
-				}
+				state = true;
+			}
+			else if (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT)
+			{
+				WebObjectSpecification spec = ((WebObjectSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject());
+				state = "file".equals(spec.getSpecURL().getProtocol());
 			}
 		}
 		setEnabled(state);
@@ -99,10 +100,16 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 			ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
 			IProject project = resourcesProject.getProject();
 
-			IFolder folder = null;
-			if (selectedNode.getType() == UserNodeType.WEB_OBJECT_FOLDER)
+			IContainer folder = null;
+			UserNodeType type = selectedNode.getType();
+			if (type == UserNodeType.WEB_OBJECT_FOLDER)
 			{
 				folder = (IFolder)selectedNode.getRealObject();
+			}
+			else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE || type == UserNodeType.SERVICES_PROJECT_PACKAGE ||
+				type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
+			{
+				folder = ServoyModel.getWorkspace().getRoot().getProject(((IPackageReader)selectedNode.getRealObject()).getPackageName());
 			}
 			else
 			{
@@ -112,7 +119,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 						((WebObjectSpecification)selectedNode.getRealObject()).getSpecURL().toURI());
 					if (specFile.length == 1)
 					{
-						folder = (IFolder)specFile[0].getParent();
+						folder = specFile[0].getParent();
 					}
 					else
 					{
@@ -125,7 +132,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 				}
 			}
 
-			IFile file = folder.getFile(newFileName);
+			IFile file = folder.getFile(new Path(newFileName));
 			if (!file.exists())
 			{
 				try

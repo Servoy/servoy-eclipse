@@ -57,10 +57,12 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONObject;
@@ -645,6 +647,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	@Override
 	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor progressMonitor) throws CoreException
 	{
+		// this is kind of a hack because you can listen to ResourceChangeEvent.PRE_BUILD and ResourceChangeEvent.POST_BUILD as workspace resource listeners
+		// because Eclipse does block the PRE_BUILD of the AutoBuildJob
+		// so this makes a job that has the workspace as the rule (so it waits for any workspace jobs to finish like the build job)
+		// then turns of the super persist cache of the PersistHelper that it always just enables when a build starts.
+		// This can't be enabled/disabled just in this method because a build creates multiply instances of this class. (1 for every project)
+		Job disableCache = Job.createSystem("clear cache", new ICoreRunnable()
+		{
+			@Override
+			public void run(IProgressMonitor monitor) throws CoreException
+			{
+				PersistHelper.enableSuperPersistCaching(false);
+			}
+		});
+		disableCache.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		disableCache.schedule();
+		PersistHelper.enableSuperPersistCaching(true);
 		// make sure the IServoyModel is initialized
 		getServoyModel();
 		referencedProjectsSet.clear();
@@ -1022,13 +1040,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ServoyLog.logError(e);
 						}
 					}
-					//import hook is not active, add error here as well
-					if (module != null && !servoyModel.isSolutionActive(module.getProject().getName()) &&
-						SolutionMetaData.isPreImportHook(module.getSolution()) && module.getSolution().getModulesNames() != null)
-					{
-						String message = "Module " + module.getSolution().getName() + " is a solution import hook, so it should not contain any modules.";
-						addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
-					}
 				}
 
 				// import hook modules should not contain other modules
@@ -1089,7 +1100,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					String otherFile = scope.getRight().getName() + '/' + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION;
 					IFile file = scriptFile.getWorkspace().getRoot().getFile(Path.fromPortableString(otherFile));
-					if (scriptFile.exists())
+					if (scriptFile.exists() &&
+						!isParentImportHook(getServoyModel().getServoyProject(scriptFile.getProject().getName()).getSolution(), (Solution)scope.getRight()))
 					{
 						// duplicate found
 						ServoyMarker mk = MarkerMessages.DuplicateScopeFound.fill(scope.getLeft(), scope.getRight().getName());
@@ -1187,7 +1199,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					String otherChildsType = "method";
 					for (IPersist child : Utils.iterate(duplicatedParent.getRight().getAllObjects()))
 					{
-						if ((child instanceof IScriptProvider || child instanceof ScriptVariable) && ((ISupportName)child).getName().equals(name))
+						if ((child instanceof IScriptProvider || child instanceof ScriptVariable) && ((ISupportName)child).getName().equals(name) &&
+							!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight()))
 						{
 							int lineNumber;
 							if (child instanceof IScriptElement)
@@ -1209,18 +1222,21 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							break;
 						}
 					}
-					int lineNumber;
-					if (persist instanceof IScriptElement)
+					if (!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight()))
 					{
-						if (persist instanceof ScriptVariable)
+						int lineNumber;
+						if (persist instanceof IScriptElement)
 						{
-							otherChildsType = "variable";
+							if (persist instanceof ScriptVariable)
+							{
+								otherChildsType = "variable";
+							}
+							lineNumber = ((IScriptElement)persist).getLineNumberOffset();
 						}
-						lineNumber = ((IScriptElement)persist).getLineNumberOffset();
+						else lineNumber = 0;
+						ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, name, duplicateParentsName);
+						addMarker(project, mk.getType(), mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 					}
-					else lineNumber = 0;
-					ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, name, duplicateParentsName);
-					addMarker(project, mk.getType(), mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 
 				}
 				Set<Pair<String, ISupportChilds>> parents = parentScopeSet;
@@ -1538,6 +1554,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 		}
+	}
+
+	private boolean isParentImportHook(Solution persistParent, Solution dupParent)
+	{
+		if (!dupParent.equals(persistParent) &&
+			(persistParent.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || persistParent.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	private void checkPersistDuplication()
@@ -4162,7 +4188,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				checkI18n(project);
 				checkLoginSolution(project);
 			}
-			else if (!servoyModel.isSolutionActiveImportHook(project.getName()) && servoyModel.shouldBeModuleOfActiveSolution(project.getName()))
+			else if (servoyModel.shouldBeModuleOfActiveSolution(project.getName()))
 			{
 				// so we have an actual Servoy project that is not active, but it should be active
 				addDeserializeProblemMarkersIfNeeded(servoyProject);
@@ -5920,7 +5946,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (activeProject != null && activeProject.getProject().getName().equals(project.getName()) && getServoyModel().getDataModelManager() != null)
 		{
 			final DataModelManager dm = getServoyModel().getDataModelManager();
-			ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProjectWithImportHooks();
+			ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 			final Map<String, MemTable> memTables = new HashMap<>();
 
 			IPersistVisitor visitor = new IPersistVisitor()

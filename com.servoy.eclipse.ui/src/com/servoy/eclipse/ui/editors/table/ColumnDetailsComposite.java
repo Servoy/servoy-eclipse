@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
@@ -81,7 +82,7 @@ public class ColumnDetailsComposite extends Composite
 {
 
 	public static final String[] DATE_FORMAT_VALUES = new String[] { "#%", "\u00A4#.00", //first char is currency symbol
-	"dd-MM-yyyy", "dd/MM/yyyy", "MM-dd-yyyy", "MM/dd/yyyy", "dd-MM-yyyy HH:mm:ss", "MM-dd-yyyy hh:mm:ss", "dd-MM-yyyy HH:mm", "MM-dd-yyyy hh:mm", "yyyy-MM-dd HH:mm:ss.S" };
+		"dd-MM-yyyy", "dd/MM/yyyy", "MM-dd-yyyy", "MM/dd/yyyy", "dd-MM-yyyy HH:mm:ss", "MM-dd-yyyy hh:mm:ss", "dd-MM-yyyy HH:mm", "MM-dd-yyyy hh:mm", "yyyy-MM-dd HH:mm:ss.S" };
 
 	private DataBindingContext bindingContext;
 	private final TreeSelectViewer foreignTypeTreeSelect;
@@ -93,6 +94,7 @@ public class ColumnDetailsComposite extends Composite
 	private final Button suggestForeignTypeButton;
 	private final Button excludedCheckBox;
 	private final Button uuidCheckBox;
+	private final Button tenantCheckBox;
 	private SuggestForeignTypesWizard suggestForeignTypesWizard;
 
 
@@ -214,6 +216,7 @@ public class ColumnDetailsComposite extends Composite
 
 		excludedCheckBox = new Button(this, SWT.CHECK);
 		uuidCheckBox = new Button(this, SWT.CHECK);
+		tenantCheckBox = new Button(this, SWT.CHECK);
 
 		uuidCheckBox.addListener(SWT.Selection, new Listener()
 		{
@@ -264,6 +267,7 @@ public class ColumnDetailsComposite extends Composite
 
 		excludedCheckBox.setText("excluded");
 		uuidCheckBox.setText("UUID");
+		tenantCheckBox.setText("Tenant");
 
 		final GroupLayout groupLayout = new GroupLayout(this);
 
@@ -271,82 +275,86 @@ public class ColumnDetailsComposite extends Composite
 			//here we create a parallel group
 			groupLayout.createSequentialGroup().
 			//add a container gap;
-			addContainerGap().
-			//add group
-			add(groupLayout.createParallelGroup(GroupLayout.LEADING).
-			//add the description text
-			add(GroupLayout.TRAILING, descriptionText, GroupLayout.PREFERRED_SIZE, 522, Short.MAX_VALUE).
-			//add group
-			add(
-				//start group
-				GroupLayout.TRAILING, groupLayout.createSequentialGroup().
-				//add group with default format label, title label, foreign type label, flags label
+				addContainerGap().
+				//add group
 				add(groupLayout.createParallelGroup(GroupLayout.LEADING).
-				//add default format label;
-				add(titleLabel).
-				//add title label;
-				add(defaultFormatLabel).
-				//add foreign type label;
-				add(foreignTypeLabel).
-				//add flags label
-				add(flagsLabel)).add(10, 10, 10).
-				//add the group
-				add(
-					//start parallel group
-					groupLayout.createParallelGroup(GroupLayout.LEADING).
-					//add the title text-box;
-					add(titleComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-					//add the default format combo-box;
-					add(formatComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-					//add the foreign-type combo-box
-					add(groupLayout.createSequentialGroup().add(foreignTypeControl, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-					//
-					addPreferredGap(LayoutStyle.RELATED).
-					//add the suggest button for foreign type
-					add(suggestForeignTypeButton)).
-					//add other flags combo-box
+				//add the description text
+					add(GroupLayout.TRAILING, descriptionText, GroupLayout.PREFERRED_SIZE, 522, Short.MAX_VALUE).
+					//add group
 					add(
-						//add the flags
-						groupLayout.createSequentialGroup().
-						//
-						add(excludedCheckBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).
-						//
-						addPreferredGap(LayoutStyle.RELATED).
-						//
-						add(uuidCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+						//start group
+						GroupLayout.TRAILING, groupLayout.createSequentialGroup().
+						//add group with default format label, title label, foreign type label, flags label
+							add(groupLayout.createParallelGroup(GroupLayout.LEADING).
+							//add default format label;
+								add(titleLabel).
+								//add title label;
+								add(defaultFormatLabel).
+								//add foreign type label;
+								add(foreignTypeLabel).
+								//add flags label
+								add(flagsLabel)).add(10, 10, 10).
+							//add the group
+							add(
+								//start parallel group
+								groupLayout.createParallelGroup(GroupLayout.LEADING).
+								//add the title text-box;
+									add(titleComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
+									//add the default format combo-box;
+									add(formatComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
+									//add the foreign-type combo-box
+									add(groupLayout.createSequentialGroup().add(foreignTypeControl, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
+									//
+										addPreferredGap(LayoutStyle.RELATED).
+										//add the suggest button for foreign type
+										add(suggestForeignTypeButton)).
+									//add other flags combo-box
+									add(
+										//add the flags
+										groupLayout.createSequentialGroup().
+										//
+											add(excludedCheckBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).
+											//
+											addPreferredGap(LayoutStyle.RELATED).
+											//
+											add(uuidCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).
+											//
+											addPreferredGap(LayoutStyle.RELATED).
+											//
+											add(tenantCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 
-		//end adding the flags
-		)
-		//-- end group layout
-		)
-		//-- end group
-		).add(
-			//create a sequential group
-			groupLayout.createSequentialGroup().
-			//add the items;
-			add(descriptionLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).
-			// add
-			add(450, 450, 450)
-		//end sequential step
-		)).
-		//add a container gap
-		addContainerGap());
+								//end adding the flags
+								)
+						//-- end group layout
+						)
+					//-- end group
+					).add(
+						//create a sequential group
+						groupLayout.createSequentialGroup().
+						//add the items;
+							add(descriptionLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).
+							// add
+							add(450, 450, 450)
+				//end sequential step
+				)).
+				//add a container gap
+				addContainerGap());
 
 		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(titleLabel).add(titleComposite)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(defaultFormatLabel).add(formatComposite)).addPreferredGap(
 					LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER, false).
-					// foreign type label;
-					add(foreignTypeLabel).
-					//foreign type treeselect;
-					add(foreignTypeControl, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE).
-					//suggest button for foreign type
-					add(suggestForeignTypeButton, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(flagsLabel).
-						//other flags combo
-						add(excludedCheckBox).add(uuidCheckBox)).addPreferredGap(LayoutStyle.UNRELATED).add(descriptionLabel).addPreferredGap(
-							LayoutStyle.RELATED).add(descriptionText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-								Integer.MAX_VALUE).addContainerGap());
+		// foreign type label;
+						add(foreignTypeLabel).
+						//foreign type treeselect;
+						add(foreignTypeControl, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE).
+						//suggest button for foreign type
+						add(suggestForeignTypeButton, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
+							groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(flagsLabel).
+							//other flags combo
+								add(excludedCheckBox).add(uuidCheckBox).add(tenantCheckBox)).addPreferredGap(LayoutStyle.UNRELATED).add(
+									descriptionLabel).addPreferredGap(LayoutStyle.RELATED).add(descriptionText, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.PREFERRED_SIZE, Integer.MAX_VALUE).addContainerGap());
 
 		setLayout(groupLayout);
 	}
@@ -388,21 +396,9 @@ public class ColumnDetailsComposite extends Composite
 			// Fill foreign type treeselect
 			foreignTypeTreeSelect.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true, c.getTable().getServerName()));
 
-			// fill flags combo
-			String[] flagStrings = new String[Column.allDefinedOtherFlags.length + 1];
-			int j = 0;
-			flagStrings[j++] = "";
-			for (int element : Column.allDefinedOtherFlags)
-			{
-				if (Column.getFlagsString(element).equals("excluded"))
-				{
-					excludedCheckBox.setSelection(c.getColumnInfo().hasFlag(element));
-				}
-				if (Column.getFlagsString(element).equals("uuid"))
-				{
-					uuidCheckBox.setSelection(c.getColumnInfo().hasFlag(element));
-				}
-			}
+			excludedCheckBox.setSelection(c.getColumnInfo().hasFlag(IBaseColumn.EXCLUDED_COLUMN));
+			uuidCheckBox.setSelection(c.getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN));
+			tenantCheckBox.setSelection(c.getColumnInfo().hasFlag(IBaseColumn.TENANT_COLUMN));
 
 			if (c.getColumnInfo() != null && (c.getColumnInfo().getDefaultFormat() == null || c.getColumnInfo().getDefaultFormat().equals("")))
 			{
@@ -435,9 +431,11 @@ public class ColumnDetailsComposite extends Composite
 		//TODO: put the hardcoded strings in a list;
 		IObservableValue getCIOtherFlagsObserveValue1 = PojoObservables.observeValue(columnInfoBean, "excludedFlag");
 		IObservableValue getCIOtherFlagsObserveValue2 = PojoObservables.observeValue(columnInfoBean, "uuidFlag");
+		IObservableValue getCIOtherFlagsObserveValue3 = PojoObservables.observeValue(columnInfoBean, "tenantFlag");
 
 		IObservableValue uuidOtherFlagsTextObserveWidget = SWTObservables.observeSelection(uuidCheckBox);
 		IObservableValue excludedOtherFlagsTextObserveWidget = SWTObservables.observeSelection(excludedCheckBox);
+		IObservableValue tenantOtherFlagsTextObserveWidget = SWTObservables.observeSelection(tenantCheckBox);
 
 		if (listener != null)
 		{
@@ -460,6 +458,9 @@ public class ColumnDetailsComposite extends Composite
 
 		//bind the 'UUID' checkbox
 		bindingContext.bindValue(uuidOtherFlagsTextObserveWidget, getCIOtherFlagsObserveValue2, null, null);
+
+		//bind the 'TENANT' checkbox
+		bindingContext.bindValue(tenantOtherFlagsTextObserveWidget, getCIOtherFlagsObserveValue3, null, null);
 
 		suggestForeignTypesWizard = new SuggestForeignTypesWizard(dataSource);
 		IObservableValue foreignTypeInWizard = suggestForeignTypesWizard.setColumnToTrace(c.getTable().getName(), c.getName(), columnInfoBean.getForeignType());

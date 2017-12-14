@@ -62,6 +62,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private final List<String> beans = new ArrayList<String>();
 	private final List<String> lafs = new ArrayList<String>();
 	private final List<String> drivers = new ArrayList<String>();
+	private final List<String> noneActiveSolutions = new ArrayList<String>();
 	private final TreeMap<String, ServerConfiguration> servers = new TreeMap<String, ServerConfiguration>();
 	private final SortedSet<String> selectedServerNames = new TreeSet<String>();
 	private String servoyPropertiesFileName;
@@ -107,6 +108,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean searchProblem = false;
 	private String webXMLFileName;
 	private String log4jXMLFileName;
+	private boolean exportNoneActiveSolutions;
 
 	/**
 	 * @param isNGExport
@@ -161,6 +163,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		log4jXMLFileName = settings.get("export.log4jxmlfilename");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
+		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
 		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
 		if (settings.get("export.startRMI") != null) startRMI = Utils.getAsBoolean(settings.get("export.startRMI"));
 		exportAllTablesFromReferencedServers = Utils.getAsBoolean(settings.get("export.exportAllTablesFromReferencedServers"));
@@ -260,6 +263,15 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 		}
 
+		if (settings.get("export.noneactivesolutions") != null)
+		{
+			StringTokenizer st = new StringTokenizer(settings.get("export.noneactivesolutions"), ";");
+			while (st.hasMoreTokens())
+			{
+				noneActiveSolutions.add(st.nextToken());
+			}
+		}
+
 		if (settings.get("export.drivers") != null)
 		{
 			StringTokenizer st = new StringTokenizer(settings.get("export.drivers"), ";");
@@ -349,6 +361,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jxmlfilename", log4jXMLFileName);
 		settings.put("export.exportActiveSolution", exportActiveSolution);
+		settings.put("export.exportNoneActiveSolutions", exportNoneActiveSolutions);
 		settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
 
 		settings.put("export.startRMIPort", startRMIPort);
@@ -427,6 +440,18 @@ public class ExportWarModel extends AbstractWarExportModel
 				sb.append(';');
 			}
 			settings.put("export.lafs", sb.toString());
+		}
+		else settings.put("export.lafs", "");
+
+		if (noneActiveSolutions.size() > 0)
+		{
+			StringBuilder sb = new StringBuilder(128);
+			for (String solName : noneActiveSolutions)
+			{
+				sb.append(solName);
+				sb.append(';');
+			}
+			settings.put("export.noneactivesolutions", sb.toString());
 		}
 		else settings.put("export.lafs", "");
 
@@ -541,6 +566,21 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.servoyPropertiesFileName = nonEmpty(servoyPropertiesFileName);
 	}
 
+	/**
+	 * @return the exportNoneActiveSolutions
+	 */
+	public boolean isExportNoneActiveSolutions()
+	{
+		return exportNoneActiveSolutions;
+	}
+
+	/**
+	 * @param exportNoneActiveSolutions the exportNoneActiveSolutions to set
+	 */
+	public void setExportNoneActiveSolutions(boolean exportNoneActiveSolutions)
+	{
+		this.exportNoneActiveSolutions = exportNoneActiveSolutions;
+	}
 
 	/**
 	 * @return the exportActiveSolution
@@ -1214,6 +1254,14 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void clearLicenses()
 	{
 		licenses.clear();
+	}
+
+	/**
+	 * @return
+	 */
+	public List<String> getNoneActiveSolutions()
+	{
+		return noneActiveSolutions;
 	}
 
 	private static String nonEmpty(String name)

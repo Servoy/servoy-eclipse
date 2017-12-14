@@ -47,12 +47,13 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * Allows exporting client licenses into the war.
  * @author emera
  */
-public class LicensePage extends WizardPage
+public class LicensePage extends WizardPage implements IRestoreDefaultPage
 {
 
 	final ExportWarModel exportModel;
 	private Composite mainContainer;
 	private ScrolledComposite sc;
+	private LicenseFieldsComposite licenseFieldsComposite;
 
 	public LicensePage(String pageName, String title, String description, ExportWarModel exportModel)
 	{
@@ -138,12 +139,26 @@ public class LicensePage extends WizardPage
 				noOfLicensesText.setText(licensesNo);
 			}
 			setEnabledButtons(licenseButton, deleteButton);
+			final LicenseFieldsComposite currentContainer = this;
 			ModifyListener modifyListener = new ModifyListener()
 			{
 				@Override
 				public void modifyText(ModifyEvent e)
 				{
 					setEnabledButtons(licenseButton, deleteButton);
+					if (currentContainer == licenseFieldsComposite)
+					{
+						if (exportModel.containsLicense(licenseText.getText()))
+						{
+							setMessage("License " + licenseText.getText() + " already exists.", IMessageProvider.ERROR);
+							licenseText.setSelection(0, licenseText.getText().length());
+							licenseButton.setEnabled(false);
+						}
+						else
+						{
+							setMessage("");
+						}
+					}
 				}
 			};
 			companyText.addModifyListener(modifyListener);
@@ -177,7 +192,7 @@ public class LicensePage extends WizardPage
 		private void setEnabledButtons(final Button licenseButton, final Button deleteButton)
 		{
 			boolean enableButtons = !StringUtils.isEmpty(companyText.getText().trim()) && !StringUtils.isEmpty(licenseText.getText().trim()) &&
-				!StringUtils.isEmpty(noOfLicensesText.getText().trim());
+				!StringUtils.isEmpty(noOfLicensesText.getText().trim()) && StringUtils.isEmpty(getErrorMessage());
 			licenseButton.setEnabled(enableButtons);
 			deleteButton.setEnabled(enableButtons);
 		}
@@ -199,17 +214,17 @@ public class LicensePage extends WizardPage
 		{
 			if (ApplicationServerRegistry.get().checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
 			{
-				setMessage("License " + licenseText + " is correct.", IMessageProvider.INFORMATION);
 				License l = new License(companyText, licenseText, noOfLicensesText.trim());
-				boolean isNew = !exportModel.getLicenses().contains(l);
+				boolean isNew = !exportModel.containsLicense(l.getCode());
 				exportModel.addLicense(l);
 
 				if (isNew)
 				{
+					setMessage("License " + licenseText + " was saved.", IMessageProvider.INFORMATION);
 					Composite composite = new Composite(mainContainer, SWT.BORDER);
-					LicenseFieldsComposite license = new LicenseFieldsComposite(composite, SWT.NONE, "", "", "");
+					licenseFieldsComposite = new LicenseFieldsComposite(composite, SWT.NONE, "", "", "");
 					composite.moveAbove(mainContainer.getChildren()[0]);
-					mainContainer.layout(new Control[] { license });
+					mainContainer.layout(new Control[] { licenseFieldsComposite });
 					sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 					sc.update();
 				}
@@ -244,7 +259,7 @@ public class LicensePage extends WizardPage
 
 
 		List<Control> ctrls = new ArrayList<>();
-		LicenseFieldsComposite licenseFieldsComposite = new LicenseFieldsComposite(new Composite(mainContainer, SWT.BORDER | SWT.FILL), SWT.NONE, "", "", "");
+		licenseFieldsComposite = new LicenseFieldsComposite(new Composite(mainContainer, SWT.BORDER | SWT.FILL), SWT.NONE, "", "", "");
 		ctrls.add(licenseFieldsComposite);
 		for (License license : exportModel.getLicenses())
 		{
@@ -252,27 +267,23 @@ public class LicensePage extends WizardPage
 				license.getCode(), license.getNumberOfLicenses());
 			ctrls.add(licenseComposite);
 		}
-		Button restoreDefaults = new Button(mainContainer, SWT.PUSH);
-		restoreDefaults.setText("Restore Defaults");
-		restoreDefaults.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				Control[] children = mainContainer.getChildren();
-				for (int i = 1; i < children.length - 1; i++)
-				{
-					children[i].dispose();
-				}
-				((LicenseFieldsComposite)((Composite)children[0]).getChildren()[0]).clear();
-				mainContainer.update();
-				exportModel.clearLicenses();
-			}
-		});
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		mainContainer.layout();
 		sc.layout();
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		Control[] children = mainContainer.getChildren();
+		for (int i = 1; i < children.length - 1; i++)
+		{
+			children[i].dispose();
+		}
+		((LicenseFieldsComposite)((Composite)children[0]).getChildren()[0]).clear();
+		mainContainer.update();
+		exportModel.clearLicenses();
 	}
 }

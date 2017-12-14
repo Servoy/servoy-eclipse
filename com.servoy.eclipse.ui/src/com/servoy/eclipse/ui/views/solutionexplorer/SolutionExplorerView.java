@@ -291,6 +291,8 @@ public class SolutionExplorerView extends ViewPart
 
 	public static final String USE_OPEN_AS_DEFAULT = "SolutionExplorerView.useOpenAsDefaultAction";
 
+	public static final String SHOW_INHERITED_METHODS = "SolutionExplorerView.showInheritedMethods";
+
 	public static final String INCLUDE_ENTRIES_FROM_MODULES = "SolutionExplorerView.includeEntriedFromModules";
 
 	public static final String DIALOGSTORE_CONTEXT_MENU_NAVIGATION = "SolutionExplorerView.contextMenuNavigation";
@@ -393,6 +395,8 @@ public class SolutionExplorerView extends ViewPart
 	private DuplicateServerAction duplicateServer;
 	private EnableServerAction enableServer;
 
+	private FlagTenantColumnAction flagTenantColumn;
+
 	private RefreshAction fRefreshAction;
 
 	private EditVariableAction editVariableAction;
@@ -451,6 +455,8 @@ public class SolutionExplorerView extends ViewPart
 	private ViewLabelDecorator labelDecorator;
 
 	private MenuItem openModeToggleButton;
+
+	private MenuItem showInheritedMethodsToggleButton;
 
 	private MenuItem includeModulesToggleButton;
 
@@ -1317,6 +1323,7 @@ public class SolutionExplorerView extends ViewPart
 		saveSplitterRatio();
 		fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, fCurrentOrientation);
 		fDialogSettings.put(USE_OPEN_AS_DEFAULT, openModeToggleButton.getSelection());
+		fDialogSettings.put(SHOW_INHERITED_METHODS, showInheritedMethodsToggleButton.getSelection());
 		fDialogSettings.put(INCLUDE_ENTRIES_FROM_MODULES, includeModulesToggleButton.getSelection());
 	}
 
@@ -2353,6 +2360,23 @@ public class SolutionExplorerView extends ViewPart
 			}
 		});
 
+		showInheritedMethodsToggleButton = new MenuItem(lowertbmenu, SWT.CHECK);
+		showInheritedMethodsToggleButton.setText("Show inherited methods");
+		showInheritedMethodsToggleButton.setSelection(
+			fDialogSettings.get(SHOW_INHERITED_METHODS) == null ? true : fDialogSettings.getBoolean(SHOW_INHERITED_METHODS));
+		((SolutionExplorerListContentProvider)list.getContentProvider()).setShowInheritedMethods(showInheritedMethodsToggleButton.getSelection());
+		showInheritedMethodsToggleButton.addSelectionListener(new SelectionListener()
+		{
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+			}
+
+			public void widgetSelected(SelectionEvent e)
+			{
+				setShowInheritedMethods(showInheritedMethodsToggleButton.getSelection());
+			}
+		});
+
 		includeModulesToggleButton = new MenuItem(lowertbmenu, SWT.CHECK);
 		includeModulesToggleButton.setText("Include entries from modules");
 		includeModulesToggleButton.setSelection(fDialogSettings.getBoolean(INCLUDE_ENTRIES_FROM_MODULES));
@@ -2504,6 +2528,7 @@ public class SolutionExplorerView extends ViewPart
 		if (reloadTablesOfServerAction.isEnabled()) manager.add(reloadTablesOfServerAction);
 		if (updateServoySequencesAction.isEnabled()) manager.add(updateServoySequencesAction);
 		if (loadRelationsAction.isEnabled()) manager.add(loadRelationsAction);
+		if (flagTenantColumn.isEnabled()) manager.add(flagTenantColumn);
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION && exportActiveSolutionAction.isEnabled() &&
 			selectedTreeNode.getRealObject() != null)
@@ -2851,6 +2876,7 @@ public class SolutionExplorerView extends ViewPart
 		ServoyModel.getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(shell);
+		flagTenantColumn = new FlagTenantColumnAction(this);
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
 		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
 		referenceToRegularFormAction = new ReferenceToRegularFormAction(this);
@@ -2911,6 +2937,7 @@ public class SolutionExplorerView extends ViewPart
 		NewWebPackageFolderAction newServiceFolderInWebPackageAction = new NewWebPackageFolderAction(this, "Create new folder in service");
 		NewWebPackageFolderAction newLayoutFolderInWebPackageAction = new NewWebPackageFolderAction(this, "Create new folder in layout");
 		NewWebPackageFolderAction newFolderInWebFolderAction = new NewWebPackageFolderAction(this, "Create new folder");
+		NewComponentResourceAction newComponentResource = new NewComponentResourceAction(shell);
 
 		newActionInTreePrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInTreePrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
@@ -2937,6 +2964,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, newServiceAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceAction);
+		newActionInTreePrimary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutAction);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS,
@@ -2944,10 +2972,12 @@ public class SolutionExplorerView extends ViewPart
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
-		newActionInTreeSecondary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newLayoutPackageProjectAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newLayoutPackageProjectAction);
+		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentResource);
+		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newComponentResource);
+		newActionInTreeSecondary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newComponentResource);
 
 		createActionInTree.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, newComponentPackageAction);
 		createActionInTree.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, newServicePackageAction);
@@ -2957,6 +2987,9 @@ public class SolutionExplorerView extends ViewPart
 		createActionInTree.registerAction(UserNodeType.SERVICE, newServiceFolderInWebPackageAction);
 		createActionInTree.registerAction(UserNodeType.LAYOUT, newLayoutFolderInWebPackageAction);
 		createActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, newFolderInWebFolderAction);
+		createActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentFolderInWebPackageAction);
+		createActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceFolderInWebPackageAction);
+		createActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutFolderInWebPackageAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -2978,7 +3011,6 @@ public class SolutionExplorerView extends ViewPart
 		newForm = new OpenNewFormWizardAction();
 		newScope = new NewScopeAction(this);
 		newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
-		NewComponentResourceAction newComponentResource = new NewComponentResourceAction(shell);
 		newActionInListPrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBALS_ITEM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBAL_VARIABLES, newVariable);
@@ -3030,7 +3062,8 @@ public class SolutionExplorerView extends ViewPart
 		openAction.registerAction(UserNodeType.RELATION, new OpenRelationAction());
 		openAction.registerAction(UserNodeType.MEDIA_IMAGE, new OpenMediaAction());
 		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, new OpenI18NAction(this));
-		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, new OpenComponentResourceAction());
+		OpenComponentResourceAction openComponentResource = new OpenComponentResourceAction();
+		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
 
 		addComponentIcon = new ContextAction(this, null, "Add Icon");
 		IAction addComponentIconAction = new AddComponentIconResourceAction(this);
@@ -3063,7 +3096,8 @@ public class SolutionExplorerView extends ViewPart
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
 		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project",
 			UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE);
-		DeleteWebPackageFolder deleteWebPackageFolder = new DeleteWebPackageFolder(this, shell, "Delete folder");
+		DeleteComponentOrServiceOrPackageResourceAction deleteWebObjectFolder = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete folder",
+			UserNodeType.WEB_OBJECT_FOLDER);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 
@@ -3114,6 +3148,7 @@ public class SolutionExplorerView extends ViewPart
 		openActionInTree.registerAction(UserNodeType.TABLE, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.VIEW, openTableInTree);
+		openActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
 
 		deleteActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteForm = new DeletePersistAction(UserNodeType.FORM, "Delete form");
@@ -3140,7 +3175,8 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
-		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebPackageFolder);
+		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebObjectFolder);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
 
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
@@ -3223,6 +3259,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(updateServoySequencesAction);
 		addTreeSelectionChangedListener(duplicateServer);
 		addTreeSelectionChangedListener(enableServer);
+		addTreeSelectionChangedListener(flagTenantColumn);
 		addTreeSelectionChangedListener(toggleFormCommandsActions);
 		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);
@@ -3237,7 +3274,8 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(newComponentFolderInWebPackageAction);
 		addTreeSelectionChangedListener(newServiceFolderInWebPackageAction);
 		addTreeSelectionChangedListener(newLayoutFolderInWebPackageAction);
-		addTreeSelectionChangedListener(deleteWebPackageFolder);
+		addTreeSelectionChangedListener(deleteWebObjectFolder);
+		addTreeSelectionChangedListener(newComponentResource);
 
 		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);
@@ -3857,6 +3895,15 @@ public class SolutionExplorerView extends ViewPart
 	public void setOpenAsDefaultOption(boolean openAsdefaultOptionStatus)
 	{
 		openModeToggleButton.setSelection(openAsdefaultOptionStatus);
+	}
+
+	public void setShowInheritedMethods(boolean showInheritedMethodsOptionStatus)
+	{
+		if (showInheritedMethodsToggleButton.getSelection() != showInheritedMethodsOptionStatus)
+			showInheritedMethodsToggleButton.setSelection(showInheritedMethodsOptionStatus);
+		fDialogSettings.put(SHOW_INHERITED_METHODS, showInheritedMethodsToggleButton.getSelection());
+		((SolutionExplorerListContentProvider)list.getContentProvider()).setShowInheritedMethods(showInheritedMethodsToggleButton.getSelection());
+		refreshList();
 	}
 
 	public void enablePostgresDBCreation()

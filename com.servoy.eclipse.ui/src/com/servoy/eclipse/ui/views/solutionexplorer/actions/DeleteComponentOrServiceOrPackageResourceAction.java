@@ -303,6 +303,10 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 				}
 				else state = node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject;
 			}
+			else if (node.getRealObject() instanceof IFolder)
+			{
+				state = state && !"META-INF".equals(((IFolder)node.getRealObject()).getName());
+			}
 		}
 		if (state)
 		{

@@ -52,7 +52,7 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
  * @author jcompagner
  * @since 6.1
  */
-public class FileSelectionPage extends WizardPage implements Listener
+public class FileSelectionPage extends WizardPage implements Listener, IRestoreDefaultPage
 {
 	/**
 	 *
@@ -61,6 +61,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 	private Text fileNameText;
 	private Button browseButton;
 	private Button exportActiveSolution;
+	private Button exportNoneActiveSolutions;
 	private Button allRowsRadioButton;
 	private Button exportI18NDataButton;
 	private Button exportUsersButton;
@@ -132,6 +133,18 @@ public class FileSelectionPage extends WizardPage implements Listener
 				exportModel.setExportActiveSolution(exportActiveSolution.getSelection());
 
 				enableSolutionExportData();
+			}
+		});
+
+		exportNoneActiveSolutions = new Button(composite, SWT.CHECK);
+		exportNoneActiveSolutions.setText(" Include none active solutions.");
+		exportNoneActiveSolutions.setSelection(exportModel.isExportNoneActiveSolutions());
+		exportNoneActiveSolutions.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setExportNoneActiveSolutions(exportNoneActiveSolutions.getSelection());
 			}
 		});
 
@@ -614,86 +627,6 @@ public class FileSelectionPage extends WizardPage implements Listener
 			}
 		});
 
-		horizontalComposite = new Composite(composite, SWT.None);
-		hcGridLayout = new GridLayout();
-		hcGridLayout.numColumns = 1;
-		hcGridLayout.marginHeight = 0;
-		hcGridLayout.marginRight = 0;
-		hcGridLayout.marginWidth = 0;
-		horizontalComposite.setLayout(hcGridLayout);
-		Button restoreDefaults = new Button(horizontalComposite, SWT.PUSH);
-		restoreDefaults.setText("Restore Defaults");
-		restoreDefaults.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				fileNameText.setText("");
-				exportModel.setFileName(null);
-				exportActiveSolution.setSelection(false);
-				exportModel.setExportActiveSolution(false);
-				allowDataModelChangeButton.setSelection(true);
-				exportModel.setAllowDataModelChanges(true);
-				exportSampleDataButton.setSelection(false);
-				exportModel.setExportSampleData(false);
-				allowKeywordsButton.setSelection(false);
-				exportModel.setAllowSQLKeywords(false);
-				updateSequencesButton.setSelection(false);
-				exportModel.setUpdateSequences(false);
-				overrideSequenceTypesButton.setSelection(false);
-				exportModel.setOverrideSequenceTypes(false);
-				overrideDefaultValuesButton.setSelection(false);
-				exportModel.setOverrideDefaultValues(false);
-				exportMetadataTablesButton.setSelection(false);
-				exportModel.setExportMetaData(false);
-				checkMetadataTablesButton.setSelection(false);
-				exportModel.setCheckMetadataTables(false);
-				exportSampleDataButton.setSelection(false);
-				exportModel.setExportSampleData(false);
-				rowsPerTableRadioButton.setSelection(true);
-				nrOfExportedSampleDataSpinner.setSelection(5000);
-				exportModel.setNumberOfSampleDataExported(5000);
-				allRowsRadioButton.setSelection(false);
-				exportModel.setAllRows(false);
-				exportI18NDataButton.setSelection(false);
-				exportModel.setExportI18NData(false);
-				insertNewI18NKeysOnlyButton.setSelection(true);
-				insertNewI18NKeysOnlyButton.setEnabled(false);
-				exportModel.setInsertNewI18NKeysOnly(false);
-				overwriteGroupsButton.setSelection(false);
-				exportModel.setOverwriteGroups(false);
-				exportUsersButton.setSelection(false);
-				createNoneExistingUsersButton.setSelection(false);
-				overwriteExistingUsersButton.setSelection(false);
-				addUsersToAdminGroupButton.setSelection(false);
-				exportModel.setImportUserPolicy(0);
-				enableSolutionExportData();
-				automaticallyUpgradeRepository.setSelection(false);
-				exportModel.setAutomaticallyUpgradeRepository(false);
-				createTomcatContextXML.setSelection(false);
-				exportModel.setCreateTomcatContextXML(false);
-				antiResourceLocking.setSelection(false);
-				antiResourceLocking.setEnabled(false);
-				exportModel.setAntiResourceLocking(false);
-				clearReferencesStatic.setSelection(false);
-				clearReferencesStatic.setEnabled(false);
-				exportModel.setClearReferencesStatic(false);
-				clearReferencesStopThreads.setEnabled(false);
-				clearReferencesStopThreads.setSelection(false);
-				exportModel.setClearReferencesStopThreads(false);
-				clearReferencesStopTimerThreads.setSelection(false);
-				clearReferencesStopTimerThreads.setEnabled(false);
-				exportModel.setClearReferencesStopTimerThreads(false);
-				minimizeJSAndCSS.setSelection(false);
-				exportModel.setMinimizeJsCssResources(false);
-
-				getWizard().getContainer().updateButtons();
-				getWizard().getContainer().updateMessage();
-
-			}
-		});
-
-
 		setControl(composite);
 	}
 
@@ -738,6 +671,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 	 */
 	private void enableSolutionExportData()
 	{
+		exportNoneActiveSolutions.setEnabled(exportActiveSolution.getSelection());
 		allowDataModelChangeButton.setEnabled(exportActiveSolution.getSelection());
 		exportAllTablesFromReferencedServers.setEnabled(exportActiveSolution.getSelection());
 		allowKeywordsButton.setEnabled(exportActiveSolution.getSelection());
@@ -866,5 +800,72 @@ public class FileSelectionPage extends WizardPage implements Listener
 		{
 			return super.getNextPage();
 		}
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		fileNameText.setText("");
+		exportNoneActiveSolutions.setSelection(false);
+		exportModel.setFileName(null);
+		exportActiveSolution.setSelection(false);
+		exportModel.setExportActiveSolution(false);
+		allowDataModelChangeButton.setSelection(true);
+		exportModel.setAllowDataModelChanges(true);
+		exportSampleDataButton.setSelection(false);
+		exportModel.setExportSampleData(false);
+		allowKeywordsButton.setSelection(false);
+		exportModel.setAllowSQLKeywords(false);
+		updateSequencesButton.setSelection(false);
+		exportModel.setUpdateSequences(false);
+		overrideSequenceTypesButton.setSelection(false);
+		exportModel.setOverrideSequenceTypes(false);
+		overrideDefaultValuesButton.setSelection(false);
+		exportModel.setOverrideDefaultValues(false);
+		exportMetadataTablesButton.setSelection(false);
+		exportModel.setExportMetaData(false);
+		checkMetadataTablesButton.setSelection(false);
+		exportModel.setCheckMetadataTables(false);
+		exportSampleDataButton.setSelection(false);
+		exportModel.setExportSampleData(false);
+		rowsPerTableRadioButton.setSelection(true);
+		nrOfExportedSampleDataSpinner.setSelection(5000);
+		exportModel.setNumberOfSampleDataExported(5000);
+		allRowsRadioButton.setSelection(false);
+		exportModel.setAllRows(false);
+		exportI18NDataButton.setSelection(false);
+		exportModel.setExportI18NData(false);
+		insertNewI18NKeysOnlyButton.setSelection(true);
+		insertNewI18NKeysOnlyButton.setEnabled(false);
+		exportModel.setInsertNewI18NKeysOnly(false);
+		overwriteGroupsButton.setSelection(false);
+		exportModel.setOverwriteGroups(false);
+		exportUsersButton.setSelection(false);
+		createNoneExistingUsersButton.setSelection(false);
+		overwriteExistingUsersButton.setSelection(false);
+		addUsersToAdminGroupButton.setSelection(false);
+		exportModel.setImportUserPolicy(0);
+		enableSolutionExportData();
+		automaticallyUpgradeRepository.setSelection(false);
+		exportModel.setAutomaticallyUpgradeRepository(false);
+		createTomcatContextXML.setSelection(false);
+		exportModel.setCreateTomcatContextXML(false);
+		antiResourceLocking.setSelection(false);
+		antiResourceLocking.setEnabled(false);
+		exportModel.setAntiResourceLocking(false);
+		clearReferencesStatic.setSelection(false);
+		clearReferencesStatic.setEnabled(false);
+		exportModel.setClearReferencesStatic(false);
+		clearReferencesStopThreads.setEnabled(false);
+		clearReferencesStopThreads.setSelection(false);
+		exportModel.setClearReferencesStopThreads(false);
+		clearReferencesStopTimerThreads.setSelection(false);
+		clearReferencesStopTimerThreads.setEnabled(false);
+		exportModel.setClearReferencesStopTimerThreads(false);
+		minimizeJSAndCSS.setSelection(false);
+		exportModel.setMinimizeJsCssResources(false);
+
+		getWizard().getContainer().updateButtons();
+		getWizard().getContainer().updateMessage();
 	}
 }

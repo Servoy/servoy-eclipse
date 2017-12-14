@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.DialogSettings;
@@ -41,6 +42,7 @@ import org.eclipse.ui.IWorkbench;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -48,6 +50,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
@@ -61,7 +64,7 @@ import com.servoy.j2db.util.Debug;
  * @author jcompagner
  * @since 6.1
  */
-public class ExportWarWizard extends Wizard implements IExportWizard
+public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDefaultWizard
 {
 
 	private FileSelectionPage fileSelectionPage;
@@ -96,6 +99,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	private DeployConfigurationPage userHomeSelectionPage;
 
 	private boolean isNGExport;
+
+	private ListSelectionPage noneActiveSolutionPage;
 
 	public ExportWarWizard()
 	{
@@ -152,6 +157,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
+		noneActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
 		beanSelectionPage.storeInput();
@@ -263,9 +269,28 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
 				getDialogSettings().get("export.plugins") == null, true);
+
+			ArrayList<String> tmp = new ArrayList<>();
+			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			String activeResourcesProjectName = servoyModel.getActiveResourcesProject().getProject().getName();
+			List<ServoyProject> activeProjects = Arrays.asList(servoyModel.getModulesOfActiveProject());
+
+			ServoyProject[] servoyProjects = servoyModel.getServoyProjects();
+			for (ServoyProject servoyProject : servoyProjects)
+			{
+				if (!activeProjects.contains(servoyProject) && servoyProject.getResourcesProject() != null &&
+					servoyProject.getResourcesProject().getProject().getName().equals(activeResourcesProjectName))
+				{
+					tmp.add(servoyProject.getProject().getName());
+				}
+			}
+			noneActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the none active solutions",
+				"Select the solutions that you want to include in this WAR. Be aware that these solutions are not checked for builder markers!", tmp,
+				exportModel.getNoneActiveSolutions(), false);
 			fileSelectionPage = new FileSelectionPage(exportModel);
 
 			addPage(fileSelectionPage);
+			addPage(noneActiveSolutionPage);
 			addPage(pluginSelectionPage);
 			addPage(beanSelectionPage);
 			addPage(lafSelectionPage);
@@ -308,6 +333,10 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	@Override
 	public IWizardPage getNextPage(IWizardPage page)
 	{
+		if (page.equals(fileSelectionPage) && !exportModel.isExportNoneActiveSolutions())
+		{
+			return super.getNextPage(noneActiveSolutionPage);
+		}
 		if (page.equals(componentsSelectionPage))
 		{
 			if (!exportModel.isReady())
@@ -367,6 +396,15 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	public IWizardPage getLastPage()
 	{
 		return userHomeSelectionPage;
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		if (getContainer().getCurrentPage() instanceof IRestoreDefaultPage)
+		{
+			((IRestoreDefaultPage)getContainer().getCurrentPage()).restoreDefaults();
+		}
 	}
 
 }

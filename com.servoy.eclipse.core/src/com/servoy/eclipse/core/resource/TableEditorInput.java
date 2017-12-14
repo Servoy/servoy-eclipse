@@ -79,7 +79,8 @@ public class TableEditorInput implements IEditorInput
 			{
 				return null;
 			}
-			return new TableEditorInput(DataSourceUtils.createDBTableDataSource(serverName, tableName));
+			return new TableEditorInput(DataSourceUtils.INMEM_DATASOURCE.equals(serverName) ? DataSourceUtils.createInmemDataSource(tableName)
+				: DataSourceUtils.createDBTableDataSource(serverName, tableName));
 		}
 		// cannot find info for table editor input
 		return null;

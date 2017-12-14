@@ -128,4 +128,8 @@ public interface IWarExportModel extends IExportSolutionModel
 	public String checkWebXML();
 
 	public String checkLog4jXML();
+
+	public List<String> getNoneActiveSolutions();
+
+	public boolean isExportNoneActiveSolutions();
 }

@@ -131,10 +131,10 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 			if (((PersistContext)element).getPersist() instanceof WebCustomType)
 			{
 				WebCustomType webCustomType = ((WebCustomType)(((PersistContext)element).getPersist()));
-
 				String captionFromSubProp = DeveloperUtils.getCustomObjectTypeCaptionFromTaggedSubproperties(webCustomType);
 				return webCustomType.getJsonKey() + (webCustomType.getIndex() >= 0 ? "[" + webCustomType.getIndex() + "]" : "") +
 					(captionFromSubProp != null ? " (" + captionFromSubProp + ")" : "");
+
 			}
 			if (((PersistContext)element).getPersist() instanceof WebFormComponentChildType)
 			{

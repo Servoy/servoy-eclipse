@@ -81,7 +81,7 @@ public abstract class AddAsSolutionReference extends Action implements ISelectio
 	protected ServoyProject askUserForActiveModuleToUse()
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProjectWithImportHooks();
+		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProject();
 		if (activeModules.length == 1)
 		{
 			return activeModules[0];

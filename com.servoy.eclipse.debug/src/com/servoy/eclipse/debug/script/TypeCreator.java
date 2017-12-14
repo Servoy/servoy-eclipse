@@ -3903,6 +3903,21 @@ public class TypeCreator extends TypeCache
 		return result;
 	}
 
+	public static Set<Member> getMembers(String memberName, Type existingType)
+	{
+		Set<Member> result = new HashSet<>();
+		Iterator<Member> members = new TypeMemberQuery(existingType).ignoreDuplicates().iterator();
+		while (members.hasNext())
+		{
+			Member member = members.next();
+			if (memberName.equals(member.getName()))
+			{
+				result.add(member);
+			}
+		}
+		return result;
+	}
+
 	private static <T extends Element> T makeDeprecated(T element)
 	{
 		element.setDeprecated(true);

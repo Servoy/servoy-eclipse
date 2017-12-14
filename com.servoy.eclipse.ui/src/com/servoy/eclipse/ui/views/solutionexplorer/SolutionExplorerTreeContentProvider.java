@@ -39,6 +39,7 @@ import java.util.zip.ZipFile;
 
 import javax.swing.Icon;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -631,9 +632,6 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 
-		List<ServoyProject> importHookModules = new ArrayList<ServoyProject>();
-		servoyModel.addImportHookModules(servoyModel.getActiveProject(), importHookModules);
-
 		List<PlatformSimpleUserNode> modulesNodeChildren = new ArrayList<PlatformSimpleUserNode>();
 		List<PlatformSimpleUserNode> allSolutionChildren = new ArrayList<PlatformSimpleUserNode>();
 
@@ -717,12 +715,8 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else
 				{
-					// it's probably a non-active solution/module
-					// it can also be an import hook module of the active solution that is not part of the flattened solution - create an un-expandable "module" node as well in this case
-					boolean isActiveImportHookModule = importHookModules.contains(servoyProject);
-
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, servoyProject,
-						getServoyProjectImage(servoyProject, false, !isActiveImportHookModule));
+						getServoyProjectImage(servoyProject, false, true));
 					node.setEnabled(false);
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
@@ -733,15 +727,6 @@ public class SolutionExplorerTreeContentProvider
 					// do not load all solutions at startup by reading solution directly
 					node.setToolTipText(servoyProject.getProject().getName() + "(" + getSolutionTypeAsString(servoyProject) + ")");
 
-					if (isActiveImportHookModule)
-					{
-						node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM, servoyProject,
-							getServoyProjectImage(servoyProject, true, false));
-						node.setToolTipText(Messages.TreeStrings_ImportHookTooltip);
-						node.setEnabled(false); // it is not expandable
-						modulesNodeChildren.add(node);
-						node.parent = modulesOfActiveSolution;
-					}
 				}
 			}
 		}
@@ -966,21 +951,14 @@ public class SolutionExplorerTreeContentProvider
 					else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE || type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 					{
 						String packageName = getPackageName(un);
+						Set<String> folderNames = new HashSet<String>();
 						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getComponentsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
 						{
 							Collections.sort(components);
-							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
-							for (String component : components)
-							{
-								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
-								Image img = getIconFromSpec(spec, false);
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
-									img != null ? img : componentIcon);
-								node.parent = un;
-								children.add(node);
-							}
+							createWebPackageProjectChildren(un, getComponentsSpecProviderState(), UserNodeType.COMPONENT, folderNames, children, components,
+								uiActivator.loadImageFromBundle("ng_component.png"));
 						}
 						List<String> layouts = new ArrayList<>(getComponentsSpecProviderState().getLayoutsInPackage(packageName));
 						if (layouts.size() > 0)
@@ -991,13 +969,19 @@ public class SolutionExplorerTreeContentProvider
 							{
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
-								Image img = getIconFromSpec(spec, false);
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
-									img != null ? img : componentIcon);
-								node.parent = un;
-								children.add(node);
+								String folderName = getFolderNameFromSpec(spec);
+								if (!packageName.equals(folderName))
+								{
+									Image img = getIconFromSpec(spec, false);
+									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
+										img != null ? img : componentIcon);
+									node.parent = un;
+									children.add(node);
+									folderNames.add(folderName);
+								}
 							}
 						}
+						children.addAll(addOtherPackageResources(un, folderNames));
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					else if (type == UserNodeType.SERVICES_FROM_RESOURCES)
@@ -1060,23 +1044,17 @@ public class SolutionExplorerTreeContentProvider
 						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
 							String packageName = getPackageName(un);
+							Set<String> folderNames = new HashSet<String>();
 							PackageSpecification<WebObjectSpecification> servicesPackage = provider.getWebObjectSpecifications().get(packageName);
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							if (servicesPackage != null)
 							{
 								List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
 								Collections.sort(services);
-								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
-								for (String component : services)
-								{
-									WebObjectSpecification spec = provider.getWebComponentSpecification(component);
-									Image img = getIconFromSpec(spec, true);
-									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
-										img != null ? img : serviceDefaultIcon);
-									node.parent = un;
-									children.add(node);
-								}
+								Image defaultIcon = uiActivator.loadImageFromBundle("service.png");
+								createWebPackageProjectChildren(un, provider, UserNodeType.SERVICE, folderNames, children, services, defaultIcon);
 							}
+							children.addAll(addOtherPackageResources(un, folderNames));
 							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
 					}
@@ -1111,12 +1089,11 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (un.getType() == UserNodeType.COMPONENT || un.getType() == UserNodeType.SERVICE || un.getType() == UserNodeType.LAYOUT)
 					{
-						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
 						WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
-						String componentName = spec.getName().contains("-") ? spec.getName().split("-")[1] : null;
-						if (componentName != null)
+						IFolder folder = getFolderFromSpec((IProject)getResource((IPackageReader)un.parent.getRealObject()), spec);
+						if (folder != null)
 						{
-							searchFolderChildren(un, project.getFolder(componentName));
+							searchFolderChildren(un, folder);
 						}
 						else
 						{
@@ -1140,6 +1117,114 @@ public class SolutionExplorerTreeContentProvider
 			return un.children;
 		}
 		return new Object[0];
+	}
+
+	private void createWebPackageProjectChildren(PlatformSimpleUserNode un, SpecProviderState provider, UserNodeType type, Set<String> folderNames,
+		List<PlatformSimpleUserNode> children, List<String> services, Image defaultIcon)
+	{
+		for (String component : services)
+		{
+			WebObjectSpecification spec = provider.getWebComponentSpecification(component);
+			String folderName = getFolderNameFromSpec(spec);
+			try
+			{
+				IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+				if (files.length == 1)
+				{
+					IFile f = files[0];
+					if (f.getProjectRelativePath().segmentCount() > 1)
+					{
+						Image img = getIconFromSpec(spec, false);
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), type, spec, img != null ? img : defaultIcon);
+						node.parent = un;
+						children.add(node);
+						folderNames.add(folderName);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
+	private List<PlatformSimpleUserNode> addOtherPackageResources(PlatformSimpleUserNode un, Set<String> folderNames) throws CoreException
+	{
+		List<PlatformSimpleUserNode> children = new ArrayList<>();
+		IContainer packageFolder = (IContainer)getResource((IPackageReader)un.getRealObject());
+		Comparator<IResource> comparator = new Comparator<IResource>()
+		{
+			@Override
+			public int compare(IResource arg0, IResource arg1)
+			{
+				return arg0.getName().compareTo(arg1.getName());
+			}
+		};
+		Set<IResource> folders = new TreeSet<IResource>(comparator);
+		Set<IResource> files = new TreeSet<IResource>(comparator);
+		for (IResource res : packageFolder.members())
+		{
+			if (res instanceof IFolder)
+			{
+				if (!folderNames.contains(res.getName())) folders.add(res);
+			}
+			else
+			{
+				if (!".project".equals(res.getName())) files.add(res);
+			}
+		}
+		for (IResource res : folders)
+		{
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(res.getName(), UserNodeType.WEB_OBJECT_FOLDER, res,
+				uiActivator.loadImageFromBundle("folder.png"));
+			node.parent = un;
+			children.add(node);
+		}
+		for (IResource res : files)
+		{
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(res.getName(), UserNodeType.COMPONENT_RESOURCE, res,
+				SolutionExplorerListContentProvider.getIcon(res.getName()));
+			node.parent = un;
+			children.add(node);
+		}
+		return children;
+	}
+
+	public static String getFolderNameFromSpec(WebObjectSpecification spec)
+	{
+		IPath path = new Path(spec.getSpecURL().toExternalForm());
+		if (path.segmentCount() > 1)//it should contain at least 1 folder
+		{
+			return path.segment(path.segmentCount() - 2);
+		}
+		return null;
+	}
+
+	public static IFolder getFolderFromSpec(IProject project, WebObjectSpecification spec)
+	{
+		String folderName = getFolderNameFromSpec(spec);
+		IFolder folder = null;
+		if (folderName != null && project != null)
+		{
+			folder = project.getFolder(folderName);
+			if (folder == null || !folder.exists())
+			{
+				try
+				{
+					IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+					if (specFile.length == 1)
+					{
+						folder = (IFolder)specFile[0].getParent();
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Could not get folder from spec for web object " + spec.getName(), e);
+				}
+			}
+		}
+		return folder != null && folder.exists() ? folder : null;
 	}
 
 	private void searchFolderChildren(PlatformSimpleUserNode un, IFolder f)
@@ -1622,15 +1707,14 @@ public class SolutionExplorerTreeContentProvider
 					WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
 					if ("file".equals(spec.getSpecURL().getProtocol()))
 					{
-						IProject project = (IProject)getResource((IPackageReader)un.parent.getRealObject());
-						String componentName = spec.getName().contains("-") ? spec.getName().split("-")[1] : null;
-						if (componentName != null)
+						IFolder folder = getFolderFromSpec((IProject)getResource((IPackageReader)un.parent.getRealObject()), spec);
+						if (folder != null)
 						{
-							return hasChildren(project.getFolder(componentName));
+							return hasChildren(folder);
 						}
 						else
 						{
-							ServoyLog.logInfo("cannot find web object name from " + spec.getName());
+							ServoyLog.logInfo("cannot find web object folder from " + spec.getName());
 						}
 					}
 					return false;
@@ -1655,6 +1739,11 @@ public class SolutionExplorerTreeContentProvider
 	{
 		try
 		{
+			if (!f.exists())
+			{
+				ServoyLog.logInfo("Web object folder " + f.getFullPath().toString() + " does not exist");
+				return false;
+			}
 			for (IResource res : f.members(false))
 			{
 				if (res instanceof IFolder)
@@ -1976,6 +2065,12 @@ public class SolutionExplorerTreeContentProvider
 					SpecProviderState specProvider = isService ? getServicesSpecProviderState() : getComponentsSpecProviderState();
 					IPackageReader reader = specProvider.getPackageReader(spec.getPackageName());
 					String iconPath = spec.getIcon().replaceFirst(spec.getPackageName() + "/", "");
+					if (reader == null || reader.getUrlForPath(iconPath) == null)
+					{
+						ServoyLog.logError("Cannot get icon " + spec.getIcon() + " for " + spec.getName(), null);
+						return null;
+					}
+
 					IPath path = new Path(reader.getUrlForPath(iconPath).toURI().toString());
 					icon = imageCache.get(path);
 					if (icon == null)

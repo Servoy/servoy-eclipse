@@ -209,7 +209,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	 * Returns an array containing the modules of the active project (including the active project).
 	 * If there is no active project, will return an array of size 0.
 	 *
-	 * The result does not include the active solution's import hooks (which are not part of the flattened solution).
+	 * The result does also include the active solution's import hooks (which are not part of the flattened solution).
 	 *
 	 * @return an array containing the modules of the active project.
 	 * @see #getModulesOfActiveProjectWithImportHooks()
@@ -222,6 +222,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 		List<ServoyProject> moduleProjects = new ArrayList<ServoyProject>();
 		addFlattenedSolutionModules(moduleProjects);
+		addImportHookModules(getActiveProject(), moduleProjects);
 		return moduleProjects.toArray(new ServoyProject[moduleProjects.size()]);
 	}
 
@@ -261,16 +262,6 @@ public abstract class AbstractServoyModel implements IServoyModel
 		}
 	}
 
-	/**
-	 * @see #getModulesOfActiveProject()
-	 */
-	public ServoyProject[] getModulesOfActiveProjectWithImportHooks()
-	{
-		List<ServoyProject> allModules = new ArrayList<ServoyProject>();
-		addFlattenedSolutionModules(allModules);
-		addImportHookModules(getActiveProject(), allModules);
-		return allModules.toArray(new ServoyProject[allModules.size()]);
-	}
 
 	public ServoyProject[] getImportHookModulesOfActiveProject()
 	{
@@ -533,22 +524,6 @@ public abstract class AbstractServoyModel implements IServoyModel
 	}
 
 	/**
-	 *  Returns true if the given solution name matches one of the import hook modules of the active solution.
-	 */
-	public boolean isSolutionActiveImportHook(String name)
-	{
-		ServoyProject[] activeModules = getImportHookModulesOfActiveProject();
-		for (ServoyProject p : activeModules)
-		{
-			if (p.getProject().getName().equals(name))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Checks whether or not the solution with given name is or should be a module of the active solution.<br>
 	 * It checks modules listed in all current modules of flattened solution + import hook modules; it is able to detect modules that are not part of the actual flattened solution yet, without actually loading them (so for example solutions that the active solution or it's modules listed as a module but was not valid/present previously).
 	 */
@@ -556,7 +531,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	{
 		if (activeProject != null)
 		{
-			ServoyProject[] modules = getModulesOfActiveProjectWithImportHooks();
+			ServoyProject[] modules = getModulesOfActiveProject();
 			for (ServoyProject spm : modules)
 			{
 				Solution s = spm.getSolution();

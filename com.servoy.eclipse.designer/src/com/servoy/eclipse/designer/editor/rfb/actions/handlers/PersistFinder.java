@@ -18,6 +18,9 @@
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.util.Iterator;
+import java.util.Map;
+
+import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.WebFormComponentChildType;
@@ -46,14 +49,22 @@ public class PersistFinder
 	{
 	}
 
-	public IPersist searchForPersist(BaseVisualFormEditor editorPart, String fullUUID)
+	public IPersist searchForPersist(BaseVisualFormEditor editorPart, String fullUUIDA)
 	{
-		if (fullUUID == null) return null;
-		String uuid = fullUUID;
+		if (fullUUIDA == null) return null;
+		String fullUUID = fullUUIDA;
+		String uuid = fullUUID, childUUID = null;
 		int index = uuid.indexOf('$');
 		if (index > 1)
 		{
 			// this is a form component selection
+			String[] uuidParts = fullUUID.split("#");
+			uuid = fullUUID = uuidParts[0];
+			if (uuidParts.length > 1)
+			{
+				childUUID = uuidParts[1];
+			}
+
 			int start = 0;
 			if (uuid.startsWith("_")) start = 1;
 			uuid = uuid.substring(start, index).replace('_', '-');
@@ -63,6 +74,33 @@ public class PersistFinder
 		{
 			searchPersist = new WebFormComponentChildType((WebComponent)searchPersist, fullUUID.substring(index + 1).replace('$', '.'),
 				ModelUtils.getEditingFlattenedSolution(editorPart.getForm()));
+			if (childUUID != null)
+			{
+				UUID childId = UUID.fromString(childUUID);
+				PropertyDescription pd = ((WebFormComponentChildType)searchPersist).getPropertyDescription();
+				Map<String, PropertyDescription> customMap = pd.getCustomJSONProperties();
+				for (PropertyDescription customProperty : customMap.values())
+				{
+					Object customValue = ((WebFormComponentChildType)searchPersist).getProperty(customProperty.getName());
+					if (customValue instanceof IPersist)
+					{
+						if (((IPersist)customValue).getUUID().equals(childUUID))
+						{
+							return (IPersist)customValue;
+						}
+					}
+					else if (customValue instanceof IPersist[])
+					{
+						for (IPersist child : (IPersist[])customValue)
+						{
+							if (child.getUUID().equals(childId))
+							{
+								return child;
+							}
+						}
+					}
+				}
+			}
 		}
 
 		return searchPersist;

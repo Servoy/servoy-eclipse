@@ -109,6 +109,13 @@ public class RfbSelectionListener implements ISelectionListener
 					uuids.add(uuid);
 					forCurrentForm = true;
 				}
+				else if (persist.getParent() instanceof WebFormComponentChildType)
+				{
+					String uuid = ((WebFormComponentChildType)persist.getParent()).getElement().getName();
+					uuid += "#" + persist.getUUID();
+					uuids.add(uuid);
+					forCurrentForm = true;
+				}
 				else
 				{
 					IPersist ancestor = persist.getAncestor(IRepository.FORMS);

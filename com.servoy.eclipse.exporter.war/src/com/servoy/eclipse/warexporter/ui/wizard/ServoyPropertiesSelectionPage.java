@@ -50,7 +50,7 @@ import com.servoy.j2db.persistence.IServer;
  * @author jcompagner
  * @since 6.1
  */
-public class ServoyPropertiesSelectionPage extends WizardPage implements Listener
+public class ServoyPropertiesSelectionPage extends WizardPage implements Listener, IRestoreDefaultPage
 {
 	/**
 	 *
@@ -383,5 +383,18 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 	{
 		if (exportModel.getServoyPropertiesFileName() == null) return super.getNextPage();
 		else return wizard.getLastPage();
+	}
+
+	@Override
+	public void restoreDefaults()
+	{
+		fileNameText.setText("");
+		fileWebXmlNameText.setText("");
+		exportModel.setServoyPropertiesFileName(null);
+		exportModel.setWebXMLFileName(null);
+		exportModel.setLog4jXMLFileName(null);
+		canFlipToNextPage();
+		getWizard().getContainer().updateButtons();
+		getWizard().getContainer().updateMessage();
 	}
 }

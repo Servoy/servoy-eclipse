@@ -196,13 +196,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static Set<String> ignoreMethodsFromPrefixedConstants = new TreeSet<String>();
 
-	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
+	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private final Image propertiesIcon;
 	private final Image specialPropertiesIcon;
 	private final Image functionIcon;
 
 	private boolean includeModules = false;
+	private boolean showInheritedMethods = true;
 
 	private final Map<ITable, List<Object>> usedTables = new HashMap<ITable, List<Object>>();
 
@@ -766,48 +767,54 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		else
 		{
-			String component = (spec.getName().contains("-") ? spec.getName().split("-")[1] : spec.getDefinition().split("/")[0]) + "/";
-			List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
-			IPackageReader reader = WebComponentSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
-			if (reader == null) reader = WebServiceSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
-			try (ZipFile zip = new ZipFile(reader.getResource().toURI().toURL().getFile()))
+			String folderName = SolutionExplorerTreeContentProvider.getFolderNameFromSpec(spec);
+			if (folderName != null)
 			{
-				Enumeration< ? extends ZipEntry> e = zip.entries();
-				while (e.hasMoreElements())
+				folderName += "/";
+				List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
+				IPackageReader reader = WebComponentSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
+				if (reader == null) reader = WebServiceSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
+				try (ZipFile zip = new ZipFile(reader.getResource().toURI().toURL().getFile()))
 				{
-					ZipEntry entry = e.nextElement();
-					if (entry.getName().startsWith(component) && !entry.isDirectory())
+					Enumeration< ? extends ZipEntry> e = zip.entries();
+					while (e.hasMoreElements())
 					{
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getName().replaceFirst(component, ""), UserNodeType.ZIP_RESOURCE, null,
-							getIcon(entry.getName()));
-						list.add(node);
+						ZipEntry entry = e.nextElement();
+						if (entry.getName().startsWith(folderName) && !entry.isDirectory())
+						{
+							PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getName().replaceFirst(folderName, ""), UserNodeType.ZIP_RESOURCE,
+								null, getIcon(entry.getName()));
+							list.add(node);
+						}
 					}
 				}
+				catch (IOException e)
+				{
+					ServoyLog.logError(e);
+				}
+				return list.toArray(new SimpleUserNode[list.size()]);
 			}
-			catch (IOException e)
-			{
-				ServoyLog.logError(e);
-			}
-			return list.toArray(new SimpleUserNode[list.size()]);
 		}
 		return new SimpleUserNode[0];
 	}
 
-	private Image getIcon(String name)
+	public static Image getIcon(String name)
 	{
-		if (name == null || !name.contains(".")) return null;
-		String suffix = name.substring(name.lastIndexOf("."));
-		if (suffix.toLowerCase().endsWith("js"))
+		if (name != null && name.contains("."))
 		{
-			return uiActivator.loadImageFromBundle("js.png");
-		}
-		if (suffix.toLowerCase().endsWith("css"))
-		{
-			return uiActivator.loadImageFromBundle("style.png");
-		}
-		if (suffix.toLowerCase().endsWith("png") || suffix.toLowerCase().endsWith("jpeg") || suffix.toLowerCase().endsWith("gif"))
-		{
-			return uiActivator.loadImageFromBundle("media.png");
+			String suffix = name.substring(name.lastIndexOf("."));
+			if (suffix.toLowerCase().endsWith("js"))
+			{
+				return uiActivator.loadImageFromBundle("js.png");
+			}
+			if (suffix.toLowerCase().endsWith("css"))
+			{
+				return uiActivator.loadImageFromBundle("style.png");
+			}
+			if (suffix.toLowerCase().endsWith("png") || suffix.toLowerCase().endsWith("jpeg") || suffix.toLowerCase().endsWith("gif"))
+			{
+				return uiActivator.loadImageFromBundle("media.png");
+			}
 		}
 		return uiActivator.loadImageFromBundle("file_obj.png");
 	}
@@ -1303,7 +1310,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					if (sm.isPrivate()) continue;
+					if (sm.isPrivate() || !showInheritedMethods) continue;
 
 					nodeText = getScriptMethodSignature(sm, null, false, true, true, true) + " [" + ((Form)sm.getParent()).getName() + "]";
 				}
@@ -1814,9 +1821,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logWarning(
-					"Class " + clz +
-						" did implement IScriptObject but doesnt have a default constructor, it should have that or use ScriptObjectRegistry.registerScriptObjectForClass()",
+				ServoyLog.logWarning("Class " + clz +
+					" did implement IScriptObject but doesnt have a default constructor, it should have that or use ScriptObjectRegistry.registerScriptObjectForClass()",
 					e);
 			}
 		}
@@ -2189,6 +2195,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (this.includeModules != includeModules)
 		{
 			this.includeModules = includeModules;
+			leafList.clear();
+		}
+	}
+
+	public void setShowInheritedMethods(boolean showInheritedMethods)
+	{
+		if (this.showInheritedMethods != showInheritedMethods)
+		{
+			this.showInheritedMethods = showInheritedMethods;
 			leafList.clear();
 		}
 	}

@@ -66,7 +66,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.validation.IValidatorExtension2#validateTypeExpression(org.eclipse.dltk.javascript.typeinfo.model.JSType)
 	 */
 	public IValidationStatus validateTypeExpression(JSType type)
@@ -83,7 +83,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.validation.IValidatorExtension#canInstantiate(org.eclipse.dltk.javascript.typeinfo.model.Type,
 	 * org.eclipse.dltk.javascript.typeinference.IValueReference)
 	 */
@@ -94,7 +94,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.validation.IValidatorExtension#canValidateUnusedVariable(org.eclipse.dltk.javascript.typeinference.IValueCollection,
 	 * org.eclipse.dltk.javascript.typeinference.IValueReference)
 	 */
@@ -125,7 +125,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 				ScriptVariable scriptVariable = form.getScriptVariable(name);
 				if (scriptVariable != null)
 				{
-					ScriptVariableSearch search = new ScriptVariableSearch(scriptVariable, false);
+					ScriptVariableSearch search = new ScriptVariableSearch(scriptVariable, false, true);
 					search.run(null);
 					if (search.getMatchCount() > 0)
 					{
@@ -192,7 +192,7 @@ public class ServoyScriptValidator implements IValidatorExtension2
 				visibility = ((IRProperty)element).getVisibility();
 				if (!((IRProperty)element).isVisible())
 				{
-					visibility = Visibility.INTERNAL; // Assume that this is hidden because of mobile 
+					visibility = Visibility.INTERNAL; // Assume that this is hidden because of mobile
 				}
 				method = false;
 			}
@@ -268,13 +268,13 @@ public class ServoyScriptValidator implements IValidatorExtension2
 			}
 			if (isMethod)
 			{
-				return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION, "The function " + name + "() is not available in solutions of type " +
-					solTypeString);
+				return new ValidationStatus(JavaScriptProblems.PRIVATE_FUNCTION,
+					"The function " + name + "() is not available in solutions of type " + solTypeString);
 			}
 			else
 			{
-				return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE, "The property " + name + " is not available in solutions of type " +
-					solTypeString);
+				return new ValidationStatus(JavaScriptProblems.PRIVATE_VARIABLE,
+					"The property " + name + " is not available in solutions of type " + solTypeString);
 			}
 		}
 		return null;

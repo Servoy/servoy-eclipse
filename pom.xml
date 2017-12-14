@@ -16,6 +16,7 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.7/R-4.7.1a-201710090410/</servoy-repo.url>
+		<dltk.url>http://developer.servoy.com/dltk_repository/</dltk.url>
 		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/</servoy-shiplibs.url>
 	</properties>
 
@@ -26,6 +27,11 @@
 			<layout>p2</layout>
 		</repository>
 		<repository>
+			<id>dltk</id>
+			<url>${dltk.url}</url>
+			<layout>p2</layout>
+		</repository>
+			<repository>
 			<id>servoy_shiblibs</id>
 			<url>${servoy-shiplibs.url}</url>
 			<layout>p2</layout>

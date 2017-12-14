@@ -36,6 +36,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectReference;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.SolutionScope;
 import com.servoy.j2db.util.Debug;
@@ -142,7 +143,7 @@ public class SolutionJSUnitSuiteCodeBuilder
 				List<TestIdentifier> modulesThatAddedTests = new ArrayList<TestIdentifier>();
 				for (RootObjectReference ref : modules)
 				{
-					if (ref.getMetaData() != null)
+					if (ref.getMetaData() instanceof SolutionMetaData && !SolutionMetaData.isImportHook((SolutionMetaData)ref.getMetaData()))
 					{
 						Solution module = (Solution)solution.getRepository().getActiveRootObject(ref.getMetaData().getRootObjectId());
 						TestIdentifier tmp = appendSolutionTestCode(module, target, testCode, inspectedModules, flattenedSolution,

@@ -435,8 +435,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		if (contentProposal != null)
 		{
 			String contents = text.getText();
-			ContentLabelProviderProposalProvider providerProposalProvider = (ContentLabelProviderProposalProvider)contentProposal.getContentProposalProvider();
-			Object value = providerProposalProvider.determineValue(contents);
+			Object value = determineValue(contents);
 			setValid(value != null && getSelectionFilter().select(value));
 			if (value != null)
 			{
@@ -448,6 +447,13 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 				contentProposal.openProposalPopup();
 			}
 		}
+	}
+
+	protected Object determineValue(String contents)
+	{
+		ContentLabelProviderProposalProvider providerProposalProvider = (ContentLabelProviderProposalProvider)contentProposal.getContentProposalProvider();
+		Object value = providerProposalProvider.determineValue(contents);
+		return value;
 	}
 
 	public boolean isValid()

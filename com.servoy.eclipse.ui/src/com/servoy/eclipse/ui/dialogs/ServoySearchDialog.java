@@ -41,6 +41,8 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -618,6 +620,26 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 			catch (Exception e)
 			{
 				Debug.error(e);
+			}
+		}
+
+		ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+		for (ServoyProject servoyProject : modulesOfActiveProject)
+		{
+			try
+			{
+				List<String> tables = servoyProject.getMemServer().getTableNames(false);
+				if (tables != null)
+				{
+					for (String tableName : tables)
+					{
+						contentProvider.add(new Table(DataSourceUtils.createInmemDataSource(tableName)), itemsFilter);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError(ex);
 			}
 		}
 

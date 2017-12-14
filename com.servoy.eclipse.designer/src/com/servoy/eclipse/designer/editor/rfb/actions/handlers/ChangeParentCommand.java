@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
@@ -42,7 +43,9 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -88,7 +91,8 @@ public class ChangeParentCommand extends Command
 		if (childPositionClass != null)
 		{
 			ISupportChilds flattenedOldParent = PersistHelper.getFlattenedPersist(flattenedSolution, form, initialParent);
-			ArrayList<IPersist> sortedChildren = getChildrenSortedOnType(flattenedOldParent);
+			ArrayList<IPersist> sortedChildren = getChildrenSortedOnType(flattenedOldParent,
+				child instanceof IChildWebObject ? ((IChildWebObject)child).getJsonKey() : null);
 			oldIndex = sortedChildren.indexOf(child);
 		}
 		ISupportChilds flattenedNewParent = PersistHelper.getFlattenedPersist(flattenedSolution, form, newParent);
@@ -131,7 +135,7 @@ public class ChangeParentCommand extends Command
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
 
-	private ArrayList<IPersist> getChildrenSortedOnType(ISupportChilds parent)
+	private ArrayList<IPersist> getChildrenSortedOnType(ISupportChilds parent, String jsonKey)
 	{
 		ArrayList<IPersist> children = new ArrayList<IPersist>();
 		Iterator<IPersist> it = parent.getAllObjects();
@@ -139,7 +143,8 @@ public class ChangeParentCommand extends Command
 		{
 			IPersist persist = it.next();
 
-			if (childPositionClass.isInstance(persist))
+			if (childPositionClass.isInstance(persist) &&
+				(jsonKey == null || (persist instanceof IChildWebObject && Utils.equalObjects(jsonKey, ((IChildWebObject)persist).getJsonKey()))))
 			{
 				children.add(persist instanceof IFlattenedPersistWrapper ? ((IFlattenedPersistWrapper< ? >)persist).getWrappedPersist() : persist);
 			}
@@ -167,7 +172,8 @@ public class ChangeParentCommand extends Command
 	{
 		if (childPositionClass != null)
 		{
-			ArrayList<IPersist> sortedChildren = getChildrenSortedOnType(flattenedNewParent);
+			ArrayList<IPersist> sortedChildren = getChildrenSortedOnType(flattenedNewParent,
+				child instanceof IChildWebObject ? ((IChildWebObject)child).getJsonKey() : null);
 			sortedChildren.remove(child);
 			int insertIndex = -1;
 			if (useOldIndex)
@@ -209,6 +215,10 @@ public class ChangeParentCommand extends Command
 						((IChildWebObject)persist).setIndex(i);
 					}
 					changes.add(persist);
+				}
+				if (flattenedNewParent instanceof IBasicWebObject && child instanceof WebCustomType)
+				{
+					((IBasicWebObject)flattenedNewParent).setProperty(((WebCustomType)child).getJsonKey(), sortedChildren.toArray(new IChildWebObject[0]));
 				}
 			}
 		}

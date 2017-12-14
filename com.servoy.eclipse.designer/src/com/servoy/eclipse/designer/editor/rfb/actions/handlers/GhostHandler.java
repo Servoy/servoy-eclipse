@@ -21,6 +21,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.rfb.startup.RFBDesignerUtils;
 import com.servoy.eclipse.designer.util.DeveloperUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -66,7 +68,10 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
@@ -100,8 +105,22 @@ public class GhostHandler implements IServerService
 		writer.array();
 		ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).acceptVisitor(new IPersistVisitor()
 		{
+			private Point getGhostContainerLocation(IBasicWebComponent bean, ArrayList<IBasicWebComponent> parentFormComponentPath)
+			{
+				Point location = bean.getLocation();
+				if (parentFormComponentPath != null)
+				{
+					for (IBasicWebComponent parentFormComponent : parentFormComponentPath)
+					{
+						location.setLocation(location.getX() + parentFormComponent.getLocation().getX(),
+							location.getY() + parentFormComponent.getLocation().getY());
+					}
+				}
+				return location;
+			}
 
-			private void writeGhostsForWebcomponentBeans(IBasicWebComponent basicWebComponent)
+			private void writeGhostsForWebcomponentBeans(IBasicWebComponent basicWebComponent, String parentID,
+				ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(basicWebComponent))
 				{
@@ -127,7 +146,7 @@ public class GhostHandler implements IServerService
 					if (basicWebComponent instanceof Bean && ((Bean)basicWebComponent).getBeanXML() != null)
 					{
 						// these things (Bean instead of WebComponent) are deprecated right?
-						startNewGhostContainer(writer, basicWebComponent, 0, 1, "", true);
+						startNewGhostContainer(writer, basicWebComponent, 0, 1, "", true, parentFormComponentPath);
 
 						try
 						{
@@ -182,7 +201,7 @@ public class GhostHandler implements IServerService
 							PropertyDescription propertyPD = spec.getProperty(dropPropEntry.getKey());
 
 							startNewGhostContainer(writer, basicWebComponent, i++, droppablePropCount, dropPropEntry.getKey(),
-								PropertyUtils.isCustomJSONArrayPropertyType(propertyPD.getType()));
+								PropertyUtils.isCustomJSONArrayPropertyType(propertyPD.getType()), parentFormComponentPath);
 
 							if (dropPropEntry.getValue() != null)
 							{
@@ -214,9 +233,11 @@ public class GhostHandler implements IServerService
 
 									try
 									{
-										String parentKey = basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
-										writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostWebObject.getUUID().toString(), ghostWebObject.getIndex(),
-											ghostWebObject.getTypeName());
+										String parentKey = parentID != null ? parentID + ghostWebObject.getJsonKey()
+											: basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
+										String ghostID = parentID != null ? parentID + "#" + ghostWebObject.getUUID() : ghostWebObject.getUUID().toString();
+
+										writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(), ghostWebObject.getTypeName());
 									}
 									catch (JSONException e1)
 									{
@@ -261,15 +282,16 @@ public class GhostHandler implements IServerService
 			}
 
 			private void startNewGhostContainer(final JSONWriter writer, IBasicWebComponent basicWebComponent, int propYCount, int totalGhostContainersOfComp,
-				String propertyName, boolean isArray)
+				String propertyName, boolean isArray, ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
 				writer.object();
 				writer.key("parentCompBounds");
 				{
 					// these will only be useful in anchor forms (in responsive the actual location of the parent component needs to be determined on client)
+					Point ghostContainerLocation = getGhostContainerLocation(basicWebComponent, parentFormComponentPath);
 					writer.object();
-					writer.key("left").value(basicWebComponent.getLocation().getX());
-					writer.key("top").value(basicWebComponent.getLocation().getY());
+					writer.key("left").value(ghostContainerLocation.getX());
+					writer.key("top").value(ghostContainerLocation.getY());
 					writer.key("width").value(basicWebComponent.getSize().width);
 					writer.key("height").value(basicWebComponent.getSize().height);
 					writer.endObject();
@@ -336,8 +358,12 @@ public class GhostHandler implements IServerService
 				return 0;
 			}
 
-			@Override
-			public Object visit(IPersist o)
+			private void writeGhostForPersist(IPersist o)
+			{
+				writeGhostForPersist(o, null, null);
+			}
+
+			private void writeGhostForPersist(IPersist o, String parentID, ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
 				if (o instanceof TabPanel)
 				{
@@ -471,9 +497,52 @@ public class GhostHandler implements IServerService
 				}
 				else if (o instanceof IBasicWebComponent)
 				{
-					writeGhostsForWebcomponentBeans((IBasicWebComponent)o);
-				}
+					writeGhostsForWebcomponentBeans((IBasicWebComponent)o, parentID, parentFormComponentPath);
 
+					String componentType = FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)o);
+					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentType);
+					if (specification != null)
+					{
+						Collection<PropertyDescription> properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
+						if (properties.size() > 0)
+						{
+							FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editorPart.getForm());
+							FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((IBasicWebComponent)o, fs, null, true);
+							for (PropertyDescription pd : properties)
+							{
+								Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+								Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+								if (frm == null) continue;
+								FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
+									fs);
+								ArrayList<IBasicWebComponent> newParentFormComponentPath;
+								if (parentFormComponentPath == null)
+								{
+									newParentFormComponentPath = new ArrayList<IBasicWebComponent>();
+								}
+								else
+								{
+									newParentFormComponentPath = parentFormComponentPath;
+								}
+								newParentFormComponentPath.add((IBasicWebComponent)o);
+								for (FormElement element : cache.getFormComponentElements())
+								{
+									IPersist p = element.getPersistIfAvailable();
+									if (p instanceof IFormElement)
+									{
+										writeGhostForPersist(p, ((IFormElement)p).getName(), newParentFormComponentPath);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			@Override
+			public Object visit(IPersist o)
+			{
+				writeGhostForPersist(o);
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
 

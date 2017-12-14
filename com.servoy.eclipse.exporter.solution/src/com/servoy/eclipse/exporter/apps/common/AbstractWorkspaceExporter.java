@@ -304,7 +304,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				{
 					if (sm.getActiveProject() != null && sm.getActiveResourcesProject() != null)
 					{
-						ServoyProject[] modules = sm.getModulesOfActiveProjectWithImportHooks();
+						ServoyProject[] modules = sm.getModulesOfActiveProject();
 
 						if (!mustStop)
 						{

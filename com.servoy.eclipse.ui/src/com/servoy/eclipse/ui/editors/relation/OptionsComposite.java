@@ -275,7 +275,7 @@ public class OptionsComposite extends Group
 
 		public Object convert(Object fromObject)
 		{
-			if (fromObject.toString().equals("")) return null;
+			if (fromObject != null && fromObject.toString().equals("")) return null;
 			return fromObject;
 		}
 	}
