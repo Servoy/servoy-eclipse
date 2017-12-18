@@ -23,7 +23,11 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.parser.IModuleDeclaration;
+import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
+import org.eclipse.dltk.compiler.problem.IProblemSeverityTranslator;
+import org.eclipse.dltk.compiler.problem.ProblemSeverity;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.SourceParserUtil;
@@ -32,8 +36,10 @@ import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantFactory;
 import org.eclipse.dltk.javascript.ast.Comment;
 import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.JSNode;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
+import org.eclipse.dltk.javascript.ast.VariableStatement;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.parser.Reporter;
 
@@ -45,7 +51,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
  */
 public class JSFileExternalize implements IBuildParticipantFactory
 {
-
 	private StringExternalizeParser stringExternalizeParser;
 
 	/*
@@ -67,6 +72,8 @@ public class JSFileExternalize implements IBuildParticipantFactory
 
 	class StringExternalizeParser implements IBuildParticipant
 	{
+		private int numberOfWarningsPerBlock = 0;
+
 		private static final String WARNING_MESSAGE = "Non-externalized string literal; it should be followed by ";
 		private static final String SUPPRESS_WARNING_NLS = "@SuppressWarnings(nls)";
 
@@ -76,6 +83,13 @@ public class JSFileExternalize implements IBuildParticipantFactory
 		public void build(IBuildContext context) throws CoreException
 		{
 			if (context.getContents() == null || context.getContents().length == 0) return;
+			if (context.getSourceModule() != null && context.getSourceModule().getScriptProject() != null)
+			{
+				final IProblemFactory problemFactory = DLTKLanguageManager.getProblemFactory(context.getSourceModule());
+				IProblemSeverityTranslator severityTranslator = problemFactory.createSeverityTranslator(context.getSourceModule().getScriptProject());
+				ProblemSeverity severity = severityTranslator.getSeverity(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING, ProblemSeverity.WARNING);
+				if (severity != null && severity.equals(ProblemSeverity.IGNORE)) return;
+			}
 			final Script script = getScript(context);
 			if (script != null)
 			{
@@ -110,6 +124,7 @@ public class JSFileExternalize implements IBuildParticipantFactory
 		{
 			if (reporter != null)
 			{
+				numberOfWarningsPerBlock++;
 				reporter.reportProblem(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING, WARNING_MESSAGE + "//$NON-NLS-" + stringLiteralIdx + "$", sourceStart,
 					sourceStop);
 			}
@@ -139,17 +154,21 @@ public class JSFileExternalize implements IBuildParticipantFactory
 					@Override
 					public boolean visitGeneral(ASTNode node) throws Exception
 					{
-						if (node instanceof FunctionStatement)
+						if (node instanceof JSNode)
 						{
-							Comment comment = ((FunctionStatement)node).getDocumentation();
+							Comment comment = ((JSNode)node).getDocumentation();
 							if (comment != null)
 							{
 								String commentStr = comment.getText();
 								if (commentStr != null && commentStr.indexOf(SUPPRESS_WARNING_NLS) != -1)
 								{
-									reporter.pushSuppressWarnings(suppressProblems);
+									return false;
 								}
 							}
+						}
+						if (numberOfWarningsPerBlock > 100)
+						{
+							return false;
 						}
 						return super.visitGeneral(node);
 					}
@@ -157,9 +176,9 @@ public class JSFileExternalize implements IBuildParticipantFactory
 					@Override
 					public void endvisitGeneral(ASTNode node) throws Exception
 					{
-						if (node instanceof FunctionStatement)
+						if (node instanceof FunctionStatement || node instanceof VariableStatement)
 						{
-							reporter.popSuppressWarnings();
+							numberOfWarningsPerBlock = 0;
 						}
 						super.endvisitGeneral(node);
 					}
