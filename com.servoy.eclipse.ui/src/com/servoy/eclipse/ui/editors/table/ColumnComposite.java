@@ -39,6 +39,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -46,6 +48,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
@@ -56,12 +59,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Scrollable;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -74,6 +76,7 @@ import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
 import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.ColorResource;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -110,24 +113,24 @@ public class ColumnComposite extends Composite
 	public ColumnComposite(TableEditor te, Composite parent, FlattenedSolution flattenedSolution, int style)
 	{
 		super(parent, style);
+		parent.getShell().setBackgroundMode(SWT.INHERIT_FORCE);
 
 		this.setLayout(new FillLayout());
-		final ScrolledComposite myScrolledComposite = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL);
+		final ScrolledComposite myScrolledComposite = new ScrolledComposite(this, SWT.TRANSPARENT | SWT.H_SCROLL | SWT.V_SCROLL);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
-		final Composite container = new Composite(myScrolledComposite, SWT.NONE);
-
+		final Composite container = new Composite(myScrolledComposite, SWT.TRANSPARENT);
 		myScrolledComposite.setContent(container);
 
 		final ITable t = te.getTable();
-		tableContainer = new Composite(container, SWT.NONE);
+		tableContainer = new Composite(container, SWT.INHERIT_DEFAULT);
 		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLinesVisible(true);
 		tableViewer.getTable().setHeaderVisible(true);
 
-		final TabFolder tabFolder;
-		tabFolder = new TabFolder(container, SWT.NONE);
+		final CTabFolder tabFolder;
+		tabFolder = new CTabFolder(container, SWT.NONE);
 		tabFolder.setVisible(false);
 
 		final GroupLayout groupLayout = new GroupLayout(container);
@@ -234,13 +237,14 @@ public class ColumnComposite extends Composite
 			}
 		});
 
-		final TabItem detailsTabItem = new TabItem(tabFolder, SWT.NONE);
+		final CTabItem detailsTabItem = new CTabItem(tabFolder, SWT.NONE, 0);
 		detailsTabItem.setText("Details");
+		tabFolder.setSelection(0);
 
-		final TabItem autoEnterTabItem = new TabItem(tabFolder, SWT.NONE);
+		final CTabItem autoEnterTabItem = new CTabItem(tabFolder, SWT.NONE, 1);
 		autoEnterTabItem.setText("Auto Enter");
 
-		final TabItem validationTabItem = new TabItem(tabFolder, SWT.NONE);
+		final CTabItem validationTabItem = new CTabItem(tabFolder, SWT.NONE, 2);
 		validationTabItem.setText("Validation");
 
 		columnValidationComposite = new ColumnValidationComposite(te, tabFolder, SWT.NONE);
@@ -267,11 +271,23 @@ public class ColumnComposite extends Composite
 			}
 		});
 
-		final TabItem conversionTabItem = new TabItem(tabFolder, SWT.NONE);
+		final CTabItem conversionTabItem = new CTabItem(tabFolder, SWT.NONE, 3);
 		conversionTabItem.setText("Conversion");
 
 		columnConversionComposite = new ColumnConversionComposite(te, tabFolder, SWT.NONE);
+
 		conversionTabItem.setControl(columnConversionComposite);
+
+		if (IconPreferences.getInstance().getUseDarkThemeIcons())
+		{
+			//JFaceResources.getColorRegistry().get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_END"); is the
+			//closest match, but the label background is slighly visible
+			Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
+			columnValidationComposite.setBackground(backgroundColor);
+			columnConversionComposite.setBackground(backgroundColor);
+			columnDetailsComposite.setBackground(backgroundColor);
+			columnAutoEnterComposite.setBackground(backgroundColor);
+		}
 
 		Button addButton;
 		addButton = new Button(container, SWT.NONE);
@@ -607,7 +623,7 @@ public class ColumnComposite extends Composite
 					Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.TEXT, 36);
 					id.setDatabasePK(true);
 					id.setSequenceType(defaultFirstColumnSequenceType);
-					id.setFlag(Column.UUID_COLUMN, true);
+					id.setFlag(IBaseColumn.UUID_COLUMN, true);
 				}
 				else
 				{

@@ -46,18 +46,19 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.base.persistence.IBaseColumn;
@@ -78,6 +79,7 @@ import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.util.ScopeWithContext;
@@ -104,9 +106,9 @@ import com.servoy.j2db.util.SortedList;
 public class ColumnAutoEnterComposite extends Composite implements SelectionListener
 {
 	private DataBindingContext bindingContext;
-	private final Combo systemValueCombo;
+	private final CCombo systemValueCombo;
 	private final Text customValueText;
-	private final Combo sequenceCombo;
+	private final CCombo sequenceCombo;
 	private final Button systemValueButton;
 	private final Button customValueButton;
 	private final Button databaseDefaultButton;
@@ -114,7 +116,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 	private final Button sequenceButton;
 	private final TreeSelectViewer lookupValueSelect;
 	private final Control lookupValueControl;
-	private final TabFolder tabFolder;
+	private final CTabFolder tabFolder;
 	private final Text databaseDefaultValue;
 	private Column column;
 	private ColumnInfoBean columnInfoBean;
@@ -133,13 +135,14 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 	public ColumnAutoEnterComposite(Composite parent, final FlattenedSolution flattenedSolution, int style)
 	{
 		super(parent, style);
+		setBackgroundMode(SWT.INHERIT_FORCE);
 		this.flattenedSolution = flattenedSolution;
 		column = null;
 		systemValueButton = new Button(this, SWT.RADIO);
 		systemValueButton.setText("System Value");
 		systemValueButton.addSelectionListener(this);
-		systemValueCombo = new Combo(this, SWT.READ_ONLY);
-		UIUtils.setDefaultVisibleItemCount(systemValueCombo);
+		systemValueCombo = new CCombo(this, SWT.READ_ONLY | SWT.BORDER);
+		systemValueCombo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 		systemValueCombo.addSelectionListener(this);
 
 		customValueButton = new Button(this, SWT.RADIO);
@@ -163,23 +166,29 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		sequenceButton.setText("Sequence");
 		sequenceButton.addSelectionListener(this);
 
-		sequenceCombo = new Combo(this, SWT.READ_ONLY);
-		UIUtils.setDefaultVisibleItemCount(sequenceCombo);
+		sequenceCombo = new CCombo(this, SWT.READ_ONLY | SWT.BORDER);
+		sequenceCombo.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 		sequenceCombo.addSelectionListener(this);
 
-		tabFolder = new TabFolder(this, SWT.NONE);
-
-		final TabItem servoySeqTabItem = new TabItem(tabFolder, SWT.NONE);
+		tabFolder = new CTabFolder(this, SWT.NONE);
+		final CTabItem servoySeqTabItem = new CTabItem(tabFolder, SWT.NONE, 0);
 		servoySeqTabItem.setText("Servoy sequence");
 
 		columnAutoEnterServoySeqComposite = new ColumnAutoEnterServoySeqComposite(tabFolder, SWT.NONE);
 		servoySeqTabItem.setControl(columnAutoEnterServoySeqComposite);
 
-		final TabItem databaseSequenceTabItem = new TabItem(tabFolder, SWT.NONE);
+		final CTabItem databaseSequenceTabItem = new CTabItem(tabFolder, SWT.NONE, 1);
 		databaseSequenceTabItem.setText("Database sequence");
 
 		columnAutoEnterDBSeqComposite = new ColumnAutoEnterDBSeqComposite(tabFolder, SWT.NONE);
 		databaseSequenceTabItem.setControl(columnAutoEnterDBSeqComposite);
+
+		if (IconPreferences.getInstance().getUseDarkThemeIcons())
+		{
+			Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
+			columnAutoEnterServoySeqComposite.setBackground(backgroundColor);
+			columnAutoEnterDBSeqComposite.setBackground(backgroundColor);
+		}
 
 		lookupValueSelect = new TreeSelectViewer(this, SWT.NONE)
 		{
