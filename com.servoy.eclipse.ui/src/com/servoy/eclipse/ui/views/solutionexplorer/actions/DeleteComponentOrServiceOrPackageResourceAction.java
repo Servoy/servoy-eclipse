@@ -55,6 +55,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
  * Deletes the selected components or services or packages of components or services.
@@ -68,12 +69,14 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 	private final Shell shell;
 	private final UserNodeType nodeType;
 	private boolean deleteFromDisk;
+	private final SolutionExplorerView viewer;
 
 
-	public DeleteComponentOrServiceOrPackageResourceAction(Shell shell, String text, UserNodeType nodeType)
+	public DeleteComponentOrServiceOrPackageResourceAction(Shell shell, String text, UserNodeType nodeType, SolutionExplorerView viewer)
 	{
 		this.shell = shell;
 		this.nodeType = nodeType;
+		this.viewer = viewer;
 		setText(text);
 		setToolTipText(text);
 	}
@@ -182,6 +185,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 							}
 							if (resources != null) resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 						}
+						viewer.refreshTreeCompletely();
 					}
 					catch (CoreException e)
 					{
