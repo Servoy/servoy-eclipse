@@ -1666,7 +1666,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		if (comment == null) return null;
 		String c = comment.replaceAll("/\\*\\*|\\*/", "");
 		c = c.replaceAll("(\\s*)\\*", "$1").trim();
-		if (!toHTML) c = c.replaceAll(System.getProperty("line.separator"), "<br/>");
+		if (!toHTML)
+		{
+			String separator = System.getProperty("line.separator");
+			String[] inputArray = c.split(separator);
+			StringBuilder stringBuilder = new StringBuilder();
+			for (String value : inputArray)
+			{
+				stringBuilder.append(value.trim());
+				stringBuilder.append(separator);
+			}
+			c = stringBuilder.toString();
+			c = c.replaceAll(separator, "<br/>");
+		}
 		if (elementName != null) c = c.replaceAll("%%elementName%%", elementName);
 		if (!toHTML) return c;
 
