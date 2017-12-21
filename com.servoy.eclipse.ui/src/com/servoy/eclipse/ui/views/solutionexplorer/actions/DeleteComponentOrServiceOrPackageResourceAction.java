@@ -137,7 +137,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 		public void run(IProgressMonitor monitor) throws CoreException
 		{
 			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-			IProject resources = activeProject == null ? null : activeProject.getResourcesProject().getProject();
+			IProject resources = activeProject == null || activeProject.getResourcesProject() == null ? null : activeProject.getResourcesProject().getProject();
 			for (SimpleUserNode selected : savedSelection)
 			{
 				Object realObject = selected.getRealObject();
