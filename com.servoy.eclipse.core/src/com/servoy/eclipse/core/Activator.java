@@ -274,7 +274,7 @@ public class Activator extends Plugin
 		plugin = this;
 
 		String propertiesFile = InstanceScope.INSTANCE.getNode(PLUGIN_ID).get(PROPERTIES_FILE_PATH_SETTING, null);
-		if (propertiesFile != null)
+		if (!Utils.stringIsEmpty(propertiesFile) && System.getProperty("property-file", null) == null)
 		{
 			System.setProperty("property-file", propertiesFile);
 		}

@@ -1084,7 +1084,7 @@ public class SolutionExplorerView extends ViewPart
 							list.refresh();
 							tree.setSelection(toSelect, true);
 							ISelection current = tree.getSelection();
-							while (current.isEmpty() && !toSelect.isEmpty())
+							while (current.isEmpty() && !toSelect.isEmpty() && toSelect.getPaths()[0].getParentPath().getSegmentCount() > 0)
 							{
 								toSelect = new TreeSelection(toSelect.getPaths()[0].getParentPath());
 								tree.setSelection(toSelect, true);
