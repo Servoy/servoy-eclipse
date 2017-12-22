@@ -84,7 +84,6 @@ import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.ArgumentType;
@@ -100,7 +99,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -1000,9 +998,8 @@ public class SolutionDeserializer
 				Debug.error(t);
 				Debug.error("Parse error with file: " + file +
 					", please check this file for deep recursion like large string concats! ( string + string + string, replace this with string \\ string)");
-				ServoyLog.logError(
-					"Parse error with file: " + file +
-						", please check this file for deep recursion like large string concats! ( string + string + string, replace this with string \\ string)",
+				ServoyLog.logError("Parse error with file: " + file +
+					", please check this file for deep recursion like large string concats! ( string + string + string, replace this with string \\ string)",
 					t);
 			}
 			if (problems.size() > 0)
@@ -1919,13 +1916,6 @@ public class SolutionDeserializer
 			}
 
 			setPersistValues(repository, retval, obj);
-			if (((AbstractBase)retval).hasOverrideCustomProperty())
-			{
-				((AbstractBase)retval).removeOverrideCustomProperty();
-				UUID uuid = retval.getUUID();
-				((AbstractBase)retval).resetUUID();
-				((ISupportExtendsID)retval).setExtendsID(((AbstractPersistFactory)repository).getElementIdForUUID(uuid));
-			}
 			if (obj.has(EXTRA_DOC_COMMENTS))
 			{
 				((AbstractBase)retval).putCustomProperty(new String[] { EXTRA_DOC_COMMENTS }, obj.get(EXTRA_DOC_COMMENTS));
