@@ -210,7 +210,11 @@ public class EditorServiceHandler implements IServerService
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER))
 							: Boolean.TRUE;
 					}
-
+					if (args.has("isHideInherited"))
+					{
+						RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
+						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null ? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
+					}
 				}
 				return Boolean.FALSE;
 			}

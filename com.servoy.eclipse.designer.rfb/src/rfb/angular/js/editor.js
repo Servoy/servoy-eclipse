@@ -1459,6 +1459,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		toggleShowData: function() {
 			wsSession.callService('formeditor', 'toggleShowData', null, true);
 		},
+		
+		isHideInherited: function() {
+			return wsSession.callService('formeditor', 'getBooleanState', {
+				"isHideInherited": false
+			}, false)
+		},
 
 		updatePaletteOrder: function(paletteOrder) {
 			return wsSession.callService('formeditor', 'updatePaletteOrder', paletteOrder, false);

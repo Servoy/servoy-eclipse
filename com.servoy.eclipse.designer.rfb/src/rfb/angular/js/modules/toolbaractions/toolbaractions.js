@@ -34,6 +34,10 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			editorScope.getEditorContentRootScope().design_highlight = result ? "highlight_element" : null;
 			editorScope.getEditorContentRootScope().$digest();
 		});
+		var hideInheritedPromise = $editorService.isHideInherited();
+		hideInheritedPromise.then(function(result) {
+			hideInheritedElements(result);
+		});		
 	});
 	var btnPlaceField = {
 		text: "Place Field Wizard",
@@ -164,30 +168,34 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	$toolbar.add(btnTabSequence, TOOLBAR_CATEGORIES.FORM);
 	$toolbar.add(btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
-	var showingInheritedElements = true;
-
+	var hideInheritedElements = function(hide)
+	{
+		btnHideInheritedElements.state = hide;
+		editorScope.getEditorContentRootScope().hideInherited = hide;
+		editorScope.getEditorContentRootScope().$digest();
+		$(editorScope.contentDocument).find('.inherited_element').each(function(index, element) {
+			if (hide) {
+				$(element).hide();
+			} else {
+				$(element).show();
+			}
+		});
+	};
 	var btnHideInheritedElements = {
 		text: "Hide inherited elements",
 		icon: "../../images/hide_inherited.png",
 		disabledIcon: "../../images/hide_inherited-disabled.png",
 		enabled: true,
+		state: false,
 		onclick: function() {
-			$(editorScope.contentDocument).find('.inherited_element').each(function(index, element) {
-				if (showingInheritedElements) {
-					$(element).hide();
-				} else {
-					$(element).show();
-				}
-			});
-			if (showingInheritedElements) {
-				showingInheritedElements = false;
-				this.style = {'background-color':'#dcdcdc'};
+			if (btnHideInheritedElements.state) {
+				btnHideInheritedElements.state = false;
 				this.text = "Show inherited elements";
 			} else {
-				showingInheritedElements = true;
-				this.style = {};
+				btnHideInheritedElements.state = true;
 				this.text = "Hide inherited elements"
 			}
+			hideInheritedElements(btnHideInheritedElements.state);
 			$editorService.executeAction('toggleHideInherited');
 		},
 	};
