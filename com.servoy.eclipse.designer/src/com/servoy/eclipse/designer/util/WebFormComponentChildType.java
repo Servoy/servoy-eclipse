@@ -31,6 +31,7 @@ import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.ui.util.IParentOverridable;
+import com.servoy.eclipse.ui.util.ISupportInheritedPropertyCheck;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -192,32 +193,8 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	private WebCustomType createWebCustomType(Object propertyDescriptionArg, final String jsonKey, final int index, UUID uuidArg)
 	{
 		Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(this);
-		return new WebCustomType(this, propertyDescriptionArg, jsonKey, index, false, idAndUUID.getLeft().intValue(),
-			uuidArg != null ? uuidArg : idAndUUID.getRight())
-		{
-			@Override
-			public void setProperty(String propertyName, Object val)
-			{
-				super.setProperty(propertyName, val);
-				if (index < 0)
-				{
-					WebFormComponentChildType.this.setProperty(jsonKey, val);
-				}
-				else
-				{
-					IChildWebObject[] currentValue = (IChildWebObject[])WebFormComponentChildType.this.convertToJavaType(jsonKey,
-						WebFormComponentChildType.this.getJson(false, true).opt(jsonKey));
-					currentValue[index] = this;
-					WebFormComponentChildType.this.setProperty(jsonKey, currentValue);
-				}
-			}
-
-			@Override
-			public String toString()
-			{
-				return WebCustomType.class.getSimpleName() + " -> " + webObjectImpl.toString(); //$NON-NLS-1$
-			}
-		};
+		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index, false, idAndUUID.getLeft().intValue(),
+			uuidArg != null ? uuidArg : idAndUUID.getRight());
 	}
 
 	@Override
@@ -262,6 +239,35 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		getJson(true, false).remove(propertyName);
 		getParentComponent().flagChanged();
 		initializeElement();
+	}
+
+	public void clearCustomProperty(String customPropertyName, String propertyName, int propertyIndex)
+	{
+		Object customProperty = getJson(true, false).get(customPropertyName);
+		if (customProperty instanceof JSONObject)
+		{
+			((JSONObject)customProperty).remove(propertyName);
+		}
+		else if (customProperty instanceof JSONArray)
+		{
+			((JSONObject)((JSONArray)customProperty).get(propertyIndex)).remove(propertyName);
+		}
+		getParentComponent().flagChanged();
+		initializeElement();
+	}
+
+	public boolean hasCustomProperty(String customPropertyName, String propertyName, int propertyIndex)
+	{
+		Object customProperty = getJson(true, true).get(customPropertyName);
+		if (customProperty instanceof JSONObject)
+		{
+			return ((JSONObject)customProperty).has(propertyName);
+		}
+		else if (customProperty instanceof JSONArray)
+		{
+			return ((JSONObject)((JSONArray)customProperty).get(propertyIndex)).has(propertyName);
+		}
+		return false;
 	}
 
 	private PropertyDescription initializeElement()
@@ -487,5 +493,60 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 			}
 		}
 		return allObjectsAsList;
+	}
+
+	class WebFormComponentCustomType extends WebCustomType implements ISupportInheritedPropertyCheck
+	{
+		String jsonKey;
+		int index;
+
+		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, boolean isNew, int id,
+			UUID uuid)
+		{
+			super(parentWebObject, propertyDescription, jsonKey, index, isNew, id, uuid);
+			this.jsonKey = jsonKey;
+			this.index = index;
+		}
+
+		@Override
+		public void setProperty(String propertyName, Object val)
+		{
+			super.setProperty(propertyName, val);
+			if (index < 0)
+			{
+				WebFormComponentChildType.this.setProperty(jsonKey, this);
+			}
+			else
+			{
+				IChildWebObject[] currentValue = (IChildWebObject[])WebFormComponentChildType.this.convertToJavaType(jsonKey,
+					WebFormComponentChildType.this.getJson(false, true).opt(jsonKey));
+				currentValue[index] = this;
+				WebFormComponentChildType.this.setProperty(jsonKey, currentValue);
+			}
+		}
+
+		@Override
+		public void clearProperty(String propertyName)
+		{
+			super.clearProperty(propertyName);
+			WebFormComponentChildType.this.clearCustomProperty(jsonKey, propertyName, index);
+		}
+
+		@Override
+		public String toString()
+		{
+			return WebCustomType.class.getSimpleName() + " -> " + webObjectImpl.toString(); //$NON-NLS-1$
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.ui.util.ISupportOwnPropertyCheck#isOwnProperty(java.lang.String)
+		 */
+		@Override
+		public boolean isInheritedProperty(String propertyName)
+		{
+			return WebFormComponentChildType.this.hasCustomProperty(jsonKey, propertyName, index);
+		}
 	}
 }

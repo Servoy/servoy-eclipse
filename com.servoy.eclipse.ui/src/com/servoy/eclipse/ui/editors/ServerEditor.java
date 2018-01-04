@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
@@ -47,7 +48,6 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -118,15 +118,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private Button saveButton;
 	private Button testConnectionButton;
 	private Text validationQueryField;
-	private Combo validationTypeField;
+	private CCombo validationTypeField;
 	private Text maxPreparedStatementsIdleField;
 	private Text maxIdleField;
 	private Text maxActiveField;
 	private Text idleTimoutField;
-	private Combo dataModel_cloneFromField;
-	private Combo schemaField;
-	private Combo catalogField;
-	private Combo driverField;
+	private CCombo dataModel_cloneFromField;
+	private CCombo schemaField;
+	private CCombo catalogField;
+	private CCombo driverField;
 	private Text urlField;
 	private Text passwordField;
 	private Text userNameField;
@@ -394,9 +394,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		driverLabel.setText("Driver");
 		driverLabel.setToolTipText(toolTip);
 
-		driverField = new Combo(advancedSettingsComposite, SWT.BORDER);
+		driverField = new CCombo(advancedSettingsComposite, SWT.BORDER);
 		driverField.setToolTipText(toolTip);
-		UIUtils.setDefaultVisibleItemCount(driverField);
+		driverField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 		driverField.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -413,9 +413,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		catalogLabel.setText("Catalog");
 		catalogLabel.setToolTipText(toolTip);
 
-		catalogField = new Combo(advancedSettingsComposite, SWT.BORDER);
+		catalogField = new CCombo(advancedSettingsComposite, SWT.BORDER);
 		catalogField.setToolTipText(toolTip);
-		UIUtils.setDefaultVisibleItemCount(catalogField);
+		catalogField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 
 		toolTip = "The specific schema to connect to; not all databases support this option.";
 		Label schemaLabel;
@@ -423,9 +423,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		schemaLabel.setText("Schema");
 		schemaLabel.setToolTipText(toolTip);
 
-		schemaField = new Combo(advancedSettingsComposite, SWT.BORDER);
+		schemaField = new CCombo(advancedSettingsComposite, SWT.BORDER);
 		schemaField.setToolTipText(toolTip);
-		UIUtils.setDefaultVisibleItemCount(schemaField);
+		schemaField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 
 		toolTip = "Determines the maximum number of connections that will be made to the database simultaneously.";
 		Label maxActiveLabel;
@@ -475,9 +475,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		validationTypeLabel.setText("Connection Validation Type");
 		validationTypeLabel.setToolTipText(toolTip);
 
-		validationTypeField = new Combo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
+		validationTypeField = new CCombo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
 		validationTypeField.setToolTipText(toolTip);
-		UIUtils.setDefaultVisibleItemCount(validationTypeField);
+		validationTypeField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 
 		toolTip = "If validation type is set to \"query validation\", then this is the query that must run successfully in order for the connection to be considered valid.";
 		Label validationQueryLabel;
@@ -494,9 +494,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		dataModel_cloneFromLabel.setText("Data model clone from");
 		dataModel_cloneFromLabel.setToolTipText(toolTip);
 
-		dataModel_cloneFromField = new Combo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
+		dataModel_cloneFromField = new CCombo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
 		dataModel_cloneFromField.setToolTipText(toolTip);
-		UIUtils.setDefaultVisibleItemCount(dataModel_cloneFromField);
+		dataModel_cloneFromField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 
 		Label enabledLabel;
 		enabledLabel = new Label(advancedSettingsComposite, SWT.LEFT);

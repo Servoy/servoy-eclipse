@@ -1084,7 +1084,7 @@ public class SolutionExplorerView extends ViewPart
 							list.refresh();
 							tree.setSelection(toSelect, true);
 							ISelection current = tree.getSelection();
-							while (current.isEmpty() && !toSelect.isEmpty())
+							while (current.isEmpty() && !toSelect.isEmpty() && toSelect.getPaths()[0].getParentPath().getSegmentCount() > 0)
 							{
 								toSelect = new TreeSelection(toSelect.getPaths()[0].getParentPath());
 								tree.setSelection(toSelect, true);
@@ -3083,28 +3083,28 @@ public class SolutionExplorerView extends ViewPart
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteComponentPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package",
-			UserNodeType.COMPONENTS_NONPROJECT_PACKAGE);
+			UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, this);
 		IAction deleteLayoutPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout package",
-			UserNodeType.LAYOUT_NONPROJECT_PACKAGE);
+			UserNodeType.LAYOUT_NONPROJECT_PACKAGE, this);
 		IAction deleteServicePackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package",
-			UserNodeType.SERVICES_NONPROJECT_PACKAGE);
+			UserNodeType.SERVICES_NONPROJECT_PACKAGE, this);
 		IAction deleteComponentProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package project",
-			UserNodeType.COMPONENTS_PROJECT_PACKAGE);
+			UserNodeType.COMPONENTS_PROJECT_PACKAGE, this);
 		IAction deleteLayoutProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout package project",
-			UserNodeType.LAYOUT_PROJECT_PACKAGE);
+			UserNodeType.LAYOUT_PROJECT_PACKAGE, this);
 		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package project",
-			UserNodeType.SERVICES_PROJECT_PACKAGE);
+			UserNodeType.SERVICES_PROJECT_PACKAGE, this);
 		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project",
-			UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE);
+			UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, this);
 		DeleteComponentOrServiceOrPackageResourceAction deleteWebObjectFolder = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete folder",
-			UserNodeType.WEB_OBJECT_FOLDER);
+			UserNodeType.WEB_OBJECT_FOLDER, this);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 
-		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT);
-		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT);
-		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE);
-		IAction deleteComponentResource = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete file", UserNodeType.COMPONENT_RESOURCE);
+		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT, this);
+		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT, this);
+		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE, this);
+		IAction deleteComponentResource = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete file", UserNodeType.COMPONENT_RESOURCE, this);
 		IAction deleteI18N = new DeleteI18NAction(shell);
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 

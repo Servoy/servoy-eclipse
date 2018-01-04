@@ -127,6 +127,7 @@ import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDefaultValue;
+import com.servoy.eclipse.ui.util.ISupportInheritedPropertyCheck;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
@@ -2122,7 +2123,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 				}
 
-				boolean hasInheritedValue = isDefaultValue && hasInheritedValue(id, beanPropertyPersist);
+				boolean hasInheritedValue = isDefaultValue && (beanPropertyPersist instanceof ISupportInheritedPropertyCheck
+					? ((ISupportInheritedPropertyCheck)beanPropertyPersist).isInheritedProperty(id.toString()) : hasInheritedValue(id, beanPropertyPersist));
 
 				if (beanPropertyPersist instanceof AbstractBase && !(beanPropertyPersist instanceof LayoutContainer) && isDefaultValue && !hasInheritedValue)
 				{

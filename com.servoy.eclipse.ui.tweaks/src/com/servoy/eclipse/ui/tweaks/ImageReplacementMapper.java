@@ -568,6 +568,10 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/designer.png"));
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.ui/icons/portal.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/portal.png"));
+			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.ui/icons/server.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/server.png"));
+			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.ui/icons/relation.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/relation.png"));
 		}
 		catch (Exception e)
 		{

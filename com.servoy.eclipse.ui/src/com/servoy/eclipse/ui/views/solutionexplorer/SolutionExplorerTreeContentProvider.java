@@ -1687,14 +1687,21 @@ public class SolutionExplorerTreeContentProvider
 					}
 					return false;
 				}
-				else if (un.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
-					un.getType() == UserNodeType.LAYOUT_NONPROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE)
+				else if (un.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_NONPROJECT_PACKAGE)
 				{
-					return (getComponentsSpecProviderState() != null &&
-						!getComponentsSpecProviderState().getComponentsInPackage(getPackageName(un)).isEmpty() ||
-						!getComponentsSpecProviderState().getLayoutsInPackage(getPackageName(un)).isEmpty());
+					return getComponentsSpecProviderState() != null &&
+						(!getComponentsSpecProviderState().getComponentsInPackage(getPackageName(un)).isEmpty() ||
+							!getComponentsSpecProviderState().getLayoutsInPackage(getPackageName(un)).isEmpty());
 				}
-				else if (un.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
+				else if (un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE)
+				{
+					return getComponentsSpecProviderState() != null;//a project package always has the META-INF folder as a child
+				}
+				else if (un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
+				{
+					return getServicesSpecProviderState() != null;
+				}
+				else if (un.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE)
 				{
 					SpecProviderState provider = getServicesSpecProviderState();
 					if (provider == null) return false;// the package management system might not yet be initialized at developer startup
