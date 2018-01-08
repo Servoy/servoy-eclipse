@@ -313,6 +313,9 @@ public class MarkerMessages
 		"Form \"{0}\" has a variable \"{1}\" which is also present in the parent hierarchy of the form.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 	public static ServoyMarker FormVariableTableCol = new ServoyMarker("Form \"{0}\" has a variable \"{1}\" which is also a column in table \"{2}\".",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+	public static ServoyMarker FormVariableTableColFromComponent = new ServoyMarker(
+		"Form \"{0}\" has a variable \"{1}\" which is also a column in table \"{2}\" which is used in web component \"{3}\" in property \"{4}\".",
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 	public static ServoyMarker FormTableNotAccessible = new ServoyMarker("Form \"{0}\" is based on table \"{1}\" which is not accessible.",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
