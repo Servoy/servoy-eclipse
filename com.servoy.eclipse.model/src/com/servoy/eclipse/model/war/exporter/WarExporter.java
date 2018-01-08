@@ -322,7 +322,8 @@ public class WarExporter
 			if (proc.waitFor() != 0)
 			{
 				Debug.error(message);
-				throw new ExportException("Could not group and minify JS and CSS resources.");
+				throw new ExportException(
+					"Could not group and minify JS and CSS resources. See log for more details and servoy wiki on how to exclude libraries from grouping using group property in the spec.");
 			}
 
 			//delete unneeded files
