@@ -63,6 +63,11 @@
 			"description": "True if this layout is can be dropped directly on the form",
 			"type": "boolean"
 		},
+		"absoluteLayout": 
+		{
+			"description": "True if this layout is can be dropped directly on the form",
+			"type": "boolean"
+		},
 		"definition": 
 		{
 			"description": "The javascript definition",
