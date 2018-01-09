@@ -851,6 +851,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							}
 						}
 					}
+					
+					var hideInheritedPromise = $editorService.isHideInherited();
+					hideInheritedPromise.then(function(result) {
+						$editorService.hideInheritedElements(result);
+					});
 				}
 			}
 
@@ -1136,11 +1141,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						"c_sessionid") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
 					replacews;
 			})
-			//init ghosts
-			var promise = $editorService.getGhostComponents();
-			promise.then(function(result) {
-				$scope.setGhosts(result);
-			});
 			
 			function areAllGhostContainersVisible() {
 				if ($scope.ghosts.ghostContainers) {
@@ -1487,6 +1487,24 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		setStatusBarText: function(text) {
 			var statusBarDiv = angular.element(document.querySelector('#statusbar'))[0];
 			statusBarDiv.innerHTML = !text ? '&nbsp;' : text;
+		},
+		
+		hideInheritedElements: function(hide)
+		{
+			var inherited_elements = $(editorScope.contentDocument).find('.inherited_element');
+			var ghosts = $(editorScope.contentArea).find('.inherited_element');
+			inherited_elements.add(ghosts).each(function(index, element) {
+				if (hide) {
+					$(element).hide();
+				} else {
+					$(element).show();
+				}
+			});
+			if (editorScope.getEditorContentRootScope() != null && hide != editorScope.getEditorContentRootScope().hideInherited)
+			{
+				editorScope.getEditorContentRootScope().hideInherited = hide;
+				editorScope.getEditorContentRootScope().$digest();
+			}
 		}
 
 		// add more service methods here

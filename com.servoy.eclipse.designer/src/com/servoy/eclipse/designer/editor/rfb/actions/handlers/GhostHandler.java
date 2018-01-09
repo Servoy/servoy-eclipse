@@ -76,6 +76,7 @@ import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gganea@servoy.com
@@ -143,10 +144,13 @@ public class GhostHandler implements IServerService
 						}
 					}
 
+					//is inherited but not overridden
+					boolean inherited = Utils.isInheritedFormElement(basicWebComponent, editorPart.getForm()) &&
+						editorPart.getForm().getChild(basicWebComponent.getUUID()) == null;
 					if (basicWebComponent instanceof Bean && ((Bean)basicWebComponent).getBeanXML() != null)
 					{
 						// these things (Bean instead of WebComponent) are deprecated right?
-						startNewGhostContainer(writer, basicWebComponent, 0, 1, "", true, parentFormComponentPath);
+						startNewGhostContainer(writer, basicWebComponent, 0, 1, "", true, parentFormComponentPath, inherited);
 
 						try
 						{
@@ -162,7 +166,7 @@ public class GhostHandler implements IServerService
 										if (pd.getType() instanceof ComponentPropertyType ||
 											(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 										{
-											writeGhostToJSON(basicWebComponent.getUUID() + pd.getName(), pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
+											writeGhostToJSON(basicWebComponent.getUUID() + pd.getName(), pd, simpleTypeName, -1, inherited);// -1 does not add a [0] at the end of the name
 										}
 									}
 									else if (PropertyUtils.isCustomJSONArrayPropertyType(pd.getType()))
@@ -175,7 +179,7 @@ public class GhostHandler implements IServerService
 													Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 											{
 												writeGhostToJSON(basicWebComponent.getUUID() + pd.getName(), writer,
-													pd.getName() + (i >= 0 ? "[" + i + "]" : ""), UUID.randomUUID().toString(), i, simpleTypeName);
+													pd.getName() + (i >= 0 ? "[" + i + "]" : ""), UUID.randomUUID().toString(), i, simpleTypeName, inherited);
 											}
 										}
 									}
@@ -201,7 +205,7 @@ public class GhostHandler implements IServerService
 							PropertyDescription propertyPD = spec.getProperty(dropPropEntry.getKey());
 
 							startNewGhostContainer(writer, basicWebComponent, i++, droppablePropCount, dropPropEntry.getKey(),
-								PropertyUtils.isCustomJSONArrayPropertyType(propertyPD.getType()), parentFormComponentPath);
+								PropertyUtils.isCustomJSONArrayPropertyType(propertyPD.getType()), parentFormComponentPath, inherited);
 
 							if (dropPropEntry.getValue() != null)
 							{
@@ -236,8 +240,8 @@ public class GhostHandler implements IServerService
 										String parentKey = parentID != null ? parentID + ghostWebObject.getJsonKey()
 											: basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
 										String ghostID = parentID != null ? parentID + "#" + ghostWebObject.getUUID() : ghostWebObject.getUUID().toString();
-
-										writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(), ghostWebObject.getTypeName());
+										writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(), ghostWebObject.getTypeName(),
+											inherited);
 									}
 									catch (JSONException e1)
 									{
@@ -282,7 +286,7 @@ public class GhostHandler implements IServerService
 			}
 
 			private void startNewGhostContainer(final JSONWriter writer, IBasicWebComponent basicWebComponent, int propYCount, int totalGhostContainersOfComp,
-				String propertyName, boolean isArray, ArrayList<IBasicWebComponent> parentFormComponentPath)
+				String propertyName, boolean isArray, ArrayList<IBasicWebComponent> parentFormComponentPath, boolean inherited)
 			{
 				writer.object();
 				writer.key("parentCompBounds");
@@ -297,7 +301,7 @@ public class GhostHandler implements IServerService
 					writer.endObject();
 				}
 				writer.key("uuid").value(basicWebComponent.getUUID());
-
+				writer.key("class").value(inherited ? " inherited_element" : "");
 				writer.key("containerPositionInComp").value(propYCount);
 				writer.key("totalGhostContainersOfComp").value(totalGhostContainersOfComp);
 				writer.key("propertyName").value(propertyName);
@@ -313,20 +317,22 @@ public class GhostHandler implements IServerService
 				writer.endObject();
 			}
 
-			private void writeGhostToJSON(String parentKey, PropertyDescription pd, String simpleTypeName, int indexForPositioning) throws JSONException
+			private void writeGhostToJSON(String parentKey, PropertyDescription pd, String simpleTypeName, int indexForPositioning, boolean inherited)
+				throws JSONException
 			{
 				writeGhostToJSON(parentKey, writer, pd.getName() + (indexForPositioning >= 0 ? "[" + indexForPositioning + "]" : ""),
-					UUID.randomUUID().toString(), indexForPositioning, simpleTypeName);
+					UUID.randomUUID().toString(), indexForPositioning, simpleTypeName, inherited);
 			}
 
-			private void writeGhostToJSON(String parentKey, JSONWriter jsonWriter, String text, String uuid, int indexForPositioning, String simpleTypeName)
-				throws JSONException
+			private void writeGhostToJSON(String parentKey, JSONWriter jsonWriter, String text, String uuid, int indexForPositioning, String simpleTypeName,
+				boolean inherited) throws JSONException
 			{
 				jsonWriter.object();
 				jsonWriter.key("uuid").value(uuid);
 				jsonWriter.key("type").value(GHOST_TYPE_CONFIGURATION);
 				jsonWriter.key("propertyType").value(simpleTypeName);
 				jsonWriter.key("text").value(text);
+				writer.key("class").value(inherited ? "inherited_element" : "");
 				jsonWriter.key("location");
 				{
 					jsonWriter.object();
@@ -382,6 +388,8 @@ public class GhostHandler implements IServerService
 						writer.key("ghosts");
 						{
 							writer.array();
+							TabPanel super_tabPanel = (TabPanel)PersistHelper.getSuperPersist(panel);
+							boolean inherited = Utils.isInheritedFormElement(panel, editorPart.getForm()) && super_tabPanel == null;
 							Iterator<IPersist> tabIterator = panel.getTabs();
 							int i = 0;
 							while (tabIterator.hasNext())
@@ -394,6 +402,8 @@ public class GhostHandler implements IServerService
 								writer.key("type").value(GHOST_TYPE_CONFIGURATION);
 								String text = tab.getText();
 								writer.key("text").value(text != null && text.trim().length() > 0 ? text : "tabs[" + i + "]");
+								writer.key("class").value(
+									inherited || super_tabPanel != null && super_tabPanel.getChild(tab.getUUID()) != null ? "inherited_element" : "");
 								writer.key("location");
 								writer.object();
 								writer.key("x").value(x);
@@ -453,11 +463,12 @@ public class GhostHandler implements IServerService
 								if (next instanceof BaseComponent) persists.add((BaseComponent)next);
 							}
 
+							Portal super_portal = (Portal)PersistHelper.getSuperPersist(portal);
+							boolean inherited = Utils.isInheritedFormElement(portal, editorPart.getForm()) && super_portal == null;
 							for (int i = 0; i < persists.size(); i++)
 							{
 								writer.object();
 								{
-
 									BaseComponent baseComponent = persists.get(i);
 									int x = baseComponent.getLocation().x;
 									int y = baseComponent.getLocation().y;
@@ -465,7 +476,8 @@ public class GhostHandler implements IServerService
 									writer.key("type").value(GHOST_TYPE_COMPONENT);
 									Object label = getGhostLabel(baseComponent, "col" + i);
 									writer.key("text").value(label);
-
+									writer.key("class").value(
+										inherited || super_portal != null && super_portal.getChild(baseComponent.getUUID()) != null ? "inherited_element" : "");
 									writer.key("location");
 									writer.object();
 									{
