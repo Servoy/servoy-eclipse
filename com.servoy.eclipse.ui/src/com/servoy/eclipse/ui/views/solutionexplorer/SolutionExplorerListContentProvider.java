@@ -1316,11 +1316,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 
 				Image icon = getImageForMethodEncapsulation(sm);
-
-				String sampleCode = getScriptMethodSignature(sm, null, true, false, false, false);
-				String tooltipCode = "<html><body><b>" + HtmlUtils.escapeMarkup(getScriptMethodSignature(sm, null, true, true, true, false)) +
-					"</b><body></html>";
-				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, sampleCode, "//Method call\n%%prefix%%" + sampleCode, tooltipCode, sm, icon));
+				dlm.add(new UserNode(nodeText, UserNodeType.FORM_METHOD, new ScriptMethodFeedback(sm), sm, icon));
 			}
 		}
 		catch (Exception e)
@@ -1418,10 +1414,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				nodeName = getScriptMethodSignature(sm, ((ISupportName)persist).getName(), false, true, true, true) + " [" + persistSolution.getName() + ']';
 			}
-			String sampleCode = getScriptMethodSignature(sm, sm.getPrefixedName(), true, false, false, false);
-			String tooltipCode = "<html><body><b>" + HtmlUtils.escapeMarkup(getScriptMethodSignature(sm, null, true, true, true, false)) + "</b><body></html>";
 
-			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM, sampleCode, tooltipCode, sm, getImageForMethodEncapsulation(sm));
+			SimpleUserNode node = new UserNode(nodeName, UserNodeType.GLOBAL_METHOD_ITEM, new ScriptMethodFeedback(sm), sm, getImageForMethodEncapsulation(sm));
 			dlm.add(node);
 		}
 		return dlm.toArray();
@@ -1665,7 +1659,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		if (comment == null) return null;
 		String c = comment.replaceAll("/\\*\\*|\\*/", "");
-		c = c.replaceAll("(\\s*)\\*", "$1").trim();
+		c = c.replaceAll("\\n(\\s*)\\*", "\n").trim();
 		if (!toHTML)
 		{
 			String separator = System.getProperty("line.separator");
@@ -2592,6 +2586,106 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 			}
 			return paramTypes.substring(0, paramTypes.length() - 2);
+		}
+	}
+
+	private static class ScriptMethodFeedback extends MethodFeedback
+	{
+		private enum PARAM
+		{
+			NAME, TYPE
+		}
+
+		ScriptMethodFeedback(final ScriptMethod sm)
+		{
+			super(sm.getName(), getParameters(sm, PARAM.TYPE), getPrefix(sm), null, new IScriptObject()
+			{
+				@Override
+				public Class< ? >[] getAllReturnedTypes()
+				{
+					return null;
+				}
+
+				@Override
+				public String getSample(String methodName)
+				{
+					String comment = getParsedComment(sm.getRuntimeProperty(IScriptProvider.COMMENT), null, false);
+					if (comment != null)
+					{
+						String example = comment.split("@example")[1].trim();
+						if (example.startsWith("<pre>"))
+						{
+							int preEndIdx = example.indexOf("</pre>");
+							example = example.substring("<pre>".length(), preEndIdx != -1 ? preEndIdx : example.length());
+						}
+						else
+						{
+							example = example.split("@")[0];
+						}
+						example = example.replaceAll("&#47;", "/");
+						example = example.replaceAll("<br>|<br/>", "\n");
+						example = example.replaceAll("\\<.*?\\>", "");
+						return example;
+					}
+					return null;
+				}
+
+				@Override
+				public String getToolTip(String methodName)
+				{
+					return getParsedComment(sm.getRuntimeProperty(IScriptProvider.COMMENT), null, false);
+				}
+
+				@Override
+				public String[] getParameterNames(String methodName)
+				{
+					return getParameters(sm, PARAM.NAME);
+				}
+
+				@Override
+				public boolean isDeprecated(String methodName)
+				{
+					return sm.isDeprecated();
+				}
+
+			}, null, getReturnTypeString(sm));
+		}
+
+		private static String[] getParameters(ScriptMethod sm, PARAM p)
+		{
+			MethodArgument[] args = sm.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+			String[] parameters = new String[args.length];
+			for (int i = 0; i < args.length; i++)
+			{
+				parameters[i] = p == PARAM.NAME ? args[i].getName() : args[i].getType().getName();
+			}
+			return parameters;
+		}
+
+		private static String getReturnTypeString(ScriptMethod sm)
+		{
+			MethodArgument returnTypeArgument = sm.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
+			String returnTypeString = "void";
+			if (returnTypeArgument != null)
+			{
+				if ("*".equals(returnTypeArgument.getType().getName())) returnTypeString = "Any";
+				else returnTypeString = returnTypeArgument.getType().getName();
+			}
+			return returnTypeString;
+		}
+
+		private static String getPrefix(ScriptMethod sm)
+		{
+			String prefixedName = sm.getPrefixedName();
+			int lastIdxOfName = prefixedName.lastIndexOf(sm.getName());
+			if (lastIdxOfName != -1)
+			{
+				return prefixedName.substring(0, lastIdxOfName);
+			}
+			else
+			{
+				return "";
+			}
 		}
 	}
 
