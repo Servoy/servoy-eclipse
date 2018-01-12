@@ -258,6 +258,8 @@ public class ServoyModel extends AbstractServoyModel
 		fireRealPersistchangesJob = createFireRealPersistchangesJob();
 		realOutstandingChanges = new ArrayList<IPersist>();
 
+		activeProjectListeners.add(new ActiveSolutionHandler());
+
 		startAppServer();
 
 		// the in-process repository is only meant to work by itself - so all servoy related projects in the workspace should
@@ -1656,6 +1658,10 @@ public class ServoyModel extends AbstractServoyModel
 						if (!lst.contains(new Path(SolutionSerializer.MEDIAS_DIR + "/")))
 						{
 							lst.add(new Path(SolutionSerializer.MEDIAS_DIR + "/"));
+						}
+						if (!lst.contains(new Path(ResourcesUtils.NODE_DIR + "/")))
+						{
+							lst.add(new Path(ResourcesUtils.NODE_DIR + "/"));
 						}
 						buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath(), lst.toArray(new IPath[lst.size()])));
 						added = true;

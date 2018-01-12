@@ -28,7 +28,7 @@ import org.eclipse.dltk.core.IScriptProjectFilenames;
 
 /**
  * Utility class for eclipse IResource operations.
- * 
+ *
  * @author acostescu
  */
 public class ResourcesUtils
@@ -36,10 +36,11 @@ public class ResourcesUtils
 
 	public static String BUILDPATH_FILE = IScriptProjectFilenames.BUILDPATH_FILENAME;
 	public static String STP_DIR = ".stp";
+	public static String NODE_DIR = ".node";
 
 	/**
 	 * Creates the given file, and it's parent containers (if they do not already exist).
-	 * 
+	 *
 	 * @param file the file to be created.
 	 * @param source the content used to fill up the file.
 	 * @param force see {@link IFile#create(InputStream, boolean, org.eclipse.core.runtime.IProgressMonitor)}.

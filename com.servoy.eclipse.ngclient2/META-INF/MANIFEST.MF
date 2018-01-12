@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy NGClient 2 plugin
+Bundle-SymbolicName: com.servoy.eclipse.ngclient.ui;singleton:=true
+Bundle-Version: 8.3.0.3200_b1
+Bundle-Vendor: Servoy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.osgi,
+ servoy_shared,
+ com.servoy.eclipse.model,
+ com.servoy.eclipse.core,
+ org.tukaani.xz
+Bundle-Activator: com.servoy.eclipse.ngclient.ui.Activator

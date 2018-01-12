@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.servoy.eclipse.ngclient.ui.nodejs">
+      <nodejs
+            id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
+            name="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
+            path="node-v8.9.4-darwin-x64/bin/npm"
+            zip="node-v8.9.4-darwin-x64.tar.gz">
+      </nodejs>
+   </extension>
+
+</plugin>
