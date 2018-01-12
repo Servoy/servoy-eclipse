@@ -50,6 +50,7 @@ import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -260,7 +261,8 @@ public class VisualFormEditorSecurityPage extends Composite
 	private void setElements()
 	{
 		List<IPersist> formElements = new ArrayList<IPersist>();
-		Iterator<IPersist> it = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getAllObjects();
+		Iterator< ? extends IPersist> it = editor.getForm().isResponsiveLayout() ? editor.getForm().getFlattenedObjects(NameComparator.INSTANCE).iterator()
+			: ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist elem = it.next();
