@@ -2612,20 +2612,24 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					String comment = getParsedComment(sm.getRuntimeProperty(IScriptProvider.COMMENT), null, false);
 					if (comment != null)
 					{
-						String example = comment.split("@example")[1].trim();
-						if (example.startsWith("<pre>"))
+						String[] commentSplitByExample = comment.split("@example");
+						if (commentSplitByExample.length > 1)
 						{
-							int preEndIdx = example.indexOf("</pre>");
-							example = example.substring("<pre>".length(), preEndIdx != -1 ? preEndIdx : example.length());
+							String example = commentSplitByExample[1].trim();
+							if (example.startsWith("<pre>"))
+							{
+								int preEndIdx = example.indexOf("</pre>");
+								example = example.substring("<pre>".length(), preEndIdx != -1 ? preEndIdx : example.length());
+							}
+							else
+							{
+								example = example.split("@")[0];
+							}
+							example = example.replaceAll("&#47;", "/");
+							example = example.replaceAll("<br>|<br/>", "\n");
+							example = example.replaceAll("\\<.*?\\>", "");
+							return example;
 						}
-						else
-						{
-							example = example.split("@")[0];
-						}
-						example = example.replaceAll("&#47;", "/");
-						example = example.replaceAll("<br>|<br/>", "\n");
-						example = example.replaceAll("\\<.*?\\>", "");
-						return example;
 					}
 					return null;
 				}
