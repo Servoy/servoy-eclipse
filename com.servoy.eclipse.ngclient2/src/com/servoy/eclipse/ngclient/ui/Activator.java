@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.BundleContext;
 
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
@@ -29,6 +30,7 @@ public class Activator extends Plugin
 
 	private File npmPath;
 	private Job extractingNode;
+	private ServoyProject activeProject;
 
 	public static Activator getInstance()
 	{
@@ -138,5 +140,21 @@ public class Activator extends Plugin
 	@Override
 	public void stop(BundleContext context) throws Exception
 	{
+	}
+
+	/**
+	 * @param activeProject
+	 */
+	public void setActiveProject(ServoyProject activeProject)
+	{
+		this.activeProject = activeProject;
+	}
+
+	/**
+	 * @return the activeProject
+	 */
+	public ServoyProject getActiveProject()
+	{
+		return activeProject;
 	}
 }

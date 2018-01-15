@@ -31,7 +31,7 @@ public class ActiveProjectListener implements IActiveProjectListener
 	{
 		if (SolutionMetaData.isServoyNGSolution(activeProject.getSolution()))
 		{
-			System.err.println(activeProject + " is changed");
+			Activator.getInstance().setActiveProject(activeProject);
 			WorkspaceJob job = new WorkspaceJob("creating node folder in main active ngclient solution")
 			{
 				@Override
