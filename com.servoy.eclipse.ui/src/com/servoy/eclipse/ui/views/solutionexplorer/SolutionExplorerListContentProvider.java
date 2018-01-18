@@ -142,6 +142,7 @@ import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Procedure;
+import com.servoy.j2db.persistence.ProcedureColumn;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -1140,8 +1141,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 			for (Procedure procedure : procedures)
 			{
-				UserNode node = new UserNode(procedure.getName(), type, new ProcedureFeedback(procedure), procedure,
-					uiActivator.loadImageFromBundle("function.png"));
+				ProcedureFeedback procedureFeedback = new ProcedureFeedback(procedure, s.getName());
+				UserNode node = new UserNode(procedureFeedback.getCall(), type, procedureFeedback, procedure, uiActivator.loadImageFromBundle("function.png"));
 				node.setClientSupport(ClientSupport.All);
 				dlm.add(node);
 			}
@@ -2375,25 +2376,44 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private static class ProcedureFeedback implements IDeveloperFeedback
 	{
 		private final Procedure procedure;
+		private final String serverName;
 
-		public ProcedureFeedback(Procedure procedure)
+		public ProcedureFeedback(Procedure procedure, String serverName)
 		{
 			this.procedure = procedure;
+			this.serverName = serverName;
+		}
+
+		public String getCall()
+		{
+			StringBuilder sb = new StringBuilder(procedure.getName());
+			sb.append('(');
+			List<ProcedureColumn> parameters = procedure.getParameters();
+			for (int i = 0; i < parameters.size(); i++)
+			{
+				if (i > 0)
+				{
+					sb.append(", ");
+				}
+				sb.append(parameters.get(i).getName());
+			}
+			sb.append(')');
+			return sb.toString();
 		}
 
 		public String getSample()
 		{
-			return procedure.getName() + " *** add args";
+			return getCall();
 		}
 
 		public String getCode()
 		{
-			return procedure.getName() + " *** add args";
+			return "datasources.sp." + serverName + '.' + getCall() + ';';
 		}
 
 		public String getToolTipText()
 		{
-			return "<pre>Table with datasource: '<b>" + getCode() + "\'</b><pre";
+			return "<pre>Procedure with signature: '<b>" + getCode() + "\'</b><pre";
 		}
 	}
 
