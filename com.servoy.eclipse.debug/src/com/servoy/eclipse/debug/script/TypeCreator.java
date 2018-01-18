@@ -175,6 +175,7 @@ import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.Procedure;
+import com.servoy.j2db.persistence.ProcedureColumn;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -3356,11 +3357,46 @@ public class TypeCreator extends TypeCache
 					Collection<Procedure> procedures = server.getProcedures();
 					for (Procedure proc : procedures)
 					{
-						Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-						property.setName(proc.getName());
-						property.setVisible(true);
-						property.setType(getTypeRef(context, ITypeNames.FUNCTION));
-						members.add(property);
+						Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+						method.setName(proc.getName());
+						method.setVisible(true);
+						method.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("function.png"));
+						if (proc.getColumns().size() > 0)
+						{
+							// for now set the JSDataSet as a return value if it has columns.
+							method.setType(getTypeRef(context, "JSDataSet"));
+						}
+						List<ProcedureColumn> parameters = proc.getParameters();
+						EList<Parameter> procParams = method.getParameters();
+						for (ProcedureColumn pc : parameters)
+						{
+							Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+							param.setName(pc.getName());
+							int paramType = Column.mapToDefaultType(pc.getColumnType().getSqlType());
+							switch (paramType)
+							{
+								case IColumnTypes.DATETIME :
+									param.setType(getTypeRef(context, "Date"));
+									break;
+
+								case IColumnTypes.INTEGER :
+								case IColumnTypes.NUMBER :
+									param.setType(getTypeRef(context, "Number"));
+									break;
+
+								case IColumnTypes.TEXT :
+									param.setType(getTypeRef(context, "String"));
+									break;
+
+								case IColumnTypes.MEDIA :
+									// Just return the Any type, because a media can hold anything.
+									// should be in sync with TypeCreater.getDataProviderType
+									param.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
+									break;
+							}
+							procParams.add(param);
+						}
+						members.add(method);
 					}
 				}
 				catch (RepositoryException | RemoteException e)
