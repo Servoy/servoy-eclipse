@@ -139,6 +139,8 @@ import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
+import com.servoy.j2db.dataprocessing.datasource.SPDataSource;
+import com.servoy.j2db.dataprocessing.datasource.SPDataSourceServer;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
@@ -172,6 +174,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
+import com.servoy.j2db.persistence.Procedure;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -465,8 +468,10 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
-		addScopeType(DBDataSource.class.getSimpleName(), new DBDataSourceCreator());
+		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class));
+		addScopeType(DBDataSource.class.getSimpleName(), new DBDataSourceCreator(DBDataSourceServer.class));
 		addScopeType(DBDataSourceServer.class.getSimpleName(), new DBDataSourceServerCreator());
+		addScopeType(SPDataSourceServer.class.getSimpleName(), new SPDataSourceServerCreator());
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 	}
@@ -3248,12 +3253,19 @@ public class TypeCreator extends TypeCache
 
 	private class DBDataSourceCreator implements IScopeTypeCreator
 	{
+		private final Class< ? > serverClass;
+
+		public DBDataSourceCreator(Class< ? > serverClass)
+		{
+			this.serverClass = serverClass;
+		}
+
 		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
-			type.setSuperType(createArrayLookupType(context, DBDataSourceServer.class));
+			type.setSuperType(createArrayLookupType(context, serverClass));
 
 			IServerManagerInternal servermanager = ServoyModel.getServerManager();
 			for (String serverName : servermanager.getServerNames(false, false, true, true))
@@ -3265,8 +3277,7 @@ public class TypeCreator extends TypeCache
 					property.setName(serverName);
 					property.setAttribute(RESOURCE, server.getConfig());
 					property.setVisible(true);
-					property.setType(
-						getTypeRef(context, DBDataSourceServer.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
+					property.setType(getTypeRef(context, serverClass.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
 					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("server.png"));
 					property.setDescription("Server");
 					type.getMembers().add(property);
@@ -3308,6 +3319,54 @@ public class TypeCreator extends TypeCache
 				property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
 				property.setDescription(Table.getTableTypeAsString(table.getTableType()));
 				members.add(property);
+			}
+
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	private class SPDataSourceServerCreator implements IScopeTypeCreator
+	{
+		public Type createType(String context, String fullTypeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+
+			int configStart = fullTypeName.indexOf('<');
+			if (configStart != -1)
+			{
+				EList<Member> members = type.getMembers();
+				String config = fullTypeName.substring(configStart + 1, fullTypeName.length() - 1);
+				String serverName = DataSourceUtils.getDataSourceServerName(config);
+				IServerManagerInternal servermanager = ServoyModel.getServerManager();
+				IServer server = servermanager.getServer(serverName);
+				try
+				{
+					Collection<Procedure> procedures = server.getProcedures();
+					for (Procedure proc : procedures)
+					{
+						Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+						property.setName(proc.getName());
+						property.setVisible(true);
+						property.setType(getTypeRef(context, ITypeNames.FUNCTION));
+						members.add(property);
+					}
+				}
+				catch (RepositoryException | RemoteException e)
+				{
+					e.printStackTrace();
+				}
 			}
 
 			return type;
