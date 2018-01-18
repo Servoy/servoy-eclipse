@@ -24,6 +24,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +42,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.json.JSONObject;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -61,6 +64,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.Procedure;
 import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
@@ -712,6 +716,12 @@ public class MemServer implements IServerInternal, IServer
 	}
 
 
+	@Override
+	public Collection<Procedure> getProcedures() throws RepositoryException, RemoteException
+	{
+		return Collections.emptySet();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -773,7 +783,7 @@ public class MemServer implements IServerInternal, IServer
 		{
 			Column c = it.next();
 			table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
-				(c.getFlags() & Column.PK_COLUMN) != 0);
+				(c.getFlags() & IBaseColumn.PK_COLUMN) != 0);
 		}
 		updateAllColumnInfo(table);
 		return table;
