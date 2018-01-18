@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -132,6 +133,7 @@ import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
@@ -139,6 +141,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
+import com.servoy.j2db.persistence.Procedure;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -438,7 +441,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
-				lm = createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE);
+				SimpleUserNode[] lmtables = createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE);
+				SimpleUserNode[] lmprocedures = createProcedures((IServerInternal)un.getRealObject(), UserNodeType.PROCEDURE);
+				lm = Utils.arrayJoin(lmtables, lmprocedures);
 			}
 			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
@@ -1121,6 +1126,29 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				ServoyLog.logError("error creating tables nodes for server: " + s, e);
 			}
+		}
+		return dlm.toArray(new SimpleUserNode[dlm.size()]);
+	}
+
+	public static SimpleUserNode[] createProcedures(IServerInternal s, UserNodeType type)
+	{
+		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
+		try
+		{
+			List<Procedure> procedures = new ArrayList<>(((IServer)s).getProcedures());
+			//Collections.sort(procedures);
+
+			for (Procedure procedure : procedures)
+			{
+				UserNode node = new UserNode(procedure.getName(), type, new ProcedureFeedback(procedure), procedure,
+					uiActivator.loadImageFromBundle("function.png"));
+				node.setClientSupport(ClientSupport.All);
+				dlm.add(node);
+			}
+		}
+		catch (RemoteException | RepositoryException e)
+		{
+			ServoyLog.logError("error creating tables nodes for server: " + s, e);
 		}
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
 	}
@@ -2343,6 +2371,30 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return "<pre>Table with datasource: '<b>" + getCode() + "\'</b><pre";
 		}
 
+	}
+	private static class ProcedureFeedback implements IDeveloperFeedback
+	{
+		private final Procedure procedure;
+
+		public ProcedureFeedback(Procedure procedure)
+		{
+			this.procedure = procedure;
+		}
+
+		public String getSample()
+		{
+			return procedure.getName() + " *** add args";
+		}
+
+		public String getCode()
+		{
+			return procedure.getName() + " *** add args";
+		}
+
+		public String getToolTipText()
+		{
+			return "<pre>Table with datasource: '<b>" + getCode() + "\'</b><pre";
+		}
 	}
 
 
