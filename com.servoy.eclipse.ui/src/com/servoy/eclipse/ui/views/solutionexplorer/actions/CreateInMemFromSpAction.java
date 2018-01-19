@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +30,15 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.OptionDialog;
@@ -52,6 +62,79 @@ import com.servoy.j2db.query.ColumnType;
  */
 public class CreateInMemFromSpAction extends Action implements ISelectionChangedListener
 {
+	/**
+	 * @author jcomp
+	 *
+	 */
+	private final class OptionWithTextFields extends OptionDialog
+	{
+		private final String[] inputValues;
+		private final Map<String, Text> fields = new HashMap<>();
+		private final Map<String, String> values = new HashMap<>();
+
+		/**
+		 * @param parentShell
+		 * @param dialogTitle
+		 * @param dialogTitleImage
+		 * @param dialogMessage
+		 * @param dialogImageType
+		 * @param dialogButtonLabels
+		 * @param defaultIndex
+		 * @param options
+		 * @param defaultOptionsIndex
+		 */
+		private OptionWithTextFields(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType,
+			String[] dialogButtonLabels, int defaultIndex, String[] options, int defaultOptionsIndex, String[] inputValues)
+		{
+			super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, defaultIndex, options, defaultOptionsIndex);
+			this.inputValues = inputValues;
+		}
+
+		@Override
+		protected Control createCustomArea(Composite parent)
+		{
+			super.createCustomArea(parent);
+			Composite comp = new Composite(parent, SWT.NONE);
+			GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+			comp.setLayoutData(gridData);
+			comp.setLayout(new GridLayout(2, false));
+			for (int index = 0; index < inputValues.length; index++)
+			{
+				Label lbl = new Label(comp, SWT.NONE);
+				if (inputValues.length == 1)
+				{
+					lbl.setText("Tablename: ");
+				}
+				else
+				{
+					lbl.setText("Tablename " + (index + 1) + ":");
+				}
+				Text text = new Text(comp, SWT.SINGLE | SWT.BORDER);
+				gridData = new GridData(GridData.FILL_HORIZONTAL);
+				text.setLayoutData(gridData);
+				String label = inputValues[index];
+				text.setText(label);
+				fields.put(label, text);
+			}
+			return comp;
+		}
+
+		public String getInputText(String inputValue)
+		{
+			return values.get(inputValue);
+		}
+
+		@Override
+		public boolean close()
+		{
+			for (Entry<String, Text> entry : fields.entrySet())
+			{
+				values.put(entry.getKey(), entry.getValue().getText());
+			}
+			return super.close();
+		}
+	}
+
 	private final SolutionExplorerView viewer;
 
 	public CreateInMemFromSpAction(SolutionExplorerView sev)
@@ -90,8 +173,21 @@ public class CreateInMemFromSpAction extends Action implements ISelectionChanged
 
 			Collections.sort(modules);
 			String[] moduleNames = modules.toArray(new String[] { });
-			final OptionDialog optionDialog = new OptionDialog(viewer.getSite().getShell(), "Create in mem table(s) for procedure " + proc.getName(), null,
-				"Select destination solution for the in mem table", MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0, moduleNames, 0);
+
+			Map<String, List<ProcedureColumn>> columns = proc.getColumns();
+			String[] labels = null;
+			if (columns.size() == 1)
+			{
+				labels = new String[] { proc.getName() };
+			}
+			else
+			{
+				labels = columns.keySet().toArray(new String[] { });
+			}
+
+			final OptionWithTextFields optionDialog = new OptionWithTextFields(viewer.getSite().getShell(),
+				"Create in mem table(s) for procedure " + proc.getName(), null, "Select destination solution for the in mem table", MessageDialog.INFORMATION,
+				new String[] { "OK", "Cancel" }, 0, moduleNames, 0, labels);
 			int retval = optionDialog.open();
 			String selectedProject = null;
 			if (retval == Window.OK)
@@ -100,7 +196,6 @@ public class CreateInMemFromSpAction extends Action implements ISelectionChanged
 			}
 			if (selectedProject != null)
 			{
-				Map<String, List<ProcedureColumn>> columns = proc.getColumns();
 				for (Entry<String, List<ProcedureColumn>> entry : columns.entrySet())
 				{
 					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedProject);
@@ -108,17 +203,27 @@ public class CreateInMemFromSpAction extends Action implements ISelectionChanged
 
 					String name = entry.getKey();
 					// if there is only 1 then don't follow the special proc columns divider.
-					if (columns.size() == 1) name = proc.getName();
+					if (columns.size() == 1) name = optionDialog.getInputText(proc.getName());
+					else name = optionDialog.getInputText(name);
+
 					IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 
 					try
 					{
+						if (memServer.hasTable(name))
+						{
+							// TODO ask the question what should happen, cancel, overwrite, merge
+						}
 						ITable table = memServer.createNewTable(validator, name);
 						List<ProcedureColumn> procColumns = entry.getValue();
 						for (ProcedureColumn procColumn : procColumns)
 						{
-							ColumnType columnType = procColumn.getColumnType();
-							table.createNewColumn(validator, procColumn.getName(), columnType.getSqlType(), columnType.getLength(), columnType.getScale());
+							// for now merge new columns in.
+							if (table.getColumn(procColumn.getName()) == null)
+							{
+								ColumnType columnType = procColumn.getColumnType();
+								table.createNewColumn(validator, procColumn.getName(), columnType.getSqlType(), columnType.getLength(), columnType.getScale());
+							}
 
 						}
 						EditorUtil.openTableEditor(table);
