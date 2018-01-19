@@ -410,6 +410,8 @@ public class SolutionExplorerView extends ViewPart
 	private SynchronizeTableDataAction synchronizeTableDataAction;
 	private SynchronizeTableDataAction synchronizeTableDataTreeAction;
 
+	private CreateInMemFromSpAction createInMemFromSPAction;
+
 	private LoadRelationsAction loadRelationsAction;
 
 	private ToggleFormCommandsAction toggleFormCommandsActions;
@@ -2658,6 +2660,7 @@ public class SolutionExplorerView extends ViewPart
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		if (searchListAction.isEnabled()) manager.add(searchListAction);
+		if (createInMemFromSPAction.isEnabled()) manager.add(createInMemFromSPAction);
 
 		manager.add(new Separator());
 		if (newActionInListPrimary.isEnabled()) manager.add(newActionInListPrimary);
@@ -3206,10 +3209,12 @@ public class SolutionExplorerView extends ViewPart
 
 		setActive = new ActivateSolutionAction();
 
+		createInMemFromSPAction = new CreateInMemFromSpAction(this);
+
 		// let the actions decide when they are enabled or disabled
 		addListSelectionChangedListener(moveCode);
-		addListSelectionChangedListener(moveCode);
 		addListSelectionChangedListener(moveSample);
+		addListSelectionChangedListener(createInMemFromSPAction);
 		addListSelectionChangedListener(deleteActionInList);
 		addListSelectionChangedListener(openAction);
 		addListSelectionChangedListener(editVariableAction);
