@@ -1901,7 +1901,16 @@ public class SolutionExplorerTreeContentProvider
 		else
 		{
 			IServerInternal server = (IServerInternal)serverNode.getRealObject();
-			serverNode.children = SolutionExplorerListContentProvider.createTables(server, type);
+			PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES, null,
+				"This node list the stored procedures of server that have this property enabled (see server editor)", server,
+				uiActivator.loadImageFromBundle("function.png"));
+			storedProceduresDataSources.parent = serverNode;
+
+			ArrayList<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
+			list.add(storedProceduresDataSources);
+			serverNode.children = SolutionExplorerListContentProvider.createTables(server, type, list);
+
+
 		}
 
 
@@ -2247,6 +2256,7 @@ public class SolutionExplorerTreeContentProvider
 			PlatformSimpleUserNode solutionDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionDataSources, UserNodeType.SOLUTION_DATASOURCES,
 				solution, IconProvider.instance().image(JSDataSources.class));
 			solutionDataSources.parent = projectNode;
+
 
 			PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
 				servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));

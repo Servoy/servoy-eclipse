@@ -440,11 +440,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createTableColumns((ITable)un.getRealObject(), un);
 			}
+			else if (type == UserNodeType.PROCEDURES)
+			{
+				lm = createProcedures((IServerInternal)un.getRealObject(), UserNodeType.PROCEDURE);
+			}
 			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
-				SimpleUserNode[] lmtables = createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE);
-				SimpleUserNode[] lmprocedures = createProcedures((IServerInternal)un.getRealObject(), UserNodeType.PROCEDURE);
-				lm = Utils.arrayJoin(lmtables, lmprocedures);
+				lm = createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE);
 			}
 			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
@@ -1080,12 +1082,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static SimpleUserNode[] createTables(IServerInternal s, UserNodeType type)
 	{
-		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
+		return createTables(s, type, new ArrayList<SimpleUserNode>());
+	}
+
+	public static SimpleUserNode[] createTables(IServerInternal s, UserNodeType type, List<SimpleUserNode> dlm)
+	{
 		if (s.isValid() && s.getConfig().isEnabled())
 		{
 			try
 			{
-				com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 				List<String> tableNames = s.getTableNames(true);
 				Collections.sort(tableNames);
 
