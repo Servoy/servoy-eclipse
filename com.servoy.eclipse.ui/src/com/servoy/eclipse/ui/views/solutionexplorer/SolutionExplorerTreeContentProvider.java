@@ -1970,8 +1970,17 @@ public class SolutionExplorerTreeContentProvider
 			{
 				if (node.children == null || node.children.length == 0)
 				{
+					PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES,
+						null, "This node list the stored procedures of server that have this property enabled (see server editor)", serverObj,
+						uiActivator.loadImageFromBundle("function.png"));
+					storedProceduresDataSources.parent = node;
+
 					PlatformSimpleUserNode viewNode = new PlatformSimpleUserNode("Views", UserNodeType.VIEWS, "", "Views", serverObj,
 						PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
+					ArrayList<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+					nodes.add(storedProceduresDataSources);
+					nodes.add(viewNode);
+					SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
 					node.children = new PlatformSimpleUserNode[] { viewNode };
 					viewNode.parent = node;
 				}
