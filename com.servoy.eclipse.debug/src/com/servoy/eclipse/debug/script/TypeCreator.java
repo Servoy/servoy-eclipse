@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -3364,10 +3365,26 @@ public class TypeCreator extends TypeCache
 							method.setName(proc.getName());
 							method.setVisible(true);
 							method.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("function.png"));
-							if (proc.getColumns().size() > 0)
+							LinkedHashMap<String, List<ProcedureColumn>> columns = proc.getColumns();
+							if (columns.size() == 1)
 							{
 								// for now set the JSDataSet as a return value if it has columns.
 								method.setType(getTypeRef(context, "JSDataSet"));
+							}
+							else if (columns.size() > 1)
+							{
+								Type procType = TypeInfoModelFactory.eINSTANCE.createType();
+								procType.setName("Procedure");
+								procType.setSuperType(getType(context, "Array"));
+								EList<Member> procMembers = procType.getMembers();
+								for (String resultsetName : columns.keySet())
+								{
+									Property prop = TypeInfoModelFactory.eINSTANCE.createProperty();
+									prop.setName(resultsetName);
+									prop.setType(getTypeRef(context, "JSDataSet"));
+									procMembers.add(prop);
+								}
+								method.setType(TypeUtil.ref(procType));
 							}
 							List<ProcedureColumn> parameters = proc.getParameters();
 							EList<Parameter> procParams = method.getParameters();
