@@ -20,6 +20,7 @@ package com.servoy.eclipse.debug.script;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.rmi.RemoteException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -3352,56 +3353,67 @@ public class TypeCreator extends TypeCache
 				String serverName = DataSourceUtils.getDataSourceServerName(config);
 				IServerManagerInternal servermanager = ServoyModel.getServerManager();
 				IServer server = servermanager.getServer(serverName);
-				try
+				if (server != null)
 				{
-					Collection<Procedure> procedures = server.getProcedures();
-					for (Procedure proc : procedures)
+					try
 					{
-						Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
-						method.setName(proc.getName());
-						method.setVisible(true);
-						method.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("function.png"));
-						if (proc.getColumns().size() > 0)
+						Collection<Procedure> procedures = server.getProcedures();
+						for (Procedure proc : procedures)
 						{
-							// for now set the JSDataSet as a return value if it has columns.
-							method.setType(getTypeRef(context, "JSDataSet"));
-						}
-						List<ProcedureColumn> parameters = proc.getParameters();
-						EList<Parameter> procParams = method.getParameters();
-						for (ProcedureColumn pc : parameters)
-						{
-							Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-							param.setName(pc.getName());
-							int paramType = Column.mapToDefaultType(pc.getColumnType().getSqlType());
-							switch (paramType)
+							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+							method.setName(proc.getName());
+							method.setVisible(true);
+							method.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("function.png"));
+							if (proc.getColumns().size() > 0)
 							{
-								case IColumnTypes.DATETIME :
-									param.setType(getTypeRef(context, "Date"));
-									break;
-
-								case IColumnTypes.INTEGER :
-								case IColumnTypes.NUMBER :
-									param.setType(getTypeRef(context, "Number"));
-									break;
-
-								case IColumnTypes.TEXT :
-									param.setType(getTypeRef(context, "String"));
-									break;
-
-								case IColumnTypes.MEDIA :
-									// Just return the Any type, because a media can hold anything.
-									// should be in sync with TypeCreater.getDataProviderType
-									param.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
-									break;
+								// for now set the JSDataSet as a return value if it has columns.
+								method.setType(getTypeRef(context, "JSDataSet"));
 							}
-							procParams.add(param);
+							List<ProcedureColumn> parameters = proc.getParameters();
+							EList<Parameter> procParams = method.getParameters();
+							for (ProcedureColumn pc : parameters)
+							{
+								Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+								param.setName(pc.getName());
+								int sqlType = pc.getColumnType().getSqlType();
+								if (sqlType == Types.BOOLEAN || sqlType == Types.BIT)
+								{
+									param.setType(getTypeRef(context, "Boolean"));
+								}
+								else
+								{
+									int paramType = Column.mapToDefaultType(sqlType);
+									switch (paramType)
+									{
+										case IColumnTypes.DATETIME :
+											param.setType(getTypeRef(context, "Date"));
+											break;
+
+										case IColumnTypes.INTEGER :
+										case IColumnTypes.NUMBER :
+											param.setType(getTypeRef(context, "Number"));
+											break;
+
+										case IColumnTypes.TEXT :
+											param.setType(getTypeRef(context, "String"));
+											break;
+
+										case IColumnTypes.MEDIA :
+											// Just return the Any type, because a media can hold anything.
+											// should be in sync with TypeCreater.getDataProviderType
+											param.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
+											break;
+									}
+								}
+								procParams.add(param);
+							}
+							members.add(method);
 						}
-						members.add(method);
 					}
-				}
-				catch (RepositoryException | RemoteException e)
-				{
-					e.printStackTrace();
+					catch (RepositoryException | RemoteException e)
+					{
+						Debug.error(e);
+					}
 				}
 			}
 
