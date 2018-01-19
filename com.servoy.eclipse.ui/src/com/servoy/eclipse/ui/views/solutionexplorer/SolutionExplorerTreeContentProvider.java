@@ -1980,8 +1980,7 @@ public class SolutionExplorerTreeContentProvider
 					ArrayList<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
 					nodes.add(storedProceduresDataSources);
 					nodes.add(viewNode);
-					SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
-					node.children = new PlatformSimpleUserNode[] { viewNode };
+					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
 					viewNode.parent = node;
 				}
 			}
