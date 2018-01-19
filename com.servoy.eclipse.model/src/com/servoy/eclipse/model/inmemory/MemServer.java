@@ -113,26 +113,35 @@ public class MemServer implements IServerInternal, IServer
 		while (tableNodes.hasNext())
 		{
 			TableNode tableNode = (TableNode)tableNodes.next();
-			Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
-			if (property != null)
+			loadTable(tableNode);
+		}
+	}
+
+	/**
+	 * @param tableNode
+	 * @param property
+	 */
+	private void loadTable(TableNode tableNode)
+	{
+		Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
+		if (property != null)
+		{
+			try
 			{
-				try
+				ITable table = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
+				DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table, (ServoyJSONObject)property);
+				table.setExistInDB(true);
+				table.setInitialized(true);
+				tableNode.setTable(table);
+				IPersist editingTableNode = servoyProject.getEditingPersist(tableNode.getUUID());
+				if (editingTableNode != null)
 				{
-					ITable table = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
-					DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table, (ServoyJSONObject)property);
-					table.setExistInDB(true);
-					table.setInitialized(true);
-					tableNode.setTable(table);
-					IPersist editingTableNode = servoyProject.getEditingPersist(tableNode.getUUID());
-					if (editingTableNode != null)
-					{
-						((TableNode)editingTableNode).setTable(table);
-					}
+					((TableNode)editingTableNode).setTable(table);
 				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
 			}
 		}
 	}
@@ -546,16 +555,18 @@ public class MemServer implements IServerInternal, IServer
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#refreshTable(java.lang.String)
-	 */
 	@Override
 	public void refreshTable(String name) throws RepositoryException
 	{
-		// TODO Auto-generated method stub
-
+		MemTable table = tables.remove(name);
+		if (table != null)
+		{
+			Iterator<TableNode> tableNodes = servoyProject.getSolution().getTableNodes(table.getDataSource());
+			if (tableNodes.hasNext())
+			{
+				loadTable(tableNodes.next());
+			}
+		}
 	}
 
 	/*

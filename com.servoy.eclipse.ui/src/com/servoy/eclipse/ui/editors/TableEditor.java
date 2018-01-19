@@ -41,6 +41,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -553,7 +554,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			throw new RuntimeException("Could not initialize table editor table could not be found");
 		}
-		isModified = isModified || !table.getExistInDB();
+		isModified = isModified || !table.getExistInDB() || (table instanceof MemTable && ((MemTable)table).isChanged());
 
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 
@@ -826,7 +827,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			// check UUID generator valid types
 			if (col.getColumnInfo() != null && col.getSequenceType() == ColumnInfo.UUID_GENERATOR)
 			{
-				if (!col.getColumnInfo().hasFlag(Column.UUID_COLUMN))
+				if (!col.getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN))
 				{
 					throw new Exception("Column '" + col.getName() +
 						"' has sequence type of 'UUID generator' , the column type should be TEXT(36) or MEDIA(16) with an UUID flag set.");
