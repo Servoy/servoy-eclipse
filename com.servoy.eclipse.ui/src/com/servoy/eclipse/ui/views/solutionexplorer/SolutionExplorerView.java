@@ -3018,7 +3018,9 @@ public class SolutionExplorerView extends ViewPart
 		newActionInListPrimary.registerAction(UserNodeType.VALUELISTS, newValueList);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
-		newActionInListPrimary.registerAction(UserNodeType.SERVER, new NewTableAction(this));
+		NewTableAction newTableAction = new NewTableAction(this);
+		addListSelectionChangedListener(newTableAction);
+		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTableAction);
 		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.LAYOUT, newComponentResource);

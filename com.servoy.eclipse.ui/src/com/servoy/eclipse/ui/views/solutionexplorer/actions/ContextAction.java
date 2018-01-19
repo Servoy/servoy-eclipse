@@ -161,4 +161,10 @@ public class ContextAction extends Action implements ISelectionChangedListener
 			registeredActionsPerClass.remove(type);
 		}
 	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return super.isEnabled() && currentAction != null && currentAction.isEnabled();
+	}
 }

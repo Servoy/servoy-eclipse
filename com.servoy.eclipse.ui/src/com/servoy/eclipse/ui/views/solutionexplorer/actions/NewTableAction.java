@@ -78,6 +78,10 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 				IServerInternal s = (IServerInternal)node.getRealObject();
 				state = (node.getType() == UserNodeType.SERVER) && (s.getConfig().isEnabled() && s.isValid());
 			}
+			else
+			{
+				state = node.getType() != UserNodeType.PROCEDURE;
+			}
 		}
 		setEnabled(state);
 	}
