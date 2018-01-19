@@ -2408,7 +2408,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getCode()
 		{
-			return "datasource.sp." + serverName + '.' + getCall() + ';';
+			return "datasources.sp." + serverName + '.' + getCall() + ';';
 		}
 
 		public String getToolTipText()
