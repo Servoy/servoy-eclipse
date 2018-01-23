@@ -686,7 +686,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 		{
 			text.addModifyListener(textModifyListener);
 		}
-		text.setSelection(text.getText().length(), text.getText().length());
+		if (text != null) text.setSelection(text.getText().length(), text.getText().length());
 		Object value = getValue();
 		boolean isValid = !getEditable() || getSelectionFilter().select(value);
 		// if valid and value is not null, check if the value can be resolved through the content provider.
