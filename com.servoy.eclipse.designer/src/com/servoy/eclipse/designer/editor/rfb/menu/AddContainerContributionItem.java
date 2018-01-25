@@ -1,6 +1,5 @@
 package com.servoy.eclipse.designer.editor.rfb.menu;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -50,48 +49,46 @@ public class AddContainerContributionItem extends CompoundContributionItem
 	@Override
 	protected IContributionItem[] getContributionItems()
 	{
-		List<IContributionItem> list = new ArrayList<IContributionItem>();
+		List<IContributionItem> list = new SortedList<IContributionItem>(new Comparator<CommandContributionItem>()
+		{
+			//we still need to sort the menu items because we are matching allowed children on layoutName
+			@Override
+			public int compare(CommandContributionItem o1, CommandContributionItem o2)
+			{
+				boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(o1.getData().label);
+				boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(o2.getData().label);
+				if (co1 && co2) return 0;
+				else if (co1) return -1;
+				else if (co2) return 1;
+				else return SortedList.COMPARABLE_COMPARATOR.compare(o1.getData().label, o2.getData().label);
+			}
+		});
 		PersistContext persistContext = DesignerUtil.getContentOutlineSelection();
 		IPersist persist = null;
 		if (persistContext != null) persist = persistContext.getPersist();
 		if (persist instanceof LayoutContainer)
 		{
+			String packageName = ((LayoutContainer)persist).getPackageName();
 			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-				((LayoutContainer)persist).getPackageName());
+				packageName);
 			if (specifications != null)
 			{
 				WebLayoutSpecification layoutSpec = specifications.getSpecification(((LayoutContainer)persist).getSpecName());
 				if (layoutSpec != null)
 				{
-					// for the right-clicked persist we iterate through all it's possible children
+					//for the right-clicked persist we iterate through all it's possible children
 					Set<String> allowedChildren = DesignerUtil.getAllowedChildren().get(layoutSpec.getPackageName() + "." + layoutSpec.getName());
-
-					// put "component" first if present and sort the others;
-					SortedList<CommandContributionItemParameter> allowedChildrenSorted = new SortedList<>(new Comparator<CommandContributionItemParameter>()
-					{
-						@Override
-						public int compare(CommandContributionItemParameter o1, CommandContributionItemParameter o2)
-						{
-							boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(o1.label);
-							boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(o2.label);
-							if (co1 && co2) return 0;
-							else if (co1) return -1;
-							else if (co2) return 1;
-							else return SortedList.COMPARABLE_COMPARATOR.compare(o1.label, o2.label);
-						}
-					});
-
 					boolean isComponentAdded = false;
 					for (String allowedChildName : allowedChildren)
 					{
 						if ("component".equalsIgnoreCase(allowedChildName))
 						{
-							allowedChildrenSorted.add(getCommandContributionItemParameter(null, null, null));
+							addMenuItem(list, null, null, null);
 							isComponentAdded = true;
 						}
 						else
 						{
-							// then we iterate through all the layouts that we have and check if the layoutName matches the current allowedChildName
+							//then we iterate through all the layouts that we have and check if the layoutName matches the current allowedChildName
 							for (WebLayoutSpecification specification : specifications.getSpecifications().values())
 							{
 								String layoutName;
@@ -104,10 +101,10 @@ public class AddContainerContributionItem extends CompoundContributionItem
 									}
 
 									//if the layoutName matches the current allowedChildName then we add this container as a menu entry
-									if (allowedChildName.equals(((LayoutContainer)persist).getPackageName() + "." + layoutName))
+									if (allowedChildName.equals(packageName + "." + layoutName))
 									{
 										String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
-										allowedChildrenSorted.add(getCommandContributionItemParameter(specification, config, null));
+										addMenuItem(list, specification, config, null);
 									}
 
 								}
@@ -124,15 +121,10 @@ public class AddContainerContributionItem extends CompoundContributionItem
 						{
 							if (allowedChildName.endsWith(".*"))
 							{
-								allowedChildrenSorted.add(getCommandContributionItemParameter(null, null, null));
+								addMenuItem(list, null, null, null);
 								break;
 							}
 						}
-					}
-
-					for (CommandContributionItemParameter z : allowedChildrenSorted)
-					{
-						list.add(new CommandContributionItem(z));
 					}
 				}
 			}
@@ -162,6 +154,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 				{
 					addMenuItem(list, null, propertyDescription.getName(),
 						PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType()) + " -> " + propertyDescription.getName());
+					// FIXME we should no longer use name in palette if we know the name from drop target (to be added) in browser ghost containers
 				}
 			}
 		}
@@ -169,12 +162,6 @@ public class AddContainerContributionItem extends CompoundContributionItem
 	}
 
 	private void addMenuItem(List<IContributionItem> list, WebLayoutSpecification specification, String config, String displayName)
-	{
-		final CommandContributionItemParameter commandContributionItemParameter = getCommandContributionItemParameter(specification, config, displayName);
-		list.add(new CommandContributionItem(commandContributionItemParameter));
-	}
-
-	private CommandContributionItemParameter getCommandContributionItemParameter(WebLayoutSpecification specification, String config, String displayName)
 	{
 		final CommandContributionItemParameter commandContributionItemParameter = new CommandContributionItemParameter(
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow(), null, AddContainerCommand.COMMAND_ID, CommandContributionItem.STYLE_PUSH);
@@ -198,6 +185,6 @@ public class AddContainerContributionItem extends CompoundContributionItem
 			commandContributionItemParameter.label = ADD_COMPONENT_SUBMENU_ITEM_TEXT;
 		}
 		commandContributionItemParameter.visibleEnabled = true;
-		return commandContributionItemParameter;
+		list.add(new CommandContributionItem(commandContributionItemParameter));
 	}
 }
