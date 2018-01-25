@@ -65,6 +65,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ModelException;
 import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
@@ -238,8 +242,41 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	class ServoyResourceVisitor implements IResourceVisitor
 	{
+		List<IPath> excludePaths = new ArrayList<>();
+
+		public ServoyResourceVisitor()
+		{
+			IScriptProject scriptProject = DLTKCore.create(getProject());
+			if (scriptProject != null)
+			{
+				try
+				{
+					IBuildpathEntry[] rawBuildpath = scriptProject.getRawBuildpath();
+					for (IBuildpathEntry buildPath : rawBuildpath)
+					{
+						excludePaths.addAll(Arrays.asList(buildPath.getExclusionPatterns()));
+					}
+				}
+				catch (ModelException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+
 		public boolean visit(IResource resource)
 		{
+			if (resource.isDerived())
+			{
+				return false;
+			}
+			for (IPath path : excludePaths)
+			{
+				if (path.equals(resource.getProjectRelativePath()))
+				{
+					return false;
+				}
+			}
 			checkResource(resource);
 			//return true to continue visiting children.
 			return true;
