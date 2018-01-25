@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SvyButton } from './button';
+import { ServoyDefaultButton } from './button';
 
 describe('SvyButton', () => {
-  let component: SvyButton;
-  let fixture: ComponentFixture<SvyButton>;
+  let component: ServoyDefaultButton;
+  let fixture: ComponentFixture<ServoyDefaultButton>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SvyButton ]
+      declarations: [ ServoyDefaultButton ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SvyButton);
+    fixture = TestBed.createComponent(ServoyDefaultButton);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,11 +1,11 @@
 import { Component, OnInit, Input ,Output,EventEmitter,Renderer,ElementRef} from '@angular/core';
 
 @Component({
-  selector: 'svy-button',
+  selector: 'servoydefault-button',
   templateUrl: './button.html',
   styleUrls: ['./button.css']
 })
-export class SvyButton implements OnInit {
+export class ServoyDefaultButton implements OnInit {
  @Input()  name;
  @Input() dataprovider;
  @Input() click;

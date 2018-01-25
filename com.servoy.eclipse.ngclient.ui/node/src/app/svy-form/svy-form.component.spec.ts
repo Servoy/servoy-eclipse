@@ -4,7 +4,7 @@ import { FormComponent,AddAttributeDirective } from './svy-form.component';
 
 import {FormService} from '../form.service';
 
-import { ComponentModule } from '../../components/component.module';
+import { ServoyDefaultComponentsModule } from '../../servoydefault/servoydefault.module';
 
 describe('FormComponent', () => {
   let component: FormComponent;
@@ -14,7 +14,7 @@ describe('FormComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ FormComponent,AddAttributeDirective ],
       imports: [
-                ComponentModule,
+                ServoyDefaultComponentsModule,
        ],
        providers:    [ {provide: FormService, useValue: new FormServiceStub() } ]
     })

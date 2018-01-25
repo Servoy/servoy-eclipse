@@ -1,11 +1,11 @@
 import { Component, OnInit ,Input,Output,EventEmitter} from '@angular/core';
 
 @Component({
-  selector: 'svy-textfield',
+  selector: 'servoydefault-textfield',
   templateUrl: './textfield.html',
   styleUrls: ['./textfield.css']
 })
-export class SvyTextfield implements OnInit {
+export class ServoyDefaultTextField implements OnInit {
   @Input() name;
   @Input() dataprovider
   @Output() dataproviderChange = new EventEmitter();

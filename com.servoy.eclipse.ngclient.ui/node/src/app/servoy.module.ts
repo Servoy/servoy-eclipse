@@ -1,11 +1,12 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { ComponentModule } from '../components/component.module';
+import { AllComponentsModule } from './allcomponents.module';
 
 
-import { AppComponent } from './app.component';
+import { MainComponent } from './main.component';
 import {WebsocketService} from './websocket.service';
 import {FormService} from './form.service';
+import {WindowRefService} from './util/windowref.service'
 import {AllServicesModules} from './allservices.service';
 
 import { FormComponent,AddAttributeDirective } from './svy-form/svy-form.component';
@@ -13,17 +14,17 @@ import { FormComponent,AddAttributeDirective } from './svy-form/svy-form.compone
 
 @NgModule({
   declarations: [
-    AppComponent,
+    MainComponent,
     FormComponent,
     AddAttributeDirective,
   ],
   imports: [
     BrowserModule,
-    ComponentModule,
+    AllComponentsModule,
     AllServicesModules
   ],
   
-  providers: [WebsocketService,FormService],
-  bootstrap: [AppComponent]
+  providers: [WebsocketService,FormService,WindowRefService],
+  bootstrap: [MainComponent]
 })
-export class AppModule { }
+export class ServoyModule { }

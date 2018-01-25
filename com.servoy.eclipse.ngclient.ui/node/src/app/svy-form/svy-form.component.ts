@@ -20,10 +20,10 @@ import {FormService,FormCache,StructureCache,ComponentCache} from '../form.servi
           </div>
       </ng-template>
       <ng-template  #svyTextfield  let-state="state" >
-        <svy-textfield [dataprovider]="state.model.dataprovider" (dataproviderChange)="datachange(state.name,'dataprovider',$event)" [name]="state.name" #cmp></svy-textfield>
+        <servoydefault-textfield [dataprovider]="state.model.dataprovider" (dataproviderChange)="datachange(state.name,'dataprovider',$event)" [name]="state.name" #cmp></servoydefault-textfield>
       </ng-template>
       <ng-template  #svyButton let-state="state">
-        <svy-button [dataprovider]="state.model.dataprovider" [click]="getHandler(state, 'click')" [name]="state.name" #cmp></svy-button>
+        <servoydefault-button [dataprovider]="state.model.dataprovider" [click]="getHandler(state, 'click')" [name]="state.name" #cmp></servoydefault-button>
       </ng-template>
    `
 })

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SvyTextfield } from './textfield';
+import { ServoyDefaultTextField } from './textfield';
 
-describe("SvyTextfield", () => {
-  let component: SvyTextfield;
-  let fixture: ComponentFixture<SvyTextfield>;
+describe("ServoyDefaultTextField", () => {
+  let component: ServoyDefaultTextField;
+  let fixture: ComponentFixture<ServoyDefaultTextField>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SvyTextfield ]
+      declarations: [ ServoyDefaultTextField ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SvyTextfield);
+    fixture = TestBed.createComponent(ServoyDefaultTextField);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

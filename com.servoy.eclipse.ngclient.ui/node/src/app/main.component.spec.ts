@@ -1,19 +1,19 @@
 import { Directive, Input} from '@angular/core';
 import { TestBed, async } from '@angular/core/testing';
-import { AppComponent } from './app.component';
+import { MainComponent } from './main.component';
 import {AllServiceService} from './allservices.service';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        AppComponent,MockFormComponent
+        MainComponent,MockFormComponent
       ],
       providers:    [ {provide: AllServiceService, useValue: new AllServicesMock() } ]
     }).compileComponents();
   }));
   it('should create the app', async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
+    const fixture = TestBed.createComponent(MainComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
   }));

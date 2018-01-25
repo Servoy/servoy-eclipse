@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 
 import {WebsocketService} from './websocket.service';
 
-import {TestService} from './test.service';
+import {NGUtilsService} from '../servoy_ng_only_services/ngutils/ngutils.service';
 
 /**
  * this is a the all services that should also be a generated ts file.
@@ -13,7 +13,7 @@ import {TestService} from './test.service';
  */
 @Injectable()
 export class AllServiceService {
-    constructor(private websocket:WebsocketService, private testService:TestService) {
+    constructor(private websocket:WebsocketService, private ngclientutils:NGUtilsService) {
         this.websocket.messages.filter(message=>message.service != null).subscribe(message=>{
            const service = this[message.service as string];
            if (service) {
@@ -30,6 +30,6 @@ export class AllServiceService {
 }
 
 @NgModule({
-    providers: [AllServiceService,TestService],
+    providers: [AllServiceService,NGUtilsService],
  })
 export class AllServicesModules { }
