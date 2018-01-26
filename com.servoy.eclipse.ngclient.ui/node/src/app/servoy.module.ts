@@ -4,7 +4,7 @@ import { AllComponentsModule } from './allcomponents.module';
 
 
 import { MainComponent } from './main.component';
-import {WebsocketService} from './websocket.service';
+import {WebsocketService} from '../sablo/websocket.service';
 import {FormService} from './form.service';
 import {WindowRefService} from './util/windowref.service'
 import {AllServicesModules} from './allservices.service';

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { Injectable } from '@angular/core';
 
-import {WebsocketService} from './websocket.service';
+import {WebsocketService} from '../sablo/websocket.service';
 
 import {NGUtilsService} from '../servoy_ng_only_services/ngutils/ngutils.service';
 

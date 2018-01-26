@@ -2,7 +2,7 @@ import { TestBed, inject } from '@angular/core/testing';
 
 import {EventEmitter } from '@angular/core';
 
-import {WebsocketService} from './websocket.service';
+import {WebsocketService} from '../sablo/websocket.service';
 
 import { FormService } from './form.service';
 

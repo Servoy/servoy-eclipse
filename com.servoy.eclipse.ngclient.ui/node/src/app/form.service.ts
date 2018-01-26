@@ -1,7 +1,7 @@
 import { Injectable,TemplateRef } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
-import {WebsocketService} from './websocket.service';
+import {WebsocketService} from '../sablo/websocket.service';
 
 import {FormComponent} from './svy-form/svy-form.component'
 
