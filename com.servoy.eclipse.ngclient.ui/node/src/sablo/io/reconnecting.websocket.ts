@@ -1,4 +1,4 @@
-import {CustomEventEmitter,CustomEvent}from "../util/eventemitter"
+import {CustomEventEmitter,CustomEvent}from "../../app/util/eventemitter"
 
 
 export class ReconnectingWebSocket {
