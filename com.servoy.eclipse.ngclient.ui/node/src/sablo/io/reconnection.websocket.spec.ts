@@ -2,7 +2,7 @@ import { TestBed,fakeAsync,tick } from '@angular/core/testing';
 
 import {ReconnectingWebSocket} from "./reconnecting.websocket";
 
-import {CustomEvent} from "../util/eventemitter"
+import {CustomEvent} from "../../app/util/eventemitter"
 
 describe('ReconnectionWebsocket', () => {
   beforeEach(() => {
