@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import {WindowRefService} from '../../app/util/windowref.service'
+import {WindowRefService} from '../../sablo/util/windowref.service'
 
 @Injectable()
 export class NGUtilsService {

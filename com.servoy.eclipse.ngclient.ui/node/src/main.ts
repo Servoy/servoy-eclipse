@@ -1,7 +1,7 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-import { ServoyModule } from './app/servoy.module';
+import { ServoyModule } from './ngclient/servoy.module';
 import { environment } from './environments/environment';
 
 if (environment.production) {

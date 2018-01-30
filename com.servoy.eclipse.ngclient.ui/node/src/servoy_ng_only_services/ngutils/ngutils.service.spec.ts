@@ -2,7 +2,7 @@ import { TestBed, inject } from '@angular/core/testing';
 
 import { NGUtilsService } from './ngutils.service';
 
-import {WindowRefService} from '../../app/util/windowref.service'
+import {WindowRefService} from '../../sablo/util/windowref.service'
 
 
 describe('NGUtilsService', () => {

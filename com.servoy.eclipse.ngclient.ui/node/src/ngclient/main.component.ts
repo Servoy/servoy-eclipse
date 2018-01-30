@@ -9,6 +9,6 @@ import {AllServiceService} from './allservices.service';
 export class MainComponent {
   title = 'Servoy NGClient';
   
-  constructor(allService:AllServiceService){
+  constructor(private allService:AllServiceService){
   }
 }

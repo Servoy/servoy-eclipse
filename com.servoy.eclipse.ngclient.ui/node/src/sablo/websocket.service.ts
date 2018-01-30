@@ -7,7 +7,7 @@ import { Subscription } from "rxjs/Subscription";
 
 
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
-import { WindowRefService } from '../app/util/windowref.service'
+import { WindowRefService } from './util/windowref.service'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
 

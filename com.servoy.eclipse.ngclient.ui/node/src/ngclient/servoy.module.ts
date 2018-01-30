@@ -4,12 +4,12 @@ import { AllComponentsModule } from './allcomponents.module';
 
 
 import { MainComponent } from './main.component';
-import {WebsocketService} from '../sablo/websocket.service';
 import {FormService} from './form.service';
-import {WindowRefService} from './util/windowref.service'
 import {AllServicesModules} from './allservices.service';
 
 import { FormComponent,AddAttributeDirective } from './svy-form/svy-form.component';
+
+import {SabloModule} from '../sablo/sablo.module'
 
 
 @NgModule({
@@ -20,11 +20,12 @@ import { FormComponent,AddAttributeDirective } from './svy-form/svy-form.compone
   ],
   imports: [
     BrowserModule,
+    SabloModule,
     AllComponentsModule,
     AllServicesModules
   ],
   
-  providers: [WebsocketService,FormService,WindowRefService],
+  providers: [FormService],
   bootstrap: [MainComponent]
 })
 export class ServoyModule { }
