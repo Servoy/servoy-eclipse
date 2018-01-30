@@ -2,12 +2,18 @@ import { TestBed,fakeAsync,tick } from '@angular/core/testing';
 
 import {ReconnectingWebSocket} from "./reconnecting.websocket";
 
-import {CustomEvent} from "../../app/util/eventemitter"
+import {CustomEvent} from "../util/eventemitter"
 
 describe('ReconnectionWebsocket', () => {
+  var normalWebSocket = null;
   beforeEach(() => {
+      normalWebSocket =  window["WebSocket"];
      window["WebSocket"] = WebSocketMock;
   });
+  
+  afterEach(() => {
+      window["WebSocket"] = normalWebSocket;
+  })
 
   it('should be connecting and reconnecting', fakeAsync(() => {
       const socket = new TestReconnectingWebSocket("ws://localhost/");
@@ -52,7 +58,6 @@ class WebSocketMock {
     public url:string;
     public closed = false;
     constructor(url:string) {
-        console.log(url);
         this.url = url;
         WebSocketMock.instance = this;
         setTimeout(() => {

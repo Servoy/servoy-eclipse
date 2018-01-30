@@ -105,8 +105,7 @@ export class WebsocketService {
         }
 
         // When ReconnectingWebSocket gets a function it will call the function to generate the url for each (re)connect.
-        const websocket = new ReconnectingWebSocket( function() {
-            return this.generateURL( this.connectionArguments['context'], this.connectionArguments['args'],
+        const websocket = new ReconnectingWebSocket(() => {return this.generateURL( this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'] );
         } );
 
