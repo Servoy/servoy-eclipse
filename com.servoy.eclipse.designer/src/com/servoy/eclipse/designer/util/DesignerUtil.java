@@ -373,7 +373,7 @@ public class DesignerUtil
 				{
 					allowedChildren.addAll(spec.getAllowedChildren());
 				}
-				else
+				if (excludedChildren != null)
 				{
 					for (PackageSpecification<WebLayoutSpecification> pack2 : packs)
 					{

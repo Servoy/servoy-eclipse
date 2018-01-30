@@ -163,23 +163,30 @@ public class HierarchyDecorator implements ILightweightLabelDecorator
 		{
 			IFile resource = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getRelativeFilePath(element, false)));
 			{
-				try
+				if (resource.exists())
 				{
-					IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-					if (markers != null)
+					try
 					{
-						int severity = -1;
-						for (IMarker marker : markers)
+						IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+						if (markers != null)
 						{
-							severity = marker.getAttribute(IMarker.SEVERITY, -1);
-							if (severity == IMarker.SEVERITY_ERROR) break;
+							int severity = -1;
+							for (IMarker marker : markers)
+							{
+								severity = marker.getAttribute(IMarker.SEVERITY, -1);
+								if (severity == IMarker.SEVERITY_ERROR) break;
+							}
+							return severity;
 						}
-						return severity;
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
 					}
 				}
-				catch (Exception e)
+				else
 				{
-					ServoyLog.logError(e);
+					ServoyLog.logInfo("Could not find frm file of form " + ((Form)element).getName());
 				}
 			}
 		}
