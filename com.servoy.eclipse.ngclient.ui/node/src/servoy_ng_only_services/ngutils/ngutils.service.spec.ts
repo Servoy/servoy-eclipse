@@ -6,9 +6,12 @@ import {WindowRefService} from '../../app/util/windowref.service'
 
 
 describe('NGUtilsService', () => {
+  let windowRef;
   beforeEach(() => {
+     windowRef =  {}
+     // we use a useFactory because when using useValue that will be cloned, so you can adjust windowRef later on.
     TestBed.configureTestingModule({
-      providers: [NGUtilsService, {provide: WindowRefService, useValue: new WindowRefServiceStub() }]
+      providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef }]
     });
   });
 
@@ -17,12 +20,7 @@ describe('NGUtilsService', () => {
   }));
   
   it('it should return the user agent', inject([NGUtilsService], (service: NGUtilsService) => {
-      expect(service.getUserAgent()).toBe("test");
+      windowRef.nativeWindow = {navigator:{userAgent:"test"}};
+      expect(service.getUserAgent()).toBe("test"); // test
     }));
 });
-
-class  WindowRefServiceStub {
-    get nativeWindow (): any {
-        return {navigator:{userAgent:"test"}};
-    }
-}
