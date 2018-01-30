@@ -88,11 +88,11 @@ export class ReconnectingWebSocket {
        
        // Wire up "on*" properties as event handlers
 
-      this.eventTarget.addEventListener('open',  (event)=> this.onopen(event));
-      this.eventTarget.addEventListener('close',  (event)=> this.onclose(event));
-      this.eventTarget.addEventListener('connecting', (event)=> this.onconnecting(event));
-      this.eventTarget.addEventListener('message',    (event)=> this.onmessage(event) );
-      this.eventTarget.addEventListener('error',      (event)=> this.onerror(event));
+      this.eventTarget.addEventListener('open',  (event:WebsocketCustomEvent)=> this.onopen(event));
+      this.eventTarget.addEventListener('close',  (event:WebsocketCustomEvent)=> this.onclose(event));
+      this.eventTarget.addEventListener('connecting', (event:WebsocketCustomEvent)=> this.onconnecting(event));
+      this.eventTarget.addEventListener('message',    (event:WebsocketCustomEvent)=> this.onmessage(event) );
+      this.eventTarget.addEventListener('error',      (event:WebsocketCustomEvent)=> this.onerror(event));
       
       // Whether or not to create a websocket upon instantiation
       if (this.automaticOpen == true) {
@@ -155,7 +155,7 @@ export class ReconnectingWebSocket {
                return;
            }
        } else {
-           this.eventTarget.dispatchEvent(new CustomEvent('connecting'));
+           this.eventTarget.dispatchEvent(new WebsocketCustomEvent('connecting'));
            this.reconnectAttempts = 0;
        }
 
@@ -191,7 +191,7 @@ export class ReconnectingWebSocket {
            self.ws = null;
            if (self.forcedClose) {
                self.readyState = WebSocket.CLOSED;
-              self.eventTarget.dispatchEvent(new CustomEvent('close'));
+              self.eventTarget.dispatchEvent(new WebsocketCustomEvent('close'));
            } else {
                self.readyState = WebSocket.CONNECTING;
                var e = new WebsocketCustomEvent('connecting');
@@ -203,7 +203,7 @@ export class ReconnectingWebSocket {
                    if (self.debug || ReconnectingWebSocket.debugAll) {
                        console.debug('ReconnectingWebSocket', 'onclose', self.getUrl());
                    }
-                   self.eventTarget.dispatchEvent(new CustomEvent('close'));
+                   self.eventTarget.dispatchEvent(new WebsocketCustomEvent('close'));
                }
 
                var timeout = self.reconnectInterval * Math.pow(self.reconnectDecay, self.reconnectAttempts);
@@ -227,7 +227,7 @@ export class ReconnectingWebSocket {
            if (self.debug || ReconnectingWebSocket.debugAll) {
                console.debug('ReconnectingWebSocket', 'onerror', self.getUrl(), event);
            }
-           self.eventTarget.dispatchEvent(new CustomEvent('error'));
+           self.eventTarget.dispatchEvent(new WebsocketCustomEvent('error'));
        };
    }
    
@@ -235,19 +235,19 @@ export class ReconnectingWebSocket {
     * An event listener to be called when the WebSocket connection's readyState changes to OPEN;
     * this indicates that the connection is ready to send and receive data.
     */
-   public onopen(event:CustomEvent) {};
+   public onopen(event:WebsocketCustomEvent) {};
    /** An event listener to be called when the WebSocket connection's readyState changes to CLOSED. */
-   public onclose(event:CustomEvent) {};
+   public onclose(event:WebsocketCustomEvent) {};
    /** An event listener to be called when a connection begins being attempted. */
-   public onconnecting(event:CustomEvent) { };
+   public onconnecting(event:WebsocketCustomEvent) { };
    /** An event listener to be called when a message is received from the server. */
-   public onmessage(event:CustomEvent) {};
+   public onmessage(event:WebsocketCustomEvent) {};
    /** An event listener to be called when an error occurs. */
-   public onerror(event:CustomEvent) {};
+   public onerror(event:WebsocketCustomEvent) {};
 
 }
 
-class WebsocketCustomEvent extends CustomEvent {
+export class WebsocketCustomEvent extends CustomEvent {
     public isReconnect:boolean;
     public code:number;
     public reason:string;
