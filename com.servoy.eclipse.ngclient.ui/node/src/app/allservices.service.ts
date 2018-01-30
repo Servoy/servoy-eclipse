@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { Injectable } from '@angular/core';
 
-import {WebsocketService} from '../sablo/websocket.service';
+import {ServicesService, ServiceProvider} from '../sablo/services.service';
 
 import {NGUtilsService} from '../servoy_ng_only_services/ngutils/ngutils.service';
 
@@ -12,22 +12,14 @@ import {NGUtilsService} from '../servoy_ng_only_services/ngutils/ngutils.service
  * then in the constructor it should be a list by name->class 
  */
 @Injectable()
-export class AllServiceService {
-    constructor(private websocket:WebsocketService, private ngclientutils:NGUtilsService) {
-        this.websocket.messages.filter(message=>message.service != null).subscribe(message=>{
-           const service = this[message.service as string];
-           if (service) {
-               if (message.property) {
-                   service[message.property as string] = message.value;
-               }
-               else if (message.call) {
-                   var proto = Object.getPrototypeOf(service)
-                   proto[message.call as string].apply(service,message.args);
-               }
-           }
-        })
+export class AllServiceService implements ServiceProvider {
+    constructor(private services:ServicesService, private ngclientutils:NGUtilsService) {
+        services.setServiceProvider(this);
     }
-}
+    getService(name:string) {
+        return this[name];
+    }
+} 
 
 @NgModule({
     providers: [AllServiceService,NGUtilsService],
