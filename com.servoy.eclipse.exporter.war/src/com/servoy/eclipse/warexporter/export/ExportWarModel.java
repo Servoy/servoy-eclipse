@@ -478,7 +478,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String encryptPassword(Cipher desCipher, String propertyName, String password)
 	{
 		String val = password;
-		if (!val.startsWith(IWarExportModel.enc_prefix) &&
+		if (val != null && !val.startsWith(IWarExportModel.enc_prefix) &&
 			(propertyName.toLowerCase().indexOf("password") != -1 || propertyName.toLowerCase().startsWith("export.license"))) //$NON-NLS-1$
 		{
 			try
