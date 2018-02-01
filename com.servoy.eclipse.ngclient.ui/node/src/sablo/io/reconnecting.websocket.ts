@@ -148,7 +148,6 @@ export class ReconnectingWebSocket {
 
    
    public open(reconnectAttempt) {
-       this.ws = new WebSocket(this.getUrl());
 
        if (reconnectAttempt) {
            if (this.maxReconnectAttempts && this.reconnectAttempts > this.maxReconnectAttempts) {
@@ -162,6 +161,8 @@ export class ReconnectingWebSocket {
        if (this.debug || ReconnectingWebSocket.debugAll) {
            console.debug('ReconnectingWebSocket', 'attempt-connect', this.getUrl());
        }
+
+       this.ws = new WebSocket(this.getUrl());
        const self = this;
        const localWs = this.ws;
        var timeout = setTimeout(function() {
@@ -173,7 +174,7 @@ export class ReconnectingWebSocket {
            this.timedOut = false;
        }, this.timeoutInterval);
 
-       this.ws.onopen = function(event) {
+       this.ws.onopen = (event) =>{
            clearTimeout(timeout);
            if (self.debug || ReconnectingWebSocket.debugAll) {
                console.debug('ReconnectingWebSocket', 'onopen', self.getUrl());
@@ -186,7 +187,7 @@ export class ReconnectingWebSocket {
            self.eventTarget.dispatchEvent(e);
        };
 
-       this.ws.onclose = function(event) {
+       this.ws.onclose = (event)=> {
            clearTimeout(timeout);
            self.ws = null;
            if (self.forcedClose) {
@@ -215,7 +216,7 @@ export class ReconnectingWebSocket {
                }, timeout > self.maxReconnectInterval ? self.maxReconnectInterval : timeout);
            }
        };
-       this.ws.onmessage = function(event) {
+       this.ws.onmessage = (event)=> {
            if (self.debug || ReconnectingWebSocket.debugAll) {
                console.debug('ReconnectingWebSocket', 'onmessage', self.getUrl(), event.data);
            }
@@ -223,7 +224,7 @@ export class ReconnectingWebSocket {
            e.data = event.data;
            self.eventTarget.dispatchEvent(e);
        };
-       this.ws.onerror = function(event) {
+       this.ws.onerror = (event)=> {
            if (self.debug || ReconnectingWebSocket.debugAll) {
                console.debug('ReconnectingWebSocket', 'onerror', self.getUrl(), event);
            }
