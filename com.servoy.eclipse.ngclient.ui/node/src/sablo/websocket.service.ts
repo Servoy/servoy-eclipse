@@ -8,6 +8,7 @@ import { Subscription } from "rxjs/Subscription";
 
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
 import { WindowRefService } from './util/windowref.service'
+import {Deferred} from './util/deferred'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
 
@@ -95,7 +96,7 @@ export class WebsocketService {
 
 
 
-    public connect( context, args, queryArgs, websocketUri ) {
+    public connect( context, args, queryArgs, websocketUri ):WebsocketSession {
 
         this.connectionArguments = {
             context: context,
@@ -136,15 +137,15 @@ export class WebsocketService {
         return this.wsSession;
     }
 
-    public getURLParameter( name: string ) {
-        decodeURIComponent(( new RegExp( '[&]?' + name + '=' + '([^&;]+?)(&|#|;|$)' ).exec( this.getQueryString() ) || [, ""] )[1].replace( /\+/g, '%20' ) ) || null
+    public getURLParameter( name: string ):string  {
+        return decodeURIComponent(( new RegExp( '[&]?' + name + '=' + '([^&;]+?)(&|#|;|$)' ).exec( this.getQueryString() ) || [, ""] )[1].replace( /\+/g, '%20' ) ) || null
     }
 
     public setPathname( name: string ) {
         this.pathname = name;
     }
 
-    public getPathname() {
+    public getPathname():string {
         return this.pathname || this.windowRef.nativeWindow.location.pathname;
     }
 
@@ -193,20 +194,20 @@ export class WebsocketSession {
 
     constructor( private websocket: ReconnectingWebSocket, private websocketService: WebsocketService, private services: ServicesService, private windowRef: WindowRefService, private converterService: ConverterService ) {
         const me = this;
-        this.websocket.onopen = function( evt ) {
+        this.websocket.onopen = ( evt )=> {
             me.setConnected();
             me.startHeartbeat();
             for ( let handler in me.onOpenHandlers ) {
                 me.onOpenHandlers[handler]( evt );
             }
         }
-        this.websocket.onerror = function( evt ) {
+        this.websocket.onerror = ( evt )=> {
             me.stopHeartbeat();
             for ( let handler in me.onErrorHandlers ) {
                 me.onErrorHandlers[handler]( evt );
             }
         }
-        this.websocket.onclose = function( evt ) {
+        this.websocket.onclose = ( evt )=> {
             me.stopHeartbeat();
             if ( me.connected != 'CLOSED' ) {
                 me.connected = 'RECONNECTING';
@@ -216,7 +217,7 @@ export class WebsocketSession {
                 me.onCloseHandlers[handler]( evt );
             }
         }
-        this.websocket.onconnecting = function( evt ) {
+        this.websocket.onconnecting = ( evt ) =>{
             // this event indicates we are trying to reconnect, the event has the close code and reason from the disconnect.
             if ( evt.code && evt.code != WsCloseCodes.CLOSED_ABNORMALLY && evt.code != WsCloseCodes.SERVICE_RESTART ) {
 
@@ -233,7 +234,7 @@ export class WebsocketSession {
                 //                    if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Connection mode (onconnecting got a server disconnect/close with reason " + evt.reason + "): ... CLOSED (" + new Date().getTime() + ")");
             }
         }
-        this.websocket.onmessage = function( message ) {
+        this.websocket.onmessage = ( message ) =>{
             me.handleHeartbeat( message ) || me.handleMessage( message );
         }
     }
@@ -485,7 +486,7 @@ export class WebsocketSession {
                 //                    $sabloTestability.increaseEventLoop();
                 //                }
                 // server wants a response; responseValue may be a promise
-                Promise.resolve( responseValue ).then( function( ret ) {
+                Promise.resolve( responseValue ).then( ( ret ) => {
                     //                    if (isPromiseLike(responseValue)) {
                     //                        $sabloTestability.decreaseEventLoop();
                     //                        if ($log.debugEnabled) $log.debug("sbl * Promise returned by call from server with smsgid '" + obj.smsgid + "' is now resolved with value: -" + ret + "-. Sending value back to server...");
@@ -503,7 +504,7 @@ export class WebsocketSession {
                     //                        $sabloLoadingIndicator.showLoading();
                     //                    }
                     this.sendMessageObject( response );
-                }, function( reason ) {
+                }, ( reason ) => {
                     //                    if (isPromiseLike(responseValue)) $sabloTestability.decreaseEventLoop();
                     // error
                     //                    $log.error("Error (follows below) in parsing/processing this message with smsgid '" + obj.smsgid + "' (async): " + message_data);
@@ -568,25 +569,4 @@ class WsCloseCodes {
     static readonly TLS_HANDSHAKE_FAILURE: 1015; // is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint.
     static readonly TRY_AGAIN_LATER: 1013; // indicates that the service is experiencing overload
 }
-
-class Deferred {
-    public readonly promise: Promise<any>;
-    private _resolve: ( value ) => void
-    private _reject: ( reason ) => void;
-    constructor() {
-        this.promise = new Promise(( resolve, reject ) => {
-            this._reject = reject;
-            this._resolve = resolve;
-        } )
-    }
-
-    public reject( reason ) {
-        this._reject( reason );
-    }
-
-    public resolve( value ) {
-        this._resolve( value );
-    }
-}
-
 
