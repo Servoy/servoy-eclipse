@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ngclient.ui;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import javax.servlet.DispatcherType;
@@ -94,7 +95,10 @@ public class IndexPageFilter implements Filter
 					{
 						String contentType = MimeTypes.guessContentTypeFromName(filename);
 						if (contentType != null) servletResponse.setContentType(contentType);
-						Utils.streamCopy(file.getContents(), servletResponse.getOutputStream());
+						try (InputStream is = file.getContents())
+						{
+							Utils.streamCopy(is, servletResponse.getOutputStream());
+						}
 						return;
 					}
 				}
