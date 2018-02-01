@@ -52,6 +52,48 @@ export class ConverterService {
         }
         return value;
     }
+   
+   /**
+    * Receives variable arguments. First is the object obj and the others (for example a, b, c) are used to
+    * return obj[a][b][c] making sure that if any does not exist or is null (for example b) it will be set to {}.
+    */
+   public getOrCreateInDepthProperty(...args) {
+       if (arguments.length == 0) return undefined;
+
+       var ret = arguments[0];
+       if (ret == undefined || ret === null || arguments.length == 1) return ret;
+       var p;
+       var i;
+       for (i = 1; i < arguments.length; i++) {
+           p = ret;
+           ret = ret[arguments[i]];
+           if (ret === undefined || ret === null) {
+               ret = {};
+               p[arguments[i]] = ret;
+           }
+       }
+       return ret;
+   }
+   
+   /**
+    * Receives variable arguments. First is the object obj and the others (for example a, b, c) are used to
+    * return obj[a][b][c] making sure that if any does not exist or is null it will just return null/undefined instead of erroring out.
+    */
+   public getInDepthProperty(...args) {
+       if (arguments.length == 0) return undefined;
+
+       var ret = arguments[0];
+       if (ret == undefined || ret === null || arguments.length == 1) return ret;
+       var i;
+       for (i = 1; i < arguments.length; i++) {
+           ret = ret[arguments[i]];
+           if (ret === undefined || ret === null) {
+               return i == arguments.length - 1 ? ret : undefined;
+           }
+       }
+
+       return ret;
+   }
     
     /**
      * Registers a custom client side property handler into the system. These handlers are useful
