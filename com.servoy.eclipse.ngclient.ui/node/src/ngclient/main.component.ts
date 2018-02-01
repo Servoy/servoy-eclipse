@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+import {ServoyService} from './servoy.service';
 import {AllServiceService} from './allservices.service';
 
 @Component({
@@ -9,6 +10,7 @@ import {AllServiceService} from './allservices.service';
 export class MainComponent {
   title = 'Servoy NGClient';
   
-  constructor(private allService:AllServiceService){
+  constructor(private servoyService:ServoyService,    private allService: AllServiceService, ){
+      this.servoyService.connect();
   }
 }
