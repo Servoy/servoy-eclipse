@@ -6,6 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --prod",
+    "build_debug": "ng build --sourcemap --watch",
     "test": "ng test -sm=false",
     "lint": "ng lint",
     "e2e": "ng e2e"

@@ -134,7 +134,15 @@ public class Activator extends Plugin
 				}
 			}
 		}
-		new RunNPMCommand(npmPath, new File(projectNodeFolder.getLocationURI()), "install", "run-script build --scripts-prepend-node-path").schedule();
+		RunNPMCommand installCommand = new RunNPMCommand(npmPath, new File(projectNodeFolder.getLocationURI()), "install");
+		installCommand.setRule(projectNodeFolder);
+		installCommand.setUser(false);
+		RunNPMCommand buildCommand = new RunNPMCommand(npmPath, new File(projectNodeFolder.getLocationURI()),
+			"run-script build_debug --scripts-prepend-node-path");
+		buildCommand.setUser(false);
+		buildCommand.setSystem(true);
+		installCommand.setNextJob(buildCommand);
+		installCommand.schedule();
 	}
 
 	@Override

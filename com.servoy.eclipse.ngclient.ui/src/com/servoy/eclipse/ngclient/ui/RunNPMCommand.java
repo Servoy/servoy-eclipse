@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 /**
  * @author jcompagner
@@ -39,6 +40,7 @@ public class RunNPMCommand extends WorkspaceJob
 	private final File projectNodeFolder;
 	private final String[] commands;
 	private final File npmPath;
+	private Job nextJob;
 
 	/**
 	 * @param name
@@ -78,12 +80,21 @@ public class RunNPMCommand extends WorkspaceJob
 				int exitValue = process.waitFor();
 				System.err.println(exitValue);
 			}
+			if (nextJob != null) nextJob.schedule();
 		}
 		catch (Exception e)
 		{
 			return Status.CANCEL_STATUS;
 		}
 		return Status.OK_STATUS;
+	}
+
+	/**
+	 * @param buildCommand
+	 */
+	public void setNextJob(Job nextJob)
+	{
+		this.nextJob = nextJob;
 	}
 
 }
