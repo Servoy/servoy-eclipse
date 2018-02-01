@@ -75,6 +75,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 	private Combo defaultI18NTable;
 	private Button btnCreateI18NTable;
 	private Button btnRecreateFormsOnI18NChange;
+	private Button btnAutoCreateI18NFiles;
 
 	private UserTypingMonitorListener typingListener;
 
@@ -186,8 +187,9 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		});
 
 		btnRecreateFormsOnI18NChange = new Button(composite, SWT.CHECK);
-		GridData btnRecreateFormsData = new GridData(GridData.HORIZONTAL_ALIGN_END);
+		GridData btnRecreateFormsData = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		btnRecreateFormsData.verticalIndent = 5;
+		btnRecreateFormsData.horizontalSpan = 3;
 		btnRecreateFormsOnI18NChange.setLayoutData(btnRecreateFormsData);
 		btnRecreateFormsOnI18NChange.setText("Recreate forms in debug clients on i18n change");
 		btnRecreateFormsOnI18NChange.addListener(SWT.Selection, new Listener()
@@ -206,6 +208,28 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		});
 		btnRecreateFormsOnI18NChange.setSelection(Activator.getEclipsePreferences().getBoolean(Activator.RECREATE_ON_I18N_CHANGE_PREFERENCE, true));
 
+		btnAutoCreateI18NFiles = new Button(composite, SWT.CHECK);
+		GridData btnAutoCreateI18NFilesData = new GridData(GridData.HORIZONTAL_ALIGN_END);
+		btnAutoCreateI18NFilesData.verticalIndent = 5;
+		btnAutoCreateI18NFiles.setLayoutData(btnAutoCreateI18NFilesData);
+		btnAutoCreateI18NFiles.setText("Automatically create I18N files in the workspace");
+		btnAutoCreateI18NFiles.setToolTipText(
+			"If set, I18N files are created when activating solution, updating solution's modules or setting the I18N property of the solution.\nIf not set you need to use 'Read from DB' from the I18N node from Solution Explorer to create the I18N files");
+		btnAutoCreateI18NFiles.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				Activator.getEclipsePreferences().putBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, btnAutoCreateI18NFiles.getSelection());
+				try
+				{
+					Activator.getEclipsePreferences().flush();
+				}
+				catch (BackingStoreException e)
+				{
+				}
+			}
+		});
+		btnAutoCreateI18NFiles.setSelection(Activator.getEclipsePreferences().getBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, true));
 
 		// Prepare the array of locales. We do this only once, here, not in initializeFields,
 		// which can be invoked several times.

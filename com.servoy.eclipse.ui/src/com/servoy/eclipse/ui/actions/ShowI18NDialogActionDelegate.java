@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.I18NMessagesUtil;
@@ -244,7 +245,10 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 		activeProject.getEditingSolution().setI18nDataSource(DataSourceUtils.createDBTableDataSource(serverName, tableName));
 		if (showDatasourceWarning) I18NMessagesUtil.showDatasourceWarning();
 		activeProject.saveEditingSolutionNodes(new IPersist[] { activeProject.getEditingSolution() }, false);
-		EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
+		if (Activator.getEclipsePreferences().getBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, true))
+		{
+			EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
+		}
 	}
 
 	public void selectionChanged(IAction action, ISelection selection)

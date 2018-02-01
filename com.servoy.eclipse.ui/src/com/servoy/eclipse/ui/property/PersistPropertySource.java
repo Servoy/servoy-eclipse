@@ -2186,7 +2186,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						I18NMessagesUtil.showDatasourceWarning();
 						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-						EclipseMessages.writeProjectI18NFiles(servoyProject, false, false);
+						if (Activator.getEclipsePreferences().getBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, true))
+						{
+							EclipseMessages.writeProjectI18NFiles(servoyProject, false, false);
+						}
 					}
 				}
 			}
