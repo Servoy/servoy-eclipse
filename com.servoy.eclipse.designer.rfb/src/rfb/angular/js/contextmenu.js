@@ -18,7 +18,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 			function getDisplayName(componentName) {
 				if($scope.packages && $scope.packages.length) {
 					var packageAndComponent = componentName.split(".");
-					if(componentName == "component" || packageAndComponent[1] == "*") return "Component";
+					if(componentName == "component" || packageAndComponent[1] == "*") return "Component [...]";
 					for(var i = 0; i < $scope.packages.length; i++) {
 						if($scope.packages[i].packageName == packageAndComponent[0]) {
 							var displayName = findComponentDisplayName($scope.packages[i].components, packageAndComponent[1]);

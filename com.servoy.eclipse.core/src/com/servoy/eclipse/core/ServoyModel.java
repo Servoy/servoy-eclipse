@@ -290,7 +290,8 @@ public class ServoyModel extends AbstractServoyModel
 					aProject.refreshMemServer();
 					ServoyResourcesProject resourceProject = aProject.getResourcesProject();
 					if (solution != null && (solution.getI18nDataSource() != null || aProject.getModules().length > 1) && resourceProject != null &&
-						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null)
+						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null &&
+						Activator.getEclipsePreferences().getBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, true))
 						EclipseMessages.writeProjectI18NFiles(aProject, false, false);
 
 					boolean isMobile = solution.getSolutionType() == SolutionMetaData.MOBILE;
@@ -540,7 +541,10 @@ public class ServoyModel extends AbstractServoyModel
 							});
 						}
 
-						EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
+						if (Activator.getEclipsePreferences().getBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, true))
+						{
+							EclipseMessages.writeProjectI18NFiles(activeProject, false, false);
+						}
 						updateWorkingSet();
 						testBuildPathsAndBuild(activeProject, false);
 						buildProjects(Arrays.asList(getServoyProjects()));
@@ -586,7 +590,10 @@ public class ServoyModel extends AbstractServoyModel
 									{
 										try
 										{
-											EclipseMessages.writeProjectI18NFiles(toProject, false, false);
+											if (Activator.getEclipsePreferences().getBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, true))
+											{
+												EclipseMessages.writeProjectI18NFiles(toProject, false, false);
+											}
 											ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(toProject, true);
 										}
 										catch (Exception ex)

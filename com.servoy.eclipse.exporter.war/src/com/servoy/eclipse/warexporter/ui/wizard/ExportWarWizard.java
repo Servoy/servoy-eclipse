@@ -128,6 +128,11 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			createErrorPage("No active Servoy solution project found", "No active Servoy solution project found",
 				"Please activate a Servoy solution project before trying to export");
 		}
+		else if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null)
+		{
+			createErrorPage("No active Resource project found", "No active Resource project found",
+				"Please activate a Resource project before trying to export");
+		}
 		else if (BuilderUtils.getMarkers(activeProject) == BuilderUtils.HAS_ERROR_MARKERS)
 		{
 			createErrorPage("Solution with errors", "Solution with errors", "Cannot export solution with errors, please fix them first");

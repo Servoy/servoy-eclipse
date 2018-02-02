@@ -1,4 +1,4 @@
-angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorService, $selectionUtils,$timeout) {
+angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorService, $selectionUtils,$timeout,$window) {
 
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
@@ -23,6 +23,12 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 				return null;
 			}	
 			return node;	
+		}
+
+		function clearHighlight() {
+			highlightDiv.style.display = 'none';
+			highlightDiv.style.outline = "";
+			if (!editorScope.isAbsoluteFormLayout()) $editorService.setStatusBarText("");			
 		}
 
 		function drawHighlightDiv() {
@@ -70,15 +76,11 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 					}
 				}
 				else {
-					highlightDiv.style.display = 'none';
-					highlightDiv.style.outline = "";
-					if (!editorScope.isAbsoluteFormLayout()) $editorService.setStatusBarText("");
+					clearHighlight();
 				}
 			}
 			else {
-				highlightDiv.style.display = 'none';
-				highlightDiv.style.outline = "";
-				if (!editorScope.isAbsoluteFormLayout()) $editorService.setStatusBarText("");
+				clearHighlight();
 			}
 		}
 		
@@ -90,6 +92,17 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 			execute = $timeout(drawHighlightDiv,300);
 		}
 		
+		function cancelHighlight() {
+			if (execute)
+				$timeout.cancel(execute);
+			clearHighlight();
+		}
+
 		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove); // real selection in editor content iframe
+		editorScope.registerDOMEvent("mouseleave","CONTENTFRAME_OVERLAY", cancelHighlight);
+		
+		$($window).resize(function() {
+			cancelHighlight();
+		});
 	});
 });

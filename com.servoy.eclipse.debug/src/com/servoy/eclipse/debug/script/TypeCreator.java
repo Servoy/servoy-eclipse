@@ -41,7 +41,6 @@ import javax.swing.Icon;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -107,7 +106,6 @@ import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
@@ -281,69 +279,39 @@ public class TypeCreator extends TypeCache
 
 	public static final String PLUGIN_TYPE_PREFIX = "plugins.";
 
-	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/function.png"), null));
-	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/properties.png"), null));
-	protected final static ImageDescriptor CONSTANT = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/constant.png"), null));
+	protected final static ImageDescriptor METHOD = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("function.png");
+	protected final static ImageDescriptor PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("properties.png");
+	protected final static ImageDescriptor CONSTANT = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("constant.png");
+	protected final static ImageDescriptor ELEMENTS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("elements.png");
+	protected final static ImageDescriptor SPECIAL_PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("special_properties.png");
 
-	protected final static ImageDescriptor ELEMENTS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/elements.png"), null));
+	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_public.png");
+	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_private.png");
+	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_public.png");
+	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(
+		"method_protected.png");
+	protected final static ImageDescriptor PRIVATE_GLOBAL_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_private.png");
 
-	protected final static ImageDescriptor SPECIAL_PROPERTY = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties.png"), null));
+	protected final static ImageDescriptor FORM_PUBLIC_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_public.png");
+	protected final static ImageDescriptor FORM_PROTECTED_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_protected.png");
+	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_private.png");
+	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_public.png");
+	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_private.png");
 
-	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.png"), null));
-	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.png"), null));
-	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_public.png"), null));
-	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_protected.png"), null));
-	protected final static ImageDescriptor PRIVATE_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_private.png"), null));
+	protected final static ImageDescriptor FOUNDSET_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("foundset.png");
+	protected final static ImageDescriptor RELATION_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("relation.png");
+	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("relation_protected.png");
+	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("relation_private.png");
 
-	protected final static ImageDescriptor FORM_PUBLIC_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_public.png"), null));
-	protected final static ImageDescriptor FORM_PROTECTED_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_protected.png"), null));
-	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_private.png"), null));
-	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.png"), null));
-	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.png"), null));
+	protected final static ImageDescriptor COLUMN_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("column.png");
+	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("columnaggr.png");
+	protected final static ImageDescriptor COLUMN_CALC_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("columncalc.png");
 
-	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/foundset.png"), null));
-	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/relation.png"), null));
-	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_protected.png"), null));
-	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_private.png"), null));
-
-	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/column.png"), null));
-	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columnaggr.png"), null));
-	protected final static ImageDescriptor COLUMN_CALC_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columncalc.png"), null));
-
-	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/globals.png"), null));
-	protected final static ImageDescriptor SCOPES = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/scopes.png"), null));
-	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/forms.png"), null));
-
-	protected final static ImageDescriptor PLUGINS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugins.png"), null));
-
-	protected final static ImageDescriptor PLUGIN_DEFAULT = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin.png"), null));
+	protected final static ImageDescriptor GLOBALS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("globals.png");
+	protected final static ImageDescriptor SCOPES = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("scopes.png");
+	protected final static ImageDescriptor FORMS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("forms.png");
+	protected final static ImageDescriptor PLUGINS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("plugins.png");
+	protected final static ImageDescriptor PLUGIN_DEFAULT = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("plugin.png");
 
 	public static final String ARRAY_INDEX_PROPERTY_PREFIX = "array__indexedby_";
 
@@ -847,6 +815,7 @@ public class TypeCreator extends TypeCache
 				{
 					((ServoyModel)servoyModel).addPersistChangeListener(true, new IPersistChangeListener()
 					{
+
 						public void persistChanges(Collection<IPersist> changes)
 						{
 							Job job = new Job("clearing cache")

@@ -181,11 +181,11 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	private void updateDataSourceCache(Form form)
 	{
 		String oldDataSource = formToDataSource.get(form);
-		String newDataSource = form.getDataSource();
+		String newDataSource = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
 		if (oldDataSource != null && !oldDataSource.equals(newDataSource) || oldDataSource == null && newDataSource != null)
 		{
-			getForms(oldDataSource).remove(form);
-			getForms(newDataSource).add(form);
+			getFormsByDatasource(oldDataSource, false).remove(form);
+			getFormsByDatasource(newDataSource, false).add(form);
 			formToDataSource.put(form, newDataSource);
 		}
 		getForms(null).add(form);
@@ -194,10 +194,26 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	@Override
 	public Set<Form> getForms(String datasource)
 	{
+		return getFormsByDatasource(datasource, true);
+	}
+
+	private Set<Form> getFormsByDatasource(String datasource, boolean includeNone)
+	{
 		String ds = datasource == null ? ALL_FORMS : datasource;
 		if (formCacheByDataSource.get(ds) == null)
 		{
 			formCacheByDataSource.put(ds, super.getForms(datasource));
+		}
+		if (includeNone)
+		{
+			if (formCacheByDataSource.get(Form.DATASOURCE_NONE) == null)
+			{
+				formCacheByDataSource.put(Form.DATASOURCE_NONE, super.getForms(Form.DATASOURCE_NONE));
+			}
+			Set<Form> result = new TreeSet<Form>(NameComparator.INSTANCE);
+			result.addAll(formCacheByDataSource.get(ds));
+			result.addAll(formCacheByDataSource.get(Form.DATASOURCE_NONE));
+			return result;
 		}
 		return formCacheByDataSource.get(ds);
 	}
@@ -209,9 +225,10 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 		if (persist instanceof Form)
 		{
 			Form form = (Form)persist;
-			getForms(null).add(form);
-			formToDataSource.put(form, form.getDataSource());
-			getForms(form.getDataSource()).add(form);
+			getFormsByDatasource(null, false).add(form);
+			String ds = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
+			formToDataSource.put(form, ds);
+			getFormsByDatasource(ds, false).add(form);
 		}
 	}
 
@@ -221,9 +238,10 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 		super.itemRemoved(persist);
 		if (persist instanceof Form)
 		{
-			getForms(null).remove(persist);
-			formToDataSource.remove(persist);
-			getForms(((Form)persist).getDataSource()).remove(persist);
+			Form form = (Form)persist;
+			getFormsByDatasource(null, false).remove(form);
+			formToDataSource.remove(form);
+			getForms(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE).remove(form);
 		}
 	}
 
@@ -239,7 +257,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 			{
 				Form f = it.next();
 				allforms.add(f);
-				formToDataSource.put(f, f.getDataSource());
+				formToDataSource.put(f, f.getDataSource() != null ? f.getDataSource() : Form.DATASOURCE_NONE);
 			}
 			formCacheByDataSource.put(ALL_FORMS, allforms);
 		}

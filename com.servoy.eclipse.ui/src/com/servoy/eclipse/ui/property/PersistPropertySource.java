@@ -2186,7 +2186,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						I18NMessagesUtil.showDatasourceWarning();
 						ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-						EclipseMessages.writeProjectI18NFiles(servoyProject, false, false);
+						if (Activator.getEclipsePreferences().getBoolean(Activator.AUTO_CREATE_I18N_FILES_PREFERENCE, true))
+						{
+							EclipseMessages.writeProjectI18NFiles(servoyProject, false, false);
+						}
 					}
 				}
 			}
@@ -2205,6 +2208,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				else if ("solutionType".equals(id))
 				{
 					ServoyModelManager.getServoyModelManager().getServoyModel().fireActiveProjectUpdated(IActiveProjectListener.SOLUTION_TYPE_CHANGED);
+				}
+				else if ("dataSource".equals(id))
+				{
+					ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()).getSolution().getChangeHandler().fireIPersistChanged(
+						persistContext.getPersist());
 				}
 				else
 				{

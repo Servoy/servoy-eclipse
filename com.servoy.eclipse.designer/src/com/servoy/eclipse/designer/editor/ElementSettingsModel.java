@@ -30,6 +30,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.SecurityInfo;
@@ -128,7 +129,7 @@ public class ElementSettingsModel
 		try
 		{
 			ArrayList<IPersist> formElements = new ArrayList<IPersist>();
-			Iterator<IPersist> it = form.getAllObjects();
+			Iterator< ? extends IPersist> it = form.isResponsiveLayout() ? form.getFlattenedObjects(NameComparator.INSTANCE).iterator() : form.getAllObjects();
 			while (it.hasNext())
 			{
 				IPersist elem = it.next();

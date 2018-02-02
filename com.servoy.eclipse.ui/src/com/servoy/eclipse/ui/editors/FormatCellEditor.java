@@ -259,14 +259,6 @@ public class FormatCellEditor extends TextDialogCellEditor
 										}
 									}
 								}
-								else if (vl.getCustomValues() != null)
-								{
-									String displayVal = vl.getCustomValues().split("\\||\n")[0].trim();
-									if (displayVal.matches("^-?\\d+$"))
-									{
-										type = IColumnTypes.NUMBER;
-									}
-								}
 								break;
 							}
 						}
