@@ -3758,7 +3758,25 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													if (DataSourceUtils.isDatasourceUri(fs))
 													{
-														invalid = persistFlattenedSolution.getTable(fs) == null;
+														ITable table = persistFlattenedSolution.getTable(fs);
+														invalid = table == null;
+														if (table != null && context instanceof Form)
+														{
+															Form form = (Form)context;
+															Iterator<ScriptVariable> iterator = form.getScriptVariables(false);
+															while (iterator.hasNext())
+															{
+																ScriptVariable var = iterator.next();
+																if (table.getColumn(var.getName()) != null)
+																{
+																	ServoyMarker mk = MarkerMessages.FormVariableTableColFromComponent.fill(form.getName(),
+																		var.getName(), table.getName(),
+																		((ISupportName)o).getName() != null ? ((ISupportName)o).getName() : "", pd.getName());
+																	addMarker(project, mk.getType(), mk.getText(), -1, FORM_VARIABLE_TYPE_COL,
+																		IMarker.PRIORITY_NORMAL, null, o);
+																}
+															}
+														}
 													}
 													else
 													{

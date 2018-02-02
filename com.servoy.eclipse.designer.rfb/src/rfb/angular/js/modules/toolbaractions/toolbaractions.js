@@ -36,7 +36,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 		});
 		var hideInheritedPromise = $editorService.isHideInherited();
 		hideInheritedPromise.then(function(result) {
-			hideInheritedElements(result);
+			btnHideInheritedElements.state = result;
+			$editorService.hideInheritedElements(result);
 		});		
 	});
 	var btnPlaceField = {
@@ -168,19 +169,6 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	$toolbar.add(btnTabSequence, TOOLBAR_CATEGORIES.FORM);
 	$toolbar.add(btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
-	var hideInheritedElements = function(hide)
-	{
-		btnHideInheritedElements.state = hide;
-		editorScope.getEditorContentRootScope().hideInherited = hide;
-		editorScope.getEditorContentRootScope().$digest();
-		$(editorScope.contentDocument).find('.inherited_element').each(function(index, element) {
-			if (hide) {
-				$(element).hide();
-			} else {
-				$(element).show();
-			}
-		});
-	};
 	var btnHideInheritedElements = {
 		text: "Hide inherited elements",
 		icon: "../../images/hide_inherited.png",
@@ -195,7 +183,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 				btnHideInheritedElements.state = true;
 				this.text = "Hide inherited elements"
 			}
-			hideInheritedElements(btnHideInheritedElements.state);
+			$editorService.hideInheritedElements(btnHideInheritedElements.state);
 			$editorService.executeAction('toggleHideInherited');
 		},
 	};

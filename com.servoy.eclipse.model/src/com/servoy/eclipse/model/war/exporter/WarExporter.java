@@ -38,6 +38,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -325,7 +327,8 @@ public class WarExporter
 			if (proc.waitFor() != 0)
 			{
 				Debug.error(message);
-				throw new ExportException("Could not group and minify JS and CSS resources.");
+				throw new ExportException(
+					"Could not group and minify JS and CSS resources. See log for more details and servoy wiki on how to exclude libraries from grouping using group property in the spec.");
 			}
 
 			//delete unneeded files
@@ -1891,14 +1894,22 @@ public class WarExporter
 				if (libs != null && libs.size() > 0)
 				{
 					File f = iterator.next();
-					if (libs.size() == 1)
+					if (libs.size() > 1)
 					{
-						pluginFiles.add(f);
-					}
-					else
-					{
+						//in this case we need to copy the newest
+						List<File> sortedLibs = new ArrayList<File>(libs);
+						Collections.sort(sortedLibs, new Comparator<File>()
+						{
+							@Override
+							public int compare(File file0, File file1)
+							{
+								return Long.compare(file0.lastModified(), file1.lastModified());
+							}
+						});
+						f = sortedLibs.get(sortedLibs.size() - 1);
 						ServoyLog.logInfo("WAR EXPORT: More versions of lib " + libName + " found, will copy " + f.getAbsolutePath() + " to the war file.");
 					}
+					pluginFiles.add(f);
 					found = true;
 					break;
 				}
