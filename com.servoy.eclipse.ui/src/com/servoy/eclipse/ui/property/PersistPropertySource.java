@@ -145,6 +145,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -200,6 +201,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.ICanBeLinkedToFoundset;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.CSSPositionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -1369,6 +1371,33 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 
 				return borderPropertyController;
+			}
+
+			if (CSSPositionPropertyType.TYPE_NAME.equals(propertyType.getName()))
+			{
+				return new PropertyController<CSSPosition, Object>(id, displayName, new ComplexPropertyConverter<CSSPosition>()
+				{
+					@Override
+					public Object convertProperty(Object property, CSSPosition value)
+					{
+						return new ComplexProperty<CSSPosition>(value)
+						{
+							@Override
+							public IPropertySource getPropertySource()
+							{
+								CSSPositionPropertySource cssPositionPropertySource = new CSSPositionPropertySource(this);
+								cssPositionPropertySource.setReadonly(readOnly);
+								return cssPositionPropertySource;
+							}
+						};
+					}
+				}, CSSPositionPropertySource.getLabelProvider(), new ICellEditorFactory()
+				{
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return CSSPositionPropertySource.createPropertyEditor(parent);
+					}
+				});
 			}
 
 			if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())

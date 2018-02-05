@@ -203,7 +203,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 			return DesignPagetype.Rfb;
 		}
 
-		if (form != null && (form.isResponsiveLayout() || (fs != null && hasWebComponents(fs.getFlattenedForm(form)))))
+		if (form != null && (form.getUseCssPosition() || form.isResponsiveLayout() || (fs != null && hasWebComponents(fs.getFlattenedForm(form)))))
 		{
 			return DesignPagetype.Rfb;
 		}

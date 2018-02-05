@@ -76,6 +76,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							    
 			var formName = $webSocket.getURLParameter("f");
 			var formLayout = $webSocket.getURLParameter("l");
+			var cssPosition = $webSocket.getURLParameter("p");
 			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
 			var formHeight = parseInt($webSocket.getURLParameter("h"), 10);
 			var editorContentRootScope = null;
@@ -688,7 +689,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.isAbsoluteFormLayout = function() {
-				return formLayout == "absolute";
+				return (formLayout == "absolute" || formLayout == "csspos");
+			}
+			
+			$scope.isCSSPositionFormLayout = function() {
+				return formLayout == "csspos";
 			}
 			
 			$scope.refreshEditorContent = function() {

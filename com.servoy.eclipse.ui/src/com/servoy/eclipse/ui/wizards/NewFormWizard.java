@@ -335,6 +335,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						form.setView(IFormConstants.VIEW_TYPE_TABLE_LOCKED);
 						ElementFactory.addFormListItems(form, null, null);
 					}
+					if (newFormWizardPage.isCSSPosition())
+					{
+						form.setUseCssPosition(Boolean.TRUE);
+					}
 				}
 				else
 				{
@@ -457,7 +461,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		private Button listFormCheck;
 
-		private Button bTypeAbstract, bTypeAnchored, bTypeResponsive;
+		private Button bTypeAbstract, bTypeAnchored, bTypeResponsive, bTypeCSSPosition;
 
 		/**
 		 * Creates a new form creation wizard page.
@@ -576,6 +580,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 		public boolean isAbstractForm()
 		{
 			return bTypeAbstract != null && bTypeAbstract.getSelection();
+		}
+
+		public boolean isCSSPosition()
+		{
+			return bTypeCSSPosition != null && bTypeCSSPosition.getSelection();
 		}
 
 		/**
@@ -787,6 +796,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 				bTypeAnchored.setText("Anchored");
 				bTypeAnchored.addSelectionListener(typeSelectionListener);
 				bTypeAnchored.setSelection(true);
+				bTypeCSSPosition = new Button(grpType, SWT.RADIO);
+				bTypeCSSPosition.setText("CSS Position");
+				bTypeCSSPosition.addSelectionListener(typeSelectionListener);
 				bTypeResponsive = new Button(grpType, SWT.RADIO);
 				bTypeResponsive.setText("Responsive");
 				bTypeResponsive.addSelectionListener(typeSelectionListener);
@@ -1035,6 +1047,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						{
 							setTypeButtonSelection(bTypeResponsive);
 						}
+						else if (superForm.getUseCssPosition())
+						{
+							setTypeButtonSelection(bTypeCSSPosition);
+						}
 						else
 						{
 							setTypeButtonSelection(bTypeAnchored);
@@ -1201,6 +1217,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			bTypeAbstract.setSelection(bTypeAbstract == b);
 			bTypeAnchored.setSelection(bTypeAnchored == b);
 			bTypeResponsive.setSelection(bTypeResponsive == b);
+			bTypeCSSPosition.setSelection(bTypeCSSPosition == b);
 		}
 
 		private void setTypeButtonsEnabled(boolean enabled)
@@ -1208,6 +1225,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			bTypeAbstract.setEnabled(enabled);
 			bTypeAnchored.setEnabled(enabled);
 			bTypeResponsive.setEnabled(enabled);
+			bTypeCSSPosition.setEnabled(enabled);
 		}
 
 		private void setFormName(String text)

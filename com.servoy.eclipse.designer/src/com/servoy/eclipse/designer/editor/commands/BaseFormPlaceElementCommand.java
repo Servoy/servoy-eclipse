@@ -56,6 +56,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -262,8 +263,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			else
 			{
-				element.setSize(newElementSize);
-				element.setLocation(location);
+				CSSPosition.setSize(element, newElementSize.width, newElementSize.height);
+				CSSPosition.setLocation(element, location.x, location.y);
 			}
 		}
 	}
