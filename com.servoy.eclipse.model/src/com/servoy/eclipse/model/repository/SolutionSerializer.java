@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -603,7 +604,9 @@ public class SolutionSerializer
 			if (workingSets != null)
 			{
 				JSONArray items = new ServoyJSONArray();
-				for (String workingSetName : workingSets.keySet())
+				List<String> workingSetNames = new ArrayList<String>(workingSets.keySet());
+				Collections.sort(workingSetNames);
+				for (String workingSetName : workingSetNames)
 				{
 					try
 					{
