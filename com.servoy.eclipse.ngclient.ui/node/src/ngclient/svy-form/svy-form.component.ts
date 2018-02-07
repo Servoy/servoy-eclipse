@@ -2,6 +2,8 @@ import { Component, Input,OnInit,OnDestroy,ViewChild,ViewChildren,TemplateRef,Qu
 
 import {FormService,FormCache,StructureCache,ComponentCache} from '../form.service';
 
+import {SabloService} from '../../sablo/sablo.service'
+
 
 @Component({
   selector: 'svy-form',
@@ -38,7 +40,7 @@ export class FormComponent implements OnInit, OnDestroy {
   
   formCache:FormCache;
   
-  constructor(private formservice:FormService) { 
+  constructor(private formservice:FormService, private sabloService:SabloService) { 
   }
   
   getTemplate(item:StructureCache|ComponentCache):TemplateRef<any> {
@@ -52,21 +54,24 @@ export class FormComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
       this.formCache = this.formservice.getFormCache(this);
+      this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true)
   }
   
   ngOnDestroy() {
   }
   
   private datachange(component:string,property:string,value) {
+      const model = this.formCache.getComponent(component).model;
+      const oldValue = model[property];
       this.formCache.getComponent(component).model[property] = value;
-     this.formservice.sendChanges(this.name, component, property,value);
+     this.formservice.sendChanges(this.name, component, property,value,oldValue);
   } 
   
   private getHandler(item:ComponentCache, handler:string) {
       if (item.handlers.indexOf(handler) >= 0) {
           var me = this;
           return function(e) {
-              me.formservice.executeEvent(this.name, item.name, handler,arguments);
+              me.formservice.executeEvent(me.name, item.name, handler,arguments);
           }
       }
   }
