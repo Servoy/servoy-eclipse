@@ -8,7 +8,7 @@ export class ConverterService {
     public static readonly DEFAULT_CONVERSION_TO_SERVER_FUNC = "_dctsf";
 
     
-    private customPropertyConverters = {};
+    private customPropertyConverters:{[s:string]:IConverter} = {};
     
     public  convertFromServerToClient(serverSentData, conversionInfo, currentClientData, scope, modelGetter) {
         if (typeof conversionInfo === 'string' || typeof conversionInfo === 'number') {
@@ -137,8 +137,69 @@ export class ConverterService {
      * 
      * }
      */
-    public registerCustomPropertyHandler(propertyTypeID, customHandler, overwrite) {
+    public registerCustomPropertyHandler(propertyTypeID:string, customHandler:IConverter, overwrite?:boolean) {
         if (overwrite == false && this.customPropertyConverters[propertyTypeID] ) return; 
         this.customPropertyConverters[propertyTypeID] = customHandler;
     }
+    
+    public getEventArgs(args,eventName)
+    {
+        var newargs = []
+        for (var i = 0; i < args.length; i++) {
+            var arg = args[i]
+            if (arg && arg.originalEvent) arg = arg.originalEvent;
+            if(arg  instanceof MouseEvent ||arg  instanceof KeyboardEvent){
+                var $event = arg;
+                var eventObj = {}
+                var modifiers = 0;
+                if($event.shiftKey) modifiers = modifiers||SwingModifiers.SHIFT_MASK;
+                if($event.metaKey) modifiers = modifiers||SwingModifiers.META_MASK;
+                if($event.altKey) modifiers = modifiers|| SwingModifiers.ALT_MASK;
+                if($event.ctrlKey) modifiers = modifiers || SwingModifiers.CTRL_MASK;
+
+                eventObj['type'] = 'event'; 
+                eventObj['eventName'] = eventName; 
+                eventObj['modifiers'] = modifiers;
+                eventObj['timestamp'] = new Date().getTime();
+                eventObj['x']= $event['pageX'];
+                eventObj['y']= $event['pageY'];
+                arg = eventObj
+            }
+            else if (arg instanceof Event)
+            {
+                var eventObj = {}
+                eventObj['type'] = 'event'; 
+                eventObj['eventName'] = eventName;
+                eventObj['timestamp'] = new Date().getTime();
+                arg = eventObj
+            }
+            else arg = this.convertClientObject(arg); // TODO should be $sabloConverters.convertFromClientToServer(now, beanConversionInfo[property] ?, undefined);, but as we do not know handler arg types, we just do default conversion (for dates & types that use $sabloUtils.DEFAULT_CONVERSION_TO_SERVER_FUNC)
+
+            newargs.push(arg)
+        }
+        return newargs;
+    }
+}
+
+export interface IConverter {
+    fromServerToClient(serverSentData:Object, currentClientData:Object, scope?:Object, modelGetter?:Object):Object;
+    fromClientToServer(newClientData:Object, oldClientData:Object):Object;
+}
+
+class SwingModifiers {
+    public static readonly SHIFT_MASK = 1;
+    public static readonly CTRL_MASK = 2;
+    public static readonly META_MASK = 4;
+    public static readonly ALT_MASK = 8;
+    public static readonly ALT_GRAPH_MASK = 32;
+    public static readonly BUTTON1_MASK = 16;
+    public static readonly BUTTON2_MASK = 8;
+    public static readonly SHIFT_DOWN_MASK = 64;
+    public static readonly CTRL_DOWN_MASK = 128;
+    public static readonly META_DOWN_MASK = 256;
+    public static readonly ALT_DOWN_MASK = 512;
+    public static readonly BUTTON1_DOWN_MASK = 1024;
+    public static readonly BUTTON2_DOWN_MASK = 2048;
+    public static readonly DOWN_MASK = 4096;
+    public static readonly ALT_GRAPH_DOWN_MASK = 8192;
 }
