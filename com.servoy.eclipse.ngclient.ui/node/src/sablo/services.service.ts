@@ -6,7 +6,7 @@ import { ConverterService } from './converter.service'
 export class ServicesService {
     private serviceProvider: ServiceProvider = new VoidServiceProvider();
 
-    constructor(private converterService:ConverterService) {
+    constructor( private converterService: ConverterService ) {
     }
 
     private serviceScopesConversionInfo = {};
@@ -35,24 +35,28 @@ export class ServicesService {
             if ( service ) {
                 var serviceData = services[servicename];
 
+                try {
+                    for ( var key in serviceData ) {
+                        if ( conversionInfo && conversionInfo[servicename] && conversionInfo[servicename][key] ) {
+                            // convert property, remember type for when a client-server conversion will be needed
+                            if ( !this.serviceScopesConversionInfo[servicename] ) this.serviceScopesConversionInfo[servicename] = {};
+                            serviceData[key] = this.converterService.convertFromServerToClient( serviceData[key], conversionInfo[servicename][key], service[key], service, function() { return service } )
 
-                for ( var key in serviceData ) {
-                    if ( conversionInfo && conversionInfo[servicename] && conversionInfo[servicename][key] ) {
-                        // convert property, remember type for when a client-server conversion will be needed
-                        if ( !this.serviceScopesConversionInfo[servicename] ) this.serviceScopesConversionInfo[servicename] = {};
-                        serviceData[key] =this. converterService.convertFromServerToClient( serviceData[key], conversionInfo[servicename][key], service[key], service,function() { return service})
+                            // TODO datachange should be through EventEmitter...
+                            //                        if ((serviceData[key] !== serviceScope.model[key] || this.serviceScopesConversionInfo[servicename][key] !== conversionInfo[servicename][key]) && serviceData[key]
+                            //                        && serviceData[key][$sabloConverters.INTERNAL_IMPL] && serviceData[key][$sabloConverters.INTERNAL_IMPL].setChangeNotifier) {
+                            //                            serviceData[key][$sabloConverters.INTERNAL_IMPL].setChangeNotifier(getChangeNotifier(servicename, key));
+                            //                        }
+                            this.serviceScopesConversionInfo[servicename][key] = conversionInfo[servicename][key];
+                        } else if ( this.serviceScopesConversionInfo[servicename] && this.serviceScopesConversionInfo[servicename][key] ) {
+                            delete this.serviceScopesConversionInfo[servicename][key];
+                        }
 
-                        // TODO datachange should be through EventEmitter...
-                        //                        if ((serviceData[key] !== serviceScope.model[key] || this.serviceScopesConversionInfo[servicename][key] !== conversionInfo[servicename][key]) && serviceData[key]
-                        //                        && serviceData[key][$sabloConverters.INTERNAL_IMPL] && serviceData[key][$sabloConverters.INTERNAL_IMPL].setChangeNotifier) {
-                        //                            serviceData[key][$sabloConverters.INTERNAL_IMPL].setChangeNotifier(getChangeNotifier(servicename, key));
-                        //                        }
-                        this.serviceScopesConversionInfo[servicename][key] = conversionInfo[servicename][key];
-                    } else if ( this.serviceScopesConversionInfo[servicename] && this.serviceScopesConversionInfo[servicename][key] ) {
-                        delete this.serviceScopesConversionInfo[servicename][key];
+                        service[key] = serviceData[key];
                     }
-
-                    service.model[key] = serviceData[key];
+                }
+                catch ( ex ) {
+                    //                    $log.error(ex);
                 }
             }
         }
