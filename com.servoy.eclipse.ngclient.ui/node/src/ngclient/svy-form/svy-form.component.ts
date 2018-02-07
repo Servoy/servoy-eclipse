@@ -19,18 +19,18 @@ import {FormService,FormCache,StructureCache,ComponentCache} from '../form.servi
                      <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
           </div>
       </ng-template>
-      <ng-template  #svyTextfield  let-state="state" >
-        <servoydefault-textfield [dataprovider]="state.model.dataprovider" (dataproviderChange)="datachange(state.name,'dataprovider',$event)" [name]="state.name" #cmp></servoydefault-textfield>
+      <ng-template  #servoydefaultTextfield  let-state="state" >
+        <servoydefault-textfield [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [name]="state.name" #cmp></servoydefault-textfield>
       </ng-template>
-      <ng-template  #svyButton let-state="state">
-        <servoydefault-button [dataprovider]="state.model.dataprovider" [click]="getHandler(state, 'click')" [name]="state.name" #cmp></servoydefault-button>
+      <ng-template  #servoydefaultButton let-state="state">
+        <servoydefault-button [text]="state.model.text" [onActionMethodID]="getHandler(state, 'onActionMethodID')" [name]="state.name" #cmp></servoydefault-button>
       </ng-template>
    `
 })
 export class FormComponent implements OnInit, OnDestroy {
   @ViewChild('svyResponsiveDiv') readonly svyResponsiveDiv:TemplateRef<any>;
-  @ViewChild('svyTextfield') readonly svyTextfield:TemplateRef<any>;
-  @ViewChild('svyButton') readonly svyButton:TemplateRef<any>;
+  @ViewChild('servoydefaultTextfield') readonly servoydefaultTextfield:TemplateRef<any>;
+  @ViewChild('servoydefaultButton') readonly servoydefaultButton:TemplateRef<any>;
   
   @ViewChildren('cmp') readonly components:QueryList<Component>;
   
