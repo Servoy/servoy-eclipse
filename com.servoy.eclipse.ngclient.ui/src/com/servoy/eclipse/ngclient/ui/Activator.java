@@ -31,6 +31,7 @@ public class Activator extends Plugin
 	private File npmPath;
 	private Job extractingNode;
 	private ServoyProject activeProject;
+	private RunNPMCommand buildCommand;
 
 	public static Activator getInstance()
 	{
@@ -137,8 +138,7 @@ public class Activator extends Plugin
 		RunNPMCommand installCommand = new RunNPMCommand(npmPath, new File(projectNodeFolder.getLocationURI()), "install");
 		installCommand.setRule(projectNodeFolder);
 		installCommand.setUser(false);
-		RunNPMCommand buildCommand = new RunNPMCommand(npmPath, new File(projectNodeFolder.getLocationURI()),
-			"run-script build_debug --scripts-prepend-node-path");
+		buildCommand = new RunNPMCommand(npmPath, new File(projectNodeFolder.getLocationURI()), "run-script build_debug --scripts-prepend-node-path");
 		buildCommand.setUser(false);
 		buildCommand.setSystem(true);
 		installCommand.setNextJob(buildCommand);
@@ -148,6 +148,7 @@ public class Activator extends Plugin
 	@Override
 	public void stop(BundleContext context) throws Exception
 	{
+		if (buildCommand != null) buildCommand.cancel();
 	}
 
 	/**
