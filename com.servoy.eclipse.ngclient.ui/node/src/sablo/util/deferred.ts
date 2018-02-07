@@ -1,9 +1,9 @@
-export class Deferred {
-    public readonly promise: Promise<any>;
+export class Deferred <T>{
+    public readonly promise: Promise<T>;
     private _resolve: ( value ) => void
     private _reject: ( reason ) => void;
     constructor() {
-        this.promise = new Promise(( resolve, reject ) => {
+        this.promise = new Promise<T>(( resolve, reject ) => {
             this._reject = reject;
             this._resolve = resolve;
         } )
@@ -13,7 +13,7 @@ export class Deferred {
         this._reject( reason );
     }
 
-    public resolve( value ) {
+    public resolve( value:T ) {
         this._resolve( value );
     }
 }
