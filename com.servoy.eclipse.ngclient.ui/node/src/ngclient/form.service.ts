@@ -31,8 +31,8 @@ export class FormService {
                                 const beanConversion = formConversion ? formConversion[beanname] : null;
                                 for ( var property in formData[beanname] ) {
                                     let value = formData[beanname][property];
-                                    if (beanConversion && beanConversion[property]) {
-                                       value = this.converterService.convertFromServerToClient( value, beanConversion[property], comp.model[property], null, null );
+                                    if ( beanConversion && beanConversion[property] ) {
+                                        value = this.converterService.convertFromServerToClient( value, beanConversion[property], comp.model[property], null, null );
                                     }
                                     comp.model[property] = value;
                                 }
@@ -76,19 +76,36 @@ export class FormService {
 
     public createFormCache( formName: String, jsonData ) {
         var formCache = new FormCache();
-        if ( jsonData.responsive ) {
+        this.walkOverChildren(jsonData.children, formCache);
+        this.formsCache.set( formName, formCache )
+    }
 
-        }
-        else {
-            jsonData.children.forEach(( elem ) => {
+    private walkOverChildren( children, formCache: FormCache, parent?: StructureCache ) {
+        children.forEach(( elem ) => {
+            if ( elem.layout == true ) {
+                const structure = new StructureCache( elem.styleclass );
+                this.walkOverChildren(elem.children, formCache, structure);
+                if (parent == null) {
+                    formCache.mainStructure = structure;
+                }
+                else {
+                    parent.addChild(structure);
+                }
+            }
+            else {
                 if ( elem.model[ConverterService.TYPES_KEY] != null ) {
                     this.converterService.convertFromServerToClient( elem.model, elem.model[ConverterService.TYPES_KEY], null, null, null );
                     formCache.addConversionInfo( elem.name, elem.model[ConverterService.TYPES_KEY] );
                 }
-                formCache.add( new ComponentCache( elem.name, elem.type, elem.model, elem.handlers, elem.position ) );
-            } );
-        }
-        this.formsCache.set( formName, formCache )
+                const comp = new ComponentCache( elem.name, elem.type, elem.model, elem.handlers, elem.position );
+                if ( parent != null ) {
+                    parent.addChild( comp )
+                }
+                else {
+                    formCache.add( comp );
+                }
+            }
+        } );
     }
 
     public sendChanges( formname: string, beanname: string, property: string, value: object, oldvalue: object ) {
@@ -136,16 +153,16 @@ export class FormService {
 
     public executeEvent( formname: string, beanname: string, handler: string, args: IArguments ) {
         console.log( formname + "," + beanname + ", executing: " + handler + " with values: " + JSON.stringify( args ) );
-        
-        var newargs = this.converterService.getEventArgs(args, handler);
+
+        var newargs = this.converterService.getEventArgs( args, handler );
         var data = {};
-//        if (property) {
-//            data[property] = formState.model[beanName][property];
-//        }
+        //        if (property) {
+        //            data[property] = formState.model[beanName][property];
+        //        }
         var cmd = { formname: formname, beanname: beanname, event: handler, args: newargs, changes: data };
-//        if (rowId)
-//            cmd['rowId'] = rowId;
-        return this.sabloService.callService('formService', 'executeEvent', cmd, false);
+        //        if (rowId)
+        //            cmd['rowId'] = rowId;
+        return this.sabloService.callService( 'formService', 'executeEvent', cmd, false );
     }
 
 
