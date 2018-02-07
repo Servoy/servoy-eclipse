@@ -7,8 +7,8 @@ import { Component, OnInit, Input ,Output,EventEmitter,Renderer,ElementRef} from
 })
 export class ServoyDefaultButton implements OnInit {
  @Input()  name;
- @Input() dataprovider;
- @Input() click;
+ @Input() text;
+ @Input() onActionMethodID;
  
  private readonly renderer: Renderer; 
  private  readonly elementRef: ElementRef;
@@ -20,10 +20,9 @@ export class ServoyDefaultButton implements OnInit {
 }
  
  ngOnInit() {
-     if (this.click) {
-         var me = this;
-         this.renderer.listen(this.elementRef.nativeElement, 'click', function(e) {
-             me.click(e,1);
+     if (this.onActionMethodID) {
+         this.renderer.listen(this.elementRef.nativeElement, 'click', (e) =>{
+             this.onActionMethodID(e);
          });
      } 
  }

@@ -7,8 +7,8 @@ import { Component, OnInit ,Input,Output,EventEmitter} from '@angular/core';
 })
 export class ServoyDefaultTextField implements OnInit {
   @Input() name;
-  @Input() dataprovider
-  @Output() dataproviderChange = new EventEmitter();
+  @Input() dataProviderID
+  @Output() dataProviderIDChange = new EventEmitter();
   
   constructor() { }
 
@@ -16,8 +16,8 @@ export class ServoyDefaultTextField implements OnInit {
       
   }
   update(val : string) {
-      this.dataprovider = val;
-      this.dataproviderChange.emit(this.dataprovider);
+      this.dataProviderID = val;
+      this.dataProviderIDChange.emit(this.dataProviderID);
   }
   
   myapicall(a1,a2,a3) {
