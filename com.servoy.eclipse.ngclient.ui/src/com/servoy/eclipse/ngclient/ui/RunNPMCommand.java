@@ -41,6 +41,7 @@ public class RunNPMCommand extends WorkspaceJob
 	private final String[] commands;
 	private final File npmPath;
 	private Job nextJob;
+	private Process process;
 
 	/**
 	 * @param name
@@ -67,7 +68,7 @@ public class RunNPMCommand extends WorkspaceJob
 				lst.add(npmPath.toString());
 				lst.addAll(Arrays.asList(command.split(" ")));
 				builder.command(lst);
-				Process process = builder.start();
+				process = builder.start();
 				InputStream inputStream = process.getInputStream();
 				byte[] bytes = new byte[512];
 				int read = inputStream.read(bytes);
@@ -77,8 +78,7 @@ public class RunNPMCommand extends WorkspaceJob
 					read = inputStream.read(bytes);
 				}
 				inputStream.close();
-				int exitValue = process.waitFor();
-				System.err.println(exitValue);
+				process.waitFor();
 			}
 			if (nextJob != null) nextJob.schedule();
 		}
@@ -96,5 +96,12 @@ public class RunNPMCommand extends WorkspaceJob
 	{
 		this.nextJob = nextJob;
 	}
+
+	@Override
+	protected void canceling()
+	{
+		if (process != null) process.destroy();
+	}
+
 
 }
