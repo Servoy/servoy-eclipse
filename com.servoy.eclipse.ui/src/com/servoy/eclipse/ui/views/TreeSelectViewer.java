@@ -72,14 +72,14 @@ import com.servoy.eclipse.ui.util.IStatusProvider;
 
 /**
  * Viewer to edit a value in a tree select dialog. The value is displayed in a textfield, a button is shown to edit the text.
- * 
+ *
  * <p>The text field can be made editable by calling setEditable(), the a content proposal will show options made available by the (tree) content provider
  * and formatted by the (text) label provider.
  * <br> When the foeld is editable, the user may enter an invalid value, in that case the foreground color is set to red and the isValid() method returns false (editors and
  * dialog should check this).
- * 
+ *
  * <p>When a IValueEditor is passed in the constructor, an open-button is added to the viewer.
- * 
+ *
  * @author rgansevles
  */
 public class TreeSelectViewer extends StructuredViewer implements IStatusProvider
@@ -140,7 +140,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 		text = createTextField(composite); // may return null if no text field is wanted
 
-		setSelectTextOnEnter(true); // may have to override this setting in places we don't want autoselection of text 
+		setSelectTextOnEnter(true); // may have to override this setting in places we don't want autoselection of text
 
 		if (valueEditor != null)
 		{
@@ -225,7 +225,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 			GroupLayout groupLayout = new GroupLayout(composite);
 			SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
-			sequentialGroup.add(text, GroupLayout.PREFERRED_SIZE, 135, Integer.MAX_VALUE);
+			sequentialGroup.add(text, GroupLayout.PREFERRED_SIZE, 200, Integer.MAX_VALUE);
 			sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(button);
 			if (openButton != null)
 			{
@@ -271,14 +271,14 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	/**
 	 * Causes the receiver to have the <em>keyboard focus</em>, such that all keyboard events will be delivered to it. Focus reassignment will respect
 	 * applicable platform constraints.
-	 * 
+	 *
 	 * @return <code>true</code> if the control got focus, and <code>false</code> if it was unable to.
-	 * 
+	 *
 	 * @exception SWTException <ul>
 	 *                <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
 	 *                <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 	 *                </ul>
-	 * 
+	 *
 	 * @see #forceFocus
 	 */
 	public boolean setFocus()
@@ -289,14 +289,14 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 	/**
 	 * Forces the receiver to have the <em>keyboard focus</em>, causing all keyboard events to be delivered to it.
-	 * 
+	 *
 	 * @return <code>true</code> if the control got focus, and <code>false</code> if it was unable to.
-	 * 
+	 *
 	 * @exception SWTException <ul>
 	 *                <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
 	 *                <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
 	 *                </ul>
-	 * 
+	 *
 	 * @see #setFocus
 	 */
 	public boolean forceFocus()
@@ -595,7 +595,7 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 	{
 		if (s == null || s.length() == 0) button.setText("   ");
 		else button.setText(s);
-		int noLoops = 10; //at least 7 loops are necessary; for the ValueListEditor layout to be displayed correctly 
+		int noLoops = 10; //at least 7 loops are necessary; for the ValueListEditor layout to be displayed correctly
 		while (composite.getShell().isLayoutDeferred() && noLoops > 0)
 		{
 			composite.getShell().setLayoutDeferred(false);
