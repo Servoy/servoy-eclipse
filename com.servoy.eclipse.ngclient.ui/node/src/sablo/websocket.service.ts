@@ -17,24 +17,11 @@ export class WebsocketService {
     private pathname: string;
     private queryString: string;
     private wsSession: WebsocketSession;
+    private wsSessionDeferred:Deferred<WebsocketSession>;
     private connectionArguments = {};
     private lastServerMessageNumber = null;
 
-    public readonly messages: EventEmitter<{ [property: string]: Object }>;
-
     constructor( private windowRef: WindowRefService, private services: ServicesService, private converterService: ConverterService ) {
-        this.messages = new EventEmitter()
-
-        // test data
-        var me = this;
-        var timer = function() {
-            me.messages.next( { formname: "test", componentname: "text1", property: "dataprovider", value: Math.random() * 100 } )
-            me.messages.next( { service: "testService", property: "avalue", value: Math.random() * 100 } )
-            me.messages.next( { service: "testService", call: "myfunc", args: ["rob", "johan"] } )
-            setTimeout( timer, 3000 );
-        }
-        setTimeout( timer, 3000 );
-
     }
 
     private generateURL( context, args, queryArgs, websocketUri ) {
@@ -85,17 +72,6 @@ export class WebsocketService {
         return new_uri;
     }
 
-    public sendChanges( formname: string, componentname: string, property: string, value: object ) {
-        console.log( formname + "," + componentname + "," + property + "," + value );
-    }
-
-    public executeEvent( formname: string, componentname: string, handler: string, args: IArguments ) {
-        console.log( formname + "," + componentname + ", executing: " + handler + " with values: " + JSON.stringify( args ) );
-    }
-
-
-
-
     public connect( context, args, queryArgs, websocketUri ):WebsocketSession {
 
         this.connectionArguments = {
@@ -109,13 +85,14 @@ export class WebsocketService {
         const websocket = new ReconnectingWebSocket(() => {return this.generateURL( this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'] );
         } );
-
-
+        
         this.wsSession = new WebsocketSession( websocket, this, this.services, this.windowRef, this.converterService );
         // todo should we just merge $websocket and $services into $sablo that just has all
         // the public api of sablo (like connect, conversions, services)
         //$services.setSession(wsSession);
-
+        if (this.wsSessionDeferred != null) {
+            this.wsSessionDeferred.resolve(this.wsSession);
+        }
         return this.wsSession
     }
 
@@ -133,8 +110,15 @@ export class WebsocketService {
         this.connectionArguments['args'] = args;
     }
 
-    public getSession() {
-        return this.wsSession;
+    public getSession():Promise<WebsocketSession> {
+        if (this.wsSession != null) 
+        return new Promise<WebsocketSession>((resolve, reject)=> { 
+            resolve(this.wsSession);
+        });
+        else if (this.wsSessionDeferred == null){
+            this.wsSessionDeferred = new Deferred<WebsocketSession>();
+        }
+        return this.wsSessionDeferred.promise;
     }
 
     public getURLParameter( name: string ):string  {
@@ -179,11 +163,11 @@ export class WebsocketSession {
     private onOpenHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
     private onErrorHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
     private onCloseHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
-    private onMessageObjectHandlers: Array<( msg: string, conversionInfo: string ) => void> = new Array()
+    private onMessageObjectHandlers: Array<( msg: any, conversionInfo: any) => void> = new Array()
 
     private functionsToExecuteAfterIncommingMessageWasHandled = undefined;
 
-    private deferredEvents: Array<Deferred> = new Array();
+    private deferredEvents: Array<Deferred<any>> = new Array();
 
     private pendingMessages = undefined
 
@@ -249,7 +233,7 @@ export class WebsocketSession {
             this.sendMessageObject( cmd );
         }
         else {
-            var deferred = new Deferred();
+            var deferred = new Deferred<any>();
             var cmsgid = this.getNextMessageId()
             this.deferredEvents[cmsgid] = deferred
             //                $sabloLoadingIndicator.showLoading();
@@ -286,7 +270,7 @@ export class WebsocketSession {
     public onclose( handler ) {
         this.onCloseHandlers.push( handler )
     }
-    public onMessageObject( handler ) {
+    public onMessageObject( handler:(message:any,conversionInfo:any)=>void ) {
         this.onMessageObjectHandlers.push( handler )
     }
 
