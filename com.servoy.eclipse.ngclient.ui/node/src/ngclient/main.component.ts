@@ -13,4 +13,10 @@ export class MainComponent {
   constructor(private servoyService:ServoyService,    private allService: AllServiceService, ){
       this.servoyService.connect();
   }
+  
+  public get mainForm() {
+      const  mainForm = this.servoyService.getSolutionSettings().mainForm;
+      if (mainForm && mainForm.name) return mainForm.name;
+      return null;
+  }
 }

@@ -283,8 +283,8 @@ class SolutionSettings {
     public enableAnchoring: boolean = true;
     public ltrOrientation: boolean = true;
     public solutionTitle = "";
-    public mainFor = {};
-    public navigatorFor = { width: 0 };
+    public mainForm: FormSettings;
+    public navigatorForm: FormSettings;
     public styleSheetPaths = [];
 }
 
@@ -293,4 +293,9 @@ class AnchorConstants {
     public static readonly EAST = 2;
     public static readonly SOUTH = 4;
     public static readonly WEST = 8;
+}
+
+class FormSettings {
+    public name: String;
+    public size: { width: number, height: number };
 }
