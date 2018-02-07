@@ -3,23 +3,30 @@ import { Injectable } from '@angular/core';
 import { AllServiceService } from './allservices.service';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
+import { ConverterService } from '../sablo/converter.service'
 import { WindowRefService } from '../sablo/util/windowref.service';
 
 import { SessionStorageService } from 'angular-web-storage';
+
+import { DateConverter } from './converters/date.converter'
 
 
 @Injectable()
 export class ServoyService {
     private solutionSettings: SolutionSettings = new SolutionSettings();
-    private uiProperties:UIProperties;
+    private uiProperties: UIProperties;
 
     private findModeShortCutAdded = false;
 
-    constructor( private websocketService: WebsocketService, 
-                            private sabloService: SabloService, 
-                            private windowRefService: WindowRefService,
-                            sessionStorageService:SessionStorageService) {
-        this.uiProperties = new UIProperties(sessionStorageService)
+    constructor( private websocketService: WebsocketService,
+        private sabloService: SabloService,
+        private windowRefService: WindowRefService,
+        converterService: ConverterService,
+        sessionStorageService: SessionStorageService ) {
+        this.uiProperties = new UIProperties( sessionStorageService )
+        const dateConverter = new DateConverter();
+        converterService.registerCustomPropertyHandler( "svy_date", dateConverter );
+        converterService.registerCustomPropertyHandler( "Date", dateConverter );
     }
 
     public connect() {
@@ -33,25 +40,9 @@ export class ServoyService {
             recordingPrefix = "/recording/websocket";
 
         }
-        var wsSession = this.sabloService.connect( '/solution/' + this.solutionSettings.solutionName, { solution: this.solutionSettings.solutionName }, recordingPrefix )
+        var wsSession = this.sabloService.connect( '/solution/' + this.solutionSettings.solutionName, { solution: this.solutionSettings.solutionName, clienttype: 2 }, recordingPrefix )
+        // TODO find mode and anchors handling (anchors should be handles completely at the server side, css positioning should go over the line)
         wsSession.onMessageObject(( msg, conversionInfo ) => {
-            // data got back from the server
-            for ( var formname in msg.forms ) {
-                // current model
-                var formState = this.sabloService.getFormStateEvenIfNotYetResolved( formname );
-                if ( typeof ( formState ) == 'undefined' ) {
-                    // if the form is not yet on the client ,wait for it and then apply it
-                    this.sabloService.getFormState( formname ).then( this.getFormMessageHandler( formname, msg, conversionInfo ),
-                        ( err ) => {
-                            //                      $log.error("Error getting form state (svy) when trying to handle msg. from server: " + err); 
-                        } );
-                }
-                else {
-                    this.getFormMessageHandler( formname, msg, conversionInfo )( formState );
-                }
-            }
-
-
 
             if ( msg.sessionid && recordingPrefix ) {
                 var btn = <HTMLAnchorElement>this.windowRefService.nativeWindow.document.createElement( "A" );        // Create a <button> element
@@ -78,7 +69,7 @@ export class ServoyService {
     public getSolutionSettings(): SolutionSettings {
         return this.solutionSettings;
     }
-    
+
     public getUIProperties(): UIProperties {
         return this.uiProperties;
     }
@@ -116,138 +107,12 @@ export class ServoyService {
         //
         //        this.sabloService.callService( "formService", "performFind", { 'formname': formname, 'clear': true, 'reduce': true, 'showDialogOnNoResults': true }, true );
     }
-
-    private getFormMessageHandler( formname, msg, conversionInfo ) {
-        return ( formState ) => {
-            var formModel = formState.model;
-            var layout = formState.layout;
-            var newFormData = msg.forms[formname];
-
-            for ( var beanname in newFormData ) {
-                // copy over the changes, skip for form properties (beanname empty)
-                var beanData = newFormData[beanname];
-                if ( beanname != '' ) {
-                    var beanModel = formModel[beanname];
-                    if ( beanModel != undefined && ( beanData.size != undefined || beanData.location != undefined ) ) {
-                        //size or location were changed at runtime, we need to update components with anchors
-                        beanData.anchors = beanModel.anchors;
-                    }
-                    this.applyBeanLayout( beanModel, layout[beanname], beanData, formState.properties.designSize, false )
-                }
-                else if ( beanData['findmode'] !== undefined ) {
-                    this.setFindMode( beanData );
-                }
-
-            }
-        }
-    }
-
-    private applyBeanLayout( beanModel, beanLayout, beanData, containerSize, isApplyBeanData ) {
-
-        if ( !beanLayout ) return;
-        var runtimeChanges = !isApplyBeanData && ( beanData.size != undefined || beanData.location != undefined );
-        //beanData.anchors means anchors changed or must be initialized
-        if ( ( beanData.anchors || runtimeChanges ) && containerSize && this.solutionSettings.enableAnchoring ) {
-            var anchoredTop = ( beanModel.anchors & AnchorConstants.NORTH ) != 0; // north
-            var anchoredRight = ( beanModel.anchors & AnchorConstants.EAST ) != 0; // east
-            var anchoredBottom = ( beanModel.anchors & AnchorConstants.SOUTH ) != 0; // south
-            var anchoredLeft = ( beanModel.anchors & AnchorConstants.WEST ) != 0; //west
-
-            if ( !anchoredLeft && !anchoredRight ) anchoredLeft = true;
-            if ( !anchoredTop && !anchoredBottom ) anchoredTop = true;
-
-            if ( anchoredTop || runtimeChanges ) {
-                if ( beanLayout.top == undefined || runtimeChanges && beanModel.location != undefined ) beanLayout.top = beanModel.location.y + 'px';
-            }
-            else delete beanLayout.top;
-
-            if ( anchoredBottom ) {
-                if ( beanLayout.bottom == undefined ) {
-                    beanLayout.bottom = ( beanModel.partHeight ? beanModel.partHeight : containerSize.height ) - beanModel.location.y - beanModel.size.height;
-                    if ( beanModel.offsetY ) {
-                        beanLayout.bottom = beanLayout.bottom - beanModel.offsetY;
-                    }
-                    beanLayout.bottom = beanLayout.bottom + "px";
-                }
-            }
-            else delete beanLayout.bottom;
-
-            if ( !anchoredTop || !anchoredBottom ) beanLayout.height = beanModel.size.height + 'px';
-            else delete beanLayout.height;
-
-            if ( anchoredLeft || runtimeChanges ) {
-                if ( this.solutionSettings.ltrOrientation ) {
-                    if ( beanLayout.left == undefined || runtimeChanges && beanModel.location != undefined ) {
-                        beanLayout.left = beanModel.location.x + 'px';
-                    }
-                }
-                else {
-                    if ( beanLayout.right == undefined || runtimeChanges && beanModel.location != undefined ) {
-                        beanLayout.right = beanModel.location.x + 'px';
-                    }
-                }
-            }
-            else if ( this.solutionSettings.ltrOrientation ) {
-                delete beanLayout.left;
-            }
-            else {
-                delete beanLayout.right;
-            }
-
-            if ( anchoredRight ) {
-                if ( this.solutionSettings.ltrOrientation ) {
-                    if ( beanLayout.right == undefined ) beanLayout.right = ( containerSize.width - beanModel.location.x - beanModel.size.width ) + "px";
-                }
-                else {
-                    if ( beanLayout.left == undefined ) beanLayout.left = ( containerSize.width - beanModel.location.x - beanModel.size.width ) + "px";
-                }
-            }
-            else if ( this.solutionSettings.ltrOrientation ) {
-                delete beanLayout.right;
-            }
-            else {
-                delete beanLayout.left;
-            }
-
-            if ( !anchoredLeft || !anchoredRight ) beanLayout.width = beanModel.size.width + 'px';
-            else delete beanLayout.width;
-        }
-
-        //we set the following properties iff the bean doesn't have anchors
-        var isAnchoredTopLeftBeanModel = !beanModel.anchors || ( beanModel.anchors == ( AnchorConstants.NORTH + AnchorConstants.WEST ) );
-        if ( isAnchoredTopLeftBeanModel || !this.solutionSettings.enableAnchoring ) {
-            if ( beanModel.location ) {
-                if ( this.solutionSettings.ltrOrientation ) {
-                    beanLayout.left = beanModel.location.x + 'px';
-                }
-                else {
-                    beanLayout.right = beanModel.location.x + 'px';
-                }
-                beanLayout.top = beanModel.location.y + 'px';
-            }
-
-            if ( beanModel.size ) {
-                beanLayout.width = beanModel.size.width + 'px';
-                beanLayout.height = beanModel.size.height + 'px';
-            }
-        }
-
-        // TODO: visibility must be based on properties of type visible, not on property name
-        if ( beanModel.visible != undefined ) {
-            if ( beanModel.visible == false ) {
-                beanLayout.display = 'none';
-            }
-            else {
-                delete beanLayout.display;
-            }
-        }
-    }
 }
 
 class UIProperties {
     private uiProperties;
-    
-    constructor(private sessionStorageService:SessionStorageService) {
+
+    constructor( private sessionStorageService: SessionStorageService ) {
     }
 
     private getUiProperties() {
