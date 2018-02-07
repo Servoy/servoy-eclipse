@@ -16,17 +16,11 @@ import { ConverterService } from './converter.service'
 @Injectable()
 export class SabloService {
 
-    private formStates = {};
-    private formStatesConversionInfo = {};
-
-    private deferredFormStates = {};
-    private deferredFormStatesWithData = {};
     private apiCallDeferredQueue = [];
-    private formResolver = null;
     
     private locale = null;
     
-    private wsSession;
+    private wsSession:WebsocketSession;
         
     private currentServiceCallCallbacks = []
     private currentServiceCallDone;
@@ -45,25 +39,8 @@ export class SabloService {
         };
         this.wsSession = this.websocketService.connect( wsSessionArgs.context, [this.getSessionId(), this.getWindowName(), this.getWindowId()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri );
 
-        this.wsSession.onMessageObject(( msg, conversionInfo, scopesToDigest ) => {
+        this.wsSession.onMessageObject(( msg, conversionInfo ) => {
             // data got back from the server
-            for ( var formname in msg.forms ) {
-                var formState = this.formStates[formname];
-                if ( typeof ( formState ) == 'undefined' ) {
-                    // if the form is not there yet, wait for the form state.
-                    this.getFormState( formname ).then( this.getFormMessageHandler( formname, msg, conversionInfo ),
-                        function( err ) {
-                            //                            $log.error( "Error getting form state when trying to handle msg. from server: " + err ); 
-                        } );
-                } else {
-                    // if the form is there apply it directly so that it is there when the form is recreated
-                    this.getFormMessageHandler( formname, msg, conversionInfo )( formState );
-                    if ( formState.getScope ) {
-                        var s = formState.getScope();
-                        if ( s ) scopesToDigest.putItem( s );
-                    }
-                }
-            }
 
             if ( conversionInfo && conversionInfo.call ) msg.call = this.converterService.convertFromServerToClient( msg.call, conversionInfo.call, undefined, undefined, undefined );
 
@@ -136,26 +113,6 @@ export class SabloService {
         return "index.html?windowname=" + encodeURIComponent( windowname ) + "&sessionid=" + this.getSessionId();
     }
 
-    public hasResolvedFormState( name ) {
-        return typeof ( this.formStates[name] ) !== 'undefined' && this.formStates[name].resolved;
-    }
-
-    public getFormState( name ) {
-        return this.getFormStateImpl( name, false );
-    }
-
-    public getFormStateWithData( name ) {
-        return this.getFormStateImpl( name, true );
-    }
-
-    public contributeFormResolver( contributedFormResolver ) {
-        this.formResolver = contributedFormResolver;
-    }
-
-    public getFormStateEvenIfNotYetResolved( name ) {
-        return this.formStates[name];
-    }
-
     public getLanguageAndCountryFromBrowser() {
         var langAndCountry;
         var browserLanguages = this.windowRefService.nativeWindow.navigator['languages'];
@@ -212,17 +169,7 @@ export class SabloService {
         }
     }
 
-    private markServiceCallDone(arg) {
-       this. currentServiceCallDone = true;
-        return arg;
-    }
-
-    private markServiceCallFailed(arg) {
-        this.currentServiceCallDone = true;
-        return Promise.reject(arg);
-    }
-
-    private waitForServiceCallbacks(promise, times) {
+    private waitForServiceCallbacks(promise:Promise<{}>, times) {
         if (this.currentServiceCallWaiting > 0) {
             // Already waiting
             return promise
@@ -230,30 +177,14 @@ export class SabloService {
 
         this.currentServiceCallDone = false
         this.currentServiceCallWaiting = times.length
-        this.currentServiceCallTimeouts = times.map(function(t) { return setTimeout(this.callServiceCallbacksWhenDone, t) })
-        return promise.then(this.markServiceCallDone, this.markServiceCallFailed)
-    }
-
-    /*
-     * Some code is interested in form state immediately after it's loaded/initialized (needsInitialData = false) in which case only some template values might be
-     * available and some code is interested in using form state only after it got the initialData (via "requestData"'s response) from server (needsInitialData = true)
-     */
-    private getFormStateImpl( name, needsInitialData ) {
-        // TODO should we also keep track here of time passed? (a timeout that is cleared if it does get resolved) (if it's not loaded/initialized in X min just reject the deferredState)
-        var deferredStates = needsInitialData ? this.deferredFormStatesWithData : this.deferredFormStates;
-        var defered;
-        if ( deferredStates[name] ) {
-            defered = deferredStates[name];
-        } else {
-            defered = new Deferred();
-            deferredStates[name] = defered;
-        }
-        var formState = this.formStates[name];
-        if ( formState && formState.resolved && !( formState.initializing && needsInitialData ) ) {
-            defered.resolve( this.formStates[name] ); // then handlers are called even if they are applied after it is resolved
-            delete deferredStates[name];
-        }
-        return defered.promise;
+        this.currentServiceCallTimeouts = times.map((t)=> { return setTimeout(this.callServiceCallbacksWhenDone, t) })
+        return promise.then((arg) => {
+            this.currentServiceCallDone = true;
+            return arg;
+        }, (arg) => {
+            this.currentServiceCallDone = true;
+            return Promise.reject(arg);
+        })
     }
 
     private getAPICallFunctions( call, formState ) {
@@ -308,97 +239,6 @@ export class SabloService {
     }
 
     private resolveFormIfNeededAndExecuteAPICall( call ) {
-        if ( !call.delayUntilFormLoads && this.formResolver != null && !this.hasResolvedFormState( call.form ) ) {
-            // this means that the form was shown and is now hidden/destroyed; but we still must handle API call to it!
-            // see if the form needs to be loaded;
-            //            if ( $log.debugEnabled ) $log.debug( "sbl * Api call '" + call.api + "' to unresolved form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) + "  will call prepareUnresolvedFormForUse." );
-            this.formResolver.prepareUnresolvedFormForUse( call.form );
-        }
-
-        return this.getFormStateWithData( call.form ).then(
-            function( formState ) {
-                var apiFunctions = this.getAPICallFunctions( call, formState );
-                if ( apiFunctions && apiFunctions[call.api] ) {
-                    return this.executeAPICall( call, apiFunctions );
-                } else {
-                    //                    if ( $log.debugEnabled ) $log.debug( "sbl * Waiting for API to be contributed before execution: '" + call.api + "' of form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) );
-                    return this.executeAPICallInTimeout( formState, 10, 20 );
-                }
-            },
-            function( err ) {
-                //                $log.error( "sbl * Error getting form state: " + err );
-                return Promise.reject( "Error getting form state: " + err );
-            } ).finally( function() {
-                if ( !call.delayUntilFormLoads && this.apiCallDeferredQueue.length > 0 ) {
-                    this.apiCallDeferredQueue.shift().resolve();
-                }
-            } );
-
+        // TODO API CALLS
     }
-
-    private getFormMessageHandler( formname, msg, conversionInfo ) {
-        return ( formState ) => {
-            var formModel = formState.model;
-            var newFormData = msg.forms[formname];
-            var newFormProperties = newFormData['']; // form properties
-            var newFormConversionInfo = ( conversionInfo && conversionInfo.forms && conversionInfo.forms[formname] ) ? conversionInfo.forms[formname] : undefined;
-
-            if ( newFormProperties ) {
-                if ( newFormConversionInfo && newFormConversionInfo[''] ) newFormProperties = this.converterService.convertFromServerToClient( newFormProperties, newFormConversionInfo[''], formModel[''], formState.getScope(), function() { return formModel[''] } );
-                if ( !formModel[''] ) formModel[''] = {};
-                for ( var p in newFormProperties ) {
-                    formModel[''][p] = newFormProperties[p];
-                }
-            }
-
-            var watchesRemoved = formState.removeWatches ? formState.removeWatches( newFormData ) : false;
-            try {
-                for ( var beanname in newFormData ) {
-                    // copy over the changes, skip for form properties (beanname empty)
-                    if ( beanname != '' ) {
-                        var newBeanConversionInfo = newFormConversionInfo ? newFormConversionInfo[beanname] : undefined;
-                        var beanConversionInfo = newBeanConversionInfo ? this.converterService.getOrCreateInDepthProperty( this.formStatesConversionInfo, formname, beanname ) : this.converterService.getInDepthProperty( this.formStatesConversionInfo, formname, beanname );
-                        this.applyBeanData( formModel[beanname], newFormData[beanname], formState.properties.designSize, null /*getChangeNotifierGenerator( formname, beanname ) */, beanConversionInfo, newBeanConversionInfo, formState.getScope ? formState.getScope() : undefined );
-                    }
-                }
-            }
-            finally {
-                if ( watchesRemoved ) {
-                    formState.addWatches( newFormData );
-                }
-            }
-        }
-    }
-
-    private applyBeanData( beanModel, beanData, containerSize, changeNotifierGenerator, beanConversionInfo, newConversionInfo, componentScope ) {
-
-        if ( newConversionInfo ) { // then means beanConversionInfo should also be defined - we assume that
-            // beanConversionInfo will be granularly updated in the loop below
-            // (to not drop other property conversion info when only one property is being applied granularly to the bean)
-            beanData = this.converterService.convertFromServerToClient( beanData, newConversionInfo, beanModel, componentScope, function() { return beanModel } );
-        }
-
-        for ( var key in beanData ) {
-            // remember conversion info for when it will be sent back to server - it might need special conversion as well
-            if ( newConversionInfo && newConversionInfo[key] ) {
-                // if the value changed and it wants to be in control of it's changes, or if the conversion info for this value changed (thus possibly preparing an old value for being change-aware without changing the value reference)
-                //                if ((beanModel[key] !== beanData[key] || beanConversionInfo[key] !== newConversionInfo[key])
-                //                    && beanData[key] && beanData[key][$sabloConverters.INTERNAL_IMPL] && beanData[key][$sabloConverters.INTERNAL_IMPL].setChangeNotifier) {
-                //                    beanData[key][$sabloConverters.INTERNAL_IMPL].setChangeNotifier(changeNotifierGenerator(key));
-                //                }
-                beanConversionInfo[key] = newConversionInfo[key];
-            } else if ( beanConversionInfo && beanConversionInfo[key] ) delete beanConversionInfo[key]; // this prop. no longer has conversion info!
-
-            // also make location and size available in model
-            beanModel[key] = beanData[key];
-        }
-        // if the model had a change notifier call it now after everything is set.
-        //        var modelChangeFunction = beanModel[$sabloConstants.modelChangeNotifier];
-        //        if (modelChangeFunction) {
-        //            for (var key in beanData) {
-        //                modelChangeFunction(key, beanModel[key]);
-        //            }
-        //        }
-    }
-
 }
