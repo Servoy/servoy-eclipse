@@ -388,7 +388,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
 									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
-									sc.getPrefixTables(), -1, sc.getDialectClass());
+									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getDialectClass());
 								if (ServoyModel.getServerManager().validateServerConfig(null, serverConfig) != null)
 								{
 									// something is wrong
@@ -400,9 +400,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 					}
 				}
 				String[] buttons = serverConfig != null ? new String[] { "OK", "Create Server", "Cancel" } : new String[] { "OK", "Cancel" };
-				final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null,
-					"Server with name '" + name +
-						"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
+				final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null, "Server with name '" + name +
+					"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
 					MessageDialog.WARNING, buttons, 0, serverNames, 0);
 				Display.getDefault().syncExec(new Runnable()
 				{
