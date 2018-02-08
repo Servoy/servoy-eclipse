@@ -68,7 +68,7 @@ export class FormComponent implements OnInit, OnDestroy {
   } 
   
   private getHandler(item:ComponentCache, handler:string) {
-      if (item.handlers.indexOf(handler) >= 0) {
+      if (item.handlers && item.handlers.indexOf(handler) >= 0) {
           var me = this;
           return function(e) {
               me.formservice.executeEvent(me.name, item.name, handler,arguments);
