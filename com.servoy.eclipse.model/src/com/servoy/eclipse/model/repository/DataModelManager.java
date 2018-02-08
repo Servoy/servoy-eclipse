@@ -482,7 +482,7 @@ public class DataModelManager implements IColumnInfoManager
 					if (checkForMarkers)
 					{
 						if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
-							differenceType == TableDifference.COLUMN_MISSING_FROM_DBI_FILE || differenceType == TableDifference.DESERIALIZE_PROBLEM)
+							differenceType == TableDifference.DESERIALIZE_PROBLEM)
 						{
 							// if the user chose 'Yes' for example, write the contents
 							if (!ModelUtils.getUnexpectedSituationHandler().allowUnexpectedDBIWrite(t))

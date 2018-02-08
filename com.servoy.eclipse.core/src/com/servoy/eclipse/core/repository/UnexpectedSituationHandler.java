@@ -50,13 +50,9 @@ public class UnexpectedSituationHandler implements IUnexpectedSituationHandler
 		{
 			public void run()
 			{
-				returnValue = new Boolean(
-					MessageDialog.openQuestion(Display.getCurrent().getActiveShell(),
-						"Unexpected database information file write",
-						"The database information file (.dbi) contents for table '" +
-							t.getName() + "' of server '" +
-							t.getServerName() +
-							"' are about to be written. This table currently has associated error markers for problems that might have prevented the loading of .dbi information in the first place. This means that you could be overwriting the current .dbi file contents with defaults.\nIf you are not sure why this happened, you should choose 'No', check the 'Problems' view for these error markers and try to solve them (see if context menu - Quick Fix is enabled).\n\nDo you wish to continue with the write?"));
+				returnValue = new Boolean(MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Unexpected database information file write",
+					"The database information file (.dbi) contents for table '" + t.getName() + "' of server '" + t.getServerName() +
+						"' are about to be written. This table currently has associated error or warning markers for problems that might have prevented the loading of .dbi information in the first place. This means that you could be overwriting the current .dbi file contents with defaults.\nIf you are not sure why this happened, you should choose 'No', check the 'Problems' view for these error markers and try to solve them (see if context menu - Quick Fix is enabled).\n\nDo you wish to continue with the write?"));
 			}
 		};
 		if (Display.getCurrent() != null)

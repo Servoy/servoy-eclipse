@@ -18,12 +18,14 @@ package com.servoy.eclipse.designer.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.EditPart;
@@ -71,6 +73,8 @@ import com.servoy.j2db.util.Utils;
 
 public class DesignerUtil
 {
+	private static final String ADD_COMPONENT_SUBMENU_ITEM_TEXT = "component";
+
 	public static List<EditPart> removeChildEditParts(List<EditPart> editParts)
 	{
 		List<EditPart> newEditParts = new ArrayList<EditPart>(editParts.size());
@@ -331,9 +335,44 @@ public class DesignerUtil
 		{
 			for (WebLayoutSpecification spec : pack.getSpecifications().values())
 			{
+				// put "component" first if present and sort the others;
+				Comparator<String> comparator = new Comparator<String>()
+				{
+					@Override
+					public int compare(String o1, String o2)
+					{
+						String n1 = getDisplayName(o1);
+						String n2 = getDisplayName(o2);
+						boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n1);
+						boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n2);
+						if (co1 && co2) return 0;
+						else if (co1) return -1;
+						else if (co2) return 1;
+						else return n1.compareTo(n2);
+					}
+
+					private String getDisplayName(String name)
+					{
+						if (name.contains("*") || ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(name)) return ADD_COMPONENT_SUBMENU_ITEM_TEXT;
+						if (name.contains("."))
+						{
+							String[] parts = name.split("\\.");
+							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
+								parts[0]);
+							if (pkg != null && parts.length > 0)
+							{
+								return pkg.getSpecification(parts[1]).getDisplayName();
+							}
+						}
+						return name;
+					}
+				};
 				List<String> excludedChildren = spec.getExcludedChildren();
-				Set<String> allowedChildren = (excludedChildren != null && excludedChildren.size() > 0) ? new HashSet<String>()
-					: new HashSet<String>(spec.getAllowedChildren());
+				Set<String> allowedChildren = new TreeSet<String>(comparator);
+				if (excludedChildren == null || excludedChildren.isEmpty())
+				{
+					allowedChildren.addAll(spec.getAllowedChildren());
+				}
 				if (excludedChildren != null)
 				{
 					for (PackageSpecification<WebLayoutSpecification> pack2 : packs)
