@@ -5,6 +5,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -127,7 +128,7 @@ public class ActiveProjectListener implements IActiveProjectListener
 		{
 			try
 			{
-				File file = new File(location.substring(index + 6), "node");
+				File file = new File(new File(new URI(location.substring(index))), "node");
 				if (file.exists())
 				{
 					final WatchService watchService = FileSystems.getDefault().newWatchService();
@@ -223,7 +224,7 @@ public class ActiveProjectListener implements IActiveProjectListener
 					}).start();
 				}
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
 				ServoyLog.logError(e);
 			}
