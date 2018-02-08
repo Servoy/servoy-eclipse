@@ -439,7 +439,22 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
-		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class));
+		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class)
+		{
+			@Override
+			protected boolean canAdd(IServerInternal server)
+			{
+				try
+				{
+					return server instanceof IServer && !((IServer)server).getProcedures().isEmpty();
+				}
+				catch (RepositoryException | RemoteException e)
+				{
+					ServoyLog.logError(e);
+				}
+				return false;
+			}
+		});
 		addScopeType(DBDataSource.class.getSimpleName(), new DBDataSourceCreator(DBDataSourceServer.class));
 		addScopeType(DBDataSourceServer.class.getSimpleName(), new DBDataSourceServerCreator());
 		addScopeType(SPDataSourceServer.class.getSimpleName(), new SPDataSourceServerCreator());
@@ -3243,7 +3258,7 @@ public class TypeCreator extends TypeCache
 			for (String serverName : servermanager.getServerNames(false, false, true, true))
 			{
 				IServerInternal server = (IServerInternal)servermanager.getServer(serverName, false, false);
-				if (server != null)
+				if (server != null && canAdd(server))
 				{
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(serverName);
@@ -3256,6 +3271,15 @@ public class TypeCreator extends TypeCache
 				}
 			}
 			return addType(context, type);
+		}
+
+		/**
+		 * @param server
+		 * @return
+		 */
+		protected boolean canAdd(IServerInternal server)
+		{
+			return true;
 		}
 
 		public ClientSupport getClientSupport()
