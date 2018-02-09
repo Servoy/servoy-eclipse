@@ -1463,6 +1463,7 @@ public class WarExporter
 //			}
 			properties.put("server." + i + ".driver", sc.getDriver());
 			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
+			properties.put("server." + i + ".queryProcedures", "" + sc.isQueryProcedures());
 			properties.put("server." + i + ".prefixTables", "" + sc.isPrefixTables());
 			String catalog = sc.getCatalog();
 			if (catalog == null)
