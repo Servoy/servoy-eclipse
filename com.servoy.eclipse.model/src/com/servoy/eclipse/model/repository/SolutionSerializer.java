@@ -617,6 +617,7 @@ public class SolutionSerializer
 						List<String> paths = workingSets.get(workingSetName);
 						if (paths != null)
 						{
+							Collections.sort(paths);
 							for (String filePath : paths)
 							{
 								jsonPaths.put(filePath);
