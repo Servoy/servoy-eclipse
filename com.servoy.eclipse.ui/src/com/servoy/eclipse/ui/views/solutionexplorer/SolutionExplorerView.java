@@ -410,6 +410,8 @@ public class SolutionExplorerView extends ViewPart
 	private SynchronizeTableDataAction synchronizeTableDataAction;
 	private SynchronizeTableDataAction synchronizeTableDataTreeAction;
 
+	private CreateInMemFromSpAction createInMemFromSPAction;
+
 	private LoadRelationsAction loadRelationsAction;
 
 	private ToggleFormCommandsAction toggleFormCommandsActions;
@@ -2658,6 +2660,7 @@ public class SolutionExplorerView extends ViewPart
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
 		if (searchListAction.isEnabled()) manager.add(searchListAction);
+		if (createInMemFromSPAction.isEnabled()) manager.add(createInMemFromSPAction);
 
 		manager.add(new Separator());
 		if (newActionInListPrimary.isEnabled()) manager.add(newActionInListPrimary);
@@ -3018,7 +3021,9 @@ public class SolutionExplorerView extends ViewPart
 		newActionInListPrimary.registerAction(UserNodeType.VALUELISTS, newValueList);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
-		newActionInListPrimary.registerAction(UserNodeType.SERVER, new NewTableAction(this));
+		NewTableAction newTableAction = new NewTableAction(this);
+		addListSelectionChangedListener(newTableAction);
+		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTableAction);
 		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.LAYOUT, newComponentResource);
@@ -3204,10 +3209,12 @@ public class SolutionExplorerView extends ViewPart
 
 		setActive = new ActivateSolutionAction();
 
+		createInMemFromSPAction = new CreateInMemFromSpAction(this);
+
 		// let the actions decide when they are enabled or disabled
 		addListSelectionChangedListener(moveCode);
-		addListSelectionChangedListener(moveCode);
 		addListSelectionChangedListener(moveSample);
+		addListSelectionChangedListener(createInMemFromSPAction);
 		addListSelectionChangedListener(deleteActionInList);
 		addListSelectionChangedListener(openAction);
 		addListSelectionChangedListener(editVariableAction);

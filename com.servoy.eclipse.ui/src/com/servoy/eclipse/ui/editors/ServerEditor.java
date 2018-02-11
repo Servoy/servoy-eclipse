@@ -112,6 +112,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 	private Button enabledButton;
 	private Button logServerButton;
+	private Button proceduresButton;
 	private Button createLogTableButton;
 	private Button createClientstatsTableButton;
 	private Button skipSysTablesButton;
@@ -529,6 +530,25 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		skipSysTablesButton = new Button(advancedSettingsComposite, SWT.CHECK);
 		skipSysTablesButton.setToolTipText(toolTip);
+
+		toolTip = "Enabling this will enable querying for stored procedures on the database and exposing that under datasources.sp.servername";
+		Label proceduresLabel;
+		proceduresLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		proceduresLabel.setText("Enable procedures");
+		proceduresLabel.setToolTipText(toolTip);
+
+		proceduresButton = new Button(advancedSettingsComposite, SWT.CHECK);
+		proceduresButton.setToolTipText(toolTip);
+		proceduresButton.addListener(SWT.Selection, new Listener()
+		{
+			public void handleEvent(Event event)
+			{
+				flagModified();
+			}
+		});
+
+		new Label(advancedSettingsComposite, SWT.LEFT);
+		new Label(advancedSettingsComposite, SWT.LEFT);
 
 		toolTip = "Servoy has functionality that allows to automatically track all insert/updates/deletes on tables.\nThis functionality can be enabled through the Security layer inside the Solution.\nThis functionality relies on one of the enabled Database Servers configured on the Servoy Application Server being marked at 'Log server'.";
 		Label logServerLabel;
@@ -1021,8 +1041,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		}
 
 		serverConfigObservable = new ImmutableObjectObservable<ServerConfig>(serverConfig,
-			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, boolean.class, int.class, String.class },
-			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "prefixTables", "idleTimeout", "dialectClass" });
+			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, boolean.class, boolean.class, int.class, String.class },
+			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "prefixTables", "queryProcedures", "idleTimeout", "dialectClass" });
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
 		if (serverInput.getIsNew()) flagModified();
@@ -1337,7 +1357,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		IObservableValue getEnabledObserveValue = serverConfigObservable.observePropertyValue("enabled");
 		IObservableValue enabledSelectionObserveWidget = SWTObservables.observeSelection(enabledButton);
 		IObservableValue getSkipSysTablesObserveValue = serverConfigObservable.observePropertyValue("skipSysTables");
+		IObservableValue proceduresButtonObserveValue = serverConfigObservable.observePropertyValue("queryProcedures");
 		IObservableValue skipSysTablesSelectionObserveWidget = SWTObservables.observeSelection(skipSysTablesButton);
+		IObservableValue proceduresButtonSelectionObserveWidget = SWTObservables.observeSelection(proceduresButton);
 
 		m_bindingContext = new DataBindingContext();
 		m_bindingContext.bindValue(serverNameTextObserveWidget, getServerNameObserveValue, null, null);
@@ -1356,6 +1378,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		m_bindingContext.bindValue(dataModel_cloneFromTextObserveWidget, getDataModel_cloneFromObserveValue, null, null);
 		m_bindingContext.bindValue(enabledSelectionObserveWidget, getEnabledObserveValue, null, null);
 		m_bindingContext.bindValue(skipSysTablesSelectionObserveWidget, getSkipSysTablesObserveValue, null, null);
+		m_bindingContext.bindValue(proceduresButtonSelectionObserveWidget, proceduresButtonObserveValue, null, null);
 
 		BindingHelper.addGlobalChangeListener(m_bindingContext, new IChangeListener()
 		{

@@ -89,10 +89,10 @@ public class DatasourceSelectComposite extends Composite
 		Label glue = new Label(this, SWT.NONE);
 
 		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(6, 6,
-			6).add(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-				groupLayout.createSequentialGroup().add(sourceLabel, GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE).add(76, 76,
-					76)).add(groupLayout.createSequentialGroup().add(sourceTableControl, GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE).addPreferredGap(
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+			groupLayout.createSequentialGroup().add(6, 6, 6).add(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
+				groupLayout.createSequentialGroup().add(sourceLabel, GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE).add(76, 76, 76)).add(
+					groupLayout.createSequentialGroup().add(sourceTableControl, GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE).addPreferredGap(
 						LayoutStyle.RELATED).add(glue, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED))).add(6,
 							6, 6).add(
 								groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(destinationTableControl,
@@ -126,7 +126,7 @@ public class DatasourceSelectComposite extends Composite
 			if (sourceTable.getSelection() != null && !sourceTable.getSelection().isEmpty())
 			{
 				String oldRelationName = getRelationNameWithDefaultDefault(oldSourceTable, oldDestinationTable);
-				if (oldRelationName.equals(nameFieldToModify.getText()) || "untitled".equals(nameFieldToModify.getText()))
+				if (oldRelationName.equalsIgnoreCase(nameFieldToModify.getText()) || "untitled".equals(nameFieldToModify.getText()))
 				{
 					IStructuredSelection selection = (IStructuredSelection)destinationTable.getSelection();
 					if (!selection.isEmpty())
