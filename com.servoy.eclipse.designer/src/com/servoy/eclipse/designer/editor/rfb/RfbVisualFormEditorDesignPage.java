@@ -70,6 +70,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -140,6 +141,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	private String layout = null;
 	private String editorId = null;
 	private String clientId = null;
+	private AbstractContainer showedContainer;
 
 	private final PartListener partListener = new PartListener();
 
@@ -258,7 +260,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			Dimension formSize = flattenedForm.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
-				"&editorid=" + editorId + "&c_sessionid=" + clientId;
+				"&editorid=" + editorId + "&c_sessionid=" + clientId + (showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
 			final Runnable runnable = new Runnable()
 			{
 				public void run()
@@ -536,6 +538,12 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh", new Object[] { });
 			}
 		});
+	}
+
+	public void showContainer(AbstractContainer container)
+	{
+		this.showedContainer = container;
+		refreshBrowserUrl(true);
 	}
 
 	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener
