@@ -2093,6 +2093,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return null;
 		}
 		List<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+		SortedList<SimpleUserNode> sortedApis = new SortedList<SimpleUserNode>(NameComparator.INSTANCE);
 
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(webcomponent);
 
@@ -2101,8 +2102,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			extractApiDocs(spec);
 
-			Map<String, PropertyDescription> properties = spec.getProperties();
-			for (PropertyDescription pd : properties.values())
+			for (PropertyDescription pd : spec.getSortedProperties())
 			{
 				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
 
@@ -2167,14 +2167,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 				}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
 
-				nodes.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
+				sortedApis.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
 			}
 		}
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeName.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeElementType.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeDesignTimeProperty.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeClientProperty.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeName.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeElementType.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeDesignTimeProperty.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeClientProperty.class));
+		nodes.addAll(sortedApis);
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 
 	}
