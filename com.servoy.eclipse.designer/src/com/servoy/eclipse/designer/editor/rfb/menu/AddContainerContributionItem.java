@@ -1,7 +1,7 @@
 package com.servoy.eclipse.designer.editor.rfb.menu;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +30,13 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.SortedList;
 
 public class AddContainerContributionItem extends CompoundContributionItem
 {
 
-	/**
-	 *
-	 */
+	private static final String ADD_COMPONENT_SUBMENU_ITEM_TEXT = "Component [...]";
+
 	public AddContainerContributionItem()
 	{
 	}
@@ -49,14 +49,28 @@ public class AddContainerContributionItem extends CompoundContributionItem
 	@Override
 	protected IContributionItem[] getContributionItems()
 	{
-		List<IContributionItem> list = new ArrayList<IContributionItem>();
+		List<IContributionItem> list = new SortedList<IContributionItem>(new Comparator<CommandContributionItem>()
+		{
+			//we still need to sort the menu items because we are matching allowed children on layoutName
+			@Override
+			public int compare(CommandContributionItem o1, CommandContributionItem o2)
+			{
+				boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(o1.getData().label);
+				boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(o2.getData().label);
+				if (co1 && co2) return 0;
+				else if (co1) return -1;
+				else if (co2) return 1;
+				else return SortedList.COMPARABLE_COMPARATOR.compare(o1.getData().label, o2.getData().label);
+			}
+		});
 		PersistContext persistContext = DesignerUtil.getContentOutlineSelection();
 		IPersist persist = null;
 		if (persistContext != null) persist = persistContext.getPersist();
 		if (persist instanceof LayoutContainer)
 		{
+			String packageName = ((LayoutContainer)persist).getPackageName();
 			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-				((LayoutContainer)persist).getPackageName());
+				packageName);
 			if (specifications != null)
 			{
 				WebLayoutSpecification layoutSpec = specifications.getSpecification(((LayoutContainer)persist).getSpecName());
@@ -87,7 +101,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 									}
 
 									//if the layoutName matches the current allowedChildName then we add this container as a menu entry
-									if (allowedChildName.equals(((LayoutContainer)persist).getPackageName() + "." + layoutName))
+									if (allowedChildName.equals(packageName + "." + layoutName))
 									{
 										String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
 										addMenuItem(list, specification, config, null);
@@ -168,7 +182,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		else
 		{
 			// add a new web component
-			commandContributionItemParameter.label = "Component";
+			commandContributionItemParameter.label = ADD_COMPONENT_SUBMENU_ITEM_TEXT;
 		}
 		commandContributionItemParameter.visibleEnabled = true;
 		list.add(new CommandContributionItem(commandContributionItemParameter));

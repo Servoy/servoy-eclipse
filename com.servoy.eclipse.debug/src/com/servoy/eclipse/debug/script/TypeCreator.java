@@ -20,6 +20,7 @@ package com.servoy.eclipse.debug.script;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.rmi.RemoteException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,7 +43,6 @@ import javax.swing.Icon;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -107,7 +108,6 @@ import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
@@ -139,6 +139,8 @@ import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
+import com.servoy.j2db.dataprocessing.datasource.SPDataSource;
+import com.servoy.j2db.dataprocessing.datasource.SPDataSourceServer;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
@@ -172,6 +174,8 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
+import com.servoy.j2db.persistence.Procedure;
+import com.servoy.j2db.persistence.ProcedureColumn;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -281,69 +285,39 @@ public class TypeCreator extends TypeCache
 
 	public static final String PLUGIN_TYPE_PREFIX = "plugins.";
 
-	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/function.png"), null));
-	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/properties.png"), null));
-	protected final static ImageDescriptor CONSTANT = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/constant.png"), null));
+	protected final static ImageDescriptor METHOD = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("function.png");
+	protected final static ImageDescriptor PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("properties.png");
+	protected final static ImageDescriptor CONSTANT = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("constant.png");
+	protected final static ImageDescriptor ELEMENTS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("elements.png");
+	protected final static ImageDescriptor SPECIAL_PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("special_properties.png");
 
-	protected final static ImageDescriptor ELEMENTS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/elements.png"), null));
+	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_public.png");
+	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_private.png");
+	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_public.png");
+	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(
+		"method_protected.png");
+	protected final static ImageDescriptor PRIVATE_GLOBAL_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_private.png");
 
-	protected final static ImageDescriptor SPECIAL_PROPERTY = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties.png"), null));
+	protected final static ImageDescriptor FORM_PUBLIC_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_public.png");
+	protected final static ImageDescriptor FORM_PROTECTED_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_protected.png");
+	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("method_private.png");
+	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_public.png");
+	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_private.png");
 
-	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.png"), null));
-	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.png"), null));
-	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_public.png"), null));
-	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_protected.png"), null));
-	protected final static ImageDescriptor PRIVATE_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_private.png"), null));
+	protected final static ImageDescriptor FOUNDSET_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("foundset.png");
+	protected final static ImageDescriptor RELATION_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("relation.png");
+	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("relation_protected.png");
+	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("relation_private.png");
 
-	protected final static ImageDescriptor FORM_PUBLIC_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_public.png"), null));
-	protected final static ImageDescriptor FORM_PROTECTED_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_protected.png"), null));
-	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_private.png"), null));
-	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.png"), null));
-	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.png"), null));
+	protected final static ImageDescriptor COLUMN_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("column.png");
+	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("columnaggr.png");
+	protected final static ImageDescriptor COLUMN_CALC_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("columncalc.png");
 
-	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/foundset.png"), null));
-	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/relation.png"), null));
-	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_protected.png"), null));
-	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_private.png"), null));
-
-	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/column.png"), null));
-	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columnaggr.png"), null));
-	protected final static ImageDescriptor COLUMN_CALC_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columncalc.png"), null));
-
-	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/globals.png"), null));
-	protected final static ImageDescriptor SCOPES = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/scopes.png"), null));
-	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/forms.png"), null));
-
-	protected final static ImageDescriptor PLUGINS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugins.png"), null));
-
-	protected final static ImageDescriptor PLUGIN_DEFAULT = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin.png"), null));
+	protected final static ImageDescriptor GLOBALS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("globals.png");
+	protected final static ImageDescriptor SCOPES = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("scopes.png");
+	protected final static ImageDescriptor FORMS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("forms.png");
+	protected final static ImageDescriptor PLUGINS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("plugins.png");
+	protected final static ImageDescriptor PLUGIN_DEFAULT = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("plugin.png");
 
 	public static final String ARRAY_INDEX_PROPERTY_PREFIX = "array__indexedby_";
 
@@ -465,8 +439,25 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
-		addScopeType(DBDataSource.class.getSimpleName(), new DBDataSourceCreator());
+		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class)
+		{
+			@Override
+			protected boolean canAdd(IServerInternal server)
+			{
+				try
+				{
+					return server instanceof IServer && !((IServer)server).getProcedures().isEmpty();
+				}
+				catch (RepositoryException | RemoteException e)
+				{
+					ServoyLog.logError(e);
+				}
+				return false;
+			}
+		});
+		addScopeType(DBDataSource.class.getSimpleName(), new DBDataSourceCreator(DBDataSourceServer.class));
 		addScopeType(DBDataSourceServer.class.getSimpleName(), new DBDataSourceServerCreator());
+		addScopeType(SPDataSourceServer.class.getSimpleName(), new SPDataSourceServerCreator());
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 	}
@@ -847,6 +838,7 @@ public class TypeCreator extends TypeCache
 				{
 					((ServoyModel)servoyModel).addPersistChangeListener(true, new IPersistChangeListener()
 					{
+
 						public void persistChanges(Collection<IPersist> changes)
 						{
 							Job job = new Job("clearing cache")
@@ -3248,31 +3240,46 @@ public class TypeCreator extends TypeCache
 
 	private class DBDataSourceCreator implements IScopeTypeCreator
 	{
+		private final Class< ? > serverClass;
+
+		public DBDataSourceCreator(Class< ? > serverClass)
+		{
+			this.serverClass = serverClass;
+		}
+
 		public Type createType(String context, String typeName)
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
-			type.setSuperType(createArrayLookupType(context, DBDataSourceServer.class));
+			type.setSuperType(createArrayLookupType(context, serverClass));
 
 			IServerManagerInternal servermanager = ServoyModel.getServerManager();
 			for (String serverName : servermanager.getServerNames(false, false, true, true))
 			{
 				IServerInternal server = (IServerInternal)servermanager.getServer(serverName, false, false);
-				if (server != null)
+				if (server != null && canAdd(server))
 				{
 					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 					property.setName(serverName);
 					property.setAttribute(RESOURCE, server.getConfig());
 					property.setVisible(true);
-					property.setType(
-						getTypeRef(context, DBDataSourceServer.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
+					property.setType(getTypeRef(context, serverClass.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
 					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("server.png"));
 					property.setDescription("Server");
 					type.getMembers().add(property);
 				}
 			}
 			return addType(context, type);
+		}
+
+		/**
+		 * @param server
+		 * @return
+		 */
+		protected boolean canAdd(IServerInternal server)
+		{
+			return true;
 		}
 
 		public ClientSupport getClientSupport()
@@ -3308,6 +3315,116 @@ public class TypeCreator extends TypeCache
 				property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
 				property.setDescription(Table.getTableTypeAsString(table.getTableType()));
 				members.add(property);
+			}
+
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	private class SPDataSourceServerCreator implements IScopeTypeCreator
+	{
+		public Type createType(String context, String fullTypeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+
+			int configStart = fullTypeName.indexOf('<');
+			if (configStart != -1)
+			{
+				EList<Member> members = type.getMembers();
+				String config = fullTypeName.substring(configStart + 1, fullTypeName.length() - 1);
+				String serverName = DataSourceUtils.getDataSourceServerName(config);
+				IServerManagerInternal servermanager = ServoyModel.getServerManager();
+				IServer server = servermanager.getServer(serverName);
+				if (server != null)
+				{
+					try
+					{
+						Collection<Procedure> procedures = server.getProcedures();
+						for (Procedure proc : procedures)
+						{
+							Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+							method.setName(proc.getName());
+							method.setVisible(true);
+							method.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("function.png"));
+							LinkedHashMap<String, List<ProcedureColumn>> columns = proc.getColumns();
+							if (columns.size() == 1)
+							{
+								// for now set the JSDataSet as a return value if it has columns.
+								method.setType(getTypeRef(context, "JSDataSet"));
+							}
+							else if (columns.size() > 1)
+							{
+								Type procType = TypeInfoModelFactory.eINSTANCE.createType();
+								procType.setName("Procedure");
+								procType.setSuperType(getType(context, "Array"));
+								EList<Member> procMembers = procType.getMembers();
+								for (String resultsetName : columns.keySet())
+								{
+									Property prop = TypeInfoModelFactory.eINSTANCE.createProperty();
+									prop.setName(resultsetName);
+									prop.setType(getTypeRef(context, "JSDataSet"));
+									procMembers.add(prop);
+								}
+								method.setType(TypeUtil.ref(procType));
+							}
+							List<ProcedureColumn> parameters = proc.getParameters();
+							EList<Parameter> procParams = method.getParameters();
+							for (ProcedureColumn pc : parameters)
+							{
+								Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+								param.setName(pc.getName());
+								int sqlType = pc.getColumnType().getSqlType();
+								if (sqlType == Types.BOOLEAN || sqlType == Types.BIT)
+								{
+									param.setType(getTypeRef(context, "Boolean"));
+								}
+								else
+								{
+									int paramType = Column.mapToDefaultType(sqlType);
+									switch (paramType)
+									{
+										case IColumnTypes.DATETIME :
+											param.setType(getTypeRef(context, "Date"));
+											break;
+
+										case IColumnTypes.INTEGER :
+										case IColumnTypes.NUMBER :
+											param.setType(getTypeRef(context, "Number"));
+											break;
+
+										case IColumnTypes.TEXT :
+											param.setType(getTypeRef(context, "String"));
+											break;
+
+										case IColumnTypes.MEDIA :
+											// Just return the Any type, because a media can hold anything.
+											// should be in sync with TypeCreater.getDataProviderType
+											param.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
+											break;
+									}
+								}
+								procParams.add(param);
+							}
+							members.add(method);
+						}
+					}
+					catch (RepositoryException | RemoteException e)
+					{
+						Debug.error(e);
+					}
+				}
 			}
 
 			return type;

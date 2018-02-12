@@ -160,6 +160,8 @@ public class Activator extends Plugin
 {
 	public static final String RECREATE_ON_I18N_CHANGE_PREFERENCE = "recreate.forms.on.i18n.change";
 
+	public static final String AUTO_CREATE_I18N_FILES_PREFERENCE = "auto.create.i18n.files";
+
 	public static final String PROPERTIES_FILE_PATH_SETTING = "servoyPropertiesFile";
 
 	// The plug-in ID

@@ -24,6 +24,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +42,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.json.JSONObject;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -61,6 +64,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.Procedure;
 import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
@@ -109,26 +113,35 @@ public class MemServer implements IServerInternal, IServer
 		while (tableNodes.hasNext())
 		{
 			TableNode tableNode = (TableNode)tableNodes.next();
-			Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
-			if (property != null)
+			loadTable(tableNode);
+		}
+	}
+
+	/**
+	 * @param tableNode
+	 * @param property
+	 */
+	private void loadTable(TableNode tableNode)
+	{
+		Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
+		if (property != null)
+		{
+			try
 			{
-				try
+				ITable table = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
+				DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table, (ServoyJSONObject)property);
+				table.setExistInDB(true);
+				table.setInitialized(true);
+				tableNode.setTable(table);
+				IPersist editingTableNode = servoyProject.getEditingPersist(tableNode.getUUID());
+				if (editingTableNode != null)
 				{
-					ITable table = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
-					DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table, (ServoyJSONObject)property);
-					table.setExistInDB(true);
-					table.setInitialized(true);
-					tableNode.setTable(table);
-					IPersist editingTableNode = servoyProject.getEditingPersist(tableNode.getUUID());
-					if (editingTableNode != null)
-					{
-						((TableNode)editingTableNode).setTable(table);
-					}
+					((TableNode)editingTableNode).setTable(table);
 				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
 			}
 		}
 	}
@@ -542,16 +555,18 @@ public class MemServer implements IServerInternal, IServer
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#refreshTable(java.lang.String)
-	 */
 	@Override
 	public void refreshTable(String name) throws RepositoryException
 	{
-		// TODO Auto-generated method stub
-
+		MemTable table = tables.remove(name);
+		if (table != null)
+		{
+			Iterator<TableNode> tableNodes = servoyProject.getSolution().getTableNodes(table.getDataSource());
+			if (tableNodes.hasNext())
+			{
+				loadTable(tableNodes.next());
+			}
+		}
 	}
 
 	/*
@@ -712,6 +727,12 @@ public class MemServer implements IServerInternal, IServer
 	}
 
 
+	@Override
+	public Collection<Procedure> getProcedures() throws RepositoryException, RemoteException
+	{
+		return Collections.emptySet();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -773,7 +794,7 @@ public class MemServer implements IServerInternal, IServer
 		{
 			Column c = it.next();
 			table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
-				(c.getFlags() & Column.PK_COLUMN) != 0);
+				(c.getFlags() & IBaseColumn.PK_COLUMN) != 0);
 		}
 		updateAllColumnInfo(table);
 		return table;

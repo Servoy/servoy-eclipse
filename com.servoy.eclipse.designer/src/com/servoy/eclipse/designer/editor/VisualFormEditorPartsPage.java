@@ -43,6 +43,8 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
+import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -74,6 +76,7 @@ import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -109,10 +112,14 @@ public class VisualFormEditorPartsPage extends Composite
 	private Button addGroupByButton;
 	private boolean doRefresh;
 
+	private boolean isNGClientOnly = false;
+
 	public VisualFormEditorPartsPage(BaseVisualFormEditor editor, Composite parent, int style)
 	{
 		super(parent, style);
 		this.editor = editor;
+		isNGClientOnly = editor.getForm().getSolution().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY;
+
 		createContents();
 		m_bindingContext = initDataBindings();
 
@@ -287,13 +294,16 @@ public class VisualFormEditorPartsPage extends Composite
 		occurrencesLabel.setBounds(218, 3, 91, 17);
 		occurrencesLabel.setText("occurrences");
 		final GroupLayout groupLayout_1 = new GroupLayout(container);
-		groupLayout_1.setHorizontalGroup(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout_1.createSequentialGroup().addContainerGap().add(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout_1.createSequentialGroup().add(partsGroup, GroupLayout.PREFERRED_SIZE, 659, Short.MAX_VALUE).add(3, 3, 3)).add(optionsGroup,
-					GroupLayout.PREFERRED_SIZE, 662, Short.MAX_VALUE)).add(9, 9, 9)));
-		groupLayout_1.setVerticalGroup(groupLayout_1.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout_1.createSequentialGroup().addContainerGap().add(partsGroup, GroupLayout.PREFERRED_SIZE, 242, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(optionsGroup, GroupLayout.PREFERRED_SIZE, 222, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+		ParallelGroup pg = groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
+			groupLayout_1.createSequentialGroup().add(partsGroup, GroupLayout.PREFERRED_SIZE, 659, Short.MAX_VALUE).add(3, 3, 3));
+		if (!isNGClientOnly) pg.add(optionsGroup, GroupLayout.PREFERRED_SIZE, 662, Short.MAX_VALUE);
+		groupLayout_1.setHorizontalGroup(
+			groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(groupLayout_1.createSequentialGroup().addContainerGap().add(pg).add(9, 9, 9)));
+
+		SequentialGroup sg = groupLayout_1.createSequentialGroup().addContainerGap().add(partsGroup, GroupLayout.PREFERRED_SIZE, 242, Short.MAX_VALUE);
+		if (!isNGClientOnly) sg.addPreferredGap(LayoutStyle.RELATED).add(optionsGroup, GroupLayout.PREFERRED_SIZE, 222, GroupLayout.PREFERRED_SIZE);
+		sg.addContainerGap();
+		groupLayout_1.setVerticalGroup(groupLayout_1.createParallelGroup(GroupLayout.TRAILING).add(sg));
 		addGroupByButton = new Button(groupByButtonGroup, SWT.NONE);
 		addGroupByButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -329,8 +339,8 @@ public class VisualFormEditorPartsPage extends Composite
 			groupLayout_2.createSequentialGroup().addContainerGap().add(groupLayout_2.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING,
 				groupByFieldsList, GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE).add(GroupLayout.LEADING, groupbyFieldsLabel).add(groupByButtonGroup,
 					GroupLayout.PREFERRED_SIZE, 193, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(groupLayout_2.createSequentialGroup().add(20, 20,
-							20).add(groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(pageBreakAfterGroup, GroupLayout.PREFERRED_SIZE, 318,
+						groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(groupLayout_2.createSequentialGroup().add(20, 20, 20).add(
+							groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(pageBreakAfterGroup, GroupLayout.PREFERRED_SIZE, 318,
 								Short.MAX_VALUE).add(pageBreakBeforeButton, GroupLayout.PREFERRED_SIZE, 261, GroupLayout.PREFERRED_SIZE).add(sinkPartIfButton,
 									GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE).add(allowPartToButton, GroupLayout.PREFERRED_SIZE, 318,
 										Short.MAX_VALUE).add(restartPageNumbersButton)).add(73, 73, 73)).add(

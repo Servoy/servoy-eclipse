@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -132,6 +133,7 @@ import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
@@ -139,6 +141,8 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
+import com.servoy.j2db.persistence.Procedure;
+import com.servoy.j2db.persistence.ProcedureColumn;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -435,6 +439,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.TABLE_COLUMNS)
 			{
 				lm = createTableColumns((ITable)un.getRealObject(), un);
+			}
+			else if (type == UserNodeType.PROCEDURES)
+			{
+				lm = createProcedures((IServerInternal)un.getRealObject(), UserNodeType.PROCEDURE);
 			}
 			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
@@ -1074,12 +1082,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static SimpleUserNode[] createTables(IServerInternal s, UserNodeType type)
 	{
-		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
+		return createTables(s, type, new ArrayList<SimpleUserNode>());
+	}
+
+	public static SimpleUserNode[] createTables(IServerInternal s, UserNodeType type, List<SimpleUserNode> dlm)
+	{
 		if (s.isValid() && s.getConfig().isEnabled())
 		{
 			try
 			{
-				com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 				List<String> tableNames = s.getTableNames(true);
 				Collections.sort(tableNames);
 
@@ -1121,6 +1132,29 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				ServoyLog.logError("error creating tables nodes for server: " + s, e);
 			}
+		}
+		return dlm.toArray(new SimpleUserNode[dlm.size()]);
+	}
+
+	public static SimpleUserNode[] createProcedures(IServerInternal s, UserNodeType type)
+	{
+		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
+		try
+		{
+			List<Procedure> procedures = new ArrayList<>(((IServer)s).getProcedures());
+			//Collections.sort(procedures);
+
+			for (Procedure procedure : procedures)
+			{
+				ProcedureFeedback procedureFeedback = new ProcedureFeedback(procedure, s.getName());
+				UserNode node = new UserNode(procedureFeedback.getCall(), type, procedureFeedback, procedure, uiActivator.loadImageFromBundle("function.png"));
+				node.setClientSupport(ClientSupport.All);
+				dlm.add(node);
+			}
+		}
+		catch (RemoteException | RepositoryException e)
+		{
+			ServoyLog.logError("error creating tables nodes for server: " + s, e);
 		}
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
 	}
@@ -2059,6 +2093,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return null;
 		}
 		List<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+		SortedList<SimpleUserNode> sortedApis = new SortedList<SimpleUserNode>(NameComparator.INSTANCE);
 
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(webcomponent);
 
@@ -2067,8 +2102,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			extractApiDocs(spec);
 
-			Map<String, PropertyDescription> properties = spec.getProperties();
-			for (PropertyDescription pd : properties.values())
+			for (PropertyDescription pd : spec.getSortedProperties())
 			{
 				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
 
@@ -2133,14 +2167,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 				}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
 
-				nodes.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
+				sortedApis.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
 			}
 		}
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeName.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeElementType.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeDesignTimeProperty.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeClientProperty.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeName.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeElementType.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeDesignTimeProperty.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeClientProperty.class));
+		nodes.addAll(sortedApis);
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 
 	}
@@ -2343,6 +2378,49 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return "<pre>Table with datasource: '<b>" + getCode() + "\'</b><pre";
 		}
 
+	}
+	private static class ProcedureFeedback implements IDeveloperFeedback
+	{
+		private final Procedure procedure;
+		private final String serverName;
+
+		public ProcedureFeedback(Procedure procedure, String serverName)
+		{
+			this.procedure = procedure;
+			this.serverName = serverName;
+		}
+
+		public String getCall()
+		{
+			StringBuilder sb = new StringBuilder(procedure.getName());
+			sb.append('(');
+			List<ProcedureColumn> parameters = procedure.getParameters();
+			for (int i = 0; i < parameters.size(); i++)
+			{
+				if (i > 0)
+				{
+					sb.append(", ");
+				}
+				sb.append(parameters.get(i).getName());
+			}
+			sb.append(')');
+			return sb.toString();
+		}
+
+		public String getSample()
+		{
+			return getCall();
+		}
+
+		public String getCode()
+		{
+			return "datasources.sp." + serverName + '.' + getCall() + ';';
+		}
+
+		public String getToolTipText()
+		{
+			return "<pre>Procedure with signature: '<b>" + getCode() + "\'</b><pre";
+		}
 	}
 
 

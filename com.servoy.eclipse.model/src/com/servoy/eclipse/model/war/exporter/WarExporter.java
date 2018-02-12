@@ -214,6 +214,9 @@ public class WarExporter
 			monitor.subTask("Copy the active solution");
 			copyActiveSolution(monitor.newChild(2), tmpWarDir);
 		}
+
+		exportAdminUser(tmpWarDir);
+
 		monitor.setWorkRemaining(exportModel.isNGExport() ? 9 : 3);
 		if (exportModel.isNGExport())
 		{
@@ -902,7 +905,13 @@ public class WarExporter
 		{
 			ServoyLog.logError(e);
 		}
+	}
 
+	/**
+	 * @param tmpWarDir
+	 */
+	private void exportAdminUser(File tmpWarDir)
+	{
 		if (exportModel.getDefaultAdminUser() != null && exportModel.getDefaultAdminPassword() != null)
 		{
 			try
@@ -1463,6 +1472,7 @@ public class WarExporter
 //			}
 			properties.put("server." + i + ".driver", sc.getDriver());
 			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
+			properties.put("server." + i + ".queryProcedures", "" + sc.isQueryProcedures());
 			properties.put("server." + i + ".prefixTables", "" + sc.isPrefixTables());
 			String catalog = sc.getCatalog();
 			if (catalog == null)
