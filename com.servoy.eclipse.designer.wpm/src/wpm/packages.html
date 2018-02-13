@@ -44,11 +44,14 @@
       <!-- Added -->
       <div class="align-center"> 
         <p> {{package.installed}} </p>
-        <md-button class="md-icon-button fa fa-trash"  ng-click="uninstall(package, $index)" ng-if="package.installed && (package.packageType != 'Solution')" ng-disabled="isInstallingOrRemoving($index)">
+        <md-button class="md-icon-button fa fa-trash"  ng-click="uninstall(package, $index)" ng-if="package.installed && package.installedIsWPA && (package.packageType != 'Solution')" ng-disabled="isInstallingOrRemoving($index)">
           <md-tooltip md-direction="bottom" md-autohide="true">
             Remove the web package from solution '{{packages[$index].activeSolution}}'.
           </md-tooltip>
         </md-button>
+        <md-tooltip md-direction="bottom" md-autohide="true" ng-if="package.installed && !package.installedIsWPA">
+            Package not added using Web Package Manager
+        </md-tooltip>
         <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
       </div>
     </td>
