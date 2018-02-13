@@ -162,6 +162,11 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 	@Override
 	public boolean performFinish()
 	{
+			// check if finish is pressed on the first page, to ask if the file can be overwritten or not.
+		if (getContainer().getCurrentPage() instanceof FileSelectionPage && getContainer().getCurrentPage().getNextPage() == null)
+		{
+			return false;
+		}
 		noneActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
@@ -332,7 +337,16 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 	@Override
 	public boolean canFinish()
 	{
-		return getContainer().getCurrentPage() instanceof DeployConfigurationPage;
+		IWizardPage[] allPages = getPages();
+		for (IWizardPage page : allPages)
+		{
+			if (page instanceof DeployConfigurationPage) continue;
+			if (!page.canFlipToNextPage())
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

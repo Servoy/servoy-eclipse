@@ -77,6 +77,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.types.StyleClassPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
@@ -149,6 +150,7 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
@@ -178,6 +180,7 @@ import com.servoy.j2db.ui.runtime.HasRuntimeDesignTimeProperty;
 import com.servoy.j2db.ui.runtime.HasRuntimeElementType;
 import com.servoy.j2db.ui.runtime.HasRuntimeFormName;
 import com.servoy.j2db.ui.runtime.HasRuntimeName;
+import com.servoy.j2db.ui.runtime.HasRuntimeStyleClass;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -2168,6 +2171,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
 
 				sortedApis.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
+			}
+			if (spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
+				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0)
+			{
+				sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeStyleClass.class));
 			}
 		}
 		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
