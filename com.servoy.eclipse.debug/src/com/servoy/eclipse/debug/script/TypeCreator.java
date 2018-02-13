@@ -97,6 +97,7 @@ import org.sablo.specification.property.types.FloatPropertyType;
 import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
+import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.base.persistence.IBaseColumn;
@@ -181,6 +182,7 @@ import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -1184,7 +1186,26 @@ public class TypeCreator extends TypeCache
 		}
 		if (!fullTypeName.startsWith("WebService"))
 		{
-			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			boolean hasStyleclass = spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
+				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0;
+
+			Method method = null;
+			if (hasStyleclass)
+			{
+				method = TypeInfoModelFactory.eINSTANCE.createMethod();
+				method.setName("addStyleClass");
+				method.setDescription(
+					"Add a style class to styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.addStyleClass('mycssclass');" +
+						"</br></br>@param {String} style class to add");
+				EList<Parameter> parameters = method.getParameters();
+				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+				param.setType(getTypeRef(null, "String"));
+				param.setName("styleclass");
+				parameters.add(param);
+				members.add(method);
+			}
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName("getFormName");
 			method.setDescription("Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();" +
 				"</br></br><b>@return</b> The name of the form.");
@@ -1201,6 +1222,21 @@ public class TypeCreator extends TypeCache
 			method.setDescription("Returns the web component type from specification file</br></br>var elementType = elements.elem.getElementType();" +
 				"</br></br><b>@return</b> The web component spec type.");
 			members.add(method);
+
+			if (hasStyleclass)
+			{
+				method = TypeInfoModelFactory.eINSTANCE.createMethod();
+				method.setName("removeStyleClass");
+				method.setDescription(
+					"Remove a style class (if already present) from styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.removeStyleClass('mycssclass');" +
+						"</br></br>@param {String} style class to remove");
+				EList<Parameter> parameters = method.getParameters();
+				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+				param.setType(getTypeRef(null, "String"));
+				param.setName("styleclass");
+				parameters.add(param);
+				members.add(method);
+			}
 
 			method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName("putClientProperty");
