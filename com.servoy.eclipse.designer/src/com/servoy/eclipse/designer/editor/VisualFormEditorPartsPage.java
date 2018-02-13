@@ -421,13 +421,13 @@ public class VisualFormEditorPartsPage extends Composite
 		List<Integer> partTypes = new ArrayList<Integer>();
 		addAvailablePartType(Part.TITLE_HEADER, lastSuperPart, currentTypes, partTypes);
 		addAvailablePartType(Part.HEADER, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.LEADING_GRAND_SUMMARY, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.LEADING_SUBSUMMARY, lastSuperPart, currentTypes, partTypes);
+		if (!isNGClientOnly) addAvailablePartType(Part.LEADING_GRAND_SUMMARY, lastSuperPart, currentTypes, partTypes);
+		if (!isNGClientOnly) addAvailablePartType(Part.LEADING_SUBSUMMARY, lastSuperPart, currentTypes, partTypes);
 		addAvailablePartType(Part.BODY, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.TRAILING_SUBSUMMARY, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.TRAILING_GRAND_SUMMARY, lastSuperPart, currentTypes, partTypes);
+		if (!isNGClientOnly) addAvailablePartType(Part.TRAILING_SUBSUMMARY, lastSuperPart, currentTypes, partTypes);
+		if (!isNGClientOnly) addAvailablePartType(Part.TRAILING_GRAND_SUMMARY, lastSuperPart, currentTypes, partTypes);
 		addAvailablePartType(Part.FOOTER, lastSuperPart, currentTypes, partTypes);
-		addAvailablePartType(Part.TITLE_FOOTER, lastSuperPart, currentTypes, partTypes);
+		if (!isNGClientOnly) addAvailablePartType(Part.TITLE_FOOTER, lastSuperPart, currentTypes, partTypes);
 
 		// keep selection even is a part was overriden/unoverriden (can't simply use part type below because of subsummaries)
 		ISelection newCurrentPartsSelection = currentPartsSelection;
