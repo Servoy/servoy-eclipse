@@ -2105,7 +2105,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			extractApiDocs(spec);
 
-			for (PropertyDescription pd : spec.getSortedProperties())
+			Map<String, PropertyDescription> properties = spec.getProperties();
+			SortedList<PropertyDescription> sortedProperties = new SortedList<PropertyDescription>(new Comparator<PropertyDescription>()
+			{
+
+				@Override
+				public int compare(PropertyDescription o1, PropertyDescription o2)
+				{
+					return o1.getName().toString().compareToIgnoreCase(o2.getName().toString());
+				}
+			}, properties.values());
+			for (PropertyDescription pd : sortedProperties)
 			{
 				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
 
