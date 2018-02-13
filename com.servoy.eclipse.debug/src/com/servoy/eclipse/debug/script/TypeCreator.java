@@ -644,6 +644,10 @@ public class TypeCreator extends TypeCache
 			{
 				property.setStatic(true);
 			}
+			if (field.getAnnotation(Deprecated.class) != null)
+			{
+				property.setDeprecated(true);
+			}
 			members.add(property);
 		}
 		for (java.lang.reflect.Method method : methods)
@@ -651,7 +655,10 @@ public class TypeCreator extends TypeCache
 			org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
 			m.setName(method.getName());
 			m.setType(getJSType(context, method.getReturnType()));
-
+			if (method.getAnnotation(Deprecated.class) != null)
+			{
+				m.setDeprecated(true);
+			}
 			EList<Parameter> parameters = m.getParameters();
 			Class< ? >[] parameterTypes = method.getParameterTypes();
 			for (int i = 0; i < parameterTypes.length; i++)
