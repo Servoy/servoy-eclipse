@@ -192,7 +192,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 							public void run()
 							{
 								ok[0] = MessageDialog.openConfirm(shell, "Overwrite SocketFactory properties",
-									"In the selected properties file SocketFactory.rmiServerFactory is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'. Please allow exporter to overwrite properties or cancel the export.");
+									"In the selected properties file SocketFactory.rmiServerFactory is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'. Please allow exporter to overwrite properties or select another properties file.");
 							}
 						});
 						if (ok[0])
@@ -201,13 +201,9 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						}
 						else
 						{
-							Display.getDefault().asyncExec(new Runnable()
-							{
-								public void run()
-								{
-									getWizard().getContainer().getShell().close();
-								}
-							});
+							exportModel.setServoyPropertiesFileName(null);
+							fileNameText.setText("");
+							return false;
 						}
 					}
 				}
