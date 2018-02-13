@@ -1901,7 +1901,16 @@ public class SolutionExplorerTreeContentProvider
 		else
 		{
 			IServerInternal server = (IServerInternal)serverNode.getRealObject();
-			serverNode.children = SolutionExplorerListContentProvider.createTables(server, type);
+			PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES, null,
+				"This node list the stored procedures of server that have this property enabled (see server editor)", server,
+				uiActivator.loadImageFromBundle("function.png"));
+			storedProceduresDataSources.parent = serverNode;
+
+			ArrayList<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
+			list.add(storedProceduresDataSources);
+			serverNode.children = SolutionExplorerListContentProvider.createTables(server, type, list);
+
+
 		}
 
 
@@ -1961,9 +1970,17 @@ public class SolutionExplorerTreeContentProvider
 			{
 				if (node.children == null || node.children.length == 0)
 				{
+					PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES,
+						null, "This node list the stored procedures of server that have this property enabled (see server editor)", serverObj,
+						uiActivator.loadImageFromBundle("function.png"));
+					storedProceduresDataSources.parent = node;
+
 					PlatformSimpleUserNode viewNode = new PlatformSimpleUserNode("Views", UserNodeType.VIEWS, "", "Views", serverObj,
 						PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
-					node.children = new PlatformSimpleUserNode[] { viewNode };
+					ArrayList<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+					nodes.add(storedProceduresDataSources);
+					nodes.add(viewNode);
+					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
 					viewNode.parent = node;
 				}
 			}
@@ -2247,6 +2264,7 @@ public class SolutionExplorerTreeContentProvider
 			PlatformSimpleUserNode solutionDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_SolutionDataSources, UserNodeType.SOLUTION_DATASOURCES,
 				solution, IconProvider.instance().image(JSDataSources.class));
 			solutionDataSources.parent = projectNode;
+
 
 			PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
 				servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));

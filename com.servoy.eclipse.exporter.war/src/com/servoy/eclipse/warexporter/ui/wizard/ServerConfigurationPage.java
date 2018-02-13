@@ -67,6 +67,7 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 	private Combo clone;
 	private Text password;
 	private Button skip;
+	private Button procedures;
 	private Combo validationType;
 
 	private final ExportWarWizard wizard;
@@ -159,12 +160,17 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 		Label lblNewLabel_11 = new Label(container, SWT.NONE);
 		lblNewLabel_11.setText("Skip system tables");
 
+		Label lblNewLabel_13 = new Label(container, SWT.NONE);
+		lblNewLabel_13.setText("Use procedures");
+
 		validationQuery = new Text(container, SWT.BORDER);
 
 		clone = new Combo(container, SWT.NONE);
 		clone.setItems(selectedServerNames.toArray(new String[selectedServerNames.size()]));
 
 		skip = new Button(container, SWT.CHECK);
+
+		procedures = new Button(container, SWT.CHECK);
 
 		ComboViewer comboViewer = new ComboViewer(container, SWT.NONE);
 		comboViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -195,55 +201,70 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 		gl_container.setHorizontalGroup(gl_container.createParallelGroup(GroupLayout.LEADING).add(gl_container.createSequentialGroup().addContainerGap().add(
 			gl_container.createParallelGroup(GroupLayout.LEADING).add(lblNewLabel_7).add(lblNewLabel_6).add(lblNewLabel_5).add(lblNewLabel_4).add(
 				lblNewLabel_3).add(lblNewLabel_2).add(lblNewLabel_1).add(lblNewLabel).add(lblNewLabel_8).add(lblNewLabel_9).add(lblNewLabel_10).add(
-					lblNewLabel_11).add(18).add(lblNewLabel_12)).add(18).add(
-						gl_container.createParallelGroup(GroupLayout.LEADING).add(skip).add(statementsIdle, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(
-							url, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(driver, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(username,
-								GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(catalog, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(schema,
-									GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(maxActive, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(maxIdle,
-										GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(validationQuery, GroupLayout.DEFAULT_SIZE, 347,
-											Short.MAX_VALUE).add(clone, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(validationType,
-												GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(password, GroupLayout.DEFAULT_SIZE, 347,
+					lblNewLabel_11).add(lblNewLabel_13).add(18).add(lblNewLabel_12)).add(18).add(
+						gl_container.createParallelGroup(GroupLayout.LEADING).add(procedures).add(skip).add(statementsIdle, GroupLayout.DEFAULT_SIZE, 347,
+							Short.MAX_VALUE).add(url, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(driver, GroupLayout.DEFAULT_SIZE, 347,
+								Short.MAX_VALUE).add(username, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(catalog, GroupLayout.DEFAULT_SIZE, 347,
+									Short.MAX_VALUE).add(schema, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(maxActive, GroupLayout.DEFAULT_SIZE, 347,
+										Short.MAX_VALUE).add(maxIdle, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(validationQuery,
+											GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(clone, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(
+												validationType, GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE).add(password, GroupLayout.DEFAULT_SIZE, 347,
 													Short.MAX_VALUE)).addContainerGap()));
 		gl_container.setVerticalGroup(gl_container.createParallelGroup(GroupLayout.LEADING).add(
 			gl_container.createSequentialGroup().addContainerGap().add(gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel).add(url,
 				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 					gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_1).add(driver, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(gl_container.createParallelGroup(GroupLayout.BASELINE).add(
-							lblNewLabel_2).add(username, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-								LayoutStyle.RELATED).add(gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_12).add(password,
-									GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-										gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_3).add(catalog, GroupLayout.PREFERRED_SIZE,
-											GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-												gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_4).add(schema,
-													GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-														LayoutStyle.RELATED).add(gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_5).add(
-															maxActive, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																LayoutStyle.RELATED).add(
+						GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+							gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_2).add(username, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+									gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_12).add(password, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+											gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_3).add(catalog, GroupLayout.PREFERRED_SIZE,
+												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+													gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_4).add(
+														schema, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+															gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_5).add(maxActive,
+																GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 																	gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_6).add(maxIdle,
-																		GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																			LayoutStyle.RELATED).add(
-																				gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_7).add(
-																					statementsIdle, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																						LayoutStyle.RELATED).add(gl_container.createParallelGroup(
-																							GroupLayout.BASELINE).add(lblNewLabel_8).add(validationType,
-																								GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																									LayoutStyle.RELATED).add(gl_container.createParallelGroup(
-																										GroupLayout.BASELINE).add(lblNewLabel_9).add(
-																											validationQuery, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																		GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																		GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																			gl_container.createParallelGroup(GroupLayout.BASELINE).add(lblNewLabel_7).add(
+																				statementsIdle, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																				GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																					gl_container.createParallelGroup(GroupLayout.BASELINE).add(
+																						lblNewLabel_8).add(validationType, GroupLayout.PREFERRED_SIZE,
+																							GroupLayout.DEFAULT_SIZE,
+																							GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																								LayoutStyle.RELATED).add(
+																									gl_container.createParallelGroup(GroupLayout.BASELINE).add(
+																										lblNewLabel_9).add(validationQuery,
+																											GroupLayout.PREFERRED_SIZE,
+																											GroupLayout.DEFAULT_SIZE,
+																											GroupLayout.PREFERRED_SIZE)).addPreferredGap(
 																												LayoutStyle.RELATED).add(
 																													gl_container.createParallelGroup(
 																														GroupLayout.BASELINE).add(
 																															lblNewLabel_10).add(clone,
-																																GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																																GroupLayout.PREFERRED_SIZE,
+																																GroupLayout.DEFAULT_SIZE,
+																																GroupLayout.PREFERRED_SIZE)).addPreferredGap(
 																																	LayoutStyle.RELATED).add(
 																																		gl_container.createParallelGroup(
 																																			GroupLayout.BASELINE).add(
 																																				lblNewLabel_11).add(
-																																					skip)).addContainerGap(
-																																						GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+																																					skip)).addPreferredGap(
+																																						LayoutStyle.RELATED).add(
+																																							gl_container.createParallelGroup(
+																																								GroupLayout.BASELINE).add(
+																																									lblNewLabel_13).add(
+																																										procedures)).addContainerGap(
+																																											GroupLayout.DEFAULT_SIZE,
+																																											Short.MAX_VALUE)));
 		container.setLayout(gl_container);
 		container.setTabList(
-			new Control[] { url, driver, username, password, catalog, schema, maxActive, maxIdle, statementsIdle, validationType, validationQuery, clone, skip });
+			new Control[] { url, driver, username, password, catalog, schema, maxActive, maxIdle, statementsIdle, validationType, validationQuery, clone, skip, procedures });
 		m_bindingContext = initDataBindings();
 
 	}
@@ -321,6 +342,10 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 		IObservableValue configSkipSysTablesObserveValue = PojoObservables.observeValue(config, "skipSysTables");
 		bindingContext.bindValue(skipObserveSelectionObserveWidget, configSkipSysTablesObserveValue, null, null);
 		//
+		IObservableValue proceduresObserveSelectionObserveWidget = SWTObservables.observeSelection(procedures);
+		IObservableValue configproceduresObserveValue = PojoObservables.observeValue(config, "queryProcedures");
+		bindingContext.bindValue(proceduresObserveSelectionObserveWidget, configproceduresObserveValue, null, null);
+		//
 		IObservableValue passwordObserveTextObserveWidget = SWTObservables.observeText(password, SWT.Modify);
 		IObservableValue configPasswordObserveValue = PojoObservables.observeValue(config, "password");
 		bindingContext.bindValue(passwordObserveTextObserveWidget, configPasswordObserveValue, null, null);
@@ -382,5 +407,6 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 		validationQuery.setText("");
 		clone.setItems(selectedServerNames.toArray(new String[selectedServerNames.size()]));//can't set to empty value otherwise
 		skip.setSelection(false);
+		procedures.setSelection(false);
 	}
 }

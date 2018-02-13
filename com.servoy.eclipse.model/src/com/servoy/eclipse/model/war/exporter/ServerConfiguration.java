@@ -35,6 +35,7 @@ public class ServerConfiguration
 	private String schema;
 	private boolean skipSysTables;
 	private boolean prefixTables;
+	private boolean queryProcedures;
 	private final String name;
 
 	public ServerConfiguration(String name)
@@ -61,6 +62,7 @@ public class ServerConfiguration
 		maxPreparedStatementsIdle = config.getMaxPreparedStatementsIdle();
 		skipSysTables = config.getSkipSysTables();
 		prefixTables = config.getPrefixTables();
+		queryProcedures = config.getQueryProcedures();
 	}
 
 	private String getDisplayValue(String value)
@@ -197,6 +199,14 @@ public class ServerConfiguration
 	}
 
 	/**
+	 * @return the queryProcedures
+	 */
+	public boolean isQueryProcedures()
+	{
+		return queryProcedures;
+	}
+
+	/**
 	 * @param serverUrl the serverUrl to set
 	 */
 	public void setServerUrl(String serverUrl)
@@ -306,6 +316,14 @@ public class ServerConfiguration
 	public void setPrefixTables(boolean prefixTables)
 	{
 		this.prefixTables = prefixTables;
+	}
+
+	/**
+	 * @param queryProcedures the queryProcedures to set
+	 */
+	public void setQueryProcedures(boolean queryProcedures)
+	{
+		this.queryProcedures = queryProcedures;
 	}
 
 }

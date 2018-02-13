@@ -779,7 +779,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 	@Override
 	protected VisualFormEditorPaletteFactory createPaletteFactory()
 	{
-		return new VisualFormEditorPaletteFactory();
+		return new VisualFormEditorPaletteFactory(getEditorPart().getForm().getSolution().getSolutionType());
 	}
 
 	@Override
