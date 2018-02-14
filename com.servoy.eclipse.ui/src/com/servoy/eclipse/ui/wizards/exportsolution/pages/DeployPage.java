@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.j2db.util.Utils;
 
@@ -204,17 +205,13 @@ public class DeployPage extends WizardPage implements IJobChangeListener
 				}
 				catch (ClientProtocolException e)
 				{
-					String msg = "Unable to make connection";
-					System.err.println(msg);
-					responseMessage.append(msg);
-					e.printStackTrace();
+					responseMessage.append("Unable to make connection").append('\n').append(e.getMessage());
+					ServoyLog.logError(e);
 				}
 				catch (IOException e)
 				{
-					String msg = "Unable to read file";
-					System.err.println(msg);
-					responseMessage.append(msg);
-					e.printStackTrace();
+					responseMessage.append("Unable to read file").append('\n').append(e.getMessage());
+					ServoyLog.logError(e);
 				}
 				finally
 				{
