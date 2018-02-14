@@ -78,8 +78,15 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 							var beanModel = $scope.getBeanModel(node);
 							if(beanModel) {
 								beanModel.location.y = beanModel.location.y + deltaY* resizeInfo.top;
+								if(beanModel.location.y < 0) {
+									beanModel.location.y = 0;
+									deltaY = 0;
+								}
 								beanModel.location.x = beanModel.location.x + deltaX* resizeInfo.left;
-
+								if(beanModel.location.x < 0) {
+									beanModel.location.x = 0;
+									deltaX = 0;
+								}
 								beanModel.size.width = beanModel.size.width + deltaX* resizeInfo.width;
 								if(beanModel.size.width < 1) beanModel.size.width = 1;
 								beanModel.size.height = beanModel.size.height + deltaY* resizeInfo.height;
