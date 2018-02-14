@@ -1053,7 +1053,7 @@ public class SolutionExplorerView extends ViewPart
 					boolean treeWidgetDisposed = true;
 					try
 					{
-						treeWidgetDisposed = (tree.getControl().getDisplay() == null);
+						treeWidgetDisposed = (tree.getControl().getDisplay() == null || tree.getControl().isDisposed());
 					}
 					catch (Exception e)
 					{
@@ -1084,6 +1084,10 @@ public class SolutionExplorerView extends ViewPart
 								tree.setSelection(toSelect, true);
 								current = tree.getSelection();
 							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logWarning("Error when refreshing the tree and trying to keep the selection", e);
 						}
 						finally
 						{
