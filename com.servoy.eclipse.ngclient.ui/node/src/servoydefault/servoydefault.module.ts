@@ -5,6 +5,9 @@ import {FormsModule}        from '@angular/forms';
 import { ServoyDefaultTextField } from './textfield/textfield';
 import { ServoyDefaultButton } from './button/button';
 
+import {SabloModule} from '../sablo/sablo.module'
+
+import {ServoyApiModule} from '../servoyapi/servoy_api.module'
 
 @NgModule({
   declarations: [
@@ -12,7 +15,9 @@ import { ServoyDefaultButton } from './button/button';
     ServoyDefaultButton
   ],
   imports:[
-    FormsModule],
+    FormsModule,
+    SabloModule,
+    ServoyApiModule],
   exports: [
      ServoyDefaultTextField,
      ServoyDefaultButton

@@ -1,1 +1,9 @@
-<button>{{text}}</button>
+<button class='svy-button btn btn-default btn-xs' 
+			  sablo-tabseq='model.tabSeq'
+              style='overflow:hidden; position:absolute; width:100%; height:100%'
+              [id]="servoyApi.getMarkupId()" #element>
+<div  style="width:100%; overflow:hidden; position:relative; white-space:nowrap; pointer-events: none;" #child>
+ 	   		<span svy-imagemediaid='{img: dataProviderID.url ? dataProviderID.url : imageMediaID, componentSize: size ,rollOverImg:rolloverImageMediaID, visible: visible}'></span>
+ 	   		<span [innerHTML]='(((dataProviderID == null && !hideText) || dataProviderID.url) ? text : dataProviderID ) | formatFilter:format?.display:format?.type | mnemonicletterFilter:mnemonic | trustAsHtml:servoyApi.trustAsHtml()'></span>
+</div>   
+</button>
