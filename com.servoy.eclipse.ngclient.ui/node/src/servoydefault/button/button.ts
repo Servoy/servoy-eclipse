@@ -4,8 +4,7 @@ import {PropertyUtils} from '../../servoyapi/utils/property_utils'
 
 @Component( {
     selector: 'servoydefault-button',
-    templateUrl: './button.html',
-    styleUrls: ['./button.css']
+    templateUrl: './button.html'
 } )
 export class ServoyDefaultButton implements OnInit, OnChanges {
     @Input() name;

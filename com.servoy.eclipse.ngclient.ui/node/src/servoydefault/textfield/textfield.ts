@@ -4,8 +4,7 @@ import {PropertyUtils} from '../../servoyapi/utils/property_utils'
 
 @Component( {
     selector: 'servoydefault-textfield',
-    templateUrl: './textfield.html',
-    styleUrls: ['./textfield.css']
+    templateUrl: './textfield.html'
 } )
 export class ServoyDefaultTextField implements OnInit, OnChanges {
     @Input() name;
