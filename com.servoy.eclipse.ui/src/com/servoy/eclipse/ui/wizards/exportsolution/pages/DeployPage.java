@@ -19,21 +19,19 @@ package com.servoy.eclipse.ui.wizards.exportsolution.pages;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -156,6 +154,18 @@ public class DeployPage extends WizardPage implements IJobChangeListener
 		deploy.setEnabled(false);
 		Job job = new Job("Deploying to Servoy application server")
 		{
+			private void updateDeployOutput(final String message)
+			{
+				Display.getDefault().syncExec(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						deployOutput.setText(message);
+					}
+				});
+			}
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
@@ -164,12 +174,16 @@ public class DeployPage extends WizardPage implements IJobChangeListener
 				File inFile = new File(exportFile);
 				try
 				{
+					responseMessage.append("Deploy started ...").append('\n');
+					updateDeployOutput(responseMessage.toString());
+
 					HttpClient httpclient = HttpClients.createDefault();
-
-					CredentialsProvider credsProvider = new BasicCredentialsProvider();
-					credsProvider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT), new UsernamePasswordCredentials(username, password));
-
 					HttpPost httppost = new HttpPost(url);
+
+					String auth = username + ":" + password;
+					byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("ISO-8859-1")));
+					String authHeader = "Basic " + new String(encodedAuth);
+					httppost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
 
 
 					MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
@@ -182,9 +196,7 @@ public class DeployPage extends WizardPage implements IJobChangeListener
 					httppost.setEntity(multipartEntityBuilder.build());
 
 					// execute the request
-					HttpClientContext context = HttpClientContext.create();
-					context.setCredentialsProvider(credsProvider);
-					HttpResponse response = httpclient.execute(httppost, context);
+					HttpResponse response = httpclient.execute(httppost);
 
 					if (response.getStatusLine().getStatusCode() == 200)
 					{
@@ -196,6 +208,7 @@ public class DeployPage extends WizardPage implements IJobChangeListener
 						{
 							responseMessage.append(s.trim()).append('\n');
 						}
+						responseMessage.append("Done!");
 					}
 					else
 					{
@@ -215,14 +228,7 @@ public class DeployPage extends WizardPage implements IJobChangeListener
 				}
 				finally
 				{
-					Display.getDefault().syncExec(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							deployOutput.setText(responseMessage.toString());
-						}
-					});
+					updateDeployOutput(responseMessage.toString());
 				}
 
 				return Status.OK_STATUS;
