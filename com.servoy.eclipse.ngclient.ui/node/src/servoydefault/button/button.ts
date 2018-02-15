@@ -1,4 +1,4 @@
-import { Component, Directive,ViewChild,QueryList,OnInit, Input, Output, EventEmitter, Renderer2, ElementRef, OnChanges,  AfterViewInit,SimpleChanges } from '@angular/core';
+import { Component, Directive,ViewChild,QueryList,OnInit, Input, Output, EventEmitter, Renderer2, ElementRef, OnChanges,SimpleChanges } from '@angular/core';
 
 import {PropertyUtils} from '../../servoyapi/utils/property_utils'
 
@@ -7,7 +7,7 @@ import {PropertyUtils} from '../../servoyapi/utils/property_utils'
     templateUrl: './button.html',
     styleUrls: ['./button.css']
 } )
-export class ServoyDefaultButton implements OnInit, OnChanges,AfterViewInit {
+export class ServoyDefaultButton implements OnInit, OnChanges {
     @Input() name;
     @Input() servoyApi;
 
@@ -56,7 +56,7 @@ export class ServoyDefaultButton implements OnInit, OnChanges,AfterViewInit {
             let change = changes[property];
             switch ( property ) {
                 case "borderType":
-                    PropertyUtils.setBorder( this.child,this.renderer ,change.currentValue);
+                    PropertyUtils.setBorder( this.elementRef.nativeElement,this.renderer ,change.currentValue);
                     break;
                 case "background":
                 case "transparent":
@@ -85,8 +85,11 @@ export class ServoyDefaultButton implements OnInit, OnChanges,AfterViewInit {
                         this.renderer.setAttribute(this.elementRef.nativeElement,  "disabled", "disabled" );
                     break;
                 case "margin":
-                    if ( change.currentValue )
-//                        element.css( change.currentValue );
+                    if ( change.currentValue ) {
+                        for (let  style in change.currentValue) {
+                            this.renderer.setStyle(this.elementRef.nativeElement, style, change.currentValue[style] );
+                        }
+                    }
                     break;
                 case "styleClass":
                     if (change.previousValue)
@@ -100,10 +103,6 @@ export class ServoyDefaultButton implements OnInit, OnChanges,AfterViewInit {
 
     }
     
-    ngAfterViewInit() {
-        console.log("after init " + this.child)
-    }
-
     ngOnInit() {
         if ( this.onActionMethodID ) {
             this.renderer.listen( this.elementRef.nativeElement, 'click', ( e ) => {
