@@ -35,4 +35,15 @@ export class PropertyUtils {
 //            element.css(newVal.borderStyle)
 //        }
     }
+   
+   public static addSelectOnEnter(element:any, renderer:Renderer2) {
+       renderer.listen(element, "focus", ()=> {
+           setTimeout(()=> {
+               // this access "document" directly which shoudn't really be done, but angular doesn't have encapsuled support for testing "is(":focus")"
+               var currentFocusedElement =  document.querySelector(":focus");
+               if (currentFocusedElement == element)
+                   element.select(); 
+           },0);           
+       });
+   }
 }
