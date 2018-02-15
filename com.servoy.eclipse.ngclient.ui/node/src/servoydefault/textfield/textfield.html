@@ -1,1 +1,8 @@
-<input  type="text"  [value]="dataProviderID" (change)="update($event.target.value)"/>
+<input style="width:100%;height:100%;overflow:hidden"
+	   class='svy-textfield svy-field form-control input-sm svy-padding-xs'
+	   type="text"  
+	   [id]="servoyApi.getMarkupId()"
+	   [value]="dataProviderID" 
+	   (change)="update($event.target.value)"
+	   sablo-tabseq='model.tabSeq'
+	   svy-decimal-key-converter #element/>
