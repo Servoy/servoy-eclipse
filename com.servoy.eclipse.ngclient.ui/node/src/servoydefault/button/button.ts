@@ -50,8 +50,6 @@ export class ServoyDefaultButton implements OnInit, OnChanges {
     }
 
     ngOnChanges( changes: SimpleChanges ) {
-        console.log("chnages" + this.child)
-        console.log( changes  )
         for ( let property in changes ) {
             let change = changes[property];
             switch ( property ) {

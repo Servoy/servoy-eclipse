@@ -52,7 +52,6 @@ export class ServoyDefaultTextField implements OnInit, OnChanges {
     }
 
     ngOnChanges( changes: SimpleChanges ) {
-        console.log( changes )
         for ( let property in changes ) {
             let change = changes[property];
             switch ( property ) {
