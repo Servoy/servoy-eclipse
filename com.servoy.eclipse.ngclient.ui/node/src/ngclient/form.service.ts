@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 
-import { FormComponent } from './svy-form/svy-form.component'
+import { FormComponent } from './form/form_component.component'
 
 import { ConverterService } from '../sablo/converter.service'
 
@@ -235,7 +235,7 @@ export class FormCache {
 export class ComponentCache {
     constructor( public readonly name: string,
         public readonly type,
-        public readonly model: { [property: string]: Object },
+        public readonly model: { [property: string]: any },
         public readonly handlers: Array<String>,
         public readonly layout: { [property: string]: string } ) {
     }

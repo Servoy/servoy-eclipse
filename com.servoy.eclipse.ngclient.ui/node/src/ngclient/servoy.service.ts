@@ -8,7 +8,7 @@ import { WindowRefService } from '../sablo/util/windowref.service';
 
 import { SessionStorageService } from 'angular-web-storage';
 
-import { DateConverter } from './converters/date.converter'
+import { DateConverter } from './converters/date_converter'
 
 
 @Injectable()

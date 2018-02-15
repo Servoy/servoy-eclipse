@@ -8,7 +8,7 @@ import {FormService} from './form.service';
 import {ServoyService} from './servoy.service';
 import {AllServicesModules} from './allservices.service';
 
-import { FormComponent,AddAttributeDirective } from './svy-form/svy-form.component';
+import { FormComponent,AddAttributeDirective } from './form/form_component.component';
 
 import {SabloModule} from '../sablo/sablo.module'
 
