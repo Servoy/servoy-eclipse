@@ -1,7 +1,5 @@
 import { Injectable, EventEmitter } from '@angular/core';
 
-import { Observable, } from 'rxjs/Observable';
-import "rxjs/add/operator/filter"
 import { IntervalObservable } from "rxjs/observable/IntervalObservable";
 import { Subscription } from "rxjs/Subscription";
 
