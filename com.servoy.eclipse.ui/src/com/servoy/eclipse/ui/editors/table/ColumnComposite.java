@@ -44,6 +44,8 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -281,12 +283,20 @@ public class ColumnComposite extends Composite
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
 			//JFaceResources.getColorRegistry().get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_END"); is the
-			//closest match, but the label background is slighly visible
-			Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
+			//closest match, but the label background is slightly visible
+			final Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
 			columnValidationComposite.setBackground(backgroundColor);
 			columnConversionComposite.setBackground(backgroundColor);
 			columnDetailsComposite.setBackground(backgroundColor);
 			columnAutoEnterComposite.setBackground(backgroundColor);
+			parent.addDisposeListener(new DisposeListener()
+			{
+				@Override
+				public void widgetDisposed(DisposeEvent e)
+				{
+					backgroundColor.dispose();
+				}
+			});
 		}
 
 		Button addButton;

@@ -49,6 +49,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -185,9 +187,17 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
-			Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
+			final Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
 			columnAutoEnterServoySeqComposite.setBackground(backgroundColor);
 			columnAutoEnterDBSeqComposite.setBackground(backgroundColor);
+			parent.addDisposeListener(new DisposeListener()
+			{
+				@Override
+				public void widgetDisposed(DisposeEvent e)
+				{
+					backgroundColor.dispose();
+				}
+			});
 		}
 
 		lookupValueSelect = new TreeSelectViewer(this, SWT.NONE)
