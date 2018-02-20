@@ -21,6 +21,8 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -190,7 +192,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             will be available as a normal admin user in solutions as well.\n"
 			+ "        -" + minimizeJsCss + " minimize JS and CSS files \n"
 			+ "        -" + licenses + " <company_name> <number_of_licenses> <license_code>... export Servoy Client\n"
-			+ "             licenses; to add more licenses use ',' as delimiter.\n"
+			+ "             licenses; to add more licenses use ',' as delimiter. If the company name contains \n"
+			+ "             spaces, then it must be enclosed in double quotes.\n"
 			+ "        -" + userHomeDirectory + " <user_home_directory>... this must be a  writable directory where\n"
 			+ "             Servoy application  related files  will be stored;  if not set, then the system\n"
 			+ "             user home directory will be used.\n"
@@ -250,14 +253,34 @@ public class WarArgumentChest extends AbstractArgumentChest
 			for (String license : l_array)
 			{
 				String[] parts = license.trim().split(" ");
+				String company = null;
+				String code = null;
+				String numLicenses = null;
 				if (parts.length != 3)
 				{
-					ServoyLog.logError(new Exception("Please specify license as <company_name> <number_of_licenses> <code>. \"" + license + "\" is not valid"));
-					continue;
+					Pattern p = Pattern.compile("\"(.+)\" (.+) (.+)");
+					Matcher m = p.matcher(license);
+					if (m.matches())
+					{
+						company = m.group(1);
+						numLicenses = m.group(2);
+						code = m.group(3);
+					}
+					else
+					{
+						ServoyLog.logError(new Exception(
+							"Please specify license as <company_name> <number_of_licenses> <code> or \"<company_name>\" <number_of_licenses> <code>. \"" +
+								license + "\" is not valid"));
+						continue;
+					}
 				}
-				String company = parts[0].trim();
-				String code = parts[2].trim();
-				result.put(code, new License(company, code, parts[1].trim()));
+				else
+				{
+					company = parts[0].trim();
+					numLicenses = parts[1].trim();
+					code = parts[2].trim();
+				}
+				result.put(code, new License(company, code, numLicenses));
 			}
 		}
 		return result;
