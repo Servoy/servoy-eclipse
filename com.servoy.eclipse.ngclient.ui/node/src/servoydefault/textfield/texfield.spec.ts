@@ -16,6 +16,7 @@ describe("ServoyDefaultTextField", () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultTextField);
     component = fixture.componentInstance;
+    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
     fixture.detectChanges();
   });
 

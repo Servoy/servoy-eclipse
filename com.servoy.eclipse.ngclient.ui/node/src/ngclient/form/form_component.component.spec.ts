@@ -1,8 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FormComponent,AddAttributeDirective } from './svy-form.component';
+import { FormComponent,AddAttributeDirective } from './form_component.component';
 
 import {FormService} from '../form.service';
+import {ServoyService} from '../servoy.service';
 import {SabloService} from '../../sablo/sablo.service';
 
 import { ServoyDefaultComponentsModule } from '../../servoydefault/servoydefault.module';
@@ -12,17 +13,20 @@ describe('FormComponent', () => {
   let fixture: ComponentFixture<FormComponent>;
   let sabloService;
   let formService;
+  let servoyService;
 
   beforeEach(async(() => {
       sabloService = jasmine.createSpyObj("SabloService", ["callService"]);
       formService = jasmine.createSpyObj("FormService", {getFormCache:{absolute:true}});
+      servoyService = jasmine.createSpyObj("ServoyService", ["connect"]);
     TestBed.configureTestingModule({
       declarations: [ FormComponent,AddAttributeDirective ],
       imports: [
                 ServoyDefaultComponentsModule,
        ],
        providers:    [ {provide: FormService, useValue:  formService },
-                               {provide: SabloService, useValue:  sabloService }
+                               {provide: SabloService, useValue:  sabloService },
+                               {provide: ServoyService, useValue:  servoyService }
                              ]
     })
     .compileComponents();

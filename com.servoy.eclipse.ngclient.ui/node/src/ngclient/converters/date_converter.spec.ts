@@ -1,5 +1,5 @@
 
-import {DateConverter} from './date.converter';
+import {DateConverter} from './date_converter';
 
 describe('DateConverter', () => {
   let dateConverter:DateConverter;
