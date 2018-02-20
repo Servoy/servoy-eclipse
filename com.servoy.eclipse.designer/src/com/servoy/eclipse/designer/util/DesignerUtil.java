@@ -437,7 +437,7 @@ public class DesignerUtil
 							}
 							if (!excludedChildren.contains(layoutName) && !excludedChildren.contains(packageName + "." + layoutName))
 							{
-								allowedChildren.add(packageName + "." + layoutName);
+								allowedChildren.add(packageName + "." + layoutSpec.getName());
 							}
 						}
 						catch (JSONException e)
