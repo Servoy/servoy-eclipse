@@ -51,8 +51,6 @@ export class ServoyDefaultLabel implements OnInit, OnChanges,AfterViewInit {
     constructor(private readonly renderer: Renderer2) {
     }
     ngAfterViewInit() {
-        console.log(this.child)
-        console.log(this.elementRef)
         this.ngOnChanges(this.changes);
     }
 
