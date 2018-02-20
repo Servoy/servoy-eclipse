@@ -74,6 +74,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -489,20 +490,27 @@ public class PlaceDataprovidersComposite extends Composite
 			@Override
 			public void handleEvent(Event event)
 			{
-				Point pt = new Point(event.x, event.y);
-				ViewerCell cell = viewer.getCell(pt);
-				if (cell != null && cell.getColumnIndex() == 2)
+				try
 				{
-					int index = viewer.getTable().getSelectionIndex();
-					input.remove(index);
-					if (input.size() == 0)
+					Point pt = new Point(event.x, event.y);
+					ViewerCell cell = viewer.getCell(pt);
+					if (cell != null && cell.getColumnIndex() == 2)
 					{
-						for (IReadyListener rl : readyListeners)
+						int index = viewer.getTable().getSelectionIndex();
+						input.remove(index);
+						if (input.size() == 0)
 						{
-							rl.isReady(false);
+							for (IReadyListener rl : readyListeners)
+							{
+								rl.isReady(false);
+							}
 						}
+						viewer.refresh();
 					}
-					viewer.refresh();
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
 				}
 			}
 		});
