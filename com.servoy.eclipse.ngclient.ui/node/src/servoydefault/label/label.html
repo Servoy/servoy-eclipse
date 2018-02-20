@@ -1,0 +1,16 @@
+<div *ngIf="!labelFor" style='width:100%;height:100%;overflow:hidden;position:absolute' class='svy-label'  [id]="servoyApi.getMarkupId()" 
+	 sablo-tabseq='(onActionMethodID || onDoubleClickMethodID || onRightClickMethodID) ? tabSeq : -2' #element>  	 
+<ng-container [ngTemplateOutlet]="template"></ng-container>
+</div>
+<label *ngIf="labelFor"  for='{{labelFor}}' style='width:100%;height:100%;overflow:hidden;position:absolute' [id]="servoyApi.getMarkupId()"  class='svy-label' #element>
+<ng-container [ngTemplateOutlet]="template"></ng-container>	
+</label>
+
+<ng-template #template>
+	<div style="width:100%;overflow:hidden;position:absolute;" class='svy-nowrap' #child>
+	   		<span svy-imagemediaid='{img: dataProviderID.url ? dataProviderID.url : imageMediaID, componentSize: size, rollOverImg:rolloverImageMediaID, visible: model.visible, updateParentSize: !hasText()}'></span>
+ 	   		<span [innerHTML]='(((dataProviderID == null && !hideText) || dataProviderID?.url) ? text : dataProviderID) | formatFilter:format?.display:format?.type | mnemonicletterFilter:mnemonic | trustAsHtml:servoyApi.trustAsHtml()'></span>
+	</div>
+</ng-template>
+
+
