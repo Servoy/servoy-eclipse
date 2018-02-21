@@ -496,8 +496,12 @@ public class PlaceDataprovidersComposite extends Composite
 					ViewerCell cell = viewer.getCell(pt);
 					if (cell != null && cell.getColumnIndex() == 2)
 					{
-						int index = viewer.getTable().getSelectionIndex();
-						input.remove(index);
+						Object data = cell.getViewerRow().getElement();
+						int index = input.indexOf(data);
+						if (index >= 0)
+						{
+							input.remove(index);
+						}
 						if (input.size() == 0)
 						{
 							for (IReadyListener rl : readyListeners)
