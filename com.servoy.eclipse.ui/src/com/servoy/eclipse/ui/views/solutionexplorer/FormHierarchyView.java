@@ -1331,6 +1331,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	public void open(Object obj)
 	{
+		activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 		showMembersAction.clearSelection();
 		showMembersAction.setChecked(obj instanceof ScriptMethod || obj instanceof IFormElement);
 		if (obj instanceof IPersist)
