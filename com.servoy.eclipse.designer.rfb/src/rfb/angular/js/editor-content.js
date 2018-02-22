@@ -183,7 +183,7 @@ angular.module('editorContent',['servoyApp'])
       }
     }
   };
-}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element,$templateCache,$compile,$webSocket) {
+}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element,$templateCache,$compile,$webSocket,$q) {
   $rootScope.getDesignFormControllerScope = function() {
     return $scope;
   };
@@ -329,9 +329,21 @@ angular.module('editorContent',['servoyApp'])
     }
     // dummy servoy api, ignore all calls
   var servoyApi = {
-    formWillShow: function(formname, relationname, formIndex) {},
+    formWillShow: function(formname, relationname, formIndex) {
+    	//dummy promise
+    	var pr = $q.defer();
+    	pr.resolve(function(data){
+    	       return true;
+    	    });
+    	return pr.promise;
+    },
     hideForm: function(formname, relationname, formIndex) {
-      return null;
+    	//dummy promise
+    	var pr = $q.defer();
+    	pr.resolve(function(data){
+    	       return true;
+    	    });
+    	return pr.promise;
     },
     getFormUrl: function(formUrl) {
       return "/designer/formplaceholder.html?formName="+formUrl+"&editingForm="+ $webSocket.getURLParameter("f") ;
