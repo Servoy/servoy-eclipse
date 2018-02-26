@@ -359,7 +359,7 @@ public class DesignerUtil
 							String[] parts = name.split("\\.");
 							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
 								parts[0]);
-							if (pkg != null && parts.length > 0)
+							if (pkg != null && parts.length > 0 && pkg.getSpecification(parts[1]) != null)
 							{
 								return pkg.getSpecification(parts[1]).getDisplayName();
 							}
