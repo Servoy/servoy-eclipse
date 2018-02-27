@@ -30,6 +30,10 @@ export class FormService {
                             var formData = msg.forms[formname];
                             for ( var beanname in formData ) {
                                 const comp = formCache.getComponent( beanname );
+                                if (!comp) {
+                                    console.log("got message for " + beanname + " of form " + formname + " but that component is not in the cache");
+                                    continue;
+                                }
                                 const beanConversion = formConversion ? formConversion[beanname] : null;
                                 for ( var property in formData[beanname] ) {
                                     let value = formData[beanname][property];

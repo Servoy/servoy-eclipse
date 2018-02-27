@@ -51,7 +51,7 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
     }
 
     ngOnChanges( changes ) {
-        console.log( changes )
+//        console.log( changes )
     }
 
     getForm( tab ) {

@@ -503,6 +503,7 @@ export class WebsocketSession {
                 } );
             }
         } catch ( e ) {
+            console.log(e);
             //            $log.error("Error (follows below) in parsing/processing this message: " + message_data);
             //            $log.error(e);
             if ( obj && obj.smsgid ) {
