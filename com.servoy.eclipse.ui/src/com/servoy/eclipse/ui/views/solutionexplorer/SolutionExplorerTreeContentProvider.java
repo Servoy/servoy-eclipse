@@ -970,14 +970,19 @@ public class SolutionExplorerTreeContentProvider
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
 								String folderName = getFolderNameFromSpec(spec);
-								if (!packageName.equals(folderName))
+								IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+								if (files.length == 1)
 								{
-									Image img = getIconFromSpec(spec, false);
-									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
-										img != null ? img : componentIcon);
-									node.parent = un;
-									children.add(node);
-									folderNames.add(folderName);
+									IFile f = files[0];
+									if (f.getProjectRelativePath().segmentCount() > 1)
+									{
+										Image img = getIconFromSpec(spec, false);
+										PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
+											img != null ? img : componentIcon);
+										node.parent = un;
+										children.add(node);
+										folderNames.add(folderName);
+									}
 								}
 							}
 						}
@@ -1167,7 +1172,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			if (res instanceof IFolder)
 			{
-				if (!folderNames.contains(res.getName())) folders.add(res);
+				if (!res.getName().startsWith(".") && !folderNames.contains(res.getName())) folders.add(res);
 			}
 			else
 			{
@@ -1213,7 +1218,7 @@ public class SolutionExplorerTreeContentProvider
 				try
 				{
 					IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-					if (specFile.length == 1)
+					if (specFile.length == 1 && specFile[0].getParent() instanceof IFolder)
 					{
 						folder = (IFolder)specFile[0].getParent();
 					}
