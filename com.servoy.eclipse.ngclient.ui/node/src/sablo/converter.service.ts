@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class ConverterService {
+    public static readonly INTERNAL_IMPL: '__internalState';
     public static readonly TYPES_KEY = 'svy_types'; // TODO this should be sablo_types...
     // objects that have a function named like this in them will send to server the result of that function call when no conversion type is available (in case of
     // usage as handler arg. for example where we don't know the arg. types on client)
@@ -52,6 +53,65 @@ export class ConverterService {
         }
         return value;
     }
+   
+   public isChanged(now, prev, conversionInfo) {
+       if ((typeof conversionInfo === 'string' || typeof conversionInfo === 'number') && now && now[ConverterService.INTERNAL_IMPL] && now[ConverterService.INTERNAL_IMPL].isChanged) {
+           return now[ConverterService.INTERNAL_IMPL].isChanged();
+       }
+
+       if (now === prev) return false;
+       if (now && prev) {
+           if (now instanceof Array) {
+               if (prev instanceof Array) {
+                   if (now.length != prev.length) return true;
+               } else {
+                   return true;
+               }
+           }
+           if (now instanceof Date) {
+               if (prev instanceof Date) {
+                   return now.getTime() != prev.getTime();
+               }
+               return true;
+           }
+
+           if ((now instanceof Object) && (prev instanceof Object)) {
+               // first build up a list of all the properties both have.
+               var fulllist = this.getCombinedPropertyNames(now, prev);
+               for (var prop in fulllist) {
+                   if(prop == "$$hashKey") continue; // ng repeat creates a child scope for each element in the array any scope has a $$hashKey property which must be ignored since it is not part of the model
+                   if (prev[prop] !== now[prop]) {
+                       if (typeof now[prop] == "object") {
+                           if (this.isChanged(now[prop],prev[prop], conversionInfo ? conversionInfo[prop] : undefined)) {
+                               return true;
+                           }
+                       } else {
+                           return true;
+                       }
+                   }
+               }
+               return false;
+           }
+       }
+       return true;
+   }
+   
+   public prepareInternalState(propertyValue, optionalInternalStateValue?) {
+       if (!propertyValue.hasOwnProperty(ConverterService.INTERNAL_IMPL))
+       {
+           if (!optionalInternalStateValue) optionalInternalStateValue = {};
+           if (Object.defineProperty) {
+               // try to avoid unwanted iteration/non-intended interference over the private property state
+               Object.defineProperty(propertyValue, ConverterService.INTERNAL_IMPL, {
+                   configurable: false,
+                   enumerable: false,
+                   writable: false,
+                   value: optionalInternalStateValue
+               });
+           } else propertyValue[ConverterService.INTERNAL_IMPL] = optionalInternalStateValue;
+       } 
+//       else $log.warn("An attempt to prepareInternalState on value '" + propertyValue + "' which already has internal state was ignored.");
+   }
    
    /**
     * Receives variable arguments. First is the object obj and the others (for example a, b, c) are used to
@@ -178,6 +238,23 @@ export class ConverterService {
             newargs.push(arg)
         }
         return newargs;
+    }
+    
+    private getCombinedPropertyNames(now,prev) {
+        var fulllist = {}
+        if (prev) {
+            var prevNames = Object.getOwnPropertyNames(prev);
+            for(var i=0; i < prevNames.length; i++) {
+                fulllist[prevNames[i]] = true;
+            }
+        }
+        if (now) {
+            var nowNames = Object.getOwnPropertyNames(now);
+            for(var i=0;i < nowNames.length;i++) {
+                fulllist[nowNames[i]] = true;
+            }
+        }
+        return fulllist;
     }
 }
 

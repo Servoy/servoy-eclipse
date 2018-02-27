@@ -9,6 +9,8 @@ import { WindowRefService } from '../sablo/util/windowref.service';
 import { SessionStorageService } from 'angular-web-storage';
 
 import { DateConverter } from './converters/date_converter'
+import { JSONObjectConverter } from './converters/json_object_converter'
+import { JSONArrayConverter} from './converters/json_array_converter'
 
 
 @Injectable()
@@ -27,6 +29,8 @@ export class ServoyService {
         const dateConverter = new DateConverter();
         converterService.registerCustomPropertyHandler( "svy_date", dateConverter );
         converterService.registerCustomPropertyHandler( "Date", dateConverter );
+        converterService.registerCustomPropertyHandler( "JSON_obj", new JSONObjectConverter(converterService) );
+        converterService.registerCustomPropertyHandler( "JSON_arr", new JSONArrayConverter(converterService) );
     }
 
     public connect() {
