@@ -31,8 +31,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
- * This class is in charge of running the pre-initialized tasks registered through extensions.
- * @author acostescu
+ * This class is in charge of triggering active solution listener events that were registered through extensions.
  */
 public class ActiveSolutionHandler implements IActiveProjectListener
 {
