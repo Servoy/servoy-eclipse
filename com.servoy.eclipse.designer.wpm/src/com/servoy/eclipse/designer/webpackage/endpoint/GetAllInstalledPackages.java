@@ -196,10 +196,13 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			for (String module : modulesList)
 			{
 				ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(module);
-				String moduleParent = findModuleParent(solutionProject.getSolution(), moduleName);
-				if (moduleParent != null)
+				if (solutionProject != null)
 				{
-					return moduleParent;
+					String moduleParent = findModuleParent(solutionProject.getSolution(), moduleName);
+					if (moduleParent != null)
+					{
+						return moduleParent;
+					}
 				}
 			}
 		}
