@@ -2448,7 +2448,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											addEncapsulationMarker(project, o, foundPersist, (Form)context);
 										}
 										if (context instanceof Form && ((Form)context).isFormComponent().booleanValue() &&
-											BaseComponent.isEventOrCommandProperty(element.getName()))
+											BaseComponent.isEventOrCommandProperty(element.getName()) &&
+											((Form)context).getFlattenedPropertiesMap().containsKey(element.getName()))
 										{
 											ServoyMarker mk = MarkerMessages.FormReferenceInvalidProperty.fill(((Form)context).getName(), element.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_REFERENCE_INVALID_PROPERTY, IMarker.PRIORITY_NORMAL, null,
