@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2 } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule } from '@angular/core';
 
 import { FormService, FormCache, StructureCache, ComponentCache } from '../form.service';
 
@@ -6,7 +6,7 @@ import { ServoyService } from '../servoy.service'
 
 import { SabloService } from '../../sablo/sablo.service'
 
-import {ServoyApi} from '../../servoyapi/servoy_api'
+import { ServoyApi } from '../servoy_api'
 
 @Component( {
     selector: 'svy-form',
@@ -27,6 +27,7 @@ import {ServoyApi} from '../../servoyapi/servoy_api'
       <ng-template #servoydefaultTextfield let-state="state"><servoydefault-textfield  [borderType]="state.model.borderType" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [valuelistID]="state.model.valuelistID" [findmode]="state.model.findmode" [placeholderText]="state.model.placeholderText" [text]="state.model.text" [toolTipText]="state.model.toolTipText" [fontType]="state.model.fontType" [margin]="state.model.margin" [visible]="state.model.visible" [editable]="state.model.editable" [format]="state.model.format" [readOnly]="state.model.readOnly" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [horizontalAlignment]="state.model.horizontalAlignment" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [displaysTags]="state.model.displaysTags" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [selectOnEnter]="state.model.selectOnEnter" [tabSeq]="state.model.tabSeq" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoydefault-textfield></ng-template>
       <ng-template #servoydefaultButton let-state="state"><servoydefault-button  [borderType]="state.model.borderType" [foreground]="state.model.foreground" [hideText]="state.model.hideText" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [textRotation]="state.model.textRotation" [mnemonic]="state.model.mnemonic" [text]="state.model.text" [toolTipText]="state.model.toolTipText" [imageMediaID]="state.model.imageMediaID" [fontType]="state.model.fontType" [margin]="state.model.margin" [visible]="state.model.visible" [format]="state.model.format" [mediaOptions]="state.model.mediaOptions" [dataProviderID]="state.model.dataProviderID" [showFocus]="state.model.showFocus" [horizontalAlignment]="state.model.horizontalAlignment" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [displaysTags]="state.model.displaysTags" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [rolloverCursor]="state.model.rolloverCursor" [rolloverImageMediaID]="state.model.rolloverImageMediaID" [tabSeq]="state.model.tabSeq" [verticalAlignment]="state.model.verticalAlignment" [onDoubleClickMethodID]="getHandler(state,'onDoubleClickMethodID')" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoydefault-button></ng-template>
       <ng-template #servoydefaultLabel let-state="state"><servoydefault-label  [borderType]="state.model.borderType" [labelFor]="state.model.labelFor" [foreground]="state.model.foreground" [hideText]="state.model.hideText" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [textRotation]="state.model.textRotation" [mnemonic]="state.model.mnemonic" [text]="state.model.text" [toolTipText]="state.model.toolTipText" [imageMediaID]="state.model.imageMediaID" [fontType]="state.model.fontType" [margin]="state.model.margin" [visible]="state.model.visible" [format]="state.model.format" [mediaOptions]="state.model.mediaOptions" [dataProviderID]="state.model.dataProviderID" [showFocus]="state.model.showFocus" [horizontalAlignment]="state.model.horizontalAlignment" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [displaysTags]="state.model.displaysTags" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [rolloverCursor]="state.model.rolloverCursor" [rolloverImageMediaID]="state.model.rolloverImageMediaID" [tabSeq]="state.model.tabSeq" [verticalAlignment]="state.model.verticalAlignment" [onDoubleClickMethodID]="getHandler(state,'onDoubleClickMethodID')" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoydefault-label></ng-template>
+       <ng-template #servoydefaultTabpanel let-state="state"><servoydefault-tabpanel  [borderType]="state.model.borderType" [fontType]="state.model.fontType" [visible]="state.model.visible" [selectedTabColor]="state.model.selectedTabColor" [tabs]="state.model.tabs" (tabsChange)="datachange(state.name,'tabs',$event)" [readOnly]="state.model.readOnly" [tabIndex]="state.model.tabIndex" (tabIndexChange)="datachange(state.name,'tabIndex',$event)" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [activeTabIndex]="state.model.activeTabIndex" (activeTabIndexChange)="datachange(state.name,'activeTabIndex',$event)" [horizontalAlignment]="state.model.horizontalAlignment" [size]="state.model.size" [background]="state.model.background" [tabOrientation]="state.model.tabOrientation" [location]="state.model.location" [tabSeq]="state.model.tabSeq" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'><svy-form *ngIf="getForm(name)"  [name]="name"></svy-form></ng-template></servoydefault-tabpanel></ng-template>
    `
 } )
 export class FormComponent implements OnInit, OnDestroy {
@@ -34,6 +35,7 @@ export class FormComponent implements OnInit, OnDestroy {
     @ViewChild( 'servoydefaultTextfield' ) readonly servoydefaultTextfield: TemplateRef<any>;
     @ViewChild( 'servoydefaultButton' ) readonly servoydefaultButton: TemplateRef<any>;
     @ViewChild( 'servoydefaultLabel' ) readonly servoydefaultLabel: TemplateRef<any>;
+    @ViewChild( 'servoydefaultTabpanel' ) readonly servoydefaultTabpanel: TemplateRef<any>;
 
     @ViewChildren( 'cmp' ) readonly components: QueryList<Component>;
 
@@ -57,11 +59,17 @@ export class FormComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        console.log("fc: " + this.name)
         this.formCache = this.formservice.getFormCache( this );
         this.sabloService.callService( 'formService', 'formLoaded', { formname: this.name }, true )
     }
 
     ngOnDestroy() {
+    }
+    
+    public getForm(name):boolean {
+        console.log("getform: " + name)
+        return this.formservice.getFormCache( this ) == null;
     }
 
     private datachange( component: string, property: string, value ) {
@@ -72,16 +80,16 @@ export class FormComponent implements OnInit, OnDestroy {
     }
 
     private getHandler( item: ComponentCache, handler: string ) {
-        let  itemCache = this.handlerCache[item.name];
+        let itemCache = this.handlerCache[item.name];
         if ( itemCache == null ) {
             itemCache = {};
             this.handlerCache[item.name] = itemCache;
         }
-        let  func = itemCache[handler];
+        let func = itemCache[handler];
         if ( func == null ) {
             if ( item.handlers && item.handlers.indexOf( handler ) >= 0 ) {
                 const me = this;
-                func =  function( e ) {
+                func = function( e ) {
                     me.formservice.executeEvent( me.name, item.name, handler, arguments );
                 }
                 itemCache[handler] = func;
@@ -92,7 +100,7 @@ export class FormComponent implements OnInit, OnDestroy {
 
     private getServoyApi( item: ComponentCache ) {
         let api = this.servoyApiCache[item.name];
-        if (api == null) {
+        if ( api == null ) {
             api = new ServoyApi( item, this.name, this.formCache.absolute, this.formservice, this.servoyService );
             this.servoyApiCache[item.name] = api;
         }

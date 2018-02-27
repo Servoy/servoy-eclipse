@@ -7,19 +7,16 @@ export class ServoyApi {
     }
 
 
-    public formWillShow( formname, relationname, formIndex ) {
-        // TODO implement when using tabpanels.
-        //        return this.formservice.formWillShow( formname, true, this.formname, this.item.name, relationname, formIndex );
+    public formWillShow( formname, relationname?, formIndex ?) {
+        return this.formservice.formWillShow( formname, true, this.formname, this.item.name, relationname, formIndex );
     }
 
-    public hideForm( formname, relationname, formIndex, formNameThatWillShow, relationnameThatWillBeShown, formIndexThatWillBeShown ) {
-        // TODO implement when using tabpanels.
-        //        return this.formservice.hideForm( formname, this.formname, this.item.name, relationname, formIndex, formNameThatWillShow, relationnameThatWillBeShown, formIndexThatWillBeShown );
+    public hideForm( formname, relationname?, formIndex?, formNameThatWillShow?, relationnameThatWillBeShown?, formIndexThatWillBeShown? ):Promise<boolean> {
+        return this.formservice.hideForm( formname, this.formname, this.item.name, relationname, formIndex, formNameThatWillShow, relationnameThatWillBeShown, formIndexThatWillBeShown );
     }
 
-    public getFormUrl( formUrl ) {
-        // TODO is this now ever needed?
-        //        return $windowService.getFormUrl( formUrl );
+    public touchForm(formName:string):boolean {
+        return this.formservice.touchForm(formName);
     }
 
     public startEdit( propertyName ) {

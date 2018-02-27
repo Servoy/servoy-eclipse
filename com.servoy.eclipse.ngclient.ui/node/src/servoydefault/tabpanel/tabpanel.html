@@ -1,0 +1,17 @@
+<ngb-tabset active="model.activeTabIndex" ng-class='(tyleClass ? .styleClass : "")  + " svy-tabpanel"'  [id]="servoyApi.getMarkupId()" sablo-tabseq='tabSeq' sablo-tabseq-config="{container: true, reservedGap: 50}">
+    <ngb-tab *ngFor="let tab of tabs" select="select(tab)" disabled="tab.disabled || !enabled || !tab.containsFormId">
+      <ng-template  svy-mnemonic='tab.mnemonic' ngbTabTitle>
+      	<img ng-hide="tab.imageMediaID == ''"  ng-src='tab.imageMediaID'/>
+        <span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
+        	  [innerHTML]='tab?.text'></span>
+      </ng-template>
+      <ng-template ngbTabContent>
+      	<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}"></ng-template>
+      
+      
+<!--      
+	 <div ng-include="getForm(tab)" sablo-tabseq='1' sablo-tabseq-config="{container: true}" ng-style='getTabsHeight()' style="position:absolute;top:40px;left:0;right:0;bottom:0;overflow:auto;"></div>
+ -->
+      </ng-template>
+    </ngb-tab>
+</ngb-tabset>

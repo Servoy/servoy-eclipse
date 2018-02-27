@@ -14,6 +14,8 @@ export class FormService {
 
     private formsCache: Map<String, FormCache>;
 
+    private touchedForms:Map<String,boolean>;
+
     constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService ) {
 
         this.formsCache = new Map();
@@ -45,39 +47,32 @@ export class FormService {
                 }
             } );
         } );
-
-        //      // some sample data
-        //      var absolute= true;
-        //      var formCache = new FormCache();
-        //      
-        //      if (absolute) {
-        //          formCache.add(new ComponentCache("text1","svyTextfield", {dataprovider:4},[],{left:"10px",top:"10px"}));
-        //          formCache.add(new ComponentCache("text2","svyTextfield", {dataprovider:5},[],{left:"20px",top:"40px"}));
-        //          formCache.add(new ComponentCache("button1","svyButton", {dataprovider:6},['click'],{left:"10px",top:"70px"}));
-        //          formCache.add(new ComponentCache("button2","svyButton", {dataprovider:7},[],{left:"30px",top:"100px"}));
-        //      }
-        //      else {
-        //          var main = new StructureCache(["container-fluid"]);
-        //          var row = main.addChild(new StructureCache(["row"]) );
-        //          row.addChild(new StructureCache(["col-md-4"],[new ComponentCache("text1","svyTextfield", {dataprovider:4},[],{})]));
-        //          row.addChild(new StructureCache(["col-md-4"],[new ComponentCache("text2","svyTextfield", {dataprovider:5},[],{})])); 
-        //          row.addChild(new StructureCache(["col-md-4"],[new ComponentCache("button1","svyButton", {dataprovider:6},['click'],{}),
-        //                                                              new ComponentCache("button2","svyButton", {dataprovider:7},[],{})])); 
-        //          formCache.mainStructure = main;
-        //      }
-        //      this.formsCache.set("test", formCache);
     }
+    
+    public touchForm(formName:string):boolean {
+        let touched = this.touchedForms[formName];
+        if (touched == null) {
+            this.touchedForms[formName] = false;
+            this.sabloService.callService("$windowService", "touchForm", { name: formName }, true);
+        }
+        return touched == true;
+    }
+
 
     public getFormCache( form: FormComponent ): FormCache {
-        var formCache = this.formsCache.get( form.name );
-        if ( formCache != null ) return formCache;
-
+        return  this.formsCache.get( form.name );
     }
 
-    public createFormCache( formName: String, jsonData ) {
-        var formCache = new FormCache();
+    public createFormCache( formName: string, jsonData ) {
+        let formCache = new FormCache();
         this.walkOverChildren(jsonData.children, formCache);
         this.formsCache.set( formName, formCache )
+        this.touchedForms[formName] = true;
+    }
+    
+    public destroyFormCache(formName:string){
+        this.formsCache.delete(formName);
+        delete this.touchedForms[formName];
     }
 
     private walkOverChildren( children, formCache: FormCache, parent?: StructureCache ) {
@@ -165,9 +160,33 @@ export class FormService {
         return this.sabloService.callService( 'formService', 'executeEvent', cmd, false );
     }
 
+    public formWillShow(formname,notifyFormVisibility?,parentForm?,beanName?,relationname?,formIndex?):Promise<boolean> {
+//        if ($log.debugEnabled) $log.debug("svy * Form " + formname + " is preparing to show. Notify server needed: " + notifyFormVisibility);
+//        if ($rootScope.updatingFormName === formname) {
+//            if ($log.debugEnabled) $log.debug("svy * Form " + formname + " was set in hidden div. Clearing out hidden div.");
+//            $rootScope.updatingFormUrl = ''; // it's going to be shown; remove it from hidden DOM
+//            $rootScope.updatingFormName = null;
+//        }
 
-    public formWillShow( name: string, server: boolean ) {
-
+        if (!formname) {
+            throw new Error("formname is undefined");
+        }
+        // TODO do we need request initial data?
+//        $sabloApplication.getFormState(formname).then(function (formState) {
+//            // if first show of this form in browser window then request initial data (dataproviders and such);
+//            if (formState.initializing && !formState.initialDataRequested) $servoyInternal.requestInitialData(formname, formState);
+//        });
+        if (notifyFormVisibility) {
+            return  this.sabloService.callService('formService', 'formvisibility', {formname:formname,visible:true,parentForm:parentForm,bean:beanName,relation:relationname,formIndex:formIndex}, false);
+        }
+        // dummy promise
+        return Promise.resolve(null);
+    }
+    public hideForm(formname,parentForm,beanName,relationname,formIndex,formnameThatWillBeShown,relationnameThatWillBeShown,formIndexThatWillBeShown) {
+        if (!formname) {
+            throw new Error("formname is undefined");
+        }
+        return  this.sabloService.callService('formService', 'formvisibility', {formname:formname,visible:false,parentForm:parentForm,bean:beanName,relation:relationname,formIndex:formIndex,show:{formname:formnameThatWillBeShown,relation:relationnameThatWillBeShown,formIndex:formIndexThatWillBeShown}});
     }
 }
 
