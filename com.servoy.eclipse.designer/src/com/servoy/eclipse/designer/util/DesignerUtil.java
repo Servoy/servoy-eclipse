@@ -332,43 +332,42 @@ public class DesignerUtil
 
 	private static void fillAllowedChildrenInternal(AllowChildrenMapFiller mapFiller)
 	{
+		// put "component" first if present and sort the others;
+		Comparator<String> comparator = new Comparator<String>()
+		{
+			@Override
+			public int compare(String o1, String o2)
+			{
+				String n1 = getDisplayName(o1);
+				String n2 = getDisplayName(o2);
+				boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n1);
+				boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n2);
+				if (co1 && co2) return 0;
+				else if (co1) return -1;
+				else if (co2) return 1;
+				else return n1.compareTo(n2);
+			}
+
+			private String getDisplayName(String name)
+			{
+				if (name.contains("*") || ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(name)) return ADD_COMPONENT_SUBMENU_ITEM_TEXT;
+				if (name.contains("."))
+				{
+					String[] parts = name.split("\\.");
+					PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(parts[0]);
+					if (pkg != null && parts.length > 0 && pkg.getSpecification(parts[1]) != null)
+					{
+						return pkg.getSpecification(parts[1]).getDisplayName();
+					}
+				}
+				return name;
+			}
+		};
 		Collection<PackageSpecification<WebLayoutSpecification>> packs = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values();
 		for (PackageSpecification<WebLayoutSpecification> pack : packs)
 		{
 			for (WebLayoutSpecification spec : pack.getSpecifications().values())
 			{
-				// put "component" first if present and sort the others;
-				Comparator<String> comparator = new Comparator<String>()
-				{
-					@Override
-					public int compare(String o1, String o2)
-					{
-						String n1 = getDisplayName(o1);
-						String n2 = getDisplayName(o2);
-						boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n1);
-						boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n2);
-						if (co1 && co2) return 0;
-						else if (co1) return -1;
-						else if (co2) return 1;
-						else return n1.compareTo(n2);
-					}
-
-					private String getDisplayName(String name)
-					{
-						if (name.contains("*") || ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(name)) return ADD_COMPONENT_SUBMENU_ITEM_TEXT;
-						if (name.contains("."))
-						{
-							String[] parts = name.split("\\.");
-							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-								parts[0]);
-							if (pkg != null && parts.length > 0 && pkg.getSpecification(parts[1]) != null)
-							{
-								return pkg.getSpecification(parts[1]).getDisplayName();
-							}
-						}
-						return name;
-					}
-				};
 				List<String> excludedChildren = spec.getExcludedChildren();
 				List<String> specAllowedChildren = spec.getAllowedChildren();
 				Set<String> allowedChildren = new TreeSet<String>(comparator);
@@ -447,11 +446,14 @@ public class DesignerUtil
 					}
 					if (!excludedChildren.contains("component")) allowedChildren.add("component");
 				}
-
-				if (allowedChildren.size() > 0)
+				
+				if (allowedChildren.isEmpty())
 				{
-					mapFiller.add(spec.getPackageName() + "." + spec.getName(), allowedChildren);
+					//add component if both excluded and allowed children are missing
+					allowedChildren.add("component");
 				}
+
+				mapFiller.add(spec.getPackageName() + "." + spec.getName(), allowedChildren);
 			}
 		}
 	}
