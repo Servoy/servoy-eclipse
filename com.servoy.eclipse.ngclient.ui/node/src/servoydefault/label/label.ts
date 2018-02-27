@@ -1,6 +1,6 @@
 import { Component, Directive,ViewChild,QueryList,OnInit, Input, Output, EventEmitter, Renderer2, ElementRef, OnChanges,AfterViewInit,SimpleChanges } from '@angular/core';
 
-import {PropertyUtils} from '../../servoyapi/utils/property_utils'
+import {PropertyUtils} from '../../ngclient/servoy_public'
 
 @Component( {
     selector: 'servoydefault-label',

@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
 
-import {PropertyUtils} from '../../servoyapi/utils/property_utils'
+import {PropertyUtils} from '../../ngclient/servoy_public'
 
 @Component( {
     selector: 'servoydefault-textfield',
