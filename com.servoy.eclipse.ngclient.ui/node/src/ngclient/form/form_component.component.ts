@@ -68,8 +68,8 @@ export class FormComponent implements OnInit, OnDestroy {
     }
     
     public getForm(name):boolean {
-        console.log("getform: " + name)
-        return this.formservice.getFormCache( this ) == null;
+        console.log("getform: " + name + " " +  this.formservice.hasFormCacheEntry( name));
+        return this.formservice.hasFormCacheEntry( name);
     }
 
     private datachange( component: string, property: string, value ) {

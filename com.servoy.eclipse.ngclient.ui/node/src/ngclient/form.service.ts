@@ -14,7 +14,7 @@ export class FormService {
 
     private formsCache: Map<String, FormCache>;
 
-    private touchedForms:Map<String,boolean>;
+//    private touchedForms:Map<String,boolean>;
 
     constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService ) {
 
@@ -50,29 +50,34 @@ export class FormService {
     }
     
     public touchForm(formName:string):boolean {
-        let touched = this.touchedForms[formName];
-        if (touched == null) {
-            this.touchedForms[formName] = false;
-            this.sabloService.callService("$windowService", "touchForm", { name: formName }, true);
-        }
-        return touched == true;
+        return true;
+//        let touched = this.touchedForms[formName];
+//        if (touched == null) {
+//            this.touchedForms[formName] = false;
+//            this.sabloService.callService("$windowService", "touchForm", { name: formName }, true);
+//        }
+//        return touched == true;
     }
 
 
     public getFormCache( form: FormComponent ): FormCache {
         return  this.formsCache.get( form.name );
     }
+    
+    public hasFormCacheEntry(name:string):boolean {
+        return this.formsCache.has(name);
+    }
 
     public createFormCache( formName: string, jsonData ) {
         let formCache = new FormCache();
         this.walkOverChildren(jsonData.children, formCache);
         this.formsCache.set( formName, formCache )
-        this.touchedForms[formName] = true;
+//        this.touchedForms[formName] = true;
     }
     
     public destroyFormCache(formName:string){
         this.formsCache.delete(formName);
-        delete this.touchedForms[formName];
+//        delete this.touchedForms[formName];
     }
 
     private walkOverChildren( children, formCache: FormCache, parent?: StructureCache ) {
