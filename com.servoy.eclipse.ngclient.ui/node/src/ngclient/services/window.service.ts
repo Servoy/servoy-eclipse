@@ -37,4 +37,8 @@ export class WindowService {
 //                $location.url($location.url());
         }
     }
+   
+   public destroyController(formName:string){
+       this.formService.destroyFormCache(formName);
+   }
 }
