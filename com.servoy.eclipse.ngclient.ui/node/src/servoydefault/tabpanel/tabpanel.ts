@@ -1,8 +1,10 @@
 import { Component, Directive, ContentChild, ViewChild, QueryList, OnInit, Input, Output, EventEmitter, Renderer2, TemplateRef, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 
-import { PropertyUtils, ServoyApi} from '../../ngclient/servoy_public'
+import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public'
 
-import {WindowRefService} from '../../sablo/util/windowref.service'
+import { WindowRefService } from '../../sablo/util/windowref.service'
+
+import { NgbTabset, NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 
 @Component( {
     selector: 'servoydefault-tabpanel',
@@ -10,8 +12,8 @@ import {WindowRefService} from '../../sablo/util/windowref.service'
 } )
 export class ServoyDefaultTabpanel implements OnInit, OnChanges {
 
-    @Input() name:string;
-    @Input() servoyApi:ServoyApi;
+    @Input() name: string;
+    @Input() servoyApi: ServoyApi;
 
     @Input() onChangeMethodID;
 
@@ -30,19 +32,23 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
     @Output() tabIndexChange = new EventEmitter();
     @Input() tabOrientation;
     @Input() tabSeq;
-    @Input() tabs;
+    @Input() tabs: Array<Tab>
     @Output() tabsChange = new EventEmitter();
     @Input() transparent;
     @Input() visible;
     @Input() activeTabIndex;
     @Output() activeTabIndexChange = new EventEmitter();
 
-    private selectedTab;
-    private waitingForServerVisibility;
-    
-    @ContentChild(TemplateRef) templateRef:TemplateRef<any>;
+    private selectedTab: Tab
+    private waitingForServerVisibility = {};
 
-    constructor(private windowRefService:WindowRefService) {
+    @ViewChild( 'tabset' )
+    private tabset: NgbTabset;
+
+    @ContentChild( TemplateRef )
+    private templateRef: TemplateRef<any>;
+
+    constructor( private windowRefService: WindowRefService ) {
 
     }
 
@@ -50,11 +56,35 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
 
     }
 
-    ngOnChanges( changes ) {
-//        console.log( changes )
+    ngOnChanges( changes: SimpleChanges ) {
+       if (changes["tabs"]) {
+           for ( let i = 0; i < this.tabs.length; i++ ) {
+               this.tabs[i]._id = this.servoyApi.getMarkupId() + "_tab_" + i;
+           }
+       }
     }
 
-    getForm( tab ) {
+    onTabChange( event: NgbTabChangeEvent ) {
+        event.preventDefault();
+        for ( let i = 0; i < this.tabs.length; i++ ) {
+            if ( this.tabs[i]._id == event.nextId ) {
+                this.select(this.tabs[i]);
+                return;
+            }
+        }
+    }
+
+    getTabId( tab: Tab ) {
+        if (tab) return tab._id;
+        if (this.selectedTab) return this.selectedTab._id;
+        for ( let i = 0; i < this.tabs.length; i++ ) {
+            if ( this.tabs[i].active ) {
+                return this.tabs[i]._id;
+            }
+        }
+    }
+
+    getForm( tab: Tab ) {
         if ( !this.selectedTab ) {
             for ( var i = 0; i < this.tabs.length; i++ ) {
                 if ( this.tabs[i].active ) {
@@ -68,14 +98,14 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
             }
         }
         if ( this.selectedTab && ( tab.containsFormId == this.selectedTab.containsFormId ) && ( tab.relationName == this.selectedTab.relationName ) ) {
-            if ( this.servoyApi.touchForm(tab.containsFormId )) {
+            if ( this.servoyApi.touchForm( tab.containsFormId ) ) {
                 return tab.containsFormId;
             }
         }
         return null;
     }
 
-    select( tab ) {
+    select( tab: Tab ) {
         if ( !this.visible ) return;
         if ( this.isValidTab( tab ) ) {
             if ( !tab.active ) {
@@ -95,7 +125,7 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
                     var currentSelectedTab = this.selectedTab;
                     var promise = this.servoyApi.hideForm( this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName );
                     //                        if ($log.debugEnabled) $log.debug("svy * Will hide previously selected form (tab): " + this.selectedTab.containsFormId);
-                    promise.then( function( ok ) {
+                    promise.then( ( ok ) =>{
                         //                            if ($log.debugEnabled) $log.debug("svy * Previously selected form (tab) hide completed with '" + ok + "': " + this.selectedTab.containsFormId);
                         delete this.waitingForServerVisibility[formInWait];
                         if ( !tab.active ) {
@@ -124,7 +154,7 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
     }
 
 
-    getTabIndex( tab ) {
+    getTabIndex( tab: Tab ) {
         if ( tab ) {
             for ( var i = 0; i < this.tabs.length; i++ ) {
                 if ( ( this.tabs[i].containsFormId == tab.containsFormId ) && ( this.tabs[i].relationName == tab.relationName ) ) {
@@ -135,7 +165,7 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
         return -1;
     }
 
-    private setFormVisible( tab, event ) {
+    private setFormVisible( tab: Tab, event ) {
         if ( tab.containsFormId ) this.servoyApi.formWillShow( tab.containsFormId, tab.relationName );
         //            if ($log.debugEnabled) $log.debug("svy * selectedTab = '" + tab.containsFormId + "' -- " + new Date().getTime());
         var oldSelected = this.selectedTab;
@@ -146,9 +176,11 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
                 this.onChangeMethodID( this.getTabIndex( oldSelected ), event != null ? event : null /* TODO $.Event("change") */ );
             }, 0, false );
         }
+        console.log("selecting tab " + tab._id)
+        this.tabset.select(tab._id);
     }
 
-    private isValidTab( tab ) {
+    private isValidTab( tab: Tab ) {
         if ( this.tabs ) {
             for ( var i = 0; i < this.tabs.length; i++ ) {
                 if ( this.tabs[i] === tab ) {
@@ -173,4 +205,18 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
             }
         }
     }
+}
+
+class Tab {
+    _id:string;
+    name: string;
+    containsFormId: string;
+    text: string
+    relationName: string
+    active: boolean
+    foreground: string
+    disabled: boolean
+    imageMediaID: string
+    mnemonic: string
+    isActive: boolean
 }
