@@ -58,6 +58,7 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
 
     ngOnChanges( changes: SimpleChanges ) {
        if (changes["tabs"]) {
+           // quickly generate the id's for a the tab html id (and selecting it)
            for ( let i = 0; i < this.tabs.length; i++ ) {
                this.tabs[i]._id = this.servoyApi.getMarkupId() + "_tab_" + i;
            }
@@ -65,6 +66,7 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
     }
 
     onTabChange( event: NgbTabChangeEvent ) {
+        // do prevent it by default, so that hte server side can decide of the swich can happen.
         event.preventDefault();
         for ( let i = 0; i < this.tabs.length; i++ ) {
             if ( this.tabs[i]._id == event.nextId ) {
@@ -74,8 +76,7 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
         }
     }
 
-    getTabId( tab: Tab ) {
-        if (tab) return tab._id;
+    getSelectedTabId(){
         if (this.selectedTab) return this.selectedTab._id;
         for ( let i = 0; i < this.tabs.length; i++ ) {
             if ( this.tabs[i].active ) {
@@ -176,7 +177,6 @@ export class ServoyDefaultTabpanel implements OnInit, OnChanges {
                 this.onChangeMethodID( this.getTabIndex( oldSelected ), event != null ? event : null /* TODO $.Event("change") */ );
             }, 0, false );
         }
-        console.log("selecting tab " + tab._id)
         this.tabset.select(tab._id);
     }
 
