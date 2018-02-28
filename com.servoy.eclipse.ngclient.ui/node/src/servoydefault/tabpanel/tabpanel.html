@@ -1,5 +1,5 @@
 <ngb-tabset active="model.activeTabIndex" ng-class='(tyleClass ? .styleClass : "")  + " svy-tabpanel"'  [id]="servoyApi.getMarkupId()" sablo-tabseq='tabSeq' sablo-tabseq-config="{container: true, reservedGap: 50}">
-    <ngb-tab *ngFor="let tab of tabs" select="select(tab)" disabled="tab.disabled || !enabled || !tab.containsFormId">
+    <ngb-tab *ngFor="let tab of tabs" select="select(tab)" [disabled]="tab.disabled || !enabled || !tab.containsFormId">
       <ng-template  svy-mnemonic='tab.mnemonic' ngbTabTitle>
       	<img ng-hide="tab.imageMediaID == ''"  ng-src='tab.imageMediaID'/>
         <span svy-background='background' svy-foreground='tab.foreground == null ? foreground : tab.foreground'
