@@ -2448,7 +2448,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											addEncapsulationMarker(project, o, foundPersist, (Form)context);
 										}
 										if (context instanceof Form && ((Form)context).isFormComponent().booleanValue() &&
-											BaseComponent.isEventOrCommandProperty(element.getName()))
+											BaseComponent.isEventOrCommandProperty(element.getName()) &&
+											((Form)context).getFlattenedPropertiesMap().containsKey(element.getName()))
 										{
 											ServoyMarker mk = MarkerMessages.FormReferenceInvalidProperty.fill(((Form)context).getName(), element.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_REFERENCE_INVALID_PROPERTY, IMarker.PRIORITY_NORMAL, null,
@@ -4168,8 +4169,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (relations != null)
 										{
 											Relation r = relations[relations.length - 1];
-											dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
-											if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
+											dataProvider = getDataProvider(persistFlattenedSolution, id, r.getPrimaryServerName(), r.getPrimaryTableName());
+											if (dataProvider == null)
+												dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignServerName(), r.getForeignTableName());
 										}
 									}
 									if (dataProvider != null) break;
@@ -4179,7 +4181,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						return dataProvider;
 					}
 
-					private IDataProvider getDataProvider(String id, String serverName, String tableName) throws RepositoryException
+					private IDataProvider getDataProvider(FlattenedSolution fs, String id, String serverName, String tableName) throws RepositoryException
 					{
 						IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
 						if (server != null)
@@ -4187,13 +4189,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ITable table = server.getTable(tableName);
 							if (table != null)
 							{
-								for (Column c : table.getColumns())
-								{
-									if (c.getDataProviderID().equals(id))
-									{
-										return c;
-									}
-								}
+								return fs.getDataProviderForTable(table, id);
 							}
 						}
 						return null;

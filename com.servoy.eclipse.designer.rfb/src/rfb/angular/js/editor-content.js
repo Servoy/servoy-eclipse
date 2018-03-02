@@ -77,6 +77,7 @@ angular.module('editorContent',['servoyApp'])
       compScope.model = model;
       compScope.api = {};
       compScope.handlers = {};
+      compScope.svy_servoyApi = $rootScope.servoyApi;
       var el = $compile(html)(compScope);
       $rootScope.getDesignFormElement().append(el);
       return el;
@@ -329,7 +330,7 @@ angular.module('editorContent',['servoyApp'])
       return ret;
     }
     // dummy servoy api, ignore all calls
-  var servoyApi = {
+  $rootScope.servoyApi = {
     formWillShow: function(formname, relationname, formIndex) {},
     hideForm: function(formname, relationname, formIndex) {
       return null;
@@ -356,7 +357,7 @@ angular.module('editorContent',['servoyApp'])
 	}
   }
   $scope.servoyApi = function(name) {
-    return servoyApi;
+    return $rootScope.servoyApi;
   }
   $scope.layout = function(name) {
     var ret = layout[name];

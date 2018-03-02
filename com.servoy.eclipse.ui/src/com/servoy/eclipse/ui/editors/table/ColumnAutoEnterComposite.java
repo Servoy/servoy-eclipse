@@ -185,7 +185,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
-			Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
+			Color backgroundColor = ColumnComposite.getServoyGrayBackground();
 			columnAutoEnterServoySeqComposite.setBackground(backgroundColor);
 			columnAutoEnterDBSeqComposite.setBackground(backgroundColor);
 		}

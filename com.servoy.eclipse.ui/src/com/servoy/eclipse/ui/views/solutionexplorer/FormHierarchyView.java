@@ -253,7 +253,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		public Object[] getChildren(Object inputElement)
 		{
 			Comparator< ? > comparator = input.isResponsiveLayout() ? PositionComparator.XY_PERSIST_COMPARATOR : NameComparator.INSTANCE;
-			Form form = showAllAction.isChecked() ? activeSolution.getFlattenedForm(input, false) : input;
+			Form form = showAllAction.isChecked() ? getActiveSolution().getFlattenedForm(input, false) : input;
 			if (inputElement instanceof Pair)
 			{
 				if (inputElement == ELEMENTS)
@@ -341,7 +341,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				input = (Form)inputElement;
 				if (fDialogSettings.getBoolean(GROUP_ELEMENTS_BY_TYPE))
 				{
-					Form form = showAllAction.isChecked() ? activeSolution.getFlattenedForm(input, false) : input;
+					Form form = showAllAction.isChecked() ? getActiveSolution().getFlattenedForm(input, false) : input;
 					List<Pair<String, Image>> availableCategories = new ArrayList<>();
 					if (!hideElementsAction.isChecked() && form.getFormElementsSortedByFormIndex().hasNext()) availableCategories.add(ELEMENTS);
 					if (!hidePartsAction.isChecked() && form.getParts().hasNext()) availableCategories.add(PARTS);
@@ -513,14 +513,14 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 					}
 				}
 
-				List<Form> formHierarchy = activeSolution.getFormHierarchy(input);
+				List<Form> formHierarchy = getActiveSolution().getFormHierarchy(input);
 				if (!input.equals(f) && formHierarchy.contains(f))
 				{
 					result.add(formHierarchy.get(formHierarchy.indexOf(f) - 1));
 				}
 				else
 				{
-					result.addAll(activeSolution.getDirectlyInheritingForms(f));
+					result.addAll(getActiveSolution().getDirectlyInheritingForms(f));
 				}
 				return result.toArray();
 			}
@@ -553,7 +553,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			if (element instanceof Form)
 			{
 				Form f = (Form)element;
-				boolean hasChildren = !activeSolution.getDirectlyInheritingForms(f).isEmpty();
+				boolean hasChildren = !getActiveSolution().getDirectlyInheritingForms(f).isEmpty();
 				if (!hasChildren && listSelection != null)
 				{
 					if (listSelection instanceof ScriptMethod)
@@ -608,25 +608,16 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private TreeViewer tree;
 	private ToolBar listToolBar;
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
-
 	private ContextAction openAction;
 	private ContextAction treeNewAction;
 	private OverrideMethodAction overrideAction;
-
 	private int fCurrentOrientation;
 	private OrientationAction[] fToggleOrientationActions;
 	private SelectionProviderMediator fSelectionProviderMediator;
-
 	private FormTreeContentProvider treeProvider;
-
 	private boolean noSelectionChange = false;
-
 	private ShowMembersInFormHierarchy showMembersAction;
-
-	private FlattenedSolution activeSolution;
-
 	private Menu listDropDownMenu;
-
 	private MenuItem groupElementsToggleButton;
 	private FormHierarchyFilter hideElementsAction;
 	private FormHierarchyFilter showAllAction;
@@ -847,7 +838,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public void setSelection(Object object, boolean refreshList)
 	{
 		if (noSelectionChange) return;
-		activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 		if (object instanceof Form)
 		{
 			setSelectionInTree(object);
@@ -871,7 +861,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private void setSelectionInTree(Object object)
 	{
 		selected = (Form)object;
-		tree.setAutoExpandLevel(activeSolution.getFormHierarchy(selected).size() + 1);
+		tree.setAutoExpandLevel(getActiveSolution().getFormHierarchy(selected).size() + 1);
 		tree.setInput(new Form[] { selected });
 		tree.setSelection(new StructuredSelection(selected));
 		tree.refresh();
@@ -896,7 +886,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			Form parent = (Form)p.getParent();
 			List<IPersist> path = new ArrayList<IPersist>();
-			path.addAll(activeSolution.getFormHierarchy(parent));
+			path.addAll(getActiveSolution().getFormHierarchy(parent));
 			Collections.reverse(path);
 			paths.add(new TreePath(path.toArray()));
 		}
@@ -1343,5 +1333,10 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			}
 		}
 		setSelection(obj);
+	}
+
+	private FlattenedSolution getActiveSolution()
+	{
+		return ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 	}
 }

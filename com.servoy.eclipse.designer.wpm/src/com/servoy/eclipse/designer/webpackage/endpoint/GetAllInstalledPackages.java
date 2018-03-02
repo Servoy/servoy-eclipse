@@ -50,6 +50,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Debug;
@@ -130,6 +131,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 					if (reader != null)
 					{
 						pack.put("installed", reader.getVersion());
+						pack.put("installedIsWPA", isWebPackageArchive(activeSolutionName, reader.getResource()));
 						File installedResource = reader.getResource();
 						if (installedResource != null) pack.put("installedResource", installedResource.getName());
 						String parentSolutionName = getParentProjectNameForPackage(reader.getResource());
@@ -149,6 +151,17 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			Debug.log(e);
 		}
 		return result;
+	}
+
+	private boolean isWebPackageArchive(String solution, File webPackageFile)
+	{
+		if (webPackageFile != null && webPackageFile.isFile())
+		{
+			ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution);
+			File projectPath = initialActiveProject.getProject().getLocation().toFile();
+			return webPackageFile.getParentFile().equals(new File(projectPath, SolutionSerializer.NG_PACKAGES_DIR_NAME));
+		}
+		return false;
 	}
 
 	private String getParentProjectNameForPackage(File packageFile)
@@ -183,10 +196,13 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			for (String module : modulesList)
 			{
 				ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(module);
-				String moduleParent = findModuleParent(solutionProject.getSolution(), moduleName);
-				if (moduleParent != null)
+				if (solutionProject != null)
 				{
-					return moduleParent;
+					String moduleParent = findModuleParent(solutionProject.getSolution(), moduleName);
+					if (moduleParent != null)
+					{
+						return moduleParent;
+					}
 				}
 			}
 		}

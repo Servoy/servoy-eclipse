@@ -17,10 +17,14 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -57,6 +61,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -113,6 +119,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -396,6 +403,25 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
+
+			if (superForm != null)
+			{
+				String parentWorkingSet = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getContainingWorkingSet(
+					superForm.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
+				if (parentWorkingSet != null)
+				{
+					IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(parentWorkingSet);
+					if (ws != null)
+					{
+						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+						Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
+						IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+						files.add(file);
+						ws.setElements(files.toArray(new IAdaptable[0]));
+					}
+				}
+			}
+
 
 			if (servoyModel.getActiveResourcesProject() != null)
 			{
@@ -899,6 +925,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				fillStyleCombo();
 				fillTemplateCombo(superForm == null ? settings.get("templatename") : null);
 				fillProjectCombo();
+				if (superForm != null)
+				{
+					handleExtendsFormChanged();
+				}
 
 				formNameField.setFocus();
 				formNameField.selectAll();

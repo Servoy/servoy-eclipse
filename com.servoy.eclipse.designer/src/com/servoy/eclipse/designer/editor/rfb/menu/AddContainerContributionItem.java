@@ -1,7 +1,7 @@
 package com.servoy.eclipse.designer.editor.rfb.menu;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +12,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.CompoundContributionItem;
 import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -30,7 +28,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.SortedList;
 
 public class AddContainerContributionItem extends CompoundContributionItem
 {
@@ -49,20 +46,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 	@Override
 	protected IContributionItem[] getContributionItems()
 	{
-		List<IContributionItem> list = new SortedList<IContributionItem>(new Comparator<CommandContributionItem>()
-		{
-			//we still need to sort the menu items because we are matching allowed children on layoutName
-			@Override
-			public int compare(CommandContributionItem o1, CommandContributionItem o2)
-			{
-				boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(o1.getData().label);
-				boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(o2.getData().label);
-				if (co1 && co2) return 0;
-				else if (co1) return -1;
-				else if (co2) return 1;
-				else return SortedList.COMPARABLE_COMPARATOR.compare(o1.getData().label, o2.getData().label);
-			}
-		});
+		List<IContributionItem> list = new ArrayList<IContributionItem>();
 		PersistContext persistContext = DesignerUtil.getContentOutlineSelection();
 		IPersist persist = null;
 		if (persistContext != null) persist = persistContext.getPersist();
@@ -78,51 +62,25 @@ public class AddContainerContributionItem extends CompoundContributionItem
 				{
 					//for the right-clicked persist we iterate through all it's possible children
 					Set<String> allowedChildren = DesignerUtil.getAllowedChildren().get(layoutSpec.getPackageName() + "." + layoutSpec.getName());
-					boolean isComponentAdded = false;
 					for (String allowedChildName : allowedChildren)
 					{
 						if ("component".equalsIgnoreCase(allowedChildName))
 						{
 							addMenuItem(list, null, null, null);
-							isComponentAdded = true;
 						}
 						else
 						{
-							//then we iterate through all the layouts that we have and check if the layoutName matches the current allowedChildName
-							for (WebLayoutSpecification specification : specifications.getSpecifications().values())
+							WebLayoutSpecification specification = specifications.getSpecification(
+								allowedChildName.contains(".") ? allowedChildName.split("\\.")[1] : allowedChildName);
+							if (specification == null && allowedChildName.contains(".")) specifications.getSpecification(allowedChildName.replace(".", "-"));
+							if (specification != null)
 							{
-								String layoutName;
-								try
-								{
-									layoutName = new JSONObject((String)specification.getConfig()).optString("layoutName", null);
-									if (layoutName == null)
-									{
-										layoutName = specification.getName();
-									}
-
-									//if the layoutName matches the current allowedChildName then we add this container as a menu entry
-									if (allowedChildName.equals(packageName + "." + layoutName))
-									{
-										String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
-										addMenuItem(list, specification, config, null);
-									}
-
-								}
-								catch (JSONException e)
-								{
-									Debug.log(e);
-								}
+								String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
+								addMenuItem(list, specification, config, null);
 							}
-						}
-					}
-					if (!isComponentAdded)
-					{
-						for (String allowedChildName : allowedChildren)
-						{
-							if (allowedChildName.endsWith(".*"))
+							else
 							{
-								addMenuItem(list, null, null, null);
-								break;
+								Debug.log("Cannot add menu item, allowed child " + allowedChildName + " not found");
 							}
 						}
 					}
