@@ -19,21 +19,50 @@ export class PropertyUtils {
     }
     
    public static  setBorder(element:any, renderer:Renderer2,newVal) {
-       // TODO impl
-//        if(typeof newVal !== 'object' || newVal == null) {element.css('border',''); return;}
-//
-//        if (element.parent().is("fieldset")){ 
-//            $(element.parent()).replaceWith($(element));//unwrap fieldset
-//        }
-//        if(newVal.type == "TitledBorder"){
-//            element.wrap('<fieldset style="padding:5px;margin:0px;border:1px solid silver;width:100%;height:100%"></fieldset>')
-//            var x = element.parent().prepend("<legend align='"+newVal.titleJustiffication+"' style='border-bottom:0px; margin:0px;width:auto;color:"+
-//                    newVal.color+"'>"+newVal.title+"</legend>")
-//            if (newVal.font) x.children("legend").css(newVal.font);
-//        }else if(newVal.borderStyle){ 
-//            element.css('border','')
-//            element.css(newVal.borderStyle)
-//        }
+        if(typeof newVal !== 'object' || newVal == null) {renderer.removeStyle(element,'border'); return;}
+
+        if (renderer.parentNode(element).nodeName == "FIELDSET"){ 
+            //unwrap fieldset
+            var parent = renderer.parentNode(element);
+            renderer.insertBefore(renderer.parentNode(parent),element,parent);
+            renderer.removeChild(renderer.parentNode(parent),parent);
+        }
+        if(newVal.type == "TitledBorder"){
+            var fieldset = renderer.createElement("fieldset");
+            renderer.setAttribute(fieldset, "style", "padding:1px;margin:0px;border:1px solid silver;width:100%;height:100%");
+            
+            var legend = renderer.createElement("legend");
+            renderer.setAttribute(legend, "align", newVal.titleJustification);
+            renderer.setAttribute(legend, "style", "border-bottom:0px; margin:0px;width:auto;color:"+newVal.color);
+            if (newVal.font)
+            {
+                for (var key in newVal.font) {
+                    //keys like 'fontSize' need to be converted into 'font-size'
+                    renderer.setStyle(legend, key.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase(), newVal.font[key]);
+                };
+            }
+            renderer.appendChild(legend, renderer.createText(newVal.title));
+            
+              // this is the way it is done in the old ngclient, but the actual component is positioned partially outside the border          
+//            var parent = renderer.parentNode(element);
+//            renderer.insertBefore(parent, fieldset, element);
+//            renderer.appendChild(fieldset, legend);
+//            renderer.appendChild(fieldset, element);
+            
+            renderer.appendChild(fieldset, legend);
+            for (var i in element.childNodes) {
+                if (element.childNodes[i].nodeType == 1) {
+                    renderer.appendChild(fieldset, element.childNodes[i]);
+                }
+            }
+            renderer.appendChild(element, fieldset);
+            
+        }else if(newVal.borderStyle){ 
+            renderer.removeStyle(element,'border');
+            for (var key in newVal.borderStyle) {
+                renderer.setStyle(element, key.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase(), newVal.borderStyle[key]);
+            };
+        }
     }
    
    public static addSelectOnEnter(element:any, renderer:Renderer2) {
