@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges,SimpleChanges, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule } from '@angular/core';
 
 import { FormService, FormCache, StructureCache, ComponentCache } from '../form.service';
 
@@ -47,7 +47,7 @@ import { ServoyApi } from '../servoy_api'
    `
 } )
 
-export class FormComponent implements OnInit, OnDestroy {
+export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild( 'svyResponsiveDiv' ) readonly svyResponsiveDiv: TemplateRef<any>;
     // component template generate start
     @ViewChild( 'servoydefaultTextfield' ) readonly servoydefaultTextfield: TemplateRef<any>;
@@ -68,7 +68,11 @@ export class FormComponent implements OnInit, OnDestroy {
 
     constructor( private formservice: FormService, private sabloService: SabloService, private servoyService: ServoyService ) {
     }
-
+    
+    ngOnChanges( changes: SimpleChanges ) {
+        this.ngOnInit();
+    }
+    
     getTemplate( item: StructureCache | ComponentCache ): TemplateRef<any> {
         if ( item instanceof StructureCache ) {
             return this.svyResponsiveDiv;
@@ -79,17 +83,16 @@ export class FormComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        console.log("fc: " + this.name)
         this.formCache = this.formservice.getFormCache( this );
         this.sabloService.callService( 'formService', 'formLoaded', { formname: this.name }, true )
     }
 
     ngOnDestroy() {
     }
-    
-    public isFormAvailable(name):boolean {
+
+    public isFormAvailable( name ): boolean {
         //console.log("isFormAvailable: " + name + " " +  this.formservice.hasFormCacheEntry( name));
-        return this.formservice.hasFormCacheEntry( name);
+        return this.formservice.hasFormCacheEntry( name );
     }
 
     private datachange( component: string, property: string, value ) {
