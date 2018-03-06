@@ -8,7 +8,6 @@ import { FormComponent } from './form/form_component.component'
 
 import { ConverterService } from '../sablo/converter.service'
 
-
 @Injectable()
 export class FormService {
 
@@ -17,7 +16,6 @@ export class FormService {
 //    private touchedForms:Map<String,boolean>;
 
     constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService ) {
-
         this.formsCache = new Map();
 
         websocketService.getSession().then(( session ) => {
@@ -53,17 +51,6 @@ export class FormService {
         } );
     }
     
-    public touchForm(formName:string):boolean {
-        return true;
-//        let touched = this.touchedForms[formName];
-//        if (touched == null) {
-//            this.touchedForms[formName] = false;
-//            this.sabloService.callService("$windowService", "touchForm", { name: formName }, true);
-//        }
-//        return touched == true;
-    }
-
-
     public getFormCache( form: FormComponent ): FormCache {
         return  this.formsCache.get( form.name );
     }

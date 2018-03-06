@@ -15,10 +15,6 @@ export class ServoyApi {
         return this.formservice.hideForm( formname, this.formname, this.item.name, relationname, formIndex, formNameThatWillShow, relationnameThatWillBeShown, formIndexThatWillBeShown );
     }
 
-    public touchForm(formName:string):boolean {
-        return this.formservice.touchForm(formName);
-    }
-
     public startEdit( propertyName ) {
         // TODO also move to form service?
         //        $servoyInternal.pushEditingStarted( this.formname, this.item.name, propertyName );
