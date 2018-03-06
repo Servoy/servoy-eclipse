@@ -1,17 +1,32 @@
 import { Injectable } from '@angular/core';
 
+import { IterableDiffers } from '@angular/core';
+
+import {SpecTypesService} from './spectypes.service'
+
 @Injectable()
 export class ConverterService {
-    public static readonly INTERNAL_IMPL: '__internalState';
+    public static readonly INTERNAL_IMPL =  '__internalState';
     public static readonly TYPES_KEY = 'svy_types'; // TODO this should be sablo_types...
     // objects that have a function named like this in them will send to server the result of that function call when no conversion type is available (in case of
     // usage as handler arg. for example where we don't know the arg. types on client)
     public static readonly DEFAULT_CONVERSION_TO_SERVER_FUNC = "_dctsf";
+    
+    constructor(private iterableDiffers:IterableDiffers, private specTypesService:SpecTypesService ) {
+    }
+    
+    public getIterableDiffers():IterableDiffers {
+        return this.iterableDiffers;
+    }
+    
+    public getSpecTypesService():SpecTypesService {
+        return this.specTypesService;
+    }
 
     
     private customPropertyConverters:{[s:string]:IConverter} = {};
     
-    public  convertFromServerToClient(serverSentData, conversionInfo, currentClientData, scope, modelGetter) {
+    public  convertFromServerToClient(serverSentData, conversionInfo, currentClientData?, scope?, modelGetter?) {
         if (typeof conversionInfo === 'string' || typeof conversionInfo === 'number') {
             var customConverter = this.customPropertyConverters[conversionInfo];
             if (customConverter) serverSentData = customConverter.fromServerToClient(serverSentData, currentClientData, scope, modelGetter);
@@ -26,7 +41,7 @@ export class ConverterService {
         return serverSentData;
     }
     
-    public convertFromClientToServer(newClientData, conversionInfo, oldClientData) {
+    public convertFromClientToServer(newClientData, conversionInfo, oldClientData?) {
         if (typeof conversionInfo === 'string' || typeof conversionInfo === 'number') {
             var customConverter = this.customPropertyConverters[conversionInfo];
             if (customConverter) return customConverter.fromClientToServer(newClientData, oldClientData);
@@ -54,7 +69,7 @@ export class ConverterService {
         return value;
     }
    
-   public isChanged(now, prev, conversionInfo) {
+   public static isChanged(now, prev, conversionInfo) {
        if ((typeof conversionInfo === 'string' || typeof conversionInfo === 'number') && now && now[ConverterService.INTERNAL_IMPL] && now[ConverterService.INTERNAL_IMPL].isChanged) {
            return now[ConverterService.INTERNAL_IMPL].isChanged();
        }
@@ -96,19 +111,18 @@ export class ConverterService {
        return true;
    }
    
-   public prepareInternalState(propertyValue, optionalInternalStateValue?) {
+   public prepareInternalState(propertyValue, internalStateValue) {
        if (!propertyValue.hasOwnProperty(ConverterService.INTERNAL_IMPL))
        {
-           if (!optionalInternalStateValue) optionalInternalStateValue = {};
            if (Object.defineProperty) {
                // try to avoid unwanted iteration/non-intended interference over the private property state
                Object.defineProperty(propertyValue, ConverterService.INTERNAL_IMPL, {
                    configurable: false,
                    enumerable: false,
                    writable: false,
-                   value: optionalInternalStateValue
+                   value: internalStateValue
                });
-           } else propertyValue[ConverterService.INTERNAL_IMPL] = optionalInternalStateValue;
+           } else propertyValue[ConverterService.INTERNAL_IMPL] = internalStateValue;
        } 
 //       else $log.warn("An attempt to prepareInternalState on value '" + propertyValue + "' which already has internal state was ignored.");
    }
@@ -240,7 +254,7 @@ export class ConverterService {
         return newargs;
     }
     
-    private getCombinedPropertyNames(now,prev) {
+    private static getCombinedPropertyNames(now,prev) {
         var fulllist = {}
         if (prev) {
             var prevNames = Object.getOwnPropertyNames(prev);

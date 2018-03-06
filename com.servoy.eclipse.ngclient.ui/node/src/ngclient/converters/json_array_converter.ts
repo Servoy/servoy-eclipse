@@ -1,5 +1,7 @@
 import { IConverter, ConverterService } from '../../sablo/converter.service'
 
+import { IterableDiffers,IterableDiffer } from '@angular/core';
+
 export class JSONArrayConverter implements IConverter {
     private static readonly UPDATES = "u";
     private static readonly REMOVES = "r";
@@ -15,7 +17,8 @@ export class JSONArrayConverter implements IConverter {
     }
 
     fromServerToClient( serverJSONValue, currentClientValue?, componentScope?, componentModelGetter?) {
-        var newValue = currentClientValue;
+        let newValue = currentClientValue;
+        let  internalState:InternalState = null;
      // remove old watches (and, at the end create new ones) to avoid old watches getting triggered by server side change
       // TODO  removeAllWatches(currentClientValue);
         try
@@ -24,7 +27,7 @@ export class JSONArrayConverter implements IConverter {
                 // full contents
                 newValue = serverJSONValue[JSONArrayConverter.VALUE];
                 this.initializeNewValue(newValue, serverJSONValue[JSONArrayConverter.CONTENT_VERSION]);
-                var internalState = newValue[ConverterService.INTERNAL_IMPL];
+                internalState = newValue[ConverterService.INTERNAL_IMPL];
                 if (typeof serverJSONValue[JSONArrayConverter.PUSH_TO_SERVER] !== 'undefined') internalState[JSONArrayConverter.PUSH_TO_SERVER] = serverJSONValue[JSONArrayConverter.PUSH_TO_SERVER];
 
                 if(newValue.length)
@@ -52,7 +55,7 @@ export class JSONArrayConverter implements IConverter {
 
                 if (serverJSONValue[JSONArrayConverter.INITIALIZE]) this.initializeNewValue(currentClientValue, serverJSONValue[JSONArrayConverter.CONTENT_VERSION]); // this can happen when an array value was set completely in browser and the child elements need to instrument their browser values as well in which case the server sends 'initialize' updates for both this array and 'smart' child elements
 
-                var internalState = currentClientValue[ConverterService.INTERNAL_IMPL];
+                 internalState = currentClientValue[ConverterService.INTERNAL_IMPL];
 
                 // if something changed browser-side, increasing the content version thus not matching next expected version,
                 // we ignore this update and expect a fresh full copy of the array from the server (currently server value is leading/has priority because not all server side values might support being recreated from client values)
@@ -127,6 +130,8 @@ export class JSONArrayConverter implements IConverter {
                 // updates would have been received with this initialize as well (to initialize child elements as well to have the setChangeNotifier and internal things)
             } else if (!serverJSONValue || !serverJSONValue[JSONArrayConverter.NO_OP]) newValue = null; // anything else would not be supported... // TODO how to handle null values (special watches/complete array set from client)? if null is on server and something is set on client or the other way around?
         } finally {
+            internalState.iterableDiffer = this.converterService.getIterableDiffers().find(newValue).create(null);
+            internalState.iterableDiffer.diff(newValue);
             // TODO how to replace the add back watches if needed
 //            addBackWatches(newValue, componentScope);
         }
@@ -137,12 +142,12 @@ export class JSONArrayConverter implements IConverter {
     fromClientToServer( newClientData, oldClientData?) {
         // TODO how to handle null values (special watches/complete array set from client)? if null is on server and something is set on client or the other way around?
 
-        var internalState;
+        let internalState:InternalState
         if (newClientData && (internalState = newClientData[ConverterService.INTERNAL_IMPL])) {
-            if (internalState.isChanged()) {
-                var changes = {};
+            let changes = internalState.getChanges(newClientData);
+            if (changes) {
                 changes[JSONArrayConverter.CONTENT_VERSION] = internalState[JSONArrayConverter.CONTENT_VERSION];
-                if (internalState.allChanged) {
+                if (/* internalState.allChanged */ !changes) {
                     // structure might have changed; increase version number
                     ++internalState[JSONArrayConverter.CONTENT_VERSION]; // we also increase the content version number - server should only be expecting updates for the next version number
                     // send all
@@ -152,46 +157,49 @@ export class JSONArrayConverter implements IConverter {
                         if (internalState.conversionInfo[idx]) toBeSentArray[idx] = this.converterService.convertFromClientToServer(val, internalState.conversionInfo[idx], oldClientData ? oldClientData[idx] : undefined);
                         else toBeSentArray[idx] = this.converterService.convertClientObject(val);
                     }
-                    internalState.allChanged = false;
-                    internalState.changedIndexes = {};
+//                    internalState.allChanged = false;
+//                    internalState.changedIndexes = {};
                     return changes;
                 } else {
+                    changes.forEachItem((record) =>  {
+                        console.log(record);
+                    });
                     // send only changed indexes
-                    var changedElements = changes[JSONArrayConverter.UPDATES] = [];
-                    for (let idx in internalState.changedIndexes) {
-                        var newVal = newClientData[idx];
-                        var oldVal = oldClientData ? oldClientData[idx] : undefined;
-
-                        var changed = (newVal !== oldVal);
-                        if (!changed) {
-                            if (internalState.elUnwatch[idx]) {
-                                var oldDumbVal = internalState.changedIndexes[idx].old;
-                                // it's a dumb value - watched; see if it really changed acording to sablo rules
-                                if (oldDumbVal !== newVal) {
-                                    if (typeof newVal == "object") {
-                                        if (this.converterService.isChanged(newVal, oldDumbVal, internalState.conversionInfo[idx])) {
-                                            changed = true;
-                                        }
-                                    } else {
-                                        changed = true;
-                                    }
-                                }
-                            } else changed = newVal && newVal[ConverterService.INTERNAL_IMPL].isChanged(); // must be smart value then; same reference as checked above; so ask it if it changed
-                        }
-
-                        if (changed) {
-                            var ch = {};
-                            ch[JSONArrayConverter.INDEX] = idx;
-
-                            if (internalState.conversionInfo[idx]) ch[JSONArrayConverter.VALUE] = this.converterService.convertFromClientToServer(newVal, internalState.conversionInfo[idx], oldVal);
-                            else ch[JSONArrayConverter.VALUE] = this.converterService.convertClientObject(newVal);
-
-                            changedElements.push(ch);
-                        }
-                    }
-                    internalState.allChanged = false;
-                    internalState.changedIndexes = {};
-                    return changes;
+//                    var changedElements = changes[JSONArrayConverter.UPDATES] = [];
+//                    for (let idx in internalState.changedIndexes) {
+//                        var newVal = newClientData[idx];
+//                        var oldVal = oldClientData ? oldClientData[idx] : undefined;
+//
+//                        var changed = (newVal !== oldVal);
+//                        if (!changed) {
+//                            if (internalState.elUnwatch[idx]) {
+//                                var oldDumbVal = internalState.changedIndexes[idx].old;
+//                                // it's a dumb value - watched; see if it really changed acording to sablo rules
+//                                if (oldDumbVal !== newVal) {
+//                                    if (typeof newVal == "object") {
+//                                        if (this.converterService.isChanged(newVal, oldDumbVal, internalState.conversionInfo[idx])) {
+//                                            changed = true;
+//                                        }
+//                                    } else {
+//                                        changed = true;
+//                                    }
+//                                }
+//                            } else changed = newVal && newVal[ConverterService.INTERNAL_IMPL].isChanged(); // must be smart value then; same reference as checked above; so ask it if it changed
+//                        }
+//
+//                        if (changed) {
+//                            var ch = {};
+//                            ch[JSONArrayConverter.INDEX] = idx;
+//
+//                            if (internalState.conversionInfo[idx]) ch[JSONArrayConverter.VALUE] = this.converterService.convertFromClientToServer(newVal, internalState.conversionInfo[idx], oldVal);
+//                            else ch[JSONArrayConverter.VALUE] = this.converterService.convertClientObject(newVal);
+//
+//                            changedElements.push(ch);
+//                        }
+//                    }
+//                    internalState.allChanged = false;
+//                    internalState.changedIndexes = {};
+//                    return changes;
                 }
             } else if (newClientData ==  oldClientData) { // TODO do we need to compare differently?
                 //if (angular.equals(newClientData, oldClientData)) {
@@ -208,33 +216,12 @@ export class JSONArrayConverter implements IConverter {
     
     /** Initializes internal state on a new object value */
     private initializeNewValue(newValue, contentVersion) {
-        var newInternalState = false; // TODO although unexpected (internal state to already be defined at this stage it can happen until SVY-8612 is implemented and property types change to use that
         if (!newValue.hasOwnProperty(ConverterService.INTERNAL_IMPL)) {
-            newInternalState = true;
-            this.converterService.prepareInternalState(newValue);
+            this.converterService.prepareInternalState(newValue, new InternalState());
         } // else: we don't try to redefine internal state if it's already defined
 
         var internalState = newValue[ConverterService.INTERNAL_IMPL];
         internalState[JSONArrayConverter.CONTENT_VERSION] = contentVersion; // being full content updates, we don't care about the version, we just accept it
-
-        if (newInternalState) {
-            // implement what $sabloConverters need to make this work
-            internalState.setChangeNotifier = function(changeNotifier) {
-                internalState.notifier = changeNotifier; 
-            }
-            internalState.isChanged = function() {
-                var hasChanges = internalState.allChanged;
-                if (!hasChanges) for (var x in internalState.changedKeys) { hasChanges = true; break; }
-                return hasChanges;
-            }
-
-            // private impl
-            internalState.modelUnwatch = [];
-//            internalState.objStructureUnwatch = null;
-            internalState.conversionInfo = {};
-            internalState.changedKeys = {};
-            internalState.allChanged = false;
-        } // else don't reinitilize it - it's already initialized
     }
     
     private getChangeNotifier(propertyValue, key) {
@@ -245,4 +232,13 @@ export class JSONArrayConverter implements IConverter {
         }
     }
 
+}
+
+class InternalState {
+    public conversionInfo = {};
+    public iterableDiffer:IterableDiffer<any>;
+    
+    getChanges(newValue) {
+        return this.iterableDiffer.diff(newValue);
+    }
 }

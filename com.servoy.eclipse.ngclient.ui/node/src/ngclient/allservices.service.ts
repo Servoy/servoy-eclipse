@@ -2,12 +2,16 @@ import { NgModule } from '@angular/core';
 
 import { Injectable } from '@angular/core';
 
-import {ServicesService, ServiceProvider} from '../sablo/services.service';
+import { ServicesService, ServiceProvider } from '../sablo/services.service';
 
-import {NGUtilsService} from '../servoy_ng_only_services/ngutils/ngutils.service';
+import { ApplicationService } from './services/application.service'
+import { WindowService } from './services/window.service'
 
-import {ApplicationService} from './services/application.service'
-import {WindowService} from './services/window.service'
+// generated services start
+import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
+import { TypesRegisterService } from '../servoydefault/types_register.service';
+// generated services end
+
 
 /**
  * this is a the all services that should also be a generated ts file.
@@ -16,18 +20,27 @@ import {WindowService} from './services/window.service'
  */
 @Injectable()
 export class AllServiceService implements ServiceProvider {
-    constructor(private services:ServicesService, 
-                           private $applicationService:ApplicationService,
-                           private $windowService:WindowService,
-                           private ngclientutils:NGUtilsService) {
-        services.setServiceProvider(this);
+    constructor( private services: ServicesService,
+        private $applicationService: ApplicationService,
+        private $windowService: WindowService,
+        // generated services start
+        private ngclientutils: NGUtilsService,
+        private servoydefaultTypesRegisterService: TypesRegisterService
+        // generated services end
+    ) {
+        services.setServiceProvider( this );
     }
-    getService(name:string) {
+    getService( name: string ) {
         return this[name];
     }
-} 
+}
 
-@NgModule({
-    providers: [AllServiceService,NGUtilsService,ApplicationService,WindowService],
- })
+@NgModule( {
+    providers: [AllServiceService, ApplicationService, WindowService,
+                // generated services start
+                , NGUtilsService, 
+                TypesRegisterService
+                // generated services end
+                ],
+} )
 export class AllServicesModules { }
