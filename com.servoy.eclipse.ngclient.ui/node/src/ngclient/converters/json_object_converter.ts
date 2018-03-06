@@ -43,7 +43,7 @@ export class JSONObjectConverter implements IConverter {
                 if ( elem instanceof BaseCustomObject ) {
                     // child is able to handle it's own change mechanism
                     elem.getStateHolder().addChangeNotifier(() => {
-                        newValue.getStateHolder().markIfChanged( c , elem,elem);
+                        newValue.getStateHolder().markIfChanged( c, elem, elem );
                     } );
                 }
                 clientObject[c] = elem;
@@ -57,18 +57,18 @@ export class JSONObjectConverter implements IConverter {
             const internalState = currentClientValue.getStateHolder();
 
             // this can happen when an object value was set completely in browser and the child values need to instrument their browser values as well in which case the server sends 'initialize' updates for both this array and 'smart' child values
-             if ( serverJSONValue[JSONObjectConverter.INITIALIZE] )
-                 internalState[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
-                 //this.initializeNewValue( currentClientValue, serverJSONValue[JSONObjectConverter.CONTENT_VERSION] ); 
+            if ( serverJSONValue[JSONObjectConverter.INITIALIZE] )
+                internalState[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
+            //this.initializeNewValue( currentClientValue, serverJSONValue[JSONObjectConverter.CONTENT_VERSION] ); 
 
 
             // if something changed browser-side, increasing the content version thus not matching next expected version,
             // we ignore this update and expect a fresh full copy of the object from the server (currently server value is leading/has priority because not all server side values might support being recreated from client values)
             if ( internalState[JSONObjectConverter.CONTENT_VERSION] == serverJSONValue[JSONObjectConverter.CONTENT_VERSION] ) {
                 internalState.ignoreChanges = true;
-                let  updates = serverJSONValue[JSONObjectConverter.UPDATES];
-                let  conversionInfos = serverJSONValue[ConverterService.TYPES_KEY];
-                let  i;
+                let updates = serverJSONValue[JSONObjectConverter.UPDATES];
+                let conversionInfos = serverJSONValue[ConverterService.TYPES_KEY];
+                let i;
                 for ( i in updates ) {
                     const update = updates[i];
                     const key = update[JSONObjectConverter.KEY];
@@ -87,7 +87,7 @@ export class JSONObjectConverter implements IConverter {
                     if ( val instanceof BaseCustomObject ) {
                         // child is able to handle it's own change mechanism
                         val.getStateHolder().addChangeNotifier(() => {
-                            currentClientValue.getStateHolder().markIfChanged( c , val,val);
+                            currentClientValue.getStateHolder().markIfChanged( c, val, val );
                         } );
                     }
                 }
@@ -114,20 +114,20 @@ export class JSONObjectConverter implements IConverter {
 
         if ( newClientData ) {
             const internalState = newClientData.getStateHolder();
-            if ( internalState.getChanges().length > 0 || internalState.allChanged) {
+            if ( internalState.getChanges().length > 0 || internalState.allChanged ) {
                 var changes = {};
-                if (internalState[JSONObjectConverter.CONTENT_VERSION]) changes[JSONObjectConverter.CONTENT_VERSION] = internalState[JSONObjectConverter.CONTENT_VERSION];
+                if ( internalState[JSONObjectConverter.CONTENT_VERSION] ) changes[JSONObjectConverter.CONTENT_VERSION] = internalState[JSONObjectConverter.CONTENT_VERSION];
                 if ( internalState.allChanged ) {
                     // structure might have changed; increase version number
                     ++internalState[JSONObjectConverter.CONTENT_VERSION]; // we also increase the content version number - server should only be expecting updates for the next version number
                     // send all
                     var toBeSentObj = changes[JSONObjectConverter.VALUE] = {};
-                    let specProperties = this.converterService.getSpecTypesService().getProperties(newClientData.constructor);
-                    if (!specProperties) specProperties = Object.keys(newClientData);
-                    specProperties.forEach((key) =>{
+                    let specProperties = this.converterService.getSpecTypesService().getProperties( newClientData.constructor );
+                    if ( !specProperties ) specProperties = Object.keys( newClientData );
+                    specProperties.forEach(( key ) => {
                         var val = newClientData[key];
                         if ( internalState.conversionInfo[key] ) toBeSentObj[key] = this.converterService.convertFromClientToServer( val, internalState.conversionInfo[key], oldClientData ? oldClientData[key] : undefined );
-                        else if (val && val.getStateHolder) {
+                        else if ( val && val.getStateHolder ) {
                             // no conversion info, but this could be a JSON_obj or JSON_array ....
                             // for now hardcoded to json obj. need a test to see if this is an array.
                             toBeSentObj[key] = this.converterService.convertFromClientToServer( val, "JSON_obj", oldClientData ? oldClientData[key] : undefined );
@@ -140,7 +140,7 @@ export class JSONObjectConverter implements IConverter {
                 } else {
                     // send only changed keys
                     var changedElements = changes[JSONObjectConverter.UPDATES] = [];
-                    internalState.getChanges().forEach((key)=>{
+                    internalState.getChanges().forEach(( key ) => {
                         var newVal = newClientData[key];
                         var oldVal = oldClientData ? oldClientData[key] : undefined;
                         var ch = {};
@@ -150,7 +150,7 @@ export class JSONObjectConverter implements IConverter {
                         else ch[JSONObjectConverter.VALUE] = this.converterService.convertClientObject( newVal );
 
                         changedElements.push( ch );
-                    })
+                    } )
                     internalState.allChanged = false;
                     internalState.clearChanges();
                     return changes;

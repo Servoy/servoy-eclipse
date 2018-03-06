@@ -6,7 +6,7 @@ import { Subscription } from "rxjs/Subscription";
 
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
 import { WindowRefService } from './util/windowref.service'
-import {Deferred} from './util/deferred'
+import { Deferred } from './util/deferred'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
 
@@ -15,7 +15,7 @@ export class WebsocketService {
     private pathname: string;
     private queryString: string;
     private wsSession: WebsocketSession;
-    private wsSessionDeferred:Deferred<WebsocketSession>;
+    private wsSessionDeferred: Deferred<WebsocketSession>;
     private connectionArguments = {};
     private lastServerMessageNumber = null;
 
@@ -70,7 +70,7 @@ export class WebsocketService {
         return new_uri;
     }
 
-    public connect( context, args, queryArgs, websocketUri ):WebsocketSession {
+    public connect( context, args, queryArgs, websocketUri ): WebsocketSession {
 
         this.connectionArguments = {
             context: context,
@@ -80,16 +80,17 @@ export class WebsocketService {
         }
 
         // When ReconnectingWebSocket gets a function it will call the function to generate the url for each (re)connect.
-        const websocket = new ReconnectingWebSocket(() => {return this.generateURL( this.connectionArguments['context'], this.connectionArguments['args'],
+        const websocket = new ReconnectingWebSocket(() => {
+            return this.generateURL( this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'] );
         } );
-        
+
         this.wsSession = new WebsocketSession( websocket, this, this.services, this.windowRef, this.converterService );
         // todo should we just merge $websocket and $services into $sablo that just has all
         // the public api of sablo (like connect, conversions, services)
         //$services.setSession(wsSession);
-        if (this.wsSessionDeferred != null) {
-            this.wsSessionDeferred.resolve(this.wsSession);
+        if ( this.wsSessionDeferred != null ) {
+            this.wsSessionDeferred.resolve( this.wsSession );
         }
         return this.wsSession
     }
@@ -108,18 +109,18 @@ export class WebsocketService {
         this.connectionArguments['args'] = args;
     }
 
-    public getSession():Promise<WebsocketSession> {
-        if (this.wsSession != null) 
-        return new Promise<WebsocketSession>((resolve, reject)=> { 
-            resolve(this.wsSession);
-        });
-        else if (this.wsSessionDeferred == null){
+    public getSession(): Promise<WebsocketSession> {
+        if ( this.wsSession != null )
+            return new Promise<WebsocketSession>(( resolve, reject ) => {
+                resolve( this.wsSession );
+            } );
+        else if ( this.wsSessionDeferred == null ) {
             this.wsSessionDeferred = new Deferred<WebsocketSession>();
         }
         return this.wsSessionDeferred.promise;
     }
 
-    public getURLParameter( name: string ):string  {
+    public getURLParameter( name: string ): string {
         return decodeURIComponent(( new RegExp( '[&]?' + name + '=' + '([^&;]+?)(&|#|;|$)' ).exec( this.getQueryString() ) || [, ""] )[1].replace( /\+/g, '%20' ) ) || null
     }
 
@@ -127,7 +128,7 @@ export class WebsocketService {
         this.pathname = name;
     }
 
-    public getPathname():string {
+    public getPathname(): string {
         return this.pathname || this.windowRef.nativeWindow.location.pathname;
     }
 
@@ -161,7 +162,7 @@ export class WebsocketSession {
     private onOpenHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
     private onErrorHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
     private onCloseHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
-    private onMessageObjectHandlers: Array<( msg: any, conversionInfo: any) => void> = new Array()
+    private onMessageObjectHandlers: Array<( msg: any, conversionInfo: any ) => void> = new Array()
 
     private functionsToExecuteAfterIncommingMessageWasHandled = undefined;
 
@@ -176,20 +177,20 @@ export class WebsocketSession {
 
     constructor( private websocket: ReconnectingWebSocket, private websocketService: WebsocketService, private services: ServicesService, private windowRef: WindowRefService, private converterService: ConverterService ) {
         const me = this;
-        this.websocket.onopen = ( evt )=> {
+        this.websocket.onopen = ( evt ) => {
             me.setConnected();
             me.startHeartbeat();
             for ( let handler in me.onOpenHandlers ) {
                 me.onOpenHandlers[handler]( evt );
             }
         }
-        this.websocket.onerror = ( evt )=> {
+        this.websocket.onerror = ( evt ) => {
             me.stopHeartbeat();
             for ( let handler in me.onErrorHandlers ) {
                 me.onErrorHandlers[handler]( evt );
             }
         }
-        this.websocket.onclose = ( evt )=> {
+        this.websocket.onclose = ( evt ) => {
             me.stopHeartbeat();
             if ( me.connected != 'CLOSED' ) {
                 me.connected = 'RECONNECTING';
@@ -199,7 +200,7 @@ export class WebsocketSession {
                 me.onCloseHandlers[handler]( evt );
             }
         }
-        this.websocket.onconnecting = ( evt ) =>{
+        this.websocket.onconnecting = ( evt ) => {
             // this event indicates we are trying to reconnect, the event has the close code and reason from the disconnect.
             if ( evt.code && evt.code != WsCloseCodes.CLOSED_ABNORMALLY && evt.code != WsCloseCodes.SERVICE_RESTART ) {
 
@@ -216,7 +217,7 @@ export class WebsocketSession {
                 //                    if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Connection mode (onconnecting got a server disconnect/close with reason " + evt.reason + "): ... CLOSED (" + new Date().getTime() + ")");
             }
         }
-        this.websocket.onmessage = ( message ) =>{
+        this.websocket.onmessage = ( message ) => {
             me.handleHeartbeat( message ) || me.handleMessage( message );
         }
     }
@@ -268,7 +269,7 @@ export class WebsocketSession {
     public onclose( handler ) {
         this.onCloseHandlers.push( handler )
     }
-    public onMessageObject( handler:(message:any,conversionInfo:any)=>void ) {
+    public onMessageObject( handler: ( message: any, conversionInfo: any ) => void ) {
         this.onMessageObjectHandlers.push( handler )
     }
 
@@ -468,7 +469,7 @@ export class WebsocketSession {
                 //                    $sabloTestability.increaseEventLoop();
                 //                }
                 // server wants a response; responseValue may be a promise
-                Promise.resolve( responseValue ).then( ( ret ) => {
+                Promise.resolve( responseValue ).then(( ret ) => {
                     //                    if (isPromiseLike(responseValue)) {
                     //                        $sabloTestability.decreaseEventLoop();
                     //                        if ($log.debugEnabled) $log.debug("sbl * Promise returned by call from server with smsgid '" + obj.smsgid + "' is now resolved with value: -" + ret + "-. Sending value back to server...");
@@ -503,7 +504,7 @@ export class WebsocketSession {
                 } );
             }
         } catch ( e ) {
-            console.log(e);
+            console.log( e );
             //            $log.error("Error (follows below) in parsing/processing this message: " + message_data);
             //            $log.error(e);
             if ( obj && obj.smsgid ) {
