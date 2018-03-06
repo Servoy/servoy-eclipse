@@ -141,6 +141,17 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 				}
 			}
 		});
+		MenuItem removeItem = new MenuItem(menu, SWT.PUSH);
+		removeItem.setText("Remove calculation");
+		removeItem.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				removeSelectedCalculation();
+			}
+		});
+
 		searchForReferencesItem = new MenuItem(menu, SWT.PUSH);
 		searchForReferencesItem.setText("Search for References");
 		searchForReferencesItem.setEnabled(true);
@@ -167,30 +178,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				TreeItem[] selection = treeViewer.getTree().getSelection();
-				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
-				{
-					ScriptCalculation calculation = (ScriptCalculation)selection[0].getData();
-					if (MessageDialog.openConfirm(getShell(), "Delete calculation",
-						"Are you sure you want to delete calculation '" + calculation.getName() + "'?"))
-					{
-						try
-						{
-							((IDeveloperRepository)calculation.getRootObject().getRepository()).deleteObject(calculation);
-						}
-						catch (RepositoryException ex)
-						{
-							ServoyLog.logError(ex);
-						}
-						treeViewer.remove(calculation);
-						treeViewer.getTree().forceFocus();
-						te.flagModified();
-					}
-				}
-				else
-				{
-					MessageDialog.openError(getShell(), "Error", "You must select a calculation to delete.");
-				}
+				removeSelectedCalculation();
 			}
 		});
 		removeButton.setEnabled(false);
@@ -501,5 +489,32 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 		TableScriptsContentProvider columnViewContentProvider = new TableScriptsContentProvider(t, IRepository.SCRIPTCALCULATIONS);
 		treeViewer.setContentProvider(columnViewContentProvider);
 		super.setRows(t);
+	}
+
+	private void removeSelectedCalculation()
+	{
+		TreeItem[] selection = treeViewer.getTree().getSelection();
+		if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
+		{
+			ScriptCalculation calculation = (ScriptCalculation)selection[0].getData();
+			if (MessageDialog.openConfirm(getShell(), "Delete calculation", "Are you sure you want to delete calculation '" + calculation.getName() + "'?"))
+			{
+				try
+				{
+					((IDeveloperRepository)calculation.getRootObject().getRepository()).deleteObject(calculation);
+				}
+				catch (RepositoryException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+				treeViewer.remove(calculation);
+				treeViewer.getTree().forceFocus();
+				tableEditor.flagModified();
+			}
+		}
+		else
+		{
+			MessageDialog.openError(getShell(), "Error", "You must select a calculation to delete.");
+		}
 	}
 }

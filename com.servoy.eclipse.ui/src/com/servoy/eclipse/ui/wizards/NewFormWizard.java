@@ -913,6 +913,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				fillStyleCombo();
 				fillTemplateCombo(superForm == null ? settings.get("templatename") : null);
 				fillProjectCombo();
+				if (superForm != null)
+				{
+					handleExtendsFormChanged();
+				}
 
 				formNameField.setFocus();
 				formNameField.selectAll();
