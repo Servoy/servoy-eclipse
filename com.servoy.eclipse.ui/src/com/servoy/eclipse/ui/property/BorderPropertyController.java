@@ -690,6 +690,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			{
 				radius = new float[] { 0, 0, 0, 0, 0, 0, 0, 0 };
 			}
+			if (v == null) v = new Float(0);
 			if (TOP_LEFT_HORIZONTAL.equals(id))
 			{
 				radius[0] = ((Float)v).floatValue();
