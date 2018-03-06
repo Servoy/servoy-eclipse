@@ -4,10 +4,9 @@ import { By }              from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
 
+import {FormatFilterPipe,MnemonicletterFilterPipe} from '../../ngclient/servoy_public'
 
 import { SabloModule } from '../../sablo/sablo.module'
-
-import { ServoyApiModule } from '../../servoyapi/servoy_api.module'
 
 describe( 'SvLabel', () => {
     let component: ServoyDefaultLabel;
@@ -16,10 +15,9 @@ describe( 'SvLabel', () => {
 
     beforeEach( async(() => {
         TestBed.configureTestingModule( {
-            declarations: [ServoyDefaultLabel],
+            declarations: [ServoyDefaultLabel ,FormatFilterPipe,MnemonicletterFilterPipe],
             imports: [
-                SabloModule,
-                ServoyApiModule],
+                SabloModule],
         } )
             .compileComponents();
     } ) );
