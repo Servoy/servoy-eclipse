@@ -36,16 +36,26 @@ import { ServoyApi } from '../servoy_api'
                 </ng-template>
             </servoydefault-tabpanel>
       </ng-template>
+      <ng-template #servoydefaultTablesspanel let-state="state">
+            <servoydefault-tablesspanel  [borderType]="state.model.borderType" [fontType]="state.model.fontType" [visible]="state.model.visible" [selectedTabColor]="state.model.selectedTabColor" [tabs]="state.model.tabs" (tabsChange)="datachange(state.name,'tabs',$event)" [readOnly]="state.model.readOnly" [tabIndex]="state.model.tabIndex" (tabIndexChange)="datachange(state.name,'tabIndex',$event)" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [activeTabIndex]="state.model.activeTabIndex" (activeTabIndexChange)="datachange(state.name,'activeTabIndex',$event)" [horizontalAlignment]="state.model.horizontalAlignment" [size]="state.model.size" [background]="state.model.background" [tabOrientation]="state.model.tabOrientation" [location]="state.model.location" [tabSeq]="state.model.tabSeq" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp>
+                <ng-template let-name='name'>
+                    <svy-form *ngIf="isFormAvailable(name)" [name]="name"></svy-form>
+                </ng-template>
+            </servoydefault-tablesspanel>
+      </ng-template>
       <!-- component template generate end -->
    `
 } )
 
 export class FormComponent implements OnInit, OnDestroy {
     @ViewChild( 'svyResponsiveDiv' ) readonly svyResponsiveDiv: TemplateRef<any>;
+    // component template generate start
     @ViewChild( 'servoydefaultTextfield' ) readonly servoydefaultTextfield: TemplateRef<any>;
     @ViewChild( 'servoydefaultButton' ) readonly servoydefaultButton: TemplateRef<any>;
     @ViewChild( 'servoydefaultLabel' ) readonly servoydefaultLabel: TemplateRef<any>;
     @ViewChild( 'servoydefaultTabpanel' ) readonly servoydefaultTabpanel: TemplateRef<any>;
+    @ViewChild( 'servoydefaultTablesspanel' ) readonly servoydefaultTablesspanel: TemplateRef<any>;
+    // component template generate end
 
     @ViewChildren( 'cmp' ) readonly components: QueryList<Component>;
 

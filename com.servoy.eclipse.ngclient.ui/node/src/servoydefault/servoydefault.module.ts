@@ -8,6 +8,7 @@ import { ServoyDefaultTextField } from './textfield/textfield';
 import { ServoyDefaultButton } from './button/button';
 import { ServoyDefaultLabel} from './label/label';
 import { ServoyDefaultTabpanel} from './tabpanel/tabpanel';
+import { ServoyDefaultTablesspanel} from './tabpanel/tablesspanel';
 
 import {SabloModule} from '../sablo/sablo.module'
 
@@ -19,6 +20,7 @@ import {FormatFilterPipe,MnemonicletterFilterPipe} from '../ngclient/servoy_publ
     ServoyDefaultButton,
     ServoyDefaultLabel,
     ServoyDefaultTabpanel,
+    ServoyDefaultTablesspanel,
     FormatFilterPipe,
     MnemonicletterFilterPipe
   ],
@@ -33,6 +35,7 @@ import {FormatFilterPipe,MnemonicletterFilterPipe} from '../ngclient/servoy_publ
             ServoyDefaultButton,
             ServoyDefaultLabel,
             ServoyDefaultTabpanel,
+            ServoyDefaultTablesspanel
   ],
   providers: []
 })
