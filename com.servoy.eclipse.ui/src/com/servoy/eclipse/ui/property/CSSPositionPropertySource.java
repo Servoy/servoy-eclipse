@@ -16,17 +16,19 @@
  */
 package com.servoy.eclipse.ui.property;
 
-import java.text.NumberFormat;
 import java.util.StringTokenizer;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.util.Utils;
 
 /**
  * IPropertySource for css position  show top, right, bottom , left width and height subproperties.
@@ -54,14 +56,52 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 	@Override
 	public IPropertyDescriptor[] createPropertyDescriptors()
 	{
+		ICellEditorFactory factory = new ICellEditorFactory()
+		{
+
+			@Override
+			public CellEditor createPropertyEditor(Composite parent)
+			{
+				TextCellEditor editor = new TextCellEditor(parent);
+				editor.setValidator(new ICellEditorValidator()
+				{
+
+					@Override
+					public String isValid(Object value)
+					{
+						if (value != null)
+						{
+							String position = value.toString().trim();
+							if (position.endsWith("px"))
+							{
+								position = position.replaceFirst("px", "");
+							}
+							else if (position.endsWith("%"))
+							{
+								position = position.replaceFirst("%", "");
+							}
+							try
+							{
+								Utils.getAsInteger(position, true);
+							}
+							catch (Exception ex)
+							{
+								return "Value must be either a number (in pixels) or a percent.";
+							}
+						}
+						return null;
+					}
+				});
+				return editor;
+			}
+		};
 		// make sure sub-properties are sorted in defined order
-		return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, TOP,
-			TOP, CSSPositionLabelProvider.INSTANCE), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, LEFT, LEFT,
-				CSSPositionLabelProvider.INSTANCE), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, BOTTOM, BOTTOM,
-					CSSPositionLabelProvider.INSTANCE), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, RIGHT, RIGHT,
-						CSSPositionLabelProvider.INSTANCE), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, WIDTH, WIDTH,
-							CSSPositionLabelProvider.INSTANCE), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, HEIGHT, HEIGHT,
-								CSSPositionLabelProvider.INSTANCE) });
+		return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new PropertyController<String, String>(TOP, TOP, null,
+			CSSPositionLabelProvider.INSTANCE, factory), new PropertyController<String, String>(LEFT, LEFT, null, CSSPositionLabelProvider.INSTANCE,
+				factory), new PropertyController<String, String>(BOTTOM, BOTTOM, null, CSSPositionLabelProvider.INSTANCE,
+					factory), new PropertyController<String, String>(RIGHT, RIGHT, null, CSSPositionLabelProvider.INSTANCE,
+						factory), new PropertyController<String, String>(WIDTH, WIDTH, null, CSSPositionLabelProvider.INSTANCE,
+							factory), new PropertyController<String, String>(HEIGHT, HEIGHT, null, CSSPositionLabelProvider.INSTANCE, factory) });
 	}
 
 	@Override
@@ -70,7 +110,7 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 		CSSPosition position = getEditableValue();
 		if (position == null)
 		{
-			return new Integer(0);
+			return "0";
 		}
 		if (TOP.equals(id))
 		{
@@ -104,46 +144,46 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 	{
 		if (BOTTOM.equals(id) || RIGHT.equals(id))
 		{
-			return Integer.valueOf(-1);
+			return "-1";
 		}
 		if (WIDTH.equals(id))
 		{
-			return Integer.valueOf(80);
+			return "80";
 		}
 		if (HEIGHT.equals(id))
 		{
-			return Integer.valueOf(20);
+			return "20";
 		}
-		return Integer.valueOf(0);
+		return "0";
 	}
 
 	@Override
 	protected CSSPosition setComplexPropertyValue(Object id, Object v)
 	{
-		CSSPosition position = (getEditableValue() == null) ? new CSSPosition(0, 0, 0, 0, 0, 0) : getEditableValue();
+		CSSPosition position = (getEditableValue() == null) ? new CSSPosition("0", "0", "0", "0", "0", "0") : getEditableValue();
 		if (TOP.equals(id))
 		{
-			position.top = (Integer)v;
+			position.top = (String)v;
 		}
 		if (LEFT.equals(id))
 		{
-			position.left = (Integer)v;
+			position.left = (String)v;
 		}
 		if (BOTTOM.equals(id))
 		{
-			position.bottom = (Integer)v;
+			position.bottom = (String)v;
 		}
 		if (RIGHT.equals(id))
 		{
-			position.right = (Integer)v;
+			position.right = (String)v;
 		}
 		if (WIDTH.equals(id))
 		{
-			position.width = (Integer)v;
+			position.width = (String)v;
 		}
 		if (HEIGHT.equals(id))
 		{
-			position.height = (Integer)v;
+			position.height = (String)v;
 		}
 		return position;
 	}
@@ -192,25 +232,18 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 			{
 				return null;
 			}
-			int top;
-			int left;
-			int bottom;
-			int right;
-			int width;
-			int height;
-			try
-			{
-				top = Integer.parseInt(tok.nextToken().trim());
-				left = Integer.parseInt(tok.nextToken().trim());
-				bottom = Integer.parseInt(tok.nextToken().trim());
-				right = Integer.parseInt(tok.nextToken().trim());
-				width = Integer.parseInt(tok.nextToken().trim());
-				height = Integer.parseInt(tok.nextToken().trim());
-			}
-			catch (NumberFormatException e)
-			{
-				return null;
-			}
+			String top;
+			String left;
+			String bottom;
+			String right;
+			String width;
+			String height;
+			top = tok.nextToken().trim();
+			left = tok.nextToken().trim();
+			bottom = tok.nextToken().trim();
+			right = tok.nextToken().trim();
+			width = tok.nextToken().trim();
+			height = tok.nextToken().trim();
 			return new CSSPosition(top, left, bottom, right, width, height);
 		}
 
@@ -240,20 +273,14 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 
 		protected static final CSSPositionLabelProvider INSTANCE = new CSSPositionLabelProvider();
 
-		NumberFormat fFormatter = NumberFormat.getInstance();
 
 		@Override
 		public String getText(Object element)
 		{
-			if (element instanceof Number)
+			if ("-1".equals(element))
 			{
-				if (((Number)element).intValue() == -1)
-				{
-					return "not set";
-				}
-				return fFormatter.format(element);
+				return "not set";
 			}
-
 			return super.getText(element);
 		}
 
