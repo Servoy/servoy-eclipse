@@ -10,6 +10,8 @@ import {ConverterService} from './converter.service'
 import {ServicesService} from './services.service'
 import {SabloService} from './sablo.service'
 
+import {SpecTypesService} from './spectypes.service'
+
 @NgModule({
     declarations: [TrustAsHtmlPipe
     ],
@@ -17,6 +19,7 @@ import {SabloService} from './sablo.service'
               AngularWebStorageModule
     ],
     providers: [ConverterService,
+                        SpecTypesService,
                         SabloService,
                         ServicesService,
                         WebsocketService,
