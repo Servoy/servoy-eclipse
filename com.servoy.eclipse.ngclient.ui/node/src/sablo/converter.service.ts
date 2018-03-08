@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
 
-import { IterableDiffers } from '@angular/core';
-
-import {SpecTypesService} from './spectypes.service'
-
 @Injectable()
 export class ConverterService {
     public static readonly INTERNAL_IMPL =  '__internalState';
@@ -11,20 +7,11 @@ export class ConverterService {
     // objects that have a function named like this in them will send to server the result of that function call when no conversion type is available (in case of
     // usage as handler arg. for example where we don't know the arg. types on client)
     public static readonly DEFAULT_CONVERSION_TO_SERVER_FUNC = "_dctsf";
-    
-    constructor(private iterableDiffers:IterableDiffers, private specTypesService:SpecTypesService ) {
-    }
-    
-    public getIterableDiffers():IterableDiffers {
-        return this.iterableDiffers;
-    }
-    
-    public getSpecTypesService():SpecTypesService {
-        return this.specTypesService;
-    }
 
-    
     private customPropertyConverters:{[s:string]:IConverter} = {};
+
+    constructor() {
+    }
     
     public  convertFromServerToClient(serverSentData, conversionInfo, currentClientData?, scope?, modelGetter?) {
         if (typeof conversionInfo === 'string' || typeof conversionInfo === 'number') {
