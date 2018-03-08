@@ -32,8 +32,7 @@ export class PropertyUtils {
             renderer.setAttribute(fieldset, "style", "padding:1px;margin:0px;border:1px solid silver;width:100%;height:100%");
             
             var legend = renderer.createElement("legend");
-            renderer.setAttribute(legend, "align", newVal.titleJustification);
-            renderer.setAttribute(legend, "style", "border-bottom:0px; margin:0px;width:auto;color:"+newVal.color);
+            renderer.setAttribute(legend, "style", "border-bottom:0px; margin:0px;width:auto;color:"+newVal.color+";text-align:"+newVal.titleJustification);
             if (newVal.font)
             {
                 for (var key in newVal.font) {
