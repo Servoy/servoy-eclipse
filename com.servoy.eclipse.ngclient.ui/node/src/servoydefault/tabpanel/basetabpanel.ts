@@ -209,7 +209,7 @@ export class Tab extends BaseCustomObject {
     }
     set isActive( value: boolean ) {
         if ( this.getStateHolder().markIfChanged( "isActive", value, this._isActive ) ) {
-            this.isActive = value;
+            this._isActive = value;
         }
     }
 }
