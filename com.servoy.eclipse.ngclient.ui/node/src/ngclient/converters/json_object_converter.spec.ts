@@ -19,14 +19,16 @@ describe( 'JSONObjectConverter', () => {
     const REAL_TYPE = "rt";
 
     let converterService: ConverterService
+    let specTypesService: SpecTypesService
     beforeEach(() => {
         TestBed.configureTestingModule( {
             providers: [ConverterService, SpecTypesService]
         } );
+        specTypesService = TestBed.get( SpecTypesService );
         converterService = TestBed.get( ConverterService );
-        converterService.registerCustomPropertyHandler( "JSON_obj", new JSONObjectConverter( converterService ) );
-        converterService.getSpecTypesService().registerType( "Tab", Tab, ["name", "myvalue"] );
-        converterService.getSpecTypesService().registerType( "TabHolder", TabHolder, ["id", "tab", "tab2"] );
+        converterService.registerCustomPropertyHandler( "JSON_obj", new JSONObjectConverter( converterService ,specTypesService) );
+        specTypesService.registerType( "Tab", Tab, ["name", "myvalue"] );
+        specTypesService.registerType( "TabHolder", TabHolder, ["id", "tab", "tab2"] );
     } );
 
     function createTabJSON() {
@@ -43,7 +45,7 @@ describe( 'JSONObjectConverter', () => {
     }
 
     it( 'type should be created and of the right type', () => {
-        const tab = converterService.getSpecTypesService().createType( "Tab" );
+        const tab = specTypesService.createType( "Tab" );
         expect( tab ).toBeDefined();
         expect( tab instanceof Tab ).toBeTruthy();
     } );

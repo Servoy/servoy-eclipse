@@ -2,6 +2,8 @@ import { IConverter, ConverterService } from '../../sablo/converter.service'
 
 import { BaseCustomObject } from '../../sablo/spectypes.service'
 
+import {SpecTypesService,instanceOfCustomObject} from '../../sablo/spectypes.service';
+
 export class JSONObjectConverter implements IConverter {
     private static readonly UPDATES = "u";
     private static readonly KEY = "k";
@@ -12,7 +14,7 @@ export class JSONObjectConverter implements IConverter {
     private static readonly NO_OP = "n";
     private static readonly REAL_TYPE = "rt";
 
-    constructor( private converterService: ConverterService ) {
+    constructor( private converterService: ConverterService , private specTypesService:SpecTypesService) {
     }
 
     fromServerToClient( serverJSONValue, currentClientValue?: BaseCustomObject, componentScope?, componentModelGetter?) {
@@ -22,7 +24,7 @@ export class JSONObjectConverter implements IConverter {
         if ( serverJSONValue && serverJSONValue[JSONObjectConverter.VALUE] ) {
             // full contents
             newValue = serverJSONValue[JSONObjectConverter.VALUE];
-            const clientObject = this.converterService.getSpecTypesService().createType( serverJSONValue[JSONObjectConverter.REAL_TYPE] );
+            const clientObject = this.specTypesService.createType( serverJSONValue[JSONObjectConverter.REAL_TYPE] );
             const internalState = clientObject.getStateHolder();
             internalState.ignoreChanges = true;
             if ( typeof serverJSONValue[JSONObjectConverter.PUSH_TO_SERVER] !== 'undefined' ) internalState[JSONObjectConverter.PUSH_TO_SERVER] = serverJSONValue[JSONObjectConverter.PUSH_TO_SERVER];
@@ -40,7 +42,7 @@ export class JSONObjectConverter implements IConverter {
                     newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined, componentScope, componentModelGetter );
                 }
 
-                if ( elem instanceof BaseCustomObject ) {
+                if ( instanceOfCustomObject(elem)) {
                     // child is able to handle it's own change mechanism
                     elem.getStateHolder().addChangeNotifier(() => {
                         newValue.getStateHolder().markIfChanged( c, elem, elem );
@@ -84,7 +86,7 @@ export class JSONObjectConverter implements IConverter {
                         currentClientValue[key] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[key], componentScope, componentModelGetter );
                     } else currentClientValue[key] = val;
 
-                    if ( val instanceof BaseCustomObject ) {
+                    if ( instanceOfCustomObject(val)) {
                         // child is able to handle it's own change mechanism
                         val.getStateHolder().addChangeNotifier(() => {
                             currentClientValue.getStateHolder().markIfChanged( c, val, val );
@@ -122,7 +124,7 @@ export class JSONObjectConverter implements IConverter {
                     ++internalState[JSONObjectConverter.CONTENT_VERSION]; // we also increase the content version number - server should only be expecting updates for the next version number
                     // send all
                     var toBeSentObj = changes[JSONObjectConverter.VALUE] = {};
-                    let specProperties = this.converterService.getSpecTypesService().getProperties( newClientData.constructor );
+                    let specProperties = this.specTypesService.getProperties( newClientData.constructor );
                     if ( !specProperties ) specProperties = Object.keys( newClientData );
                     specProperties.forEach(( key ) => {
                         var val = newClientData[key];
