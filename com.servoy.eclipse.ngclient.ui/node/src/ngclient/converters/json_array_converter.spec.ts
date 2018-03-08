@@ -3,7 +3,7 @@ import { IterableDiffers } from '@angular/core';
 
 import { ConverterService } from '../../sablo/converter.service';
 
-import { SpecTypesService, BaseCustomObject } from '../../sablo/spectypes.service'
+import { SpecTypesService, BaseCustomObject,ICustomArray } from '../../sablo/spectypes.service'
 
 import { JSONArrayConverter } from './json_array_converter';
 import { JSONObjectConverter } from './json_object_converter';
@@ -376,7 +376,6 @@ describe( 'JSONArrayConverter', () => {
         tabs[0].myvalue = "test1";
         val.tabs = tabs;
         let changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
-        console.log(changes)
         expect( changes[CONTENT_VERSION] ).toBe( 1 );
         expect( changes[UPDATES] ).toBeDefined( "change object  shoulld have updates" );
         expect( changes[UPDATES].length ).toBe( 1, "should have 1 update" );
@@ -388,7 +387,34 @@ describe( 'JSONArrayConverter', () => {
         changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
         expect( changes[NO_OP] ).toBeDefined( "should have no changes now" );
 
-    } );
+    } )
+    
+       it( 'test mark for change', () => {
+        const val: TabHolder = converterService.convertFromServerToClient( createTabHolderJSONWithFilledArray( "test" ), "JSON_obj" )
+        val.tabs[3] = new Tab();
+       val.tabs[3].name  = "test4";
+       val.tabs[3].myvalue = "test4";
+        let changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
+        expect( changes[NO_OP] ).toBeDefined( "should have no changes now" );
+       const tabs = val.tabs as ICustomArray<Tab>; 
+       tabs.markForChanged();
+       changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
+        console.log(changes)
+        expect( changes[CONTENT_VERSION] ).toBe( 1 );
+        expect( changes[UPDATES] ).toBeDefined( "change object  shoulld have updates" );
+        expect( changes[UPDATES].length ).toBe( 1, "should have 1 update" );
+        expect( changes[UPDATES][0][KEY] ).toBe( "tabs", "should have tabs key" );
+        expect( changes[UPDATES][0][VALUE][VALUE] ).toBeDefined();
+        expect( changes[UPDATES][0][VALUE][VALUE].length ).toBe(4);
+        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].name ).toBe("test1");
+        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].myvalue).toBe("test1");
+        expect( changes[UPDATES][0][VALUE][VALUE][0][CONTENT_VERSION]).toBe(1);
+        expect( changes[UPDATES][0][VALUE][VALUE][3][VALUE].name ).toBe("test4");
+        expect( changes[UPDATES][0][VALUE][VALUE][3][VALUE].myvalue).toBe("test4");
+        expect( changes[UPDATES][0][VALUE][VALUE][3][CONTENT_VERSION]).toBeUndefined();
+        changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
+        expect( changes[NO_OP] ).toBeDefined( "should have no changes now" );
+    } );;
 } );
 
 class Tab extends BaseCustomObject {

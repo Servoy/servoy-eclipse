@@ -49,7 +49,7 @@ export function  instanceOfCustomObject(object: any): object is ICustomObject {
     return object.getStateHolder != undefined;
 }
 
-export function  instanceOfCustomArray(object: any): object is ICustomArray {
+export function  instanceOfCustomArray(object: any): object is ICustomArray<any> {
     return object.getStateHolder != undefined && object.markForChanged != undefined;
 }
 
@@ -58,7 +58,7 @@ export interface ICustomObject {
     getStateHolder():State;
 }
 
-export interface ICustomArray extends Array<any> {
+export interface ICustomArray<T> extends Array<T> {
     getStateHolder():ArrayState;
     markForChanged():void;
 }
