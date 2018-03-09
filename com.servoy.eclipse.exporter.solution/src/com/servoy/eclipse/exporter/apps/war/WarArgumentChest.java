@@ -278,7 +278,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 					else
 					{
 						ServoyLog.logError(new Exception(
-							"Please specify license as <company_name> <number_of_licenses> <code> or \"<company_name>\" <number_of_licenses> <code>. \"" +
+							"Please specify license as <company_name> <number_of_licenses> <code> or \\\"<company_name>\\\" <number_of_licenses> <code>. \"" +
 								license + "\" is not valid"));
 						continue;
 					}
