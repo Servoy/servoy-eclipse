@@ -936,4 +936,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	{
 		if (graphicaleditor instanceof ISupportCheatSheetActions) ((ISupportCheatSheetActions)graphicaleditor).createNewComponent(componentDefinition);
 	}
+
+	@Override
+	public void setContentDescription(String description)
+	{
+		super.setContentDescription(description);
+	}
 }

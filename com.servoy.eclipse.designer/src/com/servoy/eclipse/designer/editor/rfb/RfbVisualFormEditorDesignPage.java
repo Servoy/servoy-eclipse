@@ -45,6 +45,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.json.JSONObject;
 import org.sablo.eventthread.WebsocketSessionWindows;
@@ -63,6 +64,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -76,6 +78,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
@@ -544,6 +547,27 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		this.showedContainer = container;
 		refreshBrowserUrl(true);
+		if (DesignerUtil.getContentOutline() != null)
+		{
+			IPage outline = DesignerUtil.getContentOutline().getCurrentPage();
+			if (outline instanceof FormOutlinePage)
+			{
+				((FormOutlinePage)outline).refresh();
+			}
+		}
+		if (showedContainer instanceof LayoutContainer)
+		{
+			editorPart.setContentDescription("Showing container: " + DesignerUtil.getLayoutContainerAsString((LayoutContainer)showedContainer));
+		}
+		else
+		{
+			editorPart.setContentDescription("");
+		}
+	}
+
+	public AbstractContainer getShowedContainer()
+	{
+		return showedContainer;
 	}
 
 	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener
