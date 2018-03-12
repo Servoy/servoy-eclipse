@@ -39,11 +39,4 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
             }
         }
     }
-  
-    protected setFormVisible( tab: Tab, event ) {
-        super.setFormVisible(tab, event);
-        this.tabset.select( tab._id );
-    }
-
- 
 }
