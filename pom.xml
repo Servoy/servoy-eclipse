@@ -7,7 +7,7 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>8.3.0.3200_b1</version>
+	<version>8.5.0.3600_b1</version>
 
 	<properties>
 		<tycho.version>1.1.0</tycho.version>
@@ -177,6 +177,11 @@
 				<module>com.servoy.eclipse.profiler</module>
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
+				<module>com.servoy.eclipse.ngclient.ui</module>
+				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
+				<module>com.servoy.eclipse.nodejs.win32.win32.x86</module>
+				<module>com.servoy.eclipse.nodejs.win32.win32.x86_64</module>
 			</modules>
 		</profile>
 		<profile>
