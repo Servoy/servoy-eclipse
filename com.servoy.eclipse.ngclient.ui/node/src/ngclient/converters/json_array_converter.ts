@@ -18,7 +18,7 @@ export class JSONArrayConverter implements IConverter {
     constructor( private converterService: ConverterService, private specTypesService:SpecTypesService, private iterableDiffers: IterableDiffers ) {
     }
 
-    fromServerToClient( serverJSONValue, currentClientValue?:ICustomArray, componentScope?, componentModelGetter?) {
+    fromServerToClient( serverJSONValue, currentClientValue?:ICustomArray<any>, componentScope?, componentModelGetter?) {
         let newValue = currentClientValue;
         let  state:ArrayState = null;
         // remove old watches (and, at the end create new ones) to avoid old watches getting triggered by server side change
@@ -142,7 +142,7 @@ export class JSONArrayConverter implements IConverter {
         return newValue;
     }
 
-    fromClientToServer( newClientData:ICustomArray, oldClientData?) {
+    fromClientToServer( newClientData:ICustomArray<any>, oldClientData?) {
 
         // test if this was an array created fully on the client.
         if (!instanceOfCustomArray(newClientData) ) {
