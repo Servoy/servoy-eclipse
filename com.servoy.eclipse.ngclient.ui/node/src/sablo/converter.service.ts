@@ -26,7 +26,7 @@ export class ConverterService {
     
     private customPropertyConverters:{[s:string]:IConverter} = {};
     
-    public  convertFromServerToClient(serverSentData, conversionInfo, currentClientData?, scope?, modelGetter?) {
+    public convertFromServerToClient(serverSentData, conversionInfo, currentClientData?, scope?, modelGetter?) {
         if (typeof conversionInfo === 'string' || typeof conversionInfo === 'number') {
             var customConverter = this.customPropertyConverters[conversionInfo];
             if (customConverter) serverSentData = customConverter.fromServerToClient(serverSentData, currentClientData, scope, modelGetter);
