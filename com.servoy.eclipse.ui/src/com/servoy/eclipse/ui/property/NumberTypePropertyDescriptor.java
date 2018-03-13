@@ -17,11 +17,12 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.widgets.Composite;
 
 /**
  * NumberPropertyDescriptor with checks for number type, don't allow decimal separators for integer.
- * 
+ *
  * @author rgansevles
  */
 
@@ -34,6 +35,13 @@ public class NumberTypePropertyDescriptor extends NumberPropertyDescriptor
 	{
 		super(propertyID, propertyDisplayname);
 		this.editorType = editorType;
+	}
+
+	public NumberTypePropertyDescriptor(int editorType, Object propertyID, String propertyDisplayname, ILabelProvider provider)
+	{
+		super(propertyID, propertyDisplayname);
+		this.editorType = editorType;
+		if (provider != null) setLabelProvider(provider);
 	}
 
 	@Override

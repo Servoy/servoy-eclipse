@@ -29,7 +29,8 @@ public enum PropertyCategory
 		if (BaseComponent.isEventProperty(propertyName)) return Events;
 		if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(propertyName) ||
 			StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(propertyName) ||
-			StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(propertyName))
+			StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(propertyName) ||
+			StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(propertyName))
 		{
 			return Layout;
 		}

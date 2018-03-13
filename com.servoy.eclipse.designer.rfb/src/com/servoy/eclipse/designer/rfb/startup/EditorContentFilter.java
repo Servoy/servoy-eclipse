@@ -44,17 +44,24 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.util.HTTPUtils;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -147,15 +154,39 @@ public class EditorContentFilter implements Filter
 			Form flattenedForm = fs.getFlattenedForm(fs.getForm(solutionAndFormName.getRight()));
 			HTTPUtils.setNoCacheHeaders((HttpServletResponse)response);
 
+			String containerID = httpServletRequest.getParameter("cont");
 			PrintWriter w = response.getWriter();
-			if (flattenedForm.isResponsiveLayout())
+			((HttpServletResponse)response).setContentType("text/html");
+			if (containerID != null)
 			{
-				((HttpServletResponse)response).setContentType("text/html");
+				int id = Utils.getAsInteger(containerID);
+				if (id > 0)
+				{
+					try
+					{
+						IPersist container = flattenedForm.findChild(
+							((EclipseRepository)ServoyModel.getDeveloperRepository()).getUUIDForElementId(id, id, -1, -1, null));
+						if (container instanceof LayoutContainer)
+						{
+							FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)container, flattenedForm, fs, w, true,
+								FormElementHelper.INSTANCE);
+							FormLayoutGenerator.generateFormEndTag(w, true);
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+
+				}
+			}
+			else if (flattenedForm.isResponsiveLayout())
+			{
 				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), fs, w, true);
 			}
 			else
 			{
-				((HttpServletResponse)response).setContentType("text/html");
 				FormLayoutGenerator.generateRecordViewForm(w, flattenedForm, solutionAndFormName.getRight(), new ServoyDataConverterContext(fs), true);
 			}
 			w.flush();

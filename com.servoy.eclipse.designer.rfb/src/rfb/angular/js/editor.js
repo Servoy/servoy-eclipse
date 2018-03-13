@@ -76,6 +76,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							    
 			var formName = $webSocket.getURLParameter("f");
 			var formLayout = $webSocket.getURLParameter("l");
+			var cssPosition = $webSocket.getURLParameter("p");
 			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
 			var formHeight = parseInt($webSocket.getURLParameter("h"), 10);
 			var editorContentRootScope = null;
@@ -688,7 +689,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.isAbsoluteFormLayout = function() {
-				return formLayout == "absolute";
+				return (formLayout == "absolute" || formLayout == "csspos");
+			}
+			
+			$scope.isCSSPositionFormLayout = function() {
+				return formLayout == "csspos";
 			}
 			
 			$scope.refreshEditorContent = function() {
@@ -1137,9 +1142,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$editorService.registerEditor($scope);
 			$editorService.connect().then(function() {
 				var replacews = $webSocket.getURLParameter("replacewebsocket") ? "&replacewebsocket=true" : "";
+				var containerID =  $webSocket.getURLParameter("cont") ? ("&cont="+$webSocket.getURLParameter("cont")) : "";
 				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&sessionid=" + $webSocket.getURLParameter(
 						"c_sessionid") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
-					replacews;
+					replacews + containerID;
 			})
 			
 			function areAllGhostContainersVisible() {

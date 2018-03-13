@@ -66,6 +66,7 @@ import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -232,7 +233,7 @@ public class ElementFactory
 	{
 		RectShape rectShape = parent.createNewRectangle(new java.awt.Point(location.x, location.y));
 		rectShape.setLineSize(1);
-		rectShape.setSize(new java.awt.Dimension(70, 70));
+		CSSPosition.setSize(rectShape, 70, 70);
 		placeElementOnTop(rectShape);
 		return rectShape;
 	}
@@ -298,7 +299,7 @@ public class ElementFactory
 			true /* when component is an override we want a flattened one */);
 		if (copy instanceof ISupportBounds)
 		{
-			((ISupportBounds)copy).setLocation(new java.awt.Point(x, y));
+			CSSPosition.setLocation((ISupportBounds)copy, x, y);
 		}
 		if (name != null)
 		{
@@ -337,7 +338,7 @@ public class ElementFactory
 				labeldim = new Dimension(10, 10 + dif);
 			}
 		}
-		label.setSize(labeldim);
+		CSSPosition.setSize(label, labeldim.width, labeldim.height);
 		placeElementOnTop(label);
 		return label;
 	}
@@ -360,14 +361,16 @@ public class ElementFactory
 			webComponent = parent.createNewWebComponent(compName, name);
 			if (webComponent != null)
 			{
-				webComponent.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
-				webComponent.setSize(new Dimension(80, 80));
+				CSSPosition.setLocation(webComponent, location == null ? 0 : location.x, location == null ? 0 : location.y);
+				int width = 80;
+				int height = 80;
 				PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 				if (description != null && description.getDefaultValue() instanceof JSONObject)
 				{
-					webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
-						((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+					width = ((JSONObject)description.getDefaultValue()).optInt("width", 80);
+					height = ((JSONObject)description.getDefaultValue()).optInt("height", 80);
 				}
+				CSSPosition.setSize(webComponent, width, height);
 			}
 			return webComponent;
 		}
@@ -623,7 +626,7 @@ public class ElementFactory
 						label = createLabel(parent, labelText, loc);
 						java.awt.Dimension labeldim = label.getSize();
 						labeldim.width = configuration.isPlaceHorizontally() ? 140 /* field width */ : 80;
-						label.setSize(labeldim);
+						CSSPosition.setSize(label, labeldim.width, labeldim.height);
 					}
 					lst.add(label);
 
@@ -637,8 +640,7 @@ public class ElementFactory
 					{
 						currentSize.width = labelSize.width;
 					}
-					label.setSize(currentSize);
-
+					CSSPosition.setSize(label, currentSize.width, currentSize.height);
 
 					if (configuration.isFillName())
 					{
@@ -729,7 +731,7 @@ public class ElementFactory
 						bc = createField(parent, dataProvider, loc);
 						java.awt.Dimension dim = bc.getSize();
 						dim.width = 140;
-						bc.setSize(dim);
+						CSSPosition.setSize(bc, dim.width, dim.height);
 					}
 				}
 				lst.add(bc);
@@ -744,8 +746,7 @@ public class ElementFactory
 				{
 					currentSize.width = fieldSize.width;
 				}
-				bc.setSize(currentSize);
-
+				CSSPosition.setSize(bc, currentSize.width, currentSize.height);
 				if (configuration.isFillName())
 				{
 					bc.setName(name);
@@ -974,7 +975,7 @@ public class ElementFactory
 			tabPanel.setTransparent(true);
 			tabPanel.setPrintable(false);
 			tabPanel.setTabOrientation(tabOrientation);
-			tabPanel.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
+			CSSPosition.setLocation(tabPanel, location == null ? 0 : location.x, location == null ? 0 : location.y);
 			placeElementOnTop(tabPanel);
 		}
 		else if (parent instanceof TabPanel)
@@ -1050,7 +1051,7 @@ public class ElementFactory
 		if (parent instanceof Form)
 		{
 			// set size of the maximum dimension form
-			tabPanel.setSize(maxDimension == null ? new Dimension(280, 150) : new Dimension(maxDimension.width, maxDimension.height));
+			CSSPosition.setSize(tabPanel, maxDimension == null ? 280 : maxDimension.width, maxDimension == null ? 150 : maxDimension.height);
 		}
 		if (tabs == null || tabs.size() == 0)
 		{
@@ -1169,8 +1170,7 @@ public class ElementFactory
 				lst.add(new Pair<IDataProvider, Object>((IDataProvider)dp, null));
 			}
 			Dimension portaldim = new Dimension(dataProviders.length * 140, 50);
-			portal.setSize(portaldim);
-
+			CSSPosition.setSize(portal, portaldim.width, portaldim.height);
 			portal.setRelationName(relationName.toString());
 
 			IPlaceDataProviderConfiguration config = new IPlaceDataProviderConfiguration()
@@ -1495,7 +1495,7 @@ public class ElementFactory
 								{ // if a single element is placed, do not use its relative location
 									x = y = 0;
 								}
-								((ISupportBounds)o).setLocation(new java.awt.Point(awtLocation.x + x, awtLocation.y + y));
+								CSSPosition.setLocation((ISupportBounds)o, awtLocation.x + x, awtLocation.y + y);
 							}
 							if (o instanceof ISupportUpdateableName)
 							{

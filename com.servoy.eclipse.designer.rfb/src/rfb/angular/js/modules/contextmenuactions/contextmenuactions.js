@@ -133,6 +133,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         					}
         				);
         			
+        			if (!editorScope.isCSSPositionFormLayout()){
         			// anchoring
         			var anchoringActions = [];
         			anchoringActions.push(
@@ -200,7 +201,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() { return "dropdown-submenu";}
         					}
         				);
-        			
+        			}
         			//arrange
         			var arrangeActions = [];
         			arrangeActions.push(

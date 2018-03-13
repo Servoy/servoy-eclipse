@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -60,6 +61,7 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
@@ -456,6 +458,32 @@ public class DesignerUtil
 				mapFiller.add(spec.getPackageName() + "." + spec.getName(), allowedChildren);
 			}
 		}
+	}
+
+	public static String getLayoutContainerAsString(LayoutContainer layout)
+	{
+		StringBuilder tag = new StringBuilder("<");
+		tag.append(layout.getTagType());
+		Map<String, String> attributes = layout.getMergedAttributes();
+		for (Entry<String, String> entry : attributes.entrySet())
+		{
+			tag.append(" ");
+			tag.append(entry.getKey());
+			if (entry.getValue() != null && entry.getValue().length() > 0)
+			{
+				tag.append("=\"");
+				tag.append(entry.getValue());
+				tag.append("\"");
+			}
+		}
+		tag.append(">");
+		if (layout.getName() != null)
+		{
+			tag.append("[");
+			tag.append(layout.getName());
+			tag.append("]");
+		}
+		return tag.toString();
 	}
 
 	private interface AllowChildrenMapFiller

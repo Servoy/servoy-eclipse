@@ -155,6 +155,7 @@ angular.module('editorContent',['servoyApp'])
   $servoyInternal.connect();
   var formName = $webSocket.getURLParameter("f");
   var solutionName = $webSocket.getURLParameter("s");
+  var containerId = $webSocket.getURLParameter("cont");
   var formModelData = null;
   var formUrl = null;
   $rootScope.flushMain = function()
@@ -176,7 +177,7 @@ angular.module('editorContent',['servoyApp'])
         promise.then(function(data) {
           formModelData = JSON.parse(data);
           $editorContentService.formData(false, formModelData);
-          formUrl = "designertemplate/" + solutionName + "/" + formName + ".html?";
+          formUrl = "designertemplate/" + solutionName + "/" + formName + ".html?" + (containerId ? ("cont="+containerId):"") ;
         });
       } else {
         // this main url is in design (the template must have special markers)

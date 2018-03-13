@@ -58,6 +58,7 @@ public class WebComponentPropertySource extends PDPropertySource
 				if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(desc.getName()) ||
 					StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(desc.getName()) ||
 					StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(desc.getName()) ||
+					StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(desc.getName()) ||
 					StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(desc.getName()) ||
 					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(desc.getName()))
 				{

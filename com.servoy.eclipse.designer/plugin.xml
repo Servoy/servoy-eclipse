@@ -914,6 +914,11 @@
             id="com.servoy.eclipse.designer.rfb.movedown"
             name="MoveDown">
       </command>
+      <command
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.ShowContainerInFormEditor"
+            id="com.servoy.eclipse.designer.rfb.showcontainer"
+            name="ShowContainer">
+      </command>
    </extension>
       <extension
          point="org.eclipse.ui.preferencePages">
@@ -1439,6 +1444,28 @@
                               operator="and">
                            <test
                                  property="com.servoy.eclipse.designer.editor.rfb.ismovable">
+                           </test>
+                        </iterate>
+                        <count
+                              value="1">
+                        </count>
+                     </and>  
+                  </with>  
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="com.servoy.eclipse.designer.rfb.showcontainer"
+                  label="Show in Form Editor"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with  
+                        variable="activeMenuSelection">  
+                     <and>
+                        <iterate
+                              operator="and">
+                           <test
+                                 property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
                            </test>
                         </iterate>
                         <count

@@ -189,10 +189,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }).addDefault(
 				Integer.valueOf(TabPanel.DEFAULT_ORIENTATION), null));
 
-	public static final PropertyDescription MNEMONIC_VALUES = new PropertyDescription("mnemonic", ValuesPropertyType.INSTANCE,
-		new ValuesConfig().setValues(
-			new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" }).setEditable(
-				true));
+	public static final PropertyDescription MNEMONIC_VALUES = new PropertyDescription("mnemonic", ValuesPropertyType.INSTANCE, new ValuesConfig().setValues(
+		new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" }).setEditable(
+			true));
 
 
 	// null type: use property controller internally
