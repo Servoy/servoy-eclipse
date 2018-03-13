@@ -31,7 +31,7 @@
 			<url>${dltk.url}</url>
 			<layout>p2</layout>
 		</repository>
-			<repository>
+		<repository>
 			<id>servoy_shiblibs</id>
 			<url>${servoy-shiplibs.url}</url>
 			<layout>p2</layout>
@@ -80,6 +80,64 @@
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
+					<filters>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>sablo</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>org.eclipse.dltk.javascript.rhino</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_base</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_shared</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_smart_client</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_headless_client</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_ngclient</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_debug</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+					</filters>
 				</configuration>
 			</plugin>
 			<plugin>
