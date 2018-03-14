@@ -1,0 +1,81 @@
+/* Default buttons (used in login, file upload)
+-------------------------------------------------- */
+
+.svy-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+  }
+  
+  .svy-btn-primary {
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+  }
+  .svy-btn-primary:hover,
+  .svy-btn-primary:focus,
+  .svy-btn-primary.active {
+    color: #fff;
+    background-color: #286090;
+    border-color: #204d74;
+  }
+  
+  .svy-btn-success {
+    color: #fff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+  }
+  .svy-btn-success:hover,
+  .svy-btn-success:focus,
+  .svy-btn-success.active {
+    color: #fff;
+    background-color: #449d44;
+    border-color: #398439;
+  }
+  
+  .svy-btn-info {
+    color: #fff;
+    background-color: #5bc0de;
+    border-color: #46b8da;
+  }
+  .svy-btn-info:hover,
+  .svy-btn-info:focus,
+  .svy-btn-info.active {
+    color: #fff;
+    background-color: #31b0d5;
+    border-color: #269abc;
+  }
+  
+  .svy-btn-danger {
+    color: #fff;
+    background-color: #d9534f;
+    border-color: #d43f3a;
+  }
+  .svy-btn-danger:hover,
+  .svy-btn-danger:focus,
+  .svy-btn-danger.active {
+    color: #fff;
+    background-color: #c9302c;
+    border-color: #ac2925;
+  }
+  
+  .svy-btn-block {
+    display: block;
+    width: 100%;
+  }

@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms'
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -14,6 +15,7 @@ import { SabloModule } from '../sablo/sablo.module'
 
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
+import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
 
 
 //COMPONENT_IMPORTS_START
@@ -28,6 +30,7 @@ import { AllComponentsModule } from './allcomponents.module';
         MainComponent,
         FormComponent,
         AddAttributeDirective,
+        DefaultLoginWindowComponent,
         // COMPONENT_DECLARATIONS_START
 //        ServoyDefaultTextField,
 //        ServoyDefaultButton,
@@ -38,6 +41,7 @@ import { AllComponentsModule } from './allcomponents.module';
     imports: [
         BrowserModule,
         NgbModule.forRoot(),
+        FormsModule,
         SabloModule,
 		AllComponentsModule,
         AllServicesModules,
@@ -45,6 +49,7 @@ import { AllComponentsModule } from './allcomponents.module';
         // COMPONENT_MODULE_IMPORTS_END
     ],
     providers: [FormService, ServoyService],
-    bootstrap: [MainComponent]
+    bootstrap: [MainComponent],
+    entryComponents: [DefaultLoginWindowComponent]
 } )
 export class ServoyModule { }
