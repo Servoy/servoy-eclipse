@@ -14,15 +14,14 @@ export class JSONArrayConverter implements IConverter {
     private static readonly PUSH_TO_SERVER = "w"; // value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
     private static readonly CONTENT_VERSION = "vEr"; // server side sync to make sure we don't end up granular updating something that has changed meanwhile server-side
     private static readonly NO_OP = "n";
-    
-    constructor( private converterService: ConverterService, private specTypesService:SpecTypesService, private iterableDiffers: IterableDiffers ) {
+
+    constructor( private converterService: ConverterService, private specTypesService: SpecTypesService, private iterableDiffers: IterableDiffers ) {
     }
 
-    fromServerToClient( serverJSONValue, currentClientValue?:ICustomArray<any>, componentScope?, componentModelGetter?) {
+    fromServerToClient( serverJSONValue, currentClientValue?: ICustomArray<any>, componentScope?, componentModelGetter?) {
         let newValue = currentClientValue;
-        let  state:ArrayState = null;
-        // remove old watches (and, at the end create new ones) to avoid old watches getting triggered by server side change
-        // TODO  removeAllWatches(currentClientValue);
+        let state: ArrayState = null;
+
         try {
             if ( serverJSONValue && serverJSONValue[JSONArrayConverter.VALUE] ) {
                 // full contents
@@ -34,7 +33,7 @@ export class JSONArrayConverter implements IConverter {
 
                 if ( newValue.length ) {
                     for ( var c = 0; c < newValue.length; c++ ) {
-                        let  elem = newValue[c];
+                        let elem = newValue[c];
                         let conversionInfo = null;
                         if ( serverJSONValue[ConverterService.TYPES_KEY] ) {
                             conversionInfo = serverJSONValue[ConverterService.TYPES_KEY][c];
@@ -60,7 +59,7 @@ export class JSONArrayConverter implements IConverter {
 
                 if ( serverJSONValue[JSONArrayConverter.INITIALIZE] )
                     state[JSONArrayConverter.CONTENT_VERSION] = serverJSONValue[JSONArrayConverter.CONTENT_VERSION];
-                
+
                 // if something changed browser-side, increasing the content version thus not matching next expected version,
                 // we ignore this update and expect a fresh full copy of the array from the server (currently server value is leading/has priority because not all server side values might support being recreated from client values)
                 if ( state[JSONArrayConverter.CONTENT_VERSION] == serverJSONValue[JSONArrayConverter.CONTENT_VERSION] ) {
@@ -142,20 +141,20 @@ export class JSONArrayConverter implements IConverter {
         return newValue;
     }
 
-    fromClientToServer( newClientData:ICustomArray<any>, oldClientData?) {
+    fromClientToServer( newClientData: ICustomArray<any>, oldClientData?) {
 
         // test if this was an array created fully on the client.
-        if (!instanceOfCustomArray(newClientData) ) {
-            this.specTypesService.enhanceArrayType(newClientData, this.iterableDiffers);
+        if ( !instanceOfCustomArray( newClientData ) ) {
+            this.specTypesService.enhanceArrayType( newClientData, this.iterableDiffers );
         }
         let internalState: ArrayState
-        if ( newClientData && ( internalState = newClientData.getStateHolder()) ) {
+        if ( newClientData && ( internalState = newClientData.getStateHolder() ) ) {
             let arrayChanges = internalState.getChangedKeys();
-            if ( arrayChanges.length > 0 || internalState.allChanged) {
+            if ( arrayChanges.length > 0 || internalState.allChanged ) {
                 const changes = {};
-            
-                if (internalState[JSONArrayConverter.CONTENT_VERSION]) changes[JSONArrayConverter.CONTENT_VERSION] = internalState[JSONArrayConverter.CONTENT_VERSION];
-                if ( internalState.allChanged) {
+
+                if ( internalState[JSONArrayConverter.CONTENT_VERSION] ) changes[JSONArrayConverter.CONTENT_VERSION] = internalState[JSONArrayConverter.CONTENT_VERSION];
+                if ( internalState.allChanged ) {
                     // structure might have changed; increase version number
                     ++internalState[JSONArrayConverter.CONTENT_VERSION]; // we also increase the content version number - server should only be expecting updates for the next version number
                     // send all
@@ -163,20 +162,20 @@ export class JSONArrayConverter implements IConverter {
                     for ( let idx = 0; idx < newClientData.length; idx++ ) {
                         const val = newClientData[idx];
                         if ( instanceOfChangeAwareValue( val ) ) {
-                            val.getStateHolder().markAllChanged(false);
+                            val.getStateHolder().markAllChanged( false );
                         }
-                        toBeSentArray[idx] = this.convert(val, internalState.conversionInfo[idx]);
+                        toBeSentArray[idx] = this.convert( val, internalState.conversionInfo[idx] );
                     }
                 } else {
                     // send only changed indexes
                     var changedElements = changes[JSONArrayConverter.UPDATES] = [];
-                    arrayChanges.forEach((idx) => {
+                    arrayChanges.forEach(( idx ) => {
                         var newVal = newClientData[idx];
                         var ch = {};
                         ch[JSONArrayConverter.INDEX] = idx;
-                        ch[JSONArrayConverter.VALUE] = this.convert(newVal, internalState.conversionInfo[idx]);
+                        ch[JSONArrayConverter.VALUE] = this.convert( newVal, internalState.conversionInfo[idx] );
                         changedElements.push( ch );
-                    })
+                    } )
                 }
                 internalState.clearChanges();
                 return changes;
@@ -190,13 +189,13 @@ export class JSONArrayConverter implements IConverter {
 
         return newClientData;
     }
-    
-    private convert(newVal, conversionInfo) {
-        if (!conversionInfo) {
-            conversionInfo = this.specTypesService.guessType(newVal);
+
+    private convert( newVal, conversionInfo ) {
+        if ( !conversionInfo ) {
+            conversionInfo = this.specTypesService.guessType( newVal );
         }
-        if ( conversionInfo) return  this.converterService.convertFromClientToServer( newVal, conversionInfo );
+        if ( conversionInfo ) return this.converterService.convertFromClientToServer( newVal, conversionInfo );
         return this.converterService.convertClientObject( newVal );
     }
- 
+
 }
