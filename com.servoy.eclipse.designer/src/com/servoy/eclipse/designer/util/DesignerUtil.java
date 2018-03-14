@@ -406,7 +406,7 @@ public class DesignerUtil
 											{
 												layoutName = layoutSpec.getName();
 											}
-											if (allowedChild.equals(layoutName))
+											if (allowedChild.equals(layoutName) || allowedChild.equals(packageName + "." + layoutName))
 											{
 												allowedChildren.add(packageName + "." + layoutSpec.getName());
 											}
@@ -446,7 +446,7 @@ public class DesignerUtil
 					}
 					if (!excludedChildren.contains("component")) allowedChildren.add("component");
 				}
-				
+
 				if (allowedChildren.isEmpty())
 				{
 					//add component if both excluded and allowed children are missing

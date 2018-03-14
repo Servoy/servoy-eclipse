@@ -54,9 +54,9 @@ export abstract class BaseTabpanel implements OnChanges {
             }
         }
         if ( changes["tabIndex"] ) {
-            let realIndex = this.tabIndex - 1;
+            const  realIndex = this.tabIndex - 1;
             console.log( realIndex );
-            this.select( this.tabs[realIndex] );
+            Promise.resolve(null).then(() =>  this.select( this.tabs[realIndex] ));
         }
     }
 
@@ -170,8 +170,10 @@ export abstract class BaseTabpanel implements OnChanges {
                     activeSet = true;
                 }
             }
+            this.tabsChange.emit( this.tabs );
+            this.activeTabIndexChange.emit(this.activeTabIndex);
         }
-        this.tabsChange.emit( this.tabs );
+       
     }
 
     protected setFormVisible( tab: Tab, event ) {
@@ -181,6 +183,7 @@ export abstract class BaseTabpanel implements OnChanges {
         var oldSelected = this.selectedTab;
         this.selectedTab = tab;
         this.tabIndex = this.getTabIndex( this.selectedTab );
+        this.tabIndexChange.emit(this.tabIndex);
         if ( oldSelected && oldSelected != tab && this.onChangeMethodID ) {
             setTimeout(() => {
                 this.onChangeMethodID( this.getTabIndex( oldSelected ), event != null ? event : null /* TODO $.Event("change") */ );
@@ -208,8 +211,6 @@ export class Tab extends BaseCustomObject {
         return this._isActive
     }
     set isActive( value: boolean ) {
-        if ( this.getStateHolder().markIfChanged( "isActive", value, this._isActive ) ) {
-            this.isActive = value;
-        }
+        this.getStateHolder().setPropertyAndHandleChanges(this, "_isActive", "isActive", value);
     }
 }
