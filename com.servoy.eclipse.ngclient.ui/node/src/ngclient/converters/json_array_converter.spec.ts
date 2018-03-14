@@ -3,7 +3,7 @@ import { IterableDiffers } from '@angular/core';
 
 import { ConverterService } from '../../sablo/converter.service';
 
-import { SpecTypesService, BaseCustomObject,ICustomArray } from '../../sablo/spectypes.service'
+import { SpecTypesService, BaseCustomObject, ICustomArray } from '../../sablo/spectypes.service'
 
 import { JSONArrayConverter } from './json_array_converter';
 import { JSONObjectConverter } from './json_object_converter';
@@ -64,9 +64,9 @@ describe( 'JSONArrayConverter', () => {
         json[ConverterService.TYPES_KEY] = { tabs: "JSON_arr" }
         return json;
     }
-    
+
     function createTabHolderJSON( val ) {
-        const data = { name: val};
+        const data = { name: val };
         const json = {};
         json[VALUE] = data;
         json[REAL_TYPE] = "TabHolder";
@@ -347,32 +347,32 @@ describe( 'JSONArrayConverter', () => {
         let changes = converterService.convertFromClientToServer( val, "JSON_arr", val );
         expect( changes[NO_OP] ).toBeDefined( "should have no changes now" );
     } );
-    
+
     it( 'update a tab in the tabs array of the TabHolder', () => {
         const val: TabHolder = converterService.convertFromServerToClient( createTabHolderJSONWithFilledArray( "test" ), "JSON_obj" )
         val.tabs[0].myvalue = "test4";
         let changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
-        
+
         expect( changes[CONTENT_VERSION] ).toBe( 1 );
         expect( changes[UPDATES] ).toBeDefined( "change object  shoulld have updates" );
         expect( changes[UPDATES].length ).toBe( 1, "should have 1 update" );
         expect( changes[UPDATES][0][KEY] ).toBe( "tabs", "should have tabs key" );
         expect( changes[UPDATES][0][VALUE][UPDATES] ).toBeDefined();
-        expect( changes[UPDATES][0][VALUE][UPDATES].length ).toBe(1);
-        expect( changes[UPDATES][0][VALUE][UPDATES][0][INDEX] ).toBe(0);
-        expect( changes[UPDATES][0][VALUE][UPDATES][0][VALUE][UPDATES].length ).toBe(1);
-        expect( changes[UPDATES][0][VALUE][UPDATES][0][VALUE][UPDATES][0][KEY] ).toBe("myvalue");
-        expect( changes[UPDATES][0][VALUE][UPDATES][0][VALUE][UPDATES][0][VALUE] ).toBe("test4");
+        expect( changes[UPDATES][0][VALUE][UPDATES].length ).toBe( 1 );
+        expect( changes[UPDATES][0][VALUE][UPDATES][0][INDEX] ).toBe( 0 );
+        expect( changes[UPDATES][0][VALUE][UPDATES][0][VALUE][UPDATES].length ).toBe( 1 );
+        expect( changes[UPDATES][0][VALUE][UPDATES][0][VALUE][UPDATES][0][KEY] ).toBe( "myvalue" );
+        expect( changes[UPDATES][0][VALUE][UPDATES][0][VALUE][UPDATES][0][VALUE] ).toBe( "test4" );
         changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
         expect( changes[NO_OP] ).toBeDefined( "should have no changes now" );
 
     } );
-    
+
     it( 'add script tabs array into a TabHolder', () => {
         const val: TabHolder = converterService.convertFromServerToClient( createTabHolderJSONWithFilledArray( "test" ), "JSON_obj" )
-        const tabs:Array<Tab> = []
+        const tabs: Array<Tab> = []
         tabs[0] = new Tab();
-        tabs[0].name  = "test1";
+        tabs[0].name = "test1";
         tabs[0].myvalue = "test1";
         val.tabs = tabs;
         let changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
@@ -381,37 +381,37 @@ describe( 'JSONArrayConverter', () => {
         expect( changes[UPDATES].length ).toBe( 1, "should have 1 update" );
         expect( changes[UPDATES][0][KEY] ).toBe( "tabs", "should have tabs key" );
         expect( changes[UPDATES][0][VALUE][VALUE] ).toBeDefined();
-        expect( changes[UPDATES][0][VALUE][VALUE].length ).toBe(1);
-        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].name ).toBe("test1");
-        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].myvalue).toBe("test1");
+        expect( changes[UPDATES][0][VALUE][VALUE].length ).toBe( 1 );
+        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].name ).toBe( "test1" );
+        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].myvalue ).toBe( "test1" );
         changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
         expect( changes[NO_OP] ).toBeDefined( "should have no changes now" );
 
     } )
-    
-       it( 'test mark for change', () => {
+
+    it( 'test mark for change', () => {
         const val: TabHolder = converterService.convertFromServerToClient( createTabHolderJSONWithFilledArray( "test" ), "JSON_obj" )
         val.tabs[3] = new Tab();
-       val.tabs[3].name  = "test4";
-       val.tabs[3].myvalue = "test4";
+        val.tabs[3].name = "test4";
+        val.tabs[3].myvalue = "test4";
         let changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
         expect( changes[NO_OP] ).toBeDefined( "should have no changes now" );
-       const tabs = val.tabs as ICustomArray<Tab>; 
-       tabs.markForChanged();
-       changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
-        console.log(changes)
+        const tabs = val.tabs as ICustomArray<Tab>;
+        tabs.markForChanged();
+        changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
+        console.log( changes )
         expect( changes[CONTENT_VERSION] ).toBe( 1 );
         expect( changes[UPDATES] ).toBeDefined( "change object  shoulld have updates" );
         expect( changes[UPDATES].length ).toBe( 1, "should have 1 update" );
         expect( changes[UPDATES][0][KEY] ).toBe( "tabs", "should have tabs key" );
         expect( changes[UPDATES][0][VALUE][VALUE] ).toBeDefined();
-        expect( changes[UPDATES][0][VALUE][VALUE].length ).toBe(4);
-        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].name ).toBe("test1");
-        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].myvalue).toBe("test1");
-        expect( changes[UPDATES][0][VALUE][VALUE][0][CONTENT_VERSION]).toBe(1);
-        expect( changes[UPDATES][0][VALUE][VALUE][3][VALUE].name ).toBe("test4");
-        expect( changes[UPDATES][0][VALUE][VALUE][3][VALUE].myvalue).toBe("test4");
-        expect( changes[UPDATES][0][VALUE][VALUE][3][CONTENT_VERSION]).toBeUndefined();
+        expect( changes[UPDATES][0][VALUE][VALUE].length ).toBe( 4 );
+        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].name ).toBe( "test1" );
+        expect( changes[UPDATES][0][VALUE][VALUE][0][VALUE].myvalue ).toBe( "test1" );
+        expect( changes[UPDATES][0][VALUE][VALUE][0][CONTENT_VERSION] ).toBe( 1 );
+        expect( changes[UPDATES][0][VALUE][VALUE][3][VALUE].name ).toBe( "test4" );
+        expect( changes[UPDATES][0][VALUE][VALUE][3][VALUE].myvalue ).toBe( "test4" );
+        expect( changes[UPDATES][0][VALUE][VALUE][3][CONTENT_VERSION] ).toBeUndefined();
         changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
         expect( changes[NO_OP] ).toBeDefined( "should have no changes now" );
     } );;
@@ -427,8 +427,7 @@ class Tab extends BaseCustomObject {
     }
 
     set myvalue( value: string ) {
-        this.getStateHolder().markIfChanged( "myvalue", value, this._myvalue );
-        this._myvalue = value;
+        this.getStateHolder().setPropertyAndHandleChanges( this, "_myvalue", "myvalue", value );
     }
 }
 
@@ -441,8 +440,6 @@ class TabHolder extends BaseCustomObject {
     }
 
     set tabs( value: Array<Tab> ) {
-        this.getStateHolder().markIfChanged( "tabs", value, this._tabs );
-        this._tabs = value;
+        this.getStateHolder().setPropertyAndHandleChanges( this, "_tabs", "tabs", value );
     }
-
 }

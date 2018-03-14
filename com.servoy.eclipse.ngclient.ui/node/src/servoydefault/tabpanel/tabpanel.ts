@@ -1,6 +1,6 @@
-import { Component, ViewChild,  Input, Output, EventEmitter } from '@angular/core';
+import { Component, ViewChild, Input, Output, EventEmitter } from '@angular/core';
 
-import {BaseTabpanel,Tab} from "./basetabpanel"
+import { BaseTabpanel, Tab } from "./basetabpanel"
 
 import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public'
 
@@ -17,7 +17,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     private tabset: NgbTabset;
 
     constructor( windowRefService: WindowRefService ) {
-        super(windowRefService);
+        super( windowRefService );
     }
 
     onTabChange( event: NgbTabChangeEvent ) {

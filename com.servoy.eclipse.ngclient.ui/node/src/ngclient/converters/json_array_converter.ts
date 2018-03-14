@@ -2,7 +2,7 @@ import { IConverter, ConverterService } from '../../sablo/converter.service'
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 
-import { SpecTypesService, ArrayState ,ICustomArray,instanceOfCustomObject,instanceOfCustomArray} from '../../sablo/spectypes.service'
+import { SpecTypesService, ArrayState, ICustomArray, instanceOfChangeAwareValue, instanceOfCustomArray } from '../../sablo/spectypes.service'
 
 export class JSONArrayConverter implements IConverter {
     private static readonly UPDATES = "u";
@@ -27,8 +27,8 @@ export class JSONArrayConverter implements IConverter {
             if ( serverJSONValue && serverJSONValue[JSONArrayConverter.VALUE] ) {
                 // full contents
                 newValue = serverJSONValue[JSONArrayConverter.VALUE];
-                this.specTypesService.enhanceArrayType(newValue, this.iterableDiffers);
-                state = newValue.getStateHolder();
+                const newValueCA = this.specTypesService.enhanceArrayType( newValue, this.iterableDiffers );
+                state = newValueCA.getStateHolder();
                 state[JSONArrayConverter.CONTENT_VERSION] = serverJSONValue[JSONArrayConverter.CONTENT_VERSION];
                 if ( typeof serverJSONValue[JSONArrayConverter.PUSH_TO_SERVER] !== 'undefined' ) state[JSONArrayConverter.PUSH_TO_SERVER] = serverJSONValue[JSONArrayConverter.PUSH_TO_SERVER];
 
@@ -45,10 +45,10 @@ export class JSONArrayConverter implements IConverter {
                             newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined, componentScope, componentModelGetter );
                         }
 
-                        if ( instanceOfCustomObject(elem)) {
+                        if ( instanceOfChangeAwareValue( elem ) ) {
                             // child is able to handle it's own change mechanism
-                            elem.getStateHolder().addChangeNotifier(() => {
-                                newValue.getStateHolder().notify();
+                            elem.getStateHolder().setChangeListener(() => {
+                                state.notifyChangeListener();
                             } );
                         }
                     }
@@ -89,10 +89,10 @@ export class JSONArrayConverter implements IConverter {
                             }
                             currentClientValue.splice( idx, 0, val );
 
-                            if ( instanceOfCustomObject(val)) {
+                            if ( instanceOfChangeAwareValue( val ) ) {
                                 // child is able to handle it's own change mechanism
-                                val.getStateHolder().addChangeNotifier(() => {
-                                    currentClientValue.getStateHolder().notify();
+                                val.getStateHolder().setChangeListener(() => {
+                                    state.notifyChangeListener();
                                 } );
                             }
                         }
@@ -115,10 +115,10 @@ export class JSONArrayConverter implements IConverter {
                                 currentClientValue[idx] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[idx], componentScope, componentModelGetter );
                             } else currentClientValue[idx] = val;
 
-                            if ( instanceOfCustomObject(val)) {
+                            if ( instanceOfChangeAwareValue( val ) ) {
                                 // child is able to handle it's own change mechanism
-                                val.getStateHolder().addChangeNotifier(() => {
-                                    currentClientValue.getStateHolder().notify();
+                                val.getStateHolder().setChangeListener(() => {
+                                    state.notifyChangeListener();
                                 } );
                             }
                         }
@@ -150,7 +150,7 @@ export class JSONArrayConverter implements IConverter {
         }
         let internalState: ArrayState
         if ( newClientData && ( internalState = newClientData.getStateHolder()) ) {
-            let arrayChanges = internalState.getChanges( );
+            let arrayChanges = internalState.getChangedKeys();
             if ( arrayChanges.length > 0 || internalState.allChanged) {
                 const changes = {};
             
@@ -162,8 +162,8 @@ export class JSONArrayConverter implements IConverter {
                     var toBeSentArray = changes[JSONArrayConverter.VALUE] = [];
                     for ( let idx = 0; idx < newClientData.length; idx++ ) {
                         const val = newClientData[idx];
-                        if (instanceOfCustomObject(val)) {
-                            val.getStateHolder().allChanged = true;
+                        if ( instanceOfChangeAwareValue( val ) ) {
+                            val.getStateHolder().markAllChanged(false);
                         }
                         toBeSentArray[idx] = this.convert(val, internalState.conversionInfo[idx]);
                     }
@@ -193,12 +193,7 @@ export class JSONArrayConverter implements IConverter {
     
     private convert(newVal, conversionInfo) {
         if (!conversionInfo) {
-            if (instanceOfCustomArray(newVal)) {
-                conversionInfo = "JSON_arr"
-            }
-            else if (instanceOfCustomObject(newVal)){
-                conversionInfo = "JSON_obj"
-            }
+            conversionInfo = this.specTypesService.guessType(newVal);
         }
         if ( conversionInfo) return  this.converterService.convertFromClientToServer( newVal, conversionInfo );
         return this.converterService.convertClientObject( newVal );

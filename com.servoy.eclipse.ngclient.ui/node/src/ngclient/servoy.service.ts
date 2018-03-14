@@ -10,11 +10,11 @@ import { SessionStorageService } from 'angular-web-storage';
 
 import { DateConverter } from './converters/date_converter'
 import { JSONObjectConverter } from './converters/json_object_converter'
-import { JSONArrayConverter} from './converters/json_array_converter'
+import { JSONArrayConverter } from './converters/json_array_converter'
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 
-import { SpecTypesService} from '../sablo/spectypes.service'
+import { SpecTypesService } from '../sablo/spectypes.service'
 
 
 @Injectable()
@@ -25,18 +25,19 @@ export class ServoyService {
     private findModeShortCutAdded = false;
 
     constructor( private websocketService: WebsocketService,
-        private sabloService: SabloService,
-        private windowRefService: WindowRefService,
-        converterService: ConverterService,
-        sessionStorageService: SessionStorageService,
-        specTypesService:SpecTypesService, iterableDiffers: IterableDiffers 
-        ) {
+            private sabloService: SabloService,
+            private windowRefService: WindowRefService,
+            converterService: ConverterService,
+            sessionStorageService: SessionStorageService,
+            specTypesService: SpecTypesService,
+            iterableDiffers: IterableDiffers ) {
+
         this.uiProperties = new UIProperties( sessionStorageService )
         const dateConverter = new DateConverter();
         converterService.registerCustomPropertyHandler( "svy_date", dateConverter );
         converterService.registerCustomPropertyHandler( "Date", dateConverter );
-        converterService.registerCustomPropertyHandler( "JSON_obj", new JSONObjectConverter(converterService,specTypesService) );
-        converterService.registerCustomPropertyHandler( "JSON_arr", new JSONArrayConverter(converterService,specTypesService,iterableDiffers) );
+        converterService.registerCustomPropertyHandler( "JSON_obj", new JSONObjectConverter( converterService, specTypesService ) );
+        converterService.registerCustomPropertyHandler( "JSON_arr", new JSONArrayConverter( converterService, specTypesService, iterableDiffers ) );
     }
 
     public connect() {
