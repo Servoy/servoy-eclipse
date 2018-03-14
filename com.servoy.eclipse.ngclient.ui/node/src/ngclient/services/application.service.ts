@@ -9,6 +9,9 @@ import {SabloService} from '../../sablo/sablo.service';
 
 import * as numeral from 'numeral';
 
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
+import { DefaultLoginWindowComponent } from './default-login-window/default-login-window.component'
+
 @Injectable()
 export class ApplicationService {
     private userProperties;
@@ -17,7 +20,8 @@ export class ApplicationService {
                             private localStorageService:LocalStorageService,
                             private sessionStorageService:SessionStorageService,
                             private windowRefService:WindowRefService,
-                            private sabloService:SabloService) {
+                            private sabloService:SabloService,
+                            private modalService:NgbModal) {
     }
 
     public setStyleSheets(paths) {
@@ -233,15 +237,8 @@ export class ApplicationService {
         return this.servoyService.getUIProperties().getUIProperty("trustDataAsHtml");
     }
     
-    private  showDefaultLoginWindow() {
-        // TODO angular 2 modal dialog
-//        $uibModal.open({
-//            templateUrl: 'templates/login.html',
-//            controller: 'LoginController',
-//            windowClass: 'login-window',
-//            backdrop: 'static',
-//            keyboard: false
-//        });             
+    private  showDefaultLoginWindow() {   
+        this.modalService.open(DefaultLoginWindowComponent);
     }
     
     private   getUserProperties() {
