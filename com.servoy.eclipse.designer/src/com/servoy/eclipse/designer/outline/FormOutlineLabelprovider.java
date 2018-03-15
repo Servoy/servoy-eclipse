@@ -149,7 +149,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 		if (element instanceof PersistContext)
 		{
 			BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
-			if (editor != null)
+			if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
 			{
 				AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 				if (container != null)
