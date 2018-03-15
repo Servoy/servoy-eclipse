@@ -1,7 +1,7 @@
 {
-  "name": "formtest",
-  "version": "0.0.0",
-  "license": "MIT",
+  "name": "ngclient2",
+  "version": "8.5.0.3400",
+  "license": "GNU Affero General Public License",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -49,6 +49,7 @@
     "karma-coverage-istanbul-reporter": "^1.4.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "karma-junit-reporter": "^1.2.0",
     "protractor": "^5.3.0",
     "ts-node": "^4.1.0",
     "tslint": "^5.9.1",

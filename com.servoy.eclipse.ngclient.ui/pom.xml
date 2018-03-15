@@ -64,7 +64,7 @@
 
 					<!-- 4. Run karma tests -->
 					<execution>
-						<id>javascript tests</id>
+						<id>angular karma test</id>
 						<phase>test</phase>	
 						<goals>
 							<goal>npm</goal>
