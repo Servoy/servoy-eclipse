@@ -38,7 +38,7 @@ export class AllServiceService implements ServiceProvider {
 @NgModule( {
     providers: [AllServiceService, ApplicationService, WindowService,
                 // generated services start
-                , NGUtilsService, 
+                NGUtilsService, 
                 TypesRegisterService
                 // generated services end
                 ],

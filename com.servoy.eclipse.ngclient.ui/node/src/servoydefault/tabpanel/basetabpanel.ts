@@ -37,7 +37,7 @@ export abstract class BaseTabpanel implements OnChanges {
     @Output() activeTabIndexChange = new EventEmitter();
 
     @ContentChild( TemplateRef )
-    private templateRef: TemplateRef<any>;
+    templateRef: TemplateRef<any>;
 
     private waitingForServerVisibility = {};
 
@@ -60,7 +60,7 @@ export abstract class BaseTabpanel implements OnChanges {
         }
     }
 
-    getForm( tab: Tab ) {
+    getForm( tab?: Tab ) {
         if ( !this.selectedTab ) {
             for ( var i = 0; i < this.tabs.length; i++ ) {
                 if ( this.tabs[i].active ) {
