@@ -1,5 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
+import { LocalStorageService } from 'angular-web-storage';
 
+import { SabloService } from '../../../sablo/sablo.service';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'; 
 import { DefaultLoginWindowComponent } from './default-login-window.component';
 
 describe('DefaultLoginWindowComponent', () => {
@@ -8,7 +12,9 @@ describe('DefaultLoginWindowComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DefaultLoginWindowComponent ]
+      imports: [ FormsModule ],
+      declarations: [ DefaultLoginWindowComponent ],
+      providers: [ { provide: SabloService }, { provide: NgbActiveModal }, { provide: LocalStorageService }]
     })
     .compileComponents();
   }));
