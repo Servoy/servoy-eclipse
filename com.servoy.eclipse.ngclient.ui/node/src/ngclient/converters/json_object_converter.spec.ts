@@ -55,7 +55,7 @@ describe( 'JSONObjectConverter', () => {
         let tab: Tab = createTabObjectFromServer();
         expect( tab ).toBeDefined();
         expect( tab instanceof Tab ).toBeTruthy( "tab should be instance of Tab" );
-        expect( tab.name ).toBe( "test", "name should be test" );
+        expect( tab.name ).toBe( "test2", "name should be test" );
         expect( tab.myvalue ).toBe( "test", "myvalue should be test" );
         expect( tab.getStateHolder().getChangedKeys().length ).toBe( 0, "should not have changes" );
 

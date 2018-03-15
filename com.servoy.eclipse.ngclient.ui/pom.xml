@@ -57,6 +57,7 @@
 						<configuration>
 							<workingDirectory>node</workingDirectory>
 							<skipTests>${maven.test.skip}</skipTests>
+							<failOnError>true</failOnError>
 							<arguments>run build</arguments>
 						</configuration>
 					</execution>
