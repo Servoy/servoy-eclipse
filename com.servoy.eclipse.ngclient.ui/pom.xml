@@ -16,19 +16,18 @@
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.4</version>
+				<version>1.6</version>
 				<executions>
 
 					<!-- 1. Install node and npm locally -->
 					<execution>
 						<id>install node and npm</id>
-						<phase>test</phase>
+						<phase>initialize</phase>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<skipTests>${maven.test.skip}</skipTests>
 							<nodeVersion>v8.10.0 </nodeVersion>
 							<npmVersion>5.6.0</npmVersion>
 						</configuration>
@@ -37,27 +36,24 @@
 					<!-- 2. Install karma and karma plugins -->
 					<execution>
 						<id>npm install</id>
-						<phase>test</phase>
+						<phase>initialize</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<skipTests>${maven.test.skip}</skipTests>
 						</configuration>
 					</execution>
 
 					<!-- 3. npm run build -->
 					<execution>
 						<id>npm run build</id>
-						<phase>test</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
 						<configuration>
 							<workingDirectory>node</workingDirectory>
-							<skipTests>${maven.test.skip}</skipTests>
-							<failOnError>true</failOnError>
 							<arguments>run build</arguments>
 						</configuration>
 					</execution>
