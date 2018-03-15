@@ -1145,7 +1145,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		try
 		{
 			List<Procedure> procedures = new ArrayList<>(((IServer)s).getProcedures());
-			//Collections.sort(procedures);
+			Collections.sort(procedures, new Comparator<Procedure>()
+			{
+				@Override
+				public int compare(Procedure o1, Procedure o2)
+				{
+					return NameComparator.INSTANCE.compare(o1.getName(), o2.getName());
+				}
+			});
 
 			for (Procedure procedure : procedures)
 			{
