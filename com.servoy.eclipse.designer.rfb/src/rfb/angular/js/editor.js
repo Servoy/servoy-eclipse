@@ -1002,6 +1002,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							$editorService.keyPressed(objEvent);
 							return false;
 						}
+						// f4 open form hierarchy
+						if (fixedKeyEvent.keyCode == 115) {
+							// send the DELETE key code to the server
+							$editorService.keyPressed(objEvent);
+							return false;
+						}
 						return true;
 					});
 					$(document).keydown(function(objEvent) {

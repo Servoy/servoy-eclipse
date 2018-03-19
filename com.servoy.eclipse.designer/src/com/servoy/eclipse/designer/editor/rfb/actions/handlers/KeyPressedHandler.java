@@ -30,6 +30,7 @@ import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
@@ -131,6 +132,21 @@ public class KeyPressedHandler implements IServerService
 					});
 				}
 				break;
+			case 115 : //f4
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						try
+						{
+							new OpenFormHierarchyHandler(selectionProvider).executeMethod(null, null);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				});
 		}
 		return null;
 	}
