@@ -33,10 +33,10 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
 
     getSelectedTabId() {
         if ( this.selectedTab ) return this.selectedTab._id;
-        for ( let i = 0; i < this.tabs.length; i++ ) {
-            if ( this.tabs[i].active ) {
-                return this.tabs[i]._id;
-            }
+        const tabIndex = this.getRealTabIndex();
+        if (tabIndex > 0) {
+            return this.tabs[tabIndex]._id;
         }
+        else if (this.tabs && this.tabs.length > 0) return this.tabs[0]._id;
     }
 }

@@ -27,19 +27,17 @@ export abstract class BaseTabpanel implements OnChanges {
     @Input() tabOrientation;
     @Input() tabSeq;
     @Input() tabs: Array<Tab>
-    @Output() tabsChange = new EventEmitter();
     @Input() transparent;
     @Input() visible;
 
     @Input() tabIndex;
     @Output() tabIndexChange = new EventEmitter();
-    @Input() activeTabIndex;
-    @Output() activeTabIndexChange = new EventEmitter();
 
     @ContentChild( TemplateRef )
     templateRef: TemplateRef<any>;
 
     private waitingForServerVisibility = {};
+    private lastSelectedTab: Tab;
 
     protected selectedTab: Tab
 
@@ -54,20 +52,14 @@ export abstract class BaseTabpanel implements OnChanges {
             }
         }
         if ( changes["tabIndex"] ) {
-            const  realIndex = this.tabIndex - 1;
-            console.log( realIndex );
-            Promise.resolve(null).then(() =>  this.select( this.tabs[realIndex] ));
+            Promise.resolve( null ).then(() => { this.select( this.tabs[this.getRealTabIndex()] ) } );
         }
     }
 
     getForm( tab?: Tab ) {
         if ( !this.selectedTab ) {
-            for ( var i = 0; i < this.tabs.length; i++ ) {
-                if ( this.tabs[i].active ) {
-                    this.select( this.tabs[i] );
-                    break;
-                }
-            }
+            const tabIndex = this.getRealTabIndex();
+            if ( tabIndex >= 0 ) this.select( this.tabs[tabIndex] );
 
             if ( !this.selectedTab && this.tabs.length ) {
                 this.select( this.tabs[0] );
@@ -86,46 +78,30 @@ export abstract class BaseTabpanel implements OnChanges {
     select( tab: Tab ) {
         if ( !this.visible ) return;
         if ( this.isValidTab( tab ) ) {
-            if ( !tab.active ) {
-                if ( this.selectedTab ) {
-                    this.selectedTab.active = false;
-                }
-                else {
-                    // there is no selected tab yet, make sure all tabs are set to none active 
-                    // then the tab that needs to be selected is the only one. 
-                    this.tabs.forEach(( tab ) => tab.active = false );
-                }
-                tab.active = true;
-                this.updateActiveTabIndex();
-            }
             //                if ($log.debugEnabled) $log.debug("svy * Will select tab '" + (tab ? tab.containsFormId : undefined) + "'. Previously selected: '" + (this.selectedTab ? this.selectedTab.containsFormId : undefined) + "'. Same: " + (tab == this.selectedTab));
             if ( ( tab != undefined && this.selectedTab != undefined && tab.containsFormId == this.selectedTab.containsFormId && tab.relationName == this.selectedTab.relationName ) || ( tab == this.selectedTab ) ) return;
             var selectEvent = this.windowRefService.nativeWindow.event ? this.windowRefService.nativeWindow.event : null;
             if ( this.selectedTab ) {
                 if ( this.selectedTab.containsFormId && !this.waitingForServerVisibility[this.selectedTab.containsFormId] ) {
-                    var formInWait = this.selectedTab.containsFormId;
+                    const formInWait = this.selectedTab.containsFormId;
                     this.waitingForServerVisibility[formInWait] = true;
-                    var currentSelectedTab = this.selectedTab;
-                    var promise = this.servoyApi.hideForm( this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName );
+                    const currentSelectedTab = this.selectedTab;
+                    this.lastSelectedTab = tab;
+                    const promise = this.servoyApi.hideForm( this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName );
                     //                        if ($log.debugEnabled) $log.debug("svy * Will hide previously selected form (tab): " + this.selectedTab.containsFormId);
                     promise.then(( ok ) => {
                         //                            if ($log.debugEnabled) $log.debug("svy * Previously selected form (tab) hide completed with '" + ok + "': " + this.selectedTab.containsFormId);
                         delete this.waitingForServerVisibility[formInWait];
-                        if ( !tab.active ) {
+                        if ( this.lastSelectedTab != tab ) {
                             // visibility changed again, just ignore this
                             //                                if ($log.debugEnabled) $log.debug("svy * Tab '" + tab.containsFormId + "': no longer active, ignore making it visible");
                             // it could be that the server was sending the correct state in the mean time already at the same time 
                             // we try to hide it. just call show again to be sure.
-                            if ( currentSelectedTab == this.selectedTab && this.selectedTab.active ) this.servoyApi.formWillShow( this.selectedTab.containsFormId, this.selectedTab.relationName );
+                            if ( currentSelectedTab == this.selectedTab ) this.servoyApi.formWillShow( this.selectedTab.containsFormId, this.selectedTab.relationName );
                             return;
                         }
                         if ( ok ) {
                             this.setFormVisible( tab, selectEvent );
-                        }
-                        else {
-                            tab.active = false;
-                            this.selectedTab.active = true;
-                            this.updateActiveTabIndex();
                         }
                     } )
                 }
@@ -134,6 +110,10 @@ export abstract class BaseTabpanel implements OnChanges {
                 this.setFormVisible( tab, selectEvent );
             }
         }
+    }
+    
+    getSelectedTab():Tab {
+        return this.selectedTab;
     }
 
     private isValidTab( tab: Tab ) {
@@ -150,7 +130,7 @@ export abstract class BaseTabpanel implements OnChanges {
     private getTabIndex( tab: Tab ) {
         if ( tab ) {
             for ( var i = 0; i < this.tabs.length; i++ ) {
-                if ( ( this.tabs[i].containsFormId == tab.containsFormId ) && ( this.tabs[i].relationName == tab.relationName ) ) {
+                if ( this.tabs[i] == tab ) {
                     return i + 1;
                 }
             }
@@ -158,37 +138,37 @@ export abstract class BaseTabpanel implements OnChanges {
         return -1;
     }
 
-    private updateActiveTabIndex() {
-        if ( this.tabs ) {
-            this.activeTabIndex = 0;
-
-            var activeSet = false;
-            for ( var i = 0; i < this.tabs.length; i++ ) {
-                this.tabs[i].isActive = activeSet ? false : this.tabs[i].active;
-                if ( !activeSet && this.tabs[i].active ) {
-                    this.activeTabIndex = i;
-                    activeSet = true;
-                }
-            }
-            this.tabsChange.emit( this.tabs );
-            this.activeTabIndexChange.emit(this.activeTabIndex);
-        }
-       
-    }
-
     protected setFormVisible( tab: Tab, event ) {
-        console.log( "setting form visible: " + tab.containsFormId )
         if ( tab.containsFormId ) this.servoyApi.formWillShow( tab.containsFormId, tab.relationName );
         //            if ($log.debugEnabled) $log.debug("svy * selectedTab = '" + tab.containsFormId + "' -- " + new Date().getTime());
         var oldSelected = this.selectedTab;
         this.selectedTab = tab;
         this.tabIndex = this.getTabIndex( this.selectedTab );
-        this.tabIndexChange.emit(this.tabIndex);
+        this.tabIndexChange.emit( this.tabIndex );
         if ( oldSelected && oldSelected != tab && this.onChangeMethodID ) {
             setTimeout(() => {
                 this.onChangeMethodID( this.getTabIndex( oldSelected ), event != null ? event : null /* TODO $.Event("change") */ );
             }, 0, false );
         }
+    }
+
+    protected getRealTabIndex(): number {
+        if ( this.tabIndex ) {
+            if ( isNaN( this.tabIndex ) ) {
+                if (!this.tabs) return -1;
+                for ( let i = 0; i < this.tabs.length; i++ ) {
+                    if (this.tabs[i].name == this.tabIndex) {
+                        this.tabIndex = i +1
+                        this.tabIndexChange.emit(i);
+                        return i;
+                    }
+                }
+                return -1;
+            }
+            return this.tabIndex - 1;
+        }
+        if ( this.tabs && this.tabs.length > 0 ) return 0;
+        return -1;
     }
 }
 
@@ -198,19 +178,8 @@ export class Tab extends BaseCustomObject {
     containsFormId: string;
     text: string
     relationName: string
-    active: boolean
     foreground: string
     disabled: boolean
     imageMediaID: string
     mnemonic: string
-
-    private _isActive: boolean;
-
-    // only push to server properties are generated with get/setters
-    get isActive(): boolean {
-        return this._isActive
-    }
-    set isActive( value: boolean ) {
-        this.getStateHolder().setPropertyAndHandleChanges(this, "_isActive", "isActive", value);
-    }
 }
