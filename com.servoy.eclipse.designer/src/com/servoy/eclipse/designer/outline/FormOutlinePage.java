@@ -339,7 +339,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 											isComponent = true;
 										}
 
-										if (sourceType != null)
+										if (sourceType != null && allowedChildren != null)
 										{
 											doAllow = allowedChildren.contains(sourceType);
 											if (!doAllow && sourcePackage != null)
