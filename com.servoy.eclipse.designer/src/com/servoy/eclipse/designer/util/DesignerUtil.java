@@ -449,7 +449,7 @@ public class DesignerUtil
 					if (!excludedChildren.contains("component")) allowedChildren.add("component");
 				}
 
-				if (allowedChildren.isEmpty())
+				if (allowedChildren.isEmpty() && excludedChildren == null && specAllowedChildren == null)
 				{
 					//add component if both excluded and allowed children are missing
 					allowedChildren.add("component");

@@ -1790,7 +1790,19 @@ public class ServoyModel extends AbstractServoyModel
 
 	public void addActiveProjectListener(IActiveProjectListener listener)
 	{
-		activeProjectListeners.add(listener);
+		addActiveProjectListener(listener, true);
+	}
+
+	public void addActiveProjectListener(IActiveProjectListener listener, boolean last)
+	{
+		if (last)
+		{
+			activeProjectListeners.add(listener);
+		}
+		else
+		{
+			activeProjectListeners.add(0, listener);
+		}
 	}
 
 	public void removeActiveProjectListener(IActiveProjectListener listener)

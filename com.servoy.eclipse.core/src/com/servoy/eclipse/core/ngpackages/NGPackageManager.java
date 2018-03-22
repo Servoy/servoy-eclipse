@@ -108,7 +108,8 @@ public class NGPackageManager extends BaseNGPackageManager
 					reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.ACTIVE_PROJECT_CHANGED, null);
 				}
 			};
-			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
+			// update this before build runs
+			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources, false);
 		}
 
 		WebObjectRegistry.startTracking();

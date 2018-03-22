@@ -43,6 +43,13 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 			$("body").on("click", function(e) {
 				$("#contextMenu").hide();
 			})
+			$("body").on("keyup", function(e) {
+				if (e.keyCode == 27) {
+					// esc key, close menu
+					$("#contextMenu").hide();
+				}
+				
+			})
 			$("body").on("contextmenu", function(e) {
 				return false;
 			})

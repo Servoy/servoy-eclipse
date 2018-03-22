@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,6 +56,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -122,26 +124,47 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								}
 								else
 								{
-									List<String> specs = new ArrayList<String>();
+									List<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
 									WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
 									for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
 									{
 										if (!webComponentSpec.getPackageName().equals("servoydefault"))
 										{
-											specs.add(webComponentSpec.getName());
+											specs.add(webComponentSpec);
 										}
 									}
-									Collections.sort(specs);
+									Collections.sort(specs, new Comparator<WebObjectSpecification>()
+									{
+
+										@Override
+										public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
+										{
+											return NameComparator.INSTANCE.compare(o1.getName(), o2.getName());
+										}
+									});
 									TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
-										FlatTreeContentProvider.INSTANCE, new LabelProvider(), null, null, SWT.NONE, "Select spec",
-										specs.toArray(new String[0]), null, false, "SpecDialog", null);
+										FlatTreeContentProvider.INSTANCE, new LabelProvider()
+										{
+											@Override
+											public String getText(Object element)
+											{
+												String componentName = ((WebObjectSpecification)element).getName();
+												int index = componentName.indexOf("-");
+												if (index != -1)
+												{
+													componentName = componentName.substring(index + 1);
+												}
+												return componentName + " [" + ((WebObjectSpecification)element).getPackageName() + "]";
+											};
+										}, null, null, SWT.NONE, "Select spec", specs.toArray(new WebObjectSpecification[0]), null, false, "SpecDialog", null);
 									dialog.open();
 									if (dialog.getReturnCode() == Window.OK)
 									{
 										if (persistContext.getPersist() instanceof AbstractContainer)
 										{
 											AbstractContainer parentPersist = (AbstractContainer)ElementUtil.getOverridePersist(persistContext);
-											String componentName = (String)((StructuredSelection)dialog.getSelection()).getFirstElement();
+											WebObjectSpecification spec = (WebObjectSpecification)((StructuredSelection)dialog.getSelection()).getFirstElement();
+											String componentName = spec.getName();
 											int index = componentName.indexOf("-");
 											if (index != -1)
 											{
@@ -155,11 +178,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 												componentName = baseName + "_" + i;
 												i++;
 											}
-											persist = parentPersist.createNewWebComponent(componentName,
-												(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
+											persist = parentPersist.createNewWebComponent(componentName, spec.getName());
 
-											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
-												(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
 											Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
 											for (String string : allPropertiesNames)
 											{

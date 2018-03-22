@@ -479,14 +479,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="5.0.1.v201404251740"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="5.0.1.v201404251740"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin

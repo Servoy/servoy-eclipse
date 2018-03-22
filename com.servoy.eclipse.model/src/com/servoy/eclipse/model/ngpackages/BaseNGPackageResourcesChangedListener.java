@@ -301,12 +301,10 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 						if (webPackageNameForFile == null)
 							webPackageNameForFile = ResourceProvider.getServicePackageReader(new File(resource.getProject().getLocationURI()));
 
-						List<ServoyProject> allActiveSolutions = Arrays.asList(ServoyModelFinder.getServoyModel().getModulesOfActiveProject());
-
 						// see if this package project is referenced by any active solution/module
 						for (IProject iProject : referencingProjects)
 						{
-							if (iProject.hasNature(ServoyProject.NATURE_ID) && allActiveSolutions.contains(iProject.getNature(ServoyProject.NATURE_ID)))
+							if (iProject.hasNature(ServoyProject.NATURE_ID) && ServoyModelFinder.getServoyModel().isSolutionActive(iProject.getName()))
 							{
 								IPackageReader reader = baseNGPackageManager.readPackageResource(resource.getProject());
 								if (reader != null) getAddedPackageReaders(iProject.getName()).add(reader);
