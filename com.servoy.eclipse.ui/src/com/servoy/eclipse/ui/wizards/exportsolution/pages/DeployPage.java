@@ -198,10 +198,11 @@ public class DeployPage extends WizardPage implements IJobChangeListener
 					// execute the request
 					HttpResponse response = httpclient.execute(httppost);
 
+					HttpEntity responseEntity = response.getEntity();
+					String responseString = EntityUtils.toString(responseEntity);
+
 					if (response.getStatusLine().getStatusCode() == 200)
 					{
-						HttpEntity responseEntity = response.getEntity();
-						String responseString = EntityUtils.toString(responseEntity);
 						String[] responses = responseString.split("\n");
 
 						for (String s : responses)
@@ -212,8 +213,7 @@ public class DeployPage extends WizardPage implements IJobChangeListener
 					}
 					else
 					{
-						responseMessage.append("HTTP ERROR : ").append(response.getStatusLine().getStatusCode()).append(' ').append(
-							response.getStatusLine().getReasonPhrase());
+						responseMessage.append("HTTP ERROR : ").append(response.getStatusLine().getStatusCode()).append(' ').append(responseString);
 					}
 				}
 				catch (ClientProtocolException e)
