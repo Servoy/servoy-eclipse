@@ -70,6 +70,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.Package.ZipPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.SpecReloadSubject.ISpecReloadListener;
@@ -1423,7 +1424,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			String packageName = iProject.getName();
 			packageType = provider.getPackageReader(packageName);
-			if (packageType == null)
+			if (packageType == null || packageType instanceof ZipPackageReader)
 			{
 				// TODO this is a partial fix for the problem that the project is not the package name
 				// see also the method resolveWebPackageDisplayName above.
@@ -1432,7 +1433,7 @@ public class SolutionExplorerTreeContentProvider
 					IPackageReader reader = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject);
 					packageName = reader.getPackageName();
 					packageType = provider.getPackageReader(packageName);
-					if (packageType == null) packageType = reader;
+					if (packageType == null || packageType instanceof ZipPackageReader) packageType = reader;
 				}
 			}
 		}
