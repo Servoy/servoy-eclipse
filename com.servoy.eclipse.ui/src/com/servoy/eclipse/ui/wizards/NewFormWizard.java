@@ -360,6 +360,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				form.setDataSource(dataSource);
 				form.setStyleName(style == null ? null : style.getName());
 			}
+			if (form.isFormComponent().booleanValue() && servoyProject.getEditingSolution().getFirstFormID() == form.getID())
+			{
+				servoyProject.getEditingSolution().setFirstFormID(0);
+			}
 
 			if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE)
 			{
