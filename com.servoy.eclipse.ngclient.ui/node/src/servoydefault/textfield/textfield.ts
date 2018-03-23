@@ -1,10 +1,11 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
 
-import {PropertyUtils} from '../../ngclient/servoy_public'
+import {PropertyUtils, FormattingService} from '../../ngclient/servoy_public'
 
 @Component( {
     selector: 'servoydefault-textfield',
-    templateUrl: './textfield.html'
+    templateUrl: './textfield.html',
+    providers: [FormattingService]
 } )
 export class ServoyDefaultTextField implements OnInit, OnChanges {
     @Input() name;
@@ -44,7 +45,7 @@ export class ServoyDefaultTextField implements OnInit, OnChanges {
     
     @ViewChild('element') elementRef:ElementRef;
 
-    constructor(private readonly renderer: Renderer2) { }
+    constructor(private readonly renderer: Renderer2, public formattingService : FormattingService) { }
 
     ngOnInit() {
 
@@ -112,7 +113,7 @@ export class ServoyDefaultTextField implements OnInit, OnChanges {
     }
 
     update( val: string ) {
-        this.dataProviderID = val;
+        this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
         this.dataProviderIDChange.emit( this.dataProviderID );
     }
 

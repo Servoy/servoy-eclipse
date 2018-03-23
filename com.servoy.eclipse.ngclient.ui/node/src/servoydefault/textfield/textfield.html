@@ -2,7 +2,8 @@
 	   class='svy-textfield svy-field form-control input-sm svy-padding-xs'
 	   type="text"  
 	   [id]="servoyApi.getMarkupId()"
-	   [value]="dataProviderID" 
+	   [value]="dataProviderID | formatFilter:format?.display:format?.type:format" 
 	   (change)="update($event.target.value)"
 	   sablo-tabseq='model.tabSeq'
-	   svy-decimal-key-converter #element/>
+	   [svyFormat]="{servoyFormat:format?.display,type:format?.type, fullFormat:format}"
+	   #element/> 

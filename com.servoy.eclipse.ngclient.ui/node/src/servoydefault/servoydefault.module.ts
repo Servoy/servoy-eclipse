@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import {FormsModule}        from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
@@ -12,7 +13,7 @@ import { ServoyDefaultTablesspanel} from './tabpanel/tablesspanel';
 
 import {SabloModule} from '../sablo/sablo.module'
 
-import {FormatFilterPipe,MnemonicletterFilterPipe} from '../ngclient/servoy_public'
+import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat} from '../ngclient/servoy_public'
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import {FormatFilterPipe,MnemonicletterFilterPipe} from '../ngclient/servoy_publ
     ServoyDefaultTabpanel,
     ServoyDefaultTablesspanel,
     FormatFilterPipe,
-    MnemonicletterFilterPipe
+    MnemonicletterFilterPipe,
+    SvyFormat
   ],
   imports:[
     FormsModule,
@@ -37,6 +39,6 @@ import {FormatFilterPipe,MnemonicletterFilterPipe} from '../ngclient/servoy_publ
             ServoyDefaultTabpanel,
             ServoyDefaultTablesspanel
   ],
-  providers: []
+  providers: [UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe]
 })
 export class ServoyDefaultComponentsModule { }
