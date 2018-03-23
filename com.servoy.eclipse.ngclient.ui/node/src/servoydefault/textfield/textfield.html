@@ -5,5 +5,5 @@
 	   [value]="dataProviderID | formatFilter:format?.display:format?.type:format" 
 	   (change)="update($event.target.value)"
 	   sablo-tabseq='model.tabSeq'
-	   [svyFormat]="{servoyFormat:format?.display,type:format?.type, fullFormat:format}"
+	   [svyFormat]="format?.display" [svyType]="format?.type" [svyFullFormat]="format"
 	   #element/> 

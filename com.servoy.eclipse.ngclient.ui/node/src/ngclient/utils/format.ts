@@ -1,5 +1,5 @@
 import { Directive, ElementRef, HostListener, Input, Injector} from '@angular/core';
-import {FormatFilterPipe} from '../servoy_public'
+import {FormatFilterPipe} from '../pipes/pipes'
 
 @Directive({ selector: '[svyFormat]'}) 
 export class SvyFormat{
@@ -7,19 +7,21 @@ export class SvyFormat{
       private element: HTMLInputElement;
       private formatFilterPipe : FormatFilterPipe;
 
-      @Input() svyFormat : Object = {servoyFormat:null, type:null, fullFormat:{uppercase:false,lowercase:false, type:null}}
+      @Input('svyFormat') servoyFormat :string;
+      @Input() svyType : string;
+      @Input() svyFullFormat : {uppercase:false,lowercase:false, type:null};
 
       public constructor(private el: ElementRef, private injector: Injector) {
           this.caretPosition = -1;
-          this.element = el.nativeElement; 
+          this.element = el.nativeElement;
           this.formatFilterPipe = this.injector.get(FormatFilterPipe);
       }
       
-      @HostListener('input',['$event']) onInput(event:Event) {
-          if (this.svyFormat.type == 'TEXT') this.format();          
+      @HostListener('input',['$event']) onInput(event:KeyboardEvent) {
+          if (this.svyType == 'TEXT') this.format();          
       }
       
-      @HostListener('keydown',['$event']) onKeydown(event:Event) {
+      @HostListener('keydown',['$event']) onKeydown(event:KeyboardEvent) {
           this.saveCaretPosition(event);   
       }
       
@@ -27,7 +29,7 @@ export class SvyFormat{
           this.setCaretPosition();
       }
       
-      private saveCaretPosition(event:Event) { 
+      private saveCaretPosition(event:KeyboardEvent) { 
           if(event.keyCode > 40) {
              this.caretPosition = this.element.selectionStart +1;
           }
@@ -38,7 +40,7 @@ export class SvyFormat{
        
       private format() {
           var value = this.element.value;
-          var ret = this.formatFilterPipe.transform(value, this.svyFormat.servoyFormat, this.svyFormat.type, this.svyFormat.fullFormat);
+          var ret = this.formatFilterPipe.transform(value, this.servoyFormat, this.svyType, this.svyFullFormat);
           this.element.value = ret;
       }
        
@@ -58,5 +60,5 @@ export class SvyFormat{
               }
           } 
           this.caretPosition = -1;
-      }      
+      }
   }
