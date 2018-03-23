@@ -1,3 +1,5 @@
 export { ServoyApi } from './servoy_api'
 export { PropertyUtils } from './utils/property_utils'
-export { FormatFilterPipe, MnemonicletterFilterPipe } from './pipes/pipes'
+export { FormatFilterPipe, MnemonicletterFilterPipe} from './pipes/pipes'
+export { SvyFormat } from './utils/format'
+export { FormattingService } from './services/formatting.service'
