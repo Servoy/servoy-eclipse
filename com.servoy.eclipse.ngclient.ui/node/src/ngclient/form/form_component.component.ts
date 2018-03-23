@@ -11,7 +11,7 @@ import { ServoyApi } from '../servoy_api'
 @Component( {
     selector: 'svy-form',
     template: `
-      <div *ngIf="formCache.absolute"> <!-- main div -->
+      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()"> <!-- main div -->
           <div *ngFor="let item of formCache.items" [config]="item" class="svy_wrapper" style="position:absolute"> <!-- wrapper div -->
                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
           </div>
@@ -88,6 +88,12 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     ngOnDestroy() {
+    }
+    
+    public getAbsoluteFormStyle() {
+        const formData = this.formCache.getComponent("");
+//        console.log(formData)
+        return {position:"absolute"};
     }
 
     public isFormAvailable( name ): boolean {
