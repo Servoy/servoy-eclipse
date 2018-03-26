@@ -3,7 +3,7 @@ import {DateConverter} from './date_converter';
 
 describe('DateConverter', () => {
   let dateConverter:DateConverter;
-  let currentOffset = new Date().getTimezoneOffset()/60*-1; // offset is negative -60 for +01:00
+  let currentOffset = new Date(2018,0,1).getTimezoneOffset()/60*-1; // offset is negative -60 for +01:00
   beforeEach(() => {
           dateConverter = new DateConverter();
   });
@@ -54,6 +54,7 @@ describe('DateConverter', () => {
   
   it('should parse date string from server with timezone +0',  () => {
       var date:Date = dateConverter.fromServerToClient("2018-01-01T00:00:00" + offsetString(0));
+  console.log("2018-01-01T00:00:00" + offsetString(0) + " ::"  + date)
       expect(date).toBeDefined();
       expect(date.getFullYear()).toBe(2018);
       expect(date.getMonth()).toBe(0);
