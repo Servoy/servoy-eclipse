@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import {FormsModule}        from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
@@ -39,6 +38,6 @@ import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat} from '../ngclient/s
             ServoyDefaultTabpanel,
             ServoyDefaultTablesspanel
   ],
-  providers: [UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe]
+  providers: []
 })
 export class ServoyDefaultComponentsModule { }
