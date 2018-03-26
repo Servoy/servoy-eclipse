@@ -47,18 +47,18 @@ export class SvyFormat{
       private setCaretPosition() {  
           if (this.caretPosition < 0) return;
           if (this.element != null) {
-              if (this.element.createTextRange) {
-                  var range = this.element.createTextRange();
-                  range.move('character', this.caretPosition);
-                  range.select();
-              } else { 
+//              if (this.element.createTextRange) {
+//                  var range = this.element.createTextRange();
+//                  range.move('character', this.caretPosition);
+//                  range.select();
+//              } else { 
                   if (this.element.selectionStart) {
                       this.element.focus();
                       this.element.setSelectionRange(this.caretPosition, this.caretPosition);
                   } else
                       this.element.focus();
               }
-          } 
+//          } 
           this.caretPosition = -1;
       }
   }
