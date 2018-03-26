@@ -743,22 +743,30 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		{
 			if (info.typeId == IRepository.FORMS)
 			{
-				if (info.uuid.equals(childUUID.toString()))
+				if (hasChildUUID(importInfo, info, childUUID))
 				{
 					if (importInfo.cleanImport) return importInfo.cleanImportUUIDMap.get(info.uuid);
 					return UUID.fromString(info.uuid);
 				}
-				for (RootElementInfo childInfo : info.children)
-				{
-					if (childInfo.uuid.equals(childUUID.toString()))
-					{
-						if (importInfo.cleanImport) return importInfo.cleanImportUUIDMap.get(info.uuid);
-						return UUID.fromString(info.uuid);
-					}
-				}
 			}
 		}
 		return null;
+	}
+
+	private boolean hasChildUUID(ImportInfo importInfo, RootElementInfo info, UUID childUUID)
+	{
+		if (info.uuid.equals(childUUID.toString()))
+		{
+			return true;
+		}
+		for (RootElementInfo childInfo : info.children)
+		{
+			if (hasChildUUID(importInfo, childInfo, childUUID))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean checkI18NStorage()
