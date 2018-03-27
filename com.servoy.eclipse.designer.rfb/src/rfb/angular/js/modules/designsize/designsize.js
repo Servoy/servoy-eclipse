@@ -32,9 +32,9 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			onclick: function() {
 				if(lastClicked == "Phone") isPortrait = !isPortrait;
 				if(isPortrait) 
-					editor.setContentSize("320px", "568px",true);
+					editor.setContentSize("320px", "568px",false);
 				else
-					editor.setContentSize("568px", "320px",true);
+					editor.setContentSize("568px", "320px",false);
 				lastClicked = "Phone";
 			},
 		};

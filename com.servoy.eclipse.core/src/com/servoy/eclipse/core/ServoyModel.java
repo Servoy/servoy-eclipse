@@ -467,6 +467,11 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
 				{
+					if (getNGPackageManager() != null)
+					{
+						getNGPackageManager().clearReferencedNGPackageProjectsCache();
+						getNGPackageManager().reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.MODULES_UPDATED, null);
+					}
 					String[] moduleNames = Utils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
 					final ArrayList<ServoyProject> modulesToUpdate = new ArrayList<ServoyProject>();
 					final StringBuilder sbUpdateModuleNames = new StringBuilder();
@@ -1790,19 +1795,7 @@ public class ServoyModel extends AbstractServoyModel
 
 	public void addActiveProjectListener(IActiveProjectListener listener)
 	{
-		addActiveProjectListener(listener, true);
-	}
-
-	public void addActiveProjectListener(IActiveProjectListener listener, boolean last)
-	{
-		if (last)
-		{
-			activeProjectListeners.add(listener);
-		}
-		else
-		{
-			activeProjectListeners.add(0, listener);
-		}
+		activeProjectListeners.add(listener);
 	}
 
 	public void removeActiveProjectListener(IActiveProjectListener listener)

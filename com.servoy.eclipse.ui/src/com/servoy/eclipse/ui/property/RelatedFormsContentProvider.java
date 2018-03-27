@@ -187,7 +187,8 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (!PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution())) children.add(new RelatedForm(rf.relations, form));
+					if (!PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()) && !form.isFormComponent().booleanValue())
+						children.add(new RelatedForm(rf.relations, form));
 				}
 
 				// add relations 1 level deeper
@@ -210,7 +211,8 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution())) continue; //is rootForm accessible via self ref relation
+					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()) || form.isFormComponent().booleanValue())
+						continue; //is rootForm accessible via self ref relation
 					ITable table = dsm.getDataSource(form.getDataSource());
 					if (table == null)
 					{
@@ -239,7 +241,8 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution())) continue; //is rootForm accessible via self ref relation
+					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution()) || form.isFormComponent().booleanValue())
+						continue; //is rootForm accessible via self ref relation
 					if (dsm.getDataSource(form.getDataSource()) == parentElement || (form.getDataSource() == null && Messages.LabelNoTable == parentElement))
 					{
 						children.add(new RelatedForm(null, form));
