@@ -752,6 +752,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				delete $scope.contentStyle.right;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
+				// we need to apply the changes to dom earlier in order to adjust the to the new size
+				$element.find('.content')[0].style.width = width + "px";
+				$element.find('.content')[0].style.right = "";
+				$element.find('.content')[0].style.minWidth = "";
 				adjustGlassPaneSize(width, height);
 				if (fixedSize)
 				{
