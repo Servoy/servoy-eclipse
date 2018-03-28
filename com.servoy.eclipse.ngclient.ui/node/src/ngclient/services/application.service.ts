@@ -11,6 +11,7 @@ import * as numeral from 'numeral';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { DefaultLoginWindowComponent } from './default-login-window/default-login-window.component'
+import { FileUploadWindowComponent } from './file-upload-window/file-upload-window.component'
 
 @Injectable()
 export class ApplicationService {
@@ -221,8 +222,11 @@ export class ApplicationService {
     }
     
     public showFileOpenDialog(title, multiselect, acceptFilter) {
-        // TODO angular 2 upload utls
-//        $svyFileuploadUtils.open("resources/upload/" + this.sabloService.getSessionId(), title, multiselect, acceptFilter);
+        const modalRef = this.modalService.open(FileUploadWindowComponent, { backdrop: 'static' });
+        modalRef.componentInstance.url = "/resources/upload/" + this.sabloService.getSessionId();
+        modalRef.componentInstance.title = title;
+        modalRef.componentInstance.multiselect = multiselect;
+        modalRef.componentInstance.filter = acceptFilter;
     }
     public getSolutionName() {
         return this.servoyService.getSolutionSettings().solutionName;
@@ -238,7 +242,7 @@ export class ApplicationService {
     }
     
     private  showDefaultLoginWindow() {   
-        this.modalService.open(DefaultLoginWindowComponent);
+        this.modalService.open(DefaultLoginWindowComponent, { backdrop: 'static' });
     }
     
     private   getUserProperties() {

@@ -16,6 +16,8 @@ import { SabloModule } from '../sablo/sablo.module'
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
 import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
+import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
+import { HttpClientModule } from '@angular/common/http';
 
 
 //COMPONENT_IMPORTS_START
@@ -31,6 +33,7 @@ import { DefaultLoginWindowComponent } from './services/default-login-window/def
         FormComponent,
         AddAttributeDirective,
         DefaultLoginWindowComponent,
+        FileUploadWindowComponent
         // COMPONENT_DECLARATIONS_START
 //        ServoyDefaultTextField,
 //        ServoyDefaultButton,
@@ -45,11 +48,12 @@ import { DefaultLoginWindowComponent } from './services/default-login-window/def
         SabloModule,
 		AllComponentsModule,
         AllServicesModules,
+        HttpClientModule
         // COMPONENT_MODULE_IMPORTS_START
         // COMPONENT_MODULE_IMPORTS_END
     ],
     providers: [FormService, ServoyService],
     bootstrap: [MainComponent],
-    entryComponents: [DefaultLoginWindowComponent]
+    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent]
 } )
 export class ServoyModule { }
