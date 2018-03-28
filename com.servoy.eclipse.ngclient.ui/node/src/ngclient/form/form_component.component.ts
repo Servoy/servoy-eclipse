@@ -11,7 +11,7 @@ import { ServoyApi } from '../servoy_api'
 @Component( {
     selector: 'svy-form',
     template: `
-      <div *ngIf="formCache.absolute"> <!-- main div -->
+      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()"> <!-- main div -->
           <div *ngFor="let item of formCache.items" [config]="item" class="svy_wrapper" style="position:absolute"> <!-- wrapper div -->
                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
           </div>
@@ -43,6 +43,7 @@ import { ServoyApi } from '../servoy_api'
                 </ng-template>
             </servoydefault-tablesspanel>
       </ng-template>
+      <ng-template #servoydefaultSplitpane let-state="state"><servoydefault-splitpane  [borderType]="state.model.borderType" [pane1MinSize]="state.model.pane1MinSize" [fontType]="state.model.fontType" [pane2MinSize]="state.model.pane2MinSize" [visible]="state.model.visible" [selectedTabColor]="state.model.selectedTabColor" [tabs]="state.model.tabs" (tabsChange)="datachange(state.name,'tabs',$event)" [readOnly]="state.model.readOnly" [foreground]="state.model.foreground" [divLocation]="state.model.divLocation" (divLocationChange)="datachange(state.name,'divLocation',$event)" [resizeWeight]="state.model.resizeWeight" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [divSize]="state.model.divSize" [horizontalAlignment]="state.model.horizontalAlignment" [size]="state.model.size" [background]="state.model.background" [tabOrientation]="state.model.tabOrientation" [location]="state.model.location" [tabSeq]="state.model.tabSeq" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'><svy-form *ngIf="isFormAvailable(name)" [name]="name"></svy-form></ng-template></servoydefault-splitpane></ng-template>
       <!-- component template generate end -->
    `
 } )
@@ -55,6 +56,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild( 'servoydefaultLabel' ) readonly servoydefaultLabel: TemplateRef<any>;
     @ViewChild( 'servoydefaultTabpanel' ) readonly servoydefaultTabpanel: TemplateRef<any>;
     @ViewChild( 'servoydefaultTablesspanel' ) readonly servoydefaultTablesspanel: TemplateRef<any>;
+    @ViewChild( 'servoydefaultSplitpane' ) readonly servoydefaultSplitpane: TemplateRef<any>;
     // component template generate end
 
     @ViewChildren( 'cmp' ) readonly components: QueryList<Component>;
@@ -88,6 +90,12 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     ngOnDestroy() {
+    }
+    
+    public getAbsoluteFormStyle() {
+        const formData = this.formCache.getComponent("");
+//        console.log(formData)
+        return {position:"absolute"};
     }
 
     public isFormAvailable( name ): boolean {

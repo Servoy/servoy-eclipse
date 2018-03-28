@@ -6,8 +6,9 @@
         	  [innerHTML]='tab?.text'></span>
       </ng-template>
       <ng-template ngbTabContent>
+      <div style="position: absolute;overflow: auto;top: 41px;bottom: 0px;left: 0px;right: 0px;">
       	<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}"></ng-template>
-      
+      </div>
       
 <!--      
 	 <div ng-include="getForm(tab)" sablo-tabseq='1' sablo-tabseq-config="{container: true}" ng-style='getTabsHeight()' style="position:absolute;top:40px;left:0;right:0;bottom:0;overflow:auto;"></div>

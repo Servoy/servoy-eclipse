@@ -131,8 +131,13 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 								}
 								
 								if ((targetRect.bottom + iframeOffsetTopIfPresent < toolbarBottom + 5) || (targetRect.top + iframeOffsetTopIfPresent > window.innerHeight - statusBarHeight - 5)
-										|| (targetRect.right + iframeOffsetLeftIfPresent < resizerRight + 5) || (targetRect.left + iframeOffsetLeftIfPresent > window.innerWidth - 5)) {
-									target.scrollIntoView();
+										|| (targetRect.right + iframeOffsetLeftIfPresent < resizerRight + 5) || (targetRect.left + iframeOffsetLeftIfPresent > window.innerWidth - 5)) 
+								{
+									//target.scrollIntoView();
+									// scrollintoview behaves strange in IE, it will scroll inside iframe as well, set some values manually for now
+									$scope.glasspane.parentElement.scrollTop = targetRect.top-50;
+									$scope.glasspane.parentElement.scrollLeft = targetRect.left-50;
+									
 								}
 							}
 						}

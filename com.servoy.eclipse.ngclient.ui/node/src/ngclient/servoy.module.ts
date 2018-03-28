@@ -18,7 +18,8 @@ import { AllComponentsModule } from './allcomponents.module';
 import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
 import { HttpClientModule } from '@angular/common/http';
-
+import { FormatFilterPipe} from './servoy_public'
+import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
 //COMPONENT_IMPORTS_START
 //import { ServoyDefaultTextField } from '../servoydefault/textfield/textfield';
@@ -52,7 +53,7 @@ import { HttpClientModule } from '@angular/common/http';
         // COMPONENT_MODULE_IMPORTS_START
         // COMPONENT_MODULE_IMPORTS_END
     ],
-    providers: [FormService, ServoyService],
+    providers: [FormService, ServoyService, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent]
 } )
