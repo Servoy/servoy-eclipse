@@ -120,7 +120,7 @@ public class Activator extends Plugin
 		return npm;
 	}
 
-	public void executeNPMCommand(String command, IFolder projectNodeFolder)
+	public void executeNPMCommands(IFolder projectNodeFolder)
 	{
 		synchronized (plugin)
 		{

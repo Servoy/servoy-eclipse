@@ -85,7 +85,7 @@ public class ActiveProjectListener implements IActiveProjectListener
 							ServoyLog.logError(e);
 						}
 					}
-					Activator.getInstance().executeNPMCommand("install", nodeFolder);
+					Activator.getInstance().executeNPMCommands(nodeFolder);
 					createFileWatcher(nodeFolder);
 					return Status.OK_STATUS;
 				}
