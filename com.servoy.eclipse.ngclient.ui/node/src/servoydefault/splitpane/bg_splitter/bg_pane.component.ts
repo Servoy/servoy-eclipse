@@ -1,25 +1,21 @@
-import { Directive, Component, Input, ElementRef, Renderer2, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Directive, Input ,ViewChild,ElementRef} from '@angular/core';
 
 import { BGSplitter } from './bg_splitter.component';
 
 @Directive({
     selector: 'bg-pane',
     host: {
-       '[class]':'"split-pane"+index'
+       '[class]':'"split-pane"+index',
+       'style':"overflow:auto"
      }
 })
-export class BGPane implements OnInit {
+export class BGPane{
     
     @Input()minSize;
-    
+
     index;
     
-    constructor(private splitter:BGSplitter) {
+    constructor(public element: ElementRef) {
 	
     }
-    
-    ngOnInit() {
-        this.index = this.splitter.addPane(this);
-    }
-    
 }
