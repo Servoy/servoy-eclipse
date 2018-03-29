@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="8.3.0.3200_b1"
+      version="8.3.0.3201_rc1"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -31,7 +31,7 @@ internal testing and evaluation by such company only subject to these terms and 
 limited use cannot be transferred nor sub-licensed. No commercial and/or productive use in
 whatever way is permitted. These terms and conditions are applicable as to use of this demo copy
 provided that Servoy does not provide any (level of) Support nor Services. Servoy provides the
-demo copy of the Servoy Software “as is” and makes no representation, guarantee or warranty of
+demo copy of the Servoy Software “as is�? and makes no representation, guarantee or warranty of
 any kind concerning the same. In no event shall Servoy be liable for any loss, direct and/or indirect
 damage/expense whatsoever including, without limitation, time, money or goodwill arising from or
 in connection with the use, performance or non-performance or inability to use, and operation of
@@ -40,7 +40,7 @@ the Servoy Software. Servoy is not liable for any loss/damage of data.
 
 Article 1. Definitions.
 
-1.1 Servoy Software shall mean the present and future standard proprietary computer business application platform software of Servoy which is generally commercially available and marketed under the name “SERVOY” including the related Software Product Description and the subsequent Releases. The factual description of related Servoy Software products indicated by Release number etc. as actually licensed to End-User is indicated in the Product Order Form.
+1.1 Servoy Software shall mean the present and future standard proprietary computer business application platform software of Servoy which is generally commercially available and marketed under the name “SERVOY�? including the related Software Product Description and the subsequent Releases. The factual description of related Servoy Software products indicated by Release number etc. as actually licensed to End-User is indicated in the Product Order Form.
 
 1.2 Software Product Description shall mean the on-line help text/manual being part of the Servoy Software and/or the Servoy standard user manual related to the Release concerned; contents of which can be found at: https://wiki.servoy.com/display/public/Documentation/Servoy+Documentation
 
@@ -107,168 +107,168 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.core"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="j2db_documentation"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="j2db_tunnel"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="j2db_runtime"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="j2db_server"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="servoy_debug"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="servoy_headless_client"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="servoy_shared"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="servoy_smart_client"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="servoy_base"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
@@ -282,14 +282,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="sablo"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="servoy_ngclient"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
@@ -465,14 +465,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.designer.wpm"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
    <plugin
@@ -493,7 +493,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.notification"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.3.0.3201_rc1"
          unpack="false"/>
 
 </feature>
