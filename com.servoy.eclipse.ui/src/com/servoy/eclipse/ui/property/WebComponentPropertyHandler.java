@@ -188,7 +188,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		bean.setProperty(getName(), convertedValue);
 	}
 
-	public boolean shouldShow(Object obj)
+	public boolean shouldShow(PersistContext persistContext)
 	{
 		if (propertyDescription.getType() instanceof ComponentPropertyType)
 		{
