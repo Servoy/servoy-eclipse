@@ -42,7 +42,7 @@ export class SvyFormat implements OnInit{
       }
       
       ngOnInit() {
-          if (!this.svyFormat.isMask && !this.svyFormat.edit) return;
+          if (!this.svyFormat || (!this.svyFormat.isMask && !this.svyFormat.edit)) return;
           
           this.ignore = false;
           this.settings = {};
