@@ -2827,9 +2827,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 */
 		public String getSample()
 		{
-			String sample = null;
 			if (scriptObject != null)
 			{
+				String sample = null;
 				if (scriptObject instanceof XMLScriptObjectAdapter)
 				{
 					sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name,
@@ -2840,8 +2840,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					sample = scriptObject.getSample(name);
 				}
 				sample = Text.processTags(sample, resolver);
+				return HtmlUtils.escapeMarkup(sample).toString();
 			}
-			return HtmlUtils.escapeMarkup(sample).toString();
+			return null;
 		}
 
 		/**
