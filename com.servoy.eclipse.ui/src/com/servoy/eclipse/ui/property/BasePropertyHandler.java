@@ -252,40 +252,44 @@ public class BasePropertyHandler implements IPropertyHandler
 	}
 
 	@Override
-	public boolean shouldShow(Object obj)
+	public boolean shouldShow(PersistContext persistContext)
 	{
 		try
 		{
 			String name = getName();
 			// check for content spec element.
-			IPersist persist = (IPersist)obj;
+			IPersist persist = persistContext.getPersist();
 			EclipseRepository repository = (EclipseRepository)persist.getRootObject().getRepository();
 			Element element = repository.getContentSpec().getPropertyForObjectTypeByName(persist.getTypeID(), name);
 
 			int dispType = -1;
-			if (obj instanceof Field)
+			if (persist instanceof Field)
 			{
 				dispType = ((Field)persist).getDisplayType();
 			}
 
-			if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(name) && obj instanceof Form)
+			if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(name) && persist instanceof Form)
 			{
-				Form form = (Form)obj;
+				Form form = (Form)persist;
 				int type = form.getSolution().getSolutionType();
 				return (type == SolutionMetaData.SOLUTION || type == SolutionMetaData.NG_CLIENT_ONLY || type == SolutionMetaData.MODULE) &&
 					form.getView() != IFormConstants.VIEW_TYPE_RECORD && form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
 			}
-			if (obj instanceof Form && ((Form)obj).isFormComponent() && BaseComponent.isEventOrCommandProperty(name))
+			if (persist instanceof Form && ((Form)persist).isFormComponent() && BaseComponent.isEventOrCommandProperty(name))
 			{
 				return false;
 			}
-
+			if (IContentSpecConstants.PROPERTY_CSS_POSITION.equals(name) && persistContext.getContext() instanceof Form &&
+				!((Form)persistContext.getContext()).getUseCssPosition())
+			{
+				return false;
+			}
 			if (IContentSpecConstants.PROPERTY_ATTRIBUTES.equals(name))
 			{
-				if (!(obj instanceof IFormElement)) return false;
-				Form form = (Form)((IFormElement)obj).getAncestor(IRepository.FORMS);
+				if (!(persist instanceof IFormElement)) return false;
+				Form form = (Form)((IFormElement)persist).getAncestor(IRepository.FORMS);
 				int type = form.getSolution().getSolutionType();
-				return (obj instanceof WebComponent || type == SolutionMetaData.NG_CLIENT_ONLY);
+				return (persist instanceof WebComponent || type == SolutionMetaData.NG_CLIENT_ONLY);
 			}
 			if (!RepositoryHelper.shouldShow(name, element, persist.getClass(), dispType))
 			{

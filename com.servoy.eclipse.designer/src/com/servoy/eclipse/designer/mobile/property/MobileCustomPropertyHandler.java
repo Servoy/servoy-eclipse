@@ -47,16 +47,16 @@ import com.servoy.j2db.util.Utils;
 public class MobileCustomPropertyHandler implements IPropertyHandler
 {
 	public static String[] DATA_ICONS = new String[] { //
-	"alert", "arrow-d", "arrow-l", "arrow-r", "arrow-u", "back", "bars", "check",
-//			"custom",
-	"delete", "edit", "forward", "gear", "grid", "home", "info", "minus", "plus", "refresh", "search", "star" };
+		"alert", "arrow-d", "arrow-l", "arrow-r", "arrow-u", "back", "bars", "check",
+		//			"custom",
+		"delete", "edit", "forward", "gear", "grid", "home", "info", "minus", "plus", "refresh", "search", "star" };
 
 	public static final PropertyDescription DATA_ICONS_VALUES = new PropertyDescription(IMobileProperties.DATA_ICON.propertyName, ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(DATA_ICONS).addDefault(null, null));
 
 
-	public static final PropertyDescription HEADERSIZE_VALUES = new PropertyDescription(IMobileProperties.HEADER_SIZE.propertyName,
-		ValuesPropertyType.INSTANCE, new ValuesConfig().setValues(
+	public static final PropertyDescription HEADERSIZE_VALUES = new PropertyDescription(IMobileProperties.HEADER_SIZE.propertyName, ValuesPropertyType.INSTANCE,
+		new ValuesConfig().setValues(
 			new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) },
 			new String[] { "h1", "h2", "h3", "h4", "h5", "h6" }).addDefault(null, null));
 
@@ -143,7 +143,8 @@ public class MobileCustomPropertyHandler implements IPropertyHandler
 			// 0: vertical (default)
 			// 1: horizontal
 			// ... future
-			return Boolean.valueOf(IMobileProperties.RADIO_STYLE_HORIZONTAL.equals(persist.getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName)));
+			return Boolean.valueOf(
+				IMobileProperties.RADIO_STYLE_HORIZONTAL.equals(persist.getCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName)));
 		}
 
 		if (STICKY_PART_NAME.equals(name))
@@ -183,8 +184,8 @@ public class MobileCustomPropertyHandler implements IPropertyHandler
 			// 0: vertical (default)
 			// 1: horizontal
 			// ... future
-			persist.putCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName, Boolean.TRUE.equals(value) ? IMobileProperties.RADIO_STYLE_HORIZONTAL
-				: null);
+			persist.putCustomMobileProperty(IMobileProperties.RADIO_STYLE.propertyName,
+				Boolean.TRUE.equals(value) ? IMobileProperties.RADIO_STYLE_HORIZONTAL : null);
 		}
 		else if (STICKY_PART_NAME.equals(name))
 		{
@@ -218,7 +219,7 @@ public class MobileCustomPropertyHandler implements IPropertyHandler
 		return csp != null && csp.supports(ClientSupport.mc);
 	}
 
-	public boolean shouldShow(Object obj)
+	public boolean shouldShow(PersistContext persistContext)
 	{
 		return true;
 	}

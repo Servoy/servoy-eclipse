@@ -72,7 +72,66 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 						if (value != null)
 						{
 							String position = value.toString().trim();
-							if (position.endsWith("px"))
+							if (position.startsWith("calc"))
+							{
+								if (position.indexOf("(") > 0 && position.indexOf(")") > 0)
+								{
+									position = position.substring(position.indexOf("(") + 1, position.lastIndexOf(")"));
+									position = position.trim();
+									String[] values = position.split(" ");
+									if (values.length == 3)
+									{
+										if (!"-".equals(values[1]) && !"+".equals(values[1]))
+										{
+											return "Only + and - operations are supported inside calc function.";
+										}
+										String number = values[0];
+										if (number.endsWith("px"))
+										{
+											number = number.replaceFirst("px", "");
+										}
+										else if (number.endsWith("%"))
+										{
+											number = number.replaceFirst("%", "");
+										}
+										try
+										{
+											Utils.getAsInteger(number, true);
+										}
+										catch (Exception ex)
+										{
+											return "First operand in calc function must be a number in pixels or percentage.";
+										}
+										number = values[2];
+										if (number.endsWith("px"))
+										{
+											number = number.replaceFirst("px", "");
+										}
+										else if (number.endsWith("%"))
+										{
+											number = number.replaceFirst("%", "");
+										}
+										try
+										{
+											Utils.getAsInteger(number, true);
+										}
+										catch (Exception ex)
+										{
+											return "Second operand in calc function must be a number in pixels or percentage.";
+										}
+									}
+									else
+									{
+										return "Value must be calc(x +/- y)";
+									}
+								}
+								else
+								{
+									return "Value must be css calc function.";
+								}
+								return null;
+							}
+							else if (position.endsWith("px"))
 							{
 								position = position.replaceFirst("px", "");
 							}
@@ -86,7 +145,7 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 							}
 							catch (Exception ex)
 							{
-								return "Value must be either a number (in pixels) or a percent.";
+								return "Value must be either a number (in pixels) , a percent or a css calc function.";
 							}
 						}
 						return null;

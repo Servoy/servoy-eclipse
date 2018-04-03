@@ -320,7 +320,7 @@ public class PseudoPropertyHandler implements IPropertyHandler
 		return true;
 	}
 
-	public boolean shouldShow(Object obj)
+	public boolean shouldShow(PersistContext persistContext)
 	{
 		return true;
 	}

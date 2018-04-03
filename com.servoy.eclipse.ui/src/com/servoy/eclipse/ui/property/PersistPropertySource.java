@@ -1733,7 +1733,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			return false;
 		}
-		return propertyDescriptor.propertyDescriptor.shouldShow(persistContext.getPersist());
+		return propertyDescriptor.propertyDescriptor.shouldShow(persistContext);
 	}
 
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)

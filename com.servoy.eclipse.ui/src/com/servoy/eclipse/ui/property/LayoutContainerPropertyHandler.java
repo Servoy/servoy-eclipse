@@ -81,7 +81,7 @@ public class LayoutContainerPropertyHandler implements IPropertyHandler
 		((LayoutContainer)obj).putAttribute(getName(), (String)value);
 	}
 
-	public boolean shouldShow(Object obj)
+	public boolean shouldShow(PersistContext persistContext)
 	{
 		return true;
 	}

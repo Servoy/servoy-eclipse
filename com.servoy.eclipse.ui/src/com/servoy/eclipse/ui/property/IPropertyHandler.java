@@ -25,7 +25,7 @@ import com.servoy.j2db.documentation.ClientSupport;
 
 /**
  * Handles type and get/set value of properties.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -45,6 +45,6 @@ public interface IPropertyHandler
 
 	PropertyDescription getPropertyDescription(Object obj, IPropertySource propertySource, PersistContext persistContext);
 
-	boolean shouldShow(Object obj);
+	boolean shouldShow(PersistContext persistContext);
 
 }
