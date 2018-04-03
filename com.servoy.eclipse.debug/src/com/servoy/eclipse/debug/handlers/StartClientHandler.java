@@ -80,6 +80,7 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 
 	private String getStartTitle(String commandId)
 	{
+		if (commandId == null) return null;
 		switch (commandId)
 		{
 			case START_SMART_CLIENT :
