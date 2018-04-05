@@ -1,10 +1,11 @@
-import { async, ComponentFixture, TestBed, fakeAsync , tick} from '@angular/core/testing'
-import {Component, Input, ElementRef, ViewChild} from '@angular/core'
-import {SvyFormat} from './format.directive'
+import { async, ComponentFixture, TestBed, fakeAsync , tick} from '@angular/core/testing';
+import {Component, Input, ElementRef, ViewChild, DebugElement} from '@angular/core';
+import {By} from "@angular/platform-browser";
+import {SvyFormat} from './format.directive';
 
 @Component({
     selector: 'test-textfield',
-    template: '<input [svyFormat]="format"/>'
+    template: '<input [svyFormat]="format" #element/>'
   })
 class TestTextfield {
     @Input() format;
@@ -15,8 +16,9 @@ describe('SvyFormat', () => {
     let svyFormat : SvyFormat; 
     let component: TestTextfield;
     let fixture: ComponentFixture<TestTextfield>;
+    let inputEl: DebugElement;
 
-    beforeEach(() => {
+beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         TestTextfield,
@@ -26,8 +28,8 @@ describe('SvyFormat', () => {
   });
 
     function sendInput(text: string) {
-        fixture.elementRef.nativeElement.value = text;
-        fixture.elementRef.nativeElement.dispatchEvent(new Event('input'));
+        component.elementRef.nativeElement.value = text;
+        component.elementRef.nativeElement.dispatchEvent(new Event('input'));
         fixture.detectChanges();
         return fixture.whenStable();
       }
@@ -35,6 +37,7 @@ describe('SvyFormat', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(TestTextfield);
         component = fixture.componentInstance;
+        inputEl = fixture.debugElement.query(By.css('input'));
         fixture.detectChanges();
         
     });
@@ -50,10 +53,27 @@ describe('SvyFormat', () => {
         sendInput("abc");
         tick();
         
-        fixture.elementRef.nativeElement.dispatchEvent(new Event('blur'));//not sure if needed
+        expect(inputEl.nativeElement.value).toEqual("ABC");    
+    }));
+    
+    it ('should apply dd.MM.yyyy mask', fakeAsync(() => {
+        component.format = {"allowedCharacters":null,"isMask":true,"isRaw":false,"edit":"##.##.####","display":"dd.MM.yyyy","type":"DATETIME","placeHolder":"dd.MM.yyyy","isNumberValidator":false};
+        fixture.detectChanges();
+        
+        sendInput("05.04.2018");
+        tick();
+        expect(component.elementRef.nativeElement.value).toEqual("05.04.2018");    
+       
+        component.elementRef.nativeElement.focus();
+        fixture.detectChanges();
+        inputEl.triggerEventHandler("keydown", {"keyCode": "49"});
+        fixture.detectChanges();
+        tick(); 
+        inputEl.triggerEventHandler("keypress", {"keyCode": "49"});  
+        fixture.detectChanges();
         tick();
         
-        //TODO expect(fixture.elementRef.nativeElement.value).toEqual("ABC");    
+        //TODO this does not work yet because svyFormat is undefined in ngOnInit of the SvyFormat directive..
+        //expect(component.elementRef.nativeElement.value).toEqual("15.04.2018");    
     }));
 });
-
