@@ -23,8 +23,7 @@ const MASK_CONST = {
 @Directive({ selector: '[svyFormat]'}) 
 export class SvyFormat implements OnInit{
     
-      @Input('svyFormat') svyFormat : {display:null, uppercase:false,lowercase:false, type:null, isMask: false, edit:'', placeHolder: '', allowedCharacters:''};
-
+      @Input('svyFormat') svyFormat : Format;
       private element: HTMLInputElement;
 
       private ignore : boolean;
@@ -145,9 +144,9 @@ export class SvyFormat implements OnInit{
           if (!this.mask) return;
           
           this.checkVal(true);
-//          if (this.element.value != this.focusText)
-//              //TODO trigger change
-//          }
+          if (this.element.value != this.focusText) {
+              this.element.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { text: () => this.element.value } }))
+          }
       }
       
       @HostListener('keypress',['$event']) onKeypress(e:KeyboardEvent) {          
@@ -183,7 +182,7 @@ export class SvyFormat implements OnInit{
                   }
               }
           }
-          return false;         
+          return false;
       }
       
       @HostListener('keydown',['$event']) onKeydown(e:KeyboardEvent) {
@@ -354,3 +353,14 @@ export class SvyFormat implements OnInit{
           return this.settings['placeholder'].length > 1 ? this.settings['placeholder'].charAt(i) : this.settings['placeholder'];
       }
   }
+
+export class Format {
+    display : string = null;
+    uppercase:boolean = false;
+    lowercase: boolean = false;
+    type : string = null;
+    isMask : boolean = false;
+    edit : string = null;
+    placeHolder: string = '';
+    allowedCharacters : string = '';
+}
