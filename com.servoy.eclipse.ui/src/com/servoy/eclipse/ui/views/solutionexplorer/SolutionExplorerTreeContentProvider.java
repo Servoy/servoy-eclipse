@@ -2380,7 +2380,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			List<String> forms = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getWorkingSetPersists(
 				workingSetNode.getName(), new String[] { workingSetNode.getSolution().getName() });
-			if (forms != null)
+			if (forms != null && !forms.isEmpty())
 			{
 				List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>();
 				for (String formName : forms)
