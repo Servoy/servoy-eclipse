@@ -200,7 +200,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 							values[z] = urlPropertiesFields.get(z).getText();
 						}
 						String newUrl = serverTemplateDefinition.getUrlForValues(values, serverConfigObservable.getObject().getServerUrl());
-						if (newUrl != null)
+						if (newUrl != null && !newUrl.equals(urlField.getText()))
 						{
 							urlField.setText(newUrl);
 						}
@@ -388,6 +388,21 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		urlField = new Text(advancedSettingsComposite, SWT.BORDER);
 		urlField.setToolTipText(ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
+		urlField.addModifyListener(new ModifyListener()
+		{
+			public void modifyText(ModifyEvent e)
+			{
+				String[] urlValues = serverTemplateDefinition.getUrlValues(urlField.getText());
+				for (int i = 0; i < urlPropertiesFields.size(); i++)
+				{
+					if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
+					{
+						urlPropertiesFields.get(i).setText(urlValues[i]);
+					}
+
+				}
+			}
+		});
 
 		toolTip = "JDBC driver to use. Each DB type has a different driver. For some DB types there are multiple drivers available.\nThis is the name of a driver class that is located in the driver directory's jar files.";
 		Label driverLabel;
