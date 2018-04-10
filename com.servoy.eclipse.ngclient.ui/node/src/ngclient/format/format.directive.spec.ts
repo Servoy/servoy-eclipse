@@ -34,11 +34,21 @@ beforeEach(() => {
         return fixture.whenStable();
       }
     
+    function typeChar(key: string) {
+        let char = key.charCodeAt(0);
+        inputEl.triggerEventHandler("keydown", {"keyCode": char});
+        fixture.detectChanges();
+        tick(); 
+        inputEl.triggerEventHandler("keypress", {"keyCode": char});  
+        fixture.detectChanges();
+        tick();
+    }
+    
     beforeEach(() => {
         fixture = TestBed.createComponent(TestTextfield);
         component = fixture.componentInstance;
         inputEl = fixture.debugElement.query(By.css('input'));
-        fixture.detectChanges();
+        //DO NOT CALL fixture.detectChanges() before setting the format value, otherwise it calls ngOnInit without having the format set
         
     });
     
@@ -64,16 +74,35 @@ beforeEach(() => {
         tick();
         expect(component.elementRef.nativeElement.value).toEqual("05.04.2018");    
        
-        component.elementRef.nativeElement.focus();
+        component.elementRef.nativeElement.selectionStart = 0;
+        component.elementRef.nativeElement.selectionEnd = 0;
         fixture.detectChanges();
-        inputEl.triggerEventHandler("keydown", {"keyCode": "49"});
+        "12032017".split("").map(function(c, i, array) { 
+            typeChar(c);
+        });        
+        expect(component.elementRef.nativeElement.value).toEqual("12.03.2017");    
+    }));
+    
+    it ('should apply 00.00 mask', fakeAsync(() => {
+        component.format = {"allowedCharacters":null,"isMask":true,"isRaw":false,"edit":"00.00","display":"00.00","type":"NUMBER","placeHolder":"00.00","isNumberValidator":false};
         fixture.detectChanges();
-        tick(); 
-        inputEl.triggerEventHandler("keypress", {"keyCode": "49"});  
-        fixture.detectChanges();
-        tick();
         
-        //TODO this does not work yet because svyFormat is undefined in ngOnInit of the SvyFormat directive..
-        //expect(component.elementRef.nativeElement.value).toEqual("15.04.2018");    
+        sendInput("5");
+        tick();
+        expect(component.elementRef.nativeElement.value).toEqual("50.00");
+       
+        component.elementRef.nativeElement.selectionStart = 1;
+        component.elementRef.nativeElement.selectionEnd = 1;
+        fixture.detectChanges();
+        typeChar("1");
+        expect(component.elementRef.nativeElement.value).toEqual("51.00");    
+        
+        component.elementRef.nativeElement.selectionStart = 0;
+        component.elementRef.nativeElement.selectionEnd = 0;
+        fixture.detectChanges();
+        "2005".split("").map(function(c, i, array) { 
+            typeChar(c);
+        });
+        expect(component.elementRef.nativeElement.value).toEqual("20.05");
     }));
 });
