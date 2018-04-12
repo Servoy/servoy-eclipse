@@ -79,3 +79,16 @@
     display: block;
     width: 100%;
   }
+  
+ .svy-overflow-auto {
+	overflow: auto;
+}
+.svy-padding-xs {
+	padding: 1px 5px;
+}
+.svy-nowrap {
+	white-space:nowrap;
+}
+.svy-nomargin {
+	margin:0px;
+}

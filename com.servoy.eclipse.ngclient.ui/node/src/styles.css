@@ -1,1 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+@import "~bootstrap/dist/css/bootstrap.min.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fontawesome.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-brands.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-regular.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
+@import "~ng-pick-datetime/assets/style/picker.min.css";
+@import "assets/styles/servoy.css";
