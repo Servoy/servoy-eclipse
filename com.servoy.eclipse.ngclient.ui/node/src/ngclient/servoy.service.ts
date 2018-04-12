@@ -81,8 +81,16 @@ export class ServoyService {
         wsSession.onopen(( evt ) => {
             // update the main app window with the right size
             wsSession.callService( "$windowService", "resize", { size: { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight } }, true );
-            var locale = this.sabloService.getLocale();
-            this.setLocale(locale.language, locale.country, true);
+            // set the correct locale, first test if it is set in the sessionstorage
+            let locale = this.sessionStorageService.get("locale");
+            if (locale) {
+                const array = locale.split('-');
+                this.setLocale(array[0], array[1] , true);
+            }
+            else {
+                locale = this.sabloService.getLocale();
+                this.setLocale(locale.language, locale.country, true);
+            }
         } );
     }
 
