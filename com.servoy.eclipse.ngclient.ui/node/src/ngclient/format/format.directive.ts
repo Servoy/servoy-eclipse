@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, Input, Injector, OnInit } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, Injector, OnChanges, SimpleChanges } from '@angular/core';
 
 
 const MASK_CONST = {
@@ -21,7 +21,7 @@ const MASK_CONST = {
 };
       
 @Directive({ selector: '[svyFormat]'}) 
-export class SvyFormat implements OnInit{
+export class SvyFormat implements OnChanges{
     
       @Input('svyFormat') svyFormat : Format;
       private element: HTMLInputElement;
@@ -40,7 +40,7 @@ export class SvyFormat implements OnInit{
           this.element = el.nativeElement;
       }
       
-      ngOnInit() {
+      ngOnChanges(changes: SimpleChanges) {
           if (!this.svyFormat || (!this.svyFormat.isMask && !this.svyFormat.edit)) return;
           
           this.ignore = false;
