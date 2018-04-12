@@ -16,7 +16,7 @@ import {ServoyDefaultSplitpane} from './splitpane/splitpane';
 
 import {SabloModule} from '../sablo/sablo.module'
 
-import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat} from '../ngclient/servoy_public'
+import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat,FormattingService,I18NProvider} from '../ngclient/servoy_public'
 
 @NgModule({
   declarations: [
@@ -46,6 +46,7 @@ import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat} from '../ngclient/s
             ServoyDefaultTablesspanel,
             ServoyDefaultSplitpane
   ],
-  providers: []
+  providers: [FormattingService
+                     ]
 })
 export class ServoyDefaultComponentsModule { }
