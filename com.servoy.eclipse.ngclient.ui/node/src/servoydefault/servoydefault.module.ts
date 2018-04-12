@@ -46,7 +46,8 @@ import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat,FormattingService,I1
             ServoyDefaultTablesspanel,
             ServoyDefaultSplitpane
   ],
-  providers: [FormattingService
+  providers: [FormattingService,
+                      I18NProvider
                      ]
 })
 export class ServoyDefaultComponentsModule { }

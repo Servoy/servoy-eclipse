@@ -21,12 +21,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormatFilterPipe} from './servoy_public'
 import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
-//COMPONENT_IMPORTS_START
-//import { ServoyDefaultTextField } from '../servoydefault/textfield/textfield';
-//import { ServoyDefaultButton } from '../servoydefault/button/button';
-//import { ServoyDefaultLabel} from '../servoydefault/label/label';
-//import { ServoyDefaultTabpanel} from '../servoydefault/tabpanel/tabpanel';
-//COMPONENT_IMPORTS_END
+import {I18NProvider} from './services/i18n_provider.service'
 
 @NgModule( {
     declarations: [
@@ -35,12 +30,6 @@ import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/com
         AddAttributeDirective,
         DefaultLoginWindowComponent,
         FileUploadWindowComponent
-        // COMPONENT_DECLARATIONS_START
-//        ServoyDefaultTextField,
-//        ServoyDefaultButton,
-//        ServoyDefaultLabel,
-//        ServoyDefaultTabpanel,
-        // COMPONENT_DECLARATIONS_END
     ],
     imports: [
         BrowserModule,
@@ -50,10 +39,8 @@ import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/com
 		AllComponentsModule,
         AllServicesModules,
         HttpClientModule
-        // COMPONENT_MODULE_IMPORTS_START
-        // COMPONENT_MODULE_IMPORTS_END
     ],
-    providers: [FormService, ServoyService, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe],
+    providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent]
 } )
