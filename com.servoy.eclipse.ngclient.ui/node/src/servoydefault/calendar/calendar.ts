@@ -61,7 +61,6 @@ export class ServoyDefaultCalendar implements OnInit, OnChanges {
                             i18nProvider:I18NProvider,
                             dateTimeAdapter: DateTimeAdapter<any> ,
                             owlDateTimeIntl:OwlDateTimeIntl) {
-        moment.locale( numeral.locale() )
         dateTimeAdapter.setLocale( numeral.locale() );
         i18nProvider.getI18NMessages("servoy.button.ok","servoy.button.cancel").then((val)=> {
             if (val["servoy.button.ok"]) owlDateTimeIntl.setBtnLabel = val["servoy.button.ok"]

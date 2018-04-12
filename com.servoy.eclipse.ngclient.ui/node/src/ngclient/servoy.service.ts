@@ -20,6 +20,9 @@ import { SpecTypesService } from '../sablo/spectypes.service'
 import * as numeral from 'numeral';
 import  'numeral/locales'; 
 
+import * as moment from 'moment';
+import  'moment/min/locales.min'; 
+
 @Injectable()
 export class ServoyService {
     private solutionSettings: SolutionSettings = new SolutionSettings();
@@ -134,8 +137,9 @@ export class ServoyService {
                                 numeralLocaleInfo.ordinal = function (number) {
                                     return ".";
                                 };
-                                //numeral.language(numeralLanguage, numeralLocaleInfo);
+                                numeral.register('locale',numeralLanguage,numeralLocaleInfo);
                                 numeral.locale(numeralLanguage);
+                                moment.locale( numeral.locale() )
                                 if (!initializing) {
                                     this.sessionStorageService.set("locale", numeralLanguage);
                                     this.sabloService.setLocale({ language : language, country : country , full: language + "-" + country});
@@ -148,6 +152,7 @@ export class ServoyService {
                 }
             }
         }
+        moment.locale( numeral.locale() )
         var lang = this.sessionStorageService.get("locale");
         if (lang) {
             var array = lang.split('-');

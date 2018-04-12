@@ -1,7 +1,6 @@
 import { IConverter } from '../../sablo/converter.service'
 
 import * as moment from 'moment';
-import  'moment/min/locales.min'; 
 
 export class DateConverter implements IConverter {
     
