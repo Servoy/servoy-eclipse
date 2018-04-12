@@ -11,6 +11,7 @@ import { SessionStorageService } from 'angular-web-storage';
 import { DateConverter } from './converters/date_converter'
 import { JSONObjectConverter } from './converters/json_object_converter'
 import { JSONArrayConverter } from './converters/json_array_converter'
+import {I18NProvider} from './services/i18n_provider.service'
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 
@@ -30,6 +31,7 @@ export class ServoyService {
             private sabloService: SabloService,
             private windowRefService: WindowRefService,
             private sessionStorageService: SessionStorageService,
+            private i18nProvider:I18NProvider,
             converterService: ConverterService,
             specTypesService: SpecTypesService,
             iterableDiffers: IterableDiffers ) {
@@ -93,7 +95,7 @@ export class ServoyService {
         try{
        // TODO angular $translate and our i18n service
 //            $translate.refresh();
-//            $svyI18NService.flush();
+            this.i18nProvider.flush();
             this.setAngularLocale(language);
             numeral.localeData((language + '-' + country).toLowerCase());
             numeral.locale((language + '-' + country).toLowerCase());

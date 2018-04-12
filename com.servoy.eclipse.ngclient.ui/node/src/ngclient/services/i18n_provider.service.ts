@@ -88,7 +88,7 @@ export class I18NProvider {
             return this.cachedPromises[key].promise;
         }
         
-       private flush() {
+       public flush() {
             this.cachedMessages = {};
             for (var key in this.cachedPromises) {
                 if (this.cachedPromises.hasOwnProperty(key) && this.cachedPromises[key].promise) {
