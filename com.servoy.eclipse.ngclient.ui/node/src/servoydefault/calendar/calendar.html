@@ -1,0 +1,20 @@
+<div class='input-group date'
+    [style]="(!readOnly && enabled && !findmode) ? { 'position':'relative'} : {'display':'inline', 'position':'relative'}"
+    #element>
+	<input type="text" 
+	   sablo-tabseq='model.tabSeq'
+	   svy-focusgained='handlers.onFocusGainedMethodID($event)'
+	   svy-focuslost='handlers.onFocusLostMethodID($event)'
+	   svy-rightclick='handlers.onRightClickMethodID($event)'
+	   svy-enter='handlers.onActionMethodID($event)'
+	   class='svy-calendar form-control input-sm svy-padding-xs svy-line-height-normal'
+	   ng-focus='focusGained($event)'
+	   ng-blur='focusLost($event)'
+       [id]="servoyApi.getMarkupId()"
+       [value]="dataProviderID | formatFilter:format?.display:format?.type:format" 
+	   (change)="update($event.target.value)"
+       #inputElement/>
+		<span [owlDateTimeTrigger]="datetime" class="input-group-append" style="padding:1px;" ng-show="!model.readOnly && model.enabled && !model.findmode"><span class="far fa-calendar-alt"></span></span>
+		<input (dateTimeChange)="dateChanged($event)" [owlDateTime]="datetime"  [value]="dataProviderID"  style="position:absolute;bottom:0px;width:0px;height:0px;border:0px;padding:0px">
+		<owl-date-time #datetime [firstDayOfWeek]="firstDayOfWeek" [hour12Timer]="hour12Timer" [pickerType]="pickerType" [showSecondsTimer]="showSecondsTimer"></owl-date-time>
+</div>

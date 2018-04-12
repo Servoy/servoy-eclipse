@@ -266,7 +266,7 @@ public class ActiveProjectListener implements IActiveProjectListener
 	private void addAllDirs(File dir, WatchService watchService)
 	{
 		// skip node modules
-		if (dir.getName().equals("node_modules")) return;
+		if (dir.getName().equals("node_modules") || dir.getName().equals("dist")) return;
 
 		try
 		{

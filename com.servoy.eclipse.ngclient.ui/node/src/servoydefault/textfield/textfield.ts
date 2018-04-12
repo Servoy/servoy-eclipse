@@ -4,8 +4,7 @@ import {PropertyUtils, FormattingService} from '../../ngclient/servoy_public'
 
 @Component( {
     selector: 'servoydefault-textfield',
-    templateUrl: './textfield.html',
-    providers: [FormattingService]
+    templateUrl: './textfield.html'
 } )
 export class ServoyDefaultTextField implements OnInit, OnChanges {
     @Input() name;
@@ -45,7 +44,7 @@ export class ServoyDefaultTextField implements OnInit, OnChanges {
     
     @ViewChild('element') elementRef:ElementRef;
 
-    constructor(private readonly renderer: Renderer2, public formattingService : FormattingService) { }
+    constructor(private readonly renderer: Renderer2, private formattingService : FormattingService) { }
 
     ngOnInit() {
 
@@ -74,7 +73,7 @@ export class ServoyDefaultTextField implements OnInit, OnChanges {
 //                    else formatState = $formatterUtils.createFormatState( $element, $scope, ngModel, true, value );
                     break;
                 case "horizontalAlignment":
-                    PropertyUtils.setHorizontalAlignment(  this.elementRef.nativeElement.nativeElement,this.renderer ,change.currentValue);
+                    PropertyUtils.setHorizontalAlignment(  this.elementRef.nativeElement,this.renderer ,change.currentValue);
                     break;
                 case "enabled":
                     if ( change.currentValue )

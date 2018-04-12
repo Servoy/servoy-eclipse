@@ -13,10 +13,17 @@ import { ServoyDefaultLabel} from './label/label';
 import { ServoyDefaultTabpanel} from './tabpanel/tabpanel';
 import { ServoyDefaultTablesspanel} from './tabpanel/tablesspanel';
 import {ServoyDefaultSplitpane} from './splitpane/splitpane';
+import {ServoyDefaultCalendar} from './calendar/calendar';
 
 import {SabloModule} from '../sablo/sablo.module'
 
-import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat} from '../ngclient/servoy_public'
+import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat,FormattingService,I18NProvider} from '../ngclient/servoy_public'
+
+import {OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
+import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-datetime-moment';
+
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+
 
 @NgModule({
   declarations: [
@@ -26,6 +33,7 @@ import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat} from '../ngclient/s
     ServoyDefaultTabpanel,
     ServoyDefaultTablesspanel,
     ServoyDefaultSplitpane,
+    ServoyDefaultCalendar,
     FormatFilterPipe,
     MnemonicletterFilterPipe,
     SvyFormat,
@@ -37,6 +45,9 @@ import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat} from '../ngclient/s
     CommonModule,
     NgbModule,
     SabloModule,
+    BrowserAnimationsModule,
+    OwlDateTimeModule,
+    OwlMomentDateTimeModule
   ],
   exports: [
             ServoyDefaultTextField,
@@ -44,8 +55,12 @@ import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat} from '../ngclient/s
             ServoyDefaultLabel,
             ServoyDefaultTabpanel,
             ServoyDefaultTablesspanel,
-            ServoyDefaultSplitpane
+            ServoyDefaultSplitpane,
+            ServoyDefaultCalendar
   ],
-  providers: []
+  providers: [FormattingService,
+                      I18NProvider,
+                      {provide: OWL_DATE_TIME_FORMATS, useValue: OWL_MOMENT_DATE_TIME_FORMATS}
+                     ]
 })
 export class ServoyDefaultComponentsModule { }

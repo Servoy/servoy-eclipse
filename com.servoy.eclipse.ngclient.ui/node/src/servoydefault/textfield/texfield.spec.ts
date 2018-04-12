@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {SabloModule} from '../../sablo/sablo.module'
 
 import { ServoyDefaultTextField } from './textfield';
-import {FormatFilterPipe,SvyFormat} from '../../ngclient/servoy_public'
+import {FormatFilterPipe,SvyFormat, FormattingService} from '../../ngclient/servoy_public'
 
 
 describe("ServoyDefaultTextField", () => {
@@ -14,7 +14,7 @@ describe("ServoyDefaultTextField", () => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultTextField, FormatFilterPipe, SvyFormat],
       imports: [SabloModule],
-      providers: [FormatFilterPipe]
+      providers: [FormatFilterPipe,FormattingService]
     })
     .compileComponents();
   }));

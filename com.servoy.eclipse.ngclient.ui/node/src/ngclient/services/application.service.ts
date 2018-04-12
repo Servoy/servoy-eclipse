@@ -7,8 +7,6 @@ import {WindowRefService} from '../../sablo/util/windowref.service';
 
 import {SabloService} from '../../sablo/sablo.service';
 
-import * as numeral from 'numeral';
-
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { DefaultLoginWindowComponent } from './default-login-window/default-login-window.component'
 import { FileUploadWindowComponent } from './file-upload-window/file-upload-window.component'
@@ -23,6 +21,10 @@ export class ApplicationService {
                             private windowRefService:WindowRefService,
                             private sabloService:SabloService,
                             private modalService:NgbModal) {
+    }
+    
+    public setLocale(language, country ){
+        this.servoyService.setLocale(language, country);
     }
 
     public setStyleSheets(paths) {
@@ -98,7 +100,6 @@ export class ApplicationService {
     
     public getClientBrowserInformation() {
         var locale = this.sabloService.getLocale();
-        this.setAngularLocale(locale.language);
         var userAgent = this.getUserAgentAndPlatform();
         return {
             serverURL: this.getServerURL(),
@@ -109,85 +110,6 @@ export class ApplicationService {
             remote_host : this.windowRefService.nativeWindow.servoy_remotehost,
             utcOffset : (new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0).getTimezoneOffset() / -60),utcDstOffset:(new Date(new Date().getFullYear(), 6, 1, 0, 0, 0, 0).getTimezoneOffset() / -60)
         };
-    }
-    
-    public setAngularLocale(language){
-        // TODO how does locale work in angular 2+
-//        var fileref= this.windowRefService.nativeWindow.document.createElement('script');
-//        fileref.setAttribute("type","text/javascript");
-//        fileref.setAttribute("src", "js/angular_i18n/angular-locale_"+language+".js");
-//        fileref.onload = function () {
-//            var localInjector = angular.injector(['ngLocale']),
-//            externalLocale = localInjector.get('$locale');
-//            angular.forEach(externalLocale, function(value, key) {
-//                $locale[key] = externalLocale[key];
-//            });
-//        }
-//        this.windowRefService.nativeWindow.document.getElementsByTagName("head")[0].appendChild(fileref);
-    }
-    
-    public setLocale(language, country, initializing) {
-        try{
-       // TODO angular $translate and our i18n service
-//            $translate.refresh();
-//            $svyI18NService.flush();
-            this.setAngularLocale(language);
-            numeral.localeData((language + '-' + country).toLowerCase());
-            numeral.locale((language + '-' + country).toLowerCase());
-            if (!initializing) this.sessionStorageService.set("locale", (language + '-' + country).toLowerCase());
-        } catch(e) {
-            try {
-                numeral.localeData(language + '-' + country);
-                numeral.locale(language + '-' + country);
-                if (!initializing) this.sessionStorageService.set("locale", language + '-' + country);
-            } catch(e2) {
-                try {
-                    //try it with just the language part
-                    numeral.localeData(language);
-                    numeral.locale(language);
-                    if (!initializing) this.sessionStorageService.set("locale", language);
-                } catch(e3) {
-                    try {
-                        //try it with just the language part but lowercase
-                        numeral.localeData(language.toLowerCase());
-                        numeral.locale(language.toLowerCase());
-                        if (!initializing) this.sessionStorageService.set("locale", language);
-                    } catch(e4) {
-                        try {
-                            //try to duplicate the language in case it's only defined like that
-                            numeral.localeData(language.toLowerCase() + "-" + language.toLowerCase()); // nl-nl for example is defined but browser only says 'nl' (this won't work for all languages for example "en-en" I don't think even exists)
-                            numeral.locale(language.toLowerCase() + "-" + language.toLowerCase()); 
-                            if (!initializing) this.sessionStorageService.set("locale", language);
-                        } catch(e5) {
-                            // we can't find a suitable locale defined in locales.js; get the needed things from server (Java knows more locales)
-                            // and create the locate info from that
-                            var promise = this.sabloService.callService("i18nService", "generateLocaleForNumeralJS", country ? {'language' : language, 'country' : country} : {'language' : language}, false);
-                            // TODO should we always do this (get stuff from server side java) instead of trying first to rely on numeral.js and locales.js provided langs?
-                            var numeralLanguage = language + (country ? '-' + country : "");
-                            promise.then(function(numeralLocaleInfo) {
-//                                if ($log.debugEnabled) $log.debug("Locale '" + numeralLanguage + "' not found in client js lib, but it was constructed based on server Java locale-specific information: " + JSON.stringify(numeralLocaleInfo));
-                                numeralLocaleInfo.ordinal = function (number) {
-                                    return ".";
-                                };
-                                //numeral.language(numeralLanguage, numeralLocaleInfo);
-                                numeral.locale(numeralLanguage);
-                                if (!initializing) {
-                                    this.sessionStorageService.set("locale", numeralLanguage);
-                                    this.sabloService.setLocale({ language : language, country : country , full: language + "-" + country});
-                                }
-                            }, function(reason) {
-//                                $log.warn("Cannot properly handle locale '" + numeralLanguage + "'. It is not available in js libs and it could not be loaded from server...");
-                            });
-                        }
-                    }
-                }
-            }
-        }
-        var lang = this.sessionStorageService.get("locale");
-        if (lang) {
-            var array = lang.split('-');
-            this.sabloService.setLocale({ language : array[0], country : (array[1] ?  array[1] : country), full: (array[1] ?  lang :  (array[0] +"-"+country))});
-        }
     }
     
     public showInfoPanel(url,w,h,t,closeText)
