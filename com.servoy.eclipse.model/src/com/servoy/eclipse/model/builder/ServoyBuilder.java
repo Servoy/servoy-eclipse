@@ -215,36 +215,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private static final int LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM = 3;
 	private static final int LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM = 20;
 
-	class ServoyDeltaVisitor implements IResourceDeltaVisitor
+	class ServoyVisitior
 	{
-		public boolean visit(IResourceDelta delta) throws CoreException
-		{
-			IResource resource = delta.getResource();
-			switch (delta.getKind())
-			{
-				case IResourceDelta.ADDED :
-					// handle added resource
-					checkResource(resource);
-					break;
-				case IResourceDelta.REMOVED :
-					// handle removed resource
-					checkResource(resource);
-					break;
-				case IResourceDelta.CHANGED :
-					// handle changed resource
-					checkResource(resource);
-					break;
-			}
-			//return true to continue visiting children.
-			return true;
-		}
-	}
+		private final List<IPath> excludePaths = new ArrayList<>();
 
-	class ServoyResourceVisitor implements IResourceVisitor
-	{
-		List<IPath> excludePaths = new ArrayList<>();
-
-		public ServoyResourceVisitor()
+		public ServoyVisitior()
 		{
 			IScriptProject scriptProject = DLTKCore.create(getProject());
 			if (scriptProject != null)
@@ -264,7 +239,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 		}
 
-		public boolean visit(IResource resource)
+		protected boolean shouldTest(IResource resource)
 		{
 			if (resource.isDerived())
 			{
@@ -277,9 +252,50 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					return false;
 				}
 			}
-			checkResource(resource);
-			//return true to continue visiting children.
 			return true;
+		}
+	}
+
+	class ServoyDeltaVisitor extends ServoyVisitior implements IResourceDeltaVisitor
+	{
+		public boolean visit(IResourceDelta delta) throws CoreException
+		{
+			IResource resource = delta.getResource();
+			if (shouldTest(resource))
+			{
+				switch (delta.getKind())
+				{
+					case IResourceDelta.ADDED :
+						// handle added resource
+						checkResource(resource);
+						break;
+					case IResourceDelta.REMOVED :
+						// handle removed resource
+						checkResource(resource);
+						break;
+					case IResourceDelta.CHANGED :
+						// handle changed resource
+						checkResource(resource);
+						break;
+				}
+				//return true to continue visiting children.
+				return true;
+			}
+			return false;
+		}
+	}
+
+	class ServoyResourceVisitor extends ServoyVisitior implements IResourceVisitor
+	{
+		public boolean visit(IResource resource)
+		{
+			if (shouldTest(resource))
+			{
+				checkResource(resource);
+				//return true to continue visiting children.
+				return true;
+			}
+			return false;
 		}
 	}
 
