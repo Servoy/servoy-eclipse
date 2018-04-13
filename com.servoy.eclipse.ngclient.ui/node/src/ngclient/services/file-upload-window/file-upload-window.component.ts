@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse, HttpEventType, HttpResponse } from '@angular/common/http';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { I18NProvider } from '../../../ngclient/servoy_public'
 
 @Component({
   selector: 'app-file-upload-window',
@@ -29,7 +30,30 @@ export class FileUploadWindowComponent {
   errorText: string = "";
   isUploading: boolean = false;
 
-  constructor(private activeModal: NgbActiveModal, private http: HttpClient) { }
+  constructor(private activeModal: NgbActiveModal, private http: HttpClient, i18nProvider:I18NProvider) {
+    i18nProvider.getI18NMessages(
+      "servoy.filechooser.button.upload",
+      "servoy.filechooser.upload.addFile",
+      "servoy.filechooser.upload.addFiles",
+      "servoy.filechooser.selected.files",
+      "servoy.filechooser.nothing.selected",
+      "servoy.filechooser.button.remove",
+      "servoy.filechooser.label.name",
+      "servoy.button.cancel",
+      "servoy.filechooser.error").then((val)=> {
+        this.i18n_upload = val["servoy.filechooser.button.upload"];
+        if (this.isMultiselect())
+          this.i18n_chooseFiles = val["servoy.filechooser.upload.addFiles"];
+        else
+          this.i18n_chooseFiles = val["servoy.filechooser.upload.addFile"];
+        this.i18n_cancel = val["servoy.button.cancel"];
+        this.i18n_selectedFiles = val["servoy.filechooser.selected.files"];
+        this.i18n_nothingSelected = val["servoy.filechooser.nothing.selected"];
+        this.i18n_remove = val["servoy.filechooser.button.remove"];
+        this.i18n_name = val["servoy.filechooser.label.name"];
+        this.genericError = val["servoy.filechooser.error"];
+      })
+  }
 
   isMultiselect(): boolean {
     return this.multiselect == true;
