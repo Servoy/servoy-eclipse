@@ -358,7 +358,7 @@ public class ElementResolver implements IElementResolver
 					members.add(property);
 				}
 			}
-			return null;
+			return members;
 		}
 		// some stuff that should just not report anything.
 		if ("document".equals(name)) // dom model
