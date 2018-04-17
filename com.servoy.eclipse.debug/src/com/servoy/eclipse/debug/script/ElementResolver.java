@@ -612,7 +612,7 @@ public class ElementResolver implements IElementResolver
 			}
 			else
 			{
-				property.setDeprecated(type.isDeprecated());
+				property.setDeprecated(property.isDeprecated() || type.isDeprecated());
 				property.setVisible(type.isVisible());
 			}
 			members.add(property);
