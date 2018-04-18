@@ -1222,7 +1222,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							break;
 						}
 					}
-					if (!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight()))
+					if (!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight().getRootObject()))
 					{
 						int lineNumber;
 						if (persist instanceof IScriptElement)
