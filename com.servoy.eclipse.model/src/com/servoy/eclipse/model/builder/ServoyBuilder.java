@@ -1200,7 +1200,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					for (IPersist child : Utils.iterate(duplicatedParent.getRight().getAllObjects()))
 					{
 						if ((child instanceof IScriptProvider || child instanceof ScriptVariable) && ((ISupportName)child).getName().equals(name) &&
-							!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight()))
+							!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight().getRootObject()))
 						{
 							int lineNumber;
 							if (child instanceof IScriptElement)
