@@ -7,6 +7,7 @@ import { SabloService } from '../sablo/sablo.service';
 import { FormComponent } from './form/form_component.component'
 
 import { ConverterService } from '../sablo/converter.service'
+import { LoggerService } from '../sablo/logger.service'
 
 @Injectable()
 export class FormService {
@@ -15,7 +16,7 @@ export class FormService {
 
 //    private touchedForms:Map<String,boolean>;
 
-    constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService ) {
+    constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, private log: LoggerService ) {
         this.formsCache = new Map();
 
         websocketService.getSession().then(( session ) => {
@@ -157,9 +158,9 @@ export class FormService {
     }
 
     public formWillShow(formname,notifyFormVisibility?,parentForm?,beanName?,relationname?,formIndex?):Promise<boolean> {
-//        if ($log.debugEnabled) $log.debug("svy * Form " + formname + " is preparing to show. Notify server needed: " + notifyFormVisibility);
+        this.log.debug("svy * Form " + formname + " is preparing to show. Notify server needed: " + notifyFormVisibility);
 //        if ($rootScope.updatingFormName === formname) {
-//            if ($log.debugEnabled) $log.debug("svy * Form " + formname + " was set in hidden div. Clearing out hidden div.");
+//            this.log.debug("svy * Form " + formname + " was set in hidden div. Clearing out hidden div.");
 //            $rootScope.updatingFormUrl = ''; // it's going to be shown; remove it from hidden DOM
 //            $rootScope.updatingFormName = null;
 //        }

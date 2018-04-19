@@ -5,8 +5,10 @@ import { BaseTabpanel, Tab } from "./basetabpanel"
 import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public'
 
 import { WindowRefService } from '../../sablo/util/windowref.service'
+import { LoggerService } from '../../sablo/logger.service'
 
 import { NgbTabset, NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
+
 
 @Component( {
     selector: 'servoydefault-tabpanel',
@@ -16,8 +18,8 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     @ViewChild( 'tabset' )
     private tabset: NgbTabset;
 
-    constructor( windowRefService: WindowRefService ) {
-        super( windowRefService );
+    constructor( windowRefService: WindowRefService, log : LoggerService) {
+        super( windowRefService, log );
     }
 
     onTabChange( event: NgbTabChangeEvent ) {

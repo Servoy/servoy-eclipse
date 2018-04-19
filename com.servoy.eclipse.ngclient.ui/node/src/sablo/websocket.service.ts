@@ -9,6 +9,7 @@ import { WindowRefService } from './util/windowref.service'
 import { Deferred } from './util/deferred'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
+import { LoggerService, LogLevel } from './logger.service'
 
 @Injectable()
 export class WebsocketService {
@@ -19,7 +20,7 @@ export class WebsocketService {
     private connectionArguments = {};
     private lastServerMessageNumber = null;
 
-    constructor( private windowRef: WindowRefService, private services: ServicesService, private converterService: ConverterService ) {
+    constructor( private windowRef: WindowRefService, private services: ServicesService, private converterService: ConverterService, private log: LoggerService ) {
     }
 
     private generateURL( context, args, queryArgs, websocketUri ) {
@@ -85,7 +86,7 @@ export class WebsocketService {
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'] );
         } );
 
-        this.wsSession = new WebsocketSession( websocket, this, this.services, this.windowRef, this.converterService );
+        this.wsSession = new WebsocketSession( websocket, this, this.services, this.windowRef, this.converterService, this.log );
         // todo should we just merge $websocket and $services into $sablo that just has all
         // the public api of sablo (like connect, conversions, services)
         //$services.setSession(wsSession);
@@ -175,7 +176,7 @@ export class WebsocketSession {
     private nextMessageId = 1;
 
 
-    constructor( private websocket: ReconnectingWebSocket, private websocketService: WebsocketService, private services: ServicesService, private windowRef: WindowRefService, private converterService: ConverterService ) {
+    constructor( private websocket: ReconnectingWebSocket, private websocketService: WebsocketService, private services: ServicesService, private windowRef: WindowRefService, private converterService: ConverterService, private log: LoggerService ) {
         const me = this;
         this.websocket.onopen = ( evt ) => {
             me.setConnected();
@@ -194,7 +195,7 @@ export class WebsocketSession {
             me.stopHeartbeat();
             if ( me.connected != 'CLOSED' ) {
                 me.connected = 'RECONNECTING';
-                //                    if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (" + new Date().getTime() + ")");
+                if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (" + new Date().getTime() + ")");
             }
             for ( var handler in me.onCloseHandlers ) {
                 me.onCloseHandlers[handler]( evt );
@@ -214,7 +215,7 @@ export class WebsocketSession {
 
                 // server disconnected, do not try to reconnect
                 me.connected = 'CLOSED';
-                //                    if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Connection mode (onconnecting got a server disconnect/close with reason " + evt.reason + "): ... CLOSED (" + new Date().getTime() + ")");
+                if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode (onconnecting got a server disconnect/close with reason " + evt.reason + "): ... CLOSED (" + new Date().getTime() + ")");
             }
         }
         this.websocket.onmessage = ( message ) => {
@@ -249,11 +250,11 @@ export class WebsocketSession {
         }
         var msg = JSON.stringify( obj )
         if ( this.isConnected() ) {
-            //            if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Sending message to server: " + msg);
+            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Sending message to server: " + msg);
             this.websocket.send( msg )
         }
         else {
-            //            if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Disconnected; will add the following to pending messages to be sent to server: " + msg);
+            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Disconnected; will add the following to pending messages to be sent to server: " + msg);
             this.pendingMessages = this.pendingMessages || []
             this.pendingMessages.push( msg )
         }
@@ -285,7 +286,7 @@ export class WebsocketSession {
         if ( this.websocket ) {
             this.websocket.close();
             this.connected = 'CLOSED';
-            //            if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Connection mode (disconnect): ... CLOSED (" + new Date().getTime() + ")");
+            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode (disconnect): ... CLOSED (" + new Date().getTime() + ")");
         }
     }
 
@@ -305,11 +306,11 @@ export class WebsocketSession {
 
     private setConnected() {
         this.connected = 'CONNECTED';
-        //        if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Connection mode: ... CONNECTED (" + new Date().getTime() + ")");
+        if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode: ... CONNECTED (" + new Date().getTime() + ")");
 
         if ( this.pendingMessages ) {
             for ( let i in this.pendingMessages ) {
-                //                if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Connected; sending pending message to server: " + pendingMessages[i]);
+                if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connected; sending pending message to server: " + this.pendingMessages[i]);
                 this.websocket.send( this.pendingMessages[i] )
             }
             this.pendingMessages = undefined
@@ -318,17 +319,17 @@ export class WebsocketSession {
 
     private startHeartbeat() {
         if ( this.heartbeatMonitor == null ) {
-            //            if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Starting heartbeat... (" + new Date().getTime() + ")");
+            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Starting heartbeat... (" + new Date().getTime() + ")");
 
             this.lastHeartbeat = new Date().getTime();
             this.heartbeatMonitor = IntervalObservable.create( 4000 ).subscribe(() => {
-                //                if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Sending heartbeat... (" + new Date().getTime() + ")");
+                if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Sending heartbeat... (" + new Date().getTime() + ")");
                 if ( new Date().getTime() - this.lastHeartbeat >= 4000 ) {
                     this.websocket.send( "P" ); // ping
                     if ( this.isConnected() && new Date().getTime() - this.lastHeartbeat > 8000 ) {
                         // no response within 8 seconds
                         if ( this.connected !== 'RECONNECTING' ) {
-                            //                            if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Connection mode (Heartbeat timed out; connection lost; waiting to reconnect): ... RECONNECTING (" + new Date().getTime() + ")");
+                            //                            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode (Heartbeat timed out; connection lost; waiting to reconnect): ... RECONNECTING (" + new Date().getTime() + ")");
                             this.connected = 'RECONNECTING';
                         }
                     }
@@ -339,7 +340,7 @@ export class WebsocketSession {
 
     private stopHeartbeat() {
         if ( this.heartbeatMonitor != null ) {
-            //            if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Stopping heartbeat... (" + new Date().getTime() + ")");
+            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Stopping heartbeat... (" + new Date().getTime() + ")");
             this.heartbeatMonitor.unsubscribe();
             this.heartbeatMonitor = undefined;
         }
@@ -350,10 +351,10 @@ export class WebsocketSession {
     }
 
     private handleHeartbeat( message ) {
-        //        if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Received heartbeat... (" + new Date().getTime() + ")");
+        if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Received heartbeat... (" + new Date().getTime() + ")");
         this.lastHeartbeat = new Date().getTime(); // something is received, the server connection is up
         if ( this.isReconnecting() ) {
-            //            if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Heartbeat received, connection re-established...");
+            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Heartbeat received, connection re-established...");
             this.setConnected();
         }
         if ( message.data == "P" ) {
@@ -368,7 +369,7 @@ export class WebsocketSession {
         this.functionsToExecuteAfterIncommingMessageWasHandled = [];
 
         try {
-            //            if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Received message from server: " + JSON.stringify(message));
+            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Received message from server: " + JSON.stringify(message));
 
             var message_data = message.data;
             var separator = message_data.indexOf( '#' );
@@ -419,7 +420,7 @@ export class WebsocketSession {
                         deferredEvent.resolve( obj.ret );
                     }
                 }
-                //                else $log.warn("Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.");
+                else this.log.warn("Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.");
                 delete this.deferredEvents[obj.cmsgid];
                 //                $sabloTestability.testEvents();
                 //                $sabloLoadingIndicator.hideLoading();
@@ -431,7 +432,7 @@ export class WebsocketSession {
                     var ret = this.onMessageObjectHandlers[handler]( obj.msg, obj[ConverterService.TYPES_KEY] ? obj[ConverterService.TYPES_KEY].msg : undefined )
                     if ( ret ) responseValue = ret;
 
-                    //                    if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Checking if any form scope changes need to be digested (obj.msg).");
+                    if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Checking if any form scope changes need to be digested (obj.msg).");
                 }
             }
 
@@ -457,12 +458,12 @@ export class WebsocketSession {
                         this.onMessageObjectHandlers[handler]( obj.calls[i], ( obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].calls ) ? obj[ConverterService.TYPES_KEY].calls[i] : undefined );
                     }
 
-                    //                    if ($log.debugLevel === $log.SPAM) $log.debug("sbl * Checking if any (obj.calls) form scopes changes need to be digested (obj.calls).");
+                    if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Checking if any (obj.calls) form scopes changes need to be digested (obj.calls).");
                 }
             }
             if ( obj && obj.smsgid ) {
                 //                if (isPromiseLike(responseValue)) {
-                //                    if ($log.debugEnabled) $log.debug("sbl * Call from server with smsgid '" + obj.smsgid + "' returned a promise; will wait for it to get resolved.");
+                //                    if (this.log.debugEnabled) this.log.debug("sbl * Call from server with smsgid '" + obj.smsgid + "' returned a promise; will wait for it to get resolved.");
                 //                    
                 //                    // the server wants a response, this could be a promise so a dialog could be shown
                 //                    // then just let protractor go through.
@@ -472,9 +473,9 @@ export class WebsocketSession {
                 Promise.resolve( responseValue ).then(( ret ) => {
                     //                    if (isPromiseLike(responseValue)) {
                     //                        $sabloTestability.decreaseEventLoop();
-                    //                        if ($log.debugEnabled) $log.debug("sbl * Promise returned by call from server with smsgid '" + obj.smsgid + "' is now resolved with value: -" + ret + "-. Sending value back to server...");
+                    //                        this.log.debug("sbl * Promise returned by call from server with smsgid '" + obj.smsgid + "' is now resolved with value: -" + ret + "-. Sending value back to server...");
                     //                    } 
-                    //                    else if ($log.debugEnabled) $log.debug("sbl * Call from server with smsgid '" + obj.smsgid + "' returned: -" + ret + "-. Sending value back to server...");
+                    //                    else this.log.debug("sbl * Call from server with smsgid '" + obj.smsgid + "' returned: -" + ret + "-. Sending value back to server...");
 
                     // success
                     var response = {
@@ -490,8 +491,8 @@ export class WebsocketSession {
                 }, ( reason ) => {
                     //                    if (isPromiseLike(responseValue)) $sabloTestability.decreaseEventLoop();
                     // error
-                    //                    $log.error("Error (follows below) in parsing/processing this message with smsgid '" + obj.smsgid + "' (async): " + message_data);
-                    //                    $log.error(reason);
+                    //                    this.log.error("Error (follows below) in parsing/processing this message with smsgid '" + obj.smsgid + "' (async): " + message_data);
+                    //                    this.log.error(reason);
                     // server wants a response; send failure so that browser side script doesn't hang
                     var response = {
                         smsgid: obj.smsgid,
@@ -505,8 +506,8 @@ export class WebsocketSession {
             }
         } catch ( e ) {
             console.log( e );
-            //            $log.error("Error (follows below) in parsing/processing this message: " + message_data);
-            //            $log.error(e);
+            this.log.error("Error (follows below) in parsing/processing this message: " + message_data);
+            this.log.error(e);
             if ( obj && obj.smsgid ) {
                 // server wants a response; send failure so that browser side script doesn't hang
                 var response = {
@@ -524,8 +525,8 @@ export class WebsocketSession {
                 try {
                     this.functionsToExecuteAfterIncommingMessageWasHandled[i]();
                 } catch ( e ) {
-                    //                    $log.error("Error (follows below) in executing PostIncommingMessageHandlingTask: " + this.functionsToExecuteAfterIncommingMessageWasHandled[i]);
-                    //                    $log.error(e);
+                    this.log.error("Error (follows below) in executing PostIncommingMessageHandlingTask: " + this.functionsToExecuteAfterIncommingMessageWasHandled[i]);
+                    this.log.error(e);
                     err = e;
                 }
             }

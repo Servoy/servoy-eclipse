@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 
 import { ConverterService } from './converter.service'
+import { LoggerService } from './logger.service'
 
 @Injectable()
 export class ServicesService {
     private serviceProvider: ServiceProvider = new VoidServiceProvider();
 
-    constructor( private converterService: ConverterService ) {
+    constructor( private converterService: ConverterService, private log : LoggerService ) {
     }
 
     private serviceScopesConversionInfo = {};
@@ -56,7 +57,7 @@ export class ServicesService {
                     }
                 }
                 catch ( ex ) {
-                    //                    $log.error(ex);
+                    this.log.error(ex);
                 }
             }
         }

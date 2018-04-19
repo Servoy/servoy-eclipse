@@ -6,6 +6,8 @@ import { WindowRefService } from '../../sablo/util/windowref.service'
 
 import { BaseCustomObject } from '../../sablo/spectypes.service'
 
+import { LoggerService } from '../../sablo/logger.service'
+
 
 export abstract class BaseTabpanel implements OnChanges {
     @Input() name: string;
@@ -41,7 +43,7 @@ export abstract class BaseTabpanel implements OnChanges {
 
     protected selectedTab: Tab
 
-    constructor( private windowRefService: WindowRefService ) {
+    constructor( private windowRefService: WindowRefService, private log : LoggerService ) {
     }
 
     ngOnChanges( changes: SimpleChanges ) {
@@ -78,7 +80,7 @@ export abstract class BaseTabpanel implements OnChanges {
     select( tab: Tab ) {
         if ( !this.visible ) return;
         if ( this.isValidTab( tab ) ) {
-            //                if ($log.debugEnabled) $log.debug("svy * Will select tab '" + (tab ? tab.containsFormId : undefined) + "'. Previously selected: '" + (this.selectedTab ? this.selectedTab.containsFormId : undefined) + "'. Same: " + (tab == this.selectedTab));
+            this.log.debug("svy * Will select tab '" + (tab ? tab.containsFormId : undefined) + "'. Previously selected: '" + (this.selectedTab ? this.selectedTab.containsFormId : undefined) + "'. Same: " + (tab == this.selectedTab));
             if ( ( tab != undefined && this.selectedTab != undefined && tab.containsFormId == this.selectedTab.containsFormId && tab.relationName == this.selectedTab.relationName ) || ( tab == this.selectedTab ) ) return;
             var selectEvent = this.windowRefService.nativeWindow.event ? this.windowRefService.nativeWindow.event : null;
             if ( this.selectedTab ) {
@@ -88,13 +90,13 @@ export abstract class BaseTabpanel implements OnChanges {
                     const currentSelectedTab = this.selectedTab;
                     this.lastSelectedTab = tab;
                     const promise = this.servoyApi.hideForm( this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName );
-                    //                        if ($log.debugEnabled) $log.debug("svy * Will hide previously selected form (tab): " + this.selectedTab.containsFormId);
+                    this.log.debug("svy * Will hide previously selected form (tab): " + this.selectedTab.containsFormId);
                     promise.then(( ok ) => {
-                        //                            if ($log.debugEnabled) $log.debug("svy * Previously selected form (tab) hide completed with '" + ok + "': " + this.selectedTab.containsFormId);
+                        this.log.debug("svy * Previously selected form (tab) hide completed with '" + ok + "': " + this.selectedTab.containsFormId);
                         delete this.waitingForServerVisibility[formInWait];
                         if ( this.lastSelectedTab != tab ) {
                             // visibility changed again, just ignore this
-                            //                                if ($log.debugEnabled) $log.debug("svy * Tab '" + tab.containsFormId + "': no longer active, ignore making it visible");
+                            this.log.debug("svy * Tab '" + tab.containsFormId + "': no longer active, ignore making it visible");
                             // it could be that the server was sending the correct state in the mean time already at the same time 
                             // we try to hide it. just call show again to be sure.
                             if ( currentSelectedTab == this.selectedTab ) this.servoyApi.formWillShow( this.selectedTab.containsFormId, this.selectedTab.relationName );
@@ -140,7 +142,7 @@ export abstract class BaseTabpanel implements OnChanges {
 
     protected setFormVisible( tab: Tab, event ) {
         if ( tab.containsFormId ) this.servoyApi.formWillShow( tab.containsFormId, tab.relationName );
-        //            if ($log.debugEnabled) $log.debug("svy * selectedTab = '" + tab.containsFormId + "' -- " + new Date().getTime());
+        this.log.debug("svy * selectedTab = '" + tab.containsFormId + "' -- " + new Date().getTime());
         var oldSelected = this.selectedTab;
         this.selectedTab = tab;
         this.tabIndex = this.getTabIndex( this.selectedTab );

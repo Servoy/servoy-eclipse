@@ -5,6 +5,7 @@ import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service'
 import { WindowRefService } from '../sablo/util/windowref.service';
+import { LoggerService  } from '../sablo/logger.service'
 
 import { SessionStorageService } from 'angular-web-storage';
 
@@ -37,7 +38,8 @@ export class ServoyService {
             private i18nProvider:I18NProvider,
             converterService: ConverterService,
             specTypesService: SpecTypesService,
-            iterableDiffers: IterableDiffers ) {
+            iterableDiffers: IterableDiffers,
+            private log: LoggerService) {
 
         this.uiProperties = new UIProperties( sessionStorageService )
         const dateConverter = new DateConverter();
@@ -141,7 +143,7 @@ export class ServoyService {
                             // TODO should we always do this (get stuff from server side java) instead of trying first to rely on numeral.js and locales.js provided langs?
                             var numeralLanguage = language + (country ? '-' + country : "");
                             promise.then(function(numeralLocaleInfo) {
-//                                if ($log.debugEnabled) $log.debug("Locale '" + numeralLanguage + "' not found in client js lib, but it was constructed based on server Java locale-specific information: " + JSON.stringify(numeralLocaleInfo));
+                              this.log.debug("Locale '" + numeralLanguage + "' not found in client js lib, but it was constructed based on server Java locale-specific information: " + JSON.stringify(numeralLocaleInfo));
                                 numeralLocaleInfo.ordinal = function (number) {
                                     return ".";
                                 };
@@ -153,7 +155,7 @@ export class ServoyService {
                                     this.sabloService.setLocale({ language : language, country : country , full: language + "-" + country});
                                 }
                             }, function(reason) {
-//                                $log.warn("Cannot properly handle locale '" + numeralLanguage + "'. It is not available in js libs and it could not be loaded from server...");
+                                this.log.warn("Cannot properly handle locale '" + numeralLanguage + "'. It is not available in js libs and it could not be loaded from server...");
                             });
                         }
                     }
