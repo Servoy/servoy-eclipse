@@ -7,7 +7,6 @@ export abstract class Logger {
     error: any;
 }
 
-export let isDebugMode = false;//TODO provider?
 const noop = (): any => undefined;
 
 //log levels for when debugEnabled(true) is called - if that is false, these levels are irrelevant
@@ -17,13 +16,22 @@ export enum LogLevel {
     SPAM
 }
 
+export class LogProvider {
+    isDebugMode : boolean = false;
+    level : LogLevel = LogLevel.DEBUG
+}
+
+declare global {
+    interface Window { svyLogProvider: LogProvider; } //extend the existing window interface with the new log provider property
+}
+
+window.svyLogProvider = window.svyLogProvider || {isDebugMode:false, level:LogLevel.DEBUG};
+
 @Injectable()
 export class LoggerService implements Logger {
-
-     private level : LogLevel = LogLevel.DEBUG;
     
      get debug() {
-         if (isDebugMode) {
+         if (window.svyLogProvider.isDebugMode) {
              return console.debug.bind(console);
          } else {
              return noop;
@@ -31,7 +39,7 @@ export class LoggerService implements Logger {
      }
 
      get warn() {
-         if (isDebugMode) {
+         if (window.svyLogProvider.isDebugMode) {
              return console.warn.bind(console);
          } else {
              return noop;
@@ -39,7 +47,7 @@ export class LoggerService implements Logger {
      }
      
      get error() {
-         if (isDebugMode) {
+         if (window.svyLogProvider.isDebugMode) {
              return console.error.bind(console);
          } else {
              return noop;
@@ -47,13 +55,11 @@ export class LoggerService implements Logger {
      }
      
      public debugLevel() : LogLevel {
-         return this.level;
+         return window.svyLogProvider.level;
      }
      
      invokeConsoleMethod(type: string, args?: any): void {
          const logFn: Function = (console)[type] || console.log || noop;
          logFn.apply(console, [args]);
      }
-     
-     
  }
