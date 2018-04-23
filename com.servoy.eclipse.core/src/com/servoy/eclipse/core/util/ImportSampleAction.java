@@ -20,19 +20,18 @@ package com.servoy.eclipse.core.util;
 import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Properties;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.intro.IIntroSite;
+import org.eclipse.ui.intro.config.IIntroAction;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -52,14 +51,16 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
  * @author lvostinar
  *
  */
-public class ImportSampleAction implements IWorkbenchWindowActionDelegate
+public class ImportSampleAction implements IIntroAction
 {
 
 	@Override
-	public void run(IAction action)
+	public void run(IIntroSite site, final Properties params)
 	{
+		String sample = params.getProperty("sample");
+		if (sample == null) sample = "crm";
 		final File sampleSolution = new File(
-			ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/solutions/examples/servoy_sample_crm.servoy");
+			ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/solutions/examples/servoy_sample_" + sample + ".servoy");
 		if (sampleSolution.exists())
 		{
 			Display.getDefault().asyncExec(new Runnable()
@@ -128,22 +129,4 @@ public class ImportSampleAction implements IWorkbenchWindowActionDelegate
 			});
 		}
 	}
-
-	@Override
-	public void selectionChanged(IAction action, ISelection selection)
-	{
-
-	}
-
-	@Override
-	public void dispose()
-	{
-
-	}
-
-	@Override
-	public void init(IWorkbenchWindow window)
-	{
-	}
-
 }
