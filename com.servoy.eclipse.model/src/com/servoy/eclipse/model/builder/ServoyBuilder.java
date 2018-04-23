@@ -1415,9 +1415,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
-			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
-			flattenedForm.acceptVisitor(new IPersistVisitor()
+			persist.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
 				{
@@ -1441,7 +1439,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 					}
-					else if (!(o instanceof ScriptVariable) && !(o instanceof Form) && o instanceof ISupportName && ((ISupportName)o).getName() != null)
+					if (o instanceof AbstractContainer) return IPersistVisitor.CONTINUE_TRAVERSAL;
+					else return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+				}
+			});
+			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
+			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
+			flattenedForm.acceptVisitor(new IPersistVisitor()
+			{
+				public Object visit(IPersist o)
+				{
+					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
+						((ISupportName)o).getName() != null)
 					{
 						Set<IPersist> duplicates = formElementsByName.get(((ISupportName)o).getName());
 						if (duplicates != null)
