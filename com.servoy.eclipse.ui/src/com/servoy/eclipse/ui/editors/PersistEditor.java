@@ -21,6 +21,9 @@ import java.util.Collection;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.help.HelpSystem;
+import org.eclipse.help.IContext;
+import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
@@ -87,7 +90,35 @@ public abstract class PersistEditor extends EditorPart implements IPersistChange
 				}
 			};
 		}
+		if (getContextId() != null && adapter.equals(IContextProvider.class))
+		{
+			return new IContextProvider()
+			{
+				@Override
+				public String getSearchExpression(Object target)
+				{
+					return null;
+				}
+
+				@Override
+				public int getContextChangeMask()
+				{
+					return IContextProvider.SELECTION;
+				}
+
+				@Override
+				public IContext getContext(Object target)
+				{
+					return HelpSystem.getContext(getContextId());
+				}
+			};
+		}
 		return super.getAdapter(adapter);
+	}
+
+	protected String getContextId()
+	{
+		return null;
 	}
 
 	/**

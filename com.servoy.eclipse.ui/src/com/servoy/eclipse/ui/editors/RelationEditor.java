@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ScriptingUtils;
@@ -659,7 +660,8 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 			{
 				// stored calcs are shown in calculations section
 				IColumn col = cols.next();
-				if ((calcs == null || !calcs.containsKey(col.getDataProviderID())) && ((col.getFlags() & Column.EXCLUDED_COLUMN) != Column.EXCLUDED_COLUMN))
+				if ((calcs == null || !calcs.containsKey(col.getDataProviderID())) &&
+					((col.getFlags() & IBaseColumn.EXCLUDED_COLUMN) != IBaseColumn.EXCLUDED_COLUMN))
 				{
 					retval.add(col);
 				}
@@ -1012,5 +1014,11 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		{
 			foreignTable.removeIColumnListener(this);
 		}
+	}
+
+	@Override
+	protected String getContextId()
+	{
+		return "com.servoy.eclipse.ui.create_solution";
 	}
 }
