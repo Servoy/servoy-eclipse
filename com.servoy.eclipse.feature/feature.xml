@@ -415,7 +415,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.equinox.concurrent"
          download-size="0"
          install-size="0"
-         version="1.1.0.v20130327-1442"
+         version="1.1.100.v20171221-2204"
          unpack="false"/>
 
    <plugin
@@ -479,14 +479,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="6.0.0.v20170929-1901"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="6.0.0.v20170929-1901"
          unpack="false"/>
 
    <plugin

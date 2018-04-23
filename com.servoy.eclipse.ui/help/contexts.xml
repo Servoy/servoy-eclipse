@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.contexts"?>
+<contexts>
+	<context id="create_solution" title="New Solution Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_solution.html" label="Create Solution"/>
+	</context>
+ <context id="create_form" title="New Form Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_form.html" label="Create Form"/>
+ </context>
+  <context id="create_form_dataproviders" title="New Form Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_form_dataproviders.html" label="Select dataproviders"/>
+ </context>
+  <context id="create_formcomponent" title="New Form Component Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_formcomponent.html" label="Create Form Component"/>
+ </context>
+
+</contexts>

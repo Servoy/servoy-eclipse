@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.DialogTray;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -26,6 +27,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchWizard;
@@ -91,6 +93,46 @@ public class OpenWizardAction extends Action
 				}
 
 				@Override
+				public boolean close()
+				{
+					boolean trayOpen = getTray() != null;
+					if (trayOpen)
+					{
+						closeTray();
+					}
+					getDialogBoundsSettings().put("tray_open", trayOpen);
+					return super.close();
+				}
+
+				@Override
+				public void create()
+				{
+					super.create();
+
+					String trayOpen = getDialogBoundsSettings().get("tray_open");
+					if ((trayOpen == null || Boolean.valueOf(trayOpen).booleanValue()))
+					{
+						getShell().getDisplay().asyncExec(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								getCurrentPage().performHelp();
+							}
+						});
+					}
+				}
+
+				@Override
+				public void openTray(DialogTray tray) throws IllegalStateException, UnsupportedOperationException
+				{
+					super.openTray(tray);
+					Rectangle bounds = getShell().getBounds();
+					bounds.width = bounds.width + 150;
+					getShell().setBounds(bounds);
+				}
+
+				@Override
 				protected void createButtonsForButtonBar(Composite parent)
 				{
 					if (wizard instanceof IRestoreDefaultWizard)
@@ -120,6 +162,26 @@ public class OpenWizardAction extends Action
 					if (restoreDefault != null) restoreDefault.setEnabled(false);
 					super.finishPressed();
 					if (restoreDefault != null && getReturnCode() != OK) restoreDefault.setEnabled(true);
+				}
+
+				@Override
+				protected void nextPressed()
+				{
+					super.nextPressed();
+					if (getTray() != null)
+					{
+						getCurrentPage().performHelp();
+					}
+				}
+
+				@Override
+				protected void backPressed()
+				{
+					super.backPressed();
+					if (getTray() != null)
+					{
+						getCurrentPage().performHelp();
+					}
 				}
 
 			};

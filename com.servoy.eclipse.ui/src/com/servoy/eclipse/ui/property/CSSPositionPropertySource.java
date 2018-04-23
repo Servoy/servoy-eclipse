@@ -22,10 +22,15 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
+import com.servoy.eclipse.ui.editors.CSSPositionDialog;
+import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.util.Utils;
@@ -62,7 +67,22 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 			@Override
 			public CellEditor createPropertyEditor(Composite parent)
 			{
-				TextCellEditor editor = new TextCellEditor(parent);
+				TextDialogCellEditor editor = new TextDialogCellEditor(parent, SWT.NONE, CSSPositionLabelProvider.INSTANCE)
+				{
+
+					@Override
+					public Object openDialogBox(Control cellEditorWindow)
+					{
+						CSSPositionDialog dialog = new CSSPositionDialog(new Shell(), getValue());
+						dialog.open();
+						if (dialog.getReturnCode() == Window.CANCEL)
+						{
+							return CANCELVALUE;
+						}
+						return dialog.getValue();
+					}
+
+				};
 				editor.setValidator(new ICellEditorValidator()
 				{
 

@@ -531,6 +531,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 			settings.put("datasource", tableWrapper == null ? null : tableWrapper.getDataSource());
 		}
 
+		@Override
+		public void performHelp()
+		{
+			if (isReferenceForm()) PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_formcomponent");
+			else PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_form");
+		}
+
 		private IDataSourceWrapper getTableWrapper()
 		{
 			IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
@@ -1335,6 +1342,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 			super(pageName);
 			setTitle("Add data providers");
 			setDescription(getTitle());
+		}
+
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_form_dataproviders");
 		}
 
 		/**

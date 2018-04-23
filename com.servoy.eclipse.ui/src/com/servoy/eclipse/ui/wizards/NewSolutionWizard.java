@@ -549,6 +549,12 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			return getErrorMessage();
 		}
 
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_solution");
+		}
+
 	}
 
 }

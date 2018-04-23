@@ -16,8 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
-		<servoy-repo.url>
-			http://download.eclipse.org/eclipse/updates/4.7/R-4.7.3-201803010715/</servoy-repo.url>
+		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.8milestones/S-4.8M6-201803080630/</servoy-repo.url>
 		<dltk.url>http://developer.servoy.com/dltk_repository/</dltk.url>
 		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/</servoy-shiplibs.url>
 	</properties>
@@ -264,6 +263,7 @@
 				<module>com.servoy.eclipse.profiler</module>
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
+				<module>org.eclipse.help.ui</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
 				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>
 				<module>com.servoy.eclipse.nodejs.macosx.cocoa.x86_64</module>
