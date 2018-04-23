@@ -1319,4 +1319,11 @@
 			itemAttribute="cheatsheetHyperlink">
 		</itemExtension>
 	</extension>
+ <extension
+       point="org.eclipse.help.contexts">
+    <contexts
+          file="help/contexts.xml"
+          plugin="com.servoy.eclipse.ui">
+    </contexts>
+ </extension>
 </plugin>
