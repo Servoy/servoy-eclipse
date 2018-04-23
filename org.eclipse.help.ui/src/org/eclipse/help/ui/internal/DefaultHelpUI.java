@@ -15,6 +15,7 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.help.IContext;
+import org.eclipse.help.IContextProvider;
 import org.eclipse.help.IHelpResource;
 import org.eclipse.help.browser.IBrowser;
 import org.eclipse.help.internal.base.BaseHelpSystem;
@@ -317,10 +318,15 @@ public class DefaultHelpUI extends AbstractHelpUI {
 					return;
 				}
 				try {
-					/*
-					 * If the context help has no description text and exactly one
-					 * topic, go straight to the topic and skip context help.
-					 */
+					IWorkbenchPart activePart = page.getActivePart();
+					Control c = window.getShell().getDisplay().getFocusControl();
+					IContextProvider adapter = activePart.getAdapter(IContextProvider.class);
+					if (adapter != null)
+						context = adapter
+								.getContext(c); /*
+												 * If the context help has no description text and exactly one
+												 * topic, go straight to the topic and skip context help.
+												 */
 					String contextText = context.getText();
 					IHelpResource[] topics = context.getRelatedTopics();
 					boolean isSingleChoiceWithoutDescription = contextText == null && topics.length == 1;
@@ -331,8 +337,6 @@ public class DefaultHelpUI extends AbstractHelpUI {
 					} else if (isSingleChoiceWithoutDescription && IHelpBaseConstants.P_IN_BROWSER.equals(openMode)) {
 						BaseHelpSystem.getHelpDisplay().displayHelpResource(topics[0].getHref(), true);
 					} else {
-						IWorkbenchPart activePart = page.getActivePart();
-						Control c = window.getShell().getDisplay().getFocusControl();
 						openingHelpView = true;
 						IViewPart part = page.showView(HELP_VIEW_ID);
 						openingHelpView = false;

@@ -1,23 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Copyright (c) 2012, 2013 Eclipse Foundation and others.
-  All rights reserved. This program and the accompanying materials
-  are made available under the terms of the Eclipse Distribution License v1.0
-  which accompanies this distribution, and is available at
-  http://www.eclipse.org/org/documents/edl-v10.php
- 
-  Contributors:
-     Igor Fedorenko - initial implementation
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>eclipse.platform.ua</artifactId>
-    <groupId>eclipse.platform.ua</groupId>
-    <version>4.7.3-SNAPSHOT</version>
-  </parent>
-  <groupId>org.eclipse.help</groupId>
-  <artifactId>org.eclipse.help.ui</artifactId>
-  <version>4.1.0-SNAPSHOT</version>
-  <packaging>eclipse-plugin</packaging>
+<!-- Copyright (c) 2012, 2013 Eclipse Foundation and others. All rights reserved. 
+	This program and the accompanying materials are made available under the 
+	terms of the Eclipse Distribution License v1.0 which accompanies this distribution, 
+	and is available at http://www.eclipse.org/org/documents/edl-v10.php Contributors: 
+	Igor Fedorenko - initial implementation -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.servoy</groupId>
+		<artifactId>servoy-eclipse</artifactId>
+		<version>8.4.0.3400_b1</version>
+	</parent>
+	<artifactId>org.eclipse.help.ui</artifactId>
+	<version>4.1.0.v20170311-0931</version>
+	<packaging>eclipse-plugin</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>adjust the p2 osgi area to overwrite the eclipse plugin</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.servoy</groupId>
+									<artifactId>org.eclipse.help.ui</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${settings.localRepository}/p2/osgi/bundle/org.eclipse.help.ui/${project.version}/</outputDirectory>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.servoy</groupId>
+									<artifactId>org.eclipse.help.ui</artifactId>
+									<version>${project.version}</version>
+									<type>xml</type>
+									<classifier>p2artifacts</classifier>
+									<overWrite>true</overWrite>
+									<outputDirectory>${settings.localRepository}/p2/osgi/bundle/org.eclipse.help.ui/${project.version}/</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
