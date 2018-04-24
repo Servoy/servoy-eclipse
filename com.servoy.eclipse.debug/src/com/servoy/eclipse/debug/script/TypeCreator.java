@@ -3535,7 +3535,7 @@ public class TypeCreator extends TypeCache
 					{
 						try
 						{
-							for (String name : server.getTableAndViewNames(true))
+							for (String name : ((IServerInternal)server).getTableAndViewNames(true, true))
 							{
 								Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 								property.setName(name);
