@@ -8,11 +8,10 @@ const noop = (): any => undefined;
 //any custom debug levels can be used as well - these are just stored here so that custom code can test the level and see if it should log its message
 export enum LogLevel {
     ERROR = 1,
-    WARN = 2, 
-    INFO = 3,
-    DEBUG = 4,
-    SPAM = 5,
-    
+    WARN, 
+    INFO,
+    DEBUG,
+    SPAM    
 }
 
 export class LogConfiguration {
@@ -21,25 +20,25 @@ export class LogConfiguration {
 }
 
 declare global {
-    interface Window { svyLogProvider: LogConfiguration; } //extend the existing window interface with the new log provider property
+    interface Window { svyLogConfiguration: LogConfiguration; } //extend the existing window interface with the new log provider property
 }
 
 @Injectable()
 export class LoggerService  {
-    private svyLogProvider:LogConfiguration;
+    private svyLogConfiguration:LogConfiguration;
     private console:Console;
 
-    constructor( windowRefService:WindowRefService) {
-        this.svyLogProvider = windowRefService.nativeWindow.svyLogProvider;
+    constructor(private windowRefService:WindowRefService) {
+        this.svyLogConfiguration = windowRefService.nativeWindow.svyLogConfiguration;
         this.console = windowRefService.nativeWindow.console;
-        if (this.svyLogProvider == null) {
-            this.svyLogProvider = new LogConfiguration();
-            windowRefService.nativeWindow.svyLogProvider = this.svyLogProvider;
+        if (this.svyLogConfiguration == null) {
+            this.svyLogConfiguration = new LogConfiguration();
+            windowRefService.nativeWindow.svyLogConfiguration = this.svyLogConfiguration;
         }
     }
     
      get debug() {
-         if (this.svyLogProvider.isDebugMode || this.svyLogProvider.level >=LogLevel.DEBUG ) {
+         if (this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >=LogLevel.DEBUG ) {
              return this.console.debug.bind(this.console);
          } else {
              return noop;
@@ -47,7 +46,7 @@ export class LoggerService  {
      }
      
      get info() {
-         if (this.svyLogProvider.isDebugMode|| this.svyLogProvider.level >=LogLevel.INFO) {
+         if (this.svyLogConfiguration.isDebugMode|| this.svyLogConfiguration.level >=LogLevel.INFO) {
              return this.console.info.bind(this.console);
          } else {
              return noop;
@@ -55,7 +54,7 @@ export class LoggerService  {
      }
 
      get warn() {
-         if (this.svyLogProvider.isDebugMode || this.svyLogProvider.level >=LogLevel.WARN) {
+         if (this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >=LogLevel.WARN) {
              return this.console.warn.bind(this.console);
          } else {
              return noop;
@@ -63,7 +62,7 @@ export class LoggerService  {
      }
      
      get error() {
-         if (this.svyLogProvider.isDebugMode|| this.svyLogProvider.level >=LogLevel.ERROR) {
+         if (this.svyLogConfiguration.isDebugMode|| this.svyLogConfiguration.level >=LogLevel.ERROR) {
              return this.console.error.bind(this.console);
          } else {
              return noop;
@@ -71,6 +70,6 @@ export class LoggerService  {
      }
      
      get  debugLevel() : LogLevel {
-         return this.svyLogProvider.level;
+         return this.svyLogConfiguration.level;
      }
  }
