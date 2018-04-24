@@ -76,6 +76,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public JSONArray executeMethod(JSONObject msg)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+		ServoyProject[] activeProjecWithModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 		SpecProviderState componentSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 		SpecProviderState serviceSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 		JSONArray result = new JSONArray();
@@ -131,7 +132,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 					if (reader != null)
 					{
 						pack.put("installed", reader.getVersion());
-						pack.put("installedIsWPA", isWebPackageArchive(activeSolutionName, reader.getResource()));
+						pack.put("installedIsWPA", isWebPackageArchive(activeProjecWithModules, reader.getResource()));
 						File installedResource = reader.getResource();
 						if (installedResource != null) pack.put("installedResource", installedResource.getName());
 						String parentSolutionName = getParentProjectNameForPackage(reader.getResource());
@@ -153,13 +154,18 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return result;
 	}
 
-	private boolean isWebPackageArchive(String solution, File webPackageFile)
+	private boolean isWebPackageArchive(ServoyProject[] activeProjecWithModules, File webPackageFile)
 	{
 		if (webPackageFile != null && webPackageFile.isFile())
 		{
-			ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution);
-			File projectPath = initialActiveProject.getProject().getLocation().toFile();
-			return webPackageFile.getParentFile().equals(new File(projectPath, SolutionSerializer.NG_PACKAGES_DIR_NAME));
+			for (ServoyProject sp : activeProjecWithModules)
+			{
+				File projectPath = sp.getProject().getLocation().toFile();
+				if (webPackageFile.getParentFile().equals(new File(projectPath, SolutionSerializer.NG_PACKAGES_DIR_NAME)))
+				{
+					return true;
+				}
+			}
 		}
 		return false;
 	}
