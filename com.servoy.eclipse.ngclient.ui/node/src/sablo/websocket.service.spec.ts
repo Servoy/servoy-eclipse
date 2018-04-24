@@ -5,6 +5,7 @@ import { WebsocketService } from './websocket.service';
 import {WindowRefService} from './util/windowref.service'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
+import {LoggerService} from './logger.service'
 
 describe('WebsocketService', () => {
     let windowRef;
@@ -20,7 +21,7 @@ describe('WebsocketService', () => {
       providers: [WebsocketService, 
                   {provide: WindowRefService, useFactory:()=>windowRef},
                   {provide: ServicesService, useFactory:()=>servicesService },
-                  {provide: ConverterService, useFactory:()=>converterService }]
+                  {provide: ConverterService, useFactory:()=>converterService }, LoggerService]
     });
   });
   

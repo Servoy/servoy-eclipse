@@ -9,6 +9,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 import { WindowRefService } from '../../sablo/util/windowref.service'
+import { LoggerService } from '../../sablo/logger.service'
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
@@ -22,7 +23,7 @@ describe( 'ServoyDefaultTabpanel', () => {
                 ServoyDefaultTablesspanel
             ],
             imports: [NgbModule.forRoot()],
-            providers: [WindowRefService]
+            providers: [WindowRefService, LoggerService]
         } ).compileComponents();
     } ) );
 

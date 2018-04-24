@@ -2,6 +2,7 @@ import { TestBed, inject } from '@angular/core/testing';
 import { IterableDiffers } from '@angular/core';
 
 import { ConverterService } from '../../sablo/converter.service';
+import { LoggerService } from '../../sablo/logger.service'
 
 import { SpecTypesService, BaseCustomObject, ICustomArray } from '../../sablo/spectypes.service'
 
@@ -27,7 +28,7 @@ describe( 'JSONArrayConverter', () => {
     let converterService: ConverterService
     beforeEach(() => {
         TestBed.configureTestingModule( {
-            providers: [ConverterService, SpecTypesService]
+            providers: [ConverterService, SpecTypesService,LoggerService]
         } );
         const specTypes = TestBed.get( SpecTypesService );
         converterService = TestBed.get( ConverterService );

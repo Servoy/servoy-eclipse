@@ -2,6 +2,7 @@ import { TestBed, inject } from '@angular/core/testing';
 
 
 import { ConverterService } from '../../sablo/converter.service';
+import { LoggerService } from '../../sablo/logger.service'
 
 import { SpecTypesService, BaseCustomObject } from '../../sablo/spectypes.service'
 
@@ -23,7 +24,7 @@ describe( 'JSONObjectConverter', () => {
     let specTypesService: SpecTypesService
     beforeEach(() => {
         TestBed.configureTestingModule( {
-            providers: [ConverterService, SpecTypesService]
+            providers: [ConverterService, SpecTypesService, LoggerService]
         } );
         specTypesService = TestBed.get( SpecTypesService );
         converterService = TestBed.get( ConverterService );

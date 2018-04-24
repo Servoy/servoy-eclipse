@@ -5,6 +5,7 @@ import {EventEmitter } from '@angular/core';
 import {WebsocketService} from '../sablo/websocket.service';
 import {SabloService} from '../sablo/sablo.service';
 import {ConverterService} from '../sablo/converter.service';
+import {LoggerService} from '../sablo/logger.service'
 
 
 import { FormService } from './form.service';
@@ -20,7 +21,7 @@ describe('FormService', () => {
     TestBed.configureTestingModule({
       providers: [FormService, {provide: WebsocketService, useValue:websocketService},
                                                    {provide: SabloService, useValue:sabloService},
-                                                   {provide: ConverterService, useValue:converterService}],
+                                                   {provide: ConverterService, useValue:converterService},LoggerService],
     });
   });
 
