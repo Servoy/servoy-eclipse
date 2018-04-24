@@ -188,15 +188,15 @@ export class ServoyService {
 
     private setFindMode( beanData ) {
         if ( beanData['findmode'] ) {
-            if ( this.windowRefService.nativeWindow.shortcut.all_shortcuts['ENTER'] === undefined ) {
+            if ( this.windowRefService.nativeWindow['shortcut'].all_shortcuts['ENTER'] === undefined ) {
                 this.findModeShortCutAdded = true;
 
-                this.windowRefService.nativeWindow.shortcut.add( 'ENTER', this.performFind );
+                this.windowRefService.nativeWindow['shortcut'].add( 'ENTER', this.performFind );
             }
         }
         else if ( beanData['findmode'] == false && this.findModeShortCutAdded ) {
             this.findModeShortCutAdded = false;
-            this.windowRefService.nativeWindow.shortcut.remove( 'ENTER' );
+            this.windowRefService.nativeWindow['shortcut'].remove( 'ENTER' );
         }
     }
 

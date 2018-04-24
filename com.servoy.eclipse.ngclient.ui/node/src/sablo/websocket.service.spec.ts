@@ -14,7 +14,7 @@ describe('WebsocketService', () => {
       normalWebSocket =  window["WebSocket"];
       window["WebSocket"] = WebSocketMock;
       
-      windowRef =  {}
+      windowRef =  {nativeWindow:{}}
      const servicesService = jasmine.createSpyObj('ServicesService', ['callServiceApi','updateServiceScopes']);
       const converterService = jasmine.createSpyObj('ConverterService', ['convertFromServerToClient','convertFromClientToServer','convertClientObject']);
     TestBed.configureTestingModule({

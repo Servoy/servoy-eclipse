@@ -195,7 +195,7 @@ export class WebsocketSession {
             me.stopHeartbeat();
             if ( me.connected != 'CLOSED' ) {
                 me.connected = 'RECONNECTING';
-                if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (" + new Date().getTime() + ")");
+                if (this.log.debugLevel === LogLevel.SPAM) this.log.debug("sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (" + new Date().getTime() + ")");
             }
             for ( var handler in me.onCloseHandlers ) {
                 me.onCloseHandlers[handler]( evt );
@@ -215,7 +215,7 @@ export class WebsocketSession {
 
                 // server disconnected, do not try to reconnect
                 me.connected = 'CLOSED';
-                if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode (onconnecting got a server disconnect/close with reason " + evt.reason + "): ... CLOSED (" + new Date().getTime() + ")");
+                if (this.log.debugLevel === LogLevel.SPAM) this.log.debug("sbl * Connection mode (onconnecting got a server disconnect/close with reason " + evt.reason + "): ... CLOSED (" + new Date().getTime() + ")");
             }
         }
         this.websocket.onmessage = ( message ) => {
@@ -250,11 +250,11 @@ export class WebsocketSession {
         }
         var msg = JSON.stringify( obj )
         if ( this.isConnected() ) {
-            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Sending message to server: " + msg);
+            if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Sending message to server: " + msg);
             this.websocket.send( msg )
         }
         else {
-            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Disconnected; will add the following to pending messages to be sent to server: " + msg);
+            if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Disconnected; will add the following to pending messages to be sent to server: " + msg);
             this.pendingMessages = this.pendingMessages || []
             this.pendingMessages.push( msg )
         }
@@ -286,7 +286,7 @@ export class WebsocketSession {
         if ( this.websocket ) {
             this.websocket.close();
             this.connected = 'CLOSED';
-            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode (disconnect): ... CLOSED (" + new Date().getTime() + ")");
+            if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Connection mode (disconnect): ... CLOSED (" + new Date().getTime() + ")");
         }
     }
 
@@ -306,11 +306,11 @@ export class WebsocketSession {
 
     private setConnected() {
         this.connected = 'CONNECTED';
-        if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode: ... CONNECTED (" + new Date().getTime() + ")");
+        if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Connection mode: ... CONNECTED (" + new Date().getTime() + ")");
 
         if ( this.pendingMessages ) {
             for ( let i in this.pendingMessages ) {
-                if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connected; sending pending message to server: " + this.pendingMessages[i]);
+                if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Connected; sending pending message to server: " + this.pendingMessages[i]);
                 this.websocket.send( this.pendingMessages[i] )
             }
             this.pendingMessages = undefined
@@ -319,17 +319,17 @@ export class WebsocketSession {
 
     private startHeartbeat() {
         if ( this.heartbeatMonitor == null ) {
-            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Starting heartbeat... (" + new Date().getTime() + ")");
+            if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Starting heartbeat... (" + new Date().getTime() + ")");
 
             this.lastHeartbeat = new Date().getTime();
             this.heartbeatMonitor = IntervalObservable.create( 4000 ).subscribe(() => {
-                if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Sending heartbeat... (" + new Date().getTime() + ")");
+                if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Sending heartbeat... (" + new Date().getTime() + ")");
                 if ( new Date().getTime() - this.lastHeartbeat >= 4000 ) {
                     this.websocket.send( "P" ); // ping
                     if ( this.isConnected() && new Date().getTime() - this.lastHeartbeat > 8000 ) {
                         // no response within 8 seconds
                         if ( this.connected !== 'RECONNECTING' ) {
-                            //                            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Connection mode (Heartbeat timed out; connection lost; waiting to reconnect): ... RECONNECTING (" + new Date().getTime() + ")");
+                            //                            if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Connection mode (Heartbeat timed out; connection lost; waiting to reconnect): ... RECONNECTING (" + new Date().getTime() + ")");
                             this.connected = 'RECONNECTING';
                         }
                     }
@@ -340,7 +340,7 @@ export class WebsocketSession {
 
     private stopHeartbeat() {
         if ( this.heartbeatMonitor != null ) {
-            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Stopping heartbeat... (" + new Date().getTime() + ")");
+            if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Stopping heartbeat... (" + new Date().getTime() + ")");
             this.heartbeatMonitor.unsubscribe();
             this.heartbeatMonitor = undefined;
         }
@@ -351,10 +351,10 @@ export class WebsocketSession {
     }
 
     private handleHeartbeat( message ) {
-        if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Received heartbeat... (" + new Date().getTime() + ")");
+        if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Received heartbeat... (" + new Date().getTime() + ")");
         this.lastHeartbeat = new Date().getTime(); // something is received, the server connection is up
         if ( this.isReconnecting() ) {
-            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Heartbeat received, connection re-established...");
+            if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Heartbeat received, connection re-established...");
             this.setConnected();
         }
         if ( message.data == "P" ) {
@@ -369,7 +369,7 @@ export class WebsocketSession {
         this.functionsToExecuteAfterIncommingMessageWasHandled = [];
 
         try {
-            if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Received message from server: " + JSON.stringify(message));
+            if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Received message from server: " + JSON.stringify(message));
 
             var message_data = message.data;
             var separator = message_data.indexOf( '#' );
@@ -432,7 +432,7 @@ export class WebsocketSession {
                     var ret = this.onMessageObjectHandlers[handler]( obj.msg, obj[ConverterService.TYPES_KEY] ? obj[ConverterService.TYPES_KEY].msg : undefined )
                     if ( ret ) responseValue = ret;
 
-                    if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Checking if any form scope changes need to be digested (obj.msg).");
+                    if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Checking if any form scope changes need to be digested (obj.msg).");
                 }
             }
 
@@ -458,7 +458,7 @@ export class WebsocketSession {
                         this.onMessageObjectHandlers[handler]( obj.calls[i], ( obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].calls ) ? obj[ConverterService.TYPES_KEY].calls[i] : undefined );
                     }
 
-                    if (this.log.debugLevel() === LogLevel.SPAM) this.log.debug("sbl * Checking if any (obj.calls) form scopes changes need to be digested (obj.calls).");
+                    if (this.log.debugLevel=== LogLevel.SPAM) this.log.debug("sbl * Checking if any (obj.calls) form scopes changes need to be digested (obj.calls).");
                 }
             }
             if ( obj && obj.smsgid ) {

@@ -106,8 +106,8 @@ export class ApplicationService {
             userAgent : userAgent.userAgent,
             platform : userAgent.platform,
             locale : locale.full,
-            remote_ipaddress : this.windowRefService.nativeWindow.servoy_remoteaddr,
-            remote_host : this.windowRefService.nativeWindow.servoy_remotehost,
+            remote_ipaddress : this.windowRefService.nativeWindow['servoy_remoteaddr'],
+            remote_host : this.windowRefService.nativeWindow['servoy_remotehost'],
             utcOffset : (new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0).getTimezoneOffset() / -60),utcDstOffset:(new Date(new Date().getFullYear(), 6, 1, 0, 0, 0, 0).getTimezoneOffset() / -60)
         };
     }

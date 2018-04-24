@@ -5,8 +5,8 @@ import {EventEmitter } from '@angular/core';
 import {WebsocketService} from '../sablo/websocket.service';
 import {SabloService} from '../sablo/sablo.service';
 import {ConverterService} from '../sablo/converter.service';
-import {LoggerService} from '../sablo/logger.service'
-
+import {LoggerService} from '../sablo/logger.service';
+import {WindowRefService} from '../sablo/util/windowref.service';
 
 import { FormService } from './form.service';
 
@@ -19,9 +19,12 @@ describe('FormService', () => {
       sabloService = jasmine.createSpyObj("SabloService", ["connect"]);
       converterService = jasmine.createSpyObj("SabloService", ["convertFromClientToServer"]);
     TestBed.configureTestingModule({
-      providers: [FormService, {provide: WebsocketService, useValue:websocketService},
-                                                   {provide: SabloService, useValue:sabloService},
-                                                   {provide: ConverterService, useValue:converterService},LoggerService],
+      providers: [FormService, 
+                          LoggerService,
+                          WindowRefService,
+                          {provide: WebsocketService, useValue:websocketService},
+                          {provide: SabloService, useValue:sabloService},
+                          {provide: ConverterService, useValue:converterService}],
     });
   });
 
