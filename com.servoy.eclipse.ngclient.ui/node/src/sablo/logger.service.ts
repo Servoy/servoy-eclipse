@@ -37,8 +37,16 @@ export class LoggerService  {
         }
     }
     
+    get spam() {
+        if (this.svyLogConfiguration.level >= LogLevel.SPAM ) {
+            return this.console.debug.bind(this.console);
+        } else {
+            return noop;
+        }
+    }
+    
      get debug() {
-         if (this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >=LogLevel.DEBUG ) {
+         if (this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.DEBUG ) {
              return this.console.debug.bind(this.console);
          } else {
              return noop;
@@ -46,7 +54,7 @@ export class LoggerService  {
      }
      
      get info() {
-         if (this.svyLogConfiguration.isDebugMode|| this.svyLogConfiguration.level >=LogLevel.INFO) {
+         if (this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.INFO) {
              return this.console.info.bind(this.console);
          } else {
              return noop;
@@ -54,7 +62,7 @@ export class LoggerService  {
      }
 
      get warn() {
-         if (this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >=LogLevel.WARN) {
+         if (this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.WARN) {
              return this.console.warn.bind(this.console);
          } else {
              return noop;

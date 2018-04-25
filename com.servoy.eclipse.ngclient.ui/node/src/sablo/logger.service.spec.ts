@@ -21,7 +21,7 @@ describe('LoggerService', () => {
     expect(log).toBeTruthy();
   }));
   
-  it('should not log', inject([LoggerService], (log: LoggerService) => {
+  it('should not log anything but errors', inject([LoggerService], (log: LoggerService) => {
       windowRef.nativeWindow.svyLogConfiguration.isDebugMode = false;
       
       log.debug('test');
@@ -32,6 +32,9 @@ describe('LoggerService', () => {
       
       log.warn('test');
       expect(windowRef.nativeWindow.console.warn).not.toHaveBeenCalled();
+      
+      log.error('ERROR!');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith('ERROR!');
     }));
   
   it('should log error', inject([LoggerService], (log: LoggerService) => {
@@ -47,6 +50,9 @@ describe('LoggerService', () => {
   it('should log info, warning, error', inject([LoggerService], (log: LoggerService) => {
       windowRef.nativeWindow.svyLogConfiguration.level = LogLevel.INFO;
       
+      log.spam('some spam');
+      expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
+      
       log.debug('test');
       expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
       
@@ -55,6 +61,32 @@ describe('LoggerService', () => {
       
       log.warn('warning...');
       expect(windowRef.nativeWindow.console.warn).toHaveBeenCalledWith('warning...');
+      
+      log.error('ERROR!');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith('ERROR!');
+    }));
+  
+  it('should log debug ... error', inject([LoggerService], (log: LoggerService) => {
+      windowRef.nativeWindow.svyLogConfiguration.level = LogLevel.DEBUG;
+      
+      log.spam('some spam');
+      expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
+      
+      log.debug('test');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('test');
+      
+      log.error('ERROR!');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith('ERROR!');
+    }));
+  
+  it('should spam', inject([LoggerService], (log: LoggerService) => {
+      windowRef.nativeWindow.svyLogConfiguration.level = LogLevel.SPAM;
+      
+      log.spam('some spam');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('some spam');
+      
+      log.debug('test');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('test');
       
       log.error('ERROR!');
       expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith('ERROR!');
