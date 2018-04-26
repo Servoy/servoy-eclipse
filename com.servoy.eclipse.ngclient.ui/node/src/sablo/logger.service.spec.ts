@@ -84,7 +84,10 @@ describe('LoggerService', () => {
       
       log.spam('some spam');
       expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('some spam');
-      
+
+      log.spam(()=>"some spam2");
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('some spam2');
+
       log.debug('test');
       expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('test');
       
