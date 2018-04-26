@@ -52,21 +52,21 @@ export class LoggerService {
     public info(message: string | ( () => string ) ) {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.INFO ) {
             const msg = message instanceof Function ? message() : message;
-            this.console.debug( msg );
+            this.console.info( msg );
         }
     }
 
     public warn(message: string | ( () => string ) ) {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.WARN ) {
             const msg = message instanceof Function ? message() : message;
-            this.console.debug( msg );
+            this.console.warn( msg );
         } 
     }
 
     public error(message: string | ( () => string ) ) {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.ERROR ) {
             const msg = message instanceof Function ? message() : message;
-            this.console.debug( msg );
+            this.console.error( msg );
         } 
     }
 

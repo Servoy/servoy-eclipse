@@ -71,12 +71,23 @@ describe('LoggerService', () => {
       
       log.spam('some spam');
       expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
+      let stringResolved = false;
+      log.spam(()=>{stringResolved=true;return 'some spam' + 2});
+      expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
+      expect(stringResolved).toBeFalsy("string resolved should not be true, spam should not have resolved it");
       
       log.debug('test');
       expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('test');
-      
+
+      log.debug(()=>{stringResolved=true;return 'test' + 2});
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('test2');
+      expect(stringResolved).toBeTruthy("stringResolved should be true, debug should have resolved it");
+
       log.error('ERROR!');
       expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith('ERROR!');
+
+      log.error(() =>'ERROR!' + 2);
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith('ERROR!2');
     }));
   
   it('should spam', inject([LoggerService], (log: LoggerService) => {
@@ -85,7 +96,7 @@ describe('LoggerService', () => {
       log.spam('some spam');
       expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('some spam');
 
-      log.spam(()=>"some spam2");
+      log.spam(()=>"some spam" + 2);
       expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('some spam2');
 
       log.debug('test');
