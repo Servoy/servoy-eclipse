@@ -80,7 +80,7 @@ describe('LoggerService', () => {
       expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('test');
 
       log.debug(()=>{stringResolved=true;return 'test' + 2});
-      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('test2');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith('test22');
       expect(stringResolved).toBeTruthy("stringResolved should be true, debug should have resolved it");
 
       log.error('ERROR!');
