@@ -61,7 +61,7 @@ export class SabloService {
                 // "{ svy_types : {product: {datatextfield1: {0: "Date"}}} }
                 var call = msg.call;
 
-                this.log.debug( "sbl * Received API call from server: '" + call.api + "' to form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) );
+                this.log.debug(() => ("sbl * Received API call from server: '" + call.api + "' to form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) ));
 
 
                 var previousApiCallPromise = null;
@@ -81,7 +81,7 @@ export class SabloService {
                             return this.resolveFormIfNeededAndExecuteAPICall();
                         },
                         function( err ) {
-                            this.log.error( "sbl * Error waiting for api call execute " + err );
+                            this.log.error(() => ("sbl * Error waiting for api call execute " + err ));
                             return Promise.reject( err );
                         } );
                 }
@@ -213,11 +213,11 @@ export class SabloService {
         var func = apiCallFunctions ? apiCallFunctions[call.api] : null;
         var returnValue;
         if ( !func ) {
-            this.log.warn( "sbl * Bean " + ( call.propertyPath ? call.propertyPath : call.bean ) + " on form " + call.form + " did not provide the called api: " + call.api )
+            this.log.warn(() => ("sbl * Bean " + ( call.propertyPath ? call.propertyPath : call.bean ) + " on form " + call.form + " did not provide the called api: " + call.api ))
             returnValue = null;
         }
         else {
-            this.log.debug( "sbl * Api call '" + call.api + "' to form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) + " will be called now." );
+            this.log.debug(() => ("sbl * Api call '" + call.api + "' to form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) + " will be called now." ));
             returnValue = func.apply( apiCallFunctions, call.args );
         }
         return returnValue;
@@ -226,7 +226,7 @@ export class SabloService {
     private executeAPICallInTimeout( call, formState, count, timeout ) {
         return Observable.of().delay( timeout ).toPromise().then(() => {
             var apiFunctions = this.getAPICallFunctions( call, formState );
-            this.log.debug( "sbl * Remaining wait cycles upon execution of API: '" + call.api + "' of form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) + ": " + count );
+            this.log.debug(() => ("sbl * Remaining wait cycles upon execution of API: '" + call.api + "' of form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) + ": " + count ));
             if ( ( apiFunctions && apiFunctions[call.api] ) || count < 1 ) {
                 return this.executeAPICall( call, apiFunctions );
             } else {
