@@ -645,6 +645,10 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				// not a servoy method key, probably a bean property
 				String[] split = methodKey.split("\\.");
 				name = split[split.length - 1];
+				if (name.endsWith("MethodID"))
+				{
+					name = name.substring(0, name.indexOf("MethodID"));
+				}
 			}
 			else
 			{
