@@ -1019,6 +1019,6 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 	@Override
 	protected String getContextId()
 	{
-		return "com.servoy.eclipse.ui.create_solution";
+		return "com.servoy.eclipse.ui.create_relation";
 	}
 }

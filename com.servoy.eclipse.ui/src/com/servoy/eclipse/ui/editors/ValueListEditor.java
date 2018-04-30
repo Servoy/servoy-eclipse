@@ -468,44 +468,52 @@ public class ValueListEditor extends PersistEditor
 		definitionGroup.setLayout(groupLayout_1);
 
 		final GroupLayout groupLayout = new GroupLayout(valueListEditorComposite);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().add(nameLabel).addPreferredGap(LayoutStyle.RELATED).add(nameField, 100, 200, Short.MAX_VALUE)).add(
-						customValuesButton)).addPreferredGap(LayoutStyle.RELATED)).add(
-							groupLayout.createSequentialGroup().add(19, 19, 19).add(customValues, 100, 200, Short.MAX_VALUE))).add(9,
-								9, 9)).add(groupLayout.createSequentialGroup().addContainerGap().add(fallbackValueListControl, GroupLayout.PREFERRED_SIZE,
-									GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(40, 40, 40).add(allowEmptyValueButton,
-										GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(40, 40, 40).addPreferredGap(
-											LayoutStyle.RELATED).add(sortingDefinitionControl, GroupLayout.PREFERRED_SIZE,
-												GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).addContainerGap()).add(
-													groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(
-														GroupLayout.LEADING).add(deprecatedLabel).add(encapsulationLabel)).addPreferredGap(
-															LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(deprecated,
-																GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(encapsulation,
-																	GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)).addContainerGap()).add(
-																		groupLayout.createSequentialGroup().add(36, 36, 36).add(
-																			applyValuelistNameButton).addContainerGap()).add(
-																				groupLayout.createSequentialGroup().addContainerGap().add(
-																					groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-																						groupLayout.createSequentialGroup().add(relatedValuesButton,
-																							GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-																								LayoutStyle.RELATED).add(relationSelectControl,
-																									GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)).add(
-																										groupLayout.createSequentialGroup().add(
-																											globalMethodValuesButton, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-																												LayoutStyle.RELATED).add(
-																													globalMethodSelectControl, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE).addPreferredGap(
-																														LayoutStyle.RELATED).add(lazyLoading,
-																															GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)).add(
-																																groupLayout.createSequentialGroup().add(
-																																	tableValuesButton, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-																																		LayoutStyle.RELATED).add(
-																																			tableSelectControl, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE))).add(
-																																				0, 200,
-																																				318)).add(
-																																					groupLayout.createSequentialGroup().addContainerGap().add(
-																																						definitionGroup, 100, 200, Short.MAX_VALUE).addContainerGap()));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(
+			groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(nameLabel).addPreferredGap(
+					LayoutStyle.RELATED).add(nameField, 100, 200, Short.MAX_VALUE)).add(customValuesButton)).addPreferredGap(LayoutStyle.RELATED)).add(
+						groupLayout.createSequentialGroup().add(19, 19, 19).add(customValues, 100, 200, Short.MAX_VALUE))).add(9, 9, 9)).add(
+							groupLayout.createSequentialGroup().addContainerGap().add(fallbackValueListControl, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(40, 40, 40).add(allowEmptyValueButton,
+									GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(40, 40, 40).addPreferredGap(
+										LayoutStyle.RELATED).add(sortingDefinitionControl, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+											Short.MAX_VALUE).addContainerGap()).add(
+												groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(
+													GroupLayout.LEADING).add(deprecatedLabel).add(encapsulationLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+														groupLayout.createParallelGroup(GroupLayout.LEADING).add(deprecated, GroupLayout.PREFERRED_SIZE, 228,
+															GroupLayout.PREFERRED_SIZE).add(encapsulation, GroupLayout.PREFERRED_SIZE, 228,
+																GroupLayout.PREFERRED_SIZE)).addContainerGap()).add(groupLayout.createSequentialGroup().add(36,
+																	36, 36).add(applyValuelistNameButton).addContainerGap()).add(
+																		groupLayout.createSequentialGroup().addContainerGap().add(
+																			groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+																				groupLayout.createSequentialGroup().add(relatedValuesButton,
+																					GroupLayout.PREFERRED_SIZE, 134,
+																					GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+																						relationSelectControl, GroupLayout.DEFAULT_SIZE, 200,
+																						Short.MAX_VALUE)).add(
+																							groupLayout.createSequentialGroup().add(globalMethodValuesButton,
+																								GroupLayout.PREFERRED_SIZE, 134,
+																								GroupLayout.PREFERRED_SIZE).addPreferredGap(
+																									LayoutStyle.RELATED).add(globalMethodSelectControl,
+																										GroupLayout.DEFAULT_SIZE, 200,
+																										Short.MAX_VALUE).addPreferredGap(
+																											LayoutStyle.RELATED).add(lazyLoading,
+																												GroupLayout.PREFERRED_SIZE,
+																												GroupLayout.PREFERRED_SIZE,
+																												GroupLayout.PREFERRED_SIZE)).add(
+																													groupLayout.createSequentialGroup().add(
+																														tableValuesButton,
+																														GroupLayout.PREFERRED_SIZE, 134,
+																														GroupLayout.PREFERRED_SIZE).addPreferredGap(
+																															LayoutStyle.RELATED).add(
+																																tableSelectControl,
+																																GroupLayout.DEFAULT_SIZE, 200,
+																																Short.MAX_VALUE))).add(0, 200,
+																																	318)).add(
+																																		groupLayout.createSequentialGroup().addContainerGap().add(
+																																			definitionGroup,
+																																			100, 200,
+																																			Short.MAX_VALUE).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(nameLabel).add(nameField,
 				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
@@ -1322,5 +1330,11 @@ public class ValueListEditor extends PersistEditor
 		{
 			getValueList().setShowDataProviders(lastShowDataProviders);
 		}
+	}
+
+	@Override
+	protected String getContextId()
+	{
+		return "com.servoy.eclipse.ui.create_valuelist";
 	}
 }

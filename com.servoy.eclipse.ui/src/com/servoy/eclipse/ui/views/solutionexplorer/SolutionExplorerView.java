@@ -63,6 +63,7 @@ import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.ui.DLTKPluginImages;
+import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.ControlContribution;
@@ -194,6 +195,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -3533,7 +3535,10 @@ public class SolutionExplorerView extends ViewPart
 			page.setRootEntry(new ModifiedPropertySheetEntry());
 			return page;
 		}
-
+		if (type.equals(IContextProvider.class))
+		{
+			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.solution_explorer");
+		}
 		return super.getAdapter(type);
 	}
 
