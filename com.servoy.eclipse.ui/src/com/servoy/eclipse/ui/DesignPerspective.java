@@ -50,7 +50,7 @@ public class DesignPerspective implements IPerspectiveFactory
 		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.65f, editorArea);//0.8f
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);
-		right.addView("org.eclipse.help.ui.HelpView");
+//		right.addPlaceholder("org.eclipse.help.ui.HelpView");
 
 		IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea);
 		bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
