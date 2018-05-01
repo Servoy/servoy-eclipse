@@ -6,8 +6,8 @@
       <nodejs
             id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
             name="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
-            path="node-v8.9.4-linux-x64/bin/npm"
-            zip="node-v8.9.4-linux-x64.tar.xz">
+            path="node-v10.0.0-linux-x64/bin/npm"
+            zip="node-v10.0.0-linux-x64.tar.xz">
       </nodejs>
    </extension>
 
