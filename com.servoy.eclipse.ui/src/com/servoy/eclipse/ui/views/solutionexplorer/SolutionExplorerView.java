@@ -154,11 +154,13 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.TextActionHandler;
@@ -300,6 +302,8 @@ public class SolutionExplorerView extends ViewPart
 	public static final String DIALOGSTORE_CONTEXT_MENU_NAVIGATION = "SolutionExplorerView.contextMenuNavigation";
 
 	public static final String DIALOGSTORE_CONTEXT_MENU_TREE_HANDLING = "SolutionExplorerView.contextMenuTreeNavigation";
+
+	public static final String DIALOGSTORE_HELP_SHOWN = "SolutionExplorerView.helpShown";
 
 	/**
 	 * This orientation tells the view to put the list (outline) part of the view under the tree.
@@ -593,6 +597,68 @@ public class SolutionExplorerView extends ViewPart
 	public MediaNode getCurrentMediaFolder()
 	{
 		return currentMediaFolder;
+	}
+
+	/**
+	 * @author jcompagner
+	 */
+	private static final class IntroViewListener implements IPartListener2
+	{
+		private boolean showHelp;
+
+		public boolean showHelp()
+		{
+			if (showHelp)
+			{
+				PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.solution_explorer");
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef)
+		{
+			if (partRef.getId().equals("org.eclipse.ui.internal.introview"))
+			{
+				showHelp = true;
+			}
+		}
+
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef)
+		{
+		}
 	}
 
 	class ViewLabelProvider extends ColumnLabelProvider implements IDeprecationProvider
@@ -962,6 +1028,12 @@ public class SolutionExplorerView extends ViewPart
 
 		// workaround until https://bugs.eclipse.org/bugs/show_bug.cgi?id=119948 gets implemented
 		Platform.getAdapterManager().loadAdapter(new SimpleUserNode("wrnd", UserNodeType.DATE), "com.servoy.eclipse.jsunit.SolutionUnitTestTarget");
+		if (!fDialogSettings.getBoolean(DIALOGSTORE_HELP_SHOWN))
+		{
+			introViewListener = new IntroViewListener();
+			site.getPage().addPartListener(introViewListener);
+		}
+
 	}
 
 	public void addTreeRefreshListener(IRefreshListener l)
@@ -1629,6 +1701,7 @@ public class SolutionExplorerView extends ViewPart
 	private EditWebPackageDetailsAction editWebPackageDetailsAction;
 	private ImportZipPackageAsProjectAction importComponentAsProject;
 	private IAction importComponentInSolution;
+	private IntroViewListener introViewListener;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -3441,6 +3514,12 @@ public class SolutionExplorerView extends ViewPart
 	@Override
 	public void setFocus()
 	{
+		if (introViewListener != null && introViewListener.showHelp())
+		{
+			fDialogSettings.put(DIALOGSTORE_HELP_SHOWN, true);
+			getSite().getPage().removePartListener(introViewListener);
+			introViewListener = null;
+		}
 		StructuredViewer focusedView = fSelectionProviderMediator.getViewerInFocus();
 		if (focusedView != null)
 		{
@@ -3508,6 +3587,12 @@ public class SolutionExplorerView extends ViewPart
 			}
 
 			tableListener = null;
+		}
+
+		if (introViewListener != null)
+		{
+			getSite().getPage().removePartListener(introViewListener);
+			introViewListener = null;
 		}
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
