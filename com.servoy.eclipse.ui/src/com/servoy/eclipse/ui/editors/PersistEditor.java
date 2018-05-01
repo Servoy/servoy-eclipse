@@ -21,8 +21,6 @@ import java.util.Collection;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.help.HelpSystem;
-import org.eclipse.help.IContext;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.SafeRunnable;
@@ -45,6 +43,7 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -92,26 +91,7 @@ public abstract class PersistEditor extends EditorPart implements IPersistChange
 		}
 		if (getContextId() != null && adapter.equals(IContextProvider.class))
 		{
-			return new IContextProvider()
-			{
-				@Override
-				public String getSearchExpression(Object target)
-				{
-					return null;
-				}
-
-				@Override
-				public int getContextChangeMask()
-				{
-					return IContextProvider.SELECTION;
-				}
-
-				@Override
-				public IContext getContext(Object target)
-				{
-					return HelpSystem.getContext(getContextId());
-				}
-			};
+			return new ViewPartHelpContextProvider(getContextId());
 		}
 		return super.getAdapter(adapter);
 	}

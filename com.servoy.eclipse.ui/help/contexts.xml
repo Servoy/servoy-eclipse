@@ -13,5 +13,17 @@
   <context id="create_formcomponent" title="New Form Component Wizard">
     <topic href="https://servoy.github.io/servoy_documentation/84/create_formcomponent.html" label="Create Form Component"/>
  </context>
+  <context id="create_relation" title="Relation Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_relation.html" label="Create/Edit Relation"/>
+ </context>
+   <context id="create_valuelist" title="ValueList Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_valuelist.html" label="Create/Edit Valuelist"/>
+ </context>
+   <context id="solution_explorer" title="Solution Explorer">
+    <topic href="https://servoy.github.io/servoy_documentation/84/solution_explorer.html" label="Solution Explorer"/>
+ </context>
+   <context id="form_hierarchy_view" title="Form Hierarchy Viewer">
+    <topic href="https://servoy.github.io/servoy_documentation/84/form_hierarchy_view.html" label="Form Hierarchy Viewer"/>
+ </context>
 
-</contexts>
+ </contexts>
