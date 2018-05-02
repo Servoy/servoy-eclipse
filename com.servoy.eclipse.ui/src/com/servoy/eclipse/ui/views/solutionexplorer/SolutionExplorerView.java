@@ -1994,7 +1994,7 @@ public class SolutionExplorerView extends ViewPart
 					for (IResourceDelta element : affectedChildren)
 					{
 						IResource resource = element.getResource();
-						if (resource instanceof IProject)
+						if (resource instanceof IProject && !((IProject)resource).getName().startsWith("import_placeholder"))
 						{
 							// see if it is a Servoy project that changed
 							try
