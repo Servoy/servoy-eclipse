@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Mobile Exporter
 Bundle-SymbolicName: com.servoy.eclipse.model.exporter.mobile;singleton:=true
-Bundle-Version: 8.3.0.3202_rc2
+Bundle-Version: 8.3.0.3203
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.runtime,
  servoy_base;bundle-version="[8.3.0,8.4.0)",
