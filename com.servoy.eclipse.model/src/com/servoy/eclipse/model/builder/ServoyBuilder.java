@@ -630,6 +630,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> VALUELIST_TYPE_UNKNOWN = new Pair<String, ProblemSeverity>("valuelistTypeUnknown", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> VALUELIST_GENERIC_ERROR = new Pair<String, ProblemSeverity>("valuelistGenericError",
 		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> VALUELIST_WITH_FALLBACK_OF_FALLBACK = new Pair<String, ProblemSeverity>("valuelistWithFallbackofFallback",
+		ProblemSeverity.ERROR);
 
 	// styles
 	public final static Pair<String, ProblemSeverity> STYLE_NOT_FOUND = new Pair<String, ProblemSeverity>("styleNotFound", ProblemSeverity.WARNING);
@@ -1804,6 +1806,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				addDeprecatedElementWarningIfNeeded(persist, fallbackValuelist, project,
 					"Valuelist \"" + elementName + "\" has a deprecated fallback valuelist \"" + fallbackValuelist.getName() + "\".");
+				if (fallbackValuelist.getFallbackValueListID() > 0)
+				{
+					ServoyMarker mk = MarkerMessages.ValuelistFallbackOfFallbackFound.fill(((ValueList)persist).getName(), fallbackValuelist.getName());
+					addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_WITH_FALLBACK_OF_FALLBACK, IMarker.PRIORITY_HIGH, null, persist);
+				}
 			}
 
 			// check usage of deprecated relation inside a valuelist

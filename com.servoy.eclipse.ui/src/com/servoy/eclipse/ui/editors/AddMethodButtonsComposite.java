@@ -201,6 +201,10 @@ public class AddMethodButtonsComposite extends Composite
 				}
 			}
 		}
+		if (persistContext.getContext() instanceof Form && dataSource == null)
+		{
+			dataSource = "";
+		}
 		if (dataSource != null)
 		{
 			if (substitutions != null) substitutions.put("dataSource", dataSource);

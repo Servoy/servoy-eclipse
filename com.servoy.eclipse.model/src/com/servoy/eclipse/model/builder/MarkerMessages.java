@@ -223,6 +223,9 @@ public class MarkerMessages
 		"Valuelist \"{0}\" references a private global method that is not accessible from this solution.", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
 	public static ServoyMarker ValuelistInvalidCustomValues = new ServoyMarker(
 		"Valuelist \"{0}\" has invalid custom value (either all rows or no rows should have a real value).", ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
+	public static ServoyMarker ValuelistFallbackOfFallbackFound = new ServoyMarker(
+		"Valuelist \"{0}\" has fallback valuelist \"{1}\" which has a fallback valuelist as well. This is not supported.",
+		ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
 
 	public static ServoyMarker StyleNotFound = new ServoyMarker("Style \"{0}\" used in form \"{1}\" does not exist.", ServoyBuilder.MISSING_STYLE);
 	public static ServoyMarker StyleFormClassNotFound = new ServoyMarker("Style class \"{0}\" used in form \"{1}\" does not exist.",
