@@ -193,6 +193,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.shared.IWebClientSessionFactory;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
@@ -2747,6 +2748,15 @@ public class ServoyModel extends AbstractServoyModel
 					if (persist instanceof IScriptElement)
 					{
 						changedScriptElements.add(persist);
+					}
+
+					if (persist instanceof TableNode)
+					{
+						String inMemTable = DataSourceUtils.getInmemDataSourceName(((TableNode)persist).getDataSource());
+						if (inMemTable != null)
+						{
+							servoyProject.getMemServer().loadTable((TableNode)persist);
+						}
 					}
 				}
 				return SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(persist) ? IPersistVisitor.CONTINUE_TRAVERSAL
