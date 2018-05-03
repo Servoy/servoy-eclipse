@@ -121,7 +121,7 @@ public class MemServer implements IServerInternal, IServer
 	 * @param tableNode
 	 * @param property
 	 */
-	private void loadTable(TableNode tableNode)
+	public void loadTable(TableNode tableNode)
 	{
 		Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
 		if (property != null)
