@@ -698,10 +698,22 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 	public static class Table implements ISupportName
 	{
 		private final String dataSource;
+		private final String name;
 
 		public Table(String dataSource)
 		{
 			this.dataSource = dataSource;
+			String table = DataSourceUtils.getDataSourceTableName(dataSource);
+			String server = DataSourceUtils.getDataSourceServerName(dataSource);
+			if (table != null && server != null)
+			{
+				if (server.equals(IServer.INMEM_SERVER))
+				{
+					name = table + " - InMemory Server";
+				}
+				else name = table + " - " + server;
+			}
+			else name = dataSource;
 		}
 
 		/**
@@ -709,7 +721,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		 */
 		public String getName()
 		{
-			return dataSource;
+			return name;
 		}
 
 		/**
