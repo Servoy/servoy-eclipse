@@ -321,12 +321,15 @@ public class DesignerUtil
 			@Override
 			public void add(String key, Set<String> values)
 			{
-				JSONArray ar = new JSONArray();
-				for (String child : values)
+				if (!values.isEmpty())
 				{
-					ar.put(child);
+					JSONArray ar = new JSONArray();
+					for (String child : values)
+					{
+						ar.put(child);
+					}
+					obj.put(key, ar);
 				}
-				obj.put(key, ar);
 			}
 		});
 		return obj;
@@ -423,7 +426,7 @@ public class DesignerUtil
 						}
 					}
 				}
-				if (excludedChildren != null)
+				else if (excludedChildren != null)
 				{
 					for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
 					{
