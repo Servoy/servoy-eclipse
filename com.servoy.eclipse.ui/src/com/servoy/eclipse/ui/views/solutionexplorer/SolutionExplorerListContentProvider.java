@@ -816,7 +816,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String suffix = name.substring(name.lastIndexOf("."));
 			if (suffix.toLowerCase().endsWith("js"))
 			{
-				return uiActivator.loadImageFromBundle("js.png");
+				return uiActivator.loadImageFromBundle("js_file.png");
 			}
 			if (suffix.toLowerCase().endsWith("css"))
 			{
@@ -1871,8 +1871,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logWarning("Class " + clz +
-					" did implement IScriptObject but doesnt have a default constructor, it should have that or use ScriptObjectRegistry.registerScriptObjectForClass()",
+				ServoyLog.logWarning(
+					"Class " + clz +
+						" did implement IScriptObject but doesnt have a default constructor, it should have that or use ScriptObjectRegistry.registerScriptObjectForClass()",
 					e);
 			}
 		}
