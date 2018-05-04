@@ -1,7 +1,7 @@
 <div id="contextMenu" class="dropdown clearfix" style="position:absolute;display:none;z-index:1000;">
 	<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
       <li ng-repeat="action in actions" ng-class="action.getItemClass()">
-      		<a tabindex="-1" href="#" ng-click="action.execute()" style="margin-left:5px; height:24px;background-repeat:no-repeat;background-position:left center;" ng-style="action.getIconStyle()">
+      		<a tabindex="-1" href="#" ng-click="action.execute()" ng-mouseover="adjustMenuPosition()" style="margin-left:5px; height:24px;background-repeat:no-repeat;background-position:left center;" ng-style="action.getIconStyle()">
       			<span style="float:left">{{action.text}}</span>
       			<span style="float:right;" ng-show="action.shortcut != undefined" class="actionshortcut">{{action.shortcut}}</span>
       		</a>

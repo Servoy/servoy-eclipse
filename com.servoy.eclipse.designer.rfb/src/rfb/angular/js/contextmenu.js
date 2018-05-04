@@ -127,6 +127,65 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 						}
 					}
 				}
+				
+				$scope.adjustMenuPosition = function(element) {
+					var win = $(window);
+					var viewport = {
+						top : win.scrollTop(),
+						left : win.scrollLeft()
+					};
+					viewport.right = viewport.left + win.width();
+					viewport.bottom = viewport.top + win.height();
+					
+					if (element) {
+						var bounds = element.offset();
+					    bounds.right = bounds.left + element.outerWidth();
+					    bounds.bottom = bounds.top + element.outerHeight();
+					    
+					    var left = bounds.left;
+					    var top = bounds.top;
+					    
+					    if (bounds.bottom > viewport.bottom) {
+					    	//-10 to make it closer to the cursor
+					    	top -= element.outerHeight() - 10;
+					    }
+					    if (bounds.right > viewport.right)
+					    {
+					    	left -= element.outerWidth() - 10;
+					    }
+					    
+					    element
+						.css({
+							left: left,
+							top: top
+						})		
+					}
+					else {	
+						var submenu = $(".dropdown-submenu:hover");
+					    if (submenu[0]) {
+					    	var menu = $(submenu[0]).find(".dropdown-menu");
+						    bounds = menu.offset();
+						    bounds.right = bounds.left + menu.outerWidth();
+						    bounds.bottom = bounds.top + menu.outerHeight();
+						    
+						    if (bounds.right > viewport.right) {
+						    	//+5 to make it overlap the menu a bit
+						    	menu.css({ left: -1*menu.outerWidth() + 5 })
+						    }
+						    else {
+						    	//remove the left property, otherwise the submenu still shows on the left
+						    	//menu[0].style.removeProperty("left");
+						    }
+						 				    
+						    if (bounds.bottom > viewport.bottom) {
+						    	menu.css({ top: -1*menu.outerHeight() + 5 })
+						    }
+						    else {
+						    	//menu[0].style.removeProperty("top");
+						    }
+					    }
+				    }
+				};
 
 				$scope.$digest();
 				$("#contextMenu")
@@ -135,6 +194,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 					left: e.pageX,
 					top: e.pageY
 				})
+				$scope.adjustMenuPosition($("#contextMenu"));
 				return false;
 			});
 			$scope.actions = $contextmenu.getActions();
