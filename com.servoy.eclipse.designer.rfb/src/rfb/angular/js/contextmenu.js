@@ -173,15 +173,11 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 						    	menu.css({ left: -1*menu.outerWidth() + 5 })
 						    }
 						    else {
-						    	//remove the left property, otherwise the submenu still shows on the left
-						    	//menu[0].style.removeProperty("left");
+						    	menu.css({ left: $("#contextMenu").outerWidth() })
 						    }
 						 				    
 						    if (bounds.bottom > viewport.bottom) {
 						    	menu.css({ top: -1*menu.outerHeight() + 5 })
-						    }
-						    else {
-						    	//menu[0].style.removeProperty("top");
 						    }
 					    }
 				    }
