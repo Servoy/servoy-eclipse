@@ -1,9 +1,8 @@
 import { Injectable, } from '@angular/core';
 import { SessionStorageService } from 'angular-web-storage';
 
-import { Observable } from 'rxjs/Observable';
-import "rxjs/add/observable/of"
-import "rxjs/add/operator/delay"
+import { Observable , of} from 'rxjs';
+import {delay} from 'rxjs/operators'
 
 import { Deferred } from './util/deferred'
 import { WindowRefService } from './util/windowref.service'
@@ -224,7 +223,7 @@ export class SabloService {
     }
 
     private executeAPICallInTimeout( call, formState, count, timeout ) {
-        return Observable.of().delay( timeout ).toPromise().then(() => {
+        return of().pipe(delay( timeout )).toPromise().then(() => {
             var apiFunctions = this.getAPICallFunctions( call, formState );
             this.log.debug(() => ("sbl * Remaining wait cycles upon execution of API: '" + call.api + "' of form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) + ": " + count ));
             if ( ( apiFunctions && apiFunctions[call.api] ) || count < 1 ) {

@@ -76,7 +76,8 @@ public class RunNPMCommand extends WorkspaceJob
 				{
 					String str = new String(bytes, 0, read);
 					str = str.replaceAll(".*?m", "");
-					System.err.println(str);
+					str = str.replaceAll("\b", "");
+					System.err.println(str.trim());
 					read = inputStream.read(bytes);
 				}
 				inputStream.close();

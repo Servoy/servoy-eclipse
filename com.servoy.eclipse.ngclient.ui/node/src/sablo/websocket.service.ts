@@ -1,7 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 
-import { IntervalObservable } from "rxjs/observable/IntervalObservable";
-import { Subscription } from "rxjs/Subscription";
+import { Subscription,interval} from "rxjs";
 
 
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
@@ -322,7 +321,7 @@ export class WebsocketSession {
             this.log.spam(() =>("sbl * Starting heartbeat... (" + new Date().getTime() + ")"));
 
             this.lastHeartbeat = new Date().getTime();
-            this.heartbeatMonitor = IntervalObservable.create( 4000 ).subscribe(() => {
+            this.heartbeatMonitor = interval( 4000 ).subscribe(() => {
                 this.log.spam(() =>("sbl * Sending heartbeat... (" + new Date().getTime() + ")"));
                 if ( new Date().getTime() - this.lastHeartbeat >= 4000 ) {
                     this.websocket.send( "P" ); // ping

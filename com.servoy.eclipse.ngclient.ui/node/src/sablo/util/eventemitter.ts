@@ -1,11 +1,11 @@
-import { Subject } from 'rxjs/Subject';
-import "rxjs/add/operator/filter"
+import { Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 export class CustomEventEmitter {
     private subject = new Subject<CustomEvent>();
     
     public addEventListener(name:string, listener:(event:CustomEvent)=>any) {
-        this.subject.filter(event=> event.name == name).subscribe(listener);
+        this.subject.pipe(filter(event=> event.name == name)).subscribe(listener);
     }
     
     public dispatchEvent(event:CustomEvent) {
