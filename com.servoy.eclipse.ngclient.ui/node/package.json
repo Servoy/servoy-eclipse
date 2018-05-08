@@ -8,7 +8,7 @@
 				"build": "ng build --prod",
 				"build_debug": "ng build --watch",
 				"test": "ng test --watch --browsers Chrome",
-				"test_headless": "ng test --browsers ChromeHeadless --watch=false -sm=false",
+				"test_headless": "ng test --browsers ChromeHeadless --watch=false",
 				"lint": "ng lint",
 				"e2e": "ng e2e"
 		},
