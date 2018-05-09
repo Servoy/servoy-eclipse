@@ -14,6 +14,7 @@ import { ServoyDefaultTabpanel} from './tabpanel/tabpanel';
 import { ServoyDefaultTablesspanel} from './tabpanel/tablesspanel';
 import {ServoyDefaultSplitpane} from './splitpane/splitpane';
 import {ServoyDefaultCalendar} from './calendar/calendar';
+import {ServoyDefaultCombobox} from './combobox/combobox';
 
 import {SabloModule} from '../sablo/sablo.module'
 
@@ -34,6 +35,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
     ServoyDefaultTablesspanel,
     ServoyDefaultSplitpane,
     ServoyDefaultCalendar,
+    ServoyDefaultCombobox,
     FormatFilterPipe,
     MnemonicletterFilterPipe,
     SvyFormat,
@@ -56,7 +58,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
             ServoyDefaultTabpanel,
             ServoyDefaultTablesspanel,
             ServoyDefaultSplitpane,
-            ServoyDefaultCalendar
+            ServoyDefaultCalendar,
+            ServoyDefaultCombobox
   ],
   providers: [FormattingService,
                       I18NProvider,
