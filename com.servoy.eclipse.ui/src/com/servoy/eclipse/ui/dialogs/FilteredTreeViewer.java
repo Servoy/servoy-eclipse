@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -77,6 +79,7 @@ import org.eclipse.ui.internal.IWorkbenchGraphicConstants;
 import org.eclipse.ui.internal.WorkbenchImages;
 import org.eclipse.ui.progress.WorkbenchJob;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.labelproviders.DelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 
@@ -112,6 +115,8 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	private ToolBar toolBar;
 	private final boolean showMenu;
 	private List<Object> orderedSelection;
+	
+	public static final String CONTENT_LOADING_JOB_FAMILY = "svyContentLoadingJobFamily";
 
 	public FilteredTreeViewer(Composite parent, boolean showFilter, boolean showMenu, ITreeContentProvider contentProvider, IBaseLabelProvider labelProvider,
 		ViewerComparator comparator, int treeStyle, TreePatternFilter treePatternFilter, IFilter selectionFilter)
@@ -601,6 +606,16 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	 */
 	private boolean hasAtMostOneView(TreeViewer tree)
 	{
+		IJobManager jobManager = Job.getJobManager();
+		try
+		{
+			//wait for content jobs to finish if it's the case
+			jobManager.join(CONTENT_LOADING_JOB_FAMILY, null);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
 		ITreeContentProvider tcp = (ITreeContentProvider)tree.getContentProvider();
 		Object[] children = tcp.getElements(tree.getInput());
 		if (children.length <= 1)
