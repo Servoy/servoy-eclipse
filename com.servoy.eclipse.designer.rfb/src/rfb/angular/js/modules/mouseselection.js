@@ -488,7 +488,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						}
 					}
 
-					return (returnNonSelectable && nonSelectableNodenull) ? [null, nonSelectableNode] : null;
+					return (returnNonSelectable && nonSelectableNode) ? [null, nonSelectableNode] : null;
 				},
 				
 				isUnknownElement: function(element) {
