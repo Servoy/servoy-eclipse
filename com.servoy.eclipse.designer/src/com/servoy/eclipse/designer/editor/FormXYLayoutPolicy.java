@@ -309,7 +309,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		});
 
 		List<java.awt.Point> moveDeltas = new ArrayList<java.awt.Point>();
-		for (ISupportBounds supportBounds : elements)
+		for (ISupportBounds supportBounds : eps)
 		{
 			java.awt.Point moveDelta = null;
 			switch (distribution)
