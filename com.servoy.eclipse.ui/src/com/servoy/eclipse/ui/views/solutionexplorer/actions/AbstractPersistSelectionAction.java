@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -37,6 +38,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.TableNode;
 
 /**
  * Used to select persists of the same type.
@@ -52,7 +54,7 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 	protected IPersist selectedPersist;
 
 	/**
-	 * 
+	 *
 	 */
 	public AbstractPersistSelectionAction(Shell shell)
 	{
@@ -91,8 +93,8 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 					{
 						nodeType = type;
 					}
-					if (type != nodeType ||
-						(type != UserNodeType.RELATION && type != UserNodeType.VALUELIST_ITEM && type != UserNodeType.MEDIA_IMAGE && type != UserNodeType.FORM))
+					if (type != nodeType || (type != UserNodeType.RELATION && type != UserNodeType.VALUELIST_ITEM && type != UserNodeType.INMEMORY_DATASOURCE &&
+						type != UserNodeType.MEDIA_IMAGE && type != UserNodeType.FORM))
 					{
 						state = false;
 						break;
@@ -106,6 +108,7 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 			selection = sel;
 		}
 		if (nodeType == UserNodeType.RELATION) persistString = "relation";
+		if (nodeType == UserNodeType.INMEMORY_DATASOURCE) persistString = "in memory datasource";
 		if (nodeType == UserNodeType.VALUELIST_ITEM) persistString = "valuelist";
 		if (nodeType == UserNodeType.MEDIA_IMAGE) persistString = "media";
 		if (nodeType == UserNodeType.FORM) persistString = "form";
@@ -119,6 +122,7 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 		if (nodeType == UserNodeType.RELATION) return IRepository.RELATIONS;
 		if (nodeType == UserNodeType.VALUELISTS) return IRepository.VALUELISTS;
 		if (nodeType == UserNodeType.MEDIA_IMAGE) return IRepository.MEDIA;
+		if (nodeType == UserNodeType.INMEMORY_DATASOURCE) return IRepository.TABLENODES;
 		if (selectedPersist instanceof ScriptCalculation) return IRepository.SCRIPTCALCULATIONS;
 		if (selectedPersist instanceof AggregateVariable) return IRepository.AGGREGATEVARIABLES;
 		return -1;
@@ -146,10 +150,25 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 				SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
 				if (projectNode != null)
 				{
-					IPersist persist = (IPersist)node.getRealObject();
-					if (persist instanceof ISupportName)
+					Object persist = node.getRealObject();
+					if (persist instanceof IPersist && persist instanceof ISupportName)
 					{
-						persistList.add(persist);
+						persistList.add((IPersist)persist);
+					}
+					else if (persist instanceof InMemServerWrapper && projectNode.getRealObject() instanceof ServoyProject)
+					{
+						Iterator<TableNode> nodes = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getTableNodes(
+							((InMemServerWrapper)persist).getDataSource());
+						while (nodes.hasNext())
+						{
+							TableNode tableNode = nodes.next();
+							if (tableNode.getColumns() != null)
+							{
+								persistList.add(tableNode);
+								break;
+							}
+						}
+
 					}
 				}
 			}
@@ -166,5 +185,10 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 	 * @param editingForms
 	 * @param nameValidator
 	 */
-	protected abstract void doWork(IPersist[] editingForms, IValidateName nameValidator);
+	protected abstract void doWork(IPersist[] editingPersists, IValidateName nameValidator);
+
+	protected String getName(IPersist persist)
+	{
+		return (persist instanceof ISupportName ? ((ISupportName)persist).getName() : ((TableNode)persist).getTableName());
+	}
 }

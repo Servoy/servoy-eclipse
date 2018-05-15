@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2888,6 +2889,7 @@ public class ServoyModel extends AbstractServoyModel
 					// deleted persist
 					// delete the persist from the real solution
 					child.getParent().removeChild(child);
+
 					// push the delete to the editing solution
 					IPersist editingPersist = servoyProject.updateEditingPersist(child, false);
 
@@ -2895,6 +2897,20 @@ public class ServoyModel extends AbstractServoyModel
 					if (editingPersist != null)
 					{
 						changedEditing.put(child.getUUID(), editingPersist);
+					}
+					if (child instanceof TableNode)
+					{
+						if (((TableNode)child).getColumns() != null)
+						{
+							try
+							{
+								servoyProject.getMemServer().removeTable(((TableNode)child).getTableName());
+							}
+							catch (SQLException e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
 					}
 				}
 			}

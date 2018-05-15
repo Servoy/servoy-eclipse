@@ -47,6 +47,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebObjectImpl;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -239,6 +240,10 @@ public class PersistCloner
 				{
 					((Media)clone).setName(newPersistName);
 					((Media)clone).setPermMediaData(((Media)persist).getMediaData());
+				}
+				else if (clone instanceof TableNode && DataSourceUtils.getInmemDataSourceName(((TableNode)clone).getDataSource()) != null)
+				{
+					((TableNode)clone).setDataSource(DataSourceUtils.createInmemDataSource(newPersistName));
 				}
 				clone.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
 				return clone;
