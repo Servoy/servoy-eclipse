@@ -26,6 +26,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -235,6 +236,7 @@ public class PersistCloner
 				if (clone instanceof ISupportUpdateableName)
 				{
 					((ISupportUpdateableName)clone).updateName(nameValidator, newPersistName);
+					ModelUtils.getEditingFlattenedSolution(clone).flushAllCachedData(); //make sure the name caches are flushed 
 				}
 				else if (clone instanceof Media)
 				{
