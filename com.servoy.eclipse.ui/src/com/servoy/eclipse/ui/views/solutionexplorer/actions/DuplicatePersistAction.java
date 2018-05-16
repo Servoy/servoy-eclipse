@@ -34,7 +34,6 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -72,11 +71,11 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 		String initialSolutionName)
 	{
 		String newName = null;
-		String oldName = ((ISupportName)persist).getName();
+		String oldName = getName(persist);
 		if (persist instanceof Media) newName = "copy_" + oldName;
 		else newName = oldName + "_copy";
 		// prepare dialog
-		InputAndListDialog dialog = new InputAndListDialog(shell, "Duplicate " + persistString + ((ISupportName)persist).getName(),
+		InputAndListDialog dialog = new InputAndListDialog(shell, "Duplicate " + persistString + getName(persist),
 			"Name of the duplicated " + persistString + ": ", newName, new IInputValidator()
 			{
 				public String isValid(String newText)
@@ -166,7 +165,7 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				{
 					ServoyLog.logError(e);
 					MessageDialog.openError(shell, "Cannot duplicate form",
-						persistString + " " + ((ISupportName)persist).getName() + "cannot be duplicated. Reason:\n" + e.getMessage());
+						persistString + " " + getName(persist) + "cannot be duplicated. Reason:\n" + e.getMessage());
 				}
 			}
 		}

@@ -26,6 +26,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -47,6 +48,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebObjectImpl;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -234,11 +236,16 @@ public class PersistCloner
 				if (clone instanceof ISupportUpdateableName)
 				{
 					((ISupportUpdateableName)clone).updateName(nameValidator, newPersistName);
+					ModelUtils.getEditingFlattenedSolution(clone).flushAllCachedData(); //make sure the name caches are flushed 
 				}
 				else if (clone instanceof Media)
 				{
 					((Media)clone).setName(newPersistName);
 					((Media)clone).setPermMediaData(((Media)persist).getMediaData());
+				}
+				else if (clone instanceof TableNode && DataSourceUtils.getInmemDataSourceName(((TableNode)clone).getDataSource()) != null)
+				{
+					((TableNode)clone).setDataSource(DataSourceUtils.createInmemDataSource(newPersistName));
 				}
 				clone.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
 				return clone;
