@@ -481,10 +481,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		Label separator4 = new Label(advancedSettingsComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 
-		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" +
-			"\"exception validation\" - will consider a connection invalid if it's getException() returns non-null.\n" +
-			"\"meta data validation\" - will consider a connection invalid if fetching database metadata fails.\n" +
-			"\"query validation\" - will consider a connection valid as long as it is able to run the given query scucessfully.";
+		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" + "\"" +
+			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION) +
+			"\" - will consider a connection invalid if it's getException() returns non-null.\n" + "\"" +
+			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION) +
+			"\" - will consider a connection invalid if fetching database metadata fails.\n" + "\"" +
+			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION) +
+			"\" - will consider a connection valid as long as it is able to run the given query scucessfully.\n" + "\"" +
+			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION) +
+			"\" - use the connection validation mechanism of the JDBC driver.";
 
 		Label validationTypeLabel;
 		validationTypeLabel = new Label(advancedSettingsComposite, SWT.LEFT);
@@ -495,7 +500,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		validationTypeField.setToolTipText(toolTip);
 		validationTypeField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 
-		toolTip = "If validation type is set to \"query validation\", then this is the query that must run successfully in order for the connection to be considered valid.";
+		toolTip = "If validation type is set to \"" + ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION) +
+			"\", then this is the query that must run successfully in order for the connection to be considered valid.";
 		Label validationQueryLabel;
 		validationQueryLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		validationQueryLabel.setText("Connection Validation Query");
@@ -1227,6 +1233,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION));
 		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION));
 		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION));
+		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION));
 
 		dataModel_cloneFromField.removeAll();
 		dataModel_cloneFromField.add(ServerConfig.NONE);
@@ -1358,10 +1365,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 					type = ServerConfig.CONNECTION_METADATA_VALIDATION;
 					validationQueryField.setEnabled(false);
 				}
-				if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(validationType))
+				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(validationType))
 				{
 					type = ServerConfig.CONNECTION_QUERY_VALIDATION;
 					validationQueryField.setEnabled(true);
+				}
+				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION).equals(validationType))
+				{
+					type = ServerConfig.CONNECTION_DRIVER_VALIDATION;
+					validationQueryField.setEnabled(false);
 				}
 				serverConfigObservable.setPropertyValue("connectionValidationType", new Integer(type));
 			}

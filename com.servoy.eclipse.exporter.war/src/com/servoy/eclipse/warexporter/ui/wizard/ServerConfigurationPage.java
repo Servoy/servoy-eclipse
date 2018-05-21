@@ -188,7 +188,8 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 			}
 		});
 		comboViewer.setInput(new Integer[] { Integer.valueOf(ServerConfig.CONNECTION_EXCEPTION_VALIDATION), Integer.valueOf(
-			ServerConfig.CONNECTION_METADATA_VALIDATION), Integer.valueOf(ServerConfig.CONNECTION_QUERY_VALIDATION) });
+			ServerConfig.CONNECTION_METADATA_VALIDATION), Integer.valueOf(
+				ServerConfig.CONNECTION_QUERY_VALIDATION), Integer.valueOf(ServerConfig.CONNECTION_DRIVER_VALIDATION) });
 
 		validationType = comboViewer.getCombo();
 		validationType.select(config.getConnectionValidationType());
@@ -378,10 +379,15 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 					type = ServerConfig.CONNECTION_METADATA_VALIDATION;
 					validationQuery.setEnabled(false);
 				}
-				if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(valType))
+				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(valType))
 				{
 					type = ServerConfig.CONNECTION_QUERY_VALIDATION;
 					validationQuery.setEnabled(true);
+				}
+				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION).equals(valType))
+				{
+					type = ServerConfig.CONNECTION_DRIVER_VALIDATION;
+					validationQuery.setEnabled(false);
 				}
 				config.setConnectionValidationType(type);
 			}
