@@ -239,7 +239,11 @@ public class PersistCloner
 					fs.flushAllCachedData(); //make sure the name caches are flushed from the active solution and modules
 					for (Solution mod : fs.getModules())
 					{
-						servoyModel.getServoyProject(mod.getName()).getEditingFlattenedSolution().flushAllCachedData();
+						FlattenedSolution editingFlattenedSolution = servoyModel.getServoyProject(mod.getName()).getEditingFlattenedSolution();
+						if (editingFlattenedSolution.getForm(clone.getID()) != null)
+						{
+							editingFlattenedSolution.flushAllCachedData();
+						}
 					}
 				}
 				else if (clone instanceof Media)
