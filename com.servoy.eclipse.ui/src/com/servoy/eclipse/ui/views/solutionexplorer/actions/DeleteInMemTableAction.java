@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.inmemory.MemServer;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -67,11 +66,6 @@ public class DeleteInMemTableAction extends AbstractInMemTableAction implements 
 	protected boolean confirm()
 	{
 		return MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?");
-	}
-
-	@Override
-	protected void updateReferencesIfNeeded(ServoyProject project)
-	{
 	}
 
 	/*

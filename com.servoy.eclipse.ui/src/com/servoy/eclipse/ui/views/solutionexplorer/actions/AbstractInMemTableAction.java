@@ -144,13 +144,12 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 								final ITable table = server == null ? null : server.getTable(selectedTable.getTableName());
 								boolean duplicateDefinitionFound = false;
 								final List<String> solutions = new ArrayList<String>();
-								final ArrayList<String> servoyProject = new ArrayList<>();
+
 								if (server instanceof IServerInternal)
 								{
-									ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 									// see if the user also wants to delete/rename the existing aggregations/calculations/tableEvents for this table
 									// that exist in the active modules (only ask if such info exists)
-									FlattenedSolution flatSolution = sm.getFlattenedSolution();
+									FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 									if (flatSolution != null)
 									{
 										Iterator<TableNode> tableNodes = flatSolution.getTableNodes(table);
@@ -186,53 +185,11 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 										}
 									}
 
-									if (duplicateDefinitionFound)
-									{
-										Display.getDefault().syncExec(new Runnable()
-										{
-											public void run()
-											{
-												final OptionDialog optionDialog = new OptionDialog(shell, "Duplicate Mem Table", null,
-													"Select from which solution/module to " + actionString1 + ": ", MessageDialog.INFORMATION,
-													new String[] { "OK", "Cancel" }, 0, solutions.toArray(new String[solutions.size()]), 0);
-												if (optionDialog.open() == Window.OK)
-												{
-													servoyProject.add(solutions.get(optionDialog.getSelectedOption()));
-												}
-											}
-										});
-									}
-
-									final IServer memServer = duplicateDefinitionFound
-										? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(servoyProject.get(0)).getMemServer()
-										: server;
 									if (completeAction)
 									{
-										ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable()
-										{
-
-											public void run(IProgressMonitor m) throws CoreException
-											{
-												try
-												{
-													doAction(memServer, table);
-												}
-												catch (SQLException e)
-												{
-													ServoyLog.logError(e);
-													warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-														"Cannot " + actionString1 + " table: " + e.getMessage()));
-												}
-												catch (RepositoryException e)
-												{
-													ServoyLog.logError(e);
-													warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-														"Cannot " + actionString1 + " table: " + e.getMessage()));
-												}
-											}
-										}, null);
-
-										refreshEditor(memServer, table);
+										ServoyProject project = getServoyProject(duplicateDefinitionFound, solutions);
+										completeAction(warnings, table, duplicateDefinitionFound ? project.getMemServer() : server);
+										updateReferencesIfNeeded(project);
 									}
 								}
 								else
@@ -240,12 +197,6 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 									warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
 										"Cannot " + actionString1 + " table " + table + " from server " + server));
 								}
-
-
-								updateReferencesIfNeeded(
-									!duplicateDefinitionFound ? ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()
-										: ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(servoyProject.get(0)));
-
 							}
 							catch (RemoteException e)
 							{
@@ -287,6 +238,33 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 					return Status.OK_STATUS;
 				}
 
+				private void completeAction(final MultiStatus warnings, final ITable table, final IServer memServer) throws CoreException
+				{
+					ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable()
+					{
+
+						public void run(IProgressMonitor m) throws CoreException
+						{
+							try
+							{
+								doAction(memServer, table);
+							}
+							catch (SQLException e)
+							{
+								ServoyLog.logError(e);
+								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot " + actionString1 + " table: " + e.getMessage()));
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError(e);
+								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot " + actionString1 + " table: " + e.getMessage()));
+							}
+						}
+					}, null);
+
+					refreshEditor(memServer, table);
+				}
+
 			};
 			job.setUser(true);
 			job.schedule();
@@ -296,7 +274,9 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 
 	protected abstract boolean confirm();
 
-	protected abstract void updateReferencesIfNeeded(ServoyProject project);
+	protected void updateReferencesIfNeeded(ServoyProject project)
+	{
+	}
 
 	protected void duplicateMemTableHandler(IServer server, final ITable table, final FlattenedSolution flatSolution)
 	{
@@ -387,6 +367,31 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 				ServoyLog.logError(e);
 			}
 		}
+	}
+
+	private ServoyProject getServoyProject(boolean duplicateDefinitionFound, final List<String> solutions)
+	{
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		if (duplicateDefinitionFound)
+		{
+			final ArrayList<String> servoyProject = new ArrayList<>();
+
+			Display.getDefault().syncExec(new Runnable()
+			{
+				public void run()
+				{
+					final OptionDialog optionDialog = new OptionDialog(shell, "Duplicate Mem Table", null,
+						"Select from which solution/module to " + actionString1 + ": ", MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0,
+						solutions.toArray(new String[solutions.size()]), 0);
+					if (optionDialog.open() == Window.OK)
+					{
+						servoyProject.add(solutions.get(optionDialog.getSelectedOption()));
+					}
+				}
+			});
+			return servoyModel.getServoyProject(servoyProject.get(0));
+		}
+		return servoyModel.getActiveProject();
 	}
 
 	protected abstract void doAction(final IServer server, final ITable table) throws SQLException, RepositoryException;
