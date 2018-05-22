@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -69,7 +70,7 @@ public class DeleteInMemTableAction extends AbstractInMemTableAction implements 
 	}
 
 	@Override
-	protected void updateReferencesIfNeeded()
+	protected void updateReferencesIfNeeded(ServoyProject project)
 	{
 	}
 
@@ -85,7 +86,7 @@ public class DeleteInMemTableAction extends AbstractInMemTableAction implements 
 	}
 
 	@Override
-	protected void refreshEditor(final ITable table)
+	protected void refreshEditor(final IServer server, final ITable table)
 	{
 		// EditorUtil.closeEditor(table) needs to be run in an UI thread
 		if (Display.getCurrent() != null)

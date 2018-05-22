@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -36,6 +37,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -50,7 +52,9 @@ import org.eclipse.ui.dialogs.ListDialog;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -136,9 +140,11 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 							if (!completeAction) continue;
 							try
 							{
-								final IServer server = selection.get(selectedTable);
+								IServer server = selection.get(selectedTable);
 								final ITable table = server == null ? null : server.getTable(selectedTable.getTableName());
 								boolean duplicateDefinitionFound = false;
+								final List<String> solutions = new ArrayList<String>();
+								final ArrayList<String> servoyProject = new ArrayList<>();
 								if (server instanceof IServerInternal)
 								{
 									ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -151,43 +157,55 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 
 										// first check if there are duplicate definitions
 										boolean definitionFound = false;
-										boolean askUser = false;
+										boolean hasReferences = false;
 										while (tableNodes.hasNext())
 										{
-											if (tableNodes.next().getColumns() != null)
+											TableNode node = tableNodes.next();
+											if (node.getColumns() != null)
 											{
 												if (definitionFound) duplicateDefinitionFound = true;
 												else definitionFound = true;
+												solutions.add(node.getRootObject().getName());
 											}
 											else
 											{
-												askUser = true;
+												hasReferences = true;
 											}
 										}
-										if (askUser)
+										if (hasReferences && !duplicateDefinitionFound)
 										{
-											if (duplicateDefinitionFound)
+											YesYesToAllNoNoToAllAsker _EACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
+											_EACAsker.setMessage(
+												"Table events, aggregations and/or calculations exist for table '" + selectedTable.getTableName() +
+													"' in the active solution and/or modules.\nDo you still want to " + actionString1 + " the table?");
+											// we have tableNode(s)... ask user if these should be deleted/renamed as well
+											if (!_EACAsker.userSaidYes())
 											{
-												duplicateMemTableHandler(server, table, flatSolution);
 												completeAction = false;
 											}
-											else
-											{
-												YesYesToAllNoNoToAllAsker _EACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
-												_EACAsker.setMessage(
-													"Table events, aggregations and/or calculations exist for table '" + selectedTable.getTableName() +
-														"' in the active solution and/or modules.\nDo you still want to " + actionString1 + " the table?");
-												// we have tableNode(s)... ask user if these should be deleted/renamed as well
-												if (!_EACAsker.userSaidYes())
-												{
-													completeAction = false;
-												}
-											}
-
 										}
 									}
 
+									if (duplicateDefinitionFound)
+									{
+										Display.getDefault().syncExec(new Runnable()
+										{
+											public void run()
+											{
+												final OptionDialog optionDialog = new OptionDialog(shell, "Duplicate Mem Table", null,
+													"Select from which solution/module to " + actionString1 + ": ", MessageDialog.INFORMATION,
+													new String[] { "OK", "Cancel" }, 0, solutions.toArray(new String[solutions.size()]), 0);
+												if (optionDialog.open() == Window.OK)
+												{
+													servoyProject.add(solutions.get(optionDialog.getSelectedOption()));
+												}
+											}
+										});
+									}
 
+									final IServer memServer = duplicateDefinitionFound
+										? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(servoyProject.get(0)).getMemServer()
+										: server;
 									if (completeAction)
 									{
 										ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable()
@@ -197,7 +215,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 											{
 												try
 												{
-													doAction(server, table);
+													doAction(memServer, table);
 												}
 												catch (SQLException e)
 												{
@@ -214,7 +232,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 											}
 										}, null);
 
-										refreshEditor(table);
+										refreshEditor(memServer, table);
 									}
 								}
 								else
@@ -223,8 +241,11 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 										"Cannot " + actionString1 + " table " + table + " from server " + server));
 								}
 
-								if (!duplicateDefinitionFound) updateReferencesIfNeeded();
-								//TODO SVY-9708 in case of duplicate definition we need to ask the user which ones to replace
+
+								updateReferencesIfNeeded(
+									!duplicateDefinitionFound ? ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()
+										: ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(servoyProject.get(0)));
+
 							}
 							catch (RemoteException e)
 							{
@@ -254,10 +275,12 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 							final MultiStatus fw = warnings;
 							Display.getDefault().asyncExec(new Runnable()
 							{
+
 								public void run()
 								{
 									ErrorDialog.openError(shell, null, null, fw);
 								}
+
 							});
 						}
 					}
@@ -273,7 +296,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 
 	protected abstract boolean confirm();
 
-	protected abstract void updateReferencesIfNeeded();
+	protected abstract void updateReferencesIfNeeded(ServoyProject project);
 
 	protected void duplicateMemTableHandler(IServer server, final ITable table, final FlattenedSolution flatSolution)
 	{
@@ -372,6 +395,6 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 
 	protected abstract boolean shouldCompleteActionIfUnsaved(String tableName);
 
-	protected abstract void refreshEditor(final ITable table);
+	protected abstract void refreshEditor(final IServer server, final ITable table);
 
 }
