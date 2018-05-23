@@ -220,6 +220,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				monitor.beginTask(jobName, 1);
+				servoyModel.refreshServoyProjects();
 				// set this solution as the new active solution or add it as a module
 				ServoyProject newProject = servoyModel.getServoyProject(page1.getNewSolutionName());
 				if (newProject != null)
@@ -259,6 +260,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					{
 						servoyModel.setActiveProject(newProject, true);
 					}
+				}
+				else
+				{
+					ServoyLog.logError("cannot activate solution", null);
 				}
 				monitor.worked(1);
 				monitor.done();
