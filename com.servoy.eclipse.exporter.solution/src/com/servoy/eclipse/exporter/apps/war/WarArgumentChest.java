@@ -137,8 +137,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Can also use -pi <none> to not export any plugin\n"
 			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -" + noneActiveSolutions+ "  ... the list of solutions that are must be exported but are not in the active solution modules\n"
-			+ "				Default: only active and its modules are exported\n"
+			+ "        -" + noneActiveSolutions+ " ... the  list  of solutions that  must  be exported  but are not in  the active\n"
+			+ "             solution modules.\n"
+			+ "             Default: only active solution and its modules are exported.\n"
 			+ "        -pluginLocations <ABSOLUTE paths to developer 'plugins' folder> ...  needed in  case\n"
 			+ "             you don't run the exporter from [servoy_install]/developer/exporter\n"
 			+ "             Default: '../plugins'.\n"
@@ -198,7 +199,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             will be available as a normal admin user in solutions as well.\n"
 			+ "        -" + minimizeJsCss + " minimize JS and CSS files \n"
 			+ "        -" + licenses + " <company_name> <number_of_licenses> <license_code>... export Servoy Client\n"
-			+ "             licenses; to add more licenses use ',' as delimiter. If the company name contains \n"
+			+ "             licenses;  to add more licenses use  ','  as delimiter. If the company name has\n"
 			+ "             spaces, then it must be enclosed in double quotes.\n"
 			+ "        -" + userHomeDirectory + " <user_home_directory>... this must be a  writable directory where\n"
 			+ "             Servoy application  related files  will be stored;  if not set, then the system\n"
@@ -207,8 +208,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             deployed app. by using the DB servers from the servoy.properties of the war.\n"
 			+ "        -" + overwriteAllProperties + " overwrite all properties of  an already deployed application\n"
 			+ "             by using the values from the servoy.properties of the war.\n"
-		+ "        -" + webXmlFileName + " a path to a web.xml that should be included instead of the default one\n"
-		+ "             should be a web.xml that is generated first by a Servoy WAR export\n";
+			+ "        -" + webXmlFileName + " a path to a web.xml  that should be included instead of default one;\n"
+			+ "             it should be a web.xml file previously generated via a Servoy WAR export.\n";
 		// @formatter:on
 	}
 
