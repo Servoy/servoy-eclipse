@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
@@ -16,7 +15,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.BundleContext;
 
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
@@ -30,8 +28,8 @@ public class Activator extends Plugin
 
 	private File npmPath;
 	private Job extractingNode;
-	private ServoyProject activeProject;
 	private RunNPMCommand buildCommand;
+	private File nodeFolder;
 
 	public static Activator getInstance()
 	{
@@ -68,6 +66,19 @@ public class Activator extends Plugin
 			};
 		}
 		extractingNode.schedule();
+
+		File stateLocation = Activator.getInstance().getStateLocation().toFile();
+		this.nodeFolder = new File(stateLocation, "target");
+
+		new NodeFolderCreatorJob(this.nodeFolder).schedule();
+	}
+
+	/**
+	 * @return the nodeFolder
+	 */
+	public File getNodeFolder()
+	{
+		return nodeFolder;
 	}
 
 	/**
@@ -120,7 +131,39 @@ public class Activator extends Plugin
 		return npm;
 	}
 
-	public void executeNPMCommands(IFolder projectNodeFolder)
+	public void executeNPMInstall()
+	{
+		waitFormNodeExtraction();
+		RunNPMCommand installCommand = new RunNPMCommand(npmPath, nodeFolder, "install");
+		installCommand.setUser(false);
+		createBuildCommand();
+		installCommand.setNextJob(buildCommand);
+		installCommand.schedule();
+
+	}
+
+	public void executeNPMBuild()
+	{
+		if (buildCommand != null) return; // already started?
+		waitFormNodeExtraction();
+		createBuildCommand();
+		buildCommand.schedule();
+	}
+
+	/**
+	 *
+	 */
+	private void createBuildCommand()
+	{
+		buildCommand = new RunNPMCommand(npmPath, nodeFolder, "run-script build_debug --scripts-prepend-node-path");
+		buildCommand.setUser(false);
+		buildCommand.setSystem(true);
+	}
+
+	/**
+	 *
+	 */
+	private void waitFormNodeExtraction()
 	{
 		synchronized (plugin)
 		{
@@ -135,35 +178,11 @@ public class Activator extends Plugin
 				}
 			}
 		}
-		RunNPMCommand installCommand = new RunNPMCommand(npmPath, new File(projectNodeFolder.getLocationURI()), "install");
-		installCommand.setRule(projectNodeFolder);
-		installCommand.setUser(false);
-		buildCommand = new RunNPMCommand(npmPath, new File(projectNodeFolder.getLocationURI()), "run-script build_debug --scripts-prepend-node-path");
-		buildCommand.setUser(false);
-		buildCommand.setSystem(true);
-		installCommand.setNextJob(buildCommand);
-		installCommand.schedule();
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception
 	{
 		if (buildCommand != null) buildCommand.cancel();
-	}
-
-	/**
-	 * @param activeProject
-	 */
-	public void setActiveProject(ServoyProject activeProject)
-	{
-		this.activeProject = activeProject;
-	}
-
-	/**
-	 * @return the activeProject
-	 */
-	public ServoyProject getActiveProject()
-	{
-		return activeProject;
 	}
 }

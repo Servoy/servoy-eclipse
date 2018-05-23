@@ -14,5 +14,6 @@ Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.core,
  org.tukaani.xz,
  javax.servlet,
- org.apache.tomcat
+ org.apache.tomcat,
+ org.apache.commons.io
 Bundle-Activator: com.servoy.eclipse.ngclient.ui.Activator

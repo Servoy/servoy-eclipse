@@ -17,9 +17,8 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -31,14 +30,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
+import org.apache.commons.io.FileUtils;
 
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.util.MimeTypes;
-import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcomp
@@ -57,9 +51,9 @@ public class IndexPageFilter implements Filter
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException
 	{
-		ServoyProject activeProject = Activator.getInstance().getActiveProject();
-		IFolder nodeFolder = null;
-		if (activeProject != null && (nodeFolder = activeProject.getProject().getFolder("/.node/dist")) != null)
+		File nodeFolder = Activator.getInstance().getNodeFolder();
+		File distFolder = new File(nodeFolder, "dist");
+		if (distFolder.exists())
 		{
 			HttpServletRequest request = (HttpServletRequest)servletRequest;
 			String requestURI = request.getRequestURI();
@@ -67,45 +61,25 @@ public class IndexPageFilter implements Filter
 			if (solutionName != null &&
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) || requestURI.toLowerCase().endsWith("/index.html")))
 			{
-				IFile file = nodeFolder.getFile("index.html");
-				try
-				{
-					file.refreshLocal(IResource.DEPTH_ZERO, null);
-					String indexHtml = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF-8"));
-					indexHtml = indexHtml.replace("<base href=\"/\">", "<base href=\"/solution/\">");
-					servletResponse.setCharacterEncoding("UTF-8");
-					servletResponse.setContentType("text/html");
-					servletResponse.setContentLengthLong(indexHtml.length());
-					servletResponse.getWriter().write(indexHtml);
-					return;
-				}
-				catch (CoreException e)
-				{
-					e.printStackTrace();
-				}
+				File file = new File(distFolder, "index.html");
+				String indexHtml = FileUtils.readFileToString(file);
+				indexHtml = indexHtml.replace("<base href=\"/\">", "<base href=\"/solution/\">");
+				servletResponse.setCharacterEncoding("UTF-8");
+				servletResponse.setContentType("text/html");
+				servletResponse.setContentLengthLong(indexHtml.length());
+				servletResponse.getWriter().write(indexHtml);
+				return;
 			}
 			else
 			{
 				String filename = requestURI.substring(SOLUTIONS_PATH.length());
-				IFile file = nodeFolder.getFile(filename);
-				try
+				File file = new File(distFolder, filename);
+				if (file.exists())
 				{
-					file.refreshLocal(IResource.DEPTH_ZERO, null);
-					if (file.exists())
-					{
-						String contentType = MimeTypes.guessContentTypeFromName(filename);
-						if (contentType != null) servletResponse.setContentType(contentType);
-						try (InputStream is = file.getContents())
-						{
-							Utils.streamCopy(is, servletResponse.getOutputStream());
-						}
-						return;
-					}
-				}
-				catch (CoreException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					String contentType = MimeTypes.guessContentTypeFromName(filename);
+					if (contentType != null) servletResponse.setContentType(contentType);
+					FileUtils.copyFile(file, servletResponse.getOutputStream());
+					return;
 				}
 			}
 		}
