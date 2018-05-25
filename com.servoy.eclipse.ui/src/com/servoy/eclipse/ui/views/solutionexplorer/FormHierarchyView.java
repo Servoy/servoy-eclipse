@@ -837,7 +837,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	public void setSelection(Object object, boolean refreshList)
 	{
-		if (noSelectionChange) return;
+		if (object == null || noSelectionChange) return;
 		if (object instanceof Form)
 		{
 			setSelectionInTree(object);
