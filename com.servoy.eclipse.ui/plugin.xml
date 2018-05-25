@@ -48,6 +48,7 @@
          <view
                id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
                relationship="stack"
+               visible="false"
                relative="com.servoy.eclipse.ui.views.SolutionExplorerView">
          </view>
       </perspectiveExtension>
