@@ -331,7 +331,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.jsoup"
          download-size="0"
          install-size="0"
-         version="1.9.2"
+         version="1.11.3"
          unpack="false"/>
 
    <plugin
@@ -366,21 +366,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.collections"
          download-size="0"
          install-size="0"
-         version="3.2.2"
+         version="4.1.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.dbcp2"
          download-size="0"
          install-size="0"
-         version="2.1.1"
+         version="2.3.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.pool2"
          download-size="0"
          install-size="0"
-         version="2.4.2"
+         version="2.5.0"
          unpack="false"/>
 
    <plugin
@@ -436,7 +436,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="commons-lang3"
          download-size="0"
          install-size="0"
-         version="3.1.0"
+         version="3.7.0"
          unpack="false"/>
 
    <plugin
