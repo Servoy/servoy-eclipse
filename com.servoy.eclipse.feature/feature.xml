@@ -317,7 +317,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.io"
          download-size="0"
          install-size="0"
-         version="2.4.0"
+         version="2.6.0"
          unpack="false"/>
 
    <plugin
@@ -479,14 +479,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="6.0.0.v20170929-1901"
+         version="6.1.1.v20180414-0329"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="6.0.0.v20170929-1901"
+         version="6.1.1.v20180414-0329"
          unpack="false"/>
 
    <plugin
