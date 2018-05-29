@@ -44,7 +44,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.servoy.eclipse.model.exporter.mobile,
  net.sourceforge.sqlexplorer;resolution:=optional,
  sablo,
- org.apache.commons.io;bundle-version="2.4.0",
+ org.apache.commons.io,
  sj.jsonschemavalidation,
  org.slf4j.api,
  org.eclipse.e4.ui.css.swt.theme
