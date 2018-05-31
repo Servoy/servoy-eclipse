@@ -475,17 +475,19 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						}
 							
 						// always return the one on top (visible); this is due to formIndex implementation
+						var el = null;
 						for (var i=elements.length;--i;) {
 							if (!(angular.element(elements[i]).is("[svy-non-selectable]"))) {
-								if(returnNonSelectable && nonSelectableNode) {
-									return [elements[i], nonSelectableNode];
+								if (el == null || this.hasGreaterZIndex(elements[i], el))
+								{
+									el = elements[i];
 								}
-								else return elements[i];
 							}
 							else {
 								nonSelectableNode = elements[i];
 							}
 						}
+						return (returnNonSelectable && nonSelectableNode) ? [el, nonSelectableNode] : el;
 					}
 
 					return (returnNonSelectable && nonSelectableNode) ? [null, nonSelectableNode] : null;
@@ -567,6 +569,26 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					var concat = matchedFromDoc.concat(matchedFromGlass);
 					return concat;
 				},
+				hasGreaterZIndex: function(e1, e2) {
+					//we are not interested in the z index if one is contained in the other
+					if (e1.contains(e2) || e2.contains(e1)) return false;
+					
+					//we will not search for the z-index property higher than the common parent
+					var limit = $(e1).parents().has(e2).first();					
+					return this.getZIndex($(e1), limit) > this.getZIndex($(e2), limit);					
+				},
+				getZIndex: function(el, limit) {
+					var zindex = el.css("z-index");
+					if (zindex !== "auto" && zindex !== "inherit" && zindex !== "initial")
+					{
+						return parseInt(zindex);
+					}
+					if (!el.parent()[0].isEqualNode(limit[0]))
+					{
+						return this.getZIndex(el.parent(), limit);
+					}
+					return -9999999;//Number.MIN_SAFE_INTEGER doesn't work in ie
+				}
 			}
 		}
 	}
