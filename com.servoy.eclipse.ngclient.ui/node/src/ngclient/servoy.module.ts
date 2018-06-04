@@ -22,6 +22,7 @@ import { FormatFilterPipe} from './servoy_public'
 import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
 import {I18NProvider} from './services/i18n_provider.service'
+import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
 
 @NgModule( {
     declarations: [
@@ -29,7 +30,8 @@ import {I18NProvider} from './services/i18n_provider.service'
         FormComponent,
         AddAttributeDirective,
         DefaultLoginWindowComponent,
-        FileUploadWindowComponent
+        FileUploadWindowComponent,
+        DefaultNavigator
     ],
     imports: [
         BrowserModule,

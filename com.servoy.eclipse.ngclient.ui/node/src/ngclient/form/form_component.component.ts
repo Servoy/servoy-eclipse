@@ -97,7 +97,11 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     public getAbsoluteFormStyle() {
         const formData = this.formCache.getComponent("");
 //        console.log(formData)
-        return {position:"absolute"};
+        var position = {position:"absolute"};
+        if(this.formCache.getComponent('svy_default_navigator') != null) {
+            position['left'] = "70px";
+        }
+        return position;
     }
 
     public isFormAvailable( name ): boolean {

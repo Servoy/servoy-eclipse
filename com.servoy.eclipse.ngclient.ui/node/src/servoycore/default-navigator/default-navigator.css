@@ -1,0 +1,27 @@
+input[type="range"] {
+    width: 30px;
+    height: 100px;
+    -webkit-appearance: slider-vertical;
+    outline: none;
+}
+
+input[type="text"] {
+    width: 40px;
+    padding: 0px;
+}
+
+span {
+    display: block;
+    text-align: center;
+}
+
+.view {
+    position: absolute;
+    width: 70px;
+}
+
+.column {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 15px;
+}

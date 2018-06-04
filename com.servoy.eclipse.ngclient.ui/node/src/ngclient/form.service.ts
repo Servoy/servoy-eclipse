@@ -52,6 +52,10 @@ export class FormService {
         } );
     }
     
+    public getFormCacheByName( formName: string ): FormCache {
+        return  this.formsCache.get( formName );
+    }
+
     public getFormCache( form: FormComponent ): FormCache {
         return  this.formsCache.get( form.name );
     }
@@ -143,7 +147,7 @@ export class FormService {
         this.sabloService.callService( 'formService', 'svyPush', dpChange, true );
     }
 
-    public executeEvent( formname: string, beanname: string, handler: string, args: IArguments ) {
+    public executeEvent( formname: string, beanname: string, handler: string, args: IArguments|Array<any> ) {
         console.log( formname + "," + beanname + ", executing: " + handler + " with values: " + JSON.stringify( args ) );
 
         var newargs = this.converterService.getEventArgs( args, handler );
