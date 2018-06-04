@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
@@ -322,5 +323,11 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		canFlipToNextPage();
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_properties");
 	}
 }

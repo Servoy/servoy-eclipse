@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -357,5 +358,11 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		else if (exportSolutionWizard.getModel().isProtectWithPassword()) return exportSolutionWizard.getPasswordPage();
 		else if (exportSolutionWizard.getModel().useImportSettings()) return exportSolutionWizard.getImportPage();
 		else return null;
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.export_solution_export_options");
 	}
 }

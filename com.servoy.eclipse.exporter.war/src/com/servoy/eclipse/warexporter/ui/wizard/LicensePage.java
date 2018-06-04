@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
@@ -285,5 +286,11 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 		((LicenseFieldsComposite)((Composite)children[0]).getChildren()[0]).clear();
 		mainContainer.update();
 		exportModel.clearLicenses();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_license");
 	}
 }

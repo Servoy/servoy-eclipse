@@ -20,6 +20,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -54,6 +55,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.dialogs.I18nComposite;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.i18n.I18NMessagesModel.I18NMessagesModelEntry;
@@ -362,5 +364,15 @@ public class I18NEditor extends EditorPart
 	public void refresh()
 	{
 		i18nComposite.refresh();
+	}
+
+	@Override
+	public Object getAdapter(Class adapter)
+	{
+		if (adapter.equals(IContextProvider.class))
+		{
+			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.i18n_editor");
+		}
+		return null;
 	}
 }

@@ -19,5 +19,11 @@
             name="Provides Solution War Export">
       </provider>
    </extension>
-
+ <extension
+       point="org.eclipse.help.contexts">
+    <contexts
+          file="help/contexts.xml"
+          plugin="com.servoy.eclipse.exporter.war">
+    </contexts>
+ </extension>
 </plugin>

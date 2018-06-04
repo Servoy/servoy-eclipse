@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 
@@ -134,5 +135,11 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 
 		exportModel.setStartRMI(true);
 		exportModel.setStartRMIPort("1099");
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_properties_configuration");
 	}
 }

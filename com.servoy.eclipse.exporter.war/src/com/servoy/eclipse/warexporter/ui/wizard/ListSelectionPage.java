@@ -28,6 +28,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.wizards.ICheckBoxView;
 import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
@@ -47,6 +48,8 @@ public class ListSelectionPage extends WizardPage implements ICheckStateListener
 	private SelectAllButtonsBar selectAllButtons;
 	private final boolean selectAll;
 
+	private final String helpString;
+
 	/**
 	 * @param string
 	 * @param string2
@@ -54,12 +57,13 @@ public class ListSelectionPage extends WizardPage implements ICheckStateListener
 	 * @param pluginDir
 	 * @param beanSelectionPage
 	 */
-	public ListSelectionPage(String pagename, String title, String description, List<String> input, List<String> files, boolean selectAll)
+	public ListSelectionPage(String pagename, String title, String description, List<String> input, List<String> files, boolean selectAll, String helpString)
 	{
 		super(pagename);
 		this.input = input;
 		this.selection = files;
 		this.selectAll = selectAll;
+		this.helpString = helpString;
 		setTitle(title);
 		setDescription(description);
 	}
@@ -149,5 +153,14 @@ public class ListSelectionPage extends WizardPage implements ICheckStateListener
 		checkboxTableViewer.setAllChecked(false);
 		selectAllButtons.enableAll();
 		selectAllButtons.disableDeselectAll();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		if (helpString != null)
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war." + helpString);
+		}
 	}
 }

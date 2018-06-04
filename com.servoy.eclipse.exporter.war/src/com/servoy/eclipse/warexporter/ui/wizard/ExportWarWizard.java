@@ -162,7 +162,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 	@Override
 	public boolean performFinish()
 	{
-			// check if finish is pressed on the first page, to ask if the file can be overwritten or not.
+		// check if finish is pressed on the first page, to ask if the file can be overwritten or not.
 		if (getContainer().getCurrentPage() instanceof FileSelectionPage && getContainer().getCurrentPage().getNextPage() == null)
 		{
 			return false;
@@ -269,16 +269,16 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
-				getDialogSettings().get("export.drivers") == null, false);
+				getDialogSettings().get("export.drivers") == null, false, "export_war_drivers");
 			lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
-				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null,
-				false);
+				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null, false,
+				"export_war_lafs");
 			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
 				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, getDialogSettings().get("export.beans") == null,
-				false);
+				false, "export_war_beans");
 			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
-				getDialogSettings().get("export.plugins") == null, true);
+				getDialogSettings().get("export.plugins") == null, true, "export_war_plugins");
 
 			ArrayList<String> tmp = new ArrayList<>();
 			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -296,7 +296,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			}
 			noneActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the none active solutions",
 				"Select the solutions that you want to include in this WAR. Be aware that these solutions are not checked for builder markers!", tmp,
-				exportModel.getNoneActiveSolutions(), false);
+				exportModel.getNoneActiveSolutions(), false, "export_war_none_active_solutions");
 			fileSelectionPage = new FileSelectionPage(exportModel);
 
 			addPage(fileSelectionPage);

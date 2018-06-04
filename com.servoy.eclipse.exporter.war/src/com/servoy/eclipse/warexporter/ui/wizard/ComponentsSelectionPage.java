@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -46,6 +47,7 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 		joinWithLastUsed();
 	}
 
+	@Override
 	protected void joinWithLastUsed()
 	{
 		if (exportModel.getExportedComponents() == null ||
@@ -75,4 +77,9 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 		return super.getNextPage();
 	}
 
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_components");
+	}
 }

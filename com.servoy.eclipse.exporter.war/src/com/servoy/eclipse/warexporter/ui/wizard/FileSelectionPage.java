@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -867,5 +868,11 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_main");
 	}
 }
