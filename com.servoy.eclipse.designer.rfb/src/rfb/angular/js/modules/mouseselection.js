@@ -425,7 +425,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM && !(angular.element(elements[elements.length - 2]).is("[svy-non-selectable]"))) {
 							return elements[elements.length - 2];
 						}
-						else {
+						else if (angular.element(elements[0]).is("[svy-non-selectable]")) {
 							nonSelectableNode = elements[elements.length - 2];
 						}
 						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
@@ -482,6 +482,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 								{
 									el = elements[i];
 								}
+								if ($(el).hasClass("ghost")) break;//no need to continue, ghosts are always on top
 							}
 							else {
 								nonSelectableNode = elements[i];
