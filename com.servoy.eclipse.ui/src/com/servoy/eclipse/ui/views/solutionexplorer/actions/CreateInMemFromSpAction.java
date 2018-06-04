@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,17 +45,21 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Procedure;
 import com.servoy.j2db.persistence.ProcedureColumn;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.query.ColumnType;
+import com.servoy.j2db.util.serialize.JSONSerializerWrapper;
 
 /**
  * @author jcompagner
@@ -221,10 +226,33 @@ public class CreateInMemFromSpAction extends Action implements ISelectionChanged
 							// for now merge new columns in.
 							if (table.getColumn(procColumn.getName()) == null)
 							{
+								String converterName = null;
 								ColumnType columnType = procColumn.getColumnType();
-								table.createNewColumn(validator, procColumn.getName(), columnType.getSqlType(), columnType.getLength(), columnType.getScale());
+								if (columnType.getSqlType() == Types.ARRAY)
+								{
+									// we have no direct support for array, use TEXT with stringserializer
+									columnType = ColumnType.getColumnType(IColumnTypes.TEXT);
+									converterName = JSONSerializerWrapper.STRING_SERIALIZER_NAME;
+								}
+								Column column = table.createNewColumn(validator, procColumn.getName(), columnType.getSqlType(), columnType.getLength(),
+									columnType.getScale());
+								if (converterName != null)
+								{
+									DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+									if (dmm != null)
+									{
+										try
+										{
+											dmm.createNewColumnInfo(column, false);
+											column.getColumnInfo().setConverterName(converterName);
+										}
+										catch (RepositoryException e)
+										{
+											ServoyLog.logWarning("Cannot create new column info in table editor", e);
+										}
+									}
+								}
 							}
-
 						}
 						EditorUtil.openTableEditor(table);
 					}
@@ -236,6 +264,7 @@ public class CreateInMemFromSpAction extends Action implements ISelectionChanged
 			}
 		}
 		else
+
 		{
 			// we need to show a dialog so it can execute it?
 		}
