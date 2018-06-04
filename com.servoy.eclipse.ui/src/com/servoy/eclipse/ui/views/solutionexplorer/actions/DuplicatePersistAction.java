@@ -32,6 +32,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IValidateName;
@@ -169,5 +170,11 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				}
 			}
 		}
+	}
+
+	@Override
+	protected boolean isEnabledForNode(UserNodeType type)
+	{
+		return type == UserNodeType.RELATION || type == UserNodeType.VALUELIST_ITEM || type == UserNodeType.MEDIA_IMAGE || type == UserNodeType.FORM;
 	}
 }

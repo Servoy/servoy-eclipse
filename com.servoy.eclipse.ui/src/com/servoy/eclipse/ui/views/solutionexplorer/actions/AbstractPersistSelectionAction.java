@@ -93,8 +93,7 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 					{
 						nodeType = type;
 					}
-					if (type != nodeType || (type != UserNodeType.RELATION && type != UserNodeType.VALUELIST_ITEM && type != UserNodeType.INMEMORY_DATASOURCE &&
-						type != UserNodeType.MEDIA_IMAGE && type != UserNodeType.FORM))
+					if (!isEnabledForNode(type))
 					{
 						state = false;
 						break;
@@ -115,6 +114,8 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 
 		setEnabled(state);
 	}
+
+	protected abstract boolean isEnabledForNode(UserNodeType type);
 
 	protected int getPersistType()
 	{
