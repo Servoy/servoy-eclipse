@@ -20,7 +20,7 @@ export class DefaultNavigator {
     this.sliderValue = -this.navigatorComponentCache.model.currentIndex;
   }
 
-  setIndex(newIndex: string) {
+  setIndex(newIndex: any) {
     var i = parseInt(newIndex)
     if (!i) {
       i = 1;
