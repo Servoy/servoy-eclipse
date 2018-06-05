@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.j2db.persistence.IServer;
@@ -414,5 +415,11 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 		clone.setItems(selectedServerNames.toArray(new String[selectedServerNames.size()]));//can't set to empty value otherwise
 		skip.setSelection(false);
 		procedures.setSelection(false);
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_db_server_config");
 	}
 }

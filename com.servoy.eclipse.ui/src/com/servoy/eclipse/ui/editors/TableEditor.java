@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
@@ -55,6 +56,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.table.AggregationsComposite;
 import com.servoy.eclipse.ui.editors.table.CalculationsComposite;
 import com.servoy.eclipse.ui.editors.table.ColumnComposite;
@@ -507,6 +509,10 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					return null;
 				}
 			};
+		}
+		if (adapter.equals(IContextProvider.class))
+		{
+			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.table_editor");
 		}
 		return super.getAdapter(adapter);
 	}

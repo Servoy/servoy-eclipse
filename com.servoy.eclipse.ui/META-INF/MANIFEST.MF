@@ -100,4 +100,4 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
  com.servoy.eclipse.ui.wizards
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -24,6 +24,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * @author gboros
@@ -66,5 +67,11 @@ public class ExportConfirmationPage extends WizardPage
 	public IWizardPage getPreviousPage()
 	{
 		return null;
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.export_solution_confirmation");
 	}
 }

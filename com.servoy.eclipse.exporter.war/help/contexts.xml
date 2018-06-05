@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.contexts"?>
+<contexts>
+    <context id="export_war_admin_configuration" title="Admin Configuration">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_admin_configuration.html" label="Admin Configuration"/>
+ </context> 
+    <context id="export_war_beans" title="Beans selection">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_beans.html" label="Beans selection"/>
+ </context> 
+     <context id="export_war_components" title="Components">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_components.html" label="Components"/>
+ </context> 
+    <context id="export_war_deploy_configuration" title="Deploy Configuration">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_deploy_configuration.html" label="Deploy Configuration"/>
+ </context> 
+    <context id="export_war_drivers" title="Drivers selection">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_drivers.html" label="Drivers selection"/>
+ </context>
+   <context id="export_war_lafs" title="Lafs selection">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_lafs.html" label="Lafs selection"/>
+ </context>
+      <context id="export_war_main" title="WAR Export">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_main.html" label="WAR Export"/>
+ </context> 
+   <context id="export_war_plugins" title="Plugin selection">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_plugins.html" label="Plugin selection"/>
+ </context>
+   <context id="export_war_license" title="License">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_license.html" label="License"/>
+ </context>
+    <context id="export_war_db_server_config" title="Database Server Configuration">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_db_server_config" label="Database Server Configuration"/>
+ </context>
+ 
+   <context id="export_war_properties_configuration" title="Properties Configuration">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_properties_configuration.html" label="Properties Configuration"/>
+ </context>
+    <context id="export_war_properties" title="Properties">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_properties.html" label="Properties"/>
+ </context> 
+    <context id="export_war_server_selection" title="Server Selection">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_server_selection.html" label="Server Selection"/>
+ </context> 
+     <context id="export_war_none_active_solutions" title="None Active Solutions">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_none_active_solutions.html" label="None Active Solutions"/>
+ </context> 
+     <context id="export_war_services" title="Services">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_war_services.html" label="Services"/>
+ </context> 
+ 
+ 
+ 
+ </contexts>

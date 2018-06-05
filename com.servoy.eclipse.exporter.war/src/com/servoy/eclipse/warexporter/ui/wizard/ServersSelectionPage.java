@@ -35,6 +35,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.wizards.ICheckBoxView;
 import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
@@ -257,5 +258,11 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		checkboxTableViewer.setAllChecked(true);
 		selectAllButtons.enableAll();
 		selectAllButtons.disableSelectAll();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_server_selection");
 	}
 }

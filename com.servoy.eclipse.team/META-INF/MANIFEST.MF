@@ -26,4 +26,5 @@ Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.team,com.servoy.eclipse.team.actions
  ,com.servoy.eclipse.team.subscriber,com.servoy.eclipse.team.ui,com.ser
  voy.eclipse.team.ui.actions
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: com.servoy.eclipse.team

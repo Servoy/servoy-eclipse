@@ -24,6 +24,7 @@ import java.util.Map;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
@@ -152,5 +153,11 @@ public class ModulesSelectionPage extends ListSelectionPage
 	public boolean canFlipToNextPage()
 	{
 		return (projectProblemsType == BuilderUtils.HAS_NO_MARKERS || projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS) && super.canFlipToNextPage();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.export_solution_module_selection");
 	}
 }

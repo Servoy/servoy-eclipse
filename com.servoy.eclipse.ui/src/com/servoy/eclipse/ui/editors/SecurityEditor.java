@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -64,6 +65,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -92,7 +94,7 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 	/**
 	 * Create contents of the editor part
-	 * 
+	 *
 	 * @param parent
 	 */
 	@Override
@@ -240,8 +242,8 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 				if (groups != null && groups.size() > 0)
 				{
 					String groupsToDelete = groups.toString();
-					if (MessageDialog.openConfirm(getSite().getShell(), "Delete group(s)", "Are you sure you want to delete the group(s): " + groupsToDelete +
-						" ?"))
+					if (MessageDialog.openConfirm(getSite().getShell(), "Delete group(s)",
+						"Are you sure you want to delete the group(s): " + groupsToDelete + " ?"))
 					{
 						model.removeGroups(groups);
 						for (TableItem item : groupTable.getItems())
@@ -260,21 +262,19 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().add(groupText, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(newGroupButton)).add(removeGroupButton).add(tableContainer, GroupLayout.PREFERRED_SIZE, 288,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-					groupLayout.createSequentialGroup().add(userNameText, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(newUserButton)).add(removeUserButton).add(treeContainer, GroupLayout.PREFERRED_SIZE, 183, Short.MAX_VALUE)).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(newUserButton).add(userNameText).add(groupText).add(newGroupButton)).addPreferredGap(
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+				groupLayout.createSequentialGroup().add(groupText, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+					LayoutStyle.RELATED).add(newGroupButton)).add(removeGroupButton).add(tableContainer, GroupLayout.PREFERRED_SIZE, 288,
+						GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+							groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(userNameText,
+								GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(newUserButton)).add(
+									removeUserButton).add(treeContainer, GroupLayout.PREFERRED_SIZE, 183, Short.MAX_VALUE)).addContainerGap()));
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.BASELINE).add(newUserButton).add(userNameText).add(groupText).add(newGroupButton)).addPreferredGap(
 				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(tableContainer, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE).add(treeContainer,
-					GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeUserButton).add(removeGroupButton)).addContainerGap()));
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(tableContainer, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE).add(
+						treeContainer, GroupLayout.PREFERRED_SIZE, 249, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
+							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeUserButton).add(removeGroupButton)).addContainerGap()));
 		container.setLayout(groupLayout);
 
 		initDataBindings();
@@ -603,5 +603,15 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 			}
 		}
 		return groups;
+	}
+
+	@Override
+	public Object getAdapter(Class adapter)
+	{
+		if (adapter.equals(IContextProvider.class))
+		{
+			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.security_editor");
+		}
+		return super.getAdapter(adapter);
 	}
 }

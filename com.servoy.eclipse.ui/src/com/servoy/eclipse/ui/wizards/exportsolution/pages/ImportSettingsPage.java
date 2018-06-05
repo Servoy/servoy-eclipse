@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
@@ -281,5 +282,11 @@ public class ImportSettingsPage extends WizardPage implements Listener
 	{
 		if (exportSolutionWizard.isDeployToApplicationServer()) return exportSolutionWizard.getDeployPage();
 		return null;
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.export_solution_import_settings");
 	}
 }

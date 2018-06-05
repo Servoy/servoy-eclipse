@@ -19,7 +19,7 @@ Require-Bundle: org.apache.tomcat,
  org.apache.httpcomponents.httpclient,
  org.apache.commons.io
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.servlet,
  javax.servlet.annotation,
  javax.servlet.http,
@@ -29,3 +29,4 @@ Import-Package: javax.servlet,
  org.osgi.framework
 Export-Package: com.servoy.eclipse.designer.rfb.endpoint,
  com.servoy.eclipse.designer.rfb.startup
+Automatic-Module-Name: com.servoy.eclipse.designer.rfb

@@ -34,6 +34,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.wizards.ICheckBoxView;
 import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
@@ -56,10 +57,12 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	private final boolean selectAll;
 	private final boolean includeSubdirectories;
 
+	private final String helpString;
+
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
 		boolean selectAll)
 	{
-		this(pagename, title, description, directory, files, requiredFiles, selectAll, false);
+		this(pagename, title, description, directory, files, requiredFiles, selectAll, false, null);
 	}
 
 	/**
@@ -70,7 +73,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	 * @param beanSelectionPage
 	 */
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
-		boolean selectAll, boolean includeSubdirectories)
+		boolean selectAll, boolean includeSubdirectories, String helpString)
 	{
 		super(pagename);
 		this.directory = directory;
@@ -78,6 +81,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		this.requiredFiles = requiredFiles;
 		this.selectAll = selectAll;
 		this.includeSubdirectories = includeSubdirectories;
+		this.helpString = helpString;
 		setTitle(title);
 		setDescription(description);
 	}
@@ -290,5 +294,14 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		checkboxTableViewer.setAllChecked(true);
 		selectAllButtons.enableAll();
 		selectAllButtons.disableSelectAll();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		if (helpString != null)
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war." + helpString);
+		}
 	}
 }
