@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.servoy.eclipse.notification;singleton:=true
 Bundle-Version: 8.4.0.3400_b1
 Bundle-Activator: com.servoy.eclipse.notification.Activator
 Bundle-Vendor: Servoy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -18,3 +18,4 @@ Bundle-ClassPath: .,
  lib/rome-1.7.5-SNAPSHOT.jar,
  lib/jdom2-2.0.6.jar,
  lib/rome-utils-1.7.5-SNAPSHOT.jar
+Automatic-Module-Name: com.servoy.eclipse.notification

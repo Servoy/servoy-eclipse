@@ -23,6 +23,7 @@ Require-Bundle: org.eclipse.core.resources,
  com.servoy.eclipse.core,
  sablo,
  org.apache.commons.lang
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
+Automatic-Module-Name: com.servoy.eclipse.exporter.war

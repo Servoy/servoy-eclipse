@@ -4,7 +4,7 @@ Bundle-Name: Workspace based Repository
 Bundle-SymbolicName: com.servoy.eclipse.model;singleton:=true
 Bundle-Version: 8.4.0.3400_b1
 Bundle-Vendor: Servoy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: servoy_shared,
  servoy_base,
  org.eclipse.core.resources,
@@ -36,3 +36,5 @@ Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.war.exporter
 Bundle-Activator: com.servoy.eclipse.model.Activator
 Bundle-ActivationPolicy: lazy
+Import-Package: javax.servlet;version="3.1.0"
+Automatic-Module-Name: com.servoy.eclipse.model

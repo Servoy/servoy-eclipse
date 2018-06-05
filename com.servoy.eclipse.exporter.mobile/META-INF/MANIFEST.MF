@@ -24,7 +24,8 @@ Require-Bundle: com.servoy.eclipse.model,
  org.apache.httpcomponents.httpcore,
  org.apache.httpcomponents.httpclient,
  com.servoy.eclipse.debug
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: org.eclipse.ui.internal.browser
+Automatic-Module-Name: com.servoy.eclipse.exporter.mobile
