@@ -1416,7 +1416,7 @@ public class WarExporter
 		//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, //
 		//{ "SocketFactory.SSLKeystorePassphrase", "", "The SSL passphrase to access the keystore", "password" }, //
 
-		properties.setProperty("servoy.use.client.timezone", "true");
+//		properties.setProperty("servoy.use.client.timezone", "true");
 
 		// TODO ask for all kinds of other stuff like branding?
 		properties.setProperty("servoy.server.start.rmi", Boolean.toString(exportModel.getStartRMI()));
