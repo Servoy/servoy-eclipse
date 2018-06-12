@@ -56,6 +56,7 @@ import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
+import org.eclipse.dltk.javascript.typeinfo.model.AnyType;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -2698,7 +2699,8 @@ public class TypeCreator extends TypeCache
 					{
 						// the special internal once (like clear() of related) should be also added
 						// because they should override the normal super JSFoundSet clear
-						overridden = TypeCreator.clone(member, member.getType());
+						// leave the type check in the clone, dont give member.getType() because that removes the type from this member
+						overridden = TypeCreator.clone(member, null);
 						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
 					}
 				}
@@ -4492,6 +4494,10 @@ public class TypeCreator extends TypeCache
 				SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
 				typeRef.setTarget(member.getDirectType());
 				clone.setType(typeRef);
+			}
+			else if (member.getType() instanceof AnyType)
+			{
+				clone.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
 			}
 		}
 		else

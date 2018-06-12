@@ -444,6 +444,11 @@ public class ElementResolver implements IElementResolver
 					}
 				}
 			}
+			if (!members.isEmpty())
+			{
+				//return members if found in existing types defined by TypeCreator
+				return members;
+			}
 		}
 
 		String typeName;
@@ -593,6 +598,10 @@ public class ElementResolver implements IElementResolver
 			{
 				typeRef = TypeUtil.classType(type);
 				image = TypeCreator.CONSTANT;
+			}
+			else if (type.getName().equals("Any"))
+			{
+				typeRef = TypeInfoModelFactory.eINSTANCE.createAnyType();
 			}
 			else
 			{
