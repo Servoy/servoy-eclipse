@@ -19,7 +19,7 @@ Require-Bundle: servoy_shared,
  org.apache.commons.pool2,
  j2db_server,
  org.apache.commons.codec,
- org.apache.commons.io,
+ org.apache.commons.io;bundle-version="2.6.0",
  org.apache.commons.collections
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
