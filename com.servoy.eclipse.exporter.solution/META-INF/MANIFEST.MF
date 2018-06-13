@@ -14,7 +14,7 @@ Require-Bundle: org.eclipse.core.resources,
  com.servoy.eclipse.model.exporter.mobile,
  servoy_ngclient,
  sablo,
- org.apache.commons.io
+ org.apache.commons.io;bundle-version="2.6.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: com.servoy.eclipse.exporter.solution
