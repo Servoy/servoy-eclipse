@@ -32,7 +32,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
@@ -59,6 +58,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	private List<String> moduleList = null;
 	private boolean exportAllTablesFromReferencedServers = false;
 	private String protectionPassword = null;
+	private String importOptionsFile = null;
 
 	public ArgumentChest(String[] args)
 	{
@@ -79,7 +79,10 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		if (argsMap.containsKey("users")) exportUsers = true;
 		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
 		protectionPassword = parseArg("pwd", "Protection password was not specified after '-pwd' argument.", argsMap, false);
-
+		if (argsMap.containsKey("isf"))
+		{
+			importOptionsFile = parseArg("isf", "Import options file was not specified after '-isf' argument.", argsMap, false);
+		}
 		if (argsMap.containsKey("modules"))
 		{
 			exportModules = true;
@@ -135,6 +138,9 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			+ "             in export. If only '-modules' is used,  it will export all  referenced modules.\n"
 			+ "             If a list of  modules is also included, it  will export only  modules from this\n"
 			+ "             list, provided they are referenced by exported solution.\n"
+			+ "        -isf <import_options_file> ... path to import options file. Default value is null.\n"
+			+ "             If present, will be added to export file as import_settings.json. This file should\n"
+			+ "             be taken from developer export (import_settings.json) - inside .servoy file \n"
 			+ getHelpMessageExistCodes();
 		// @formatter:on
 	}
@@ -226,7 +232,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		{
 			try
 			{
-				dbcontents = MetaDataUtils.generateMetaDataFileContents((Table)table, -1);
+				dbcontents = MetaDataUtils.generateMetaDataFileContents(table, -1);
 			}
 			catch (Exception e)
 			{
@@ -256,4 +262,8 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return f.getAbsolutePath();
 	}
 
+	public String getImportOptionsFile()
+	{
+		return importOptionsFile;
+	}
 }
