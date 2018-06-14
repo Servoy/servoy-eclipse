@@ -147,13 +147,13 @@ public class OptionsComposite extends Group
 										deleteRelatedRecordsButton)).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().add(9, 9, 9).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(joinTypeLabel).add(joinCombo,
+				groupLayout.createSequentialGroup().add(9, 9, 9).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(joinTypeLabel).add(joinCombo,
 					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(initialSortLabel).add(initalSort).add(button)).addPreferredGap(
 							LayoutStyle.RELATED).add(
 								groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel).add(deprecated)).addPreferredGap(
 									LayoutStyle.RELATED).add(
-										groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulationLabel).add(encapsulation))).add(
+										groupLayout.createParallelGroup(GroupLayout.LEADING).add(encapsulationLabel).add(encapsulation))).add(
 											groupLayout.createSequentialGroup().addContainerGap().add(allowCreationOfButton).addPreferredGap(
 												LayoutStyle.RELATED).add(
 													groupLayout.createSequentialGroup().add(allowParentDeleteButton).addPreferredGap(LayoutStyle.RELATED).add(
