@@ -62,6 +62,8 @@ import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
@@ -1098,12 +1100,18 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				Collections.sort(tableNames);
 
 				List<String> hiddenTables = null;
+				List<String> metadataTables = null;
 				for (String tableName : tableNames)
 				{
 					if (s.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (hiddenTables == null) hiddenTables = new ArrayList<String>();
 						hiddenTables.add(tableName);
+					}
+					else if (s.getTable(tableName).isMarkedAsMetaData())
+					{
+						if (metadataTables == null) metadataTables = new ArrayList<String>();
+						metadataTables.add(tableName);
 					}
 					else
 					{
@@ -1114,6 +1122,27 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						UserNode node = new UserNode(tableName, type, new DataSourceFeedback(dataSource), DataSourceWrapperFactory.getWrapper(dataSource),
 							uiActivator.loadImageFromBundle("table.png"));
 						node.setClientSupport(ClientSupport.All);
+						dlm.add(node);
+					}
+				}
+				if (metadataTables != null)
+				{
+					for (String name : metadataTables)
+					{
+						String dataSource = s.getTable(name).getDataSource();
+
+						Image image = uiActivator.loadImageFromBundle("metadata_table.png");
+						if (image == null)
+						{
+							//we don't have a metadata icon, for now we add some decorator over the existing table icon
+							image = uiActivator.loadImageFromBundle("table.png");
+							image = new DecorationOverlayIcon(image,
+								com.servoy.eclipse.ui.Activator.loadDefaultImageDescriptorFromBundle("layout_decorator.png"),
+								IDecoration.TOP_LEFT).createImage();
+							uiActivator.putImageInCache("metadata_table.png", image);
+						}
+						UserNode node = new UserNode(name, type, new DataSourceFeedback(dataSource, true), DataSourceWrapperFactory.getWrapper(dataSource),
+							image);
 						dlm.add(node);
 					}
 				}
@@ -1871,9 +1900,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			catch (Exception e)
 			{
-				ServoyLog.logWarning(
-					"Class " + clz +
-						" did implement IScriptObject but doesnt have a default constructor, it should have that or use ScriptObjectRegistry.registerScriptObjectForClass()",
+				ServoyLog.logWarning("Class " + clz +
+					" did implement IScriptObject but doesnt have a default constructor, it should have that or use ScriptObjectRegistry.registerScriptObjectForClass()",
 					e);
 			}
 		}
@@ -2379,6 +2407,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private static class DataSourceFeedback implements IDeveloperFeedback
 	{
 		private final String dataSource;
+		private boolean isMetadata = false;
 
 		/**
 		 * @param name
@@ -2387,6 +2416,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		public DataSourceFeedback(String dataSource)
 		{
 			this.dataSource = dataSource;
+		}
+
+		public DataSourceFeedback(String datasource, boolean isMetadata)
+		{
+			this(datasource);
+			this.isMetadata = isMetadata;
 		}
 
 		public String getSample()
@@ -2401,7 +2436,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getToolTipText()
 		{
-			return "<pre>Table with datasource: '<b>" + getCode() + "\'</b><pre";
+			return "<pre>" + (isMetadata ? "Metadata table " : "Table") + " with datasource: '<b>" + getCode() + "\'</b><pre";
 		}
 
 	}
