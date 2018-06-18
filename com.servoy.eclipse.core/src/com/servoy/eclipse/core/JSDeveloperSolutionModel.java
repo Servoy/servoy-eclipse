@@ -19,6 +19,7 @@ package com.servoy.eclipse.core;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -50,19 +51,24 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.IForm;
+import com.servoy.j2db.dataprocessing.BufferedDataSetInternal;
+import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Class that is a special interface in javascript only there in the developer that bridges between the runtime client and the developers workspace
@@ -190,6 +196,23 @@ public class JSDeveloperSolutionModel
 	 */
 	public void js_save(Object obj, final boolean override)
 	{
+		save(obj, override, null, null);
+	}
+
+	/**
+	 * Updates the given in memory datasource and saves it into the developers workspace.
+	 *
+	 * @param dataSource datasource name or JSDataSource object to save.
+	 * @param dataset the dataset with the update columns
+	 * @param types array of the update columns types
+	 */
+	public void js_updateInMemDataSource(Object dataSource, JSDataSet dataSet, Object types)
+	{
+		save(dataSource, true, dataSet, types);
+	}
+
+	private void save(Object obj, final boolean override, JSDataSet updateDataSet, Object updateDataSetTypes)
+	{
 		String name = null;
 		if (obj instanceof String)
 		{
@@ -238,18 +261,66 @@ public class JSDeveloperSolutionModel
 								DataModelManager dataModelManager = ServoyModelFinder.getServoyModel().getDataModelManager();
 								if (dataModelManager != null)
 								{
-									((MemTable)memTable).setColumns(dataModelManager.serializeTable(table));
-								}
-								else
-								{
-									state.reportError("Internal error.", "Cannot save table " + tableName);
-									return Status.CANCEL_STATUS;
+									if (updateDataSet != null)
+									{
+										ColumnType[] columnTypes = null;
+										if (updateDataSetTypes instanceof Object[])
+										{
+											columnTypes = new ColumnType[((Object[])updateDataSetTypes).length];
+											for (int i = 0; i < ((Object[])updateDataSetTypes).length; i++)
+											{
+												columnTypes[i] = ColumnType.getColumnType(Utils.getAsInteger(((Object[])updateDataSetTypes)[i]));
+											}
+										}
+										if (columnTypes == null) columnTypes = BufferedDataSetInternal.getColumnTypeInfo(updateDataSet.getDataSet());
+
+										if (columnTypes.length == updateDataSet.getDataSet().getColumnCount())
+										{
+											List<String> tableColumnNames = Arrays.asList(memTable.getColumnNames());
+											List<String> updateColumnNames = Arrays.asList(updateDataSet.getDataSet().getColumnNames());
+
+											for (String columnName : tableColumnNames)
+											{
+												if (updateColumnNames.indexOf(columnName) == -1)
+												{
+													memTable.removeColumn(memTable.getColumn(columnName));
+												}
+											}
+											tableColumnNames = Arrays.asList(memTable.getColumnNames());
+											for (int i = 0; i < updateColumnNames.size(); i++)
+											{
+												String columnName = updateColumnNames.get(i);
+												if (tableColumnNames.indexOf(columnName) == -1)
+												{
+													memTable.createNewColumn(DummyValidator.INSTANCE, columnName, columnTypes[i].getSqlType(),
+														columnTypes[i].getLength());
+												}
+												else if (memTable.getColumn(columnName).getColumnType().getSqlType() != columnTypes[i].getSqlType())
+												{
+													state.reportJSWarning("In memory table '" + memTable.getDataSource() + "' column '" + columnName +
+														"' has SQL type " + memTable.getColumn(columnName).getColumnType().getSqlType() +
+														" while in the update it has " + columnTypes[i].getSqlType());
+												}
+											}
+										}
+										else
+										{
+											state.reportJSError("Can't update in memory table '" + memTable.getDataSource() +
+												"' as the number of column types does not match the number of columns of the dataset", null);
+										}
+										memServer.syncTableObjWithDB(memTable, false, false, null);
+									}
+									else
+									{
+										((MemTable)memTable).setColumns(dataModelManager.serializeTable(table));
+									}
 								}
 							}
 							else
 							{
-								state.reportError("Cannot save", "The in memory table '" + tableName +
-									"' already exists. Please delete it, or use the 'save' method with the 'override' flag set to true.");
+								state.reportJSError(
+									"The in memory table '" + tableName + "' already exists. Please delete it, or use the 'updateInMemDataSource' method.",
+									null);
 								return Status.CANCEL_STATUS;
 							}
 							saveObj = solutionCopy.getOrCreateTableNode(objName);
