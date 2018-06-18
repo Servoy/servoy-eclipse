@@ -18,6 +18,9 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import com.servoy.eclipse.ui.Activator;
@@ -33,14 +36,22 @@ public class FormHierarchyFilter extends Action
 	boolean on;
 	private final TreeViewer viewer;
 
-	public FormHierarchyFilter(TreeViewer viewer, boolean initValue, String img, String text)
+	public FormHierarchyFilter(TreeViewer viewer, String img, String text, String propertyName, IDialogSettings dialogSettings)
 	{
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle(img));
 		setText(text);
 		setToolTipText(getText());
-		setChecked(initValue);
 		this.viewer = viewer;
-		on = initValue;
+		on = false;
+		setChecked(dialogSettings.getBoolean(propertyName));
+		addPropertyChangeListener(new IPropertyChangeListener()
+		{
+			@Override
+			public void propertyChange(PropertyChangeEvent event)
+			{
+				dialogSettings.put(propertyName, isChecked());
+			}
+		});
 	}
 
 	@Override

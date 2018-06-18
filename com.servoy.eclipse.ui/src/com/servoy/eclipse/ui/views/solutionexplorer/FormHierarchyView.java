@@ -34,8 +34,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -596,6 +594,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private static final String DIALOGSTORE_RATIO = "FormHierarchyView.ratio";
 	private static final String DIALOGSTORE_SHOW_MEMBERS = "FormHierarchy.SHOW_MEMBERS";
 	public static final String DIALOGSTORE_SHOW_ALL_MEMBERS = "FormHierarchy.SHOW_ALL_MEMBERS";
+	public static final String DIALOGSTORE_HIDE_ELEMENTS = "FormHierarchy.HIDE_ELEMENTS";
+	public static final String DIALOGSTORE_HIDE_METHODS = "FormHierarchy.HIDE_METHODS";
+	public static final String DIALOGSTORE_HIDE_PARTS = "FormHierarchy.HIDE_PARTS";
+	public static final String DIALOGSTORE_HIDE_VARIABLES = "FormHierarchy.HIDE_VARIABLES";
+
 	private static final String GROUP_ELEMENTS_BY_TYPE = "GroupElements";
 	private static final String OPEN_FORM_PREFERENCE = "FormHierarchy.OPEN_FORM";
 	public static final int OPEN_IN_FORM_EDITOR = 0;
@@ -1141,29 +1144,19 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		showMembersAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(showMembersAction);
 
-		showAllAction = new FormHierarchyFilter(list, false, "show_all_inherited.png", "Show All Inherited Members");
-		showAllAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_ALL_MEMBERS));
-		showAllAction.addPropertyChangeListener(new IPropertyChangeListener()
-		{
-
-			@Override
-			public void propertyChange(PropertyChangeEvent event)
-			{
-				fDialogSettings.put(DIALOGSTORE_SHOW_ALL_MEMBERS, showAllAction.isChecked());
-			}
-		});
+		showAllAction = new FormHierarchyFilter(list, "show_all_inherited.png", "Show All Inherited Members", DIALOGSTORE_SHOW_ALL_MEMBERS, fDialogSettings);
 		lowertbmanager.add(showAllAction);
 
-		hideElementsAction = new FormHierarchyFilter(list, false, "hide_elements.png", "Hide elements");
+		hideElementsAction = new FormHierarchyFilter(list, "hide_elements.png", "Hide elements", DIALOGSTORE_HIDE_ELEMENTS, fDialogSettings);
 		lowertbmanager.add(hideElementsAction);
 
-		hideMethodsAction = new FormHierarchyFilter(list, false, "hide_method.png", "Hide methods");
+		hideMethodsAction = new FormHierarchyFilter(list, "hide_method.png", "Hide methods", DIALOGSTORE_HIDE_METHODS, fDialogSettings);
 		lowertbmanager.add(hideMethodsAction);
 
-		hidePartsAction = new FormHierarchyFilter(list, false, "hide_parts.png", "Hide parts");
+		hidePartsAction = new FormHierarchyFilter(list, "hide_parts.png", "Hide parts", DIALOGSTORE_HIDE_PARTS, fDialogSettings);
 		lowertbmanager.add(hidePartsAction);
 
-		hideVariablesAction = new FormHierarchyFilter(list, false, "hide_variables.png", "Hide variables");
+		hideVariablesAction = new FormHierarchyFilter(list, "hide_variables.png", "Hide variables", DIALOGSTORE_HIDE_VARIABLES, fDialogSettings);
 		lowertbmanager.add(hideVariablesAction);
 	}
 
