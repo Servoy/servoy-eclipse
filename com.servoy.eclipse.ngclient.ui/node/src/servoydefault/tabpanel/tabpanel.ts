@@ -5,7 +5,7 @@ import { BaseTabpanel, Tab } from "./basetabpanel"
 import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public'
 
 import { WindowRefService } from '../../sablo/util/windowref.service'
-import { LoggerService } from '../../sablo/logger.service'
+import { LoggerFactory } from '../../sablo/logger.service'
 
 import { NgbTabset, NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 
@@ -18,7 +18,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     @ViewChild( 'tabset' )
     private tabset: NgbTabset;
 
-    constructor( windowRefService: WindowRefService, log : LoggerService) {
+    constructor( windowRefService: WindowRefService, log : LoggerFactory) {
         super( windowRefService, log );
     }
 

@@ -7,16 +7,18 @@ import { SabloService } from '../sablo/sablo.service';
 import { FormComponent } from './form/form_component.component'
 
 import { ConverterService } from '../sablo/converter.service'
-import { LoggerService } from '../sablo/logger.service'
+import { LoggerService, LoggerFactory} from '../sablo/logger.service'
 
 @Injectable()
 export class FormService {
 
     private formsCache: Map<String, FormCache>;
+    private log: LoggerService;
 
 //    private touchedForms:Map<String,boolean>;
 
-    constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, private log: LoggerService ) {
+    constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, private logFactory: LoggerFactory ) {
+        this.log = logFactory.getLogger(FormService.name);
         this.formsCache = new Map();
 
         websocketService.getSession().then(( session ) => {

@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 
 import { ConverterService } from './converter.service'
-import { LoggerService } from './logger.service'
+import { LoggerService, LoggerFactory } from './logger.service'
 
 @Injectable()
 export class ServicesService {
     private serviceProvider: ServiceProvider = new VoidServiceProvider();
+    private log: LoggerService;
 
-    constructor( private converterService: ConverterService, private log : LoggerService ) {
+    constructor( private converterService: ConverterService, private logFactory : LoggerFactory ) {
+        this.log = logFactory.getLogger(ServicesService.name);
     }
 
     private serviceScopesConversionInfo = {};

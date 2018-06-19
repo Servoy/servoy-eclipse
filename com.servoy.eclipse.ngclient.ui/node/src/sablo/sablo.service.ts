@@ -9,7 +9,7 @@ import { WindowRefService } from './util/windowref.service'
 
 import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service'
-import { LoggerService } from './logger.service'
+import { LoggerService, LoggerFactory } from './logger.service'
 
 
 
@@ -26,9 +26,11 @@ export class SabloService {
     private currentServiceCallDone;
     private currentServiceCallWaiting = 0
     private currentServiceCallTimeouts;
+    private log: LoggerService;
     
 
-    constructor( private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService, private windowRefService:WindowRefService, private log : LoggerService ) {
+    constructor( private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService, private windowRefService:WindowRefService, private logFactory : LoggerFactory ) {
+        this.log = logFactory.getLogger(SabloService.name);
     }
 
     public connect( context, queryArgs, websocketUri ): WebsocketSession {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {LoggerService} from './logger.service'
+import {LoggerService, LoggerFactory} from './logger.service'
 
 @Injectable()
 export class ConverterService {
@@ -11,8 +11,10 @@ export class ConverterService {
     public static readonly DEFAULT_CONVERSION_TO_SERVER_FUNC = "_dctsf";
 
     private customPropertyConverters: { [s: string]: IConverter } = {};
+    private log: LoggerService;
 
-    constructor(private log:LoggerService) {
+    constructor(private logFactory:LoggerFactory) {
+        this.log = logFactory.getLogger(ConverterService.name);
     }
 
     public convertFromServerToClient( serverSentData, conversionInfo, currentClientData?, scope?, modelGetter?) {

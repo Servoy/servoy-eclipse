@@ -5,7 +5,7 @@ import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service'
 import { WindowRefService } from '../sablo/util/windowref.service';
-import { LoggerService  } from '../sablo/logger.service'
+import { LoggerService, LoggerFactory  } from '../sablo/logger.service'
 
 import { SessionStorageService } from 'angular-web-storage';
 
@@ -30,6 +30,7 @@ export class ServoyService {
     private uiProperties: UIProperties;
 
     private findModeShortCutAdded = false;
+    private log: LoggerService;
 
     constructor( private websocketService: WebsocketService,
             private sabloService: SabloService,
@@ -39,8 +40,9 @@ export class ServoyService {
             converterService: ConverterService,
             specTypesService: SpecTypesService,
             iterableDiffers: IterableDiffers,
-            private log: LoggerService) {
+            private logFactory: LoggerFactory) {
 
+        this.log = logFactory.getLogger(ServoyService.name);
         this.uiProperties = new UIProperties( sessionStorageService )
         const dateConverter = new DateConverter();
         converterService.registerCustomPropertyHandler( "svy_date", dateConverter );

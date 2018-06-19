@@ -9,7 +9,7 @@ import { WebsocketService } from './websocket.service';
 import { ConverterService } from './converter.service'
 import { ServicesService } from './services.service'
 import { SabloService } from './sablo.service'
-import { LoggerService } from './logger.service'
+import { LoggerFactory } from './logger.service'
 
 import { SpecTypesService } from './spectypes.service'
 
@@ -25,7 +25,7 @@ import { SpecTypesService } from './spectypes.service'
         ServicesService,
         WebsocketService,
         WindowRefService,
-        LoggerService],
+        LoggerFactory],
     exports: [TrustAsHtmlPipe]
 } )
 

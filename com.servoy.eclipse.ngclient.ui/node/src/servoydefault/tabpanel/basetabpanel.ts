@@ -6,7 +6,7 @@ import { WindowRefService } from '../../sablo/util/windowref.service'
 
 import { BaseCustomObject } from '../../sablo/spectypes.service'
 
-import { LoggerService } from '../../sablo/logger.service'
+import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
 
 
 export abstract class BaseTabpanel implements OnChanges {
@@ -41,9 +41,11 @@ export abstract class BaseTabpanel implements OnChanges {
     private waitingForServerVisibility = {};
     private lastSelectedTab: Tab;
 
-    protected selectedTab: Tab
+    protected selectedTab: Tab;
+    private log: LoggerService;
 
-    constructor( private windowRefService: WindowRefService, private log : LoggerService ) {
+    constructor( private windowRefService: WindowRefService, private logFactory : LoggerFactory ) {
+        this.log = logFactory.getLogger(BaseTabpanel.name);
     }
 
     ngOnChanges( changes: SimpleChanges ) {

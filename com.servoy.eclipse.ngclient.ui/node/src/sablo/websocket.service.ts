@@ -8,7 +8,7 @@ import { WindowRefService } from './util/windowref.service'
 import { Deferred } from './util/deferred'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
-import { LoggerService, LogLevel } from './logger.service'
+import { LoggerService, LogLevel, LoggerFactory } from './logger.service'
 
 @Injectable()
 export class WebsocketService {
@@ -18,8 +18,10 @@ export class WebsocketService {
     private wsSessionDeferred: Deferred<WebsocketSession>;
     private connectionArguments = {};
     private lastServerMessageNumber = null;
+    private log: LoggerService;
 
-    constructor( private windowRef: WindowRefService, private services: ServicesService, private converterService: ConverterService, private log: LoggerService ) {
+    constructor( private windowRef: WindowRefService, private services: ServicesService, private converterService: ConverterService, private logFactory: LoggerFactory ) {
+        this.log = logFactory.getLogger(WebsocketService.name);
     }
 
     private generateURL( context, args, queryArgs, websocketUri ) {
@@ -85,7 +87,7 @@ export class WebsocketService {
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'] );
         } );
 
-        this.wsSession = new WebsocketSession( websocket, this, this.services, this.windowRef, this.converterService, this.log );
+        this.wsSession = new WebsocketSession( websocket, this, this.services, this.windowRef, this.converterService, this.logFactory);
         // todo should we just merge $websocket and $services into $sablo that just has all
         // the public api of sablo (like connect, conversions, services)
         //$services.setSession(wsSession);
@@ -173,9 +175,11 @@ export class WebsocketSession {
     private currentEventLevelForServer;
 
     private nextMessageId = 1;
+    private log: LoggerService;
 
 
-    constructor( private websocket: ReconnectingWebSocket, private websocketService: WebsocketService, private services: ServicesService, private windowRef: WindowRefService, private converterService: ConverterService, private log: LoggerService ) {
+    constructor( private websocket: ReconnectingWebSocket, private websocketService: WebsocketService, private services: ServicesService, private windowRef: WindowRefService, private converterService: ConverterService, private logFactory: LoggerFactory ) {
+        this.log = logFactory.getLogger(WebsocketSession.name);
         const me = this;
         this.websocket.onopen = ( evt ) => {
             me.setConnected();
