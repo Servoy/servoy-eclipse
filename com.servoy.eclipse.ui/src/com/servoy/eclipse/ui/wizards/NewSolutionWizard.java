@@ -552,7 +552,12 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		@Override
 		public void performHelp()
 		{
+			boolean focusNameField = solutionNameField.isFocusControl();
 			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_solution");
+			if (focusNameField)
+			{
+				solutionNameField.setFocus();
+			}
 		}
 
 	}

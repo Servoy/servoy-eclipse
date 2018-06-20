@@ -534,8 +534,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 		@Override
 		public void performHelp()
 		{
+			boolean focusNameField = formNameField.isFocusControl();
 			if (isReferenceForm()) PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_formcomponent");
 			else PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_form");
+			if (focusNameField)
+			{
+				formNameField.setFocus();
+				formNameField.selectAll();
+			}
 		}
 
 		private IDataSourceWrapper getTableWrapper()
