@@ -12,26 +12,19 @@ export enum LogLevel {
     SPAM
 }
 
-export class LogConfiguration {
-    isDebugMode: boolean = false;
-    level: LogLevel = LogLevel.ERROR
+export class LogConfiguration {    
+    constructor(public isDebugMode : boolean = false, public level : LogLevel=LogLevel.ERROR){}
 }
 
 declare global {
-    interface Window { svyLogConfiguration: LogConfiguration, logFactory: LoggerFactory } //extend the existing window interface with the new log provider property
+    interface Window { svyLogConfiguration: LogConfiguration, logFactory: LoggerFactory, logLevels: {} } //extend the existing window interface with the new log provider property
 }
 
 export class LoggerService {
-    private svyLogConfiguration: LogConfiguration;
     private console: Console;
 
-    constructor( private windowRefService: WindowRefService, private className : string ) {
-        this.svyLogConfiguration = windowRefService.nativeWindow.svyLogConfiguration;
+    constructor( private windowRefService: WindowRefService, private svyLogConfiguration: LogConfiguration, private className : string ) {
         this.console = windowRefService.nativeWindow.console;
-        if ( this.svyLogConfiguration == null ) {
-            this.svyLogConfiguration = new LogConfiguration();
-            windowRefService.nativeWindow.svyLogConfiguration = this.svyLogConfiguration;
-        }
     }
 
     public spam( message: string | ( () => string ) ) {
@@ -69,8 +62,12 @@ export class LoggerService {
         } 
     }
 
-    get debugLevel(): LogLevel {
-        return this.svyLogConfiguration.level;
+    public toggleDebugMode() {
+        return this.svyLogConfiguration.isDebugMode = !this.svyLogConfiguration.isDebugMode;
+    }
+    
+    public setLogLevel(level: LogLevel) {
+        this.svyLogConfiguration.level = level;
     }
     
     private getTime() : string {
@@ -83,14 +80,21 @@ export class LoggerService {
 export class LoggerFactory {
     
     private instances: any = {};
+    private defaultLogConfiguration: LogConfiguration;
     
     constructor(private windowRefService: WindowRefService ) {
         windowRefService.nativeWindow.logFactory = this;
+        this.defaultLogConfiguration = windowRefService.nativeWindow.svyLogConfiguration;
+        if ( this.defaultLogConfiguration == null ) {
+            this.defaultLogConfiguration = new LogConfiguration();
+            windowRefService.nativeWindow.svyLogConfiguration = this.defaultLogConfiguration;
+            windowRefService.nativeWindow.logLevels = {error: LogLevel.ERROR, debug: LogLevel.DEBUG, info: LogLevel.INFO, warn: LogLevel.WARN, spam:LogLevel.SPAM};
+        }
     }
     
     public getLogger(cls: any) : LoggerService {
         if (this.instances[cls] == undefined) {
-            this.instances[cls] = new LoggerService(this.windowRefService, cls);
+            this.instances[cls] = new LoggerService(this.windowRefService, new LogConfiguration(this.defaultLogConfiguration.isDebugMode, this.defaultLogConfiguration.level), cls);
         }
         return this.instances[cls];
     }
