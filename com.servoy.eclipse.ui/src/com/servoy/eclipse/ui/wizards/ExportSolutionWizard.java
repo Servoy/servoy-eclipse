@@ -49,6 +49,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.export.ExportSolutionJob;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.DeployPage;
+import com.servoy.eclipse.ui.wizards.exportsolution.pages.DeployProgressPage;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.ExportConfirmationPage;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.ExportOptionsPage;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.FileSelectionPage;
@@ -159,6 +160,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	private PasswordPage passwordPage;
 	private ImportSettingsPage importPage;
 	private DeployPage deployPage;
+	private DeployProgressPage deployProgressPage;
 
 	private final IFileAccess workspace;
 
@@ -223,7 +225,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 
 		IWizardPage currentPage = this.getContainer().getCurrentPage();
-		if (currentPage != deployPage)
+		if (currentPage != deployProgressPage)
 		{
 			doExport(null);
 		}
@@ -378,6 +380,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		addPage(importPage);
 		deployPage = new DeployPage(this);
 		addPage(deployPage);
+		deployProgressPage = new DeployProgressPage(this);
+		addPage(deployProgressPage);
 	}
 
 	@Override
@@ -395,7 +399,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !modulesSelectionPage.hasDBDownErrors()) return false;
 		}
-		if (exportModel.useImportSettings() && (currentPage != importPage) && (currentPage != deployPage)) return false;
+		if (exportModel.useImportSettings() && (currentPage != importPage) && (currentPage != deployProgressPage)) return false;
 		if (currentPage == importPage && deployToApplicationServer) return false;
 		return exportModel.canFinish();
 	}
@@ -484,6 +488,11 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	public DeployPage getDeployPage()
 	{
 		return deployPage;
+	}
+
+	public DeployProgressPage getDeployProgressPage()
+	{
+		return deployProgressPage;
 	}
 
 	public ModulesSelectionPage getModulesSelectionPage()
