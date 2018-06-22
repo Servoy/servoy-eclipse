@@ -20,46 +20,65 @@ declare global {
     interface Window { svyLogConfiguration: LogConfiguration, logFactory: LoggerFactory, logLevels: {} } //extend the existing window interface with the new log provider property
 }
 
+const noop = (): any => undefined;
+
 export class LoggerService {
     private console: Console;
+    private enabled : boolean = false;
 
     constructor( private windowRefService: WindowRefService, private svyLogConfiguration: LogConfiguration, private className : string ) {
         this.console = windowRefService.nativeWindow.console;
     }
-
-    public spam( message: string | ( () => string ) ) {
+    
+    public buildMessage(message: string | ( () => string )){
+        if (this.enabled) {
+            return message instanceof Function ? message() : message;
+        }
+    }
+  
+    get spam() {
         if ( this.svyLogConfiguration.level >= LogLevel.SPAM ) {
-            const msg = message instanceof Function ? message() : message;
-            this.console.debug(this.getTime() +" SPAM " + this.className + " - " + msg);
+            this.enabled = true;
+            return this.console.debug.bind(this.console, this.getTime() +" SPAM " + this.className + " - ");
         }
+        this.enabled = false;
+        return noop;
     }
 
-    public debug(message: string | ( () => string ) ) {
+    get debug() {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.DEBUG ) {
-            const msg = message instanceof Function ? message() : message;
-            this.console.debug(this.getTime() +" DEBUG " + this.className + " - " + msg );
-        } 
-    }
-
-    public info(message: string | ( () => string ) ) {
-        if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.INFO ) {
-            const msg = message instanceof Function ? message() : message;
-            this.console.info(this.getTime() +" INFO " + this.className + " - " + msg);
+            this.enabled = true;
+            return this.console.debug.bind(this.console, this.getTime() +" DEBUG " + this.className + " - ");
         }
+        this.enabled = false;
+        return noop;
     }
 
-    public warn(message: string | ( () => string ) ) {
+    get info() {
+        if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.INFO ) {
+            this.enabled = true;
+            return this.console.info.bind(this.console, this.getTime() +" INFO " + this.className + " - ");
+        }
+        this.enabled = false;
+        return noop;
+    }
+
+    get warn() {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.WARN ) {
-            const msg = message instanceof Function ? message() : message;
-            this.console.warn(this.getTime() +" WARN " + this.className + " - " + msg);
+            this.enabled = true;
+            return this.console.warn.bind(this.console, this.getTime() +" WARN " + this.className + " - ");
         } 
+        this.enabled = false;
+        return noop;
     }
 
-    public error(message: string | ( () => string ) ) {
+    get error() {
         if ( this.svyLogConfiguration.isDebugMode || this.svyLogConfiguration.level >= LogLevel.ERROR ) {
-            const msg = message instanceof Function ? message() : message;
-            this.console.error(this.getTime() +" ERROR " + this.className + " - " + msg);
+            this.enabled = true;
+            return this.console.error.bind(this.console, this.getTime() +" ERROR " + this.className + " - ");
         } 
+        this.enabled = false;
+        return noop;
     }
 
     public toggleDebugMode() {

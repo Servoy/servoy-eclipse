@@ -22,7 +22,7 @@ export class ConverterService {
             var customConverter = this.customPropertyConverters[conversionInfo];
             if ( customConverter ) serverSentData = customConverter.fromServerToClient( serverSentData, currentClientData, scope, modelGetter );
             else { //converter not found - will not convert
-                this.log.error(() => ("cannot find type converter (s->c) for: '" + conversionInfo + "'."));
+                this.log.error(this.log.buildMessage(() => ("cannot find type converter (s->c) for: '" + conversionInfo + "'.")));
             }
         } else if ( conversionInfo ) {
             for ( var conKey in conversionInfo ) {
@@ -37,7 +37,7 @@ export class ConverterService {
             var customConverter = this.customPropertyConverters[conversionInfo];
             if ( customConverter ) return customConverter.fromClientToServer( newClientData, oldClientData );
             else { //converter not found - will not convert
-            	this.log.error(() => ("cannot find type converter (c->s) for: '" + conversionInfo + "'."));
+            	this.log.error(this.log.buildMessage(() => ("cannot find type converter (c->s) for: '" + conversionInfo + "'.")));
                 return newClientData;
             }
         } else if ( conversionInfo ) {

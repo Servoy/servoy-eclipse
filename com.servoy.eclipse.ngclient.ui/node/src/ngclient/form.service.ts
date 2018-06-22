@@ -32,7 +32,7 @@ export class FormService {
                             for ( var beanname in formData ) {
                                 const comp = formCache.getComponent( beanname );
                                 if (!comp) {
-                                    console.log("got message for " + beanname + " of form " + formname + " but that component is not in the cache");
+                                    this.log.debug(this.log.buildMessage(() => ("got message for " + beanname + " of form " + formname + " but that component is not in the cache")));
                                     continue;
                                 }
                                 const beanConversion = formConversion ? formConversion[beanname] : null;
@@ -150,7 +150,7 @@ export class FormService {
     }
 
     public executeEvent( formname: string, beanname: string, handler: string, args: IArguments|Array<any> ) {
-        console.log( formname + "," + beanname + ", executing: " + handler + " with values: " + JSON.stringify( args ) );
+        this.log.debug(this.log.buildMessage(() => (formname + "," + beanname + ", executing: " + handler + " with values: " + JSON.stringify( args ) )));
 
         var newargs = this.converterService.getEventArgs( args, handler );
         var data = {};
@@ -164,9 +164,9 @@ export class FormService {
     }
 
     public formWillShow(formname,notifyFormVisibility?,parentForm?,beanName?,relationname?,formIndex?):Promise<boolean> {
-        this.log.debug(() => ("svy * Form " + formname + " is preparing to show. Notify server needed: " + notifyFormVisibility));
+        this.log.debug(this.log.buildMessage(() => ("svy * Form " + formname + " is preparing to show. Notify server needed: " + notifyFormVisibility)));
 //        if ($rootScope.updatingFormName === formname) {
-//            this.log.debug(() => ("svy * Form " + formname + " was set in hidden div. Clearing out hidden div."));
+//            this.log.debug(this.log.buildMessage(() => ("svy * Form " + formname + " was set in hidden div. Clearing out hidden div.")));
 //            $rootScope.updatingFormUrl = ''; // it's going to be shown; remove it from hidden DOM
 //            $rootScope.updatingFormName = null;
 //        }
