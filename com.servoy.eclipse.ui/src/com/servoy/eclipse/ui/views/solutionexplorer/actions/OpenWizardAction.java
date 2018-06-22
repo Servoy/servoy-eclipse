@@ -160,6 +160,10 @@ public class OpenWizardAction extends Action
 				protected void finishPressed()
 				{
 					if (restoreDefault != null) restoreDefault.setEnabled(false);
+					if (getTray() != null)
+					{
+						closeTray();
+					}
 					super.finishPressed();
 					if (restoreDefault != null && getReturnCode() != OK) restoreDefault.setEnabled(true);
 				}
