@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.designer.actions;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.gef.EditPart;
@@ -23,16 +25,25 @@ import org.eclipse.gef.requests.GroupRequest;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest.Distribution;
+import com.servoy.eclipse.designer.editor.PersistGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.designer.editor.commands.MultipleSelectionAction;
+import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.PositionComparator;
 
 /**
  * An action to distribute objects.
  */
 public class DistributeAction extends MultipleSelectionAction
 {
+	public static final Comparator< ? super EditPart> XY_POSITION_COMPARATOR = new EditorPartPositionComparator(true);
+	public static final Comparator< ? super EditPart> YX_POSITION_COMPARATOR = new EditorPartPositionComparator(false);
+
 	private final Distribution distribution;
+	private Comparator< ? super EditPart> comparator;
 
 	public DistributeAction(IWorkbenchPart part, Distribution distribution)
 	{
@@ -40,6 +51,39 @@ public class DistributeAction extends MultipleSelectionAction
 		this.distribution = distribution;
 		init(distribution);
 	}
+
+	public static class EditorPartPositionComparator implements Comparator<EditPart>
+	{
+		private final boolean xy;
+
+		private EditorPartPositionComparator(boolean xy)
+		{
+			this.xy = xy;
+		}
+
+		public int compare(EditPart e1, EditPart e2)
+		{
+			if (e1 instanceof PersistGraphicalEditPart && e2 instanceof PersistGraphicalEditPart)
+			{
+				IPersist o1 = ((PersistGraphicalEditPart)e1).getPersist();
+				IPersist o2 = ((PersistGraphicalEditPart)e2).getPersist();
+				if (o1 instanceof ISupportBounds && o2 instanceof ISupportBounds)
+				{
+					return PositionComparator.comparePoint(xy, CSSPosition.getLocation((ISupportBounds)o1), CSSPosition.getLocation((ISupportBounds)o2));
+				}
+				if (o1 instanceof ISupportBounds && !(o2 instanceof ISupportBounds))
+				{
+					return -1;
+				}
+				if (!(o1 instanceof ISupportBounds) && o2 instanceof ISupportBounds)
+				{
+					return 1;
+				}
+			}
+			return 0;
+		}
+	}
+
 
 	/**
 	 * Initializes this action's text and images.
@@ -53,6 +97,7 @@ public class DistributeAction extends MultipleSelectionAction
 				setToolTipText(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_SPACING_TOOLTIP);
 				setId(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_SPACING.getId());
 				setImageDescriptor(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_SPACING_IMAGE);
+				comparator = XY_POSITION_COMPARATOR;
 				break;
 
 			case HORIZONTAL_CENTERS :
@@ -60,6 +105,7 @@ public class DistributeAction extends MultipleSelectionAction
 				setToolTipText(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_CENTER_TOOLTIP);
 				setId(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_CENTER.getId());
 				setImageDescriptor(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_CENTER_IMAGE);
+				comparator = XY_POSITION_COMPARATOR;
 				break;
 
 			case HORIZONTAL_PACK :
@@ -67,6 +113,7 @@ public class DistributeAction extends MultipleSelectionAction
 				setToolTipText(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_PACK_TOOLTIP);
 				setId(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_PACK.getId());
 				setImageDescriptor(DesignerActionFactory.DISTRIBUTE_HORIZONTAL_PACK_IMAGE);
+				comparator = XY_POSITION_COMPARATOR;
 				break;
 
 			case VERTICAL_SPACING :
@@ -74,6 +121,7 @@ public class DistributeAction extends MultipleSelectionAction
 				setToolTipText(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING_TOOLTIP);
 				setId(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING.getId());
 				setImageDescriptor(DesignerActionFactory.DISTRIBUTE_VERTICAL_SPACING_IMAGE);
+				comparator = YX_POSITION_COMPARATOR;
 				break;
 
 			case VERTICAL_CENTERS :
@@ -81,6 +129,7 @@ public class DistributeAction extends MultipleSelectionAction
 				setToolTipText(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER_TOOLTIP);
 				setId(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER.getId());
 				setImageDescriptor(DesignerActionFactory.DISTRIBUTE_VERTICAL_CENTER_IMAGE);
+				comparator = YX_POSITION_COMPARATOR;
 				break;
 
 			case VERTICAL_PACK :
@@ -88,6 +137,7 @@ public class DistributeAction extends MultipleSelectionAction
 				setToolTipText(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK_TOOLTIP);
 				setId(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK.getId());
 				setImageDescriptor(DesignerActionFactory.DISTRIBUTE_VERTICAL_PACK_IMAGE);
+				comparator = YX_POSITION_COMPARATOR;
 				break;
 		}
 
@@ -97,6 +147,7 @@ public class DistributeAction extends MultipleSelectionAction
 	protected GroupRequest createRequest(List<EditPart> objects)
 	{
 		DistributeRequest distributeRequest = new DistributeRequest(requestType, distribution);
+		Collections.sort(objects, comparator);
 		distributeRequest.setEditParts(objects);
 		return distributeRequest;
 	}
