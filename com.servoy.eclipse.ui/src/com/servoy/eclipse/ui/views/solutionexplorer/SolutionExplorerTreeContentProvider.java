@@ -1096,7 +1096,7 @@ public class SolutionExplorerTreeContentProvider
 					else if (un.getType() == UserNodeType.COMPONENT || un.getType() == UserNodeType.SERVICE || un.getType() == UserNodeType.LAYOUT)
 					{
 						WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
-						IFolder folder = getFolderFromSpec((IProject)getResource((IPackageReader)un.parent.getRealObject()), spec);
+						IFolder folder = getFolderFromSpec(getResource((IPackageReader)un.parent.getRealObject()), spec);
 						if (folder != null)
 						{
 							searchFolderChildren(un, folder);
@@ -1207,18 +1207,19 @@ public class SolutionExplorerTreeContentProvider
 		return null;
 	}
 
-	public static IFolder getFolderFromSpec(IProject project, WebObjectSpecification spec)
+	public static IFolder getFolderFromSpec(IResource resource, WebObjectSpecification spec)
 	{
 		String folderName = getFolderNameFromSpec(spec);
 		IFolder folder = null;
-		if (folderName != null && project != null)
+		if (resource instanceof IContainer && folderName != null)
 		{
-			folder = project.getFolder(folderName);
+			IContainer container = (IContainer)resource;
+			folder = container.getFolder(new Path(folderName));
 			if (folder == null || !folder.exists())
 			{
 				try
 				{
-					IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+					IFile[] specFile = container.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
 					if (specFile.length == 1 && specFile[0].getParent() instanceof IFolder)
 					{
 						folder = (IFolder)specFile[0].getParent();
@@ -1720,7 +1721,7 @@ public class SolutionExplorerTreeContentProvider
 					WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
 					if ("file".equals(spec.getSpecURL().getProtocol()))
 					{
-						IFolder folder = getFolderFromSpec((IProject)getResource((IPackageReader)un.parent.getRealObject()), spec);
+						IFolder folder = getFolderFromSpec(getResource((IPackageReader)un.parent.getRealObject()), spec);
 						if (folder != null)
 						{
 							return hasChildren(folder);
