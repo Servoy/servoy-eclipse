@@ -191,6 +191,21 @@ export class FormService {
         }
         return  this.sabloService.callService('formService', 'formvisibility', {formname:formname,visible:false,parentForm:parentForm,bean:beanName,relation:relationname,formIndex:formIndex,show:{formname:formnameThatWillBeShown,relation:relationnameThatWillBeShown,formIndex:formIndexThatWillBeShown}});
     }
+
+    public pushEditingStarted(formname, beanname, propertyname ) {
+        var messageForServer = { formname : formname, beanname : beanname, property : propertyname };
+			
+        // // detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server and trim down the last array index which identifies the row on client
+        // // TODO this is a big hack - see comment in pushDPChange below
+        // var formState = $sabloApplication.getFormStateEvenIfNotYetResolved(formName);
+        // var foundsetLinkedDPInfo = getFoundsetLinkedDPInfo(propertyName, formState.model[beanName]);
+        // if (foundsetLinkedDPInfo)	{
+        //     if (foundsetLinkedDPInfo.rowId) messageForServer['fslRowID'] = foundsetLinkedDPInfo.rowId;
+        //     messageForServer.property = foundsetLinkedDPInfo.propertyNameForServer;
+        // }	
+
+        this.sabloService.callService("formService", "startEdit", messageForServer, true);
+    }
 }
 
 export class FormCache {

@@ -16,8 +16,7 @@ export class ServoyApi {
     }
 
     public startEdit( propertyName ) {
-        // TODO also move to form service?
-        //        $servoyInternal.pushEditingStarted( this.formname, this.item.name, propertyName );
+        this.formservice.pushEditingStarted(this.formname, this.item.name, propertyName);
     }
 
     public apply( propertyName ) {

@@ -18,12 +18,24 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
     @Input() selectOnEnter
     @Input() valuelistID
     
+    private funcOnFocus: any;
+
     constructor(renderer: Renderer2, private formattingService : FormattingService) {
         super(renderer);
     }
 
     ngOnInit() {
-        // attach focus gained/lost
+        let nativeInput = this.getNativeInput();
+        if(nativeInput) {
+            this.funcOnFocus = this.renderer.listen(nativeInput, 'focus', (evt) => {
+                if(this.servoyApi) {
+                    // we could get the property string from the native element's attribute,
+                    // ( let dpString = this.getNativeElement().getAttribute('[dataProviderID]'); ...)
+                    // but now it is anyway hard-coded in form_component.component.ts
+                    this.servoyApi.startEdit("dataProviderID");
+                }
+            })
+        }
     }
 
     ngOnChanges( changes: SimpleChanges ) {
@@ -52,5 +64,17 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
     update( val: string ) {
         this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
         this.dataProviderIDChange.emit( this.dataProviderID );
+    }
+
+    /**
+     * this should return the native input element that will be used for startEdit 
+     */
+    protected getNativeInput():any {
+        return null;
+    }
+
+    ngOnDestroy() {
+        if(this.funcOnFocus) this.funcOnFocus();
+        super.ngOnDestroy();
     }
 }

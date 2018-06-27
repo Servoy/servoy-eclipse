@@ -12,4 +12,8 @@ export class ServoyDefaultTextField extends ServoyDefaultBaseField {
     constructor(renderer: Renderer2, formattingService : FormattingService) { 
         super(renderer,formattingService);
     }
+
+    getNativeInput() {
+        return this.elementRef.nativeElement;
+    }
 }
