@@ -54,6 +54,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.IPropertyType;
@@ -2709,6 +2710,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		if (propertyDescription == null) return null;
 
 		IPropertyType< ? > propertyType = propertyDescription.getType();
+		if (propertyType instanceof IYieldingType) propertyType = ((IYieldingType< ? , ? >)propertyType).getPossibleYieldType();
+
 		if (propertyType == ValuesPropertyType.INSTANCE)
 		{
 			final ValuesConfig config = (ValuesConfig)propertyDescription.getConfig();
@@ -2832,8 +2835,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (forFoundsetName != null)
 		{
-			IPropertyType< ? > typeForPropertyController = (propertyType instanceof FoundsetLinkedPropertyType< ? , ? >)
-				? ((FoundsetLinkedPropertyType< ? , ? >)propertyType).getPossibleYieldType() : propertyType;
 			ITable table = null;
 
 			try
@@ -2895,11 +2896,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Debug.log(e);
 			}
 
-			if (typeForPropertyController instanceof TagStringPropertyType)
+			if (propertyType instanceof TagStringPropertyType)
 			{
 				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, table);
 			}
-			else if (typeForPropertyController instanceof DataproviderPropertyType)
+			else if (propertyType instanceof DataproviderPropertyType)
 			{
 				final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true,
 					true, table != null, table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
