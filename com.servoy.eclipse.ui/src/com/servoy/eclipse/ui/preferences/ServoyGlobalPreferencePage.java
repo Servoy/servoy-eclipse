@@ -180,12 +180,12 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 
 		// JS Validation
 		Group jsValidationOptionsContainer = new Group(rootContainer, SWT.NONE);
-		jsValidationOptionsContainer.setText("Javascript valdiation");
+		jsValidationOptionsContainer.setText("Javascript validation");
 		jsValidationOptionsContainer.setLayout(new GridLayout(1, false));
 		jsValidationOptionsContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		jsValidationButton = new Button(jsValidationOptionsContainer, SWT.CHECK);
-		jsValidationButton.setText("Use simple parsing of related javascript files");
+		jsValidationButton.setText("Shallow parsing of related javascript files (relies on @return JSDoc values)");
 		jsValidationButton.setToolTipText("Enable this when you want to go around the limitiation of Servoy only parsing 3 level deep into scripting.\n" +
 			"This can also enhance the build time because a lot less parsing needs to be done.\n" +
 			"You need to document the @return for all methods and make sure constructor function do have @constructor.\n" +
