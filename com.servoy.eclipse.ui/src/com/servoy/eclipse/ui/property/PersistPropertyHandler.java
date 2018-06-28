@@ -327,7 +327,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 							if (toTest instanceof MediaNode)
 							{
 								MediaNode node = ((MediaNode)toTest);
-								return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css");
+								return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css") || node.getName().endsWith(".less");
 							}
 							return false;
 						}
