@@ -25,6 +25,7 @@ import com.servoy.eclipse.ui.editors.RelationEditor;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.RelationItem;
+import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -65,7 +66,9 @@ public class RelationItemLabelProvider extends LabelProvider implements ITableLa
 				if (info.getCIFrom() == null) return RelationEditor.EMPTY;
 				if (info.getRawCIFrom().startsWith(LiteralDataprovider.LITERAL_PREFIX)) return info.getCIFrom();
 				String ci_from = relationEditor.getDataProvidersIndex(RelationEditor.CI_FROM, info.getCIFrom());
-				return ci_from != null ? info.getCIFrom() : UnresolvedValue.getUnresolvedMessage(info.getCIFrom());
+				if (ci_from != null) return info.getCIFrom();
+				if (ScopesUtils.isVariableScope(info.getCIFrom())) return info.getCIFrom();
+				return UnresolvedValue.getUnresolvedMessage(info.getCIFrom());
 			case RelationEditor.CI_OP :
 				return (info.getOperator() != null ? RelationItem.getOperatorAsString(Utils.getAsInteger(info.getOperator())) : RelationEditor.EMPTY);
 			case RelationEditor.CI_TO :

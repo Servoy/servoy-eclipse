@@ -83,6 +83,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IItemChangeListener;
@@ -825,7 +826,15 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 					int primary_index = Arrays.asList(getDataProviders(CI_FROM)).indexOf(rr.getCIFrom());
 					if (primary_index == -1)
 					{
-						dbp[i] = new LiteralDataprovider(rr.getCIFrom());
+						if (ScopesUtils.isVariableScope(rr.getCIFrom()))
+						{
+							// match with foreign key type
+							dbp[i] = new EnumDataProvider(rr.getCIFrom(), dbf[i] != null ? dbf[i].getType() : 0);
+						}
+						else
+						{
+							dbp[i] = new LiteralDataprovider(rr.getCIFrom());
+						}
 					}
 					else
 					{
