@@ -188,7 +188,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		jsValidationButton.setText("Shallow parsing of related javascript files (relies on @return JSDoc values)");
 		jsValidationButton.setToolTipText("Enable this when you want to go around the limitiation of Servoy only parsing 3 level deep into scripting.\n" +
 			"This can also enhance the build time because a lot less parsing needs to be done.\n" +
-			"You need to document the @return for all methods and make sure constructor function do have @constructor.\n" +
+			"You need to document the @return for all methods and make sure constructor functions do have @constructor.\n" +
 			"This is because the return value of a function is not inferenced from the parsing of the body.\n" +
 			"All related javascript files (scopes/forms) are not fully parsed, only the function declarations and @constructor functions bodies");
 
