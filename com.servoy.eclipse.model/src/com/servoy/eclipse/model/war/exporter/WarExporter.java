@@ -116,6 +116,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
+import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
@@ -261,7 +262,7 @@ public class WarExporter
 				String content = ResourceProvider.compileLessWithNashorn(new String(media.getMediaData()));
 				if (content != null)
 				{
-					File folder = new File(tmpWarDir, "servoy_solution_css/");
+					File folder = new File(tmpWarDir, NGClientWebsocketSession.SERVOY_SOLUTION_CSS);
 					if (!folder.exists() && !folder.mkdir())
 					{
 						Debug.error("Could not create folder " + folder.getName());
