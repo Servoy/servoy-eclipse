@@ -109,12 +109,14 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
+import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
@@ -222,12 +224,14 @@ public class WarExporter
 		{
 			monitor.subTask("Copying NGClient components/services...");
 			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
-			monitor.setWorkRemaining(5);
+			monitor.setWorkRemaining(6);
 			monitor.subTask("Copy exported components");
 			copyExportedComponentsAndServicesPropertyFile(tmpWarDir);
 			monitor.worked(2);
 			monitor.subTask("Grouping JS and CSS resources");
 			copyMinifiedAndGrouped(tmpWarDir);
+			monitor.subTask("Compile less resources");
+			compileLessResources(tmpWarDir);
 			monitor.worked(1);
 		}
 		monitor.subTask("Creating deploy properties");
@@ -240,6 +244,50 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.done();
 		return;
+	}
+
+	/**
+	 * @param tmpWarDir
+	 */
+	private void compileLessResources(File tmpWarDir)
+	{
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		FlattenedSolution fs = servoyModel.getFlattenedSolution();
+		Iterator<Media> it = fs.getMedias(false);
+		while (it.hasNext())
+		{
+			Media media = it.next();
+			if (media.getName().endsWith(".less"))
+			{
+				String content = ResourceProvider.compileLessWithNashorn(new String(media.getMediaData()));
+				if (content != null)
+				{
+					File folder = new File(tmpWarDir, NGClientWebsocketSession.SERVOY_SOLUTION_CSS);
+					if (!folder.exists() && !folder.mkdir())
+					{
+						Debug.error("Could not create folder " + folder.getName());
+						break;
+					}
+					try
+					{
+						File f = new File(folder, media.getName().replace(".less", ".css"));
+						f.createNewFile();
+						try (PrintWriter printWriter = new PrintWriter(f))
+						{
+							printWriter.println(content);
+						}
+						catch (FileNotFoundException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					catch (IOException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
+		}
 	}
 
 	/**

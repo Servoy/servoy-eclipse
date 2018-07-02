@@ -5898,10 +5898,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								if (dataProvider == null)
 								{
-									mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
-									errorsFound = true;
-									addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-										element);
+									boolean isHiddenEnumProperty = ScopesUtils.isVariableScope(primaryDataProvider) &&
+										primaryDataProvider.split("\\.").length > 3;
+									if (!isHiddenEnumProperty)
+									{
+										mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
+										errorsFound = true;
+										addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
+											element);
+									}
 								}
 								else
 								{

@@ -57,6 +57,8 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.Utils;
 
 public class DataProviderEditingSupport extends EditingSupport
@@ -257,28 +259,47 @@ public class DataProviderEditingSupport extends EditingSupport
 					currentValue = intValue != -1 ? dataProviders[intValue] : ((CCombo)editor.getControl()).getText();
 					if (intValue == -1 && !currentValue.equals(""))
 					{
-						Object parsed = null;
-						int foreignKeyColumnSQLType = Types.OTHER;
-						IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
-						ITable foreignTable = dsm.getDataSource(relationEditor.getRelation().getForeignDataSource());
-						if (foreignTable != null)
+						boolean possibleNestedProperty = false;
+						if (ScopesUtils.isVariableScope(currentValue.toString()))
 						{
-							String colName = pi.getCITo();
-							Column c = foreignTable.getColumn(colName);
-							if (c != null)
+							FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(relationEditor.getRelation());
+							Pair<String, String> variablePair = ScopesUtils.getVariableScope(currentValue.toString());
+							String varName = variablePair.getRight();
+							if (varName.contains("."))
 							{
-								foreignKeyColumnSQLType = c.getColumnType().getSqlType();
-
+								varName = varName.substring(0, varName.indexOf("."));
+							}
+							if (flattenedEditingSolution.getScriptVariable(variablePair.getLeft(), varName) != null)
+							{
+								possibleNestedProperty = true;
 							}
 						}
-						parsed = Utils.parseJSExpression(currentValue, foreignKeyColumnSQLType);
-						if (parsed == null && (foreignKeyColumnSQLType == Types.OTHER || IColumnTypes.TEXT == Column.mapToDefaultType(foreignKeyColumnSQLType)))
+						if (!possibleNestedProperty)
 						{
-							// not a bool, number or string, convert to quoted string
-							currentValue = Utils.makeJSExpression(currentValue);
-						}
+							Object parsed = null;
+							int foreignKeyColumnSQLType = Types.OTHER;
+							IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
+							ITable foreignTable = dsm.getDataSource(relationEditor.getRelation().getForeignDataSource());
+							if (foreignTable != null)
+							{
+								String colName = pi.getCITo();
+								Column c = foreignTable.getColumn(colName);
+								if (c != null)
+								{
+									foreignKeyColumnSQLType = c.getColumnType().getSqlType();
 
-						currentValue = LiteralDataprovider.LITERAL_PREFIX + currentValue;
+								}
+							}
+							parsed = Utils.parseJSExpression(currentValue, foreignKeyColumnSQLType);
+							if (parsed == null &&
+								(foreignKeyColumnSQLType == Types.OTHER || IColumnTypes.TEXT == Column.mapToDefaultType(foreignKeyColumnSQLType)))
+							{
+								// not a bool, number or string, convert to quoted string
+								currentValue = Utils.makeJSExpression(currentValue);
+							}
+
+							currentValue = LiteralDataprovider.LITERAL_PREFIX + currentValue;
+						}
 					}
 					previousValue = pi.getCIFrom();
 					pi.setCIFrom((String)currentValue);
