@@ -91,6 +91,8 @@ import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil.Encapsulation2StringConverter;
 import com.servoy.eclipse.ui.util.EditorUtil.String2EncapsulationConverter;
+import com.servoy.eclipse.ui.util.EditorUtil.String2TypeConverter;
+import com.servoy.eclipse.ui.util.EditorUtil.Type2StringConverter;
 import com.servoy.eclipse.ui.util.IControlFactory;
 import com.servoy.eclipse.ui.util.IStatusChangedListener;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
@@ -160,6 +162,8 @@ public class ValueListEditor extends PersistEditor
 	private ISelectionChangedListener tableSelectionListener;
 	private ISelectionChangedListener relationSelectionListener;
 	private IStatusChangedListener statusChangeListener;
+
+	private Combo displayType, realType;
 
 	@Override
 	protected boolean validatePersist(IPersist persist)
@@ -451,6 +455,28 @@ public class ValueListEditor extends PersistEditor
 		encapsulation = new Combo(valueListEditorComposite, SWT.READ_ONLY);
 		encapsulation.setItems(new String[] { Messages.Public, Messages.ModuleScope });
 
+		Group typeDefinitionGroup = new Group(valueListEditorComposite, SWT.NONE);
+		typeDefinitionGroup.setText("Type definition");
+
+		Label displayTypeLabel = new Label(typeDefinitionGroup, SWT.NONE);
+		displayTypeLabel.setText("Display value type");
+		displayType = new Combo(typeDefinitionGroup, SWT.READ_ONLY);
+		displayType.setItems(Type2StringConverter.INSTANCE.getAllTypes());
+
+		Label realTypeLabel = new Label(typeDefinitionGroup, SWT.NONE);
+		realTypeLabel.setText("Real value type");
+		realType = new Combo(typeDefinitionGroup, SWT.READ_ONLY);
+		realType.setItems(Type2StringConverter.INSTANCE.getAllTypes());
+
+		final GroupLayout groupLayout_0 = new GroupLayout(typeDefinitionGroup);
+		groupLayout_0.setHorizontalGroup(
+			groupLayout_0.createSequentialGroup().addContainerGap().add(displayTypeLabel).addPreferredGap(LayoutStyle.RELATED).add(displayType,
+				GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.UNRELATED).add(realTypeLabel).addPreferredGap(
+					LayoutStyle.RELATED).add(realType, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE));
+		groupLayout_0.setVerticalGroup(groupLayout_0.createSequentialGroup().addContainerGap().add(
+			groupLayout_0.createParallelGroup().add(displayTypeLabel).add(displayType).add(realTypeLabel).add(realType)));
+		typeDefinitionGroup.setLayout(groupLayout_0);
+
 		final GroupLayout groupLayout_1 = new GroupLayout(definitionGroup);
 		groupLayout_1.setHorizontalGroup(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout_1.createSequentialGroup().add(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
@@ -513,31 +539,36 @@ public class ValueListEditor extends PersistEditor
 																																		groupLayout.createSequentialGroup().addContainerGap().add(
 																																			definitionGroup,
 																																			100, 200,
-																																			Short.MAX_VALUE).addContainerGap()));
+																																			Short.MAX_VALUE).addContainerGap()).add(
+																																				groupLayout.createSequentialGroup().addContainerGap().add(
+																																					typeDefinitionGroup,
+																																					100, 200,
+																																					Short.MAX_VALUE).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(nameLabel).add(nameField,
 				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 					customValuesButton).addPreferredGap(LayoutStyle.RELATED).add(customValues, 50, 100, 400).addPreferredGap(LayoutStyle.RELATED).add(
 						groupLayout.createParallelGroup(GroupLayout.CENTER).add(globalMethodValuesButton).add(globalMethodSelectControl).add(
-							lazyLoading)).addPreferredGap(LayoutStyle.RELATED).add(
-								groupLayout.createParallelGroup(GroupLayout.TRAILING).add(tableValuesButton).add(tableSelectControl)).addPreferredGap(
-									LayoutStyle.RELATED).add(applyValuelistNameButton).addPreferredGap(LayoutStyle.RELATED).add(
-										groupLayout.createParallelGroup(GroupLayout.LEADING).add(relatedValuesButton).add(
-											relationSelectControl)).addPreferredGap(LayoutStyle.RELATED).add(definitionGroup, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(9, 9, 9).add(
-													groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-														groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel)).add(
-															groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecated))).add(9, 9, 9).add(
-																groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-																	groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulationLabel)).add(
-																		groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulation))).add(9, 9,
-																			9).add(
-																				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-																					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
-																						fallbackValueListControl)).add(
-																							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
-																								sortingDefinitionControl).add(allowEmptyValueButton))).add(24,
-																									24, 24)));
+							lazyLoading)).addPreferredGap(LayoutStyle.RELATED).add(typeDefinitionGroup, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,
+								Short.MAX_VALUE).add(9, 9, 9).add(
+									groupLayout.createParallelGroup(GroupLayout.TRAILING).add(tableValuesButton).add(tableSelectControl)).addPreferredGap(
+										LayoutStyle.RELATED).add(applyValuelistNameButton).addPreferredGap(LayoutStyle.RELATED).add(
+											groupLayout.createParallelGroup(GroupLayout.LEADING).add(relatedValuesButton).add(
+												relationSelectControl)).addPreferredGap(LayoutStyle.RELATED).add(definitionGroup, GroupLayout.DEFAULT_SIZE,
+													GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(9, 9, 9).add(
+														groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+															groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel)).add(
+																groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecated))).add(9, 9, 9).add(
+																	groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+																		groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulationLabel)).add(
+																			groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulation))).add(9, 9,
+																				9).add(
+																					groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+																						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
+																							fallbackValueListControl)).add(
+																								groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
+																									sortingDefinitionControl).add(allowEmptyValueButton))).add(
+																										24, 24, 24)));
 		valueListEditorComposite.setLayout(groupLayout);
 
 		myScrolledComposite.setMinSize(valueListEditorComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -787,6 +818,11 @@ public class ValueListEditor extends PersistEditor
 		IObservableValue encapsulationObserveWidget = SWTObservables.observeSelection(encapsulation);
 		IObservableValue encapsulationObserveValue = PojoObservables.observeValue(getValueList(), "encapsulation");
 
+		IObservableValue displayTypeObserveWidget = SWTObservables.observeSelection(displayType);
+		IObservableValue displayTypeObserveValue = PojoObservables.observeValue(getValueList(), "displayValueType");
+		IObservableValue realTypeObserveWidget = SWTObservables.observeSelection(realType);
+		IObservableValue realTypeObserveValue = PojoObservables.observeValue(getValueList(), "realValueType");
+
 		m_bindingContext = new DataBindingContext();
 		//
 		m_bindingContext.bindValue(fallbackValueListObserveWidget, fallbackValueListObserveValue,
@@ -883,6 +919,10 @@ public class ValueListEditor extends PersistEditor
 		m_bindingContext.bindValue(encapsulationObserveWidget, encapsulationObserveValue,
 			new UpdateValueStrategy().setConverter(String2EncapsulationConverter.INSTANCE),
 			new UpdateValueStrategy().setConverter(Encapsulation2StringConverter.INSTANCE));
+		m_bindingContext.bindValue(displayTypeObserveWidget, displayTypeObserveValue, new UpdateValueStrategy().setConverter(String2TypeConverter.INSTANCE),
+			new UpdateValueStrategy().setConverter(Type2StringConverter.INSTANCE));
+		m_bindingContext.bindValue(realTypeObserveWidget, realTypeObserveValue, new UpdateValueStrategy().setConverter(String2TypeConverter.INSTANCE),
+			new UpdateValueStrategy().setConverter(Type2StringConverter.INSTANCE));
 
 		BindingHelper.addGlobalChangeListener(m_bindingContext, new IChangeListener()
 		{

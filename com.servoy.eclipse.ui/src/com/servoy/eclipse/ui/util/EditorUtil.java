@@ -782,18 +782,18 @@ public class EditorUtil
 						{
 							TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS,
 								FlatTreeContentProvider.INSTANCE, new LabelProvider()
-							{
-								@Override
-								public String getText(Object element)
 								{
-									if (element instanceof IEditorPart)
+									@Override
+									public String getText(Object element)
 									{
-										IEditorPart part = (IEditorPart)element;
-										return part.getTitle();
+										if (element instanceof IEditorPart)
+										{
+											IEditorPart part = (IEditorPart)element;
+											return part.getTitle();
+										}
+										return super.getText(element);
 									}
-									return super.getText(element);
-								}
-							}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true,
+								}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true,
 								"saveEditors", null);
 							dialog.open();
 							if (dialog.getReturnCode() == Window.OK)
@@ -1007,6 +1007,57 @@ public class EditorUtil
 				return Integer.valueOf(PersistEncapsulation.MODULE_SCOPE);
 			}
 			return new Integer(-1);
+		}
+	}
+
+	public static class Type2StringConverter extends Converter
+	{
+		public static final Type2StringConverter INSTANCE = new Type2StringConverter();
+
+		private Type2StringConverter()
+		{
+			super(int.class, String.class);
+		}
+
+		public Object convert(Object fromObject)
+		{
+			if (fromObject instanceof Integer)
+			{
+				int enc = ((Integer)fromObject).intValue();
+				if (enc != 0) return Column.getDisplayTypeString(enc);
+			}
+			return "";
+		}
+
+		public String[] getAllTypes()
+		{
+			int[] iTypes = Column.allDefinedTypes;
+			String[] types = new String[iTypes.length];
+			for (int i = 0; i < iTypes.length; i++)
+			{
+				types[i] = Column.getDisplayTypeString(iTypes[i]);
+			}
+			return types;
+		}
+	}
+	public static class String2TypeConverter extends Converter
+	{
+		public static final String2TypeConverter INSTANCE = new String2TypeConverter();
+
+		private String2TypeConverter()
+		{
+			super(String.class, int.class);
+		}
+
+		public Object convert(Object fromObject)
+		{
+			if (fromObject instanceof String)
+			{
+				int idx = Arrays.asList(Type2StringConverter.INSTANCE.getAllTypes()).indexOf(fromObject);
+				if (idx > -1 && idx < Column.allDefinedTypes.length) return new Integer(Column.allDefinedTypes[idx]);
+			}
+
+			return new Integer(0);
 		}
 	}
 }
