@@ -177,10 +177,12 @@ import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
+import com.servoy.j2db.server.ngclient.property.ValueListConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -579,7 +581,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> VALUELIST_WITH_FALLBACK_OF_FALLBACK = new Pair<String, ProblemSeverity>("valuelistWithFallbackofFallback",
 		ProblemSeverity.ERROR);
-
+	public final static Pair<String, ProblemSeverity> VALUELIST_DATAPROVIDER_TYPE_MISMATCH = new Pair<String, ProblemSeverity>(
+		"valuelistDataproviderTypeMismatch", ProblemSeverity.ERROR);
 	// styles
 	public final static Pair<String, ProblemSeverity> STYLE_NOT_FOUND = new Pair<String, ProblemSeverity>("styleNotFound", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> STYLE_CLASS_NO_STYLE = new Pair<String, ProblemSeverity>("styleClassNoStyle", ProblemSeverity.WARNING);
@@ -3900,8 +3903,80 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										inForm = parentForm.getName();
 
+
+										// check for valuelist type matching dataprovider type in web components
+										if ((o instanceof WebComponent || o instanceof WebCustomType) && dataProvider != null)
+										{
+											Collection<PropertyDescription> dpProperties = new ArrayList<PropertyDescription>();
+
+											if (o instanceof WebComponent)
+											{
+												WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(
+													((WebComponent)o).getTypeName());
+												if (spec != null)
+												{
+													dpProperties.addAll(spec.getProperties().values());
+												}
+											}
+											else
+											{
+												WebCustomType customType = (WebCustomType)o;
+												WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
+												WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(
+													parent.getTypeName());
+												if (parentSpec != null)
+												{
+													PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
+														customType.getTypeName())).getCustomJSONTypeDefinition();
+													if (cpd != null)
+													{
+														dpProperties.addAll(cpd.getProperties().values());
+													}
+												}
+											}
+
+											for (PropertyDescription pd1 : dpProperties)
+											{
+												if (pd1.getType() instanceof ValueListPropertyType &&
+													pd.getName().equals(((ValueListConfig)pd1.getConfig()).getFor()))
+												{
+													UUID valuelistUUID = Utils.getAsUUID(((AbstractBase)o).getProperty(pd1.getName()), false);
+													if (valuelistUUID != null)
+													{
+														ValueList valuelist = (ValueList)flattenedSolution.searchPersist(valuelistUUID);
+														if (valuelist != null)
+														{
+															int realValueType = valuelist.getRealValueType();
+															if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
+															{
+																ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
+																	elementName != null ? elementName : "", inForm);
+																addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+																	IMarker.PRIORITY_NORMAL, null, o);
+															}
+														}
+													}
+												}
+											}
+
+										}
 										if ((o instanceof Field || o instanceof GraphicalComponent) && dataProvider != null)
 										{
+											// check for valuelist type matching dataprovider type
+											int valuelistID = o instanceof Field ? ((Field)o).getValuelistID() : ((GraphicalComponent)o).getValuelistID();
+											ValueList valuelist = persistFlattenedSolution.getValueList(valuelistID);
+											if (valuelist != null)
+											{
+												int realValueType = valuelist.getRealValueType();
+												if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
+												{
+													ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
+														elementName != null ? elementName : "", inForm);
+													addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+														IMarker.PRIORITY_NORMAL, null, o);
+												}
+											}
+
 											String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
 											if (o instanceof Field && ((Field)o).getDisplayType() != Field.TEXT_FIELD &&
 												((Field)o).getDisplayType() != Field.TYPE_AHEAD && ((Field)o).getDisplayType() != Field.CALENDAR)

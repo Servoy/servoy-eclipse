@@ -468,6 +468,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_valuelistRelationSequenceInconsistent, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_RELATION_WITH_DATASOURCE,
 				Messages.ErrorWarningPreferencePage_valuelistRelationWithDatasource, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+				Messages.ErrorWarningPreferencePage_valuelistDataproviderTypeMismatch, false));
 		}
 		else if (ERROR_WARNING_MODULES_PROBLEMS.equals(problemSection))
 		{
