@@ -101,7 +101,7 @@ public class MemServer implements IServerInternal, IServer
 	public MemServer(ServoyProject servoyProject)
 	{
 		this.servoyProject = servoyProject;
-		this.serverConfig = new ServerConfig(DataSourceUtils.INMEM_DATASOURCE, "", "", "", null, "", "", null, true, true, "");
+		this.serverConfig = new ServerConfig(DataSourceUtils.INMEM_DATASOURCE, "", "", "", null, "", "", null, true, true, null, "");
 		init();
 	}
 
