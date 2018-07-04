@@ -28,6 +28,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 
+import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -208,6 +209,17 @@ public class FormatCellEditor extends TextDialogCellEditor
 
 							if (vl != null)
 							{
+								if ((vl.getValueListType() == IValueListConstants.CUSTOM_VALUES ||
+									vl.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES))
+								{
+									int displayValueType = vl.getDisplayValueType();
+									if (displayValueType != 0)
+									{
+										type = displayValueType;
+										break;
+									}
+								}
+
 								IDataProvider dataProvider = null;
 								ITable table = null;
 								try
@@ -256,10 +268,10 @@ public class FormatCellEditor extends TextDialogCellEditor
 										if (dataProvider != null)
 										{
 											type = dataProvider.getDataProviderType();
+											break;
 										}
 									}
 								}
-								break;
 							}
 						}
 					}
