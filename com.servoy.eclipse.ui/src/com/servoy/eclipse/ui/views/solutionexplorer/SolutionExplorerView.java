@@ -1995,38 +1995,49 @@ public class SolutionExplorerView extends ViewPart
 					{
 						IResource resource = element.getResource();
 						// do not refresh import placeholder during import, will cause exceptions
-						if (resource instanceof IProject && !((IProject)resource).getName().startsWith("import_placeholder"))
+						if (resource instanceof IProject)
 						{
-							// see if it is a Servoy project that changed
-							try
+							if (((IProject)resource).getName().startsWith("import_placeholder"))
 							{
-								IProject project = (IProject)resource;
-								if ((!project.isOpen()) || (!project.hasNature(ServoyUpdatingProject.NATURE_ID)))
+								if (element.getKind() == IResourceDelta.REMOVED && isSolutionInTree(resource))
 								{
-									if (element.getKind() != IResourceDelta.REMOVED && project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
+									mustRefresh = true;
+									break;
+								}
+							}
+							else
+							{
+								// see if it is a Servoy project that changed
+								try
+								{
+									IProject project = (IProject)resource;
+									if ((!project.isOpen()) || (!project.hasNature(ServoyUpdatingProject.NATURE_ID)))
 									{
-										// if it is not already in the tree then add it
-										if (!isSolutionInTree(resource))
+										if (element.getKind() != IResourceDelta.REMOVED && project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
 										{
-											mustRefresh = true;
-											break;
+											// if it is not already in the tree then add it
+											if (!isSolutionInTree(resource))
+											{
+												mustRefresh = true;
+												break;
+											}
 										}
-									}
-									else
-									{
-										// see if it was in the tree (if it was a Servoy
-										// Project) and must be removed
-										if (isSolutionInTree(resource))
+										else
 										{
-											mustRefresh = true;
-											break;
+											// see if it was in the tree (if it was a Servoy
+											// Project) and must be removed
+											if (isSolutionInTree(resource))
+											{
+												mustRefresh = true;
+												break;
+											}
 										}
 									}
 								}
-							}
-							catch (CoreException e)
-							{
-								ServoyLog.logError(e);
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
+								}
 							}
 						}
 					}
