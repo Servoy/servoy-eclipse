@@ -17,13 +17,13 @@ describe('LoggerService', () => {
   });
 
   it('should be created', inject([LoggerFactory], (logFactory: LoggerFactory) => {
-      var log = logFactory.getLogger(LoggerService.name);
+      var log = logFactory.getLogger("LoggerService");
       expect(log).toBeTruthy();
   }));
   
   it('should not log anything but errors', inject([LoggerFactory], (logFactory: LoggerFactory) => {
    	   //by default isDebugMode is false, so it should only log errors
-      var log = logFactory.getLogger(LoggerService.name); //by default isDebugMode is false
+      var log = logFactory.getLogger("LoggerService"); //by default isDebugMode is false
       
       log.debug('test');
       expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
@@ -34,25 +34,26 @@ describe('LoggerService', () => {
       log.warn('test');
       expect(windowRef.nativeWindow.console.warn).not.toHaveBeenCalled();
       
-      var time = new Date();
       log.error('ERROR!');
-      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' ERROR LoggerService - ','ERROR!');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(jasmine.stringMatching(' ERROR LoggerService - '),'ERROR!');
+  
+  	  log.warn(log.buildMessage(()=>('test')));
+      expect(windowRef.nativeWindow.console.warn).not.toHaveBeenCalled();
   }));
   
   it('should log error', inject([LoggerFactory], (logFactory: LoggerFactory) => {
-      var log = logFactory.getLogger(LoggerService.name);
+      var log = logFactory.getLogger("LoggerService");
       log.setLogLevel(LogLevel.ERROR);
       
       log.warn('test');
       expect(windowRef.nativeWindow.console.warn).not.toHaveBeenCalled();
       
-      var time = new Date();
       log.error('ERROR!');
-      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' ERROR LoggerService - ','ERROR!');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(jasmine.stringMatching(' ERROR LoggerService - '),'ERROR!');
     }));
   
   it('should log info, warning, error', inject([LoggerFactory], (logFactory: LoggerFactory) => {
-      var log = logFactory.getLogger(LoggerService.name);
+      var log = logFactory.getLogger("LoggerService");
       log.setLogLevel(LogLevel.INFO);
       
       log.spam('some spam');
@@ -61,21 +62,18 @@ describe('LoggerService', () => {
       log.debug('test');
       expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
       
-      var time = new Date();
       log.info('some info');
-      expect(windowRef.nativeWindow.console.info).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' INFO LoggerService - ','some info');
+      expect(windowRef.nativeWindow.console.info).toHaveBeenCalledWith(jasmine.stringMatching(' INFO LoggerService - '),'some info');
       
-      time = new Date();
       log.warn('warning...');
-      expect(windowRef.nativeWindow.console.warn).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' WARN LoggerService - ','warning...');
+      expect(windowRef.nativeWindow.console.warn).toHaveBeenCalledWith(jasmine.stringMatching(' WARN LoggerService - '),'warning...');
       
-      time = new Date();
       log.error('ERROR!');
-      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' ERROR LoggerService - ','ERROR!');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(jasmine.stringMatching(' ERROR LoggerService - '),'ERROR!');
     }));
   
   it('should log debug ... error', inject([LoggerFactory], (logFactory: LoggerFactory) => {
-      var log = logFactory.getLogger(LoggerService.name);
+      var log = logFactory.getLogger("LoggerService");
       log.setLogLevel(LogLevel.DEBUG);
       
       log.spam('some spam');
@@ -85,43 +83,35 @@ describe('LoggerService', () => {
       expect(windowRef.nativeWindow.console.debug).not.toHaveBeenCalled();
       expect(stringResolved).toBeFalsy("string resolved should not be true, spam should not have resolved it");
       
-      var time = new Date();
       log.debug('test');
-      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' DEBUG LoggerService - ','test');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(jasmine.stringMatching(' DEBUG LoggerService - '),'test');
 
-      time = new Date();
       log.debug(log.buildMessage(()=>{stringResolved=true;return 'test' + 2}));
-      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' DEBUG LoggerService - ','test2');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(jasmine.stringMatching(' DEBUG LoggerService - '),'test2');
       expect(stringResolved).toBeTruthy("stringResolved should be true, debug should have resolved it");
 
-      time = new Date();
       log.error('ERROR!');
-      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' ERROR LoggerService - ','ERROR!');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(jasmine.stringMatching(' ERROR LoggerService - '),'ERROR!');
 
-      time = new Date();
       log.error(log.buildMessage(() =>'ERROR!' + 2));
-      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' ERROR LoggerService - ','ERROR!2');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(jasmine.stringMatching(' ERROR LoggerService - '),'ERROR!2');
     }));
   
   it('should spam', inject([LoggerFactory], (logFactory: LoggerFactory) => {
-      var log = logFactory.getLogger(LoggerService.name);
+      var log = logFactory.getLogger("LoggerService");
       log.setLogLevel(LogLevel.SPAM);
       
-      var time = new Date();
       log.spam('some spam');
-      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' SPAM LoggerService - ','some spam');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(jasmine.stringMatching(' SPAM LoggerService - '),'some spam');
 
-      time = new Date();
       log.spam(log.buildMessage(()=>"some spam" + 2));
-      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' SPAM LoggerService - ','some spam2');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(jasmine.stringMatching(' SPAM LoggerService - '),'some spam2');
 
-      time = new Date();
       log.debug('test');
-      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' DEBUG LoggerService - ','test');
+      expect(windowRef.nativeWindow.console.debug).toHaveBeenCalledWith(jasmine.stringMatching(' DEBUG LoggerService - '),'test');
       
-      time = new Date();
       log.error('ERROR!');
-      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds() + ' ERROR LoggerService - ','ERROR!');
+      expect(windowRef.nativeWindow.console.error).toHaveBeenCalledWith(jasmine.stringMatching(' ERROR LoggerService - '),'ERROR!');
     }));
   
 });

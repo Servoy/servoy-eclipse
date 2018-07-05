@@ -14,7 +14,7 @@ export class ConverterService {
     private log: LoggerService;
 
     constructor(private logFactory:LoggerFactory) {
-        this.log = logFactory.getLogger(ConverterService.name);
+        this.log = logFactory.getLogger("ConverterService");
     }
 
     public convertFromServerToClient( serverSentData, conversionInfo, currentClientData?, scope?, modelGetter?) {

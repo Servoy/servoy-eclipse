@@ -42,7 +42,7 @@ export class ServoyService {
             iterableDiffers: IterableDiffers,
             private logFactory: LoggerFactory) {
 
-        this.log = logFactory.getLogger(ServoyService.name);
+        this.log = logFactory.getLogger("ServoyService");
         this.uiProperties = new UIProperties( sessionStorageService )
         const dateConverter = new DateConverter();
         converterService.registerCustomPropertyHandler( "svy_date", dateConverter );

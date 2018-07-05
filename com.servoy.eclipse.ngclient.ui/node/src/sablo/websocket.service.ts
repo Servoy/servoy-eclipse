@@ -21,7 +21,7 @@ export class WebsocketService {
     private log: LoggerService;
 
     constructor( private windowRef: WindowRefService, private services: ServicesService, private converterService: ConverterService, private logFactory: LoggerFactory ) {
-        this.log = logFactory.getLogger(WebsocketService.name);
+        this.log = logFactory.getLogger("WebsocketService");
     }
 
     private generateURL( context, args, queryArgs, websocketUri ) {
@@ -179,7 +179,7 @@ export class WebsocketSession {
 
 
     constructor( private websocket: ReconnectingWebSocket, private websocketService: WebsocketService, private services: ServicesService, private windowRef: WindowRefService, private converterService: ConverterService, private logFactory: LoggerFactory ) {
-        this.log = logFactory.getLogger(WebsocketSession.name);
+        this.log = logFactory.getLogger("WebsocketSession");
         const me = this;
         this.websocket.onopen = ( evt ) => {
             me.setConnected();

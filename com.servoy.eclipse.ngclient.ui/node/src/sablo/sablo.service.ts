@@ -30,7 +30,7 @@ export class SabloService {
     
 
     constructor( private websocketService: WebsocketService, private sessionStorage: SessionStorageService, private converterService: ConverterService, private windowRefService:WindowRefService, private logFactory : LoggerFactory ) {
-        this.log = logFactory.getLogger(SabloService.name);
+        this.log = logFactory.getLogger("SabloService");
     }
 
     public connect( context, queryArgs, websocketUri ): WebsocketSession {

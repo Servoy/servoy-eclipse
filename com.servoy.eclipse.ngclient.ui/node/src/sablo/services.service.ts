@@ -9,7 +9,7 @@ export class ServicesService {
     private log: LoggerService;
 
     constructor( private converterService: ConverterService, private logFactory : LoggerFactory ) {
-        this.log = logFactory.getLogger(ServicesService.name);
+        this.log = logFactory.getLogger("ServicesService");
     }
 
     private serviceScopesConversionInfo = {};

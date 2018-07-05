@@ -18,7 +18,7 @@ export class FormService {
 //    private touchedForms:Map<String,boolean>;
 
     constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, private logFactory: LoggerFactory ) {
-        this.log = logFactory.getLogger(FormService.name);
+        this.log = logFactory.getLogger("FormService");
         this.formsCache = new Map();
 
         websocketService.getSession().then(( session ) => {

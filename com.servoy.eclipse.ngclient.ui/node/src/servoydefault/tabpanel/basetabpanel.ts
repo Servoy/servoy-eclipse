@@ -45,7 +45,7 @@ export abstract class BaseTabpanel implements OnChanges {
     private log: LoggerService;
 
     constructor( private windowRefService: WindowRefService, private logFactory : LoggerFactory ) {
-        this.log = logFactory.getLogger(BaseTabpanel.name);
+        this.log = logFactory.getLogger("BaseTabpanel");
     }
 
     ngOnChanges( changes: SimpleChanges ) {
