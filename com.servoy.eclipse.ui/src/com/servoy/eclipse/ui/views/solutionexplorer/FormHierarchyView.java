@@ -152,7 +152,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				if (it.hasNext())
 				{
 					Object next = it.next();
-					if (next instanceof ScriptMethod || next instanceof BaseComponent)
+					if (next instanceof ScriptMethod || next instanceof ScriptVariable || next instanceof BaseComponent)
 					{
 						persist = (IPersist)next;
 					}
@@ -174,7 +174,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 						try
 						{
 							IEditorInput input = editor.getEditorInput();
-							if (input instanceof FileEditorInput && persist instanceof ScriptMethod)
+							if (input instanceof FileEditorInput && (persist instanceof ScriptMethod || persist instanceof ScriptVariable))
 							{
 								FileEditorInput fileEditorInput = (FileEditorInput)input;
 								String path = SolutionSerializer.getScriptPath(persist.getParent(), false);
@@ -725,6 +725,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		IAction openScript = new OpenScriptAction();
 		openAction.registerAction(ScriptMethod.class, openScript);
+		openAction.registerAction(ScriptVariable.class, openScript);
 		IAction openPersistEditor = new OpenPersistEditorAction();
 		openAction.registerAction(BaseComponent.class, openPersistEditor);
 		final OpenFormEditorAction openFormEditor = new OpenFormEditorAction();
