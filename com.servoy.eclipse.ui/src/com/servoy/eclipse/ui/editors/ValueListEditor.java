@@ -98,6 +98,7 @@ import com.servoy.eclipse.ui.util.IStatusChangedListener;
 import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
@@ -574,6 +575,16 @@ public class ValueListEditor extends PersistEditor
 		myScrolledComposite.setMinSize(valueListEditorComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		initDataBindings();
+
+		if ((getValueList().getValueListType() == IValueListConstants.CUSTOM_VALUES ||
+			getValueList().getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES) &&
+			(getValueList().getDisplayValueType() == 0 || getValueList().getRealValueType() == 0))
+		{
+			if (getValueList().getDisplayValueType() == 0) getValueList().setDisplayValueType(IColumnTypes.TEXT);
+			if (getValueList().getRealValueType() == 0) getValueList().setRealValueType(IColumnTypes.TEXT);
+			getValueList().flagChanged();
+			flagModified();
+		}
 
 		// mark dirty if invalid - so that user is hinted to save it as a valid valuelist
 		String message = checkValidState();
