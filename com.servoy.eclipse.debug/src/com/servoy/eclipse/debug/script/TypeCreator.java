@@ -170,6 +170,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Part;
@@ -897,23 +898,41 @@ public class TypeCreator extends TypeCache
 					@Override
 					public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 					{
-						Job job = new Job("clearing cache")
-						{
-
-							@Override
-							public IStatus run(IProgressMonitor monitor)
-							{
-								clearCache();
-								return Status.OK_STATUS;
-							}
-						};
-						job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-						job.schedule();
+						runClearCacheJob();
 					}
 
 				});
+
+				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				ITableListener tableListener = new ITableListener.TableListener()
+				{
+					@Override
+					public void tablesAdded(IServerInternal server, String[] tableNames)
+					{
+						runClearCacheJob();
+					}
+
+					@Override
+					public void hiddenTableChanged(IServerInternal server, Table table)
+					{
+						runClearCacheJob();
+					}
+
+					@Override
+					public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
+					{
+						runClearCacheJob();
+					}
+				};
+				// add listeners to initial server list
+				String[] array = serverManager.getServerNames(false, false, true, true);
+				for (String server_name : array)
+				{
+					((IServerInternal)serverManager.getServer(server_name, false, false)).addTableListener(tableListener);
+				}
 			}
 		}
+
 	}
 
 	protected final Class< ? > getTypeClass(String name)
@@ -4641,6 +4660,23 @@ public class TypeCreator extends TypeCache
 		arrayType.setType(getTypeRef(context, arrayClassType.getSimpleName()));
 		superType.getMembers().add(arrayType);
 		return superType;
+	}
+
+
+	private void runClearCacheJob()
+	{
+		Job job = new Job("clearing cache")
+		{
+
+			@Override
+			public IStatus run(IProgressMonitor monitor)
+			{
+				clearCache();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.schedule();
 	}
 
 
