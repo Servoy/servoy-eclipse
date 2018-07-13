@@ -27,7 +27,7 @@ export class FormService {
                     for ( var formname in msg.forms ) {
                         const formCache = this.formsCache.get( formname );
                         if ( formCache != null ) {
-                            const formConversion = conversionInfo ? conversionInfo.forms[formname] : null;
+                            const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
                             var formData = msg.forms[formname];
                             for ( var beanname in formData ) {
                                 const comp = formCache.getComponent( beanname );
