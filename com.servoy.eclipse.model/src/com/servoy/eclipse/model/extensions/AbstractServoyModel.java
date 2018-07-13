@@ -286,7 +286,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 			Solution s = p.getSolution();
 			if (s != null)
 			{
-				if (SolutionMetaData.isImportHook(s.getSolutionMetaData())) importHookModules.add(p);
+				if (SolutionMetaData.isImportHook(s.getSolutionMetaData()) && !importHookModules.contains(p)) importHookModules.add(p);
 
 				String[] moduleNames = Utils.getTokenElements(s.getModulesNames(), ",", true);
 				for (String moduleName : moduleNames)

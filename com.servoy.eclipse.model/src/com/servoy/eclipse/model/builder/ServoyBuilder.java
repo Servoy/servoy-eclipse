@@ -177,10 +177,12 @@ import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
+import com.servoy.j2db.server.ngclient.property.ValueListConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -577,7 +579,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> VALUELIST_TYPE_UNKNOWN = new Pair<String, ProblemSeverity>("valuelistTypeUnknown", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> VALUELIST_GENERIC_ERROR = new Pair<String, ProblemSeverity>("valuelistGenericError",
 		ProblemSeverity.ERROR);
-
+	public final static Pair<String, ProblemSeverity> VALUELIST_WITH_FALLBACK_OF_FALLBACK = new Pair<String, ProblemSeverity>("valuelistWithFallbackofFallback",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> VALUELIST_DATAPROVIDER_TYPE_MISMATCH = new Pair<String, ProblemSeverity>(
+		"valuelistDataproviderTypeMismatch", ProblemSeverity.ERROR);
 	// styles
 	public final static Pair<String, ProblemSeverity> STYLE_NOT_FOUND = new Pair<String, ProblemSeverity>("styleNotFound", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> STYLE_CLASS_NO_STYLE = new Pair<String, ProblemSeverity>("styleClassNoStyle", ProblemSeverity.WARNING);
@@ -1200,7 +1205,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					for (IPersist child : Utils.iterate(duplicatedParent.getRight().getAllObjects()))
 					{
 						if ((child instanceof IScriptProvider || child instanceof ScriptVariable) && ((ISupportName)child).getName().equals(name) &&
-							!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight()))
+							!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight().getRootObject()))
 						{
 							int lineNumber;
 							if (child instanceof IScriptElement)
@@ -1222,7 +1227,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							break;
 						}
 					}
-					if (!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight()))
+					if (!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight().getRootObject()))
 					{
 						int lineNumber;
 						if (persist instanceof IScriptElement)
@@ -1415,9 +1420,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
-			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
-			flattenedForm.acceptVisitor(new IPersistVisitor()
+			persist.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
 				{
@@ -1441,7 +1444,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 					}
-					else if (!(o instanceof ScriptVariable) && !(o instanceof Form) && o instanceof ISupportName && ((ISupportName)o).getName() != null)
+					if (o instanceof AbstractContainer) return IPersistVisitor.CONTINUE_TRAVERSAL;
+					else return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+				}
+			});
+			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
+			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
+			flattenedForm.acceptVisitor(new IPersistVisitor()
+			{
+				public Object visit(IPersist o)
+				{
+					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
+						((ISupportName)o).getName() != null)
 					{
 						Set<IPersist> duplicates = formElementsByName.get(((ISupportName)o).getName());
 						if (duplicates != null)
@@ -1742,6 +1756,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				addDeprecatedElementWarningIfNeeded(persist, fallbackValuelist, project,
 					"Valuelist \"" + elementName + "\" has a deprecated fallback valuelist \"" + fallbackValuelist.getName() + "\".");
+				if (fallbackValuelist.getFallbackValueListID() > 0)
+				{
+					ServoyMarker mk = MarkerMessages.ValuelistFallbackOfFallbackFound.fill(((ValueList)persist).getName(), fallbackValuelist.getName());
+					addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_WITH_FALLBACK_OF_FALLBACK, IMarker.PRIORITY_HIGH, null, persist);
+				}
 			}
 
 			// check usage of deprecated relation inside a valuelist
@@ -2448,7 +2467,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											addEncapsulationMarker(project, o, foundPersist, (Form)context);
 										}
 										if (context instanceof Form && ((Form)context).isFormComponent().booleanValue() &&
-											BaseComponent.isEventOrCommandProperty(element.getName()))
+											BaseComponent.isEventOrCommandProperty(element.getName()) &&
+											((Form)context).getFlattenedPropertiesMap().containsKey(element.getName()))
 										{
 											ServoyMarker mk = MarkerMessages.FormReferenceInvalidProperty.fill(((Form)context).getName(), element.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_REFERENCE_INVALID_PROPERTY, IMarker.PRIORITY_NORMAL, null,
@@ -3883,8 +3903,80 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										inForm = parentForm.getName();
 
+
+										// check for valuelist type matching dataprovider type in web components
+										if ((o instanceof WebComponent || o instanceof WebCustomType) && dataProvider != null)
+										{
+											Collection<PropertyDescription> dpProperties = new ArrayList<PropertyDescription>();
+
+											if (o instanceof WebComponent)
+											{
+												WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(
+													((WebComponent)o).getTypeName());
+												if (spec != null)
+												{
+													dpProperties.addAll(spec.getProperties().values());
+												}
+											}
+											else
+											{
+												WebCustomType customType = (WebCustomType)o;
+												WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
+												WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(
+													parent.getTypeName());
+												if (parentSpec != null)
+												{
+													PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
+														customType.getTypeName())).getCustomJSONTypeDefinition();
+													if (cpd != null)
+													{
+														dpProperties.addAll(cpd.getProperties().values());
+													}
+												}
+											}
+
+											for (PropertyDescription pd1 : dpProperties)
+											{
+												if (pd1.getType() instanceof ValueListPropertyType &&
+													pd.getName().equals(((ValueListConfig)pd1.getConfig()).getFor()))
+												{
+													UUID valuelistUUID = Utils.getAsUUID(((AbstractBase)o).getProperty(pd1.getName()), false);
+													if (valuelistUUID != null)
+													{
+														ValueList valuelist = (ValueList)flattenedSolution.searchPersist(valuelistUUID);
+														if (valuelist != null)
+														{
+															int realValueType = valuelist.getRealValueType();
+															if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
+															{
+																ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
+																	elementName != null ? elementName : "", inForm);
+																addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+																	IMarker.PRIORITY_NORMAL, null, o);
+															}
+														}
+													}
+												}
+											}
+
+										}
 										if ((o instanceof Field || o instanceof GraphicalComponent) && dataProvider != null)
 										{
+											// check for valuelist type matching dataprovider type
+											int valuelistID = o instanceof Field ? ((Field)o).getValuelistID() : ((GraphicalComponent)o).getValuelistID();
+											ValueList valuelist = persistFlattenedSolution.getValueList(valuelistID);
+											if (valuelist != null)
+											{
+												int realValueType = valuelist.getRealValueType();
+												if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
+												{
+													ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
+														elementName != null ? elementName : "", inForm);
+													addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+														IMarker.PRIORITY_NORMAL, null, o);
+												}
+											}
+
 											String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
 											if (o instanceof Field && ((Field)o).getDisplayType() != Field.TEXT_FIELD &&
 												((Field)o).getDisplayType() != Field.TYPE_AHEAD && ((Field)o).getDisplayType() != Field.CALENDAR)
@@ -4168,8 +4260,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (relations != null)
 										{
 											Relation r = relations[relations.length - 1];
-											dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
-											if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
+											dataProvider = getDataProvider(persistFlattenedSolution, id, r.getPrimaryServerName(), r.getPrimaryTableName());
+											if (dataProvider == null)
+												dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignServerName(), r.getForeignTableName());
 										}
 									}
 									if (dataProvider != null) break;
@@ -4179,7 +4272,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						return dataProvider;
 					}
 
-					private IDataProvider getDataProvider(String id, String serverName, String tableName) throws RepositoryException
+					private IDataProvider getDataProvider(FlattenedSolution fs, String id, String serverName, String tableName) throws RepositoryException
 					{
 						IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
 						if (server != null)
@@ -4187,13 +4280,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							ITable table = server.getTable(tableName);
 							if (table != null)
 							{
-								for (Column c : table.getColumns())
-								{
-									if (c.getDataProviderID().equals(id))
-									{
-										return c;
-									}
-								}
+								return fs.getDataProviderForTable(table, id);
 							}
 						}
 						return null;
@@ -5833,10 +5920,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								if (dataProvider == null)
 								{
-									mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
-									errorsFound = true;
-									addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-										element);
+									boolean isHiddenEnumProperty = ScopesUtils.isVariableScope(primaryDataProvider) &&
+										primaryDataProvider.split("\\.").length > 3;
+									if (!isHiddenEnumProperty)
+									{
+										mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
+										errorsFound = true;
+										addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
+											element);
+									}
 								}
 								else
 								{

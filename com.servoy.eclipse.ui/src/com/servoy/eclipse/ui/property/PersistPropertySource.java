@@ -54,6 +54,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.IPropertyType;
@@ -145,6 +146,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -200,6 +202,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.ICanBeLinkedToFoundset;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.CSSPositionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -1371,6 +1374,33 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				return borderPropertyController;
 			}
 
+			if (CSSPositionPropertyType.TYPE_NAME.equals(propertyType.getName()))
+			{
+				return new PropertyController<CSSPosition, Object>(id, displayName, new ComplexPropertyConverter<CSSPosition>()
+				{
+					@Override
+					public Object convertProperty(Object property, CSSPosition value)
+					{
+						return new ComplexProperty<CSSPosition>(value)
+						{
+							@Override
+							public IPropertySource getPropertySource()
+							{
+								CSSPositionPropertySource cssPositionPropertySource = new CSSPositionPropertySource(this);
+								cssPositionPropertySource.setReadonly(readOnly);
+								return cssPositionPropertySource;
+							}
+						};
+					}
+				}, CSSPositionPropertySource.getLabelProvider(), new ICellEditorFactory()
+				{
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return CSSPositionPropertySource.createPropertyEditor(parent);
+					}
+				});
+			}
+
 			if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())
 			{
 				return new CheckboxPropertyDescriptor(id, displayName);
@@ -1704,7 +1734,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			return false;
 		}
-		return propertyDescriptor.propertyDescriptor.shouldShow(persistContext.getPersist());
+		return propertyDescriptor.propertyDescriptor.shouldShow(persistContext);
 	}
 
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
@@ -2680,6 +2710,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		if (propertyDescription == null) return null;
 
 		IPropertyType< ? > propertyType = propertyDescription.getType();
+		if (propertyType instanceof IYieldingType) propertyType = ((IYieldingType< ? , ? >)propertyType).getPossibleYieldType();
+
 		if (propertyType == ValuesPropertyType.INSTANCE)
 		{
 			final ValuesConfig config = (ValuesConfig)propertyDescription.getConfig();
@@ -2803,8 +2835,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (forFoundsetName != null)
 		{
-			IPropertyType< ? > typeForPropertyController = (propertyType instanceof FoundsetLinkedPropertyType< ? , ? >)
-				? ((FoundsetLinkedPropertyType< ? , ? >)propertyType).getPossibleYieldType() : propertyType;
 			ITable table = null;
 
 			try
@@ -2866,11 +2896,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Debug.log(e);
 			}
 
-			if (typeForPropertyController instanceof TagStringPropertyType)
+			if (propertyType instanceof TagStringPropertyType)
 			{
 				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, table);
 			}
-			else if (typeForPropertyController instanceof DataproviderPropertyType)
+			else if (propertyType instanceof DataproviderPropertyType)
 			{
 				final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true,
 					true, table != null, table != null, INCLUDE_RELATIONS.NESTED, true, true, null);

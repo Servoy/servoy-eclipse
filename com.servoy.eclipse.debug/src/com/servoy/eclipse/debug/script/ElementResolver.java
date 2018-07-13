@@ -358,7 +358,7 @@ public class ElementResolver implements IElementResolver
 					members.add(property);
 				}
 			}
-			return null;
+			return members;
 		}
 		// some stuff that should just not report anything.
 		if ("document".equals(name)) // dom model
@@ -443,6 +443,11 @@ public class ElementResolver implements IElementResolver
 						}
 					}
 				}
+			}
+			if (!members.isEmpty())
+			{
+				//return members if found in existing types defined by TypeCreator
+				return members;
 			}
 		}
 
@@ -594,6 +599,10 @@ public class ElementResolver implements IElementResolver
 				typeRef = TypeUtil.classType(type);
 				image = TypeCreator.CONSTANT;
 			}
+			else if (type.getName().equals("Any"))
+			{
+				typeRef = TypeInfoModelFactory.eINSTANCE.createAnyType();
+			}
 			else
 			{
 				typeRef = TypeUtil.ref(type);
@@ -612,7 +621,7 @@ public class ElementResolver implements IElementResolver
 			}
 			else
 			{
-				property.setDeprecated(type.isDeprecated());
+				property.setDeprecated(property.isDeprecated() || type.isDeprecated());
 				property.setVisible(type.isVisible());
 			}
 			members.add(property);

@@ -71,6 +71,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RectShape;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
@@ -107,7 +108,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static final String ELEMENTS_SPINNER_ID = "spinner";
 	private static final String[] ELEMENTS_IDS = new String[] { /* */ELEMENTS_BUTTON_ID, /* */ELEMENTS_RADIOS_ID, /* */ELEMENTS_CHECKS_ID, /* */ELEMENTS_LABEL_ID, /* */ELEMENTS_TEXT_FIELD_ID, /* */ELEMENTS_TEXT_AREA_ID, /* */ELEMENTS_HTML_AREA_ID, /* */ELEMENTS_RTF_AREA_ID, /* */ELEMENTS_PASSWORD_ID, /* */ELEMENTS_CALENDAR_ID, /* */ELEMENTS_IMAGE_MEDIA_ID, /* */ELEMENTS_COMBOBOX_ID, /* */ELEMENTS_LISTBOX_ID, /* */ELEMENTS_MULTISELECT_LISTBOX_ID, /* */ELEMENTS_TYPE_AHEAD_ID, /* */ELEMENTS_SPINNER_ID, /* */ELEMENTS_PORTAL_ID
 		/* */ };
-
+	private static final String[] NG_ELEMENTS_IDS = new String[] { /* */ELEMENTS_BUTTON_ID, /* */ELEMENTS_RADIOS_ID, /* */ELEMENTS_CHECKS_ID, /* */ELEMENTS_LABEL_ID, /* */ELEMENTS_TEXT_FIELD_ID, /* */ELEMENTS_TEXT_AREA_ID, /* */ELEMENTS_HTML_AREA_ID, /* */ELEMENTS_PASSWORD_ID, /* */ELEMENTS_CALENDAR_ID, /* */ELEMENTS_IMAGE_MEDIA_ID, /* */ELEMENTS_COMBOBOX_ID, /* */ELEMENTS_LISTBOX_ID, /* */ELEMENTS_MULTISELECT_LISTBOX_ID, /* */ELEMENTS_TYPE_AHEAD_ID, /* */ELEMENTS_SPINNER_ID, /* */ELEMENTS_PORTAL_ID
+		/* */ };
 	private static final String SHAPES_ID = "shapes";
 	private static final String SHAPES_BORDER_PANEL_ID = "border panel";
 	private static final String SHAPES_RECTANGLE_ID = "rectangle";
@@ -138,6 +140,18 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 	private SpecProviderState componentsSpecProviderState;
 
+	private final int solutionType;
+
+	public VisualFormEditorPaletteFactory(int solutionType)
+	{
+		this.solutionType = solutionType;
+	}
+
+	private String[] getElementsIDs()
+	{
+		return solutionType == SolutionMetaData.NG_CLIENT_ONLY ? NG_ELEMENTS_IDS : ELEMENTS_IDS;
+	}
+
 	@Override
 	protected PaletteCustomization getDefaultPaletteCustomization()
 	{
@@ -148,8 +162,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		// add elements
 		drawers.add(ELEMENTS_ID);
 		entryProperties.put(ELEMENTS_ID + '.' + PaletteCustomization.PROPERTY_LABEL, Messages.LabelElementsPalette);
-		drawerEntries.put(ELEMENTS_ID, Arrays.asList(ELEMENTS_IDS));
-		for (String itemId : ELEMENTS_IDS)
+		drawerEntries.put(ELEMENTS_ID, Arrays.asList(getElementsIDs()));
+		for (String itemId : getElementsIDs())
 		{
 			entryProperties.put(ELEMENTS_ID + '.' + itemId + '.' + PaletteCustomization.PROPERTY_LABEL, Utils.stringInitCap(itemId));
 			entryProperties.put(ELEMENTS_ID + '.' + itemId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Create a " + itemId);
@@ -161,11 +175,15 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		// add templates
 		addTemplates(drawers, drawerEntries, entryProperties);
 
-		// add servoy beans
-		addBeans(true, drawers, drawerEntries, entryProperties);
 
-		// add other beans
-		addBeans(false, drawers, drawerEntries, entryProperties);
+		if (solutionType != SolutionMetaData.NG_CLIENT_ONLY)
+		{
+			// add servoy beans
+			addBeans(true, drawers, drawerEntries, entryProperties);
+
+			// add other beans
+			addBeans(false, drawers, drawerEntries, entryProperties);
+		}
 
 		// add components
 		addComponents(drawers, drawerEntries, entryProperties, componentsSpecProviderState);

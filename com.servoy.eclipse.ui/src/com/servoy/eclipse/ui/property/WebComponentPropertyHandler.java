@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
+import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
@@ -99,6 +100,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		try
 		{
 			IPropertyType< ? > type = propertyDescription.getType();
+			if (type instanceof IYieldingType) type = ((IYieldingType< ? , ? >)type).getPossibleYieldType();
+
 			if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
 				type instanceof MediaPropertyType || type instanceof FormComponentPropertyType)
 			{
@@ -141,7 +144,10 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		IBasicWebObject bean = (IBasicWebObject)obj;
 
 		Object convertedValue = value;
-		if (propertyDescription.getType() instanceof FunctionPropertyType)
+		IPropertyType< ? > type = propertyDescription.getType();
+		if (type instanceof IYieldingType) type = ((IYieldingType< ? , ? >)type).getPossibleYieldType();
+
+		if (type instanceof FunctionPropertyType)
 		{
 			//  value is methodid
 			ITable table = null;
@@ -153,22 +159,22 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(bean, persistContext.getContext(), table, ((Integer)value).intValue());
 			convertedValue = scriptMethod == null ? null : scriptMethod.getUUID().toString();
 		}
-		else if (propertyDescription.getType() instanceof ValueListPropertyType)
+		else if (type instanceof ValueListPropertyType)
 		{
 			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
 			convertedValue = (val == null) ? null : val.getUUID().toString();
 		}
-		else if (propertyDescription.getType() instanceof FormPropertyType)
+		else if (type instanceof FormPropertyType)
 		{
 			Form frm = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getForm(((Integer)value).intValue());
 			convertedValue = (frm == null) ? null : frm.getUUID().toString();
 		}
-		else if (propertyDescription.getType() instanceof MediaPropertyType)
+		else if (type instanceof MediaPropertyType)
 		{
 			Media media = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getMedia(((Integer)value).intValue());
 			convertedValue = (media == null) ? null : media.getUUID().toString();
 		}
-		else if (propertyDescription.getType() instanceof FormComponentPropertyType)
+		else if (type instanceof FormComponentPropertyType)
 		{
 			if (convertedValue != null)
 			{
@@ -188,7 +194,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		bean.setProperty(getName(), convertedValue);
 	}
 
-	public boolean shouldShow(Object obj)
+	public boolean shouldShow(PersistContext persistContext)
 	{
 		if (propertyDescription.getType() instanceof ComponentPropertyType)
 		{

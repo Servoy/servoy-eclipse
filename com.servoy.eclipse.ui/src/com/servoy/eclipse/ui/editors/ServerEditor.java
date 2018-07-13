@@ -33,6 +33,7 @@ import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -82,6 +83,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -200,7 +202,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 							values[z] = urlPropertiesFields.get(z).getText();
 						}
 						String newUrl = serverTemplateDefinition.getUrlForValues(values, serverConfigObservable.getObject().getServerUrl());
-						if (newUrl != null)
+						if (newUrl != null && !newUrl.equals(urlField.getText()))
 						{
 							urlField.setText(newUrl);
 						}
@@ -388,6 +390,21 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		urlField = new Text(advancedSettingsComposite, SWT.BORDER);
 		urlField.setToolTipText(ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
+		urlField.addModifyListener(new ModifyListener()
+		{
+			public void modifyText(ModifyEvent e)
+			{
+				String[] urlValues = serverTemplateDefinition.getUrlValues(urlField.getText());
+				for (int i = 0; i < urlPropertiesFields.size(); i++)
+				{
+					if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
+					{
+						urlPropertiesFields.get(i).setText(urlValues[i]);
+					}
+
+				}
+			}
+		});
 
 		toolTip = "JDBC driver to use. Each DB type has a different driver. For some DB types there are multiple drivers available.\nThis is the name of a driver class that is located in the driver directory's jar files.";
 		Label driverLabel;
@@ -466,10 +483,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		Label separator4 = new Label(advancedSettingsComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 
-		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" +
-			"\"exception validation\" - will consider a connection invalid if it's getException() returns non-null.\n" +
-			"\"meta data validation\" - will consider a connection invalid if fetching database metadata fails.\n" +
-			"\"query validation\" - will consider a connection valid as long as it is able to run the given query scucessfully.";
+		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" + "\"" +
+			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION) +
+			"\" - will consider a connection invalid if it's getException() returns non-null.\n" + "\"" +
+			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION) +
+			"\" - will consider a connection invalid if fetching database metadata fails.\n" + "\"" +
+			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION) +
+			"\" - will consider a connection valid as long as it is able to run the given query scucessfully.\n" + "\"" +
+			ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION) +
+			"\" - use the connection validation mechanism of the JDBC driver.";
 
 		Label validationTypeLabel;
 		validationTypeLabel = new Label(advancedSettingsComposite, SWT.LEFT);
@@ -480,7 +502,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		validationTypeField.setToolTipText(toolTip);
 		validationTypeField.setVisibleItemCount(UIUtils.COMBO_VISIBLE_ITEM_COUNT);
 
-		toolTip = "If validation type is set to \"query validation\", then this is the query that must run successfully in order for the connection to be considered valid.";
+		toolTip = "If validation type is set to \"" + ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION) +
+			"\", then this is the query that must run successfully in order for the connection to be considered valid.";
 		Label validationQueryLabel;
 		validationQueryLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		validationQueryLabel.setText("Connection Validation Query");
@@ -1040,13 +1063,27 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		}
 
-		serverConfigObservable = new ImmutableObjectObservable<ServerConfig>(serverConfig,
-			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, boolean.class, boolean.class, int.class, String.class },
-			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "prefixTables", "queryProcedures", "idleTimeout", "dialectClass" });
+		serverConfigObservable = new ImmutableObjectObservable<ServerConfig>(serverConfig, new Class[] { //
+			String.class, String.class, String.class, String.class, Map.class, //
+			String.class, String.class, String.class, int.class, int.class, //
+			int.class, int.class, String.class, String.class, boolean.class, //
+			boolean.class, boolean.class, boolean.class, int.class, Integer.class, //
+			String.class //
+		}, new String[] { //
+			"serverName", "userName", "password", "serverUrl", "connectionProperties", //
+			"driver", "catalog", "schema", "maxActive", "maxIdle", //
+			"maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", //
+			"skipSysTables", "prefixTables", "queryProcedures", "idleTimeout", "selectINValueCountLimit", //
+			"dialectClass" });
+
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
-		if (serverInput.getIsNew()) flagModified();
+		if (serverInput.getIsNew())
+
+			flagModified();
+
 		updateTitle();
+
 	}
 
 	protected void updateTitle()
@@ -1212,6 +1249,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_EXCEPTION_VALIDATION));
 		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_METADATA_VALIDATION));
 		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION));
+		validationTypeField.add(ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION));
 
 		dataModel_cloneFromField.removeAll();
 		dataModel_cloneFromField.add(ServerConfig.NONE);
@@ -1343,10 +1381,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 					type = ServerConfig.CONNECTION_METADATA_VALIDATION;
 					validationQueryField.setEnabled(false);
 				}
-				if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(validationType))
+				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(validationType))
 				{
 					type = ServerConfig.CONNECTION_QUERY_VALIDATION;
 					validationQueryField.setEnabled(true);
+				}
+				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION).equals(validationType))
+				{
+					type = ServerConfig.CONNECTION_DRIVER_VALIDATION;
+					validationQueryField.setEnabled(false);
 				}
 				serverConfigObservable.setPropertyValue("connectionValidationType", new Integer(type));
 			}
@@ -1423,6 +1466,10 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		if (ServerConfig.class.equals(adapter))
 		{
 			return serverConfigObservable.getObject();
+		}
+		if (adapter.equals(IContextProvider.class))
+		{
+			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.server_editor");
 		}
 		return super.getAdapter(adapter);
 	}

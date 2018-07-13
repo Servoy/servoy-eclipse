@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.gef.commands.CompoundCommand;
@@ -36,6 +37,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Debug;
 
@@ -81,14 +83,26 @@ public class SpacingCentersPack implements IServerService
 							return;
 						}
 					}
+					switch (methodName)
+					{
+						case "vertical_centers" :
+						case "vertical_pack" :
+						case "vertical_spacing" :
+							Collections.sort(elements, PositionComparator.YX_BOUNDS_COMPARATOR);
+							break;
+						case "horizontal_centers" :
+						case "horizontal_pack" :
+						case "horizontal_spacing" :
+							Collections.sort(elements, PositionComparator.XY_BOUNDS_COMPARATOR);
+					}
 					List<Point> deltas = FormXYLayoutPolicy.getDistributeChildrenDeltas(elements, Distribution.valueOf(methodName.toUpperCase()));
 					CompoundCommand cc = new CompoundCommand();
-					for (int i = 0; i < selection.length; i++)
+					for (int i = 0; i < elements.size(); i++)
 					{
-						Point newLocation = new Point(((ISupportBounds)selection[i].getPersist()).getLocation());
+						Point newLocation = new Point((elements.get(i)).getLocation());
 						newLocation.x += deltas.get(i).x;
 						newLocation.y += deltas.get(i).y;
-						cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(selection[i], false),
+						cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource((IPersist)elements.get(i), false),
 							StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), newLocation));
 					}
 					editorPart.getCommandStack().execute(cc);

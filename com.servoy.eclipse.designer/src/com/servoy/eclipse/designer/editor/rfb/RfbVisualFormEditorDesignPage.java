@@ -45,6 +45,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.IPage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.json.JSONObject;
 import org.sablo.eventthread.WebsocketSessionWindows;
@@ -63,6 +64,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -70,11 +72,13 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
@@ -140,6 +144,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	private String layout = null;
 	private String editorId = null;
 	private String clientId = null;
+	private AbstractContainer showedContainer;
 
 	private final PartListener partListener = new PartListener();
 
@@ -243,6 +248,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	private String computeLayout(Form form)
 	{
 		if (form.isResponsiveLayout()) return "flow";
+		if (form.getUseCssPosition()) return "csspos";
 		else return "absolute";
 	}
 
@@ -257,7 +263,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			Dimension formSize = flattenedForm.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
-				"&editorid=" + editorId + "&c_sessionid=" + clientId;
+				"&editorid=" + editorId + "&c_sessionid=" + clientId + (showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
 			final Runnable runnable = new Runnable()
 			{
 				public void run()
@@ -535,6 +541,33 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh", new Object[] { });
 			}
 		});
+	}
+
+	public void showContainer(AbstractContainer container)
+	{
+		this.showedContainer = container;
+		refreshBrowserUrl(true);
+		if (DesignerUtil.getContentOutline() != null)
+		{
+			IPage outline = DesignerUtil.getContentOutline().getCurrentPage();
+			if (outline instanceof FormOutlinePage)
+			{
+				((FormOutlinePage)outline).refresh();
+			}
+		}
+		if (showedContainer instanceof LayoutContainer)
+		{
+			editorPart.setContentDescription("Showing container: " + DesignerUtil.getLayoutContainerAsString((LayoutContainer)showedContainer));
+		}
+		else
+		{
+			editorPart.setContentDescription("");
+		}
+	}
+
+	public AbstractContainer getShowedContainer()
+	{
+		return showedContainer;
 	}
 
 	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener

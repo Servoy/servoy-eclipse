@@ -17,10 +17,14 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -57,6 +61,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -113,6 +119,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -335,6 +342,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						form.setView(IFormConstants.VIEW_TYPE_TABLE_LOCKED);
 						ElementFactory.addFormListItems(form, null, null);
 					}
+					if (newFormWizardPage.isCSSPosition())
+					{
+						form.setUseCssPosition(Boolean.TRUE);
+					}
 				}
 				else
 				{
@@ -352,6 +363,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				form.setName(newFormWizardPage.getFormName());
 				form.setDataSource(dataSource);
 				form.setStyleName(style == null ? null : style.getName());
+			}
+			if (form.isFormComponent().booleanValue() && servoyProject.getEditingSolution().getFirstFormID() == form.getID())
+			{
+				servoyProject.getEditingSolution().setFirstFormID(0);
 			}
 
 			if (servoyProject.getSolution().getSolutionType() == SolutionMetaData.MOBILE)
@@ -392,6 +407,25 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
+
+			if (superForm != null)
+			{
+				String parentWorkingSet = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getContainingWorkingSet(
+					superForm.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
+				if (parentWorkingSet != null)
+				{
+					IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(parentWorkingSet);
+					if (ws != null)
+					{
+						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+						Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
+						IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+						files.add(file);
+						ws.setElements(files.toArray(new IAdaptable[0]));
+					}
+				}
+			}
+
 
 			if (servoyModel.getActiveResourcesProject() != null)
 			{
@@ -457,7 +491,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		private Button listFormCheck;
 
-		private Button bTypeAbstract, bTypeAnchored, bTypeResponsive;
+		private Button bTypeAbstract, bTypeAnchored, bTypeResponsive, bTypeCSSPosition;
 
 		/**
 		 * Creates a new form creation wizard page.
@@ -495,6 +529,19 @@ public class NewFormWizard extends Wizard implements INewWizard
 			this(pageName);
 			IDialogSettings settings = NewFormWizard.this.getDialogSettings();
 			settings.put("datasource", tableWrapper == null ? null : tableWrapper.getDataSource());
+		}
+
+		@Override
+		public void performHelp()
+		{
+			boolean focusNameField = formNameField.isFocusControl();
+			if (isReferenceForm()) PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_formcomponent");
+			else PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_form");
+			if (focusNameField)
+			{
+				formNameField.setFocus();
+				formNameField.selectAll();
+			}
 		}
 
 		private IDataSourceWrapper getTableWrapper()
@@ -576,6 +623,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 		public boolean isAbstractForm()
 		{
 			return bTypeAbstract != null && bTypeAbstract.getSelection();
+		}
+
+		public boolean isCSSPosition()
+		{
+			return bTypeCSSPosition != null && bTypeCSSPosition.getSelection();
 		}
 
 		/**
@@ -787,6 +839,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 				bTypeAnchored.setText("Anchored");
 				bTypeAnchored.addSelectionListener(typeSelectionListener);
 				bTypeAnchored.setSelection(true);
+				bTypeCSSPosition = new Button(grpType, SWT.RADIO);
+				bTypeCSSPosition.setText("CSS Position");
+				bTypeCSSPosition.addSelectionListener(typeSelectionListener);
 				bTypeResponsive = new Button(grpType, SWT.RADIO);
 				bTypeResponsive.setText("Responsive");
 				bTypeResponsive.addSelectionListener(typeSelectionListener);
@@ -887,6 +942,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				fillStyleCombo();
 				fillTemplateCombo(superForm == null ? settings.get("templatename") : null);
 				fillProjectCombo();
+				if (superForm != null)
+				{
+					handleExtendsFormChanged();
+				}
 
 				formNameField.setFocus();
 				formNameField.selectAll();
@@ -1034,6 +1093,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						if (superForm.isResponsiveLayout())
 						{
 							setTypeButtonSelection(bTypeResponsive);
+						}
+						else if (superForm.getUseCssPosition())
+						{
+							setTypeButtonSelection(bTypeCSSPosition);
 						}
 						else
 						{
@@ -1201,6 +1264,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			bTypeAbstract.setSelection(bTypeAbstract == b);
 			bTypeAnchored.setSelection(bTypeAnchored == b);
 			bTypeResponsive.setSelection(bTypeResponsive == b);
+			bTypeCSSPosition.setSelection(bTypeCSSPosition == b);
 		}
 
 		private void setTypeButtonsEnabled(boolean enabled)
@@ -1208,6 +1272,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			bTypeAbstract.setEnabled(enabled);
 			bTypeAnchored.setEnabled(enabled);
 			bTypeResponsive.setEnabled(enabled);
+			bTypeCSSPosition.setEnabled(enabled);
 		}
 
 		private void setFormName(String text)
@@ -1283,6 +1348,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 			super(pageName);
 			setTitle("Add data providers");
 			setDescription(getTitle());
+		}
+
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_form_dataproviders");
 		}
 
 		/**

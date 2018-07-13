@@ -65,6 +65,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private ComboViewer encapsulationTypeCombo;
 	private Spinner waitForSolutionToBeLoadedInTestClientSpinner;
 	private Button useDarkIconsButton;
+	private Button jsValidationButton;
 
 	public void init(IWorkbench workbench)
 	{
@@ -177,6 +178,21 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		useDarkIconsButton.setText("Use dark theme icons (restart required)");
 
 
+		// JS Validation
+		Group jsValidationOptionsContainer = new Group(rootContainer, SWT.NONE);
+		jsValidationOptionsContainer.setText("Javascript validation");
+		jsValidationOptionsContainer.setLayout(new GridLayout(1, false));
+		jsValidationOptionsContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		jsValidationButton = new Button(jsValidationOptionsContainer, SWT.CHECK);
+		jsValidationButton.setText("Shallow parsing of related javascript files (relies on @return JSDoc values)");
+		jsValidationButton.setToolTipText("Enable this when you want to go around the limitiation of Servoy only parsing 3 level deep into scripting.\n" +
+			"This can also enhance the build time because a lot less parsing needs to be done.\n" +
+			"You need to document the @return for all methods and make sure constructor functions do have @constructor.\n" +
+			"This is because the return value of a function is not inferenced from the parsing of the body.\n" +
+			"All related javascript files (scopes/forms) are not fully parsed, only the function declarations and @constructor functions bodies");
+
+
 		Group launcherSettings = new Group(rootContainer, SWT.NONE); // TODO it would really be nicer to have these in a real launch configuration page (similar to what mobile client lauchers do)
 		launcherSettings.setText("Launcher settings");
 		launcherSettings.setLayout(new GridLayout(3, false));
@@ -216,6 +232,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
+		jsValidationButton.setSelection(prefs.skipFunctionBodyWhenParsingJS());
 		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
 	}
 
@@ -233,6 +250,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
 		useDarkIconsButton.setSelection(IconPreferences.USE_DARK_THEME_ICONS_DEFAULT);
+		jsValidationButton.setSelection(DesignerPreferences.SKIP_FUNCTION_BODY_PARSING_DEFAULT);
 		super.performDefaults();
 	}
 
@@ -252,6 +270,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setEncapsulationType(
 			((Integer)((ObjectWrapper)((IStructuredSelection)encapsulationTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
+		prefs.setSkipFunctionBodyWhenParsingJS(jsValidationButton.getSelection());
 		prefs.save();
 
 		IconPreferences iconPreferences = IconPreferences.getInstance();

@@ -62,6 +62,8 @@ import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
@@ -77,6 +79,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.types.StyleClassPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
@@ -149,6 +152,7 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
@@ -178,6 +182,7 @@ import com.servoy.j2db.ui.runtime.HasRuntimeDesignTimeProperty;
 import com.servoy.j2db.ui.runtime.HasRuntimeElementType;
 import com.servoy.j2db.ui.runtime.HasRuntimeFormName;
 import com.servoy.j2db.ui.runtime.HasRuntimeName;
+import com.servoy.j2db.ui.runtime.HasRuntimeStyleClass;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -813,7 +818,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String suffix = name.substring(name.lastIndexOf("."));
 			if (suffix.toLowerCase().endsWith("js"))
 			{
-				return uiActivator.loadImageFromBundle("js.png");
+				return uiActivator.loadImageFromBundle("js_file.png");
 			}
 			if (suffix.toLowerCase().endsWith("css"))
 			{
@@ -1095,12 +1100,18 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				Collections.sort(tableNames);
 
 				List<String> hiddenTables = null;
+				List<String> metadataTables = null;
 				for (String tableName : tableNames)
 				{
 					if (s.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (hiddenTables == null) hiddenTables = new ArrayList<String>();
 						hiddenTables.add(tableName);
+					}
+					else if (s.getTable(tableName).isMarkedAsMetaData())
+					{
+						if (metadataTables == null) metadataTables = new ArrayList<String>();
+						metadataTables.add(tableName);
 					}
 					else
 					{
@@ -1111,6 +1122,27 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						UserNode node = new UserNode(tableName, type, new DataSourceFeedback(dataSource), DataSourceWrapperFactory.getWrapper(dataSource),
 							uiActivator.loadImageFromBundle("table.png"));
 						node.setClientSupport(ClientSupport.All);
+						dlm.add(node);
+					}
+				}
+				if (metadataTables != null)
+				{
+					for (String name : metadataTables)
+					{
+						String dataSource = s.getTable(name).getDataSource();
+
+						Image image = uiActivator.loadImageFromBundle("metadata_table.png");
+						if (image == null)
+						{
+							//we don't have a metadata icon, for now we add some decorator over the existing table icon
+							image = uiActivator.loadImageFromBundle("table.png");
+							image = new DecorationOverlayIcon(image,
+								com.servoy.eclipse.ui.Activator.loadDefaultImageDescriptorFromBundle("layout_decorator.png"),
+								IDecoration.TOP_LEFT).createImage();
+							uiActivator.putImageInCache("metadata_table.png", image);
+						}
+						UserNode node = new UserNode(name, type, new DataSourceFeedback(dataSource, true), DataSourceWrapperFactory.getWrapper(dataSource),
+							image);
 						dlm.add(node);
 					}
 				}
@@ -1142,7 +1174,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		try
 		{
 			List<Procedure> procedures = new ArrayList<>(((IServer)s).getProcedures());
-			//Collections.sort(procedures);
+			Collections.sort(procedures, new Comparator<Procedure>()
+			{
+				@Override
+				public int compare(Procedure o1, Procedure o2)
+				{
+					return NameComparator.INSTANCE.compare(o1.getName(), o2.getName());
+				}
+			});
 
 			for (Procedure procedure : procedures)
 			{
@@ -2093,6 +2132,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			return null;
 		}
 		List<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+		SortedList<SimpleUserNode> sortedApis = new SortedList<SimpleUserNode>(NameComparator.INSTANCE);
 
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(webcomponent);
 
@@ -2102,7 +2142,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			extractApiDocs(spec);
 
 			Map<String, PropertyDescription> properties = spec.getProperties();
-			for (PropertyDescription pd : properties.values())
+			SortedList<PropertyDescription> sortedProperties = new SortedList<PropertyDescription>(new Comparator<PropertyDescription>()
+			{
+
+				@Override
+				public int compare(PropertyDescription o1, PropertyDescription o2)
+				{
+					return o1.getName().toString().compareToIgnoreCase(o2.getName().toString());
+				}
+			}, properties.values());
+			for (PropertyDescription pd : sortedProperties)
 			{
 				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
 
@@ -2167,14 +2216,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 				}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
 
-				nodes.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
+				sortedApis.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
+			}
+			if (spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
+				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0)
+			{
+				sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeStyleClass.class));
 			}
 		}
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeName.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeElementType.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeDesignTimeProperty.class));
-		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeClientProperty.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeName.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeElementType.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeDesignTimeProperty.class));
+		sortedApis.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeClientProperty.class));
+		nodes.addAll(sortedApis);
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 
 	}
@@ -2352,6 +2407,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private static class DataSourceFeedback implements IDeveloperFeedback
 	{
 		private final String dataSource;
+		private boolean isMetadata = false;
 
 		/**
 		 * @param name
@@ -2360,6 +2416,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		public DataSourceFeedback(String dataSource)
 		{
 			this.dataSource = dataSource;
+		}
+
+		public DataSourceFeedback(String datasource, boolean isMetadata)
+		{
+			this(datasource);
+			this.isMetadata = isMetadata;
 		}
 
 		public String getSample()
@@ -2374,7 +2436,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getToolTipText()
 		{
-			return "<pre>Table with datasource: '<b>" + getCode() + "\'</b><pre";
+			return "<pre>" + (isMetadata ? "Metadata table " : "Table") + " with datasource: '<b>" + getCode() + "\'</b><pre";
 		}
 
 	}
@@ -2801,9 +2863,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 */
 		public String getSample()
 		{
-			String sample = null;
 			if (scriptObject != null)
 			{
+				String sample = null;
 				if (scriptObject instanceof XMLScriptObjectAdapter)
 				{
 					sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name,
@@ -2814,8 +2876,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					sample = scriptObject.getSample(name);
 				}
 				sample = Text.processTags(sample, resolver);
+				return HtmlUtils.escapeMarkup(sample).toString();
 			}
-			return HtmlUtils.escapeMarkup(sample).toString();
+			return null;
 		}
 
 		/**

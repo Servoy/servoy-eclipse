@@ -68,11 +68,6 @@ public class DeleteInMemTableAction extends AbstractInMemTableAction implements 
 		return MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?");
 	}
 
-	@Override
-	protected void updateReferencesIfNeeded()
-	{
-	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -85,7 +80,7 @@ public class DeleteInMemTableAction extends AbstractInMemTableAction implements 
 	}
 
 	@Override
-	protected void refreshEditor(final ITable table)
+	protected void refreshEditor(final IServer server, final ITable table)
 	{
 		// EditorUtil.closeEditor(table) needs to be run in an UI thread
 		if (Display.getCurrent() != null)

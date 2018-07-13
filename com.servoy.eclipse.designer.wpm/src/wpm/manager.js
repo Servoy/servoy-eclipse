@@ -267,7 +267,7 @@ angular.module('app', ['ngMaterial'])
 			  
 		  $scope.getReleaseTooltip = function(index) {
 			    if ($scope.packages[index].installed) { 
-			      return "Version to upgrade to...";
+						return $scope.packages[index].installedIsWPA ? "Version to upgrade to..." : "Released versions";
 			    } else {
 			      return "Version to add to the active solution or modules...";
 			    }
@@ -307,7 +307,7 @@ angular.module('app', ['ngMaterial'])
 
 		  /* return true if install or update is available */
 		  $scope.installAvailable = function (index) {
-		  	return !$scope.packages[index].installed || (!$scope.isLatestRelease(index) && $scope.packages[index].selected > $scope.packages[index].installed);
+		  	return !$scope.packages[index].installed || ($scope.packages[index].installedIsWPA && !$scope.isLatestRelease(index) && $scope.packages[index].selected > $scope.packages[index].installed);
 		  }
 
 		  /* return true if there is installing or removing is pending */

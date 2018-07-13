@@ -60,6 +60,17 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 		super.incoming(msg, lastPart);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint#onStart()
+	 */
+	@Override
+	public void onStart()
+	{
+		// ignore
+	}
+
 	@Override
 	@OnClose
 	public void onClose(CloseReason closeReason)

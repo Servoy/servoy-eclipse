@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.j2db.util.Utils;
@@ -83,5 +84,11 @@ public class PasswordPage extends WizardPage implements Listener
 	public void requestPasswordFieldFocus()
 	{
 		passwordText.setFocus();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.export_solution_password");
 	}
 }

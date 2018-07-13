@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="8.3.0.3200_b1"
+      version="8.4.0.3400_b1"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -11,7 +11,7 @@
    </description>
 
    <copyright url="http://download.servoy.com/developer/copyright.html">
-      Copyright © 1997-2017 Servoy BV. All rights reserved.
+      Copyright © 1997-2018 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 This computer program is protected by copyright law and international
 treaties.
@@ -107,168 +107,168 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="com.servoy.eclipse.core"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.debug"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.jsunit"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.profiler"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="j2db_documentation"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="j2db_tunnel"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="j2db_runtime"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="j2db_server"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="servoy_debug"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="servoy_headless_client"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="servoy_shared"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="servoy_smart_client"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.solution"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.war"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.extension.compatibility"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="servoy_base"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.exporter.mobile"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rfb"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.rib"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.model.exporter.mobile"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
@@ -282,14 +282,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="sablo"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="servoy_ngclient"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
@@ -317,7 +317,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.io"
          download-size="0"
          install-size="0"
-         version="2.4.0"
+         version="2.6.0"
          unpack="false"/>
 
    <plugin
@@ -331,7 +331,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.jsoup"
          download-size="0"
          install-size="0"
-         version="1.9.2"
+         version="1.11.3"
          unpack="false"/>
 
    <plugin
@@ -359,21 +359,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.collections"
          download-size="0"
          install-size="0"
-         version="3.2.2"
+         version="4.1.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.dbcp2"
          download-size="0"
          install-size="0"
-         version="2.1.1"
+         version="2.3.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.pool2"
          download-size="0"
          install-size="0"
-         version="2.4.2"
+         version="2.5.0"
          unpack="false"/>
 
    <plugin
@@ -408,7 +408,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.equinox.concurrent"
          download-size="0"
          install-size="0"
-         version="1.1.0.v20130327-1442"
+         version="1.1.100.v20171221-2204"
          unpack="false"/>
 
    <plugin
@@ -422,14 +422,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="jabsorb"
          download-size="0"
          install-size="0"
-         version="1.3.0.s2"
+         version="1.3.3"
          unpack="false"/>
 
    <plugin
          id="commons-lang3"
          download-size="0"
          install-size="0"
-         version="3.1.0"
+         version="3.7.0"
          unpack="false"/>
 
    <plugin
@@ -443,64 +443,42 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.slf4j.api"
          download-size="0"
          install-size="0"
-         version="1.7.2.v20121108-1250"
+         version="1.8.0_beta0"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.designer.wpm"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200_b1"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="5.0.1.v201404251740"
+         version="6.2.0"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="5.0.1.v201404251740"
+         version="6.2.0"
          unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.notification"
          download-size="0"
          install-size="0"
-         version="8.3.0.3200"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.logging.log4j.api"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.logging.log4j.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.logging.log4j.slf4j-impl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
+         version="8.4.0.3400_b1"
          unpack="false"/>
 
 </feature>

@@ -16,9 +16,6 @@
  */
 package com.servoy.eclipse.designer.outline;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.swt.SWT;
@@ -26,6 +23,9 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.designer.util.DeveloperUtils;
 import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.Activator;
@@ -34,7 +34,9 @@ import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SupportNameLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -104,29 +106,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 			}
 			if (((PersistContext)element).getPersist() instanceof LayoutContainer)
 			{
-				LayoutContainer layout = (LayoutContainer)((PersistContext)element).getPersist();
-				StringBuilder tag = new StringBuilder("<");
-				tag.append(layout.getTagType());
-				Map<String, String> attributes = layout.getMergedAttributes();
-				for (Entry<String, String> entry : attributes.entrySet())
-				{
-					tag.append(" ");
-					tag.append(entry.getKey());
-					if (entry.getValue() != null && entry.getValue().length() > 0)
-					{
-						tag.append("=\"");
-						tag.append(entry.getValue());
-						tag.append("\"");
-					}
-				}
-				tag.append(">");
-				if (layout.getName() != null)
-				{
-					tag.append("[");
-					tag.append(layout.getName());
-					tag.append("]");
-				}
-				return tag.toString();
+				return DesignerUtil.getLayoutContainerAsString((LayoutContainer)((PersistContext)element).getPersist());
 			}
 			if (((PersistContext)element).getPersist() instanceof WebCustomType)
 			{
@@ -165,6 +145,44 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 		{
 			// inherited elements
 			return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
+		}
+		if (element instanceof PersistContext)
+		{
+			BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
+			if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
+			{
+				AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
+				if (container != null)
+				{
+					IPersist currentPersist = ((PersistContext)element).getPersist();
+					if (container == currentPersist)
+					{
+						return Display.getCurrent().getSystemColor(SWT.COLOR_BLUE);
+					}
+					if (container.getParent() == currentPersist.getParent())
+					{
+						return Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+					}
+					boolean isShowedContainer = false;
+					if (currentPersist instanceof IChildWebObject)
+					{
+						currentPersist = currentPersist.getParent();
+					}
+					while (currentPersist.getParent() instanceof LayoutContainer)
+					{
+						if (currentPersist.getParent() == container)
+						{
+							isShowedContainer = true;
+							break;
+						}
+						currentPersist = currentPersist.getParent();
+					}
+					if (!isShowedContainer)
+					{
+						return Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+					}
+				}
+			}
 		}
 		return null;
 	}

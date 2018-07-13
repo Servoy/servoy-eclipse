@@ -30,13 +30,16 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.DummyValidator;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManager;
 import com.servoy.j2db.persistence.ITable;
@@ -204,8 +207,19 @@ public class I18NServerTableDialog extends Dialog
 					// Create the table in the repository.
 					IValidateName validator = DummyValidator.INSTANCE;
 					table = server.createNewTable(validator, adjustedTableName);
-					Column column = table.createNewColumn(validator, "message_id", Types.INTEGER, 0, 0, false, true);
-					column.setSequenceType(ColumnInfo.SERVOY_SEQUENCE);
+					int defaultFirstColumnSequenceType = new DesignerPreferences().getPrimaryKeySequenceType();
+					if (defaultFirstColumnSequenceType == ColumnInfo.UUID_GENERATOR)
+					{
+						Column column = table.createNewColumn(validator, "message_id", IColumnTypes.TEXT, 36);
+						column.setDatabasePK(true);
+						column.setSequenceType(defaultFirstColumnSequenceType);
+						column.setFlag(IBaseColumn.UUID_COLUMN, true);
+					}
+					else
+					{
+						Column column = table.createNewColumn(validator, "message_id", Types.INTEGER, 0, 0, false, true);
+						column.setSequenceType(defaultFirstColumnSequenceType);
+					}
 					table.createNewColumn(validator, "message_key", Types.VARCHAR, 150, 0, false);
 					table.createNewColumn(validator, "message_language", Types.VARCHAR, 5, 0, true);
 					table.createNewColumn(validator, "message_value", Types.VARCHAR, 2000, 0, true);

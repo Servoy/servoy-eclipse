@@ -209,7 +209,7 @@ public class ServoyResourcesProject implements IProjectNature
 		{
 			return getFormNames(workingSetPersists.get(workingSetName), solutionNames);
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	private List<String> getFormNames(List<String> pathsList, String[] solutionNames)
@@ -238,7 +238,7 @@ public class ServoyResourcesProject implements IProjectNature
 			Collections.sort(formNames, NameComparator.INSTANCE);
 			return formNames;
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	public String getContainingWorkingSet(String formName, String[] solutionNames)

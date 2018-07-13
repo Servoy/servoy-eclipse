@@ -32,6 +32,7 @@ import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -74,12 +75,17 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 					state = false;
 				}
 			}
-			else if (!(sel instanceof Form) && !(sel instanceof ScriptMethod))
+			else if (!isEnabledFor(sel))
 			{
 				state = false;
 			}
 		}
 		setEnabled(state);
+	}
+
+	private boolean isEnabledFor(Object sel)
+	{
+		return (sel instanceof Form) || (sel instanceof ScriptMethod) || (sel instanceof ScriptVariable);
 	}
 
 	@Override

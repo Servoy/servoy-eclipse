@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
@@ -189,5 +190,11 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		exportModel.setOverwriteDeployedServoyProperties(false);
 		exportModel.setUserHome(null);
 
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_deploy_configuration");
 	}
 }

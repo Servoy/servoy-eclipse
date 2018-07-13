@@ -77,6 +77,7 @@ angular.module('editorContent',['servoyApp'])
       compScope.model = model;
       compScope.api = {};
       compScope.handlers = {};
+      compScope.svy_servoyApi = $rootScope.servoyApi;
       var el = $compile(html)(compScope);
       $rootScope.getDesignFormElement().append(el);
       return el;
@@ -154,6 +155,7 @@ angular.module('editorContent',['servoyApp'])
   $servoyInternal.connect();
   var formName = $webSocket.getURLParameter("f");
   var solutionName = $webSocket.getURLParameter("s");
+  var containerId = $webSocket.getURLParameter("cont");
   var formModelData = null;
   var formUrl = null;
   $rootScope.flushMain = function()
@@ -175,7 +177,7 @@ angular.module('editorContent',['servoyApp'])
         promise.then(function(data) {
           formModelData = JSON.parse(data);
           $editorContentService.formData(false, formModelData);
-          formUrl = "designertemplate/" + solutionName + "/" + formName + ".html?";
+          formUrl = "designertemplate/" + solutionName + "/" + formName + ".html?" + (containerId ? ("cont="+containerId):"") ;
         });
       } else {
         // this main url is in design (the template must have special markers)
@@ -328,7 +330,7 @@ angular.module('editorContent',['servoyApp'])
       return ret;
     }
     // dummy servoy api, ignore all calls
-  var servoyApi = {
+  $rootScope.servoyApi = {
     formWillShow: function(formname, relationname, formIndex) {},
     hideForm: function(formname, relationname, formIndex) {
       return null;
@@ -355,7 +357,7 @@ angular.module('editorContent',['servoyApp'])
 	}
   }
   $scope.servoyApi = function(name) {
-    return servoyApi;
+    return $rootScope.servoyApi;
   }
   $scope.layout = function(name) {
     var ret = layout[name];

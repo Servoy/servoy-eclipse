@@ -41,6 +41,7 @@ import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesig
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
@@ -55,6 +56,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.IContextProvider;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.Utils;
 
@@ -203,7 +205,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 			return DesignPagetype.Rfb;
 		}
 
-		if (form != null && (form.isResponsiveLayout() || (fs != null && hasWebComponents(fs.getFlattenedForm(form)))))
+		if (form != null && (form.getUseCssPosition() || form.isResponsiveLayout() || (fs != null && hasWebComponents(fs.getFlattenedForm(form)))))
 		{
 			return DesignPagetype.Rfb;
 		}
@@ -394,6 +396,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		if (!isMobile() && adapter.equals(CommandStack.class) && getActivePage() >= 0 && getControl(getActivePage()).equals(seceditor))
 		{
 			return dummyCommandStack;
+		}
+		if (adapter.equals(IContextProvider.class))
+		{
+			return new ViewPartHelpContextProvider("com.servoy.eclipse.ui.form_editor");
 		}
 		return super.getAdapter(adapter);
 	}

@@ -56,6 +56,7 @@ import org.eclipse.dltk.javascript.typeinfo.MetaType;
 import org.eclipse.dltk.javascript.typeinfo.TypeCache;
 import org.eclipse.dltk.javascript.typeinfo.TypeMemberQuery;
 import org.eclipse.dltk.javascript.typeinfo.TypeUtil;
+import org.eclipse.dltk.javascript.typeinfo.model.AnyType;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
@@ -97,6 +98,7 @@ import org.sablo.specification.property.types.FloatPropertyType;
 import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
+import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.base.persistence.IBaseColumn;
@@ -181,6 +183,7 @@ import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -642,6 +645,10 @@ public class TypeCreator extends TypeCache
 			{
 				property.setStatic(true);
 			}
+			if (field.getAnnotation(Deprecated.class) != null)
+			{
+				property.setDeprecated(true);
+			}
 			members.add(property);
 		}
 		for (java.lang.reflect.Method method : methods)
@@ -649,7 +656,10 @@ public class TypeCreator extends TypeCache
 			org.eclipse.dltk.javascript.typeinfo.model.Method m = TypeInfoModelFactory.eINSTANCE.createMethod();
 			m.setName(method.getName());
 			m.setType(getJSType(context, method.getReturnType()));
-
+			if (method.getAnnotation(Deprecated.class) != null)
+			{
+				m.setDeprecated(true);
+			}
 			EList<Parameter> parameters = m.getParameters();
 			Class< ? >[] parameterTypes = method.getParameterTypes();
 			for (int i = 0; i < parameterTypes.length; i++)
@@ -1184,7 +1194,26 @@ public class TypeCreator extends TypeCache
 		}
 		if (!fullTypeName.startsWith("WebService"))
 		{
-			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			boolean hasStyleclass = spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
+				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0;
+
+			Method method = null;
+			if (hasStyleclass)
+			{
+				method = TypeInfoModelFactory.eINSTANCE.createMethod();
+				method.setName("addStyleClass");
+				method.setDescription(
+					"Add a style class to styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.addStyleClass('mycssclass');" +
+						"</br></br>@param {String} style class to add");
+				EList<Parameter> parameters = method.getParameters();
+				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+				param.setType(getTypeRef(null, "String"));
+				param.setName("styleclass");
+				parameters.add(param);
+				members.add(method);
+			}
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName("getFormName");
 			method.setDescription("Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();" +
 				"</br></br><b>@return</b> The name of the form.");
@@ -1201,6 +1230,21 @@ public class TypeCreator extends TypeCache
 			method.setDescription("Returns the web component type from specification file</br></br>var elementType = elements.elem.getElementType();" +
 				"</br></br><b>@return</b> The web component spec type.");
 			members.add(method);
+
+			if (hasStyleclass)
+			{
+				method = TypeInfoModelFactory.eINSTANCE.createMethod();
+				method.setName("removeStyleClass");
+				method.setDescription(
+					"Remove a style class (if already present) from styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.removeStyleClass('mycssclass');" +
+						"</br></br>@param {String} style class to remove");
+				EList<Parameter> parameters = method.getParameters();
+				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+				param.setType(getTypeRef(null, "String"));
+				param.setName("styleclass");
+				parameters.add(param);
+				members.add(method);
+			}
 
 			method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName("putClientProperty");
@@ -2655,7 +2699,8 @@ public class TypeCreator extends TypeCache
 					{
 						// the special internal once (like clear() of related) should be also added
 						// because they should override the normal super JSFoundSet clear
-						overridden = TypeCreator.clone(member, member.getType());
+						// leave the type check in the clone, dont give member.getType() because that removes the type from this member
+						overridden = TypeCreator.clone(member, null);
 						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
 					}
 				}
@@ -3492,7 +3537,7 @@ public class TypeCreator extends TypeCache
 					{
 						try
 						{
-							for (String name : server.getTableAndViewNames(true))
+							for (String name : ((IServerInternal)server).getTableAndViewNames(true, true))
 							{
 								Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 								property.setName(name);
@@ -4449,6 +4494,10 @@ public class TypeCreator extends TypeCache
 				SimpleType typeRef = TypeInfoModelFactory.eINSTANCE.createSimpleType();
 				typeRef.setTarget(member.getDirectType());
 				clone.setType(typeRef);
+			}
+			else if (member.getType() instanceof AnyType)
+			{
+				clone.setType(TypeInfoModelFactory.eINSTANCE.createAnyType());
 			}
 		}
 		else

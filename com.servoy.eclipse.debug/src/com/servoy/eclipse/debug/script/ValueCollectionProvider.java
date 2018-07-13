@@ -55,6 +55,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.persistence.Form;
@@ -505,6 +506,9 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				Pair<Long, IValueCollection> pair = getFromScriptCache(file);
 				if (pair == null || pair.getLeft().longValue() != file.getModificationStamp())
 				{
+					DesignerPreferences dp = new DesignerPreferences();
+					boolean skipBody = dp.skipFunctionBodyWhenParsingJS();
+
 					Set<IFile> set = creatingCollection.get();
 					if (set.contains(file))
 					{
@@ -519,7 +523,9 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						if (set.size() == 0)
 						{
 							// and the scriptCache size is bigger then the default 300 or the system property
-							if (scriptCache.size() > MAX_SCRIPT_CACHE_SIZE)
+							int max = MAX_SCRIPT_CACHE_SIZE;
+							if (skipBody) max = max * 2;
+							if (scriptCache.size() > max)
 							{
 								// clear the cache to help the garbage collector.
 								scriptCache.clear();
@@ -528,16 +534,15 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						}
 					}
 					set.add(file);
-					boolean doResolve = false;
-					Boolean resolving = resolve.get();
-					if (resolving == null)
+					boolean doResolve = skipBody;
+					if (!skipBody && resolve.get() == null)
 					{
 						doResolve = true;
 						resolve.set(Boolean.TRUE);
 					}
 					try
 					{
-						collection = ValueCollectionFactory.createValueCollection(file, doResolve);
+						collection = ValueCollectionFactory.createValueCollection(file, doResolve, !skipBody);
 						collection = ValueCollectionFactory.makeImmutable(collection);
 						if (globalsFile)
 						{

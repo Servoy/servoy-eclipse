@@ -48,6 +48,7 @@
          <view
                id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
                relationship="stack"
+               visible="false"
                relative="com.servoy.eclipse.ui.views.SolutionExplorerView">
          </view>
       </perspectiveExtension>
@@ -1319,4 +1320,11 @@
 			itemAttribute="cheatsheetHyperlink">
 		</itemExtension>
 	</extension>
+ <extension
+       point="org.eclipse.help.contexts">
+    <contexts
+          file="help/contexts.xml"
+          plugin="com.servoy.eclipse.ui">
+    </contexts>
+ </extension>
 </plugin>

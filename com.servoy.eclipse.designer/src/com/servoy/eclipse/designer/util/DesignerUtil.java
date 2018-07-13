@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -39,6 +40,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -59,9 +61,11 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -317,12 +321,15 @@ public class DesignerUtil
 			@Override
 			public void add(String key, Set<String> values)
 			{
-				JSONArray ar = new JSONArray();
-				for (String child : values)
+				if (!values.isEmpty())
 				{
-					ar.put(child);
+					JSONArray ar = new JSONArray();
+					for (String child : values)
+					{
+						ar.put(child);
+					}
+					obj.put(key, ar);
 				}
-				obj.put(key, ar);
 			}
 		});
 		return obj;
@@ -330,74 +337,156 @@ public class DesignerUtil
 
 	private static void fillAllowedChildrenInternal(AllowChildrenMapFiller mapFiller)
 	{
+		// put "component" first if present and sort the others;
+		Comparator<String> comparator = new Comparator<String>()
+		{
+			@Override
+			public int compare(String o1, String o2)
+			{
+				String n1 = getDisplayName(o1);
+				String n2 = getDisplayName(o2);
+				boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n1);
+				boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n2);
+				if (co1 && co2) return 0;
+				else if (co1) return -1;
+				else if (co2) return 1;
+				else return n1.compareTo(n2);
+			}
+
+			private String getDisplayName(String name)
+			{
+				if (name.contains("*") || ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(name)) return ADD_COMPONENT_SUBMENU_ITEM_TEXT;
+				if (name.contains("."))
+				{
+					String[] parts = name.split("\\.");
+					PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(parts[0]);
+					if (pkg != null && parts.length > 0 && pkg.getSpecification(parts[1]) != null)
+					{
+						return pkg.getSpecification(parts[1]).getDisplayName();
+					}
+				}
+				return name;
+			}
+		};
 		Collection<PackageSpecification<WebLayoutSpecification>> packs = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values();
 		for (PackageSpecification<WebLayoutSpecification> pack : packs)
 		{
 			for (WebLayoutSpecification spec : pack.getSpecifications().values())
 			{
-				// put "component" first if present and sort the others;
-				Comparator<String> comparator = new Comparator<String>()
-				{
-					@Override
-					public int compare(String o1, String o2)
-					{
-						String n1 = getDisplayName(o1);
-						String n2 = getDisplayName(o2);
-						boolean co1 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n1);
-						boolean co2 = ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(n2);
-						if (co1 && co2) return 0;
-						else if (co1) return -1;
-						else if (co2) return 1;
-						else return n1.compareTo(n2);
-					}
-
-					private String getDisplayName(String name)
-					{
-						if (name.contains("*") || ADD_COMPONENT_SUBMENU_ITEM_TEXT.equals(name)) return ADD_COMPONENT_SUBMENU_ITEM_TEXT;
-						if (name.contains("."))
-						{
-							String[] parts = name.split("\\.");
-							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-								parts[0]);
-							if (pkg != null && parts.length > 0)
-							{
-								return pkg.getSpecification(parts[1]).getDisplayName();
-							}
-						}
-						return name;
-					}
-				};
 				List<String> excludedChildren = spec.getExcludedChildren();
+				List<String> specAllowedChildren = spec.getAllowedChildren();
 				Set<String> allowedChildren = new TreeSet<String>(comparator);
+				String packageName = pack.getPackageName();
 				if (excludedChildren == null || excludedChildren.isEmpty())
 				{
-					allowedChildren.addAll(spec.getAllowedChildren());
-				}
-				if (excludedChildren != null)
-				{
-					for (PackageSpecification<WebLayoutSpecification> pack2 : packs)
+					if (!specAllowedChildren.isEmpty())
 					{
-						String packageName = pack2.getPackageName();
-						for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
+						if (specAllowedChildren.contains("*"))//we allow all components and all layouts
 						{
-							// this can't be a filter. because also row can be a top level container and needs to be able to get into a column.
-//							if (layoutSpec.isTopContainer()) continue;
-							String layoutName = layoutSpec.getName();
+							for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
+							{
+								allowedChildren.add(packageName + "." + layoutSpec.getName());
+							}
+							allowedChildren.add("component");
+						}
+						else
+						{
+							//we iterate through all the layouts that we have and check if the layoutName matches the current allowedChildName
+							for (String allowedChild : specAllowedChildren)
+							{
+								if (allowedChild.equalsIgnoreCase("component") || allowedChild.endsWith(".*"))
+								{
+									//not sure what is the difference between "component" and something which ended in ".*", but in the old code we added "component" to the menu;
+									//so will keep it like that to avoid breaking existing packages that we are not aware of and use stuff ending in ".*"
+									allowedChildren.add("component");
+								}
+								else
+								{
+									for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
+									{
+										try
+										{
+											String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);
+											if (layoutName == null)
+											{
+												layoutName = layoutSpec.getName();
+											}
+											if (allowedChild.equals(layoutName) || allowedChild.equals(packageName + "." + layoutName))
+											{
+												allowedChildren.add(packageName + "." + layoutSpec.getName());
+											}
+										}
+										catch (JSONException e)
+										{
+											Debug.log(e);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (excludedChildren != null)
+				{
+					for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
+					{
+						// this can't be a filter. because also row can be a top level container and needs to be able to get into a column.
+//						if (layoutSpec.isTopContainer()) continue;
+						try
+						{
+							String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);
+							if (layoutName == null)
+							{
+								layoutName = layoutSpec.getName();
+							}
 							if (!excludedChildren.contains(layoutName) && !excludedChildren.contains(packageName + "." + layoutName))
 							{
-								allowedChildren.add(packageName + "." + layoutName);
+								allowedChildren.add(packageName + "." + layoutSpec.getName());
 							}
+						}
+						catch (JSONException e)
+						{
+							Debug.log(e);
 						}
 					}
 					if (!excludedChildren.contains("component")) allowedChildren.add("component");
 				}
 
-				if (allowedChildren.size() > 0)
+				if (allowedChildren.isEmpty() && excludedChildren == null && specAllowedChildren == null)
 				{
-					mapFiller.add(spec.getPackageName() + "." + spec.getName(), allowedChildren);
+					//add component if both excluded and allowed children are missing
+					allowedChildren.add("component");
 				}
+
+				mapFiller.add(spec.getPackageName() + "." + spec.getName(), allowedChildren);
 			}
 		}
+	}
+
+	public static String getLayoutContainerAsString(LayoutContainer layout)
+	{
+		StringBuilder tag = new StringBuilder("<");
+		tag.append(layout.getTagType());
+		Map<String, String> attributes = layout.getMergedAttributes();
+		for (Entry<String, String> entry : attributes.entrySet())
+		{
+			tag.append(" ");
+			tag.append(entry.getKey());
+			if (entry.getValue() != null && entry.getValue().length() > 0)
+			{
+				tag.append("=\"");
+				tag.append(entry.getValue());
+				tag.append("\"");
+			}
+		}
+		tag.append(">");
+		if (layout.getName() != null)
+		{
+			tag.append("[");
+			tag.append(layout.getName());
+			tag.append("]");
+		}
+		return tag.toString();
 	}
 
 	private interface AllowChildrenMapFiller

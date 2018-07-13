@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Extension Compatibility
 Bundle-SymbolicName: com.servoy.eclipse.extension.compatibility;singleton:=true
-Bundle-Version: 8.3.0.3200_b1
+Bundle-Version: 8.4.0.3400_b1
 Bundle-Vendor: Servoy
 Require-Bundle: servoy_shared,
  servoy_smart_client,
@@ -20,10 +20,11 @@ Require-Bundle: servoy_shared,
  org.apache.commons.pool2,
  j2db_server,
  org.apache.commons.codec,
- org.apache.commons.io,
+ org.apache.commons.io;bundle-version="2.6.0",
  org.apache.commons.collections
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: javax.servlet,
  javax.servlet.http
+Automatic-Module-Name: com.servoy.eclipse.extension.compatibility

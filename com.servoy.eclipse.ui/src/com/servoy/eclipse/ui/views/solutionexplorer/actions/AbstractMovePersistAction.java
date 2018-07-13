@@ -30,8 +30,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
@@ -64,6 +64,13 @@ public abstract class AbstractMovePersistAction extends AbstractPersistSelection
 		if ((activeModules.length - 1) == 0) setEnabled(false);
 	}
 
+	@Override
+	protected boolean isEnabledForNode(UserNodeType type)
+	{
+		return type == UserNodeType.RELATION || type == UserNodeType.VALUELIST_ITEM || type == UserNodeType.MEDIA_IMAGE || type == UserNodeType.FORM ||
+			type == UserNodeType.INMEMORY_DATASOURCE;
+	}
+
 	protected Location askForNewLocation(final IPersist persist, IValidateName nameValidator)
 	{
 		if (location == null)
@@ -82,8 +89,8 @@ public abstract class AbstractMovePersistAction extends AbstractPersistSelection
 			Collections.sort(modules);
 			String[] moduleNames = modules.toArray(new String[] { });
 			final OptionDialog optionDialog = new OptionDialog(shell, "Select destination module", null,
-				"Select module where to move " + persistString + " " + ((ISupportName)persist).getName(), MessageDialog.INFORMATION,
-				new String[] { "OK", "Cancel" }, 0, moduleNames, 0);
+				"Select module where to move " + persistString + " " + getName(persist), MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0,
+				moduleNames, 0);
 			int retval = optionDialog.open();
 			String selectedProject = null;
 			if (retval == Window.OK)
@@ -100,12 +107,12 @@ public abstract class AbstractMovePersistAction extends AbstractPersistSelection
 		{
 			try
 			{
-				nameValidator.checkName(((ISupportName)persist).getName(), persist.getID(), new ValidatorSearchContext(getPersistType()), false);
+				nameValidator.checkName(getName(persist), persist.getID(), new ValidatorSearchContext(getPersistType()), false);
 			}
 			catch (RepositoryException ex)
 			{
 				MessageDialog.openError(shell, persistString + " already exists",
-					persistString + " " + ((ISupportName)persist).getName() + " already exists, it won't be moved to another module");
+					persistString + " " + getName(persist) + " already exists, it won't be moved to another module");
 				return null;
 			}
 		}

@@ -71,13 +71,6 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 				editorScope.setSelection(node);
 			}
 
-			//set the focus on the target so that the editor area scrolls to that element
-			//this is also a workaround for IE bug: if the user clicks the editor area scroll bar then nothing else will ever gain focus
-			//=> keyboard arrows will just scroll instead of moving selected elements
-			var isThisFormGhost = editorScope.getGhost(event.target.getAttribute("svy-id"));
-			if (!isThisFormGhost || (isThisFormGhost.type !== EDITOR_CONSTANTS.GHOST_TYPE_FORM))
-				$(event.target).focus();
-
 		}
 
 		function onmousedown(event) {
@@ -432,7 +425,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM && !(angular.element(elements[elements.length - 2]).is("[svy-non-selectable]"))) {
 							return elements[elements.length - 2];
 						}
-						else {
+						else if (angular.element(elements[0]).is("[svy-non-selectable]")) {
 							nonSelectableNode = elements[elements.length - 2];
 						}
 						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
@@ -482,20 +475,23 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						}
 							
 						// always return the one on top (visible); this is due to formIndex implementation
+						var el = null;
 						for (var i=elements.length;--i;) {
 							if (!(angular.element(elements[i]).is("[svy-non-selectable]"))) {
-								if(returnNonSelectable && nonSelectableNode) {
-									return [elements[i], nonSelectableNode];
+								if (el == null || this.hasGreaterZIndex(elements[i], el))
+								{
+									el = elements[i];
 								}
-								else return elements[i];
+								if ($(el).hasClass("ghost")) break;//no need to continue, ghosts are always on top
 							}
 							else {
 								nonSelectableNode = elements[i];
 							}
 						}
+						return (returnNonSelectable && nonSelectableNode) ? [el, nonSelectableNode] : el;
 					}
 
-					return (returnNonSelectable && nonSelectableNodenull) ? [null, nonSelectableNode] : null;
+					return (returnNonSelectable && nonSelectableNode) ? [null, nonSelectableNode] : null;
 				},
 				
 				isUnknownElement: function(element) {
@@ -574,6 +570,26 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					var concat = matchedFromDoc.concat(matchedFromGlass);
 					return concat;
 				},
+				hasGreaterZIndex: function(e1, e2) {
+					//we are not interested in the z index if one is contained in the other
+					if (e1.contains(e2) || e2.contains(e1)) return false;
+					
+					//we will not search for the z-index property higher than the common parent
+					var limit = $(e1).parents().has(e2).first();					
+					return this.getZIndex($(e1), limit) > this.getZIndex($(e2), limit);					
+				},
+				getZIndex: function(el, limit) {
+					var zindex = el.css("z-index");
+					if (zindex !== "auto" && zindex !== "inherit" && zindex !== "initial")
+					{
+						return parseInt(zindex);
+					}
+					if (!el.parent()[0].isEqualNode(limit[0]))
+					{
+						return this.getZIndex(el.parent(), limit);
+					}
+					return -9999999;//Number.MIN_SAFE_INTEGER doesn't work in ie
+				}
 			}
 		}
 	}

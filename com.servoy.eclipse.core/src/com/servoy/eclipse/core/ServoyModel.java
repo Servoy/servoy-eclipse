@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -193,6 +194,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.shared.IWebClientSessionFactory;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
@@ -465,6 +467,11 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
 				{
+					if (getNGPackageManager() != null)
+					{
+						getNGPackageManager().clearReferencedNGPackageProjectsCache();
+						getNGPackageManager().reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.MODULES_UPDATED, null);
+					}
 					String[] moduleNames = Utils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
 					final ArrayList<ServoyProject> modulesToUpdate = new ArrayList<ServoyProject>();
 					final StringBuilder sbUpdateModuleNames = new StringBuilder();
@@ -2743,6 +2750,15 @@ public class ServoyModel extends AbstractServoyModel
 					{
 						changedScriptElements.add(persist);
 					}
+
+					if (persist instanceof TableNode)
+					{
+						String inMemTable = DataSourceUtils.getInmemDataSourceName(((TableNode)persist).getDataSource());
+						if (inMemTable != null)
+						{
+							servoyProject.getMemServer().loadTable((TableNode)persist);
+						}
+					}
 				}
 				return SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(persist) ? IPersistVisitor.CONTINUE_TRAVERSAL
 					: IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
@@ -2873,6 +2889,7 @@ public class ServoyModel extends AbstractServoyModel
 					// deleted persist
 					// delete the persist from the real solution
 					child.getParent().removeChild(child);
+
 					// push the delete to the editing solution
 					IPersist editingPersist = servoyProject.updateEditingPersist(child, false);
 
@@ -2880,6 +2897,20 @@ public class ServoyModel extends AbstractServoyModel
 					if (editingPersist != null)
 					{
 						changedEditing.put(child.getUUID(), editingPersist);
+					}
+					if (child instanceof TableNode)
+					{
+						if (((TableNode)child).getColumns() != null)
+						{
+							try
+							{
+								servoyProject.getMemServer().removeTable(((TableNode)child).getTableName());
+							}
+							catch (SQLException e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
 					}
 				}
 			}

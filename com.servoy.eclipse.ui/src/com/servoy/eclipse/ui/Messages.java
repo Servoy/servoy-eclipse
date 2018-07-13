@@ -202,6 +202,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_valuelistRelationSequenceInconsistent;
 	public static String ErrorWarningPreferencePage_valuelistCustomValuesWithDBInfo;
 	public static String ErrorWarningPreferencePage_valuelistInvalidCustomValues;
+	public static String ErrorWarningPreferencePage_valuelistDataproviderTypeMismatch;
 	public static String ErrorWarningPreferencePage_propertyMultipleMethodsOnSameTable;
 	public static String ErrorWarningPreferencePage_serverMissingDriver;
 	public static String ErrorWarningPreferencePage_dataproviderMissingConverter;
@@ -276,6 +277,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_imageMediaNotSet;
 	public static String ErrorWarningPreferencePage_methodNumberOfArgsMismatch;
 	public static String ErrorWarningPreferencePage_rolloverImageAndCursorNotWorking;
+	public static String ErrorWarningPreferencePage_methodOverrideProblem;
 
 	static
 	{

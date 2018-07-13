@@ -76,6 +76,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							    
 			var formName = $webSocket.getURLParameter("f");
 			var formLayout = $webSocket.getURLParameter("l");
+			var cssPosition = $webSocket.getURLParameter("p");
 			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
 			var formHeight = parseInt($webSocket.getURLParameter("h"), 10);
 			var editorContentRootScope = null;
@@ -688,7 +689,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.isAbsoluteFormLayout = function() {
-				return formLayout == "absolute";
+				return (formLayout == "absolute" || formLayout == "csspos");
+			}
+			
+			$scope.isCSSPositionFormLayout = function() {
+				return formLayout == "csspos";
 			}
 			
 			$scope.refreshEditorContent = function() {
@@ -747,6 +752,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				delete $scope.contentStyle.right;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
+				// we need to apply the changes to dom earlier in order to adjust the to the new size
+				$element.find('.content')[0].style.width = width + "px";
+				$element.find('.content')[0].style.right = "";
+				$element.find('.content')[0].style.minWidth = "";
 				adjustGlassPaneSize(width, height);
 				if (fixedSize)
 				{
@@ -1002,6 +1011,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							$editorService.keyPressed(objEvent);
 							return false;
 						}
+						// f4 open form hierarchy
+						if (fixedKeyEvent.keyCode == 115) {
+							// send the DELETE key code to the server
+							$editorService.keyPressed(objEvent);
+							return false;
+						}
 						return true;
 					});
 					$(document).keydown(function(objEvent) {
@@ -1137,9 +1152,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$editorService.registerEditor($scope);
 			$editorService.connect().then(function() {
 				var replacews = $webSocket.getURLParameter("replacewebsocket") ? "&replacewebsocket=true" : "";
+				var containerID =  $webSocket.getURLParameter("cont") ? ("&cont="+$webSocket.getURLParameter("cont")) : "";
 				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&sessionid=" + $webSocket.getURLParameter(
 						"c_sessionid") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
-					replacews;
+					replacews + containerID;
 			})
 			
 			function areAllGhostContainersVisible() {

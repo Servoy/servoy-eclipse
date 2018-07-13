@@ -144,6 +144,12 @@ public class FormContentProvider implements ITreeContentProvider
 			Job job = new Job("Searching possible parent forms")
 			{
 				@Override
+				public boolean belongsTo(Object family)
+				{
+					return family == FilteredTreeViewer.CONTENT_LOADING_JOB_FAMILY;
+				}
+
+				@Override
 				protected IStatus run(IProgressMonitor monitor)
 				{
 					ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();

@@ -49,7 +49,6 @@ import org.eclipse.dltk.javascript.ast.SingleLineComment;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -139,7 +138,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
-public class I18NExternalizeDialog extends Dialog
+public class I18NExternalizeDialog extends HelpDialog
 {
 	private static final String PREFERENCE_KEY_SHOW_DB_MESSAGES = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.show_db_messages";
 	private static final String PREFERENCE_KEY_SHOW_EXTERNALIZED = "com.servoy.eclipse.ui.dialogs.I18NExternalizeDialog.show_externalized_messages";
@@ -209,6 +208,12 @@ public class I18NExternalizeDialog extends Dialog
 		isShowIgnoredMsg = PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_IGNORED);
 		isShowEmptyMsg = PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_EMPTY);
 		isShowOnlyEditedMsg = PlatformUI.getPreferenceStore().getBoolean(I18NExternalizeDialog.PREFERENCE_KEY_SHOW_ONLY_EDITED);
+	}
+
+	@Override
+	public String getHelpID()
+	{
+		return "com.servoy.eclipse.ui.i18nexternalize";
 	}
 
 	private ArrayList<ServoyProject> getI18NProjects()

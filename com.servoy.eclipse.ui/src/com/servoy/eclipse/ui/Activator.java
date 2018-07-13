@@ -306,39 +306,51 @@ public class Activator extends AbstractUIPlugin
 		return loadImageFromBundle(name, false);
 	}
 
-	public Image loadImageFromBundle(String name, boolean disabled)
+	public Image loadImageFromBundle(final String name, final boolean disabled)
 	{
-		String storeName = name;
+		final String storeName;
 		if (disabled)
 		{
 			storeName = name + "__DISABLED__";
 		}
+		else
+		{
+			storeName = name;
+		}
 		Image img = imageCacheBundle.get(storeName);
 		if (img == null)
 		{
-			if (disabled)
+			Display.getDefault().syncExec(new Runnable()
 			{
-				// first just load the normal image from the cache (or create and store it in the cache so it will be disposed)
-				img = loadImageFromBundle(name, false);
-				if (img != null)
+
+				@Override
+				public void run()
 				{
-					img = new Image(img.getDevice(), img, SWT.IMAGE_DISABLE);
-					imageCacheBundle.put(storeName, img);
-				}
-			}
-			else
-			{
-				ImageDescriptor id = Activator.loadImageDescriptorFromBundle(name);
-				if (id != null)
-				{
-					img = id.createImage();
-					if (img != null)
+					if (disabled)
 					{
-						imageCacheBundle.put(storeName, img);
+						// first just load the normal image from the cache (or create and store it in the cache so it will be disposed)
+						Image img = loadImageFromBundle(name, false);
+						if (img != null)
+						{
+							img = new Image(img.getDevice(), img, SWT.IMAGE_DISABLE);
+							imageCacheBundle.put(storeName, img);
+						}
+					}
+					else
+					{
+						ImageDescriptor id = Activator.loadImageDescriptorFromBundle(name);
+						if (id != null)
+						{
+							Image img = id.createImage();
+							if (img != null)
+							{
+								imageCacheBundle.put(storeName, img);
+							}
+						}
 					}
 				}
-
-			}
+			});
+			img = imageCacheBundle.get(storeName);
 		}
 		return img;
 	}

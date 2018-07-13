@@ -47,6 +47,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebObjectImpl;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -234,11 +235,26 @@ public class PersistCloner
 				if (clone instanceof ISupportUpdateableName)
 				{
 					((ISupportUpdateableName)clone).updateName(nameValidator, newPersistName);
+					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+					FlattenedSolution fs = servoyModel.getActiveProject().getEditingFlattenedSolution();
+					fs.flushAllCachedData(); //make sure the name caches are flushed from the active solution and modules
+					for (Solution mod : fs.getModules())
+					{
+						FlattenedSolution editingFlattenedSolution = servoyModel.getServoyProject(mod.getName()).getEditingFlattenedSolution();
+						if (editingFlattenedSolution.getForm(clone.getID()) != null)
+						{
+							editingFlattenedSolution.flushAllCachedData();
+						}
+					}
 				}
 				else if (clone instanceof Media)
 				{
 					((Media)clone).setName(newPersistName);
 					((Media)clone).setPermMediaData(((Media)persist).getMediaData());
+				}
+				else if (clone instanceof TableNode && DataSourceUtils.getInmemDataSourceName(((TableNode)clone).getDataSource()) != null)
+				{
+					((TableNode)clone).setDataSource(DataSourceUtils.createInmemDataSource(newPersistName));
 				}
 				clone.setRuntimeProperty(AbstractBase.NameChangeProperty, "");
 				return clone;

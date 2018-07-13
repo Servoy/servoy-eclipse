@@ -166,7 +166,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							if (type == 'component' || type == "layout" || type == "template") {
 								if (type == 'component') {
 									if ($scope.isAbsoluteFormLayout())
-									    angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>', model);
+									    angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-servoyApi=\'svy_servoyApi\' svy-autoapply-disabled=\'true\'/></div>', model);
 									else 
 									    angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>', model);
 								}

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.contexts"?>
+<contexts>
+	<context id="create_solution" title="New Solution Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_solution.html" label="Create Solution"/>
+	</context>
+ <context id="create_form" title="New Form Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_form.html" label="Create Form"/>
+ </context>
+  <context id="create_form_dataproviders" title="New Form Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_form_dataproviders.html" label="Select dataproviders"/>
+ </context>
+  <context id="create_formcomponent" title="New Form Component Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_formcomponent.html" label="Create Form Component"/>
+ </context>
+  <context id="create_relation" title="Relation Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_relation.html" label="Create/Edit Relation"/>
+ </context>
+   <context id="create_valuelist" title="ValueList Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/create_valuelist.html" label="Create/Edit Valuelist"/>
+ </context>
+   <context id="solution_explorer" title="Solution Explorer">
+    <topic href="https://servoy.github.io/servoy_documentation/84/solution_explorer.html" label="Solution Explorer"/>
+ </context>
+   <context id="form_hierarchy_view" title="Form Hierarchy Viewer">
+    <topic href="https://servoy.github.io/servoy_documentation/84/form_hierarchy_view.html" label="Form Hierarchy Viewer"/>
+ </context>
+  <context id="i18nexternalize" title="I18N Externalize Strings">
+    <topic href="https://servoy.github.io/servoy_documentation/84/i18nexternalize.html" label="I18N Externalize Strings"/>
+ </context>
+  <context id="i18n_editor" title="I18N Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/i18n_editor.html" label="I18n Editor"/>
+ </context>
+  <context id="table_editor" title="Table Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/table_editor.html" label="Table Editor"/>
+ </context>
+  <context id="server_editor" title="Server Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/server_editor.html" label="Server Editor"/>
+ </context>
+  <context id="security_editor" title="Security Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/security_editor.html" label="Security Editor"/>
+ </context>
+   <context id="form_editor" title="Form Editor">
+    <topic href="https://servoy.github.io/servoy_documentation/84/form_editor.html" label="Form Editor"/>
+ </context>
+
+   <context id="export_solution_module_selection" title="Module Selection">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_solution_module_selection.html" label="Module Selection"/>
+ </context>
+   <context id="export_solution_file_selection" title="File Selection">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_solution_file_selection.html" label="File Selection"/>
+ </context>
+    <context id="export_solution_confirmation" title="Export Confirmation">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_solution_confirmation.html" label="Export Confirmation"/>
+ </context> 
+   <context id="export_solution_export_options" title="Export Options">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_solution_export_options.html" label="Export Options"/>
+ </context>
+    <context id="export_solution_password" title="Password Options">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_solution_password.html" label="Password Options"/>
+ </context> 
+   <context id="export_solution_import_settings" title="Import Settings">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_solution_import_settings.html" label="Import Settings"/>
+ </context>
+    <context id="export_solution_deploy" title="Deploy Options">
+    <topic href="https://servoy.github.io/servoy_documentation/84/export_solution_deploy.html" label="Deploy Options"/>
+ </context> 
+ </contexts>

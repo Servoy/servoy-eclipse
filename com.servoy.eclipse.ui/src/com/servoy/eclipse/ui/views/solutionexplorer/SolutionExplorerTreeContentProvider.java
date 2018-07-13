@@ -70,6 +70,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.Package.ZipPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.SpecReloadSubject.ISpecReloadListener;
@@ -970,14 +971,19 @@ public class SolutionExplorerTreeContentProvider
 								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(
 									layout);
 								String folderName = getFolderNameFromSpec(spec);
-								if (!packageName.equals(folderName))
+								IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+								if (files.length == 1)
 								{
-									Image img = getIconFromSpec(spec, false);
-									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
-										img != null ? img : componentIcon);
-									node.parent = un;
-									children.add(node);
-									folderNames.add(folderName);
+									IFile f = files[0];
+									if (f.getProjectRelativePath().segmentCount() > 1)
+									{
+										Image img = getIconFromSpec(spec, false);
+										PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
+											img != null ? img : componentIcon);
+										node.parent = un;
+										children.add(node);
+										folderNames.add(folderName);
+									}
 								}
 							}
 						}
@@ -1090,7 +1096,7 @@ public class SolutionExplorerTreeContentProvider
 					else if (un.getType() == UserNodeType.COMPONENT || un.getType() == UserNodeType.SERVICE || un.getType() == UserNodeType.LAYOUT)
 					{
 						WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
-						IFolder folder = getFolderFromSpec((IProject)getResource((IPackageReader)un.parent.getRealObject()), spec);
+						IFolder folder = getFolderFromSpec(getResource((IPackageReader)un.parent.getRealObject()), spec);
 						if (folder != null)
 						{
 							searchFolderChildren(un, folder);
@@ -1167,7 +1173,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			if (res instanceof IFolder)
 			{
-				if (!folderNames.contains(res.getName())) folders.add(res);
+				if (!res.getName().startsWith(".") && !folderNames.contains(res.getName())) folders.add(res);
 			}
 			else
 			{
@@ -1201,19 +1207,20 @@ public class SolutionExplorerTreeContentProvider
 		return null;
 	}
 
-	public static IFolder getFolderFromSpec(IProject project, WebObjectSpecification spec)
+	public static IFolder getFolderFromSpec(IResource resource, WebObjectSpecification spec)
 	{
 		String folderName = getFolderNameFromSpec(spec);
 		IFolder folder = null;
-		if (folderName != null && project != null)
+		if (resource instanceof IContainer && folderName != null)
 		{
-			folder = project.getFolder(folderName);
+			IContainer container = (IContainer)resource;
+			folder = container.getFolder(new Path(folderName));
 			if (folder == null || !folder.exists())
 			{
 				try
 				{
-					IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
-					if (specFile.length == 1)
+					IFile[] specFile = container.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+					if (specFile.length == 1 && specFile[0].getParent() instanceof IFolder)
 					{
 						folder = (IFolder)specFile[0].getParent();
 					}
@@ -1418,7 +1425,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			String packageName = iProject.getName();
 			packageType = provider.getPackageReader(packageName);
-			if (packageType == null)
+			if (packageType == null || packageType instanceof ZipPackageReader)
 			{
 				// TODO this is a partial fix for the problem that the project is not the package name
 				// see also the method resolveWebPackageDisplayName above.
@@ -1427,7 +1434,7 @@ public class SolutionExplorerTreeContentProvider
 					IPackageReader reader = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject);
 					packageName = reader.getPackageName();
 					packageType = provider.getPackageReader(packageName);
-					if (packageType == null) packageType = reader;
+					if (packageType == null || packageType instanceof ZipPackageReader) packageType = reader;
 				}
 			}
 		}
@@ -1714,7 +1721,7 @@ public class SolutionExplorerTreeContentProvider
 					WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
 					if ("file".equals(spec.getSpecURL().getProtocol()))
 					{
-						IFolder folder = getFolderFromSpec((IProject)getResource((IPackageReader)un.parent.getRealObject()), spec);
+						IFolder folder = getFolderFromSpec(getResource((IPackageReader)un.parent.getRealObject()), spec);
 						if (folder != null)
 						{
 							return hasChildren(folder);
@@ -2374,7 +2381,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			List<String> forms = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getWorkingSetPersists(
 				workingSetNode.getName(), new String[] { workingSetNode.getSolution().getName() });
-			if (forms != null)
+			if (forms != null && !forms.isEmpty())
 			{
 				List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>();
 				for (String formName : forms)

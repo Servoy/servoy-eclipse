@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -36,6 +37,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -50,7 +52,9 @@ import org.eclipse.ui.dialogs.ListDialog;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -136,85 +140,56 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 							if (!completeAction) continue;
 							try
 							{
-								final IServer server = selection.get(selectedTable);
+								IServer server = selection.get(selectedTable);
 								final ITable table = server == null ? null : server.getTable(selectedTable.getTableName());
 								boolean duplicateDefinitionFound = false;
+								final List<String> solutions = new ArrayList<String>();
+
 								if (server instanceof IServerInternal)
 								{
-									ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 									// see if the user also wants to delete/rename the existing aggregations/calculations/tableEvents for this table
 									// that exist in the active modules (only ask if such info exists)
-									FlattenedSolution flatSolution = sm.getFlattenedSolution();
+									FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 									if (flatSolution != null)
 									{
 										Iterator<TableNode> tableNodes = flatSolution.getTableNodes(table);
 
 										// first check if there are duplicate definitions
 										boolean definitionFound = false;
-										boolean askUser = false;
+										boolean hasReferences = false;
 										while (tableNodes.hasNext())
 										{
-											if (tableNodes.next().getColumns() != null)
+											TableNode node = tableNodes.next();
+											if (node.getColumns() != null)
 											{
 												if (definitionFound) duplicateDefinitionFound = true;
 												else definitionFound = true;
+												solutions.add(node.getRootObject().getName());
 											}
 											else
 											{
-												askUser = true;
+												hasReferences = true;
 											}
 										}
-										if (askUser)
+										if (hasReferences && !duplicateDefinitionFound)
 										{
-											if (duplicateDefinitionFound)
+											YesYesToAllNoNoToAllAsker _EACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
+											_EACAsker.setMessage(
+												"Table events, aggregations and/or calculations exist for table '" + selectedTable.getTableName() +
+													"' in the active solution and/or modules.\nDo you still want to " + actionString1 + " the table?");
+											// we have tableNode(s)... ask user if these should be deleted/renamed as well
+											if (!_EACAsker.userSaidYes())
 											{
-												duplicateMemTableHandler(server, table, flatSolution);
 												completeAction = false;
 											}
-											else
-											{
-												YesYesToAllNoNoToAllAsker _EACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
-												_EACAsker.setMessage(
-													"Table events, aggregations and/or calculations exist for table '" + selectedTable.getTableName() +
-														"' in the active solution and/or modules.\nDo you still want to " + actionString1 + " the table?");
-												// we have tableNode(s)... ask user if these should be deleted/renamed as well
-												if (!_EACAsker.userSaidYes())
-												{
-													completeAction = false;
-												}
-											}
-
 										}
 									}
 
-
 									if (completeAction)
 									{
-										ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable()
-										{
-
-											public void run(IProgressMonitor m) throws CoreException
-											{
-												try
-												{
-													doAction(server, table);
-												}
-												catch (SQLException e)
-												{
-													ServoyLog.logError(e);
-													warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-														"Cannot " + actionString1 + " table: " + e.getMessage()));
-												}
-												catch (RepositoryException e)
-												{
-													ServoyLog.logError(e);
-													warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-														"Cannot " + actionString1 + " table: " + e.getMessage()));
-												}
-											}
-										}, null);
-
-										refreshEditor(table);
+										ServoyProject project = getServoyProject(duplicateDefinitionFound, solutions);
+										completeAction(warnings, table, duplicateDefinitionFound ? project.getMemServer() : server);
+										updateReferencesIfNeeded(project);
 									}
 								}
 								else
@@ -222,9 +197,6 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 									warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
 										"Cannot " + actionString1 + " table " + table + " from server " + server));
 								}
-
-								if (!duplicateDefinitionFound) updateReferencesIfNeeded();
-								//TODO SVY-9708 in case of duplicate definition we need to ask the user which ones to replace
 							}
 							catch (RemoteException e)
 							{
@@ -254,14 +226,43 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 							final MultiStatus fw = warnings;
 							Display.getDefault().asyncExec(new Runnable()
 							{
+
 								public void run()
 								{
 									ErrorDialog.openError(shell, null, null, fw);
 								}
+
 							});
 						}
 					}
 					return Status.OK_STATUS;
+				}
+
+				private void completeAction(final MultiStatus warnings, final ITable table, final IServer memServer) throws CoreException
+				{
+					ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable()
+					{
+
+						public void run(IProgressMonitor m) throws CoreException
+						{
+							try
+							{
+								doAction(memServer, table);
+							}
+							catch (SQLException e)
+							{
+								ServoyLog.logError(e);
+								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot " + actionString1 + " table: " + e.getMessage()));
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError(e);
+								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot " + actionString1 + " table: " + e.getMessage()));
+							}
+						}
+					}, null);
+
+					refreshEditor(memServer, table);
 				}
 
 			};
@@ -273,7 +274,9 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 
 	protected abstract boolean confirm();
 
-	protected abstract void updateReferencesIfNeeded();
+	protected void updateReferencesIfNeeded(ServoyProject project)
+	{
+	}
 
 	protected void duplicateMemTableHandler(IServer server, final ITable table, final FlattenedSolution flatSolution)
 	{
@@ -366,12 +369,37 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 		}
 	}
 
+	private ServoyProject getServoyProject(boolean duplicateDefinitionFound, final List<String> solutions)
+	{
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		if (duplicateDefinitionFound)
+		{
+			final ArrayList<String> servoyProject = new ArrayList<>();
+
+			Display.getDefault().syncExec(new Runnable()
+			{
+				public void run()
+				{
+					final OptionDialog optionDialog = new OptionDialog(shell, "Duplicate Mem Table", null,
+						"Select from which solution/module to " + actionString1 + ": ", MessageDialog.INFORMATION, new String[] { "OK", "Cancel" }, 0,
+						solutions.toArray(new String[solutions.size()]), 0);
+					if (optionDialog.open() == Window.OK)
+					{
+						servoyProject.add(solutions.get(optionDialog.getSelectedOption()));
+					}
+				}
+			});
+			return servoyModel.getServoyProject(servoyProject.get(0));
+		}
+		return servoyModel.getActiveProject();
+	}
+
 	protected abstract void doAction(final IServer server, final ITable table) throws SQLException, RepositoryException;
 
 	protected abstract void doAction(IServer server, ITable table, ArrayList<String> userSelection) throws RepositoryException;
 
 	protected abstract boolean shouldCompleteActionIfUnsaved(String tableName);
 
-	protected abstract void refreshEditor(final ITable table);
+	protected abstract void refreshEditor(final IServer server, final ITable table);
 
 }

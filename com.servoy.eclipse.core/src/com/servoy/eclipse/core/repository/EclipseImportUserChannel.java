@@ -388,7 +388,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
 									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
-									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getDialectClass());
+									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass());
 								if (ServoyModel.getServerManager().validateServerConfig(null, serverConfig) != null)
 								{
 									// something is wrong

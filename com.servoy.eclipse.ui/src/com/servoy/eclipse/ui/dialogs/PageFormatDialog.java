@@ -95,10 +95,8 @@ public class PageFormatDialog extends Dialog
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
 
 		String defaultCountry = Locale.getDefault().getCountry();
-		if (defaultCountry != null &&
-			(defaultCountry.equals("")
-				||
-				defaultCountry.equals(Locale.US.getCountry()) || defaultCountry.equals(Locale.CANADA.getCountry()) || defaultCountry.equals(Locale.UK.getCountry())))
+		if (defaultCountry != null && (defaultCountry.equals("") || defaultCountry.equals(Locale.US.getCountry()) ||
+			defaultCountry.equals(Locale.CANADA.getCountry()) || defaultCountry.equals(Locale.UK.getCountry())))
 		{
 			currentUnits = Size2DSyntax.INCH;
 		}
@@ -124,16 +122,14 @@ public class PageFormatDialog extends Dialog
 		final GroupLayout groupLayout = new GroupLayout(composite);
 
 		composite.setLayout(groupLayout);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(paperComposite, GroupLayout.PREFERRED_SIZE, 400, GroupLayout.PREFERRED_SIZE).add(
-					groupLayout.createSequentialGroup().add(orientationComposite, GroupLayout.PREFERRED_SIZE, 198, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(marginsComposite, GroupLayout.PREFERRED_SIZE, 198, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(paperComposite)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(orientationComposite, GroupLayout.PREFERRED_SIZE, 165, GroupLayout.PREFERRED_SIZE).add(
-					marginsComposite, GroupLayout.PREFERRED_SIZE, 165, GroupLayout.PREFERRED_SIZE)).addContainerGap()));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.LEADING).add(paperComposite, GroupLayout.PREFERRED_SIZE, 400, GroupLayout.PREFERRED_SIZE).add(
+				groupLayout.createSequentialGroup().add(orientationComposite, GroupLayout.PREFERRED_SIZE, 198, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+					LayoutStyle.RELATED).add(marginsComposite, GroupLayout.PREFERRED_SIZE, 198, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.BASELINE).add(paperComposite)).addPreferredGap(LayoutStyle.RELATED).add(
+				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(orientationComposite, GroupLayout.PREFERRED_SIZE, 165,
+					GroupLayout.PREFERRED_SIZE).add(marginsComposite, GroupLayout.PREFERRED_SIZE, 165, GroupLayout.PREFERRED_SIZE)).addContainerGap()));
 		composite.setLayout(groupLayout);
 
 		setValues();
@@ -368,9 +364,9 @@ public class PageFormatDialog extends Dialog
 			{
 				return this;
 			}
-			return new MediaMargins((float)Utils.convertPageFormatUnit(unit, newUnit, leftMargin), (float)Utils.convertPageFormatUnit(unit, newUnit,
-				rightMargin), (float)Utils.convertPageFormatUnit(unit, newUnit, topMargin), (float)Utils.convertPageFormatUnit(unit, newUnit, bottomMargin),
-				newUnit);
+			return new MediaMargins((float)Utils.convertPageFormatUnit(unit, newUnit, leftMargin),
+				(float)Utils.convertPageFormatUnit(unit, newUnit, rightMargin), (float)Utils.convertPageFormatUnit(unit, newUnit, topMargin),
+				(float)Utils.convertPageFormatUnit(unit, newUnit, bottomMargin), newUnit);
 		}
 
 	}
@@ -478,20 +474,18 @@ public class PageFormatDialog extends Dialog
 			});
 
 			final GroupLayout groupLayout = new GroupLayout(this);
-			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(sizeLabel).add(widthLabel).add(heightLabel)).add(15, 15, 15).add(
+			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(sizeLabel).add(widthLabel).add(heightLabel)).add(15, 15, 15).add(
 					groupLayout.createParallelGroup(GroupLayout.TRAILING).add(sizeCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 						Short.MAX_VALUE).add(widthText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(heightText,
-						GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addContainerGap()));
+							GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sizeCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(sizeLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(widthText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(widthLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(heightText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(heightLabel)).addContainerGap()));
+				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sizeCombo,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(sizeLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(widthText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+							GroupLayout.PREFERRED_SIZE).add(widthLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+								groupLayout.createParallelGroup(GroupLayout.BASELINE).add(heightText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+									GroupLayout.PREFERRED_SIZE).add(heightLabel)).addContainerGap()));
 			setLayout(groupLayout);
 		}
 
@@ -585,21 +579,18 @@ public class PageFormatDialog extends Dialog
 
 			});
 			final GroupLayout groupLayout = new GroupLayout(this);
-			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(portraitButton).add(landscapeButton)/* .add(reversedPortraitButton) */.add(
-						reversedLandscapeButton)).addContainerGap()));
+			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(portraitButton).add(landscapeButton)/* .add(reversedPortraitButton) */.add(
+					reversedLandscapeButton)).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().addContainerGap().add(portraitButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 					GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(landscapeButton, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED)/*
-																												 * .add(reversedPortraitButton,
-																												 * GroupLayout.PREFERRED_SIZE,
-																												 * GroupLayout.PREFERRED_SIZE,
-																												 * Short.MAX_VALUE).addPreferredGap
-																												 * (LayoutStyle.RELATED)
-																												 */.add(reversedLandscapeButton,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+						GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+							LayoutStyle.RELATED)/*
+												 * .add(reversedPortraitButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+												 * Short.MAX_VALUE).addPreferredGap (LayoutStyle.RELATED)
+												 */.add(reversedLandscapeButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.PREFERRED_SIZE).addContainerGap()));
 			setLayout(groupLayout);
 
 			updateInfo();
@@ -726,23 +717,22 @@ public class PageFormatDialog extends Dialog
 			});
 
 			final GroupLayout groupLayout = new GroupLayout(this);
-			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(leftLabel).add(rightLabel).add(topLabel).add(bottomLabel)).addPreferredGap(
+			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(leftLabel).add(rightLabel).add(topLabel).add(bottomLabel)).addPreferredGap(
 					LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.TRAILING).add(leftText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(
-						rightText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(topText, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(bottomText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addContainerGap()));
+						groupLayout.createParallelGroup(GroupLayout.TRAILING).add(leftText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+							Short.MAX_VALUE).add(rightText, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(topText,
+								GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(bottomText, GroupLayout.PREFERRED_SIZE,
+									GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(leftText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(leftLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(rightText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(rightLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(topText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(topLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(bottomText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(bottomLabel)).addContainerGap()));
+				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(leftText,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(leftLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(rightText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+							GroupLayout.PREFERRED_SIZE).add(rightLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+								groupLayout.createParallelGroup(GroupLayout.BASELINE).add(topText, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+									GroupLayout.PREFERRED_SIZE).add(topLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+										groupLayout.createParallelGroup(GroupLayout.BASELINE).add(bottomText, GroupLayout.PREFERRED_SIZE,
+											GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(bottomLabel)).addContainerGap()));
 			setLayout(groupLayout);
 		}
 
@@ -777,7 +767,7 @@ public class PageFormatDialog extends Dialog
 
 		}
 	}
-	private class NumberVerifyListener implements VerifyListener
+	public static class NumberVerifyListener implements VerifyListener
 	{
 
 		public void verifyText(VerifyEvent e)

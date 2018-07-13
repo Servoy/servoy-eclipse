@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.ui.property;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.beans.PropertyDescriptor;
 
 import javax.swing.border.Border;
@@ -43,6 +45,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -51,6 +54,7 @@ import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
@@ -60,6 +64,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.CSSPositionPropertyType;
 
 /**
  * Base class for property handlers base on java beans/introspection.
@@ -138,6 +143,12 @@ public class BasePropertyHandler implements IPropertyHandler
 		{
 			return new PropertyDescription(name, BorderPropertyType.INSTANCE, Boolean.FALSE);
 		}
+
+		if (clazz == CSSPosition.class)
+		{
+			return new PropertyDescription(name, CSSPositionPropertyType.INSTANCE, Boolean.FALSE);
+		}
+
 
 		if (clazz == boolean.class || clazz == Boolean.class)
 		{
@@ -219,7 +230,20 @@ public class BasePropertyHandler implements IPropertyHandler
 	{
 		try
 		{
-			propertyDescriptor.getWriteMethod().invoke(obj, new Object[] { value });
+			if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
+				persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition())
+			{
+				CSSPosition.setLocation((ISupportBounds)obj, ((Point)value).x, ((Point)value).y);
+			}
+			else if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(getName()) && value instanceof Dimension && persistContext != null &&
+				persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition())
+			{
+				CSSPosition.setSize((ISupportBounds)obj, ((Dimension)value).width, ((Dimension)value).height);
+			}
+			else
+			{
+				propertyDescriptor.getWriteMethod().invoke(obj, new Object[] { value });
+			}
 		}
 		catch (Exception e)
 		{
@@ -228,41 +252,44 @@ public class BasePropertyHandler implements IPropertyHandler
 	}
 
 	@Override
-	public boolean shouldShow(Object obj)
+	public boolean shouldShow(PersistContext persistContext)
 	{
 		try
 		{
 			String name = getName();
 			// check for content spec element.
-			IPersist persist = (IPersist)obj;
+			IPersist persist = persistContext.getPersist();
 			EclipseRepository repository = (EclipseRepository)persist.getRootObject().getRepository();
 			Element element = repository.getContentSpec().getPropertyForObjectTypeByName(persist.getTypeID(), name);
 
 			int dispType = -1;
-			if (obj instanceof Field)
+			if (persist instanceof Field)
 			{
 				dispType = ((Field)persist).getDisplayType();
 			}
 
-			if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(name) && obj instanceof Form)
+			if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(name) && persist instanceof Form)
 			{
-				Form form = (Form)obj;
+				Form form = (Form)persist;
 				int type = form.getSolution().getSolutionType();
 				return (type == SolutionMetaData.SOLUTION || type == SolutionMetaData.NG_CLIENT_ONLY || type == SolutionMetaData.MODULE) &&
 					form.getView() != IFormConstants.VIEW_TYPE_RECORD && form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
 			}
-
-			if (obj instanceof Form && ((Form)obj).isFormComponent() && BaseComponent.isEventOrCommandProperty(name))
+			if (persist instanceof Form && ((Form)persist).isFormComponent() && BaseComponent.isEventOrCommandProperty(name))
 			{
 				return false;
 			}
-
+			if (IContentSpecConstants.PROPERTY_CSS_POSITION.equals(name) && persistContext.getContext() instanceof Form &&
+				!((Form)persistContext.getContext()).getUseCssPosition())
+			{
+				return false;
+			}
 			if (IContentSpecConstants.PROPERTY_ATTRIBUTES.equals(name))
 			{
-				if (!(obj instanceof IFormElement)) return false; 
-				Form form = (Form)((IFormElement)obj).getAncestor(IRepository.FORMS);
+				if (!(persist instanceof IFormElement)) return false;
+				Form form = (Form)((IFormElement)persist).getAncestor(IRepository.FORMS);
 				int type = form.getSolution().getSolutionType();
-				return (obj instanceof WebComponent || type == SolutionMetaData.NG_CLIENT_ONLY);
+				return (persist instanceof WebComponent || type == SolutionMetaData.NG_CLIENT_ONLY);
 			}
 			if (!RepositoryHelper.shouldShow(name, element, persist.getClass(), dispType))
 			{

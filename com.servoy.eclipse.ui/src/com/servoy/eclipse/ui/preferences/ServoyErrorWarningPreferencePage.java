@@ -468,6 +468,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_valuelistRelationSequenceInconsistent, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_RELATION_WITH_DATASOURCE,
 				Messages.ErrorWarningPreferencePage_valuelistRelationWithDatasource, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+				Messages.ErrorWarningPreferencePage_valuelistDataproviderTypeMismatch, false));
 		}
 		else if (ERROR_WARNING_MODULES_PROBLEMS.equals(problemSection))
 		{
@@ -543,7 +545,7 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_REFERENCE_INVALID_PROPERTY,
 				Messages.ErrorWarningPreferencePage_formReferenceInvalidProperty, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_REFERENCE_INVALID_SCRIPT,
-					Messages.ErrorWarningPreferencePage_formReferenceInvalidScript, true));
+				Messages.ErrorWarningPreferencePage_formReferenceInvalidScript, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION,
 				Messages.ErrorWarningPreferencePage_nonAccessibleFormInModuleUsedInParentSolutionForm, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
@@ -554,7 +556,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				new ErrorWarningPreferenceItem(ServoyBuilder.TAB_SEQUENCE_NOT_SET, Messages.ErrorWarningPreferencePage_formTabPanelTabSequenceNotSet, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT,
 				Messages.ErrorWarningPreferencePage_formElementExtendsDeletedElement, true));
-
+			associatedProblemMarkers.add(
+				new ErrorWarningPreferenceItem(ServoyBuilder.METHOD_OVERRIDE_PROBLEM, Messages.ErrorWarningPreferencePage_methodOverrideProblem, true));
 		}
 		else if (ERROR_WARNING_STYLES_PROBLEMS.equals(problemSection))
 		{

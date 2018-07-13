@@ -7,17 +7,17 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>8.3.0.3200_b1</version>
+	<version>8.4.0.3400_b1</version>
 
 	<properties>
-		<tycho.version>1.1.0</tycho.version>
-		<tycho.extra.version>1.1.0</tycho.extra.version>
+		<tycho.version>1.2.0</tycho.version>
+		<tycho.extra.version>1.2.0</tycho.extra.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.7/R-4.7.2-201711300510/</servoy-repo.url>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.8/</servoy-repo.url>
 		<dltk.url>http://developer.servoy.com/dltk_repository/</dltk.url>
-		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/</servoy-shiplibs.url>
+		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins84/</servoy-shiplibs.url>
 	</properties>
 
 	<repositories>
@@ -31,7 +31,7 @@
 			<url>${dltk.url}</url>
 			<layout>p2</layout>
 		</repository>
-			<repository>
+		<repository>
 			<id>servoy_shiblibs</id>
 			<url>${servoy-shiplibs.url}</url>
 			<layout>p2</layout>
@@ -80,6 +80,64 @@
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
+					<filters>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>sablo</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>org.eclipse.dltk.javascript.rhino</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_base</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_shared</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_smart_client</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_headless_client</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_ngclient</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>servoy_debug</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
+					</filters>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -177,6 +235,7 @@
 				<module>com.servoy.eclipse.profiler</module>
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
+				<module>org.eclipse.help.ui</module>
 			</modules>
 		</profile>
 		<profile>
@@ -195,18 +254,6 @@
 								</goals>
 								<configuration>
 									<target>
-										<macrodef name="stripVersion">
-											<attribute name="src" />
-											<attribute name="result" />
-											<sequential>
-												<script language="javascript">
-													var index = "@{src}".lastIndexOf(".")
-													project.setProperty(
-													"@{result}", "@{src}".substring(0,index)
-													);
-												</script>
-											</sequential>
-										</macrodef>
 										<replaceregexp file="${basedir}/com.servoy.eclipse.product/p2.inf"
 											match="${project.version}" replace="${newVersion}" byline="true" />
 										<replaceregexp
@@ -218,14 +265,6 @@
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
 											match="${project.version}" replace="${newVersion}" byline="true" />
-										<stripVersion src="${project.version}" result="stripProject" />
-										<stripVersion src="${newVersion}" result="stripNewVersion" />
-										<replaceregexp match="\[${stripProject}" replace="\[${stripNewVersion}"
-											byline="true">
-											<fileset dir="${basedir}">
-												<include name="**/*MANIFEST.MF" />
-											</fileset>
-										</replaceregexp>
 									</target>
 								</configuration>
 							</execution>

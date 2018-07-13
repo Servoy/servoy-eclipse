@@ -18,12 +18,14 @@
 package com.servoy.eclipse.exporter.apps.solution;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -43,6 +45,7 @@ import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
 import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
@@ -98,13 +101,19 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 					metadataDefManager = defManagers.getRight();
 				}
 			}
-
+			JSONObject importSettings = null;
+			if (configuration.getImportOptionsFile() != null)
+			{
+				String importSettingsString = Utils.getTXTFileContent(new File(configuration.getImportOptionsFile()), Charset.forName("UTF8"));
+				importSettings = new JSONObject(importSettingsString);
+			}
 			try
 			{
 				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
 					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
 					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
-					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager, true, null, null);
+					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager, true, importSettings,
+					null);
 			}
 			catch (final RepositoryException e)
 			{

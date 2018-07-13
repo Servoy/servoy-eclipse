@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.j2db.persistence.IServer;
@@ -188,7 +189,8 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 			}
 		});
 		comboViewer.setInput(new Integer[] { Integer.valueOf(ServerConfig.CONNECTION_EXCEPTION_VALIDATION), Integer.valueOf(
-			ServerConfig.CONNECTION_METADATA_VALIDATION), Integer.valueOf(ServerConfig.CONNECTION_QUERY_VALIDATION) });
+			ServerConfig.CONNECTION_METADATA_VALIDATION), Integer.valueOf(
+				ServerConfig.CONNECTION_QUERY_VALIDATION), Integer.valueOf(ServerConfig.CONNECTION_DRIVER_VALIDATION) });
 
 		validationType = comboViewer.getCombo();
 		validationType.select(config.getConnectionValidationType());
@@ -378,10 +380,15 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 					type = ServerConfig.CONNECTION_METADATA_VALIDATION;
 					validationQuery.setEnabled(false);
 				}
-				if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(valType))
+				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_QUERY_VALIDATION).equals(valType))
 				{
 					type = ServerConfig.CONNECTION_QUERY_VALIDATION;
 					validationQuery.setEnabled(true);
+				}
+				else if (ServerConfig.getConnectionValidationTypeAsString(ServerConfig.CONNECTION_DRIVER_VALIDATION).equals(valType))
+				{
+					type = ServerConfig.CONNECTION_DRIVER_VALIDATION;
+					validationQuery.setEnabled(false);
 				}
 				config.setConnectionValidationType(type);
 			}
@@ -408,5 +415,11 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 		clone.setItems(selectedServerNames.toArray(new String[selectedServerNames.size()]));//can't set to empty value otherwise
 		skip.setSelection(false);
 		procedures.setSelection(false);
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_db_server_config");
 	}
 }

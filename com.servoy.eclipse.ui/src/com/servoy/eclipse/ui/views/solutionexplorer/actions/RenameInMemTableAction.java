@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,9 +36,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.inmemory.MemServer;
-import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
@@ -181,11 +180,10 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 	}
 
 	@Override
-	protected void updateReferencesIfNeeded()
+	protected void updateReferencesIfNeeded(ServoyProject project)
 	{
 		try
 		{
-			ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 			project.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 			final Set<IPersist> persists = new HashSet<>();
 			project.getEditingSolution().acceptVisitor(new IPersistVisitor()
@@ -261,11 +259,11 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 	}
 
 	@Override
-	protected void refreshEditor(final ITable table)
+	protected void refreshEditor(final IServer server, final ITable table)
 	{
 		try
 		{
-			final ITable newTable = ((MemTable)table).getParent().getTable(names.get(table.getName()));
+			final ITable newTable = server.getTable(names.get(table.getName()));
 			if (newTable == null)
 			{
 				ServoyLog.logInfo("Table '" + names.get(table.getName()) + "' not found, cannot open it in editor.");
@@ -287,7 +285,7 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 				});
 			}
 		}
-		catch (RepositoryException e)
+		catch (RepositoryException | RemoteException e)
 		{
 			ServoyLog.logError("Could not open mem table '" + names.get(table.getName()) + "' in editor", e);
 		}

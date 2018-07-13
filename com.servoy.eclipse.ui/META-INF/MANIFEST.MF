@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 8.3.0.3200_b1
+Bundle-Version: 8.4.0.3400_b1
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -67,14 +67,16 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  servoy_ngclient,
- org.apache.commons.io;bundle-version="2.4.0",
+ org.apache.commons.io;bundle-version="2.6.0",
  org.maven.ide.eclipse.grouplayout;bundle-version="1.1.0",
  org.apache.commons.dbcp2,
  org.eclipse.jface,
  sj.jsonschemavalidation,
  org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
  org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
- com.servoy.eclipse.ui.tweaks
+ com.servoy.eclipse.ui.tweaks,
+ org.apache.commons.codec,
+ org.eclipse.help
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,
@@ -98,4 +100,4 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
  com.servoy.eclipse.ui.wizards
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

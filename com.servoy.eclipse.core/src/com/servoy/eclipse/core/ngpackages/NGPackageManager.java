@@ -92,14 +92,6 @@ public class NGPackageManager extends BaseNGPackageManager
 					{
 						reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.RESOURCES_UPDATED_ON_ACTIVE_PROJECT, null);
 					}
-					else if (updateInfo == MODULES_UPDATED)
-					{
-						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
-						clearReferencedNGPackageProjectsCache();
-						//TODO can we improve this?
-						reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.MODULES_UPDATED, null);
-//						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
-					}
 				}
 
 				public void activeProjectChanged(ServoyProject activeProject)
@@ -108,6 +100,7 @@ public class NGPackageManager extends BaseNGPackageManager
 					reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.ACTIVE_PROJECT_CHANGED, null);
 				}
 			};
+			// update this before build runs
 			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
 		}
 

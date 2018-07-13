@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Debug Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.debug;singleton:=true
-Bundle-Version: 8.3.0.3200_b1
+Bundle-Version: 8.4.0.3400_b1
 Bundle-Activator: com.servoy.eclipse.debug.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.runtime,
@@ -41,5 +41,6 @@ Bundle-ClassPath: .
 Export-Package: com.servoy.eclipse.debug,
  com.servoy.eclipse.debug.actions,
  com.servoy.eclipse.debug.handlers
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.eclipse.ui.internal.browser
+Automatic-Module-Name: com.servoy.eclipse.debug

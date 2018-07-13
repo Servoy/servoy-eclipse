@@ -21,6 +21,8 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -45,6 +47,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String selectedServices;
 	private String excludedComponentPackages;
 	private String excludedServicePackages;
+	private String excludedPlugins;
+	private String excludedBeans;
+	private String excludedLafs;
+	private String excludedDrivers;
 
 	private boolean exportMetaData = false;
 	private boolean exportSampleData = false;
@@ -126,18 +132,27 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -b <bean_names> ... the list of beans to export\n"
 			+ "             Default: all beans from application_server/beans are exported.\n"
 			+ "             Can also use -b <none> to not export any bean\n"
+			+ "			-excludeBeans <bean_names> ... the list of beans excluded from the export e.g -excludeBeans bean1.jar bean2.zip\n"
+			+ "             Default: none is excluded.\n"
 			+ "        -l <lafs_names> ... the list of lafs to export \n"
 			+ "             Default: all lafs from application_server/lafs are exported.\n"
 			+ "             Can also use -l <none> to not export any laf\n"
+			+ "			-excludeLafs <lafs_names> ... the list of lafs excluded from the export e.g -excludeLafs laf1.jar laf2.zip\n"
+			+ "             Default: none is excluded.\n"
 			+ "        -d <jdbc_drivers> ... the list of drivers to export\n"
 			+ "             Default: all drivers from application_server/drivers are exported.\n"
+			+ "			-excludeDrivers <jdbc_drivers> ... the list of plugins excluded from the export e.g -excludeDrivers driver1.jar driver2.zip\n"
+			+ "             Default: none is excluded.\n"
 			+ "        -pi <plugin_names> ... the list of plugins to export e.g -pi plugin1.jar plugin2.zip\n"
 			+ "             Default: all plugins from application_server/plugins are exported.\n"
 			+ "             Can also use -pi <none> to not export any plugin\n"
+			+ "			-excludePlugins <plugin_names> ... the list of plugins excluded from the export e.g -excludePlugins plugin1.jar plugin2.zip\n"
+			+ "             Default: none is excluded.\n"
 			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -" + noneActiveSolutions+ "  ... the list of solutions that are must be exported but are not in the active solution modules\n"
-			+ "				Default: only active and its modules are exported\n"
+			+ "        -" + noneActiveSolutions+ " ... the  list  of solutions that  must  be exported  but are not in  the active\n"
+			+ "             solution modules.\n"
+			+ "             Default: only active solution and its modules are exported.\n"
 			+ "        -pluginLocations <ABSOLUTE paths to developer 'plugins' folder> ...  needed in  case\n"
 			+ "             you don't run the exporter from [servoy_install]/developer/exporter\n"
 			+ "             Default: '../plugins'.\n"
@@ -197,7 +212,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             will be available as a normal admin user in solutions as well.\n"
 			+ "        -" + minimizeJsCss + " minimize JS and CSS files \n"
 			+ "        -" + licenses + " <company_name> <number_of_licenses> <license_code>... export Servoy Client\n"
-			+ "             licenses; to add more licenses use ',' as delimiter.\n"
+			+ "             licenses;  to add more licenses use  ','  as delimiter. If the company name has\n"
+			+ "             spaces, then it must be enclosed in double quotes.\n"
 			+ "        -" + userHomeDirectory + " <user_home_directory>... this must be a  writable directory where\n"
 			+ "             Servoy application  related files  will be stored;  if not set, then the system\n"
 			+ "             user home directory will be used.\n"
@@ -205,9 +221,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             deployed app. by using the DB servers from the servoy.properties of the war.\n"
 			+ "        -" + overwriteAllProperties + " overwrite all properties of  an already deployed application\n"
 			+ "             by using the values from the servoy.properties of the war.\n"
-		+ "        -" + log4jXmlFileName + " a path to a log4j.xml that should be included instead of the default one\n"
-		+ "        -" + webXmlFileName + " a path to a web.xml that should be included instead of the default one\n"
-		+ "             should be a web.xml that is generated first by a Servoy WAR export\n";
+			+ "        -" + log4jXmlFileName + " a path to a log4j.xml that should be included instead of the default one.\n"
+			+ "        -" + webXmlFileName + " a path to a web.xml  that should be included instead of default one;\n"
+			+ "             it should be a web.xml file previously generated via a Servoy WAR export.\n";
 		// @formatter:on
 	}
 
@@ -217,9 +233,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 		printArgsMap(System.out, argsMap);
 		warSettingsFile = parseArg("pfw", "Properties file was not specified after '-pfw' argument.", argsMap, false);
 		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap, false);
+		excludedPlugins = parseArg("excludedPlugins", null, argsMap, false);
 		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap, false);
+		excludedBeans = parseArg("excludedBeans", null, argsMap, false);
 		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap, false);
+		excludedLafs = parseArg("excludedLafs", null, argsMap, false);
 		drivers = parseArg("d", "Driver name(s) was(were) not specified after '-d' argument.", argsMap, false);
+		excludedDrivers = parseArg("excludedDrivers", null, argsMap, false);
 		isExportActiveSolution = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
@@ -262,14 +282,34 @@ public class WarArgumentChest extends AbstractArgumentChest
 			for (String license : l_array)
 			{
 				String[] parts = license.trim().split(" ");
+				String company = null;
+				String code = null;
+				String numLicenses = null;
 				if (parts.length != 3)
 				{
-					ServoyLog.logError(new Exception("Please specify license as <company_name> <number_of_licenses> <code>. \"" + license + "\" is not valid"));
-					continue;
+					Pattern p = Pattern.compile("\"(.+)\" (.+) (.+)");
+					Matcher m = p.matcher(license);
+					if (m.matches())
+					{
+						company = m.group(1);
+						numLicenses = m.group(2);
+						code = m.group(3);
+					}
+					else
+					{
+						ServoyLog.logError(new Exception(
+							"Please specify license as <company_name> <number_of_licenses> <code> or \\\"<company_name>\\\" <number_of_licenses> <code>. \"" +
+								license + "\" is not valid"));
+						continue;
+					}
 				}
-				String company = parts[0].trim();
-				String code = parts[2].trim();
-				result.put(code, new License(company, code, parts[1].trim()));
+				else
+				{
+					company = parts[0].trim();
+					numLicenses = parts[1].trim();
+					code = parts[2].trim();
+				}
+				result.put(code, new License(company, code, numLicenses));
 			}
 		}
 		return result;
@@ -324,9 +364,19 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return plugins;
 	}
 
+	public String getExcludedPlugins()
+	{
+		return excludedPlugins;
+	}
+
 	public String getBeans()
 	{
 		return beans;
+	}
+
+	public String getExcludedBeans()
+	{
+		return excludedBeans;
 	}
 
 	public String getLafs()
@@ -334,9 +384,19 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return lafs;
 	}
 
+	public String getExcludedLafs()
+	{
+		return excludedLafs;
+	}
+
 	public String getDrivers()
 	{
 		return drivers;
+	}
+
+	public String getExcludedDrivers()
+	{
+		return excludedDrivers;
 	}
 
 	public boolean isExportActiveSolutionOnly()

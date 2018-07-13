@@ -185,7 +185,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
-			Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
+			Color backgroundColor = ColumnComposite.getServoyGrayBackground();
 			columnAutoEnterServoySeqComposite.setBackground(backgroundColor);
 			columnAutoEnterDBSeqComposite.setBackground(backgroundColor);
 		}
@@ -376,18 +376,17 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		lookupValueControl = lookupValueSelect.getControl();
 
 		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 509,
-					Short.MAX_VALUE).add(groupLayout.createSequentialGroup().add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(systemValueButton).add(customValueButton).add(databaseDefaultButton).add(
-							lookupValueButton).add(sequenceButton)).addPreferredGap(LayoutStyle.RELATED).add(
-								groupLayout.createParallelGroup(GroupLayout.LEADING).add(customValueText, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(
-									systemValueCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(databaseDefaultValue, GroupLayout.PREFERRED_SIZE,
-										420, Short.MAX_VALUE).add(sequenceCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(lookupValueControl,
-											GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)))).addContainerGap()));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 509, Short.MAX_VALUE).add(
+				groupLayout.createSequentialGroup().add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(systemValueButton).add(customValueButton).add(databaseDefaultButton).add(
+						lookupValueButton).add(sequenceButton)).addPreferredGap(LayoutStyle.RELATED).add(
+							groupLayout.createParallelGroup(GroupLayout.LEADING).add(customValueText, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(
+								systemValueCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(databaseDefaultValue, GroupLayout.PREFERRED_SIZE, 420,
+									Short.MAX_VALUE).add(sequenceCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(lookupValueControl,
+										GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)))).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(systemValueButton).add(
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(systemValueButton).add(
 				systemValueCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(customValueButton).add(customValueText, GroupLayout.PREFERRED_SIZE,
 						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
@@ -395,7 +394,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 								LayoutStyle.RELATED).add(
 									groupLayout.createParallelGroup(GroupLayout.LEADING).add(lookupValueButton).add(lookupValueControl)).addPreferredGap(
 										LayoutStyle.RELATED).add(
-											groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sequenceButton).add(sequenceCombo,
+											groupLayout.createParallelGroup(GroupLayout.LEADING).add(sequenceButton).add(sequenceCombo,
 												GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
 													LayoutStyle.RELATED).add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 														GroupLayout.PREFERRED_SIZE).addContainerGap()));

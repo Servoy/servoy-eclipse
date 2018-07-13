@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.util.Utils;
@@ -160,5 +161,11 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_admin_configuration");
 	}
 }

@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
@@ -307,7 +308,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 							public void run()
 							{
 								ok[0] = MessageDialog.openConfirm(shell, "Overwrite SocketFactory properties",
-									"In the selected properties file SocketFactory.rmiServerFactory is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'. Please allow exporter to overwrite properties or cancel the export.");
+									"In the selected properties file SocketFactory.rmiServerFactory is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'. Please allow exporter to overwrite properties or select another properties file.");
 							}
 						});
 						if (ok[0])
@@ -316,13 +317,9 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						}
 						else
 						{
-							Display.getDefault().asyncExec(new Runnable()
-							{
-								public void run()
-								{
-									getWizard().getContainer().getShell().close();
-								}
-							});
+							exportModel.setServoyPropertiesFileName(null);
+							fileNameText.setText("");
+							return false;
 						}
 					}
 				}
@@ -396,5 +393,11 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		canFlipToNextPage();
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
+	}
+
+	@Override
+	public void performHelp()
+	{
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_properties");
 	}
 }

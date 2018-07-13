@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="8.3.0.3200_b1" useFeatures="true" includeLaunchers="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="8.4.0.3400_b1" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
       <text>
          Servoy
 
-Version: 8.2b1  - build 3100
+Version:8.4.0.3400_b1
 
-Copyright © 1997-2017 Servoy BV. All rights reserved.
+Copyright © 1997-2018 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 
 This computer program is protected by copyright law and international treaties.
@@ -93,6 +93,7 @@ Article 1. Definitions.
 - Maintenance Release (x.x.x): the generally commercially available patch of the Servoy Software which is limited to bug fixing;
 - Minor Release (--.x.0): the generally commercially available release of the Servoy Software which primarily contains corrections and/or possibly some limited new functionality;
 - Major Release (x.0.0): the generally commercially available version of the Servoy Software which primarily contains corrections and new functionality.
+<<<<<<< HEAD
 The timing of the provision by Servoy of the Releases shall be at its sole discretion.
          </text>
    </license>
@@ -126,9 +127,47 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
+=======
+The timing of the provision by Servoy of the Releases shall be at its sole discretion.
+         </text>
+   </license>
+
+   <plugins>
+   </plugins>
+
+   <features>
+      <feature id="com.servoy.eclipse.feature" version="8.4.0.3400_b1"/>
+      <feature id="org.eclipse.emf.common"/>
+      <feature id="org.eclipse.emf.common.ui"/>
+      <feature id="org.eclipse.emf.ecore"/>
+      <feature id="org.eclipse.emf.edit"/>
+      <feature id="org.eclipse.emf.edit.ui"/>
+      <feature id="org.eclipse.equinox.p2.user.ui"/>
+      <feature id="org.eclipse.platform"/>
+      <feature id="org.eclipse.jdt"/>
+      <feature id="org.eclipse.help"/>
+      <feature id="org.eclipse.rcp"/>
+      <feature id="org.eclipse.ecf.core.feature"/>
+      <feature id="org.eclipse.ecf.core.ssl.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.httpclient4.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature"/>
+      <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
+   </features>
+
+   <configurations>
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
+      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
+>>>>>>> refs/remotes/origin/v84x_branch
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
+<<<<<<< HEAD
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
       <property name="org.eclipse.update.reconcile" value="false" />
+=======
+      <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="4"/> 
+>>>>>>> refs/remotes/origin/v84x_branch
    </configurations>
 
    <preferencesInfo>

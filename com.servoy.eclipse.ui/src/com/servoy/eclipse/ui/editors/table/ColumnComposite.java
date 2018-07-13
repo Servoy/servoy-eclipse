@@ -29,6 +29,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
@@ -280,9 +281,7 @@ public class ColumnComposite extends Composite
 
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
-			//JFaceResources.getColorRegistry().get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_END"); is the
-			//closest match, but the label background is slighly visible
-			Color backgroundColor = new Color(Display.getCurrent(), 38, 38, 38);
+			Color backgroundColor = getServoyGrayBackground();
 			columnValidationComposite.setBackground(backgroundColor);
 			columnConversionComposite.setBackground(backgroundColor);
 			columnDetailsComposite.setBackground(backgroundColor);
@@ -377,6 +376,19 @@ public class ColumnComposite extends Composite
 			displayDataProviderID.setSelection(true);
 			showDataProviderColumn();
 		}
+	}
+
+	public static Color getServoyGrayBackground()
+	{
+		//JFaceResources.getColorRegistry().get("org.eclipse.ui.workbench.ACTIVE_TAB_BG_END"); is the
+		//closest match, but the label background is slightly visible
+		Color backgroundColor = JFaceResources.getColorRegistry().get("servoy_gray_background");
+		if (backgroundColor == null)
+		{
+			JFaceResources.getColorRegistry().put("servoy_gray_background", new RGB(38, 38, 38));
+			backgroundColor = JFaceResources.getColorRegistry().get("servoy_gray_background");
+		}
+		return backgroundColor;
 	}
 
 	public IColumn addColumn(ITable t, String newName, int type, int length) throws RepositoryException
