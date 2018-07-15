@@ -422,7 +422,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="jabsorb"
          download-size="0"
          install-size="0"
-         version="1.3.3"
+         version="1.3.0.s2"
          unpack="false"/>
 
    <plugin
@@ -443,7 +443,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="slf4j.api"
          download-size="0"
          install-size="0"
-         version="1.8.0.beta0"
+         version="1.8.0.beta3-SNAPSHOT"
          unpack="false"/>
 
    <plugin
@@ -490,13 +490,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.apache.logging.log4j.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.logging.log4j.osgi"
          download-size="0"
          install-size="0"
          version="0.0.0"
