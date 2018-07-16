@@ -563,6 +563,28 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_launch_config.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.team.ui/$nl$/icons/full/obj/import_projectset.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import_projectset.png"));
+			//TODO view icon			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/eview16/filenav_nav.png"),
+//			formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/navigator_view.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/elcl16/collapseall.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/collapseall.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/elcl16/synced.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/link_to_editor.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/dtool16/import_wiz.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import-disabled.png"));//TODO need disabled icon
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/import_wiz.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/dtool16/export_wiz.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/export-disabled.png"));//TODO need disabled icon
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/export_wiz.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/export.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/dlcl16/refresh_nav.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/refresh-disabled.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/elcl16/refresh_nav.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/refresh.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/elcl16/up_nav.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/prev_nav.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/dlcl16/up_nav.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/prev_nav-disabled.png")); //TODO need disabled icon
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/designer.png"));
