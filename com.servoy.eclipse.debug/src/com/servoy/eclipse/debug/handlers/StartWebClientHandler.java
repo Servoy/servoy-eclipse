@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -40,6 +42,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.internal.browser.BrowserManager;
 import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 import org.eclipse.ui.internal.browser.Messages;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
@@ -62,8 +65,10 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 
 
 	private IWebBrowser webBrowser;
+	private IEclipsePreferences eclipsePreferences;
 
 	protected static final String COMMAND_PARAMETER = "com.servoy.eclipse.debug.browser";
+	protected static final String LAST_USED_BROWSER = "com.servoy.eclipse.debug.browser.last";
 
 	//private HashMap<String, Image> browsersImagesList;
 
@@ -190,8 +195,10 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 		return webBrowser == null ? PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser() : webBrowser;
 	}
 
-	public void initBrowser(String ewbName)
+	public void initBrowser(String name)
 	{
+		String lastUsedBrowser = getLastUsedBrowserName();
+		String ewbName = name == null ? lastUsedBrowser : name;
 		try
 		{
 			Iterator iterator = BrowserManager.getInstance().getWebBrowsers().iterator();
@@ -226,6 +233,7 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 					}
 				}
 			}
+			if (name != null && !name.equals(lastUsedBrowser)) setLastUsedBrowserName(name);
 		}
 		catch (Exception ex)
 		{
@@ -233,4 +241,29 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 		}
 	}
 
+	private String getLastUsedBrowserName()
+	{
+		if (eclipsePreferences == null)
+		{
+			eclipsePreferences = InstanceScope.INSTANCE.getNode(Activator.PLUGIN_ID);
+		}
+		return eclipsePreferences.get(LAST_USED_BROWSER, Messages.prefSystemBrowser);
+	}
+
+	private void setLastUsedBrowserName(String browserName)
+	{
+		if (eclipsePreferences == null)
+		{
+			eclipsePreferences = InstanceScope.INSTANCE.getNode(Activator.PLUGIN_ID);
+		}
+		eclipsePreferences.put(LAST_USED_BROWSER, browserName);
+		try
+		{
+			eclipsePreferences.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage()));
+		}
+	}
 }
