@@ -182,7 +182,7 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 	@Override
 	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 	{
-		return false;
+		return true;
 	}
 
 	/*
