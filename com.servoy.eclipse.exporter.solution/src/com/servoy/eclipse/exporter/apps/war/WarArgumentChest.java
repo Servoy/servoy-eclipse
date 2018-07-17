@@ -36,7 +36,6 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
  */
 public class WarArgumentChest extends AbstractArgumentChest
 {
-
 	private String plugins;
 	private String beans;
 	private String lafs;
@@ -93,6 +92,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String webXmlFileName = "webXmlFileName";
 
 	private static final String noneActiveSolutions = "nas";
+	private static final String excludeDrivers = "excludeDrivers";
+	private static final String excludeLafs = "excludeLafs";
+	private static final String excludeBeans = "excludeBeans";
+	private static final String excludePlugins = "excludePlugins";
 
 	private HashMap<String, String> argumentsMap;
 	private Map<String, License> licenseMap = new HashMap<>();
@@ -131,21 +134,21 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -b <bean_names> ... the list of beans to export\n"
 			+ "             Default: all beans from application_server/beans are exported.\n"
 			+ "             Can also use -b <none> to not export any bean\n"
-			+ "			-excludeBeans <bean_names> ... the list of beans excluded from the export e.g -excludeBeans bean1.jar bean2.zip\n"
+			+ "			-"+excludeBeans+" <bean_names> ... the list of beans excluded from the export e.g -"+excludeBeans+" bean1.jar bean2.zip\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -l <lafs_names> ... the list of lafs to export \n"
 			+ "             Default: all lafs from application_server/lafs are exported.\n"
 			+ "             Can also use -l <none> to not export any laf\n"
-			+ "			-excludeLafs <lafs_names> ... the list of lafs excluded from the export e.g -excludeLafs laf1.jar laf2.zip\n"
+			+ "			-"+excludeLafs+" <lafs_names> ... the list of lafs excluded from the export e.g -"+excludeLafs+" laf1.jar laf2.zip\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -d <jdbc_drivers> ... the list of drivers to export\n"
 			+ "             Default: all drivers from application_server/drivers are exported.\n"
-			+ "			-excludeDrivers <jdbc_drivers> ... the list of plugins excluded from the export e.g -excludeDrivers driver1.jar driver2.zip\n"
+			+ "			-"+excludeDrivers+" <jdbc_drivers> ... the list of plugins excluded from the export e.g -"+excludeDrivers+" driver1.jar driver2.zip\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -pi <plugin_names> ... the list of plugins to export e.g -pi plugin1.jar plugin2.zip\n"
 			+ "             Default: all plugins from application_server/plugins are exported.\n"
 			+ "             Can also use -pi <none> to not export any plugin\n"
-			+ "			-excludePlugins <plugin_names> ... the list of plugins excluded from the export e.g -excludePlugins plugin1.jar plugin2.zip\n"
+			+ "			-"+excludePlugins+" <plugin_names> ... the list of plugins excluded from the export e.g -"+excludePlugins+" plugin1.jar plugin2.zip\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
@@ -231,13 +234,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 		printArgsMap(System.out, argsMap);
 		warSettingsFile = parseArg("pfw", "Properties file was not specified after '-pfw' argument.", argsMap, false);
 		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap, false);
-		excludedPlugins = parseArg("excludedPlugins", null, argsMap, false);
+		excludedPlugins = parseArg(excludePlugins, null, argsMap, false);
 		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap, false);
-		excludedBeans = parseArg("excludedBeans", null, argsMap, false);
+		excludedBeans = parseArg(excludeBeans, null, argsMap, false);
 		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap, false);
-		excludedLafs = parseArg("excludedLafs", null, argsMap, false);
+		excludedLafs = parseArg(excludeLafs, null, argsMap, false);
 		drivers = parseArg("d", "Driver name(s) was(were) not specified after '-d' argument.", argsMap, false);
-		excludedDrivers = parseArg("excludedDrivers", null, argsMap, false);
+		excludedDrivers = parseArg(excludeDrivers, null, argsMap, false);
 		isExportActiveSolution = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolution = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
