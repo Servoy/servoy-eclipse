@@ -46,6 +46,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -292,6 +293,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 
 	private final ToggleAction toggleAllAction;
 	private final CheckUncheckAction checkUncheckAllAction;
+	private final OpenScriptAction showEditWithScriptEditor;
 
 	/**
 	 * @param shell
@@ -313,6 +315,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		showScopesAction = new ShowAction("Show Scopes");
 		toggleAllAction = new ToggleAction();
 		checkUncheckAllAction = new CheckUncheckAction();
+		showEditWithScriptEditor = new OpenScriptAction();
 
 		setSelectionHistory(new SelectionHistory()
 		{
@@ -471,6 +474,27 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		setListLabelProvider(provider);
 
 	}
+
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillContextMenu(org.eclipse.jface.action.IMenuManager)
+	 */
+	@Override
+	protected void fillContextMenu(IMenuManager menuManager)
+	{
+		// TODO Auto-generated method stub
+		if (this.getSelectedItems().getFirstElement() instanceof Form)
+		{
+
+			menuManager.add(showEditWithScriptEditor);
+			super.fillContextMenu(menuManager);
+			showEditWithScriptEditor.setSelection(getSelectedItems());
+
+		}
+	}
+
 
 	/**
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillViewMenu(org.eclipse.jface.action.IMenuManager)
