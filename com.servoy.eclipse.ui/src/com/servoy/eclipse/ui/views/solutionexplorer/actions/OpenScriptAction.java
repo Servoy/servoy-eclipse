@@ -59,7 +59,15 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		selection = (IStructuredSelection)event.getSelection();
+		setSelection((IStructuredSelection)event.getSelection());
+	}
+
+	/**
+	 * @param selection
+	 */
+	public void setSelection(IStructuredSelection selection)
+	{
+		this.selection = selection;
 		Iterator< ? > it = selection.iterator();
 		boolean state = it.hasNext();
 		while (it.hasNext())

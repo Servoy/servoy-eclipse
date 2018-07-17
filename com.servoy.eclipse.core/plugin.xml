@@ -424,7 +424,15 @@
             id="com.servoy.eclipse.core.resource.i18n"
             name="I18N"
             priority="normal">
-      </content-type>      
+      </content-type>
+      <content-type
+            base-type="org.eclipse.wst.css.core.csssource"
+            describer="org.eclipse.wst.css.core.internal.contenttype.ContentDescriberForCSS"
+            file-extensions="less"
+            id="less"
+            name="LESS"
+            priority="normal">
+		</content-type>
    </extension>
    <extension
          id="ServoyUpdatingProject"
