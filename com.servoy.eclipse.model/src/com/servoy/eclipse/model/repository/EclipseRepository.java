@@ -51,6 +51,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.AbstractRootObject;
+import com.servoy.j2db.persistence.ChangeHandler;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -401,6 +403,13 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 	@Override
 	public void updateRootObject(IRootObject rootObject) throws RepositoryException
 	{
+		ChangeHandler rootObjectChangeHandler = rootObject.getChangeHandler();
+		if (rootObjectChangeHandler == null)
+		{
+			rootObjectChangeHandler = new ChangeHandler(this);
+			((AbstractRootObject)rootObject).setChangeHandler(rootObjectChangeHandler);
+		}
+
 		if (rootObject instanceof Solution)
 		{
 			updateNodesInWorkspace(new IPersist[] { rootObject }, true);

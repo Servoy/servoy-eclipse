@@ -64,7 +64,7 @@ public class MediaSearch extends AbstractPersistSearch
 		FileTextSearchScope scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.frm", "*.js" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile(mediaImage.getUUID().toString()), monitor);
 
-		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js", "*.css" }, true);
+		scope = FileTextSearchScope.newSearchScope(scopes, new String[] { "*.js", "*.css", "*.less" }, true);
 		TextSearchEngine.create().search(scope, collector, Pattern.compile("\\bmedia:///" + mediaImage.getName() + "\\b"), monitor);
 
 		return Status.OK_STATUS;
