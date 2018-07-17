@@ -478,7 +478,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillContextMenu(org.eclipse.jface.action.IMenuManager)
 	 */
 	@Override
@@ -490,6 +490,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 
 			menuManager.add(showEditWithScriptEditor);
 			super.fillContextMenu(menuManager);
+			showEditWithScriptEditor.setEnabled(true);
 			showEditWithScriptEditor.setSelection(getSelectedItems());
 
 		}

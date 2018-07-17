@@ -65,7 +65,6 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 	/**
 	 * @param selection
 	 */
-
 	public void setSelection(IStructuredSelection selection)
 	{
 		this.selection = selection;
