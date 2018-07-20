@@ -339,7 +339,7 @@ public class ModelUtils
 				}
 
 				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches
-				|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
+					|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
 				{
 					continue;
 				}
@@ -485,7 +485,7 @@ public class ModelUtils
 		DataSourceCollectorVisitor datasourceCollector = new DataSourceCollectorVisitor();
 		solution.acceptVisitor(datasourceCollector);
 
-		Map<String, IServer> serverProxies = new HashMap<String, IServer>();
+		ConcurrentMap<String, IServer> serverProxies = new ConcurrentHashMap<String, IServer>();
 		for (String serverName : DataSourceUtils.getServerNames(datasourceCollector.getDataSources()))
 		{
 			try
