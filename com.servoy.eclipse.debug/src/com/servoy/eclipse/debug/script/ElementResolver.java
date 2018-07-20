@@ -45,6 +45,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -84,6 +85,7 @@ public class ElementResolver implements IElementResolver
 	private final Set<String> noneCalcNames = new HashSet<String>();
 	private final Set<String> noneFoundsetNames = new HashSet<String>();
 	private final Set<String> deprecated = new HashSet<String>();
+	private final Set<String> serversideScriptingNames = new HashSet<>();
 
 	public ElementResolver()
 	{
@@ -118,6 +120,9 @@ public class ElementResolver implements IElementResolver
 
 		noneCalcNames.addAll(noneFoundsetNames); // all filtered out for foundset methods is also filtered out for calcs
 		noneCalcNames.add(IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER);
+
+		serversideScriptingNames.add("servoyApi");
+		serversideScriptingNames.add("console");
 
 		deprecated.add("alldataproviders");
 		deprecated.add("currentcontroller");
@@ -257,6 +262,20 @@ public class ElementResolver implements IElementResolver
 			}
 		}
 
+		try
+		{
+			if (resource != null && resource.getProject() != null && resource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID) &&
+				resource.getName().endsWith("_server.js"))
+			{
+				if (typeNames.isEmpty()) typeNames = new HashSet<>();
+				typeNames.addAll(serversideScriptingNames);
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+
 		return typeNames;
 	}
 
@@ -380,8 +399,24 @@ public class ElementResolver implements IElementResolver
 			members.add(method);
 		}
 
-		// try to resolve first based on existing types as defined by TypeCreator (so that deprecated & other things are in sync)
 		IResource ctxResource = context.getModelElement().getResource();
+		try
+		{
+			if (ctxResource != null && ctxResource.getProject() != null && ctxResource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID) &&
+				ctxResource.getName().endsWith("_server.js") && serversideScriptingNames.contains(name))
+			{
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(name);
+				property.setReadOnly(true);
+				property.setType(context.getTypeRef(name));
+				members.add(property);
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Cannot resolve " + name, e);
+		}
+		// try to resolve first based on existing types as defined by TypeCreator (so that deprecated & other things are in sync)
 		if (ctxResource != null && fs != null && fs.getSolution() != null)
 		{
 			IPath path = ctxResource.getProjectRelativePath();

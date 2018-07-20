@@ -237,6 +237,8 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
+import com.servoy.j2db.server.ngclient.scripting.ConsoleObject;
+import com.servoy.j2db.server.ngclient.scripting.ServoyApiObject;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
@@ -404,6 +406,8 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType(JSDatabaseManager.class);
 		addAnonymousClassType(JSDeveloperSolutionModel.class);
 		addAnonymousClassType(JSSecurity.class);
+		addAnonymousClassType("servoyApi", ServoyApiObject.class);
+		addAnonymousClassType("console", ConsoleObject.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 
 
