@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentMap;
 import java.util.zip.GZIPOutputStream;
 
 import org.eclipse.core.resources.IFile;
@@ -1660,7 +1661,7 @@ public class SolutionSerializer
 		}
 		solution.setSerializableRuntimeProperty(Solution.PRE_LOADED_STYLES, all_styles);
 
-		Map<String, IServer> serverProxies = solution.getServerProxies();
+		ConcurrentMap<String, IServer> serverProxies = solution.getServerProxies();
 		IRepository oldRepository = solution.getRepository();
 		solution.setServerProxies(null);//clear
 		solution.setRepository(null);//clear
@@ -1676,7 +1677,7 @@ public class SolutionSerializer
 		ois.writeInt(modCount);
 		if (mods != null)
 		{
-			Map<String, IServer>[] tmpModuleServerProxies = new Map[modCount];
+			ConcurrentMap<String, IServer>[] tmpModuleServerProxies = new ConcurrentMap[modCount];
 			IRepository[] tmpModuleRepositories = new IRepository[modCount];
 			int i;
 			for (i = 0; i < modCount; i++)
