@@ -290,6 +290,7 @@ public class TypeCreator extends TypeCache
 	private static final int STATIC_FIELD = 4;
 
 	public static final String PLUGIN_TYPE_PREFIX = "plugins.";
+	private static final String _ABS_POSTFIX = "_abs";
 
 	protected final static ImageDescriptor METHOD = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("function.png");
 	protected final static ImageDescriptor PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("properties.png");
@@ -1312,6 +1313,40 @@ public class TypeCreator extends TypeCache
 				"Get a design-time property of an element.</br>" + "	var property = elements.elem.getDesignTimeProperty('myprop');</br></br>" +
 					"@param {Object} key the name of the property</br></br>" + "@return Object The value of the property for specified key.");
 			members.add(method);
+
+			if (fullTypeName.endsWith(_ABS_POSTFIX))
+			{
+				method = TypeInfoModelFactory.eINSTANCE.createMethod();
+				method.setName("setLocation");
+				parameters = method.getParameters();
+				param = TypeInfoModelFactory.eINSTANCE.createParameter();
+				param.setType(getTypeRef(null, "Number"));
+				param.setName("x");
+				parameters.add(param);
+				param = TypeInfoModelFactory.eINSTANCE.createParameter();
+				param.setType(getTypeRef(null, "Number"));
+				param.setName("y");
+				parameters.add(param);
+				method.setDescription(
+					"Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen. Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.</br>NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:</br> //returns the X and Y coordinates </br> var x = forms.company.elements.faxBtn.getLocationX();</br> var y = forms.company.elements.faxBtn.getLocationY();</br> //sets the new location 10 px to the right; 10 px down from the current location</br> forms.company.elements.faxBtn.setLocation(x+10,y+10);" +
+						"</br>       elements.elem.setLocation(200,200);</br></br>" + "<b>@param</b> Number x the X coordinate of the element in pixels.</br>" +
+						"<b>@param</b> Number y the Y coordinate of the element in pixels.</br>");
+				members.add(method);
+
+				method = TypeInfoModelFactory.eINSTANCE.createMethod();
+				method.setName("getLocationX");
+				method.setDescription(
+					"Returns the x location of the current element. NOTE: getLocationX() can be used with getLocationY() to set the location of an element using the setLocation function.</br>For Example:</br> //returns the X and Y coordinates </br> var x = forms.company.elements.faxBtn.getLocationX(); </br> var y = forms.company.elements.faxBtn.getLocationY();</br> //sets the new location 10 px to the right; 10 px down from the current location </br>forms.company.elements.faxBtn.setLocation(x+10,y+10);</br>" +
+						"</br>		var x = elements.elem.getLocationX();</br></br>" + "</br><b>@return</b> Number The x location of the element in pixels.");
+				members.add(method);
+
+				method = TypeInfoModelFactory.eINSTANCE.createMethod();
+				method.setName("getLocationY");
+				method.setDescription(
+					"Returns the x location of the current element. NOTE: getLocationY() can be used with getLocationY() to set the location of an element using the setLocation function.</br>For Example:</br> //returns the X and Y coordinates </br> var x = forms.company.elements.faxBtn.getLocationX(); </br> var y = forms.company.elements.faxBtn.getLocationY();</br> //sets the new location 10 px to the right; 10 px down from the current location </br>forms.company.elements.faxBtn.setLocation(x+10,y+10);</br>" +
+						"</br>		var y = elements.elem.getLocationY();</br></br>" + "</br><b>@return</b> Number The y location of the element in pixels.");
+				members.add(method);
+			}
 		}
 		return addType(bucket, type);
 	}
@@ -4285,6 +4320,11 @@ public class TypeCreator extends TypeCache
 							typeName = sb.toString();
 						}
 						elementType = getTypeRef(context, typeName);
+						if (formElement.getParent() instanceof Form && !((Form)formElement.getParent()).isResponsiveLayout())
+						{
+							wcTypeNames.put(elementType.getName() + _ABS_POSTFIX, spec);
+							elementType = getTypeRef(context, elementType.getName() + _ABS_POSTFIX);
+						}
 					}
 					else
 					{
