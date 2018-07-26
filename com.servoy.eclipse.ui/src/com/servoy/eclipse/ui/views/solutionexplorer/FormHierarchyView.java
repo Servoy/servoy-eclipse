@@ -640,15 +640,14 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	@Override
 	public void saveState(IMemento mem)
 	{
-		if (selected != null && selected.getUUID() != null)
+		if (getInput() != null)
 		{
-			mem.putString(SELECTED_FORM, selected.getUUID().toString());
+			mem.putString(SELECTED_FORM, getInput().getUUID().toString());
 		}
 		else
 		{
 			//this shouldn't happen
-			ServoyLog.logInfo(
-				"Save State failed." + (selected == null ? " Selection in the Form Hierarchy is null." : (selected.toString() + " uuid is null.")));
+			ServoyLog.logInfo("Save State failed." + (tree.getInput() == null ? "Form Hierarchy input is null." : (getInput().toString() + " uuid is null.")));
 		}
 		super.saveState(mem);
 	}
@@ -695,7 +694,10 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			Utils.getAsUUID(formUuid, false));
 		if (persist instanceof Form)
 		{
-			setSelection(persist);
+			Form form = (Form)persist;
+			tree.setInput(new Form[] { form });
+			setContentDescription(form.getName() + " [" + form.getRootObject().getName() + "]");
+			setSelection(form);
 		}
 	}
 
@@ -852,7 +854,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		else if (tree.getInput() == null)
 		{
 			selected = (Form)(((IPersist)object).getParent());
-			tree.setInput(new Form[] { selected });
 			showMembersInFormHierarchy(object, true);
 			list.setInput(selected);
 		}
@@ -868,7 +869,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		selected = (Form)object;
 		tree.setAutoExpandLevel(getActiveSolution().getFormHierarchy(selected).size() + 1);
-		tree.setInput(new Form[] { selected });
 		tree.setSelection(new StructuredSelection(selected));
 		tree.refresh();
 	}
@@ -902,7 +902,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			noSelectionChange = true;
 			tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
-			tree.setSelection(initialSelection);
+			tree.setSelection(new StructuredSelection(object));
 			if (refreshList)
 			{
 				list.setInput(((IPersist)object).getParent());
@@ -1326,13 +1326,25 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		if (obj instanceof IPersist)
 		{
 			Form form = (Form)(obj instanceof Form ? obj : (((IPersist)obj).getAncestor(IRepository.FORMS)));
-			if (!form.equals(selected))
+			if (!form.equals(getInput()))
 			{
 				selected = form;
+				tree.setInput(new Form[] { selected });
+				setContentDescription(selected.getName() + " [" + selected.getRootObject().getName() + "]");
 				setSelectionInTree(selected);
 			}
 		}
 		setSelection(obj);
+	}
+
+	private Form getInput()
+	{
+		if (tree.getInput() instanceof Form[])
+		{
+			Form[] forms = (Form[])tree.getInput();
+			return forms.length != 0 ? forms[0] : null;
+		}
+		return null;
 	}
 
 	private FlattenedSolution getActiveSolution()

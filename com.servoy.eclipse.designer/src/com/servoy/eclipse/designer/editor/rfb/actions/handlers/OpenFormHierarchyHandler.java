@@ -47,7 +47,7 @@ public class OpenFormHierarchyHandler implements IServerService
 		FormHierarchyView view = (FormHierarchyView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(FormHierarchyView.ID);
 		IPersist persist = select.getFirstElement() instanceof PersistContext ? ((PersistContext)select.getFirstElement()).getPersist()
 			: (IPersist)select.getFirstElement();
-		view.setSelection(persist);
+		view.open(persist);
 		return null;
 	}
 
