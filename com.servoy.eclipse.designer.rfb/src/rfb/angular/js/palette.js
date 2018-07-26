@@ -78,7 +78,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 			* enterDragMode($event,ghost.type,null,null,null,ghost.type,null,null,propertyName) for a ghost
 			*/
 			$scope.enterDragMode = function(event, componentName, packageName, tagName, model, type, topContainer,
-				layoutName, propertyName) {
+				layoutName, propertyName,componentTagName) {
 					var dragClone = null;
 					var angularElement = null;
 					var mouseentercallback;
@@ -166,7 +166,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							if (type == 'component' || type == "layout" || type == "template") {
 								if (type == 'component') {
 									if ($scope.isAbsoluteFormLayout())
-									    angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-servoyApi=\'svy_servoyApi\' svy-autoapply-disabled=\'true\'/></div>', model);
+									    angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><'+ (componentTagName ? componentTagName : tagName) +' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-servoyApi=\'svy_servoyApi\' svy-autoapply-disabled=\'true\'/></div>', model);
 									else 
 									    angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>', model);
 								}

@@ -72,6 +72,7 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -195,10 +196,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
-							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
+							boolean responsive = form.isResponsiveLayout();
+							if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
+							{
+								AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
+								if (container instanceof LayoutContainer && NGUtils.isAbsoluteLayoutDiv((LayoutContainer)container))
+								{
+									responsive = false;
+								}
+							}
+							if (!responsive) FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
 							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm);
-							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
-							if (form.isResponsiveLayout())
+							if (!responsive) FormLayoutGenerator.generateEndDiv(w);
+							if (responsive)
 							{
 								IPersist parent = ((ISupportExtendsID)fe.getPersistIfAvailable()).getRealParent();
 								parentuuid = parent.getUUID();

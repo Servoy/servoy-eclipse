@@ -80,6 +80,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -245,22 +246,31 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 * @param form
 	 * @return
 	 */
-	private String computeLayout(Form form)
+	private String computeLayout(Form form, boolean isAbsoluteLayoutDiv)
 	{
+		if (isAbsoluteLayoutDiv) return "absolute";
 		if (form.isResponsiveLayout()) return "flow";
 		if (form.getUseCssPosition()) return "csspos";
-		else return "absolute";
+		return "absolute";
 	}
 
 	public void refreshBrowserUrl(boolean force)
 	{
 		Form form = editorPart.getForm();
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
-		String newLayout = computeLayout(flattenedForm);
+
+		boolean isAbsoluteLayoutDiv = false;
+		if (showedContainer instanceof LayoutContainer)
+		{
+			isAbsoluteLayoutDiv = NGUtils.isAbsoluteLayoutDiv((LayoutContainer)showedContainer);
+		}
+
+		String newLayout = computeLayout(flattenedForm, isAbsoluteLayoutDiv);
 		if (!Utils.equalObjects(layout, newLayout) || force)
 		{
 			layout = newLayout;
 			Dimension formSize = flattenedForm.getSize();
+			if (isAbsoluteLayoutDiv) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&editorid=" + editorId + "&c_sessionid=" + clientId + (showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
