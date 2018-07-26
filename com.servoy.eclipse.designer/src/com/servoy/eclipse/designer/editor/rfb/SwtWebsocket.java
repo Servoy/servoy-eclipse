@@ -49,10 +49,13 @@ import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Display;
+import org.json.JSONObject;
+import org.sablo.websocket.IServerService;
 import org.sablo.websocket.WebsocketEndpoint;
 
 import com.servoy.eclipse.designer.rfb.endpoint.EditorContentEndpoint;
 import com.servoy.eclipse.designer.rfb.endpoint.EditorEndpoint;
+import com.servoy.j2db.server.ngclient.NGRuntimeWindowManager;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -111,6 +114,23 @@ public class SwtWebsocket
 
 		websocketEndpoint = new EditorContentEndpoint();
 		((EditorContentEndpoint)websocketEndpoint).start(newSession, contentId, args[1], args[2].split("\\?")[0]);
+		websocketEndpoint.getWindow().getSession().registerServerService(NGRuntimeWindowManager.WINDOW_SERVICE, new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject arguments) throws Exception
+			{
+				// editor content endpoint session doesn't have a window service so we ignore requests comming from client for that...
+				// before adding this, one would get messages in the log file when opening/resizing form editors (because client was trying to send resize call to server side window service) like:
+				// INFO [main] org.sablo.websocket.WebsocketEndpoint - Unknown service called from the client: $windowService [ ]
+
+				if ("windowClosing".equals(methodName))
+				{
+					return Boolean.TRUE;
+				} // else the others don't return anything anyway
+
+				return null;
+			}
+		});
 		return true;
 	}
 
