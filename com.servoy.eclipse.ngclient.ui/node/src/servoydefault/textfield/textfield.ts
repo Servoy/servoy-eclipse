@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
 
-import {FormattingService} from '../../ngclient/servoy_public'
+import {FormattingService, DecimalkeyconverterDirective} from '../../ngclient/servoy_public'
 
 import {ServoyDefaultBaseField} from '../basefield'
 

@@ -18,7 +18,7 @@ import {ServoyDefaultCombobox} from './combobox/combobox';
 
 import {SabloModule} from '../sablo/sablo.module'
 
-import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat,FormattingService,I18NProvider} from '../ngclient/servoy_public'
+import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat,FormattingService,I18NProvider,DecimalkeyconverterDirective} from '../ngclient/servoy_public'
 
 import {OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
 import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-datetime-moment';
@@ -39,6 +39,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
     FormatFilterPipe,
     MnemonicletterFilterPipe,
     SvyFormat,
+    DecimalkeyconverterDirective,
 	BGSplitter,
     BGPane
   ],
