@@ -28,6 +28,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -1115,19 +1116,14 @@ public class WarExporter
 		}
 		try (InputStream is = webXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
 		{
-			byte[] buffer = new byte[8096];
-			int read = webXmlIS.read(buffer);
-			while (read != -1)
-			{
-				bos.write(buffer, 0, read);
-				read = webXmlIS.read(buffer);
-			}
+			copyStream(webXmlIS, bos);
 		}
 		catch (Exception e)
 		{
 			throw new ExportException("Can't create the web.xml file: " + webXMLFile.getAbsolutePath(), e);
 		}
 	}
+
 
 	private void copyLog4jXml(File tmpWarDir) throws ExportException
 	{
@@ -1154,17 +1150,22 @@ public class WarExporter
 		}
 		try (InputStream is = logXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(log4jXMLFile)))
 		{
-			byte[] buffer = new byte[8096];
-			int read = is.read(buffer);
-			while (read != -1)
-			{
-				bos.write(buffer, 0, read);
-				read = is.read(buffer);
-			}
+			copyStream(is, bos);
 		}
 		catch (Exception e)
 		{
 			throw new ExportException("Can't create the log4j.xml file: " + log4jXMLFile.getAbsolutePath(), e);
+		}
+	}
+
+	private static void copyStream(InputStream inputStream, OutputStream outputStream) throws IOException
+	{
+		byte[] buffer = new byte[8096];
+		int read = inputStream.read(buffer);
+		while (read != -1)
+		{
+			outputStream.write(buffer, 0, read);
+			read = inputStream.read(buffer);
 		}
 	}
 

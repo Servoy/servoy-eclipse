@@ -13,7 +13,7 @@
 			dateTimeFormat="yyyy-MM-dd HH:mm"
 		/>
 		<File name="servoy_log"
-			fileName="${sys:servoy.application_server.dir}/servoy_log.txt"
+			fileName="${sys:user.home}/.servoy/server/${web:contextPath}/servoy_log.txt"
 			immediateFlush="true"
 			append="true">
 			<PatternLayout
