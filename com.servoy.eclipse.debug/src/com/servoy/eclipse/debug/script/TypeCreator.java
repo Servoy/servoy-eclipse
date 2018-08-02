@@ -1220,135 +1220,104 @@ public class TypeCreator extends TypeCache
 		{
 			boolean hasStyleclass = spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
 				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0;
-
 			Method method = null;
+
 			if (hasStyleclass)
 			{
-				method = TypeInfoModelFactory.eINSTANCE.createMethod();
-				method.setName("addStyleClass");
-				method.setDescription(
+				members.add(fillParameter(createMethod("addStyleClass",
 					"Add a style class to styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.addStyleClass('mycssclass');" +
-						"</br></br>@param {String} style class to add");
-				EList<Parameter> parameters = method.getParameters();
-				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-				param.setType(getTypeRef(null, "String"));
-				param.setName("styleclass");
-				parameters.add(param);
-				members.add(method);
-			}
+						"</br></br>@param {String} style class to add"),
+					createParam("String", "styleclass")));
 
-			method = TypeInfoModelFactory.eINSTANCE.createMethod();
-			method.setName("getFormName");
-			method.setDescription("Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();" +
-				"</br></br><b>@return</b> The name of the form.");
-			members.add(method);
-
-			method = TypeInfoModelFactory.eINSTANCE.createMethod();
-			method.setName("getName");
-			method.setDescription("Returns the name of the element. (may be null as well)</br></br>var name = elements.elem.getName();" +
-				"</br></br><b>@return</b> The name of the element.");
-			members.add(method);
-
-			method = TypeInfoModelFactory.eINSTANCE.createMethod();
-			method.setName("getElementType");
-			method.setDescription("Returns the web component type from specification file</br></br>var elementType = elements.elem.getElementType();" +
-				"</br></br><b>@return</b> The web component spec type.");
-			members.add(method);
-
-			if (hasStyleclass)
-			{
-				method = TypeInfoModelFactory.eINSTANCE.createMethod();
-				method.setName("removeStyleClass");
-				method.setDescription(
+				members.add(fillParameter(createMethod("removeStyleClass",
 					"Remove a style class (if already present) from styleclass named property or other property marked as mainStyleClass in the spec</br></br>elements.myelem.removeStyleClass('mycssclass');" +
-						"</br></br>@param {String} style class to remove");
-				EList<Parameter> parameters = method.getParameters();
-				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-				param.setType(getTypeRef(null, "String"));
-				param.setName("styleclass");
-				parameters.add(param);
-				members.add(method);
+						"</br></br>@param {String} style class to remove"),
+					createParam("String", "styleclass")));
+
+				members.add(fillParameter(createMethod("hasStyleClass",
+					"Check if a style class is present on styleclass named property</br></br>elements.myelem.hasStyleClass('mycssclass');" +
+						"</br></br>@param {String} style class to search"),
+					createParam("String", "styleclass")));
 			}
 
-			method = TypeInfoModelFactory.eINSTANCE.createMethod();
-			method.setName("putClientProperty");
-			EList<Parameter> parameters = method.getParameters();
-			Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
-			param.setType(getTypeRef(null, "String"));
-			param.setName("key");
-			parameters.add(param);
-			param = TypeInfoModelFactory.eINSTANCE.createParameter();
-			param.setType(getTypeRef(null, "Object"));
-			parameters.add(param);
-			param.setName("value");
-			method.setDescription(
+			members.add(fillParameter(
+				createMethod("getFormName", "Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();" +
+					"</br></br><b>@return</b> The name of the form.")));
+
+			members.add(
+				fillParameter(createMethod("getName", "Returns the name of the element. (may be null as well)</br></br>var name = elements.elem.getName();" +
+					"</br></br><b>@return</b> The name of the element.")));
+
+			members.add(fillParameter(createMethod("getElementType",
+				"Returns the web component type from specification file</br></br>var elementType = elements.elem.getElementType();" +
+					"</br></br><b>@return</b> The web component spec type.")));
+
+			members.add(fillParameter(createMethod("putClientProperty",
 				"Sets the value for the specified element client property key. NOTE: Depending on the operating system, a user interface property name may be available.</br>" +
 					"elements.elem.putClientProperty('ToolTipText','some text');</br></br>" +
-					"@param {Object} key user interface key (depends on operating system)</br>" + "@param {Object} value a predefined value for the key");
-			members.add(method);
+					"@param {Object} key user interface key (depends on operating system)</br>" + "@param {Object} value a predefined value for the key"),
+				createParam("String", "key"), createParam("Object", "value")
 
-			method = TypeInfoModelFactory.eINSTANCE.createMethod();
-			method.setName("getClientProperty");
-			parameters = method.getParameters();
-			param = TypeInfoModelFactory.eINSTANCE.createParameter();
-			param.setType(getTypeRef(null, "String"));
-			param.setName("key");
-			parameters.add(param);
-			method.setDescription(
+			));
+			members.add(fillParameter(createMethod("getClientProperty",
 				"Gets the specified client property for the element based on a key. NOTE: Depending on the operating system, a user interface property name may be available.</br>" +
 					"var property = elements.elem.getClientProperty('ToolTipText');</br></br>" +
 					"@param {Object} key user interface key (depends on operating system)</br></br>" +
-					"@return Object The value of the property for specified key.");
-			members.add(method);
+					"@return Object The value of the property for specified key."),
+				createParam("String", "key")));
 
-			method = TypeInfoModelFactory.eINSTANCE.createMethod();
-			method.setName("getDesignTimeProperty");
+			method = fillParameter(
+				createMethod("getDesignTimeProperty",
+					"Get a design-time property of an element.</br>" + "	var property = elements.elem.getDesignTimeProperty('myprop');</br></br>" +
+						"@param {Object} key the name of the property</br></br>" + "@return Object The value of the property for specified key."),
+				createParam("String", "key"));
 			method.setType(getTypeRef(null, ITypeNames.OBJECT));
-			parameters = method.getParameters();
-			param = TypeInfoModelFactory.eINSTANCE.createParameter();
-			param.setType(getTypeRef(null, "String"));
-			param.setName("key");
-			parameters.add(param);
-			method.setDescription(
-				"Get a design-time property of an element.</br>" + "	var property = elements.elem.getDesignTimeProperty('myprop');</br></br>" +
-					"@param {Object} key the name of the property</br></br>" + "@return Object The value of the property for specified key.");
 			members.add(method);
 
 			if (fullTypeName.endsWith(_ABS_POSTFIX))
 			{
-				method = TypeInfoModelFactory.eINSTANCE.createMethod();
-				method.setName("setLocation");
-				parameters = method.getParameters();
-				param = TypeInfoModelFactory.eINSTANCE.createParameter();
-				param.setType(getTypeRef(null, "Number"));
-				param.setName("x");
-				parameters.add(param);
-				param = TypeInfoModelFactory.eINSTANCE.createParameter();
-				param.setType(getTypeRef(null, "Number"));
-				param.setName("y");
-				parameters.add(param);
-				method.setDescription(
+				members.add(fillParameter(createMethod("setLocation",
 					"Sets the location of an element. It takes as input the X (horizontal) and Y (vertical) coordinates - starting from the TOP LEFT side of the screen. Please note that location should not be altered at runtime when an element is anchored. Use the solutionModel in such a situation.</br>NOTE: getLocationX() can be used with getLocationY() to return the current location of an element; then use the X and Y coordinates with the setLocation function to set a new location. For Example:</br> //returns the X and Y coordinates </br> var x = forms.company.elements.faxBtn.getLocationX();</br> var y = forms.company.elements.faxBtn.getLocationY();</br> //sets the new location 10 px to the right; 10 px down from the current location</br> forms.company.elements.faxBtn.setLocation(x+10,y+10);" +
 						"</br>       elements.elem.setLocation(200,200);</br></br>" + "<b>@param</b> Number x the X coordinate of the element in pixels.</br>" +
-						"<b>@param</b> Number y the Y coordinate of the element in pixels.</br>");
-				members.add(method);
+						"<b>@param</b> Number y the Y coordinate of the element in pixels.</br>"),
+					createParam("Number", "x"), createParam("Number", "y")));
 
-				method = TypeInfoModelFactory.eINSTANCE.createMethod();
-				method.setName("getLocationX");
-				method.setDescription(
+				members.add(fillParameter(createMethod("getLocationX",
 					"Returns the x location of the current element. NOTE: getLocationX() can be used with getLocationY() to set the location of an element using the setLocation function.</br>For Example:</br> //returns the X and Y coordinates </br> var x = forms.company.elements.faxBtn.getLocationX(); </br> var y = forms.company.elements.faxBtn.getLocationY();</br> //sets the new location 10 px to the right; 10 px down from the current location </br>forms.company.elements.faxBtn.setLocation(x+10,y+10);</br>" +
-						"</br>		var x = elements.elem.getLocationX();</br></br>" + "</br><b>@return</b> Number The x location of the element in pixels.");
-				members.add(method);
+						"</br>		var x = elements.elem.getLocationX();</br></br>" + "</br><b>@return</b> Number The x location of the element in pixels.")));
 
-				method = TypeInfoModelFactory.eINSTANCE.createMethod();
-				method.setName("getLocationY");
-				method.setDescription(
+				members.add(fillParameter(createMethod("getLocationY",
 					"Returns the x location of the current element. NOTE: getLocationY() can be used with getLocationY() to set the location of an element using the setLocation function.</br>For Example:</br> //returns the X and Y coordinates </br> var x = forms.company.elements.faxBtn.getLocationX(); </br> var y = forms.company.elements.faxBtn.getLocationY();</br> //sets the new location 10 px to the right; 10 px down from the current location </br>forms.company.elements.faxBtn.setLocation(x+10,y+10);</br>" +
-						"</br>		var y = elements.elem.getLocationY();</br></br>" + "</br><b>@return</b> Number The y location of the element in pixels.");
-				members.add(method);
+						"</br>		var y = elements.elem.getLocationY();</br></br>" + "</br><b>@return</b> Number The y location of the element in pixels.")));
 			}
 		}
 		return addType(bucket, type);
+	}
+
+	private Method fillParameter(Method method, Parameter... params)
+	{
+
+		for (Parameter para : params)
+		{
+			method.getParameters().add(para);
+		}
+		return method;
+	}
+
+	private Method createMethod(String name, String description)
+	{
+		Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+		method.setName(name);
+		method.setDescription(description);
+		return method;
+	}
+
+	private Parameter createParam(String parameterType, String paramName)
+	{
+		Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+		param.setType(getTypeRef(null, parameterType));
+		param.setName(paramName);
+		return param;
 	}
 
 	/**
