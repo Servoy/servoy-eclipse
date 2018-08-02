@@ -18,11 +18,13 @@ package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.dialogs.Dialog;
@@ -46,6 +48,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.ICheckBoxView;
 import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
@@ -54,7 +57,10 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.Utils;
 
 
 /**
@@ -67,6 +73,8 @@ public class FormElementDeleteCommand extends Command
 
 	/** Object to remove from. */
 	private ISupportChilds[] parents;
+
+	private final Set<Form> subforms = new HashSet<Form>();
 
 	/**
 	 * Create a command that will remove the element from its parent.
@@ -112,10 +120,11 @@ public class FormElementDeleteCommand extends Command
 	{
 		private final List<IPersist> overridingPersists;
 		private CheckboxTableViewer checkboxTableViewer;
-		private HashMap<String, IPersist> options;
+		private HashMap<String, List<IPersist>> options;
 		Set<IPersist> selected;
 		private final String description;
 		private SelectAllButtonsBar selectAllButtons;
+		public Set<String> items;
 
 		protected ConfirmDeleteDialog(Shell parentShell, String description, List<IPersist> overridingPersists)
 		{
@@ -133,7 +142,7 @@ public class FormElementDeleteCommand extends Command
 			Label l = new Label(parent, SWT.NONE);
 			l.setText(description);
 
-			options = new HashMap<String, IPersist>();
+			options = new HashMap<String, List<IPersist>>();
 			checkboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.FULL_SELECTION);
 			checkboxTableViewer.setContentProvider(new IStructuredContentProvider()
 			{
@@ -153,15 +162,19 @@ public class FormElementDeleteCommand extends Command
 					if (inputElement instanceof List< ? >)
 					{
 						List<IPersist> persists = (List<IPersist>)inputElement;
-						String[] items = new String[persists.size()];
+						items = new TreeSet<String>();
 						int i = 0;
 						for (IPersist p : persists)
 						{
 							String item = ((Form)p.getAncestor(IRepository.FORMS)).getName();
-							items[i++] = item;
-							options.put(item, p);
+							items.add(item);
+							if (!options.containsKey(item))
+							{
+								options.put(item, new ArrayList<IPersist>());
+							}
+							options.get(item).add(p);
 						}
-						return items;
+						return items.toArray();
 					}
 					return null;
 				}
@@ -191,11 +204,11 @@ public class FormElementDeleteCommand extends Command
 		{
 			if (event.getChecked())
 			{
-				selected.add(options.get(event.getElement()));
+				selected.addAll(options.get(event.getElement()));
 			}
 			else
 			{
-				selected.remove(options.get(event.getElement()));
+				selected.removeAll(options.get(event.getElement()));
 			}
 			if (checkboxTableViewer.getCheckedElements().length < checkboxTableViewer.getTable().getItemCount())
 			{
@@ -254,6 +267,11 @@ public class FormElementDeleteCommand extends Command
 				if (dialog.open() == Window.OK)
 				{
 					confirmedChildren.addAll(dialog.selected);
+					for (IPersist p : dialog.selected)
+					{
+						Form subform = (Form)p.getAncestor(IRepository.FORMS);
+						if (!subform.isChanged()) subforms.add(subform);
+					}
 				}
 				else
 				{
@@ -295,6 +313,15 @@ public class FormElementDeleteCommand extends Command
 		}
 
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(children));
+		try
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().saveEditingSolutionNodes(
+				subforms.toArray(new IPersist[subforms.size()]), false);
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError("Could not save forms", e);
+		}
 	}
 
 	@Override
@@ -322,41 +349,60 @@ public class FormElementDeleteCommand extends Command
 	private static List<IPersist> getOverridingPersists(IPersist persist)
 	{
 		List<IPersist> overriding = new ArrayList<IPersist>();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
-		//retrieve all the forms;
-		Iterator<Form> it = servoyModel.getFlattenedSolution().getForms(true);
-
-		//start iterating through all the forms;
-		while (it.hasNext())
+		List<Form> inheriting = getAllSubforms(ServoyModelManager.getServoyModelManager().getServoyModel(), (Form)persist.getAncestor(IRepository.FORMS));
+		Collections.sort(inheriting, NameComparator.INSTANCE);
+		for (Form child : inheriting)
 		{
-			Form itForm = servoyModel.getFlattenedSolution().getFlattenedForm(it.next());
-			if (itForm.getExtendsID() > 0)
+			Iterator<IPersist> elementsIte = child.getAllObjects();
+			while (elementsIte.hasNext())
 			{
-				Iterator<IPersist> elementsIte = itForm.getAllObjects();
-				while (elementsIte.hasNext())
-				{
-					addOverriding(overriding, persist, elementsIte.next());
-				}
+				addOverriding(overriding, persist, elementsIte.next());
 			}
 		}
-
 		return overriding;
 	}
 
-	private static void addOverriding(List<IPersist> overriding, IPersist persist, IPersist p)
+	private static List<Form> getAllSubforms(ServoyModel servoyModel, Form form)
 	{
-		if (p instanceof ISupportExtendsID && (((ISupportExtendsID)p).getExtendsID() == persist.getID()))
+		List<Form> subforms = new ArrayList<>();
+		List<Form> inheriting = servoyModel.getEditingFlattenedSolution(form).getDirectlyInheritingForms(form);
+		for (Form child : inheriting)
+		{
+			subforms.add(child);
+			subforms.addAll(getAllSubforms(servoyModel, child));
+		}
+		return subforms;
+	}
+
+	private static void addOverriding(List<IPersist> overriding, IPersist superPersist, IPersist p)
+	{
+		if (p instanceof ISupportExtendsID && (((ISupportExtendsID)p).getExtendsID() == superPersist.getID()))
 		{
 			overriding.add(p);
-		}
-		else if (p instanceof ISupportChilds)
-		{
-			ISupportChilds parent = (ISupportChilds)p;
-			Iterator<IPersist> childrenIt = parent.getAllObjects();
-			while (childrenIt.hasNext())
+			if (p instanceof ISupportChilds)
 			{
-				addOverriding(overriding, persist, childrenIt.next());
+				ISupportChilds parent = (ISupportChilds)p;
+				for (IPersist child : Utils.iterate(parent.getAllObjects()))
+				{
+					if (child instanceof ISupportExtendsID && !PersistHelper.isOverrideElement((ISupportExtendsID)child))
+					{ // is is an extra child element compared to its super child elements
+						overriding.add(child);
+					}
+					else if (((AbstractBase)child).hasOverrideProperties())
+					{
+						overriding.add(child);
+					}
+				}
+			}
+			else if (p instanceof ISupportChilds)
+			{
+				ISupportChilds parent = (ISupportChilds)p;
+				Iterator<IPersist> childrenIt = parent.getAllObjects();
+				while (childrenIt.hasNext())
+				{
+					addOverriding(overriding, superPersist, childrenIt.next());
+				}
 			}
 		}
 	}
