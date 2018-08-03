@@ -31,6 +31,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -88,6 +89,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
@@ -615,6 +617,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 	private ContextAction openAction;
 	private ContextAction treeNewAction;
+	private ContextAction searchReference;
 	private OverrideMethodAction overrideAction;
 	private int fCurrentOrientation;
 	private OrientationAction[] fToggleOrientationActions;
@@ -672,6 +675,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		treeNewAction = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD), "New");
+		searchReference = new ContextAction(this, null, null);
 		overrideAction = new OverrideMethodAction(this);
 		createTreeViewer(fSplitter);
 		createListViewer(fSplitter);
@@ -763,6 +767,10 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		treeNewAction.registerAction(Form.class, newSubform);
 		treeNewAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(treeNewAction);
+		IAction sa = new SearchAction();
+		searchReference.registerAction(Form.class, sa);
+		searchReference.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(searchReference);
 	}
 
 	private void createListViewer(Composite parent)
@@ -787,6 +795,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		overrideAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(overrideAction);
 
+		searchReference.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(searchReference);
 		listToolBar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
 		viewForm.setTopCenter(listToolBar);
 
@@ -1124,11 +1134,15 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private void fillTreeContextMenu(IMenuManager manager)
 	{
 		if (treeNewAction.isEnabled()) manager.add(treeNewAction);
+		manager.add(new Separator());
+		if (searchReference.isEnabled()) manager.add(searchReference);
 	}
 
 	private void fillListContextMenu(IMenuManager manager)
 	{
 		if (overrideAction.isEnabled()) manager.add(overrideAction);
+		manager.add(new Separator());
+		if (searchReference.isEnabled()) manager.add(searchReference);
 	}
 
 	public void groupElementsOption(boolean group)
