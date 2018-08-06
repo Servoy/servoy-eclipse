@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.ChangeSupport;
@@ -30,6 +32,7 @@ import org.eclipse.swt.SWT;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ScriptCalculation;
 
 public class CalculationTypeEditingSupport extends EditingSupport
@@ -99,12 +102,33 @@ public class CalculationTypeEditingSupport extends EditingSupport
 			ScriptCalculation calculation = (ScriptCalculation)element;
 			int index = Integer.parseInt(value.toString());
 			int type = Column.allDefinedTypes[index];
-			if (type != calculation.getType())
-			{
-				calculation.setTypeAndCheck(type, Activator.getDefault().getDesignClient());
-				changeSupport.fireEvent(new ChangeEvent(observable));
-			}
+			calculation.setDeclaration(Pattern.compile("return+.+;").matcher(calculation.getDeclaration()).replaceFirst(getMethodReturnString(type)));
+			calculation.setTypeAndCheck(type, Activator.getDefault().getDesignClient());
+			changeSupport.fireEvent(new ChangeEvent(observable));
 			getViewer().update(element, null);
+		}
+	}
+
+	/**
+	 * @param index
+	 * @return
+	 */
+	private String getMethodReturnString(int index)
+	{
+		switch ((index))
+		{
+			case IColumnTypes.TEXT :
+				return "return '';";
+			case IColumnTypes.INTEGER :
+				return "return 1;";
+			case IColumnTypes.NUMBER :
+				return "return 1;";
+			case IColumnTypes.DATETIME :
+				return "return new Date(2018, 0, 1);";
+			case IColumnTypes.MEDIA :
+				return "return new Media();";
+			default :
+				return "return '';";
 		}
 	}
 
