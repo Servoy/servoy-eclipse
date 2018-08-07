@@ -320,15 +320,13 @@ public class DefaultHelpUI extends AbstractHelpUI {
 				try {
 					IWorkbenchPart activePart = page.getActivePart();
 					Control c = window.getShell().getDisplay().getFocusControl();
-					if (activePart != null) {
-						IContextProvider adapter = activePart.getAdapter(IContextProvider.class);
-						if (adapter != null)
-							context = adapter.getContext(c);
-					}
-					/*
-					 * If the context help has no description text and exactly one topic, go straight to the
-					 * topic and skip context help.
-					 */
+					IContextProvider adapter = activePart.getAdapter(IContextProvider.class);
+					if (adapter != null)
+						context = adapter
+								.getContext(c); /*
+												 * If the context help has no description text and exactly one
+												 * topic, go straight to the topic and skip context help.
+												 */
 					String contextText = context.getText();
 					IHelpResource[] topics = context.getRelatedTopics();
 					boolean isSingleChoiceWithoutDescription = contextText == null && topics.length == 1;
