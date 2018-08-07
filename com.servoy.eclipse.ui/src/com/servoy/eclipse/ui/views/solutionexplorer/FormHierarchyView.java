@@ -70,6 +70,7 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -1133,6 +1134,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	private void fillTreeContextMenu(IMenuManager manager)
 	{
+		manager.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
+		manager.add(new Separator());
 		if (treeNewAction.isEnabled()) manager.add(treeNewAction);
 		manager.add(new Separator());
 		if (searchReference.isEnabled()) manager.add(searchReference);
