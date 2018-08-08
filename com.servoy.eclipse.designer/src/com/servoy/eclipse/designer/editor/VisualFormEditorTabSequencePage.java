@@ -66,12 +66,12 @@ import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
-import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.IDragData;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.WebFormComponentChildType;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
 import com.servoy.j2db.FlattenedSolution;
