@@ -75,7 +75,7 @@ public class ImportSampleAction implements IWorkbenchWindowActionDelegate
 							{
 								ConfigServletImportUserChannel userChannel = new ConfigServletImportUserChannel(new PrintWriter(new CharArrayWriter()), true,
 									true, true, false, true, true, true, true, true, true, true, true, false,
-									IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G, true, true, false, false, false, true);
+									IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G, true, true, false, false, false, true, true);
 								IApplicationServerSingleton as = ApplicationServerRegistry.get();
 
 								try
