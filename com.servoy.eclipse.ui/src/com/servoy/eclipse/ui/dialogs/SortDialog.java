@@ -39,6 +39,9 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -67,7 +70,6 @@ import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.smart.WebStart;
 
 public class SortDialog extends Dialog
 {
@@ -188,7 +190,19 @@ public class SortDialog extends Dialog
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				WebStart.setClipboardContent(getValue());
+				Object o = getValue();
+				if (o instanceof String)
+				{
+					Clipboard clipboard = new Clipboard(getShell().getDisplay());
+					try
+					{
+						clipboard.setContents(new String[] { o.toString() }, new Transfer[] { TextTransfer.getInstance() });
+					}
+					finally
+					{
+						clipboard.dispose();
+					}
+				}
 			}
 		});
 
