@@ -708,4 +708,10 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		return false;
 	}
+
+	@Override
+	public boolean allowImportEmptySolution()
+	{
+		return true;
+	}
 }
