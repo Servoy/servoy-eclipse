@@ -36,10 +36,10 @@ import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
-import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.WebFormComponentChildType;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;

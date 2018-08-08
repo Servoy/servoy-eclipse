@@ -198,7 +198,7 @@ public class PDPropertySource extends PersistPropertySource
 					}));
 			props.add(attributesPropertyHandler);
 		}
-		if (persistContext.getPersist() instanceof WebComponent)
+		if (persistContext.getPersist() instanceof WebComponent || persistContext.getPersist() instanceof WebFormComponentChildType)
 		{
 			props.add(new PseudoPropertyHandler("designTimeProperties"));
 		}
