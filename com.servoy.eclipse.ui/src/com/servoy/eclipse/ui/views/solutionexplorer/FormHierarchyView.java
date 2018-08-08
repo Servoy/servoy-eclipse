@@ -107,7 +107,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.ShowMembersInFormHie
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
@@ -742,14 +741,14 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		if (memento == null) return;
 		String formUuid = memento.getString(SELECTED_FORM);
 		if (formUuid == null) return;
-		IPersist persist = AbstractRepository.searchPersist(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution(),
-			Utils.getAsUUID(formUuid, false));
+		IPersist persist = getActiveSolution().searchPersist(Utils.getAsUUID(formUuid, false));
 		if (persist instanceof Form)
 		{
 			Form form = (Form)persist;
 			tree.setInput(new Form[] { form });
 			setContentDescription(form.getName() + " [" + form.getRootObject().getName() + "]");
 			setSelection(form);
+			expandTreePaths(form);
 		}
 	}
 
@@ -896,34 +895,34 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 	}
 
-	public void setSelection(Object object)
+	public void setSelection(IPersist persist)
 	{
-		setSelection(object, true);
+		setSelection(persist, true);
 	}
 
-	public void setSelection(Object object, boolean refreshList)
+	public void setSelection(IPersist persist, boolean refreshList)
 	{
 		if (noSelectionChange) return;
-		if (object == null)
+		if (persist == null)
 		{
 			tree.refresh();
 			return;
 		}
 
-		if (object instanceof Form)
+		if (persist instanceof Form)
 		{
-			setSelectionInTree(object);
+			setSelectionInTree(persist);
 			list.setInput(selected);
 		}
 		else if (tree.getInput() == null)
 		{
-			selected = (Form)(((IPersist)object).getParent());
-			showMembersInFormHierarchy(object, true);
+			selected = (Form)((persist).getParent());
+			showMembersInFormHierarchy(persist, true);
 			list.setInput(selected);
 		}
 		else
 		{
-			showMembersInFormHierarchy(object, refreshList);
+			showMembersInFormHierarchy(persist, refreshList);
 		}
 		list.refresh();
 		list.expandAll();
@@ -937,40 +936,64 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree.refresh();
 	}
 
-	private void showMembersInFormHierarchy(Object object, boolean refreshList)
+	private void showMembersInFormHierarchy(IPersist persist, boolean refreshList)
 	{
-		treeProvider.setSelection((IPersist)object);
+		treeProvider.setSelection(persist);
 
 		tree.getTree().setRedraw(false);
 		tree.refresh();
-		tree.expandAll();
-		List<IPersist> toExpand = treeProvider.getLeavesToExpand();
-		Set<TreePath> paths = new HashSet<>();
-		for (IPersist p : toExpand)
-		{
-			Form parent = (Form)p.getParent();
-			List<IPersist> path = new ArrayList<IPersist>();
-			path.addAll(getActiveSolution().getFormHierarchy(parent));
-			Collections.reverse(path);
-			paths.add(new TreePath(path.toArray()));
-		}
-		tree.getTree().setRedraw(true);
-		tree.refresh();
+		expandTreePaths(persist);
 		try
 		{
 			noSelectionChange = true;
-			tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
-			tree.setSelection(new StructuredSelection(object));
 			if (refreshList)
 			{
-				list.setInput(((IPersist)object).getParent());
-				list.setSelection(new StructuredSelection(object));
-				list.reveal(object);
+				list.setInput(persist.getParent());
+				list.setSelection(new StructuredSelection(persist));
+				list.reveal(persist);
 			}
 		}
 		finally
 		{
 			noSelectionChange = false;
+		}
+	}
+
+
+	private void expandTreePaths(IPersist object)
+	{
+		if (showMembersAction.isChecked())
+		{
+			//the tree is filtered, so every leaf is an override of the searched member or the member itself
+			tree.expandAll();
+			try
+			{
+				noSelectionChange = true;
+				tree.setSelection(new StructuredSelection(object));
+			}
+			finally
+			{
+				noSelectionChange = false;
+			}
+		}
+		else
+		{
+			List<IPersist> path = new ArrayList<IPersist>();
+			path.addAll(getActiveSolution().getFormHierarchy(getInput()));
+			Collections.reverse(path);
+			TreePath treePath = new TreePath(path.toArray());
+			tree.getTree().setRedraw(true);
+			tree.refresh();
+			try
+			{
+				noSelectionChange = true;
+				tree.setExpandedTreePaths(new TreePath[] { treePath });
+				tree.setSelection(new StructuredSelection(object));
+			}
+			finally
+			{
+				noSelectionChange = false;
+			}
 		}
 	}
 
@@ -1308,7 +1331,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 									resource.getProject().getName());
 								if (servoyProject == null) continue;
 								UUID uuid = SolutionDeserializer.getUUID(resource.getRawLocation().toFile());
-								IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), uuid);
+								IPersist persist = getActiveSolution().searchPersist(uuid);
 								if (persist != null) changedProblemPersists.add(persist);
 							}
 						}
@@ -1397,8 +1420,9 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				setContentDescription(selected.getName() + " [" + selected.getRootObject().getName() + "]");
 				setSelectionInTree(selected);
 			}
+			setSelection((IPersist)obj);
+			expandTreePaths((IPersist)obj);
 		}
-		setSelection(obj);
 	}
 
 	private Form getInput()
