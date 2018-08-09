@@ -816,6 +816,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree.addSelectionChangedListener(treeNewAction);
 		IAction sa = new SearchAction();
 		searchReference.registerAction(Form.class, sa);
+		searchReference.registerAction(ScriptMethod.class, sa);
+		searchReference.registerAction(BaseComponent.class, sa);
 		searchReference.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(searchReference);
 	}
@@ -1213,6 +1215,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	private void fillListContextMenu(IMenuManager manager)
 	{
+		manager.add(new Separator(IWorkbenchActionConstants.OPEN_EXT));
+		manager.add(new Separator());
 		if (overrideAction.isEnabled()) manager.add(overrideAction);
 		manager.add(new Separator());
 		if (searchReference.isEnabled()) manager.add(searchReference);
