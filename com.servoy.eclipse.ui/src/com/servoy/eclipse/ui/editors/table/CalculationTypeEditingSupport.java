@@ -126,7 +126,7 @@ public class CalculationTypeEditingSupport extends EditingSupport
 			case IColumnTypes.DATETIME :
 				return "return new Date(2018, 0, 1);";
 			case IColumnTypes.MEDIA :
-				return "return new Media();";
+				return "return null;";
 			default :
 				return "return '';";
 		}

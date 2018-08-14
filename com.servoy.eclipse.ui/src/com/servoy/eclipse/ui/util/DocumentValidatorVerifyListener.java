@@ -83,7 +83,23 @@ public class DocumentValidatorVerifyListener implements VerifyListener
 				PlainDocument uncheckedNewContent = new PlainDocument(content);
 				uncheckedNewContent.replace(e.start, e.end - e.start, e.text, null);
 
-				e.doit = uncheckedNewContent.getText(0, uncheckedNewContent.getLength()).equals(checkedNewContent.getText(0, checkedNewContent.getLength()));
+				if (uncheckedNewContent.getText(0, uncheckedNewContent.getLength()).equals(checkedNewContent.getText(0, checkedNewContent.getLength())))
+				{
+					e.doit = true;
+				}
+				else
+				{
+					if (e.text.length() > 1)
+					{
+						e.text = checkedNewContent.getText(0, checkedNewContent.getLength()).trim();
+						e.doit = true;
+					}
+					else if (e.text.length() == 0)
+					{
+						e.doit = true;
+					}
+					else e.doit = false;
+				}
 			}
 			catch (BadLocationException ex)
 			{

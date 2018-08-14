@@ -146,6 +146,12 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							IPersist real = ((PersistContext)element).getPersist();
 							if (real != null)
 							{
+								if (PersistHelper.isInAbsoluteLayoutMode(real))
+								{
+									// do not allow d&d from absolute layout div
+									event.doit = false;
+									return;
+								}
 								lst.add(real);
 							}
 						}

@@ -130,7 +130,7 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		if (sel.size() == 1)
 		{
-			if (sel.getFirstElement() instanceof Form)
+			if (sel.getFirstElement() instanceof Form || sel.getFirstElement() instanceof ScriptMethod || sel.getFirstElement() instanceof BaseComponent)
 			{
 				selectedObject = sel.getFirstElement();
 			}
