@@ -104,7 +104,6 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 
@@ -257,7 +256,7 @@ public class CreateComponentHandler implements IServerService
 				}
 			}
 			if (editorPart.getForm().isResponsiveLayout() &&
-				!NGUtils.isAbsoluteLayoutDiv(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
+				!PersistHelper.isAbsoluteLayoutDiv(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
 			{
 				List<IPersist> children = new ArrayList<IPersist>();
 				Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
@@ -791,7 +790,7 @@ public class CreateComponentHandler implements IServerService
 		parent.addChild(container);
 		container.setLocation(new Point(index, index));
 		newPersists.add(container);
-		if (NGUtils.isAbsoluteLayoutDiv(layoutSpec)) container.setSize(new Dimension(200, 200));
+		if (PersistHelper.isAbsoluteLayoutDiv(layoutSpec)) container.setSize(new Dimension(200, 200));
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)

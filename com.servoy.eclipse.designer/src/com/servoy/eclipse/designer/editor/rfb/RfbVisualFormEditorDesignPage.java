@@ -80,7 +80,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -248,7 +247,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 */
 	private String computeLayout(Form form, boolean isAbsoluteLayoutDiv)
 	{
-		if (isAbsoluteLayoutDiv) return "absolute";
+		if (isAbsoluteLayoutDiv) return "csspos";
 		if (form.isResponsiveLayout()) return "flow";
 		if (form.getUseCssPosition()) return "csspos";
 		return "absolute";
@@ -262,7 +261,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		boolean isAbsoluteLayoutDiv = false;
 		if (showedContainer instanceof LayoutContainer)
 		{
-			isAbsoluteLayoutDiv = NGUtils.isAbsoluteLayoutDiv((LayoutContainer)showedContainer);
+			isAbsoluteLayoutDiv = PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)showedContainer);
 		}
 
 		String newLayout = computeLayout(flattenedForm, isAbsoluteLayoutDiv);

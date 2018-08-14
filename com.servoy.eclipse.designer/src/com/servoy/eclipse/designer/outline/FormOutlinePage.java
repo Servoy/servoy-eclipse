@@ -84,7 +84,6 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 
@@ -147,7 +146,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							IPersist real = ((PersistContext)element).getPersist();
 							if (real != null)
 							{
-								if (real.getParent() instanceof LayoutContainer && NGUtils.isAbsoluteLayoutDiv((LayoutContainer)real.getParent()))
+								if (PersistHelper.isInAbsoluteLayoutMode(real))
 								{
 									// do not allow d&d from absolute layout div
 									event.doit = false;

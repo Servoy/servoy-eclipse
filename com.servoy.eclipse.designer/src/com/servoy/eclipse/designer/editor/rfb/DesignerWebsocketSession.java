@@ -72,7 +72,6 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -200,7 +199,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
 							{
 								AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
-								if (container instanceof LayoutContainer && NGUtils.isAbsoluteLayoutDiv((LayoutContainer)container))
+								if (container instanceof LayoutContainer && PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)container))
 								{
 									responsive = false;
 								}
