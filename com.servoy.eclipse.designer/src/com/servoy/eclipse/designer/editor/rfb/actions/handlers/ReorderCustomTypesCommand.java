@@ -81,7 +81,7 @@ public class ReorderCustomTypesCommand extends Command
 			});
 
 			setIndexes(property);
-			source.getParent().setProperty(jsonKey, asList.toArray());
+			source.getParent().setProperty(jsonKey, asList.toArray(new IChildWebObject[0]));
 			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
 		}
 	}
