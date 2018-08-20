@@ -459,7 +459,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		private Form input;
 		private IPersist listSelection;
-		private ArrayList<IPersist> leavesToExpand = new ArrayList<>();
 		private List<Form> hierarchy = new ArrayList<>();
 
 		@Override
@@ -467,7 +466,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			input = null;
 			listSelection = null;
-			leavesToExpand = null;
 		}
 
 		@Override
@@ -500,7 +498,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 					if (child != null)
 					{
 						result.add(child);
-						leavesToExpand.add(child);
 					}
 				}
 
@@ -537,11 +534,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			return new Object[0];
 		}
 
-		public List<IPersist> getLeavesToExpand()
-		{
-			return leavesToExpand;
-		}
-
 		@Override
 		public Object getParent(Object element)
 		{
@@ -576,7 +568,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		public void setSelection(IPersist object)
 		{
 			listSelection = object;
-			leavesToExpand = new ArrayList<>();
 			hierarchy = getPersistFormHierarchy(listSelection);
 		}
 
