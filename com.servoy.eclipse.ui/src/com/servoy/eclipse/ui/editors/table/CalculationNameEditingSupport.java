@@ -177,13 +177,16 @@ public class CalculationNameEditingSupport extends EditingSupport
 				{
 					if (calculation.getTable().getColumnType(combo.getText()) != 0)
 					{
-						int type = calculation.getType();
-						calculation.setType(calculation.getTable().getColumnType(combo.getText()));
+						int type = calculation.getTable().getColumnType(combo.getText());
 						Matcher m = Pattern.compile("return+.+;").matcher(calculation.getDeclaration());
-						if (m.find() && m.group().equals(calculation.getDefaultReturnMethodString(type)))
+						if (m.find() && m.group().equals(ScriptCalculation.getDefaultReturnMethodString(calculation.getType())))
 						{
 							calculation.setDeclaration(Pattern.compile("return+.+;").matcher(calculation.getDeclaration()).replaceFirst(
-								calculation.getDefaultReturnMethodString(calculation.getTable().getColumnType(combo.getText()))));
+								ScriptCalculation.getDefaultReturnMethodString(type)));
+						}
+						if (type != calculation.getType())
+						{
+							calculation.setType(type);
 						}
 					}
 					calculation.updateName(nameValidator, combo.getText());

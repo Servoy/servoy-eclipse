@@ -105,10 +105,10 @@ public class CalculationTypeEditingSupport extends EditingSupport
 			calculation.setTypeAndCheck(Column.allDefinedTypes[index], Activator.getDefault().getDesignClient());
 			Matcher m = Pattern.compile("return+.+;").matcher(calculation.getDeclaration());
 
-			if (m.find() && m.group().equals(calculation.getDefaultReturnMethodString(type)))
+			if (m.find() && m.group().equals(ScriptCalculation.getDefaultReturnMethodString(type)))
 			{
 				calculation.setDeclaration(Pattern.compile("return+.+;").matcher(calculation.getDeclaration()).replaceFirst(
-					calculation.getDefaultReturnMethodString(calculation.getType())));
+					ScriptCalculation.getDefaultReturnMethodString(calculation.getType())));
 			}
 			changeSupport.fireEvent(new ChangeEvent(observable));
 			getViewer().update(element, null);
