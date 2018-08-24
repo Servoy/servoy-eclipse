@@ -185,8 +185,8 @@ public class Activator extends AbstractUIPlugin
 													final MessageDialog dialog = new MessageDialog(new Shell(),
 														"Missing package '" + automaticDownloadPackage + "'", null,
 														"Missing package was detected in solution '" + module.getProject().getName() + "': '" +
-															automaticDownloadPackage + "'. Do you want to try to download it using Web Package Manager ?",
-														MessageDialog.QUESTION, new String[] { "Automatic install", "Cancel" }, 0);
+															automaticDownloadPackage + "'. Do you want to try to download it using Web Package Manager?",
+														MessageDialog.QUESTION, new String[] { "Automatic install", "Skip" }, 0);
 													dialog.setBlockOnOpen(true);
 													int pressedButton = dialog.open();
 													if (pressedButton == 0)
