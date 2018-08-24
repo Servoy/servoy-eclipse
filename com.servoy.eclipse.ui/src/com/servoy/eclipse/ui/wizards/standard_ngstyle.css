@@ -25,4 +25,12 @@ div:not(.container):not(.container-fluid):not([class^="col-xs-"]):not([class^="c
 	margin-left: 0;
 }
 
+input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
 /* ------------ END: standard ngclient css ------------ */
