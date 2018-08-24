@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeEvent;
@@ -173,6 +175,20 @@ public class CalculationNameEditingSupport extends EditingSupport
 			{
 				if (!calculation.getName().equals(combo.getText()))
 				{
+					if (calculation.getTable().getColumnType(combo.getText()) != 0)
+					{
+						int type = calculation.getTable().getColumnType(combo.getText());
+						Matcher m = Pattern.compile("return+.+;").matcher(calculation.getDeclaration());
+						if (m.find() && m.group().equals(ScriptCalculation.getDefaultReturnMethodString(calculation.getType())))
+						{
+							calculation.setDeclaration(Pattern.compile("return+.+;").matcher(calculation.getDeclaration()).replaceFirst(
+								ScriptCalculation.getDefaultReturnMethodString(type)));
+						}
+						if (type != calculation.getType())
+						{
+							calculation.setType(type);
+						}
+					}
 					calculation.updateName(nameValidator, combo.getText());
 					changeSupport.fireEvent(new ChangeEvent(observable));
 				}

@@ -73,4 +73,10 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 		return super.createClientService(name);
 	}
 
+	@Override
+	public boolean shouldTest()
+	{
+		return false;
+	}
+
 }

@@ -126,6 +126,7 @@ public class ElementSearch extends AbstractPersistSearch
 
 				public void acceptElement(Object element, ISourceRange range)
 				{
+					acceptForeignElement(element);
 				}
 
 				public void acceptForeignElement(Object object)
