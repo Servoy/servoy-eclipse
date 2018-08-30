@@ -164,6 +164,7 @@ public class ValueListEditor extends PersistEditor
 	private ISelectionChangedListener relationSelectionListener;
 	private IStatusChangedListener statusChangeListener;
 
+	// type definition widgets
 	private Combo displayType, realType;
 
 	@Override
@@ -618,6 +619,41 @@ public class ValueListEditor extends PersistEditor
 		doRefresh();
 	}
 
+	public void updateTypeDefinitionWidgets()
+	{
+		ValueListDPSelectionComposite[] dpSelectionCompositeA = { dp_select1, dp_select2, dp_select3 };
+		boolean isDisplayValueSet = false;
+		int displayValueType = IColumnTypes.TEXT;
+		int realValueType = IColumnTypes.TEXT;
+		boolean isRealValueSet = false;
+		for (ValueListDPSelectionComposite dpSelectionComposite : dpSelectionCompositeA)
+		{
+			if (dpSelectionComposite.isEnabled())
+			{
+				if (!isDisplayValueSet && dpSelectionComposite.getShowInField())
+				{
+					displayValueType = dpSelectionComposite.getDataProviderType();
+					isDisplayValueSet = true;
+				}
+
+				if (dpSelectionComposite.getReturnInDataProvider())
+				{
+					realValueType = isRealValueSet ? IColumnTypes.TEXT : dpSelectionComposite.getDataProviderType();
+					isRealValueSet = true;
+				}
+			}
+		}
+		if (isDisplayValueSet && (displayValueType != getValueList().getDisplayValueType()))
+		{
+			getValueList().setDisplayValueType(displayValueType);
+		}
+		if (isRealValueSet && (realValueType != getValueList().getRealValueType()))
+		{
+			getValueList().setRealValueType(realValueType);
+		}
+		if (m_bindingContext != null) m_bindingContext.updateTargets();
+	}
+
 	@Override
 	protected void doRefresh()
 	{
@@ -704,6 +740,11 @@ public class ValueListEditor extends PersistEditor
 				customValues.setText("");
 			}
 
+			boolean isCustomOrGlobalValuelist = valueList.getValueListType() == IValueListConstants.CUSTOM_VALUES ||
+				valueList.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES;
+			realType.setEnabled(isCustomOrGlobalValuelist);
+			displayType.setEnabled(isCustomOrGlobalValuelist);
+
 			currentTable = table;
 
 			dp_select1.initDataBindings(table);
@@ -715,6 +756,9 @@ public class ValueListEditor extends PersistEditor
 			dp_select1.setEnabled(enabled);
 			dp_select2.setEnabled(enabled);
 			dp_select3.setEnabled(enabled);
+
+			updateTypeDefinitionWidgets();
+
 			sortingDefinitionSelect.setEnabled(enabled);
 			separator_char.setEnabled(enabled);
 			separatorCharacterLabel.setEnabled(enabled);
