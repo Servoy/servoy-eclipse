@@ -21,6 +21,8 @@ import org.eclipse.core.databinding.beans.PojoObservables;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.IValueChangeListener;
+import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -44,6 +46,7 @@ import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -63,6 +66,8 @@ public class ValueListDPSelectionComposite extends Composite
 	private int mask;
 	private ITable table;
 	private int methodNr;
+	private int dataProviderType = IColumnTypes.TEXT;
+	private boolean isInitDataBinding;
 
 	public ValueListDPSelectionComposite(Composite parent, FlattenedSolution flattenedSolution, int style)
 	{
@@ -102,8 +107,13 @@ public class ValueListDPSelectionComposite extends Composite
 			editor.flagModified();
 			Object[] selectedObjects = ((IStructuredSelection)event.getSelection()).toArray();
 			String dataProvider = null;
+			dataProviderType = IColumnTypes.TEXT;
 			if (selectedObjects != null && selectedObjects.length > 0 && selectedObjects[0] instanceof IDataProvider)
+			{
 				dataProvider = ((IDataProvider)selectedObjects[0]).getDataProviderID();
+				dataProviderType = ((IDataProvider)selectedObjects[0]).getDataProviderType();
+			}
+
 			switch (methodNr)
 			{
 				case 1 :
@@ -118,7 +128,7 @@ public class ValueListDPSelectionComposite extends Composite
 				default :
 					break;
 			}
-
+			if (!isInitDataBinding) editor.updateTypeDefinitionWidgets();
 		}
 
 	}
@@ -127,6 +137,7 @@ public class ValueListDPSelectionComposite extends Composite
 
 	public void initDataBindings(final ITable table)
 	{
+		isInitDataBinding = true;
 		((DataProviderContentProvider)tree.getContentProvider()).setTable(table, null);
 		tree.refreshTree();
 		this.table = table;
@@ -153,6 +164,7 @@ public class ValueListDPSelectionComposite extends Composite
 			default :
 				break;
 		}
+		isInitDataBinding = false;
 	}
 
 	public void setSelection(String selection)
@@ -188,12 +200,24 @@ public class ValueListDPSelectionComposite extends Composite
 		listener = new SelectionChangedListener(editor);
 		addSelectionChangedListener();
 
+
+		IValueChangeListener<Object> showInReturnInValueChangeListener = new IValueChangeListener<Object>()
+		{
+			@Override
+			public void handleValueChange(ValueChangeEvent< ? > event)
+			{
+				editor.updateTypeDefinitionWidgets();
+			}
+		};
+
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
 
 		IObservableValue returnDataProviderFieldTextObserveWidget = SWTObservables.observeSelection(returnInDataproviderButton);
-		IObservableValue getValueListReturnDataProviderObserveValue = PojoObservables.observeValue(this, "returnInDataProvider");
+		IObservableValue< ? > getValueListReturnDataProviderObserveValue = PojoObservables.observeValue(this, "returnInDataProvider");
+		getValueListReturnDataProviderObserveValue.addValueChangeListener(showInReturnInValueChangeListener);
 		IObservableValue showInFieldSelectionObserveWidget = SWTObservables.observeSelection(showInFieldButton);
-		IObservableValue getShowInFieldSelectionObserveValue = PojoObservables.observeValue(this, "showInField");
+		IObservableValue< ? > getShowInFieldSelectionObserveValue = PojoObservables.observeValue(this, "showInField");
+		getShowInFieldSelectionObserveValue.addValueChangeListener(showInReturnInValueChangeListener);
 
 		m_bindingContext = new DataBindingContext();
 
@@ -241,6 +265,11 @@ public class ValueListDPSelectionComposite extends Composite
 	public Object getDataProvider()
 	{
 		return ((IStructuredSelection)tree.getSelection()).getFirstElement();
+	}
+
+	public int getDataProviderType()
+	{
+		return dataProviderType;
 	}
 
 	@Override
