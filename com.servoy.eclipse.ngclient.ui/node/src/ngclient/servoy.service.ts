@@ -6,12 +6,14 @@ import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service'
 import { WindowRefService } from '../sablo/util/windowref.service';
 import { LoggerService, LoggerFactory  } from '../sablo/logger.service'
+import { SabloDeferHelper} from '../sablo/defer.service';
 
 import { SessionStorageService } from 'angular-web-storage';
 
 import { DateConverter } from './converters/date_converter'
 import { JSONObjectConverter } from './converters/json_object_converter'
 import { JSONArrayConverter } from './converters/json_array_converter'
+import { ValuelistConverter } from './converters/valuelist_converter'
 import {I18NProvider} from './services/i18n_provider.service'
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
@@ -39,6 +41,7 @@ export class ServoyService {
             private i18nProvider:I18NProvider,
             converterService: ConverterService,
             specTypesService: SpecTypesService,
+            sabloDeferHelper: SabloDeferHelper,
             iterableDiffers: IterableDiffers,
             private logFactory: LoggerFactory) {
 
@@ -49,6 +52,7 @@ export class ServoyService {
         converterService.registerCustomPropertyHandler( "Date", dateConverter );
         converterService.registerCustomPropertyHandler( "JSON_obj", new JSONObjectConverter( converterService, specTypesService ) );
         converterService.registerCustomPropertyHandler( "JSON_arr", new JSONArrayConverter( converterService, specTypesService, iterableDiffers ) );
+        converterService.registerCustomPropertyHandler( "valuelist", new ValuelistConverter( sabloService, sabloDeferHelper) );
     }
 
     public connect() {

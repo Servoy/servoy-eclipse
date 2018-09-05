@@ -86,6 +86,11 @@ export interface ICustomArray<T> extends Array<T>, IChangeAwareValue {
     markForChanged(): void;
 }
 
+export interface IValuelist extends Array<any>  {
+    filterList(filterString:string): Promise<any>;
+    getDisplayValue(realValue:any): Promise<any>;
+}
+
 export class BaseCustomObject implements ICustomObject {
     private state = new BaseCustomObjectState();
 
