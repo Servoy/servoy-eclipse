@@ -384,6 +384,13 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		if (persists != null)
 		{
+			if (persists.size() == 1 && persists.get(0) == showedContainer && showedContainer instanceof LayoutContainer &&
+				PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)showedContainer))
+			{
+				// probably size has changed we need a full refresh
+				refreshBrowserUrl(true);
+				return;
+			}
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editorPart.getForm());
 			final Form form = fs.getFlattenedForm(editorPart.getForm(), false);
 			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
