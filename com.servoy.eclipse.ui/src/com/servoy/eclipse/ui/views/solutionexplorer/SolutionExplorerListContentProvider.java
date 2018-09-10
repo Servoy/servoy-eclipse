@@ -616,6 +616,27 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				String prefix = '.' + DataSourceUtilsBase.DB_DATASOURCE_SCHEME + '.' + ((TableWrapper)un.getRealObject()).getServerName() + '.' +
 					((TableWrapper)un.getRealObject()).getTableName();
 				lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+
+				ITable table = null;
+				try
+				{
+					table = ServoyModel.getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName()).getTable(
+						((TableWrapper)un.getRealObject()).getTableName());
+				}
+				catch (RemoteException e)
+				{
+					ServoyLog.logError(e);
+				}
+				if (table != null)
+				{
+					Object[] tableColumns = createTableColumns(table, un);
+					Object[] newElements = new Object[lm.length + tableColumns.length];
+
+					System.arraycopy(tableColumns, 0, newElements, 0, tableColumns.length);
+					System.arraycopy(lm, 0, newElements, tableColumns.length, lm.length);
+
+					lm = newElements;
+				}
 			}
 			else if (type == UserNodeType.FORM_ELEMENTS)
 			{
@@ -1243,7 +1264,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		if (table != null)
 		{
-			genTableColumns(table, dlm, UserNodeType.TABLE_COLUMNS_ITEM, un.getSolution(), null);
+			if (un.getSolution() == null)
+			{
+				genTableColumns(table, dlm, UserNodeType.TABLE_COLUMNS_ITEM,
+					ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution(), null);
+			}
+			else genTableColumns(table, dlm, UserNodeType.TABLE_COLUMNS_ITEM, un.getSolution(), null);
 		}
 
 		return dlm.toArray();
