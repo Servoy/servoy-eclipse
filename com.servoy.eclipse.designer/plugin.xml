@@ -1455,7 +1455,7 @@
             </command>
             <command
                   commandId="com.servoy.eclipse.designer.rfb.showcontainer"
-                  label="Show in Form Editor"
+                  label="Zoom in Form Editor"
                   style="push">
                <visibleWhen
                      checkEnabled="false">

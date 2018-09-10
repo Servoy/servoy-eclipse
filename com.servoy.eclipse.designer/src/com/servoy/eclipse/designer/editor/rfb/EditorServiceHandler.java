@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -60,9 +61,11 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.LayoutContainer;
 
 /**
  * Handle requests from the rfb html editor.
@@ -155,6 +158,44 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+
+		configuredHandlers.put("zoomIn", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				PersistContext selection = null;
+				if (selectionProvider != null && selectionProvider.getSelection() instanceof IStructuredSelection &&
+					((IStructuredSelection)selectionProvider.getSelection()).size() == 1)
+				{
+					selection = (PersistContext)((IStructuredSelection)selectionProvider.getSelection()).getFirstElement();
+				}
+				IPersist currentPersist = selection.getPersist();
+				while (currentPersist != null && !(currentPersist instanceof LayoutContainer))
+				{
+					currentPersist = currentPersist.getParent();
+				}
+				if (currentPersist instanceof LayoutContainer)
+				{
+					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).showContainer((LayoutContainer)currentPersist);
+				}
+				return null;
+			}
+		});
+
+
+		configuredHandlers.put("zoomOut", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).showContainer(null);
+				return null;
+			}
+		});
+
 		configuredHandlers.put("toggleShowData", new IServerService()
 		{
 
@@ -213,7 +254,8 @@ public class EditorServiceHandler implements IServerService
 					if (args.has("isHideInherited"))
 					{
 						RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor();
-						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null ? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
+						return Boolean.valueOf(rfbVisualFormEditorDesignPage != null
+							? rfbVisualFormEditorDesignPage.getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED) : null);
 					}
 				}
 				return Boolean.FALSE;
