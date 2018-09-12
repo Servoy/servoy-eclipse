@@ -165,8 +165,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnZoomIn = {
 			text: "Zoom in",
-			icon: "../../images/group.png",
-			disabledIcon: "../../images/group-disabled.png",
+			icon: "../../images/zoom_in.png",
+			disabledIcon: "../../images/zoom_in_disabled.png",
 			enabled: false,
 			onclick: function() {
 				$editorService.executeAction('zoomIn');
@@ -175,8 +175,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	
 	var btnZoomOut = {
 			text: "Zoom out",
-			icon: "../../images/ungroup.png",
-			disabledIcon: "../../images/ungroup-disabled.png",
+			icon: "../../images/zoom_out.png",
+			disabledIcon: "../../images/zoom_out_disabled.png",
 			enabled: false,
 			onclick: function() {
 				$editorService.executeAction('zoomOut');

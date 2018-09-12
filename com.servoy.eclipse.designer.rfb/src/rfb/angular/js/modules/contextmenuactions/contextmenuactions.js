@@ -329,7 +329,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 				$contextmenu.add(
 						{
 							text: "Zoom in",
-							getIconStyle: function(){ return {'background-image':"url(images/forms.png)"}},
+							getIconStyle: function(){ return {'background-image':"url(images/zoom_in.png)"}},
 							getItemClass: function() { if (hasSelection(1)) return "enabled"; else return "disabled"}, 
 							execute:function()
 							{
@@ -345,7 +345,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 				$contextmenu.add(
 						{
 							text: "Zoom out",
-							getIconStyle: function(){ return {'background-image':"url(images/forms.png)"}},
+							getIconStyle: function(){ return {'background-image':"url(images/zoom_out.png)"}},
 							getItemClass: function() { if ($editorService.isShowingContainer()) return "enabled"; else return "disabled"}, 
 							execute:function()
 							{
