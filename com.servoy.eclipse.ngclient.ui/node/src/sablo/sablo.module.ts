@@ -12,6 +12,7 @@ import { SabloService } from './sablo.service'
 import { LoggerFactory } from './logger.service'
 
 import { SpecTypesService } from './spectypes.service'
+import { SabloDeferHelper} from './defer.service';
 
 @NgModule( {
     declarations: [TrustAsHtmlPipe
@@ -25,7 +26,8 @@ import { SpecTypesService } from './spectypes.service'
         ServicesService,
         WebsocketService,
         WindowRefService,
-        LoggerFactory],
+        LoggerFactory,
+        SabloDeferHelper],
     exports: [TrustAsHtmlPipe]
 } )
 
