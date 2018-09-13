@@ -1,5 +1,6 @@
 <div class='input-group date'
-    [style]="(!readOnly && enabled && !findmode) ? { 'position':'relative'} : {'display':'inline', 'position':'relative'}"
+	[style]="(!readOnly && enabled && !findmode) ? { 'position':'relative'} : {'display':'inline', 'position':'relative'}"
+	[svyStartEdit]="'dataProviderID'"
     #element>
 	<input type="text" 
 	   sablo-tabseq='model.tabSeq'

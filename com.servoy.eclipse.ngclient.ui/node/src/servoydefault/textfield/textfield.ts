@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
 
-import {FormattingService, DecimalkeyconverterDirective} from '../../ngclient/servoy_public'
+import {FormattingService, DecimalkeyconverterDirective, StartEditDirective} from '../../ngclient/servoy_public'
 
 import {ServoyDefaultBaseField} from '../basefield'
 
@@ -11,9 +11,5 @@ import {ServoyDefaultBaseField} from '../basefield'
 export class ServoyDefaultTextField extends ServoyDefaultBaseField {
     constructor(renderer: Renderer2, formattingService : FormattingService) { 
         super(renderer,formattingService);
-    }
-
-    getNativeInput() {
-        return this.elementRef.nativeElement;
     }
 }

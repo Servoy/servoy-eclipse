@@ -1,8 +1,8 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
 
 import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
 
-export class ServoyDefaultBaseComponent implements OnInit, OnChanges, OnDestroy {
+export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
     @Input() name;
     @Input() servoyApi;
 
@@ -106,8 +106,5 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges, OnDestroy 
     */
     protected getNativeChild():any {
         return this.elementRef.nativeElement;
-    }
-
-    ngOnDestroy() {
     }
 }
