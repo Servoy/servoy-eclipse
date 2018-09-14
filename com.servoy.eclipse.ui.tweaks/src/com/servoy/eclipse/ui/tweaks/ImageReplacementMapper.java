@@ -570,13 +570,13 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/elcl16/synced.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/link_to_editor.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/dtool16/import_wiz.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/import-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/import_wiz.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/import.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/dtool16/export_wiz.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/export-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/export-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/etool16/export_wiz.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/export.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/export.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/dlcl16/refresh_nav.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/refresh-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/elcl16/refresh_nav.png"),
@@ -585,6 +585,10 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/prev_nav.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/dlcl16/up_nav.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/prev_nav-disabled.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/etool16/debug_exc.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/debug.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/etool16/run_exc.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/run.png"));
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/designer.png"));
