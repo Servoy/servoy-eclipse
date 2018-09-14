@@ -1,31 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration
-	status="INFO"
-	packages="com.servoy.j2db.server.util">
+<Configuration packages="com.servoy.j2db.server.util"
+	debug="false" status="INFO">
 	<Appenders>
-		<Console name="console" target="SYSTEM_OUT">
-			<PatternLayout
-				pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
-			/>
+		<Console name="stdout" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %p [%t] %c - %m%n" />
 		</Console>
-		<SlidingWindow name="configservlet"
-			windowSize="100"
-			dateTimeFormat="yyyy-MM-dd HH:mm"
-		/>
-		<File name="servoy_log"
+		<SlidingWindow name="configservlet" windowSize="1000"
+			dateTimeFormat="yyyy-MM-dd HH:mm" />
+		<RollingFile name="file"
 			fileName="${sys:user.home}/.servoy/server/${web:contextPath}/servoy_log.txt"
-			immediateFlush="true"
-			append="true">
+			filePattern="${sys:user.home}/.servoy/server/${web:contextPath}/servoy_log-%i.txt.zip"
+			immediateFlush="true" append="true">
+			<Policies>
+				<SizeBasedTriggeringPolicy size="10MB" />
+			</Policies>
 			<PatternLayout
-				pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
-			/>
-		</File>
+				pattern="%d %p [%t] %c - %m [%X{clientid} %X{solution}]%n" />
+		</RollingFile>
+		<Async name="asyncfile">
+			<AppenderRef ref="file" />
+		</Async>
 	</Appenders>
 	<Loggers>
-		<Root level="debug">
-			<AppenderRef ref="console"/>
-			<AppenderRef ref="configservlet"/>
-			<AppenderRef ref="servoy_log"/>
+		<Logger name="com.servoy.j2db.util.Debug" level="WARN" />
+		<Logger name="com.servoy.j2db.dataprocessing.editedRecords"
+			level="WARN" />
+		<Logger name="com.servoy.j2db.server.persistence.Server"
+			level="WARN" />
+		<Logger
+			name="com.servoy.j2db.persistence.XMLInMemoryImportHandlerVersions11AndHigher"
+			level="WARN" />
+		<Logger name="com.servoy.j2db.persistence.XMLExporter"
+			level="WARN" />
+		<Logger name="com.servoy.j2db.server" level="WARN" />
+		<Logger name="com.servoy.j2db.server.main.WebServer"
+			level="WARN" />
+		<Logger name="com.servoy.j2db.datasource" level="WARN" />
+		<Logger name="com.servoy.j2db.datasource.ClientManager"
+			level="WARN" />
+		<Logger name="org.sablo" level="WARN" />
+		<Logger name="org.sablo.specification.property" level="WARN" />
+		<Logger name="org.sablo.websocket" level="WARN" />
+		<Logger name="com.servoy.j2db.server.ngclient.property.types"
+			level="WARN" />
+		<Logger name="org.apache.wicket" level="WARN" />
+		<Logger
+			name="org.apache.wicket.request.target.component.listener.BehaviorRequestTarget"
+			level="ERROR" />
+		<Root level="WARN">
+			<AppenderRef ref="asyncfile" />
+			<AppenderRef ref="configservlet" />
+			<!-- <AppenderRef ref="stdout" /> -->
 		</Root>
 	</Loggers>
-</Configuration>
+</Configuration>			

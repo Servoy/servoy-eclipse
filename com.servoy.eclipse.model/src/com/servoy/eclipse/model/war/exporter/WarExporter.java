@@ -1897,7 +1897,7 @@ public class WarExporter
 		}
 		catch (Exception e)
 		{
-			throw new ExportException("Cant'copy file from " + sourceFile + " to " + destFile, e);
+			throw new ExportException("Can't copy file from " + sourceFile + " to " + destFile, e);
 		}
 
 	}
