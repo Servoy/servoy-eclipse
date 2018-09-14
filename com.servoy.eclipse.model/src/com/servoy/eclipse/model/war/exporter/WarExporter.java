@@ -440,7 +440,7 @@ public class WarExporter
 		attr = doc.createAttribute("name");
 		attr.setValue(NGClientEntryFilter.SERVOY_THIRDPARTY_SVYGRP + id);
 		group.setAttributeNode(attr);
-		for (String relativePath : NGClientEntryFilter.INDEX_3TH_PARTY_JS)
+		for (String relativePath : NGClientEntryFilter.INDEX_3RD_PARTY_JS)
 		{
 			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "js");
 		}
@@ -476,7 +476,7 @@ public class WarExporter
 		attr = doc.createAttribute("name");
 		attr.setValue(NGClientEntryFilter.SERVOY_CSS_THIRDPARTY_SVYGRP + id);
 		group.setAttributeNode(attr);
-		for (String relativePath : NGClientEntryFilter.INDEX_3TH_PARTY_CSS)
+		for (String relativePath : NGClientEntryFilter.INDEX_3RD_PARTY_CSS)
 		{
 			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "css");
 		}
