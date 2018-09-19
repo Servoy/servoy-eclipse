@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import {FormsModule}        from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -63,9 +63,13 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
             ServoyDefaultCalendar,
             ServoyDefaultCombobox
   ],
-  providers: [FormattingService,
-                      I18NProvider,
-                      {provide: OWL_DATE_TIME_FORMATS, useValue: OWL_MOMENT_DATE_TIME_FORMATS}
-                     ]
+  providers: [
+              FormattingService,
+              I18NProvider,
+              {provide: OWL_DATE_TIME_FORMATS, useValue: OWL_MOMENT_DATE_TIME_FORMATS}
+                     ],
+  schemas: [
+    CUSTOM_ELEMENTS_SCHEMA
+  ]
 })
 export class ServoyDefaultComponentsModule { }
