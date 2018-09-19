@@ -5,5 +5,5 @@
 <div  style="width:100%; overflow:hidden; position:relative; white-space:nowrap; pointer-events: none;" #child>
  	   		<span svy-imagemediaid='{img: dataProviderID.url ? dataProviderID.url : imageMediaID, componentSize: size ,rollOverImg:rolloverImageMediaID, visible: visible}'></span>
  	   		<span [innerHTML]='(((dataProviderID == null && !hideText) || dataProviderID?.url) ? text : dataProviderID ) | formatFilter:format?.display:format?.type | mnemonicletterFilter:mnemonic | trustAsHtml:servoyApi.trustAsHtml()'></span>
-</div>   
+</div> 
 </button>
