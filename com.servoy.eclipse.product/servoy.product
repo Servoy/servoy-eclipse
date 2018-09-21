@@ -31,6 +31,7 @@ and will be prosecuted to the maximum extent possible under law.
       <vmArgs>-Xms40m
 -Xmx1G
 -XX:MaxPermSize=256M
+-DLog4jContextSelector=org.apache.logging.log4j.core.selector.BasicContextSelector
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
@@ -121,18 +122,19 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </features>
 
    <configurations>
-      <plugin id="org.apache.logging.log4j.slf4j18-impl" autoStart="true" startLevel="0" />
-      <plugin id="org.apache.logging.log4j.api" autoStart="true" startLevel="0" />
-      <plugin id="org.apache.logging.log4j.core" autoStart="true" startLevel="0" />
+      <plugin id="j2db_log4j" autoStart="true" startLevel="0" />
       <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="0" />
       <plugin id="org.apache.aries.util" autoStart="true" startLevel="0" />
-      <plugin id="slf4j.api" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.logging.log4j.api" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.logging.log4j.core" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.logging.log4j.slf4j18-impl" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
-      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
-      <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="4"/> 
+      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
+      <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="4" />
+      <plugin id="slf4j.api" autoStart="true" startLevel="0" />
    </configurations>
 
    <preferencesInfo>
