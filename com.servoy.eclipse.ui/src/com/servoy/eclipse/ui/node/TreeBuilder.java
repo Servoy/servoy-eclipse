@@ -75,6 +75,11 @@ public class TreeBuilder
 		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Array.class, UserNodeType.ARRAY, null);
 	}
 
+	public static UserNode[] createJSObject(IImageLookup imageLookup)
+	{
+		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Object.class, UserNodeType.OBJECT, null);
+	}
+
 	public static UserNode[] createJSDate(IImageLookup imageLookup)
 	{
 		return createTypedArray(imageLookup, com.servoy.j2db.documentation.scripting.docs.Date.class, UserNodeType.DATE, null);

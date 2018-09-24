@@ -390,8 +390,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			key = un.getRealObject();
 		}
 		else if (!(type == UserNodeType.PLUGINS || type == UserNodeType.STRING || type == UserNodeType.NUMBER || type == UserNodeType.DATE ||
-			type == UserNodeType.ARRAY || type == UserNodeType.STATEMENTS || type == UserNodeType.SPECIAL_OPERATORS || type == UserNodeType.XML_METHODS ||
-			type == UserNodeType.XML_LIST_METHODS || type == UserNodeType.FUNCTIONS || type == UserNodeType.FORM_ELEMENTS || type == UserNodeType.JSON))
+			type == UserNodeType.ARRAY || type == UserNodeType.OBJECT || type == UserNodeType.STATEMENTS || type == UserNodeType.SPECIAL_OPERATORS ||
+			type == UserNodeType.XML_METHODS || type == UserNodeType.XML_LIST_METHODS || type == UserNodeType.FUNCTIONS || type == UserNodeType.FORM_ELEMENTS ||
+			type == UserNodeType.JSON))
 		// if (type !=  UserNodeType.OTHER_CACHED_RETURN_TYPES_THAT_DO_NOT_MODIFY_THE_KEY)
 		{
 			// THE DATA FOR THIS TYPE OF NODES IS NOT CACHED
@@ -583,6 +584,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.ARRAY)
 			{
 				lm = TreeBuilder.createJSArray(this);
+			}
+			else if (type == UserNodeType.OBJECT)
+			{
+				lm = TreeBuilder.createJSObject(this);
 			}
 			else if (type == UserNodeType.REGEXP)
 			{
