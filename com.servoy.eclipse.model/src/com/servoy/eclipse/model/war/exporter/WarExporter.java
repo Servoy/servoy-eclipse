@@ -940,7 +940,7 @@ public class WarExporter
 			prop.setProperty("insertNewI18NKeysOnly", Boolean.toString(exportModel.isInsertNewI18NKeysOnly()));
 			prop.setProperty("importUserPolicy", Integer.toString(exportModel.getImportUserPolicy()));
 			prop.setProperty("addUsersToAdminGroup", Boolean.toString(exportModel.isAddUsersToAdminGroup()));
-			prop.setProperty("allowDataModelChange", Boolean.toString(exportModel.isAllowDataModelChanges()));
+			prop.setProperty("allowDataModelChange", exportModel.getAllowDataModelChanges());
 			prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
 			prop.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
 

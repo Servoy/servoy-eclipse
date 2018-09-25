@@ -396,9 +396,9 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public boolean isAllowDataModelChanges()
+		public String getAllowDataModelChanges()
 		{
-			return !configuration.isStopOnAllowDataModelChanges();
+			return Boolean.toString(!configuration.isStopOnAllowDataModelChanges());
 		}
 
 		@Override

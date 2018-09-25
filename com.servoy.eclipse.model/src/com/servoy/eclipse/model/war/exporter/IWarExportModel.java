@@ -75,7 +75,7 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public boolean isAddUsersToAdminGroup();
 
-	public boolean isAllowDataModelChanges();
+	public String getAllowDataModelChanges();
 
 	public boolean isUpdateSequences();
 
