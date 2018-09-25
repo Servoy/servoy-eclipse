@@ -164,7 +164,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		private Text filePath;
 		private Button browseButton;
 		private Button cleanImport;
-		private Button allowDataModelChange;
 		private Button displayDataModelChanges;
 		private Button bActivateSolution;
 
@@ -235,10 +234,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			cleanImport = new Button(topLevel, SWT.CHECK);
 			cleanImport.setText("Clean Import");
 
-			allowDataModelChange = new Button(topLevel, SWT.CHECK);
-			allowDataModelChange.setText("Allow data model (database) changes");
-			allowDataModelChange.setSelection(true);
-
 			displayDataModelChanges = new Button(topLevel, SWT.CHECK);
 			displayDataModelChanges.setText("Display data model (database) changes");
 
@@ -279,12 +274,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			formData = new FormData();
 			formData.left = new FormAttachment(cleanImport, 0, SWT.LEFT);
 			formData.top = new FormAttachment(cleanImport, 0, SWT.BOTTOM);
-			formData.right = new FormAttachment(100, 0);
-			allowDataModelChange.setLayoutData(formData);
-
-			formData = new FormData();
-			formData.left = new FormAttachment(allowDataModelChange, 10, SWT.LEFT);
-			formData.top = new FormAttachment(allowDataModelChange, 0, SWT.BOTTOM);
 			formData.right = new FormAttachment(100, 0);
 			displayDataModelChanges.setLayoutData(formData);
 
@@ -336,14 +325,13 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			final String resourcesProjectName = page.getNewName();
 			final ServoyResourcesProject existingProject = page.getResourcesProject();
 			final boolean isCleanImport = page.isCleanImport();
-			final boolean allowDataModelChanges = page.getAllowDataModelChange();
 			final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
 			final boolean doActivateSolution = page.getActivateSolution();
 			IRunnableWithProgress runnable = new IRunnableWithProgress()
 			{
 				public void run(IProgressMonitor monitor)
 				{
-					final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(allowDataModelChanges, doDisplayDataModelChanges, getShell());
+					final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(doDisplayDataModelChanges, getShell());
 					IApplicationServerSingleton as = ApplicationServerRegistry.get();
 					try
 					{
@@ -479,11 +467,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		public boolean isCleanImport()
 		{
 			return cleanImport.getSelection();
-		}
-
-		public boolean getAllowDataModelChange()
-		{
-			return allowDataModelChange.getSelection();
 		}
 
 		public boolean getDisplayDataModelChange()

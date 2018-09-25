@@ -80,7 +80,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean usingDbiFileInfoOnly;
 	private boolean allRows;
 	private String warFileName;
-	private boolean allowDataModelChanges = true;
+	private String allowDataModelChanges = "true";
 	private boolean allowSQLKeywords;
 	private boolean updateSequences;
 	private boolean overrideSequenceTypes;
@@ -173,7 +173,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		checkMetadataTables = Utils.getAsBoolean(settings.get("export.checkMetadataTables"));
 		exportMetaData = Utils.getAsBoolean(settings.get("export.exportMetaData"));
 		usingDbiFileInfoOnly = Utils.getAsBoolean(settings.get("export.usingDbiFileInfoOnly"));
-		if (settings.get("export.allowDataModelChanges") != null) allowDataModelChanges = Utils.getAsBoolean(settings.get("export.allowDataModelChanges"));
+		if (settings.get("export.allowDataModelChanges") != null) allowDataModelChanges = settings.get("export.allowDataModelChanges");
 		allowSQLKeywords = Utils.getAsBoolean(settings.get("export.allowSQLKeywords"));
 		updateSequences = Utils.getAsBoolean(settings.get("export.updateSequences"));
 		overrideDefaultValues = Utils.getAsBoolean(settings.get("export.overrideDefaultValues"));
@@ -846,7 +846,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	/**
 	 * @return
 	 */
-	public boolean isAllowDataModelChanges()
+	public String getAllowDataModelChanges()
 	{
 		return allowDataModelChanges;
 	}
@@ -854,7 +854,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	/**
 	 * @param selection
 	 */
-	public void setAllowDataModelChanges(boolean allowDataModelChanges)
+	public void setAllowDataModelChanges(String allowDataModelChanges)
 	{
 		this.allowDataModelChanges = allowDataModelChanges;
 	}
