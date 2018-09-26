@@ -578,6 +578,11 @@ public class TypeCreator extends TypeCache
 			{
 				ignorePackages.put(name, Boolean.FALSE);
 			}
+			catch (NoClassDefFoundError e)
+			{
+				ignorePackages.put(name, Boolean.FALSE);
+				ServoyLog.logError(e);
+			}
 		}
 		else if (typeName.equals("Continuation"))
 		{
