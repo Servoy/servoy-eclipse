@@ -138,6 +138,13 @@
 								<version>${project.version}</version>
 							</restrictTo>
 						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>j2db_server</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
 					</filters>
 				</configuration>
 			</plugin>
