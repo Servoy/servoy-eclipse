@@ -188,34 +188,54 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 			getFormsByDatasource(newDataSource, false).add(form);
 			formToDataSource.put(form, newDataSource);
 		}
-		getForms(null).add(form);
 	}
 
 	@Override
-	public Set<Form> getForms(String datasource)
+	public Iterator<Form> getForms(String datasource, boolean sort)
 	{
-		return getFormsByDatasource(datasource, true);
+		return getFormsByDatasource(datasource, true).iterator();
 	}
 
 	private Set<Form> getFormsByDatasource(String datasource, boolean includeNone)
 	{
 		String ds = datasource == null ? ALL_FORMS : datasource;
-		if (formCacheByDataSource.get(ds) == null)
+		Set<Form> datasourceSet = formCacheByDataSource.get(ds);
+		if (datasourceSet == null)
 		{
-			formCacheByDataSource.put(ds, super.getForms(datasource));
+			datasourceSet = fillSet(datasource);
+			formCacheByDataSource.put(ds, datasourceSet);
 		}
 		if (includeNone)
 		{
-			if (formCacheByDataSource.get(Form.DATASOURCE_NONE) == null)
+			Set<Form> datasourceNoneSet = formCacheByDataSource.get(Form.DATASOURCE_NONE);
+			if (datasourceNoneSet == null)
 			{
-				formCacheByDataSource.put(Form.DATASOURCE_NONE, super.getForms(Form.DATASOURCE_NONE));
+				datasourceNoneSet = fillSet(Form.DATASOURCE_NONE);
+				formCacheByDataSource.put(Form.DATASOURCE_NONE, datasourceNoneSet);
 			}
 			Set<Form> result = new TreeSet<Form>(NameComparator.INSTANCE);
-			result.addAll(formCacheByDataSource.get(ds));
-			result.addAll(formCacheByDataSource.get(Form.DATASOURCE_NONE));
+			result.addAll(datasourceSet);
+			result.addAll(datasourceNoneSet);
 			return result;
 		}
-		return formCacheByDataSource.get(ds);
+		return datasourceSet;
+	}
+
+	/**
+	 * @param datasource
+	 * @return
+	 */
+	private Set<Form> fillSet(String datasource)
+	{
+		Set<Form> result = new TreeSet<Form>(NameComparator.INSTANCE);
+		Iterator<Form> forms = super.getForms(datasource, false);
+		while (forms.hasNext())
+		{
+			Form f = forms.next();
+			result.add(f);
+			formToDataSource.put(f, f.getDataSource() != null ? f.getDataSource() : Form.DATASOURCE_NONE);
+		}
+		return result;
 	}
 
 	@Override
@@ -241,7 +261,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 			Form form = (Form)persist;
 			getFormsByDatasource(null, false).remove(form);
 			formToDataSource.remove(form);
-			getForms(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE).remove(form);
+			getFormsByDatasource(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE, false).remove(form);
 		}
 	}
 
@@ -249,7 +269,7 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	protected void fillFormCaches()
 	{
 		super.fillFormCaches();
-		if (formCacheByDataSource.get(ALL_FORMS) == null) //cache all forms
+		if (formCacheByDataSource.isEmpty()) //cache by datasource
 		{
 			Set<Form> allforms = new TreeSet<Form>(NameComparator.INSTANCE);
 			Iterator<Form> it = Solution.getForms(getAllObjectsAsList(), null, true);
@@ -258,6 +278,16 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 				Form f = it.next();
 				allforms.add(f);
 				formToDataSource.put(f, f.getDataSource() != null ? f.getDataSource() : Form.DATASOURCE_NONE);
+
+				String ds = f.getDataSource();
+				if (ds == null) ds = Form.DATASOURCE_NONE;
+				Set<Form> set = formCacheByDataSource.get(ds);
+				if (set == null)
+				{
+					set = new TreeSet<>(NameComparator.INSTANCE);
+					formCacheByDataSource.put(ds, set);
+				}
+				set.add(f);
 			}
 			formCacheByDataSource.put(ALL_FORMS, allforms);
 		}
