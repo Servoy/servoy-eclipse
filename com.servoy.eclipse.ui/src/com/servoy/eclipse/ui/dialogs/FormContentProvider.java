@@ -172,7 +172,7 @@ public class FormContentProvider implements ITreeContentProvider
 					switch (options.type)
 					{
 						case FORMS :
-							Iterator<Form> forms = flattenedSolution.getForms(options.datasource).iterator();
+							Iterator<Form> forms = flattenedSolution.getForms(options.datasource, true);
 							while (forms.hasNext())
 							{
 								Form obj = forms.next();
@@ -186,7 +186,7 @@ public class FormContentProvider implements ITreeContentProvider
 							break;
 
 						case HIERARCHY :
-							forms = flattenedSolution.getForms(childForm.getDataSource()).iterator();
+							forms = flattenedSolution.getForms(childForm.getDataSource(), true);
 							Map<Form, Integer> possibleParentForms = new TreeMap<Form, Integer>(NameComparator.INSTANCE);
 							while (forms.hasNext())
 							{
