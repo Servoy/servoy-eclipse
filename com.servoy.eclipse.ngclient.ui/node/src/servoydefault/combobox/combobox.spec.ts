@@ -1,11 +1,14 @@
-import { async, ComponentFixture, TestBed, tick, fakeAsync } from '@angular/core/testing';
-
-import { ServoyDefaultCombobox, Item } from './combobox';
-
-import {SabloModule} from '../../sablo/sablo.module'
-import {FormatFilterPipe, MnemonicletterFilterPipe, FormattingService, ServoyApi} from '../../ngclient/servoy_public'
+import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ElementRef } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { Item } from '../basecombo';
+import { ServoyDefaultCombobox } from './combobox';
+import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';
+import { of } from 'rxjs';
+ 
+const eventEnter: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'Enter'});
+const eventC: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'c'});
+const eventInput: Event = new Event('input');
 
 const mockData: Item[] = [
   {
@@ -22,19 +25,57 @@ const mockData: Item[] = [
   },
 ];
 
-fdescribe('SvyCombobox', () => {
+const mockState = {
+  model: {
+    placeholderText: '',
+    size: {
+      width: '100',
+      height: '20'
+    },
+    format: {
+      type: 'number'
+    }
+  }
+}
+ 
+Object.defineProperty(eventEnter, 'keyCode', {
+  get : function() {
+    return 13;
+  }
+});
+Object.defineProperty(eventC, 'keyCode', {
+  get : function() {
+    return 67;
+  }
+});
+ 
+function addInputToEnterEvent(fixture) {
+  Object.defineProperty(eventEnter, 'target', {
+    get : function() {
+      return fixture.debugElement.query(By.css('input')).nativeElement;
+    }
+  });
+}
+function addInputToKeyEvent(fixture) {
+  Object.defineProperty(eventC, 'target', {
+    get : function(): ElementRef {
+      return fixture.debugElement.query(By.css('input')).nativeElement;
+    }
+  });
+}
+ 
+describe('ComboboxComponent', () => {
   let component: ServoyDefaultCombobox;
   let fixture: ComponentFixture<ServoyDefaultCombobox>;
   let servoyApi;
-  let spy: any;
-
+ 
   beforeEach(async(() => {
-    servoyApi = jasmine.createSpyObj( "ServoyApi", ["getMarkupId", "trustAsHtml", "getApiData"] )
+    servoyApi = jasmine.createSpyObj( "ServoyApi", ["getMarkupId", "trustAsHtml", "getApiData", "getDataProviderID"] )
     servoyApi.getApiData.and.returnValue( mockData );
+    servoyApi.getDataProviderID.and.returnValue( of(1) );
     
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultCombobox ,FormatFilterPipe ,MnemonicletterFilterPipe ],
-      imports:[ SabloModule, FormsModule ],
+      declarations: [ ServoyDefaultCombobox ],
       providers: [ FormattingService ]
     })
     .compileComponents();
@@ -42,128 +83,152 @@ fdescribe('SvyCombobox', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultCombobox);
-    
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
 
-    component = fixture.componentInstance;
-    component.state = {};
-    component.state.model = {};
-    component.enabled = true;
-    component.state.model.placeholderText = "";
+    addInputToEnterEvent(fixture);
+    addInputToKeyEvent(fixture);
     
+    component = fixture.componentInstance;
+    component.state = mockState;
+    component.format = 'string';
+    component.ngOnInit();
+
     fixture.detectChanges();
   });
-
-  describe('on create', () => {
-
-    it('should create Combobox Component', () => {
-      expect(component).toBeTruthy();
-    });
-
-    it('should set default values', () => {
-      expect(component.isFocused).toEqual(false);
-      expect(component.showDropdown).toEqual(false);
-    });
-  
-    it('should call getApiData from servoyApi on ngOnInit', () => {
-      expect(servoyApi.getApiData).toHaveBeenCalled(); 
-    });
-  
-    it('should populate Combobox Component with values from servoyApi', () => {
-      expect(component.valueList).toEqual(mockData);
-    });
-
-    it('should have default selected item', () => {
-      const defaultSelectedItem = mockData[0];
-      expect(component.selectedComboboxItem).toEqual(defaultSelectedItem);
-    });
-
+ 
+  it('should create component', () => {
+    expect(component).toBeTruthy();
   });
-
-  describe('on container select', () => {
-    let element;
+ 
+  it('should set initial list of values', () => {
+    expect(component.valueList).toEqual(component.filteredValueList);
+  });
+ 
+  it('should set initial selected item based on index', () => {
+    const itemBasedOnIndex: Item = component.filteredValueList[component.selectedItemIndex];
+    expect(component.selectedItem.getValue()).toEqual(itemBasedOnIndex);
+  });
+ 
+  it('should set initial dropdown closed', () => {
+    expect(component.isOpen).toBeFalsy();
+  });
+ 
+  describe('on click events', () => {
+    let bodyElement;
     beforeEach(() => {
-      element = fixture.nativeElement.querySelector('input');
-      fixture.nativeElement.click();
+      bodyElement = document.getElementsByTagName('body')[0];
+ 
+      component.onLabelClick();
       fixture.detectChanges();
     });
-    
-    it('should focus on input field on container click', () => {
-      expect(document.activeElement).toEqual(element);;
-    });
-    
+ 
     it('should open dropdown on container click', () => {
+      expect(component.isOpen).toBeTruthy();
+    });
+ 
+    it('should set selected item on item click', () => {
+      const indexOfItemToSelect = 2;
+      const itemToSelectOnIndex = component.filteredValueList[indexOfItemToSelect];
+
+      component.selectItem(itemToSelectOnIndex, indexOfItemToSelect);
       fixture.detectChanges();
-      expect(component.isFocused).toEqual(true);
-      expect(component.showDropdown).toEqual(true);
+ 
+      expect(component.selectedItem.getValue()).toEqual(itemToSelectOnIndex);
     });
-
-    it('should have active class on selected item', () => {
-      const defaultSelectedItem = mockData[0];
+ 
+    it('should close dropdown on outside click', () => {
+      bodyElement.click();
       fixture.detectChanges();
-      const selectedElement = fixture.debugElement.queryAll(By.css('.active'));
-
-      expect(selectedElement.length).toEqual(1);
-      expect(selectedElement[0].nativeElement.textContent).toEqual(defaultSelectedItem.displayValue);
+ 
+      expect(component.isOpen).toBeFalsy();
     });
-
-    describe('on new item select', () => {
-      let listElements;
-      let nativeElementToTest;
-      beforeEach(() => {
-        listElements = fixture.debugElement.queryAll(By.css('.ui-select-choices-row'));
-        
-        nativeElementToTest = listElements[1].nativeElement;
-      });
-
-      it('should set selectedComboboxItem as the selected item', () => {
-        expect(nativeElementToTest.classList).not.toContain('active');
-        
-        nativeElementToTest.click();
-        fixture.detectChanges();
-
-        expect(nativeElementToTest.classList).toContain('active');
-        expect(component.selectedComboboxItem.displayValue).toEqual(nativeElementToTest.textContent);
-      });
-
-      it('should close dropdown on item click', () => {
-        nativeElementToTest.dispatchEvent(new Event("click"));
-        fixture.detectChanges();
-
-        expect(component.showDropdown).toBeFalsy();
-      }); 
-
-      it('should close dropdown on ouside click', () => {
-        const tempBody = document.querySelector('body');
-        tempBody.click();
-        fixture.detectChanges();
-        
-        expect(component.showDropdown).toBeFalsy();;
-      }); 
-    });
-    
-    describe('on starting typing', () => {
-      let valueToBeSet;
-      let matchingDropdownItems;
-      beforeEach(() => {
-        valueToBeSet = 'clu';
-        matchingDropdownItems = component.valueList.filter(v => v.displayValue.toLowerCase().indexOf(valueToBeSet) !== -1).length;
-        component.comboboxInput.nativeElement.value = valueToBeSet;
-        component.comboboxInput.nativeElement.dispatchEvent(new Event('input'));
-      });
-    
-      it('should only show dropdown list with matching items', () => {
-        expect(component.filteredValueList.length).toEqual(matchingDropdownItems);
-      });
-
-      it('should clear input field value and reset found values list on item select', () => {
-        component.clearSearchInput();
-
-        expect(component.comboboxInput.nativeElement.value).toEqual('');
-        expect(component.filteredValueList.length).toEqual(component.valueList.length);
-      }); 
-    });
-
   });
+ 
+  describe('on keyboard events', () => {
+    describe('on Down key', () => {
+      let itemPossitionAfterDownKey;
+      beforeEach(() => {
+        itemPossitionAfterDownKey = component.activeItemIndex + 1;
 
+        component.activateNextListItem();
+        fixture.detectChanges();
+      });
+ 
+      it('should select next item in available list', () => {
+        const activeItemPossition = component.activeItemIndex;
+        expect(activeItemPossition).toEqual(itemPossitionAfterDownKey);
+      });
+    });
+ 
+    describe('on Up key', () => {
+      let itemPossitionAfterUpKey;
+      beforeEach(() => {
+        itemPossitionAfterUpKey = component.filteredValueList.length - 1;
+
+        component.activatePreviousListItem();
+        fixture.detectChanges();
+      });
+ 
+      it('should select previous item in available list', () => {
+        const activeItemPossition = component.activeItemIndex;
+        expect(activeItemPossition).toEqual(itemPossitionAfterUpKey);
+      });
+ 
+      describe('on Enter key', () => {
+        beforeEach(() => {
+          const inputElement = fixture.debugElement.query(By.css('input')).nativeElement;
+          component.onInputKeyup(eventEnter, inputElement);
+          fixture.detectChanges();
+        });
+ 
+        it('should set current item as selected item', () => {
+          const possOfSelectedItem = component.filteredValueList.indexOf(component.selectedItem.getValue());
+          expect(possOfSelectedItem).toEqual(itemPossitionAfterUpKey);
+        });
+ 
+        it('should close dropdown', () => {
+          expect(component.isOpen).toBeFalsy();
+        });
+      });
+    });
+ 
+    describe('on input search successfull', () => {
+      const keyToSearchBy = 'c';
+      let inputElement;
+      beforeEach(() => {
+        inputElement = fixture.debugElement.query(By.css('input')).nativeElement;
+        inputElement.dispatchEvent(eventInput);
+        inputElement.value = keyToSearchBy;
+        component.isInputFocused.next(true);
+        fixture.detectChanges();
+      });
+ 
+      it('should only show matching items', () => {
+        const matchingItems = component.valueList.filter(d => d.displayValue.toLowerCase().indexOf(keyToSearchBy) !== -1);
+        expect( component.filterList(inputElement.value)).toEqual(matchingItems);
+      });
+    });
+ 
+    describe('on input search un-successfull', () => {
+      const keyToSearchBy = 'xyz';
+      let inputElement;
+      beforeEach(() => {
+        inputElement = fixture.debugElement.query(By.css('input')).nativeElement;
+        inputElement.dispatchEvent(eventInput);
+        inputElement.value = keyToSearchBy;
+        component.isInputFocused.next(true);
+        fixture.detectChanges();
+      });
+ 
+      it('should have empty filtered list', () => {
+        const matchingItems = component.valueList.filter(d => d.displayValue.toLowerCase().indexOf(keyToSearchBy) !== -1);
+        expect(component.filterList(inputElement.value).length).toEqual(matchingItems.length);
+      });
+ 
+      it('should set active index to first element', () => {
+        expect(component.activeItemIndex).toEqual(0);
+      });
+    });
+  });
+ 
 });

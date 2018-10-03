@@ -1,0 +1,26 @@
+
+<div class="svy-combobox ui-select-bootstrap dropdown ng-empty ng-valid"
+    [ngStyle]="styles"
+    [class.open]="isOpen"
+    appendTo="body">
+  <input type="search"
+        class="form-control ui-select-search ng-pristine ng-valid ng-empty ng-touched"
+        [ngStyle]="styles"
+        role="combobox"
+        tabindex="0"
+        (input)="onInput($event)"
+        (keydown)="onInputKeyDown($event)"
+        (keyup)="onInputKeyup($event, selectLabel)"
+        (focus)="onInputFocus()"
+        #inputElement>
+  <ul class="ui-select-choices ui-select-choices-content ui-select-dropdown dropdown-menu ng-scope"
+      *ngIf="isOpen">
+    <li class="ui-select-choices-row ng-scope"
+        *ngFor="let item of filteredValueList; let i = index;"
+        (click)="selectItem(item, i)"
+        (mouseover)="activeItemIndex = i"
+        [class.active]="isItemSelected(i)">
+      <span>{{item.displayValue}}</span>
+    </li>
+  </ul>
+</div>

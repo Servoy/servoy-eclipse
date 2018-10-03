@@ -1,0 +1,9 @@
+
+.svy-combobox .ui-select-search {
+  border: 0;
+  border-style: solid;
+  border-color: #DBDBDB;
+  border-width: 1px 1px 1px 1px;
+  border-radius: 0;
+  box-shadow: none;
+}

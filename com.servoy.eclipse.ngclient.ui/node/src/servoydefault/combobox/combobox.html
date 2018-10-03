@@ -1,76 +1,42 @@
- <div class="svy-combobox ui-select-container ui-select-bootstrap dropdown ng-empty ng-valid" 
-			 [class.open]="showDropdown" 
-			 search-enabled="enablefilter" 
-			 reset-search-input="true" 
-			 append-to-body="true" 
-			 [id]="servoyApi.getMarkupId()"
-			 svy-tooltip="model.toolTipText" 
-			 sablo-tabseq="model.tabSeq" 
-			 (focus)="onFocus()"
-			 (blur)="onBlur()"
-			 tabindex="0">
-	<div class="ui-select-match ng-scope" 
-			 [class.hidden]="showDropdown"
-			 [class.btn-default-focus]="isFocused" 
-			 [attr.placeholder]="state.model.placeholderText">
-		<span tabindex="-1" 
-					class="btn btn-default form-control ui-select-toggle" 
-					aria-label="Select box activate">
-			<span *ngIf="isTouched" 
-						class="ui-select-match-text pull-left ng-hide" 
-						[class.ui-select-allow-clear]="filteredValueListHasValues()">{{selectedComboboxItem?.displayValue}}</span>
-			<i class="caret pull-right" 
-				 (click)="toggleInput()"></i>
-			<a *ngIf="isInputEmpty()" 
-				aria-label="Select box clear" 
-				style="margin-right: 10px" 
-				(click)="clearSearchInput()" 
-				class="btn btn-xs btn-link pull-right ng-hide">
-				<i class="glyphicon glyphicon-remove" 
-					 aria-hidden="true"></i>
-			</a>
-		</span>
-	</div>
-	<span *ngIf="showDropdown && isSpinnerEnabled()" 
-				class="ui-select-refreshing glyphicon-refresh ui-select-spin ng-hide"></span>
-		<input type="search" 
-					autocomplete="off" 
-					tabindex="-1" 
-					aria-expanded="true" 
-					aria-label="Select box" 
-					aria-owns="ui-select-choices-0" 
-					class="form-control ui-select-search ng-pristine ng-untouched ng-valid ng-empty ng-hide" 
-					[class.ui-select-search-hidden]="!showDropdown"
-					placeholder="" 
-					#comboboxInput
-					(input)="onInputValue($event)">
-		<ul class="ui-select-choices ui-select-choices-content ui-select-dropdown dropdown-menu ng-scope" 
-				*ngIf="showDropdown && filteredValueListHasValues()">
-			<li class="ui-select-choices-group" 
-					*ngFor="let item of filteredValueList; index as i"
-					[id]="'ui-select-choices-' + i">
-				<div class="divider ng-hide" 
-						 *ngIf="isGrouped">
-				</div>
-				<div [attr.id]="'ui-select-choices-row-' + servoyApi.getMarkupId() + '-' + item.realValue" 
-						 [class.active]="isComboboxItemSelected(item)"
-						 class="ui-select-choices-row ng-scope" 
-						 role="option" 
-						 (click)="selectValue(item)" 
-						 id="ui-select-choices-row-0-0">
-					<span class="ui-select-choices-row-inner" uis-transclude-append="">
-						<div class="ng-binding ng-scope">{{item.displayValue}}</div>
-				</span>
-			</div>
-			</li>
-		</ul>
-		<div class="ui-select-no-choice"></div>
-		<input [disabled]="!showDropdown" 
-					class="ui-select-focusser ui-select-offscreen ng-scope" 
-					type="text" 
-					id="focusser-0" 
-					aria-label="Select box focus" 
-					aria-haspopup="true" 
-					role="button" 
-					tabindex="1">
-	</div>
+
+<div class="svy-combobox ui-select-bootstrap dropdown ng-empty ng-valid"
+			[ngStyle]="styles"
+			[class.open]="isOpen"
+			appendTo="body">
+	<span class="ui-select-match ng-scope"
+				[ngStyle]="styles"
+				[class.btn-default-focus]="isElementFocused(selectLabel)"
+				*ngIf="selectedItem | async as selectedItem">
+		<span class="btn btn-default form-control ui-select-toggle"
+					[class.open]="isOpen"
+					tabindex="0"
+					#selectLabel
+					[class.ng-select-focused]="isElementFocused(selectLabel)"
+					(keyup)="onLabelKeyup($event)"
+					(keydown)="onNavigateAvay($event)"
+					(click)="onLabelClick()">{{ selectedItem.displayValue }}</span>
+		<i class="caret pull-right"
+			 *ngIf="!isOpen"></i>
+		<input type="search"
+						[class.ui-select-search-hidden]="!(isInputFocused | async)"
+						class="form-control ui-select-search ng-pristine ng-valid ng-empty ng-touched"
+						[ngStyle]="styles"
+						role="combobox"
+						[attr.tabindex]="getTabindex()"
+						(input)="onInput($event)"
+						(keydown.tab)="onNavigateAvay($event)"
+						(keydown)="onInputKeyDown($event)"
+						(keyup)="onInputKeyup($event, selectLabel)"
+						#inputElement>
+	</span>
+	<ul class="ui-select-choices ui-select-choices-content ui-select-dropdown dropdown-menu ng-scope"
+			*ngIf="isOpen">
+		<li class="ui-select-choices-row ng-scope"
+				*ngFor="let item of filteredValueList; let i = index;"
+				(click)="selectItem(item, i)"
+				(mouseover)="activeItemIndex = i"
+				[class.active]="isItemSelected(i)">
+			<span>{{item.displayValue}}</span>
+		</li>
+	</ul>
+</div>

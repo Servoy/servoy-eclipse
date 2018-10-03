@@ -1,6 +1,7 @@
 
 import { FormService, FormCache, StructureCache, ComponentCache } from '../ngclient/form.service';
 import { ServoyService } from '../ngclient/servoy.service'
+import { Observable, of } from 'rxjs';
 
 export class ServoyApi {
     constructor( private item: ComponentCache, private formname: string, private absolute: boolean, private formservice: FormService, private servoyService: ServoyService ) {
@@ -52,5 +53,9 @@ export class ServoyApi {
 
     public getApiData() {
         return this.item.model.valuelistID;
+    }
+
+    public getDataProviderID(): Observable<number> {
+        return of(this.item.model.dataProviderID);
     }
 }
