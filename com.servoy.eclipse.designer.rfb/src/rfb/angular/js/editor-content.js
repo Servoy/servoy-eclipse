@@ -364,7 +364,7 @@ angular.module('editorContent',['servoyApp'])
     if (!ret) {
       ret = {}
       if (formData.components[name]) {
-    	  if (formData.formProperties['useCssPosition'])
+    	  if (formData.formProperties['useCssPosition'][name])
     	  {
     		  $editorContentService.setCSSPositionProperties(ret,formData.components[name]['cssPosition']);
     	  }
@@ -715,7 +715,7 @@ angular.module('editorContent',['servoyApp'])
 
             var compLayout = layoutData[name];
             if (compLayout) {
-            	if (formData.formProperties['useCssPosition'])
+            	if (formData.formProperties['useCssPosition'][name])
             	{
             		setCSSPositionProperties(compLayout,newCompData['cssPosition']);
             	}
