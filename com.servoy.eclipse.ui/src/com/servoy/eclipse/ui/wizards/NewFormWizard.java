@@ -391,7 +391,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				{
 					ElementFactory.createFields(form, config, designerPreferences.getGridSnapTo() ? new SnapToGridFieldPositioner(designerPreferences) : null,
 						config.isPlaceHorizontally() ? new Point(0, 0) : new Point(60, 70));
-					if (config.isPlaceHorizontally())
+					if (config.isPlaceHorizontally() && !form.getUseCssPosition())
 					{
 						form.setView(FormController.LOCKED_TABLE_VIEW);
 					}
