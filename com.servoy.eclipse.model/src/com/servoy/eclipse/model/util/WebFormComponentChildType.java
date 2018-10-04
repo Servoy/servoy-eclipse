@@ -14,7 +14,7 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.ui.property;
+package com.servoy.eclipse.model.util;
 
 
 import java.util.ArrayList;
@@ -30,8 +30,6 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.utils.PropertyUtils;
 
-import com.servoy.eclipse.ui.util.IParentOverridable;
-import com.servoy.eclipse.ui.util.ISupportInheritedPropertyCheck;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;

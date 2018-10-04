@@ -32,8 +32,8 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.property.WebFormComponentChildType;
 import com.servoy.j2db.persistence.IPersist;
 
 /**

@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.Image;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.IParentOverridable;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
