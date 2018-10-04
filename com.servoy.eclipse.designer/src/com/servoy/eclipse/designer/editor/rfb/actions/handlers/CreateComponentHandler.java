@@ -604,10 +604,17 @@ public class CreateComponentHandler implements IServerService
 							for (String string : allPropertiesNames)
 							{
 								PropertyDescription property = spec.getProperty(string);
-								if (property != null && property.getInitialValue() != null)
+								if (property != null)
 								{
-									Object initialValue = property.getInitialValue();
-									if (initialValue != null) webComponent.setProperty(string, initialValue);
+									if (args.has(string) && webComponent.getProperty(string) == null)
+									{
+										webComponent.setProperty(string, args.opt(string));
+									}
+									else if (property.getInitialValue() != null)
+									{
+										Object initialValue = property.getInitialValue();
+										if (initialValue != null) webComponent.setProperty(string, initialValue);
+									}
 								}
 							}
 							List<IPersist> changes = new ArrayList<>();

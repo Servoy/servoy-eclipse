@@ -52,6 +52,12 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					for(var i = 0; i < got.data.length; i++) {
 						got.data[i].isOpen = "true";
 						packageOrder[layoutType].push(got.data[i].packageName);
+						
+						for (var j = 0; j < got.data[i].components.length; j++) {
+							if (got.data[i].components[j].properties) {
+								got.data[i].components[j].isOpen = "true";
+							}
+						}
 					}
 				});
 			}
@@ -78,7 +84,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 			* enterDragMode($event,ghost.type,null,null,null,ghost.type,null,null,propertyName) for a ghost
 			*/
 			$scope.enterDragMode = function(event, componentName, packageName, tagName, model, type, topContainer,
-				layoutName, propertyName,componentTagName) {
+				layoutName, propertyName,componentTagName, propName, propValue) {
 					var dragClone = null;
 					var angularElement = null;
 					var mouseentercallback;
@@ -192,6 +198,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								angularElement.css(css);
 							}
 						}
+						ev.preventDefault();
 					});
 					
 					mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(){
@@ -306,6 +313,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							component.x = ev.pageX;
 							component.y = ev.pageY;
 							if (propertyName) component.propertyName = propertyName;
+							if (propName) component[propName] = propValue;							
 							if (angularElement && $scope.isAbsoluteFormLayout()) {
 								var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
 								var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
