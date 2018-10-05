@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration packages="com.servoy.j2db.server.util"
+<Configuration
 	debug="false" status="INFO">
 	<Appenders>
 		<Console name="stdout" target="SYSTEM_OUT">
