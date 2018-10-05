@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
@@ -67,6 +68,7 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -165,10 +167,26 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 					if (solution != null)
 					{
-						solution.setSolutionType(page1.getSolutionType());
+						int solutionType = page1.getSolutionType();
+						solution.setSolutionType(solutionType);
 
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
+
+						if (solutionType == SolutionMetaData.SOLUTION || solutionType == SolutionMetaData.NG_CLIENT_ONLY ||
+							solutionType == SolutionMetaData.MODULE)
+						{
+							Media defaultTheme = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
+								solution.getName() + ".less");
+							defaultTheme.setMimeType("text/css");
+							try (InputStream is = NewSolutionWizard.class.getResource("resources/default-theme.less").openStream())
+							{
+								defaultTheme.setPermMediaData(Utils.getBytesFromInputStream(is));
+							}
+
+							solution.setStyleSheetID(defaultTheme.getID());
+							repository.updateRootObject(solution);
+						}
 					}
 					monitor.worked(1);
 

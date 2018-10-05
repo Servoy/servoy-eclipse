@@ -319,14 +319,42 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			);
 			}
 			else {//this is an Responsive Layout 
-    			$contextmenu.add(
-				{
-					text: "Add",
-//					subMenu: $contextmenu.getAddActions(),
-				}
-		);
+				$contextmenu.add(
+						{
+							text: "Add",
+							//					subMenu: $contextmenu.getAddActions(),
+						}
+				);
+
+				$contextmenu.add(
+						{
+							text: "Zoom in",
+							getIconStyle: function(){ return {'background-image':"url(images/zoom_in.png)"}},
+							getItemClass: function() { if (hasSelection(1)) return "enabled"; else return "disabled"}, 
+							execute:function()
+							{
+								$("#contextMenu").hide();
+								$editorService.executeAction('zoomIn');
+							}
+						}
+				);
 			}
 			
+			if (!editorScope.isAbsoluteFormLayout() || $editorService.isShowingContainer())
+			{
+				$contextmenu.add(
+						{
+							text: "Zoom out",
+							getIconStyle: function(){ return {'background-image':"url(images/zoom_out.png)"}},
+							getItemClass: function() { if ($editorService.isShowingContainer()) return "enabled"; else return "disabled"}, 
+							execute:function()
+							{
+								$("#contextMenu").hide();
+								$editorService.executeAction('zoomOut');
+							}
+						}
+				);
+			}	
 			
 			$contextmenu.add(
 					{

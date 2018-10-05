@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -57,7 +58,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 {
 	private int groupsAction = SKIP_ACTION;
 	private Boolean allowSQLKeywords = null;
-	private Boolean allowDataModelChanges = null;
+	private Boolean allowDataModelChangesGlobal = null;
+	private final Map<String, Boolean> allowDataModelChangesForServer = new HashMap<String, Boolean>();
 	private Boolean displayDataModelChanges = null;
 	private Integer importI18NPolicy = null;
 	private Boolean skipDatabaseViewsUpdate = null;
@@ -76,11 +78,10 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	private final Shell shell;
 	private final HashMap<String, Integer> rootObjectsMap = new HashMap();
 
-	public EclipseImportUserChannel(boolean allowDataModelChanges, boolean displayDataModelChanges, Shell shell)
+	public EclipseImportUserChannel(boolean displayDataModelChanges, Shell shell)
 	{
 		this.shell = shell;
 		allImportantMSGes = new StringBuffer();
-		this.allowDataModelChanges = new Boolean(allowDataModelChanges);
 		this.displayDataModelChanges = new Boolean(displayDataModelChanges);
 	}
 
@@ -667,14 +668,49 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		}
 	}
 
-	public int getAllowDataModelChange()
+	public int getAllowDataModelChange(String serverName)
 	{
-		if (allowDataModelChanges == null)
+		if (allowDataModelChangesGlobal != null)
 		{
-			allowDataModelChanges = Boolean.valueOf(
-				UIUtils.askConfirmation(shell, "Allow Database Change", "Do you want to change database structure as in import file?"));
+			return allowDataModelChangesGlobal.booleanValue() ? OK_ACTION : CANCEL_ACTION;
 		}
-		return allowDataModelChanges.booleanValue() ? OK_ACTION : CANCEL_ACTION;
+		if (allowDataModelChangesForServer.containsKey(serverName))
+		{
+			return allowDataModelChangesForServer.get(serverName).booleanValue() ? OK_ACTION : CANCEL_ACTION;
+		}
+
+		MessageDialog dialog = new MessageDialog(shell, "Allow Database Change for Server: " + serverName, null,
+			"Do you want to change database structure as in import file for server: " + serverName + "?", MessageDialog.QUESTION,
+			new String[] { "Yes for all servers", IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, "No for all servers" }, 0);
+		dialog.setBlockOnOpen(true);
+		final int[] returnValue = new int[1];
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				returnValue[0] = dialog.open();
+			}
+		});
+		int action = OK_ACTION;
+		if (returnValue[0] == 0)
+		{
+			allowDataModelChangesGlobal = Boolean.TRUE;
+		}
+		else if (returnValue[0] == 1)
+		{
+			allowDataModelChangesForServer.put(serverName, Boolean.TRUE);
+		}
+		else if (returnValue[0] == 2)
+		{
+			allowDataModelChangesForServer.put(serverName, Boolean.FALSE);
+			action = CANCEL_ACTION;
+		}
+		else if (returnValue[0] == 3)
+		{
+			allowDataModelChangesGlobal = Boolean.FALSE;
+			action = CANCEL_ACTION;
+		}
+		return action;
 	}
 
 	public boolean getDisplayDataModelChange()
@@ -707,5 +743,11 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	public boolean compactSolutions()
 	{
 		return false;
+	}
+
+	@Override
+	public boolean allowImportEmptySolution()
+	{
+		return true;
 	}
 }

@@ -71,7 +71,7 @@ public class KeywordProvider implements IKeywordProvider
 		}
 		if (category == JSKeywordCategory.JS_DOC_TAG)
 		{
-			return new String[] { "@AllowToRunInFind", "@enum", "@override" };
+			return new String[] { "@AllowToRunInFind", "@enum", "@override", "@parse" };
 		}
 		return null;
 	}

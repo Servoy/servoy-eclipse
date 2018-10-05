@@ -33,6 +33,7 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
@@ -46,6 +47,7 @@ import com.servoy.j2db.server.ngclient.WebFormComponent;
 public class WebComponentPropertySource extends PDPropertySource
 {
 	private static final Map<String, PropertyDescriptor> BEAN_PROPERTIES = new HashMap<String, PropertyDescriptor>();
+	private static final Map<String, PropertyDescriptor> CONTAINER_PROPERTIES = new HashMap<String, PropertyDescriptor>();
 
 	static
 	{
@@ -72,6 +74,10 @@ public class WebComponentPropertySource extends PDPropertySource
 				if (StaticContentSpecLoader.PROPERTY_TAGTYPE.getPropertyName().equals(desc.getName()))
 				{
 					BEAN_PROPERTIES.put(desc.getName(), desc);
+				}
+				if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(desc.getName()))
+				{
+					CONTAINER_PROPERTIES.put(desc.getName(), desc);
 				}
 			}
 		}
@@ -104,7 +110,7 @@ public class WebComponentPropertySource extends PDPropertySource
 	protected IPropertyHandler[] createPropertyHandlers(Object valueObject)
 	{
 		IPropertyHandler[] tmp1 = super.createPropertyHandlers(valueObject);
-		IPropertyHandler[] tmp2 = createComponentSpecificPropertyHandlersFromSpec(getPropertyDescription());
+		IPropertyHandler[] tmp2 = createComponentSpecificPropertyHandlersFromSpec(getPropertyDescription(), persistContext.getPersist());
 		ArrayList<IPropertyHandler> handlers = new ArrayList<>(Arrays.asList(tmp1));
 		handlers.addAll(Arrays.asList(tmp2));
 		IPropertyHandler groupIDHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName()));
@@ -115,7 +121,7 @@ public class WebComponentPropertySource extends PDPropertySource
 	}
 
 
-	public static IPropertyHandler[] createComponentSpecificPropertyHandlersFromSpec(PropertyDescription propertyDescription)
+	public static IPropertyHandler[] createComponentSpecificPropertyHandlersFromSpec(PropertyDescription propertyDescription, IPersist persist)
 	{
 		List<IPropertyHandler> props = new ArrayList<IPropertyHandler>();
 
@@ -129,6 +135,10 @@ public class WebComponentPropertySource extends PDPropertySource
 			}
 
 			PropertyDescriptor beanPropertyDescriptor = BEAN_PROPERTIES.get(desc.getName());
+			if (persist instanceof LayoutContainer && CONTAINER_PROPERTIES.containsKey(desc.getName()))
+			{
+				beanPropertyDescriptor = CONTAINER_PROPERTIES.get(desc.getName());
+			}
 			if (beanPropertyDescriptor != null)
 			{
 				// handled by bean, not in web component spec

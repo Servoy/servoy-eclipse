@@ -444,7 +444,7 @@ public class WarExporter
 		attr = doc.createAttribute("name");
 		attr.setValue(NGClientEntryFilter.SERVOY_THIRDPARTY_SVYGRP + id);
 		group.setAttributeNode(attr);
-		for (String relativePath : NGClientEntryFilter.INDEX_3TH_PARTY_JS)
+		for (String relativePath : NGClientEntryFilter.INDEX_3RD_PARTY_JS)
 		{
 			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "js");
 		}
@@ -480,7 +480,7 @@ public class WarExporter
 		attr = doc.createAttribute("name");
 		attr.setValue(NGClientEntryFilter.SERVOY_CSS_THIRDPARTY_SVYGRP + id);
 		group.setAttributeNode(attr);
-		for (String relativePath : NGClientEntryFilter.INDEX_3TH_PARTY_CSS)
+		for (String relativePath : NGClientEntryFilter.INDEX_3RD_PARTY_CSS)
 		{
 			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "css");
 		}
@@ -944,7 +944,7 @@ public class WarExporter
 			prop.setProperty("insertNewI18NKeysOnly", Boolean.toString(exportModel.isInsertNewI18NKeysOnly()));
 			prop.setProperty("importUserPolicy", Integer.toString(exportModel.getImportUserPolicy()));
 			prop.setProperty("addUsersToAdminGroup", Boolean.toString(exportModel.isAddUsersToAdminGroup()));
-			prop.setProperty("allowDataModelChange", Boolean.toString(exportModel.isAllowDataModelChanges()));
+			prop.setProperty("allowDataModelChange", exportModel.getAllowDataModelChanges());
 			prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
 			prop.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
 
@@ -1224,7 +1224,6 @@ public class WarExporter
 		// delete the tomcat boostrapper, also not needed in a war file
 		new File(targetLibDir, "server-bootstrap.jar").delete();
 		new File(targetLibDir, "tomcat-juli.jar").delete();
-		new File(targetLibDir, "tim-api.jar").delete();
 		return targetLibDir;
 	}
 

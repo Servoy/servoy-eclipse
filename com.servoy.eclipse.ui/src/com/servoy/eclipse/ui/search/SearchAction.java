@@ -130,24 +130,31 @@ public class SearchAction extends Action implements ISelectionChangedListener
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		if (sel.size() == 1)
 		{
-			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
-			if (node.getType() == UserNodeType.VALUELIST_ITEM || node.getType() == UserNodeType.RELATION || node.getType() == UserNodeType.FORM ||
-				node.getType() == UserNodeType.FORM_METHOD || node.getType() == UserNodeType.GLOBAL_METHOD_ITEM ||
-				node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM ||
-				node.getType() == UserNodeType.SERVER || node.getType() == UserNodeType.TABLE || node.getType() == UserNodeType.FORM_ELEMENTS_ITEM ||
-				node.getType() == UserNodeType.BEAN || node.getType() == UserNodeType.VIEW || node.getType() == UserNodeType.TABLE_COLUMNS_ITEM ||
-				node.getType() == UserNodeType.RELATION_COLUMN || node.getType() == UserNodeType.CALCULATIONS_ITEM ||
-				node.getType() == UserNodeType.MEDIA_IMAGE)
+			if (sel.getFirstElement() instanceof Form || sel.getFirstElement() instanceof ScriptMethod || sel.getFirstElement() instanceof BaseComponent)
 			{
-				selectedObject = node.getRealObject();
-				if (selectedObject instanceof Object[])
-				{
-					selectedObject = ((Object[])selectedObject)[0];
-				}
+				selectedObject = sel.getFirstElement();
 			}
-			else if (node.getType() == UserNodeType.PLUGIN)
+			else
 			{
-				selectedObject = node.getName();
+				SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
+				if (node.getType() == UserNodeType.VALUELIST_ITEM || node.getType() == UserNodeType.RELATION || node.getType() == UserNodeType.FORM ||
+					node.getType() == UserNodeType.FORM_METHOD || node.getType() == UserNodeType.GLOBAL_METHOD_ITEM ||
+					node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM || node.getType() == UserNodeType.FORM_VARIABLE_ITEM ||
+					node.getType() == UserNodeType.SERVER || node.getType() == UserNodeType.TABLE || node.getType() == UserNodeType.FORM_ELEMENTS_ITEM ||
+					node.getType() == UserNodeType.BEAN || node.getType() == UserNodeType.VIEW || node.getType() == UserNodeType.TABLE_COLUMNS_ITEM ||
+					node.getType() == UserNodeType.RELATION_COLUMN || node.getType() == UserNodeType.CALCULATIONS_ITEM ||
+					node.getType() == UserNodeType.MEDIA_IMAGE)
+				{
+					selectedObject = node.getRealObject();
+					if (selectedObject instanceof Object[])
+					{
+						selectedObject = ((Object[])selectedObject)[0];
+					}
+				}
+				else if (node.getType() == UserNodeType.PLUGIN)
+				{
+					selectedObject = node.getName();
+				}
 			}
 		}
 		setEnabled(selectedObject != null);

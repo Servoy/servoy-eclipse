@@ -1,11 +1,21 @@
 <li ng-repeat="item in items | filter:{displayName:searchText} | orderBy:'displayName'" style="position:relative;">
-	<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName) " class="paletteItem" title="Drag component {{item.displayName}} to form to add it"> 
-		<img draggable="false" style="align:center" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
+    <div uib-accordion-group is-disabled="!item.properties || !item.components" is-open="item.isOpen" ng-attr-style="{{item.components.length > 0 ? 'margin-left:-19px' : ''}}">    
+		<uib-accordion-heading> 
+			<div class="palette-heading" title="Drag component {{item.displayName}} to form to add it"  ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName,null,item.componentTagName)"
+			 ng-attr-style="{{systemFont}}"><img draggable="false" ng-if="item.components.length > 0" ng-src="{{item.isOpen ? 'templates/images/chevron_down.png' : 'templates/images/chevron_right.png'}}" style="margin-right:0"/>
+			<img draggable="false" style="align:center" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
+			</div>
+			<img ng-click="showPreviewImage(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
+			<ul>
+				<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,item.name,null,null,null,ghost.type,null,null,ghost.propertyName) " class="palette-heading" title="Drag a '{{ghost.type}}' to {{ !!ghost.multiple ?  'a \'' + ghost.propertyName + '\' property of' : ''}} a '{{item.displayName}}' component on the form in order to add it.">
+					<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}
+				</li>
+			</ul>
+		</uib-accordion-heading>
+		<ul ng-repeat="propertyName in item.properties">
+			<li ng-repeat="comp in item.components" ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName,null,item.componentTagName, propertyName, comp.propertyValue) " class="paletteItem" title="Drag component {{item.displayName + '-' + propertyName + ':' + comp.component}} to form to add it"> 
+				<img draggable="false" style="align:center" ng-src="/{{item.icon}}" alt=""/>{{propertyName + ': ' + comp.component}}
+			</li>
+		</ul>
 	</div>
-	<img ng-click="showPreviewImage(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
-	<ul>
-		<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,item.name,null,null,null,ghost.type,null,null,ghost.propertyName) " class="paletteItem" title="Drag a '{{ghost.type}}' to {{ !!ghost.multiple ?  'a \'' + ghost.propertyName + '\' property of' : ''}} a '{{item.displayName}}' component on the form in order to add it.">
-			<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ !!ghost.multiple ? ghost.type + " (" + ghost.propertyName + ")" : ghost.type }}
-		</li>
-	</ul>
 </li>

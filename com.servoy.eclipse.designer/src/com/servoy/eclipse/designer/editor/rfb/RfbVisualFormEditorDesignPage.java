@@ -245,22 +245,31 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 * @param form
 	 * @return
 	 */
-	private String computeLayout(Form form)
+	private String computeLayout(Form form, boolean isAbsoluteLayoutDiv)
 	{
+		if (isAbsoluteLayoutDiv) return "csspos";
 		if (form.isResponsiveLayout()) return "flow";
 		if (form.getUseCssPosition()) return "csspos";
-		else return "absolute";
+		return "absolute";
 	}
 
 	public void refreshBrowserUrl(boolean force)
 	{
 		Form form = editorPart.getForm();
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
-		String newLayout = computeLayout(flattenedForm);
+
+		boolean isAbsoluteLayoutDiv = false;
+		if (showedContainer instanceof LayoutContainer)
+		{
+			isAbsoluteLayoutDiv = PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)showedContainer);
+		}
+
+		String newLayout = computeLayout(flattenedForm, isAbsoluteLayoutDiv);
 		if (!Utils.equalObjects(layout, newLayout) || force)
 		{
 			layout = newLayout;
 			Dimension formSize = flattenedForm.getSize();
+			if (isAbsoluteLayoutDiv) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&editorid=" + editorId + "&c_sessionid=" + clientId + (showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
@@ -375,6 +384,13 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		if (persists != null)
 		{
+			if (persists.size() == 1 && persists.get(0) == showedContainer && showedContainer instanceof LayoutContainer &&
+				PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)showedContainer))
+			{
+				// probably size has changed we need a full refresh
+				refreshBrowserUrl(true);
+				return;
+			}
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editorPart.getForm());
 			final Form form = fs.getFlattenedForm(editorPart.getForm(), false);
 			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));

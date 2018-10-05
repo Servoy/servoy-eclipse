@@ -23,6 +23,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -56,7 +58,7 @@ public class ImportSettingsPage extends WizardPage implements Listener
 	private static final String OVERRIDE_DEFAUL_VALUES = "fd";
 
 	private static final String ALLOW_RESERVED_SQL_KEYWORDS = "ak";
-	private static final String ALLOW_DATA_MODEL_CHANGES = "dm";
+	private static final String ALLOWED_DATA_MODEL_CHANGES = "dm";
 	private static final String SKIP_VIEWS = "sv";
 	private static final String DISPLAY_DATA_MODEL_CHANGES = "dmc";
 	private static final String IMPORT_META_DATA = "md";
@@ -214,7 +216,57 @@ public class ImportSettingsPage extends WizardPage implements Listener
 
 		createCheckbox("Allow reserved SQL keywords as table or column names (will fail unless supported by the backend database)", ALLOW_RESERVED_SQL_KEYWORDS,
 			composite);
-		createCheckbox("Allow data model (database) changes", ALLOW_DATA_MODEL_CHANGES, composite);
+
+		String servers = importSettings.optString(ALLOWED_DATA_MODEL_CHANGES);
+		gd = new GridData();
+		gd.horizontalSpan = 1;
+		gd.horizontalAlignment = GridData.FILL;
+		gd.verticalAlignment = GridData.FILL;
+		final Button checkbox = new Button(composite, SWT.CHECK);
+		checkbox.setSelection(true);
+		if ("false".equals(servers))
+		{
+			checkbox.setSelection(false);
+		}
+		checkbox.setText("Allow data model (database) changes");
+		checkbox.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				importSettings.put(ALLOWED_DATA_MODEL_CHANGES, Boolean.toString(checkbox.getSelection()));
+				exportSolutionWizard.getModel().setImportSettings(importSettings);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+
+			}
+		});
+		checkbox.setToolTipText("Enable/Disable changes for all servers");
+
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		gd.horizontalAlignment = GridData.FILL;
+		gd.verticalAlignment = GridData.FILL;
+
+		final Text allowedServers = new Text(composite, SWT.BORDER);
+		allowedServers.setLayoutData(gd);
+		allowedServers.setText(!"true".equals(servers) && !"false".equals(servers) ? servers : "");
+		allowedServers.addModifyListener(new ModifyListener()
+		{
+			@Override
+			public void modifyText(ModifyEvent e)
+			{
+				checkbox.setSelection(true);
+				importSettings.put(ALLOWED_DATA_MODEL_CHANGES, allowedServers.getText());
+				exportSolutionWizard.getModel().setImportSettings(importSettings);
+			}
+		});
+		allowedServers.setToolTipText("Comma separated server names where changes are allowed");
+
 		createCheckbox("Skip database views import", SKIP_VIEWS, composite);
 		createCheckbox("Display data model (database) changes", DISPLAY_DATA_MODEL_CHANGES, composite);
 		createCheckbox("Import solution meta data", IMPORT_META_DATA, composite);

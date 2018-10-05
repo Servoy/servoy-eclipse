@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.ChangeSupport;
@@ -98,12 +101,16 @@ public class CalculationTypeEditingSupport extends EditingSupport
 		{
 			ScriptCalculation calculation = (ScriptCalculation)element;
 			int index = Integer.parseInt(value.toString());
-			int type = Column.allDefinedTypes[index];
-			if (type != calculation.getType())
+			int type = calculation.getType();
+			calculation.setTypeAndCheck(Column.allDefinedTypes[index], Activator.getDefault().getDesignClient());
+			Matcher m = Pattern.compile("return+.+;").matcher(calculation.getDeclaration());
+
+			if (m.find() && m.group().equals(ScriptCalculation.getDefaultReturnMethodString(type)))
 			{
-				calculation.setTypeAndCheck(type, Activator.getDefault().getDesignClient());
-				changeSupport.fireEvent(new ChangeEvent(observable));
+				calculation.setDeclaration(Pattern.compile("return+.+;").matcher(calculation.getDeclaration()).replaceFirst(
+					ScriptCalculation.getDefaultReturnMethodString(calculation.getType())));
 			}
+			changeSupport.fireEvent(new ChangeEvent(observable));
 			getViewer().update(element, null);
 		}
 	}

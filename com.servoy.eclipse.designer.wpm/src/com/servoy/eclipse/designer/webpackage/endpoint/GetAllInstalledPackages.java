@@ -75,6 +75,11 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 
 	public JSONArray executeMethod(JSONObject msg)
 	{
+		return getAllInstalledPackages(msg);
+	}
+
+	public static JSONArray getAllInstalledPackages(JSONObject msg)
+	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 		ServoyProject[] activeProjecWithModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 		SpecProviderState componentSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
@@ -154,7 +159,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return result;
 	}
 
-	private boolean isWebPackageArchive(ServoyProject[] activeProjecWithModules, File webPackageFile)
+	private static boolean isWebPackageArchive(ServoyProject[] activeProjecWithModules, File webPackageFile)
 	{
 		if (webPackageFile != null && webPackageFile.isFile())
 		{
@@ -170,7 +175,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return false;
 	}
 
-	private String getParentProjectNameForPackage(File packageFile)
+	private static String getParentProjectNameForPackage(File packageFile)
 	{
 		if (packageFile != null && packageFile.isFile())
 		{
@@ -185,7 +190,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
-	private String findModuleParent(Solution solution, String moduleName)
+	private static String findModuleParent(Solution solution, String moduleName)
 	{
 		String[] modules = Utils.getTokenElements(solution.getModulesNames(), ",", true);
 		List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));

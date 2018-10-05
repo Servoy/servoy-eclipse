@@ -78,6 +78,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	int importUserPolicy = IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G; // get from user.
 
 	private Button allowDataModelChangeButton;
+	private Text allowDataModelServers;
 	private Button allowKeywordsButton;
 	private Button updateSequencesButton;
 	private Button overrideSequenceTypesButton;
@@ -150,16 +151,37 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		});
 
 		allowDataModelChangeButton = new Button(composite, SWT.CHECK);
-		allowDataModelChangeButton.setText("Allow data model changes");
-		allowDataModelChangeButton.setSelection(exportModel.isAllowDataModelChanges());
+		allowDataModelChangeButton.setText("Allowed data model changes");
+		allowDataModelChangeButton.setSelection(true);
+		if ("false".equals(exportModel.getAllowDataModelChanges()))
+		{
+			allowDataModelChangeButton.setSelection(false);
+		}
 		allowDataModelChangeButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				exportModel.setAllowDataModelChanges(allowDataModelChangeButton.getSelection());
+				exportModel.setAllowDataModelChanges(Boolean.toString(allowDataModelChangeButton.getSelection()));
 			}
 		});
+		allowDataModelChangeButton.setToolTipText("Enable/Disable changes for all servers");
+
+		allowDataModelServers = new Text(composite, SWT.BORDER);
+		allowDataModelServers.setText(!"true".equals(exportModel.getAllowDataModelChanges()) && !"false".equals(exportModel.getAllowDataModelChanges())
+			? exportModel.getAllowDataModelChanges() : "");
+		allowDataModelServers.addModifyListener(new ModifyListener()
+		{
+			@Override
+			public void modifyText(ModifyEvent e)
+			{
+				allowDataModelChangeButton.setSelection(true);
+				exportModel.setAllowDataModelChanges(allowDataModelServers.getText());
+			}
+		});
+		allowDataModelServers.setToolTipText("Comma separated server names where changes are allowed");
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		allowDataModelServers.setLayoutData(gd);
 
 		exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
 		exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only");
@@ -812,7 +834,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		exportActiveSolution.setSelection(false);
 		exportModel.setExportActiveSolution(false);
 		allowDataModelChangeButton.setSelection(true);
-		exportModel.setAllowDataModelChanges(true);
+		exportModel.setAllowDataModelChanges("true");
 		exportSampleDataButton.setSelection(false);
 		exportModel.setExportSampleData(false);
 		allowKeywordsButton.setSelection(false);

@@ -46,6 +46,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -206,6 +207,19 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		}
 	}
 
+	private class OpenInScriptEditorAction extends OpenScriptAction
+	{
+		/**
+		 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction#run()
+		 */
+		@Override
+		public void run()
+		{
+			super.run();
+			getShell().close();
+		}
+	}
+
 	private class ToggleAction extends Action
 	{
 		public ToggleAction()
@@ -292,6 +306,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 
 	private final ToggleAction toggleAllAction;
 	private final CheckUncheckAction checkUncheckAllAction;
+	private final OpenInScriptEditorAction showEditWithScriptEditor;
 
 	/**
 	 * @param shell
@@ -313,6 +328,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		showScopesAction = new ShowAction("Show Scopes");
 		toggleAllAction = new ToggleAction();
 		checkUncheckAllAction = new CheckUncheckAction();
+		showEditWithScriptEditor = new OpenInScriptEditorAction();
 
 		setSelectionHistory(new SelectionHistory()
 		{
@@ -471,6 +487,27 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		setListLabelProvider(provider);
 
 	}
+
+
+	/**
+	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillContextMenu(org.eclipse.jface.action.IMenuManager)
+	 */
+	@Override
+	protected void fillContextMenu(IMenuManager menuManager)
+	{
+
+		if (this.getSelectedItems().getFirstElement() instanceof Form)
+		{
+
+			menuManager.add(showEditWithScriptEditor);
+
+			super.fillContextMenu(menuManager);
+			showEditWithScriptEditor.setSelection(getSelectedItems());
+
+
+		}
+	}
+
 
 	/**
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillViewMenu(org.eclipse.jface.action.IMenuManager)

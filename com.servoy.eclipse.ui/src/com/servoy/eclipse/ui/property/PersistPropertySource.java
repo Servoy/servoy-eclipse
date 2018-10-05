@@ -87,6 +87,7 @@ import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.ISupportInheritedPropertyCheck;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -128,7 +129,6 @@ import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDefaultValue;
-import com.servoy.eclipse.ui.util.ISupportInheritedPropertyCheck;
 import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
@@ -208,6 +208,7 @@ import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MapPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
@@ -1436,6 +1437,46 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			if (propertyType == StyleClassPropertyType.INSTANCE)
 			{
 				return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
+			}
+
+			if (propertyType == MapPropertyType.INSTANCE)
+			{
+				MapEntriesPropertyController mapPC = new MapEntriesPropertyController(id, displayName, null);
+				return new PropertyController<JSONObject, Object>(id, displayName,
+					new ChainedPropertyConverter<JSONObject, Map<String, Object>, Object>(new IPropertyConverter<JSONObject, Map<String, Object>>()
+					{
+
+						@Override
+						public Map<String, Object> convertProperty(Object id, JSONObject value)
+						{
+							HashMap<String, Object> map = null;
+							if (value != null)
+							{
+								map = new HashMap<String, Object>();
+								for (String key : value.keySet())
+								{
+									map.put(key, value.get(key));
+								}
+							}
+							return map;
+						}
+
+						@Override
+						public JSONObject convertValue(Object id, Map<String, Object> value)
+						{
+							JSONObject jsonObj = null;
+							if (value != null)
+							{
+								jsonObj = new JSONObject();
+								for (Map.Entry<String, Object> mapEntry : value.entrySet())
+								{
+									jsonObj.put(mapEntry.getKey(), mapEntry.getValue());
+								}
+							}
+							return jsonObj;
+						}
+
+					}, mapPC.getConverter()), mapPC.getLabelProvider(), mapPC);
 			}
 
 			retval = getPropertiesPropertyDescriptor(propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription,

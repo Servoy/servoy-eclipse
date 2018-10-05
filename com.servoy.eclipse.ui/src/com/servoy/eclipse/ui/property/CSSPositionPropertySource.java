@@ -221,7 +221,7 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 	@Override
 	public Object resetComplexPropertyValue(Object id)
 	{
-		if (BOTTOM.equals(id) || RIGHT.equals(id))
+		if (LEFT.equals(id) || TOP.equals(id) || BOTTOM.equals(id) || RIGHT.equals(id))
 		{
 			return "-1";
 		}

@@ -7,6 +7,11 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 		utils = $selectionUtils.getUtilsForScope(scope);
 		if (editorScope.isAbsoluteFormLayout()) {
 			btnToggleDesignMode.enabled = false;
+			btnZoomIn.hide = true;
+			if (!$editorService.isShowingContainer())
+			{
+				btnZoomOut.hide = true;
+			}	
 		} else {
 			btnPlaceField.hide = true;
 			btnPlaceImage.hide = true;
@@ -18,6 +23,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			btnClassicEditor.hide = true;
 			btnHideInheritedElements.hide = true;
 		}
+		btnZoomOut.enabled = $editorService.isShowingContainer();
 		var promise = $editorService.isShowData();
 		promise.then(function(result) {
 			btnToggleShowData.state = result;
@@ -157,6 +163,26 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 		},
 	};
 
+	var btnZoomIn = {
+			text: "Zoom in",
+			icon: "../../images/zoom_in.png",
+			disabledIcon: "../../images/zoom_in_disabled.png",
+			enabled: false,
+			onclick: function() {
+				$editorService.executeAction('zoomIn');
+			},
+		};
+	
+	var btnZoomOut = {
+			text: "Zoom out",
+			icon: "../../images/zoom_out.png",
+			disabledIcon: "../../images/zoom_out_disabled.png",
+			enabled: false,
+			onclick: function() {
+				$editorService.executeAction('zoomOut');
+			},
+		};
+	
 	var btnSaveAsTemplate = {
 		text: "Save as template...",
 		icon: "toolbaractions/icons/template_save.png",
@@ -167,6 +193,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	};
 
 	$toolbar.add(btnTabSequence, TOOLBAR_CATEGORIES.FORM);
+	$toolbar.add(btnZoomIn, TOOLBAR_CATEGORIES.FORM);
+	$toolbar.add(btnZoomOut, TOOLBAR_CATEGORIES.FORM);
 	$toolbar.add(btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
 	var btnHideInheritedElements = {
@@ -654,7 +682,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			btnTabSequence.enabled = selection.length > 1;
 			btnSameWidth.enabled = selection.length > 1;
 			btnSameHeight.enabled = selection.length > 1;
-
+			btnZoomOut.enabled = $editorService.isShowingContainer();
 			if (editorScope.isAbsoluteFormLayout()) {
 				btnDistributeHorizontalSpacing.enabled = selection.length > 2;
 				btnDistributeHorizontalCenters.enabled = selection.length > 2;
@@ -691,6 +719,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			else {
 				btnMoveUp.enabled = selection.length == 1;
 				btnMoveDown.enabled = selection.length == 1;
+				btnZoomIn.enabled = selection.length == 1 ;
 			}
 		});
 	})

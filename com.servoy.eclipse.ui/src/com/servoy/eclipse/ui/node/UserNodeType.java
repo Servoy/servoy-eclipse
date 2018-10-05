@@ -80,6 +80,7 @@ public enum UserNodeType
 	JSLIB,
 	DATE,
 	ARRAY,
+	OBJECT,
 	REGEXP,
 	STRING,
 	NUMBER,

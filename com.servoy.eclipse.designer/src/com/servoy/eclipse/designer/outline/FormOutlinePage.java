@@ -60,10 +60,10 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ChangeParentCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
-import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.labelproviders.DelegatingDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -146,6 +146,12 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							IPersist real = ((PersistContext)element).getPersist();
 							if (real != null)
 							{
+								if (PersistHelper.isInAbsoluteLayoutMode(real))
+								{
+									// do not allow d&d from absolute layout div
+									event.doit = false;
+									return;
+								}
 								lst.add(real);
 							}
 						}

@@ -59,6 +59,7 @@ public class IconProvider
 		c2i = new HashMap<Class< ? >, String>();
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSLib.class, "jslibfolder.png");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Array.class, "jslibarray.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Object.class, "object.png");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Date.class, "day_obj.png");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.String.class, "jslibstring.png");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Math.class, "sum.png");

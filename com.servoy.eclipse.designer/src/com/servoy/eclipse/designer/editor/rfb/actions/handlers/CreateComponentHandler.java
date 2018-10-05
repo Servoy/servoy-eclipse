@@ -59,11 +59,13 @@ import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -145,6 +147,21 @@ public class CreateComponentHandler implements IServerService
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(newPersist));
 								IStructuredSelection structuredSelection = new StructuredSelection(newPersist);
 								selectionProvider.setSelection(structuredSelection);
+								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
+									PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)newPersist[0]))
+								{
+									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(), "Edit absolute layout container",
+										"Do you want to zoom into the layout container so you can edit it ?"))
+									{
+										BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
+										if (editor != null)
+										{
+											BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
+											if (activePage instanceof RfbVisualFormEditorDesignPage)
+												((RfbVisualFormEditorDesignPage)activePage).showContainer((LayoutContainer)newPersist[0]);
+										}
+									}
+								}
 							}
 						}
 						catch (Exception ex)
@@ -255,7 +272,8 @@ public class CreateComponentHandler implements IServerService
 					}
 				}
 			}
-			if (editorPart.getForm().isResponsiveLayout())
+			if (editorPart.getForm().isResponsiveLayout() &&
+				!PersistHelper.isAbsoluteLayoutDiv(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
 			{
 				List<IPersist> children = new ArrayList<IPersist>();
 				Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
@@ -586,10 +604,17 @@ public class CreateComponentHandler implements IServerService
 							for (String string : allPropertiesNames)
 							{
 								PropertyDescription property = spec.getProperty(string);
-								if (property != null && property.getInitialValue() != null)
+								if (property != null)
 								{
-									Object initialValue = property.getInitialValue();
-									if (initialValue != null) webComponent.setProperty(string, initialValue);
+									if (args.has(string) && webComponent.getProperty(string) == null)
+									{
+										webComponent.setProperty(string, args.opt(string));
+									}
+									else if (property.getInitialValue() != null)
+									{
+										Object initialValue = property.getInitialValue();
+										if (initialValue != null) webComponent.setProperty(string, initialValue);
+									}
 								}
 							}
 							List<IPersist> changes = new ArrayList<>();
@@ -789,6 +814,7 @@ public class CreateComponentHandler implements IServerService
 		parent.addChild(container);
 		container.setLocation(new Point(index, index));
 		newPersists.add(container);
+		if (PersistHelper.isAbsoluteLayoutDiv(layoutSpec)) container.setSize(new Dimension(200, 200));
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)

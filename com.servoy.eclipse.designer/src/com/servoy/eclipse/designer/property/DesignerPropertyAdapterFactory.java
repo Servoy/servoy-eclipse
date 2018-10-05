@@ -40,10 +40,10 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.mobile.property.MobileComponentWithTitlePropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobileListPropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
-import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.actions.Openable;
 import com.servoy.eclipse.ui.editors.PersistEditor;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -343,8 +343,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 									((WebObjectSpecification)getPropertyDescription()).getHandlers().containsKey(
 										propertyDescriptor.propertyDescriptor.getName()))
 									return PropertyCategory.Events;
-								if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName()))
-									return PropertyCategory.Component;
+								if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName()) ||
+									"designTimeProperties".equals(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
 								return super.createPropertyCategory(propertyDescriptor);
 							}
 

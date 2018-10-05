@@ -27,8 +27,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;

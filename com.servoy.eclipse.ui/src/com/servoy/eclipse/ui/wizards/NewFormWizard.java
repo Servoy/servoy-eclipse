@@ -391,7 +391,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				{
 					ElementFactory.createFields(form, config, designerPreferences.getGridSnapTo() ? new SnapToGridFieldPositioner(designerPreferences) : null,
 						config.isPlaceHorizontally() ? new Point(0, 0) : new Point(60, 70));
-					if (config.isPlaceHorizontally())
+					if (config.isPlaceHorizontally() && !form.getUseCssPosition())
 					{
 						form.setView(FormController.LOCKED_TABLE_VIEW);
 					}
@@ -438,8 +438,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (form.isResponsiveLayout() && WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().isEmpty())
 			{
 				final MessageDialog dialog = new MessageDialog(getShell(), "No Responsive Layout present", null,
-					"This solution does not have a responsive layout yet. You need a responsive layout to build responsive form, do you want to download a responsive layout now ?",
-					MessageDialog.QUESTION, new String[] { "Automatic install (bootstrap/12grid)", "Manual install", "Cancel" }, 0);
+					"This solution does not have a responsive layout yet. You need a responsive layout to build responsive form, do you want to download a responsive layout package now?",
+					MessageDialog.QUESTION, new String[] { "Automatic install (bootstrap/12grid)", "Manual install", "Skip" }, 0);
 				dialog.setBlockOnOpen(true);
 				int pressedButton = dialog.open();
 

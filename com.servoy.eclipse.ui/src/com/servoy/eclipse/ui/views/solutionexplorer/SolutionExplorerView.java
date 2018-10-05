@@ -2605,6 +2605,9 @@ public class SolutionExplorerView extends ViewPart
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
 
+		if (copyTable.isEnabled()) manager.add(copyTable);
+		if (hideUnhideTablesAction.isEnabled()) manager.add(hideUnhideTablesAction);
+
 		if (selectedTreeNode != null && selectedTreeNode.getRealType() == UserNodeType.SERVERS)
 		{
 			MenuManager createDBSubmenu = new MenuManager("Create new database", "newDatabase");
@@ -3356,6 +3359,8 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(reloadTablesOfServerAction);
 		addTreeSelectionChangedListener(updateServoySequencesAction);
 		addTreeSelectionChangedListener(duplicateServer);
+		addTreeSelectionChangedListener(copyTable);
+		addTreeSelectionChangedListener(hideUnhideTablesAction);
 		addTreeSelectionChangedListener(enableServer);
 		addTreeSelectionChangedListener(flagTenantColumn);
 		addTreeSelectionChangedListener(toggleFormCommandsActions);

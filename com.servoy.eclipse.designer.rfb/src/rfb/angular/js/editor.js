@@ -1376,6 +1376,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			wsSession.callService('formeditor', action, params, true)
 		},
 
+		isShowingContainer : function(){
+			return $webSocket.getURLParameter("cont");
+		},
 		sameSize: function(width) {
 			var selection = editorScope.getSelection();
 			if (selection && selection.length > 1) {

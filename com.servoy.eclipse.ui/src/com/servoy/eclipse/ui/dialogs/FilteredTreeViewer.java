@@ -44,10 +44,12 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
@@ -85,7 +87,7 @@ import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabel
 
 /**
  * JFace-like viewer for selecting a value from a tree. A filter is built-in.
- * 
+ *
  * @author rgansevles
  */
 
@@ -97,7 +99,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * List of open listeners (element type: <code>ISelectionActivateListener</code>).
-	 * 
+	 *
 	 * @see #fireOpen
 	 */
 	private final ListenerList openListeners = new ListenerList();
@@ -115,7 +117,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 	private ToolBar toolBar;
 	private final boolean showMenu;
 	private List<Object> orderedSelection;
-	
+
 	public static final String CONTENT_LOADING_JOB_FAMILY = "svyContentLoadingJobFamily";
 
 	public FilteredTreeViewer(Composite parent, boolean showFilter, boolean showMenu, ITreeContentProvider contentProvider, IBaseLabelProvider labelProvider,
@@ -221,7 +223,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 		{
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
 			 */
 			public void widgetDisposed(DisposeEvent e)
@@ -264,19 +266,35 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			{
 				return new StructuredSelection(getCheckedElements());
 			}
+
+			@Override
+			public ITreeSelection getStructuredSelection() throws ClassCastException
+			{
+				List<TreePath> paths = new ArrayList<TreePath>();
+				Object[] selection = getCheckedElements();
+				if (selection != null)
+				{
+					for (Object select : selection)
+					{
+						paths.add(new TreePath(new Object[] { select }));
+					}
+				}
+				return new TreeSelection(paths.toArray(new TreePath[0]));
+			}
 		};
 	}
 
 	/**
 	 * Create the refresh job for the receiver.
-	 * 
+	 *
 	 */
 	private void createFixedRefreshJob()
 	{
-		refreshJob = new WorkbenchJob("Refresh Filter") {
+		refreshJob = new WorkbenchJob("Refresh Filter")
+		{
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.ui.progress.UIJob#runInUIThread(org.eclipse.core.runtime.IProgressMonitor)
 			 */
 			@Override
@@ -336,13 +354,13 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 							treeViewer.expandToLevel(treePath, 1);
 						}
 						// enabled toolbar - there is text to clear
-						// and the list is currently being filtered		
+						// and the list is currently being filtered
 						updateToolbar(true);
 					}
 					else
 					{
 						// disabled toolbar - there is no text to clear
-						// and the list is currently not filtered		        	
+						// and the list is currently not filtered
 						updateToolbar(false);
 					}
 
@@ -370,7 +388,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 			/**
 			 * Returns true if the job should be canceled (because of timeout or actual cancellation).
-			 * 
+			 *
 			 * @param items
 			 * @param provider
 			 * @param monitor
@@ -600,7 +618,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Return whether or not there are less than two views in the list.
-	 * 
+	 *
 	 * @param tree
 	 * @return <code>true</code> if there are less than two views in the list.
 	 */
@@ -642,7 +660,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Adds a listener for selection-open in this viewer. Has no effect if an identical listener is already registered.
-	 * 
+	 *
 	 * @param listener an open listener
 	 */
 	public void addOpenListener(IOpenListener listener)
@@ -653,7 +671,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Removes the given open listener from this viewer. Has no affect if an identical listener is not registered.
-	 * 
+	 *
 	 * @param listener an open listener
 	 */
 	public void removeOpenListener(IOpenListener listener)
@@ -663,9 +681,9 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Notifies any open event listeners that a open event has been received. Only listeners registered at the time this method is called are notified.
-	 * 
+	 *
 	 * @param event an open
-	 * 
+	 *
 	 * @see IOpenListener#open(OpenEvent)
 	 */
 	protected void fireOpen(final OpenEvent event)
@@ -686,7 +704,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
 	 */
 	public void doubleClick(DoubleClickEvent event)
@@ -707,8 +725,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 		}
 	}
 
-	protected void handleDispose(@SuppressWarnings("unused")
-	DisposeEvent event)
+	protected void handleDispose(@SuppressWarnings("unused") DisposeEvent event)
 	{
 		openListeners.clear();
 		labelProvider = null;
@@ -719,7 +736,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Adds a listener for selection changes in this selection provider. Has no effect if an identical listener is already registered.
-	 * 
+	 *
 	 * @param listener a selection changed listener
 	 */
 	public void addSelectionChangedListener(ISelectionChangedListener listener)
@@ -729,7 +746,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Returns the current selection for this provider.
-	 * 
+	 *
 	 * @return the current selection
 	 */
 	public ISelection getSelection()
@@ -792,7 +809,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Removes the given selection change listener from this selection provider. Has no affect if an identical listener is not registered.
-	 * 
+	 *
 	 * @param listener a selection changed listener
 	 */
 	public void removeSelectionChangedListener(ISelectionChangedListener listener)
@@ -802,7 +819,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Sets the current selection for this selection provider.
-	 * 
+	 *
 	 * @param selection the new selection
 	 */
 	public void setSelection(ISelection selection)
@@ -838,9 +855,9 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 
 	/**
 	 * Label provider to provide default folder images on expandable items
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public static class TreeFolderLabelProvider extends DelegateLabelProvider implements IFontProvider, IColorProvider
 	{
@@ -876,6 +893,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			return null;
 		}
 
+		@Override
 		public Color getBackground(Object element)
 		{
 			if (getLabelProvider() instanceof IColorProvider)
@@ -885,6 +903,7 @@ public class FilteredTreeViewer extends FilteredTree implements ISelectionProvid
 			return null;
 		}
 
+		@Override
 		public Color getForeground(Object element)
 		{
 			if (getLabelProvider() instanceof IColorProvider)

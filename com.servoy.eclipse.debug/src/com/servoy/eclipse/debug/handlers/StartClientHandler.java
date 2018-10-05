@@ -36,6 +36,7 @@ import org.eclipse.ui.commands.IElementUpdater;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.menus.UIElement;
 
+import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -47,7 +48,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 /**
  * @author emera
  */
-public class StartClientHandler extends StartDebugHandler implements IElementUpdater
+public class StartClientHandler extends StartDebugHandler implements IElementUpdater, IActiveProjectListener
 {
 
 
@@ -56,6 +57,19 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 	static final String START_NG_CLIENT = "com.servoy.eclipse.ui.StartNGClient";
 	static final String START_MOBILE_CLIENT = "com.servoy.eclipse.ui.StartMobileClient";
 	final static IDialogSettings fDialogSettings = Activator.getDefault().getDialogSettings();
+
+	public StartClientHandler()
+	{
+		super();
+		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
+	}
+
+	@Override
+	public void dispose()
+	{
+		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
+		super.dispose();
+	}
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException
@@ -157,5 +171,44 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 	public void updateElement(UIElement element, Map parameters)
 	{
 		element.setTooltip(getStartTitle(getCommandId()));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.core.IActiveProjectListener#activeProjectWillChange(com.servoy.eclipse.model.nature.ServoyProject,
+	 * com.servoy.eclipse.model.nature.ServoyProject)
+	 */
+	@Override
+	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+	{
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.core.IActiveProjectListener#activeProjectChanged(com.servoy.eclipse.model.nature.ServoyProject)
+	 */
+	@Override
+	public void activeProjectChanged(ServoyProject activeProject)
+	{
+		ICommandService cmdService = PlatformUI.getWorkbench().getService(ICommandService.class);
+		cmdService.refreshElements("com.servoy.eclipse.ui.StartClient", null);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.core.IActiveProjectListener#activeProjectUpdated(com.servoy.eclipse.model.nature.ServoyProject, int)
+	 */
+	@Override
+	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+	{
+		if (updateInfo == IActiveProjectListener.SOLUTION_TYPE_CHANGED)
+		{
+			ICommandService cmdService = PlatformUI.getWorkbench().getService(ICommandService.class);
+			cmdService.refreshElements("com.servoy.eclipse.ui.StartClient", null);
+		}
 	}
 }

@@ -364,10 +364,17 @@ angular.module('editorContent',['servoyApp'])
     if (!ret) {
       ret = {}
       if (formData.components[name]) {
-        ret.left = formData.components[name].location.x + "px";
-        ret.top = formData.components[name].location.y + "px";
-        ret.width = formData.components[name].size.width + "px";
-        ret.height = formData.components[name].size.height + "px";
+    	  if (formData.formProperties['useCssPosition'][name])
+    	  {
+    		  $editorContentService.setCSSPositionProperties(ret,formData.components[name]['cssPosition']);
+    	  }
+    	  else
+    	  {
+    		  ret.left = formData.components[name].location.x + "px";
+    		  ret.top = formData.components[name].location.y + "px";
+    		  ret.width = formData.components[name].size.width + "px";
+    		  ret.height = formData.components[name].size.height + "px";
+    	  }
       }
       ret.position = 'absolute'
       layout[name] = ret;
@@ -516,9 +523,59 @@ angular.module('editorContent',['servoyApp'])
     setLayoutData: function(data) {
       layoutData = data;
     },
+    setCSSPositionProperties: function(cssPositionObject,cssPosition){
+    	delete cssPositionObject.left;
+    	delete cssPositionObject.right;
+    	delete cssPositionObject.top;
+    	delete cssPositionObject.bottom;
+    	delete cssPositionObject.width;
+    	delete cssPositionObject.height;
+    	delete cssPositionObject['min-width'];
+    	delete cssPositionObject['min-height'];
+    	if (cssPosition.left != -1)
+    	{
+    		cssPositionObject.left = isNaN(parseInt(cssPosition.left)) ? cssPosition.left : (cssPosition.left + 'px');
+    	}
+    	if (cssPosition.right != -1)
+    	{
+    		cssPositionObject.right = isNaN(parseInt(cssPosition.right)) ? cssPosition.right : (cssPosition.right + 'px');
+    	}
+    	if (cssPosition.top != -1)
+    	{
+    		cssPositionObject.top = isNaN(parseInt(cssPosition.top)) ? cssPosition.top : (cssPosition.top + 'px');
+    	}
+    	if (cssPosition.bottom != -1)
+    	{
+    		cssPositionObject.bottom = isNaN(parseInt(cssPosition.bottom)) ? cssPosition.bottom : (cssPosition.bottom + 'px');
+    	}
+    	if (cssPosition.width != -1)
+    	{
+    		if (cssPosition.left != -1 && cssPosition.right != -1)
+    		{
+    			cssPositionObject['min-width'] = cssPosition.width;
+    		}
+    		else
+    		{
+    			cssPositionObject.width = cssPosition.width;
+    		}	
+    	}
+    	if (cssPosition.height != -1)
+    	{
+    		if (cssPosition.top != -1 && cssPosition.bottom != -1)
+    		{
+    			cssPositionObject['min-height'] = cssPosition.height;
+    		}
+    		else
+    		{
+    			cssPositionObject.height = cssPosition.height;
+    		}	
+    	}
+    	return cssPositionObject;
+    },
     updateFormData: function(updates) {
       var data = JSON.parse(updates);
       if (data && (data.components || data.deleted || data.renderGhosts || data.parts || data.containers || data.deletedContainers || data.compAttributes)) {
+    	  var setCSSPositionProperties = this.setCSSPositionProperties;
         // TODO should it be converted??
         $rootScope.$apply(function() {
           function compModelGetter(compName) {
@@ -658,10 +715,17 @@ angular.module('editorContent',['servoyApp'])
 
             var compLayout = layoutData[name];
             if (compLayout) {
-              compLayout.left = newCompData.location.x + "px";
-              compLayout.top = newCompData.location.y + "px";
-              compLayout.width = newCompData.size.width + "px";
-              compLayout.height = newCompData.size.height + "px";
+            	if (formData.formProperties['useCssPosition'][name])
+            	{
+            		setCSSPositionProperties(compLayout,newCompData['cssPosition']);
+            	}
+            	else
+            	{
+            		 compLayout.left = newCompData.location.x + "px";
+                     compLayout.top = newCompData.location.y + "px";
+                     compLayout.width = newCompData.size.width + "px";
+                     compLayout.height = newCompData.size.height + "px";
+            	}	
             }
           }
           

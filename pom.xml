@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<prerequisites>
@@ -8,7 +9,6 @@
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
 	<version>8.4.0.3400_b1</version>
-
 	<properties>
 		<tycho.version>1.2.0</tycho.version>
 		<tycho.extra.version>1.2.0</tycho.extra.version>
@@ -137,6 +137,13 @@
 								<version>${project.version}</version>
 							</restrictTo>
 						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>j2db_server</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
 					</filters>
 				</configuration>
 			</plugin>
@@ -254,17 +261,22 @@
 								</goals>
 								<configuration>
 									<target>
-										<replaceregexp file="${basedir}/com.servoy.eclipse.product/p2.inf"
-											match="${project.version}" replace="${newVersion}" byline="true" />
+										<replaceregexp
+											file="${basedir}/com.servoy.eclipse.product/p2.inf"
+											match="${project.version}" replace="${newVersion}"
+											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/about.properties"
-											match="${project.version}" replace="${newVersion}" byline="true" />
+											match="${project.version}" replace="${newVersion}"
+											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.core/plugin.properties"
-											match="${project.version}" replace="${newVersion}" byline="true" />
+											match="${project.version}" replace="${newVersion}"
+											byline="true" />
 										<replaceregexp
 											file="${basedir}/com.servoy.eclipse.feature/feature.xml"
-											match="${project.version}" replace="${newVersion}" byline="true" />
+											match="${project.version}" replace="${newVersion}"
+											byline="true" />
 									</target>
 								</configuration>
 							</execution>

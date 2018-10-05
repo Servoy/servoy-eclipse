@@ -37,6 +37,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
@@ -140,7 +142,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 				try
 				{
 					ServoyProject activeSolutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
-					List<JSONObject> remotePackages = null;
+					JSONArray allInstalledPackages = null;
 					String[] packages = dependency.split(",");
 					for (String dependendPck : packages)
 					{
@@ -162,45 +164,79 @@ public class InstallWebPackageHandler implements IDeveloperService
 							continue;
 						}
 
-
-						if (remotePackages == null)
+						if (allInstalledPackages == null)
 						{
-							remotePackages = GetAllInstalledPackages.getRemotePackages();
+							allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages(null);
 						}
 
-						for (JSONObject pckObject : remotePackages)
+						for (Object pckObj : allInstalledPackages)
 						{
-							if (pckObject.get("name").equals(nameAndVersion[0]))
+							if (pckObj instanceof JSONObject)
 							{
-								JSONArray releases = pckObject.getJSONArray("releases");
-								if (nameAndVersion.length > 1)
+								JSONObject pckObject = (JSONObject)pckObj;
+								if (pckObject.get("name").equals(nameAndVersion[0]))
 								{
-									String version = "";
-									String prefix = "=";
-									if (nameAndVersion[1].startsWith(">="))
+									String installedVersion = pckObject.optString("installed");
+									JSONArray releases = pckObject.getJSONArray("releases");
+									if (nameAndVersion.length > 1)
 									{
-										prefix = nameAndVersion[1].substring(0, 2);
-										version = nameAndVersion[1].substring(2);
-									}
-									else if (nameAndVersion[1].startsWith(">"))
-									{
-										prefix = nameAndVersion[1].substring(0, 1);
-										version = nameAndVersion[1].substring(1);
-									}
-									for (int j = 0; j < releases.length(); j++)
-									{
-										if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
+										String version = "";
+										String prefix = "=";
+										if (nameAndVersion[1].startsWith(">="))
 										{
-											importPackage(pckObject, releases.getJSONObject(j).optString("version"), solutionName, resourceListenerSwitch);
-											break;
+											prefix = nameAndVersion[1].substring(0, 2);
+											version = nameAndVersion[1].substring(2);
+										}
+										else if (nameAndVersion[1].startsWith(">"))
+										{
+											prefix = nameAndVersion[1].substring(0, 1);
+											version = nameAndVersion[1].substring(1);
+										}
+
+										// if no compatible version already installed try to install one
+										if (installedVersion.isEmpty() || !versionCheck(installedVersion, version, prefix))
+										{
+											for (int j = 0; j < releases.length(); j++)
+											{
+												if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
+												{
+													String installVersion = releases.getJSONObject(j).optString("version");
+													int[] response = { Window.OK };
+													if (!installedVersion.isEmpty())
+													{
+														Display.getDefault().syncExec(new Runnable()
+														{
+															public void run()
+															{
+																response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Web Package Manager",
+																	null,
+																	"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
+																		", but you already have version " + installedVersion +
+																		" installed. Do you want to overwrite the installed one?",
+																	MessageDialog.QUESTION,
+																	new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0).open();
+															}
+														});
+													}
+													if (response[0] == Window.OK)
+													{
+														importPackage(pckObject, installVersion, solutionName, resourceListenerSwitch);
+													}
+													break;
+												}
+											}
 										}
 									}
+									else
+									{
+										// if not installed, install the latest release
+										if (installedVersion.isEmpty())
+										{
+											importPackage(pckObject, releases.getJSONObject(0).optString("version"), solutionName, resourceListenerSwitch);
+										}
+									}
+									break;
 								}
-								else
-								{
-									importPackage(pckObject, releases.getJSONObject(0).optString("version"), solutionName, resourceListenerSwitch);
-								}
-								break;
 							}
 						}
 

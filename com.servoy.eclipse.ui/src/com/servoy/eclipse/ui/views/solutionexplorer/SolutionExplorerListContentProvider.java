@@ -390,8 +390,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			key = un.getRealObject();
 		}
 		else if (!(type == UserNodeType.PLUGINS || type == UserNodeType.STRING || type == UserNodeType.NUMBER || type == UserNodeType.DATE ||
-			type == UserNodeType.ARRAY || type == UserNodeType.STATEMENTS || type == UserNodeType.SPECIAL_OPERATORS || type == UserNodeType.XML_METHODS ||
-			type == UserNodeType.XML_LIST_METHODS || type == UserNodeType.FUNCTIONS || type == UserNodeType.FORM_ELEMENTS || type == UserNodeType.JSON))
+			type == UserNodeType.ARRAY || type == UserNodeType.OBJECT || type == UserNodeType.STATEMENTS || type == UserNodeType.SPECIAL_OPERATORS ||
+			type == UserNodeType.XML_METHODS || type == UserNodeType.XML_LIST_METHODS || type == UserNodeType.FUNCTIONS || type == UserNodeType.FORM_ELEMENTS ||
+			type == UserNodeType.JSON))
 		// if (type !=  UserNodeType.OTHER_CACHED_RETURN_TYPES_THAT_DO_NOT_MODIFY_THE_KEY)
 		{
 			// THE DATA FOR THIS TYPE OF NODES IS NOT CACHED
@@ -584,6 +585,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = TreeBuilder.createJSArray(this);
 			}
+			else if (type == UserNodeType.OBJECT)
+			{
+				lm = TreeBuilder.createJSObject(this);
+			}
 			else if (type == UserNodeType.REGEXP)
 			{
 				lm = TreeBuilder.createJSRegexp(this);
@@ -616,6 +621,27 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				String prefix = '.' + DataSourceUtilsBase.DB_DATASOURCE_SCHEME + '.' + ((TableWrapper)un.getRealObject()).getServerName() + '.' +
 					((TableWrapper)un.getRealObject()).getTableName();
 				lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+
+				ITable table = null;
+				try
+				{
+					table = ServoyModel.getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName()).getTable(
+						((TableWrapper)un.getRealObject()).getTableName());
+				}
+				catch (RemoteException e)
+				{
+					ServoyLog.logError(e);
+				}
+				if (table != null)
+				{
+					Object[] tableColumns = createTableColumns(table, un);
+					Object[] newElements = new Object[lm.length + tableColumns.length];
+
+					System.arraycopy(tableColumns, 0, newElements, 0, tableColumns.length);
+					System.arraycopy(lm, 0, newElements, tableColumns.length, lm.length);
+
+					lm = newElements;
+				}
 			}
 			else if (type == UserNodeType.FORM_ELEMENTS)
 			{
@@ -1243,7 +1269,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		if (table != null)
 		{
-			genTableColumns(table, dlm, UserNodeType.TABLE_COLUMNS_ITEM, un.getSolution(), null);
+			if (un.getSolution() == null)
+			{
+				genTableColumns(table, dlm, UserNodeType.TABLE_COLUMNS_ITEM,
+					ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution(), null);
+			}
+			else genTableColumns(table, dlm, UserNodeType.TABLE_COLUMNS_ITEM, un.getSolution(), null);
 		}
 
 		return dlm.toArray();

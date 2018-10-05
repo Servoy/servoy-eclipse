@@ -27,7 +27,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.designer.util.DeveloperUtils;
-import com.servoy.eclipse.designer.util.WebFormComponentChildType;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;

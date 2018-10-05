@@ -31,6 +31,7 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.PseudoPropertyHandler.CustomPropertySetterDelegatePropertyController;
 import com.servoy.j2db.FlattenedSolution;
@@ -198,7 +199,7 @@ public class PDPropertySource extends PersistPropertySource
 					}));
 			props.add(attributesPropertyHandler);
 		}
-		if (persistContext.getPersist() instanceof WebComponent)
+		if (persistContext.getPersist() instanceof WebComponent || persistContext.getPersist() instanceof WebFormComponentChildType)
 		{
 			props.add(new PseudoPropertyHandler("designTimeProperties"));
 		}
