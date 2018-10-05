@@ -224,7 +224,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + overwriteAllProperties + " overwrite all properties of  an already deployed application\n"
 			+ "             by using the values from the servoy.properties of the war.\n"
 			+ "        -" + webXmlFileName + " a path to a web.xml  that should be included instead of default one;\n"
-			+ "             it should be a web.xml file previously generated via a Servoy WAR export.\n";
+			+ "             it should be a web.xml file previously generated via a Servoy WAR export.\n"
+			+ getHelpMessageExistCodes();
 		// @formatter:on
 	}
 
