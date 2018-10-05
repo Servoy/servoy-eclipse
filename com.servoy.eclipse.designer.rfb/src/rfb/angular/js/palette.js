@@ -50,12 +50,12 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					packageOrder = {};
 					packageOrder[layoutType] = [];
 					for(var i = 0; i < got.data.length; i++) {
-						got.data[i].isOpen = "true";
+						got.data[i].isOpen = true;
 						packageOrder[layoutType].push(got.data[i].packageName);
 						
 						for (var j = 0; j < got.data[i].components.length; j++) {
 							if (got.data[i].components[j].properties) {
-								got.data[i].components[j].isOpen = "true";
+								got.data[i].components[j].isOpen = false;
 							}
 						}
 					}
