@@ -65,6 +65,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -180,6 +181,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 		editorWebsocketSession.registerServerService("formeditor", editorServiceHandler);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(partListener);
+		ServoyModelFinder.getServoyModel().addFormComponentListener(partListener);
 		try
 		{
 			browser = new Browser(parent, SWT.NONE);
@@ -327,6 +329,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		WebsocketSessionManager.removeSession(editorWebsocketSession.getUuid());
 		WebsocketSessionManager.removeSession(designerWebsocketSession.getUuid());
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(partListener);
+		ServoyModelFinder.getServoyModel().removeFormComponentListener(partListener);
 	}
 
 //	protected IWebsocketSession getContentWebsocketSession()
@@ -586,7 +589,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		return showedContainer;
 	}
 
-	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener
+	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener
 	{
 		private boolean hidden = false;
 		private boolean refresh = false;
@@ -602,6 +605,15 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				}
 				else refresh = true;
 			}
+		}
+
+		public void formComponentChanged()
+		{
+			if (!hidden)
+			{
+				refresh();
+			}
+			else refresh = true;
 		}
 
 		private void refresh()
