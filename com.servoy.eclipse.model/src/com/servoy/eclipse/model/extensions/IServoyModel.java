@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.model.extensions;
 
+import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
@@ -94,5 +95,14 @@ public interface IServoyModel
 	 * @return
 	 */
 	IServerInternal getMemServer(String tablename);
+
+	/**
+	 * Fire that a form component is added, deleted or its name/datasource updated.
+	 */
+	void fireFormComponentChanged();
+
+	void addFormComponentListener(IFormComponentListener listener);
+
+	void removeFormComponentListener(IFormComponentListener listener);
 
 }

@@ -73,6 +73,7 @@ import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
@@ -400,6 +401,11 @@ public class DesignerFilter implements Filter
 										componentJson.put("icon", spec.getIcon());
 									}
 									componentJson.put("types", new JSONArray(getPalleteTypeNames(spec)));
+									if (!spec.getProperties(FormComponentPropertyType.INSTANCE).isEmpty())
+									{
+										componentJson.put("properties", getFormComponentPropertyNames(spec));
+										componentJson.put("components", getFormComponents(form));
+									}
 									if (componentJson.has("category"))
 									{
 										categories.append(componentJson.getString("category"), componentJson);
@@ -541,6 +547,36 @@ public class DesignerFilter implements Filter
 			}
 		}
 		return sb.append("</" + tagName + ">");
+	}
+
+	private List<String> getFormComponentPropertyNames(WebObjectSpecification spec)
+	{
+		List<String> result = new ArrayList<>();
+		for (PropertyDescription propertyDescription : spec.getProperties(FormComponentPropertyType.INSTANCE))
+		{
+			result.add(propertyDescription.getName());
+		}
+		return result;
+	}
+
+	private List<JSONObject> getFormComponents(Form form)
+	{
+		List<JSONObject> result = new ArrayList<JSONObject>();
+		Iterator<Form> it = form.getSolution().getAllComponentForms(true);
+		while (it.hasNext())
+		{
+			Form formComponent = it.next();
+			if (form.getDataSource() == null || formComponent.getDataSource() == null || formComponent.getDataSource().equals(form.getDataSource()))
+			{
+				JSONObject json = new JSONObject();
+				json.put("component", formComponent.getName());
+				JSONObject propertyvalue = new JSONObject();
+				propertyvalue.put(FormComponentPropertyType.SVY_FORM, formComponent.getUUID());
+				json.put("propertyValue", propertyvalue);
+				result.add(json);
+			}
+		}
+		return result;
 	}
 
 	private List<JSONObject> getPalleteTypeNames(WebObjectSpecification spec)

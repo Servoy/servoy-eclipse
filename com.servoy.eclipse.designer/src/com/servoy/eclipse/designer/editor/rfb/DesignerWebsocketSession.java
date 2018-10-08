@@ -46,7 +46,7 @@ import org.sablo.websocket.impl.ClientService;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.ui.property.WebFormComponentChildType;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;

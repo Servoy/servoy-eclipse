@@ -27,6 +27,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -70,8 +71,8 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 			{
 				public String isValid(String newText)
 				{
-					return IdentDocumentValidator.isJavaIdentifier(newText) ? (newText.equals(form.getName()) ? "" : null) : (newText.length() == 0
-						? "" : "Invalid form name");
+					return IdentDocumentValidator.isJavaIdentifier(newText) ? (newText.equals(form.getName()) ? "" : null)
+						: (newText.length() == 0 ? "" : "Invalid form name");
 				}
 			});
 		int res = nameDialog.open();
@@ -86,6 +87,10 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 				{
 					((ISupportUpdateableName)editingPersist).updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
 					project.saveEditingSolutionNodes(new IPersist[] { editingPersist }, true);
+					if (form.isFormComponent().booleanValue())
+					{
+						ServoyModelFinder.getServoyModel().fireFormComponentChanged();
+					}
 				}
 			}
 			catch (RepositoryException e)

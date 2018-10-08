@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2016 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2018 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -15,26 +15,13 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.ui.util;
-
-import com.servoy.j2db.persistence.IPersist;
+package com.servoy.eclipse.model;
 
 /**
- * @author jcompagner
- *
+ * Interface used for form component created, deleted and changed notifications.
+ * @author emera
  */
-public interface IParentOverridable
+public interface IFormComponentListener
 {
-
-	/**
-	 * @return
-	 */
-	IPersist getParentToOverride();
-
-	/**
-	 * @param newPersist
-	 * @return
-	 */
-	IPersist newOverwrittenParent(IPersist newPersist);
-
+	void formComponentChanged();
 }

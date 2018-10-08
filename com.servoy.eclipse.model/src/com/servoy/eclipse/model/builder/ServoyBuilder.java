@@ -178,11 +178,14 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.ValueListConfig;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -576,6 +579,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_INVALID_PROPERTY = new Pair<String, ProblemSeverity>("formReferenceInvalidProperty",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_INVALID_SCRIPT = new Pair<String, ProblemSeverity>("formReferenceInvalidScript",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_INVALID_DATASOURCE = new Pair<String, ProblemSeverity>("formComponentInvalidDataSource",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING);
@@ -2673,6 +2678,34 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													ServoyLog.logError(ex);
 												}
 											}
+										}
+									}
+								}
+							}
+							if (spec != null)
+							{
+								Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+								if (properties.size() > 0)
+								{
+									FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((WebComponent)o, flattenedSolution, null, true);
+									Form form = (Form)o.getAncestor(IRepository.FORMS);
+									for (PropertyDescription pd : properties)
+									{
+										Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+										Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
+										if (frm == null) continue;
+										if (!Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
+										{
+											ServoyMarker mk = MarkerMessages.FormComponentInvalidDataSource.fill(((WebComponent)o).getName(), pd.getName(),
+												frm.getName(), form.getName());
+											addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE, IMarker.PRIORITY_NORMAL, null,
+												o);
+										}
+										FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd,
+											(JSONObject)propertyValue, frm, flattenedSolution);
+										for (FormElement element : cache.getFormComponentElements())
+										{
+											checkDataProviders(element.getPersistIfAvailable(), context);
 										}
 									}
 								}

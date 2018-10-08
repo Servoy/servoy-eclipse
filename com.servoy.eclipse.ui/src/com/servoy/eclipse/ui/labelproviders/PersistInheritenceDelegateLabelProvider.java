@@ -23,8 +23,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.util.IParentOverridable;
 import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.util.IParentOverridable;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;

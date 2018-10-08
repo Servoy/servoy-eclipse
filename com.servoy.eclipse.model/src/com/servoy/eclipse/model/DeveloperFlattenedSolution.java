@@ -187,6 +187,11 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 			getFormsByDatasource(oldDataSource, false).remove(form);
 			getFormsByDatasource(newDataSource, false).add(form);
 			formToDataSource.put(form, newDataSource);
+
+			if (form.isFormComponent().booleanValue())
+			{
+				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
+			}
 		}
 	}
 
@@ -249,6 +254,11 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 			String ds = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
 			formToDataSource.put(form, ds);
 			getFormsByDatasource(ds, false).add(form);
+
+			if (form.isFormComponent().booleanValue())
+			{
+				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
+			}
 		}
 	}
 
@@ -262,6 +272,11 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 			getFormsByDatasource(null, false).remove(form);
 			formToDataSource.remove(form);
 			getFormsByDatasource(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE, false).remove(form);
+
+			if (form.isFormComponent().booleanValue())
+			{
+				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
+			}
 		}
 	}
 

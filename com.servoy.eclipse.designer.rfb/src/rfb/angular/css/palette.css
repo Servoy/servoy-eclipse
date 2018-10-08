@@ -10,6 +10,7 @@
 .palette-heading {
     font-weight: 500;
 	font-size: 12px;
+	color: #000;
 	cursor: pointer;
 	margin: .3em 0px 0px 0px
 }
@@ -92,6 +93,10 @@
     flex-shrink: 0;
 	-webkit-flex-shrink: 0;
 	color: #000;
+}
+.paletteItem {
+	font-weight: 500;
+	font-size: 12px;
 }
 .paletteItem:hover {
 	background-color: lightblue;
