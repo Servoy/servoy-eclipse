@@ -20,6 +20,7 @@ package com.servoy.eclipse.exporter.apps.common;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
+import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -99,6 +100,21 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 	protected BaseNGPackageManager createNGPackageManager()
 	{
 		return new ExportNGPackageManager();
+	}
+
+	@Override
+	public void fireFormComponentChanged()
+	{
+	}
+
+	@Override
+	public void addFormComponentListener(IFormComponentListener listener)
+	{
+	}
+
+	@Override
+	public void removeFormComponentListener(IFormComponentListener listener)
+	{
 	}
 
 }
