@@ -486,6 +486,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> COLUMN_FOREIGN_TYPE_PROBLEM = new Pair<String, ProblemSeverity>("ColumnForeignTypeProblem",
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> COLUMN_MULTIPLE_TENANT_PROBLEM = new Pair<String, ProblemSeverity>("ColumnMultipleTenantProblem",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE = new Pair<String, ProblemSeverity>(
 		"ColumnIncompatibleTypeForSequence", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_WITH_UUID = new Pair<String, ProblemSeverity>("ColumnIncompatbleWithUUID",
@@ -5316,6 +5318,19 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								if (column.getColumnInfo() != null)
 								{
+									if (column.getColumnInfo().hasFlag(IBaseColumn.TENANT_COLUMN))
+									{
+										for (Column col : table.getColumns())
+										{
+											if (col != column && col.getColumnInfo() != null && col.getColumnInfo().hasFlag(IBaseColumn.TENANT_COLUMN))
+											{
+												ServoyMarker mk = MarkerMessages.ColumnMultipleTenantTypeProblem.fill(tableName, column.getName());
+												addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_MULTIPLE_TENANT_PROBLEM, IMarker.PRIORITY_NORMAL, null,
+													null).setAttribute("columnName", column.getName());
+												break;
+											}
+										}
+									}
 									if (column.getColumnInfo().getAutoEnterType() == ColumnInfo.LOOKUP_VALUE_AUTO_ENTER)
 									{
 										String lookup = column.getColumnInfo().getLookupValue();

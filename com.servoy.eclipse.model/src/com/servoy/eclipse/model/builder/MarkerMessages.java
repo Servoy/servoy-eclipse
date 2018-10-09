@@ -550,6 +550,8 @@ public class MarkerMessages
 		"Table \"{0}\" has column \"{1}\" which is a database identity but is not a primary key in the table.", ServoyBuilder.COLUMN_MARKER_TYPE);
 	public static ServoyMarker ColumnForeignTypeProblem = new ServoyMarker(
 		"Table \"{0}\" has column \"{1}\" which has an invalid foreign type suggestion: \"{2}\".", ServoyBuilder.COLUMN_MARKER_TYPE);
+	public static ServoyMarker ColumnMultipleTenantTypeProblem = new ServoyMarker(
+		"Table \"{0}\" has column \"{1}\" which is marked as tenant. Table has multiple tenant columns.", ServoyBuilder.COLUMN_MARKER_TYPE);
 
 	/**
 	 * The lookup value used for a column is invalid. This can happen when the lookup points to a global identifier that does not exist,

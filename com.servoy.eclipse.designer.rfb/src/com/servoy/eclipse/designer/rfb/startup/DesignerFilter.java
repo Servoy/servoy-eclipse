@@ -187,6 +187,8 @@ public class DesignerFilter implements Filter
 							}
 						});
 					}
+
+					List<JSONObject> formComponents = null;
 					for (String key : orderedKeys)
 					{
 						boolean startedArray = false;
@@ -403,8 +405,11 @@ public class DesignerFilter implements Filter
 									componentJson.put("types", new JSONArray(getPalleteTypeNames(spec)));
 									if (!spec.getProperties(FormComponentPropertyType.INSTANCE).isEmpty())
 									{
-										componentJson.put("properties", getFormComponentPropertyNames(spec));
-										componentJson.put("components", getFormComponents(form));
+										if (formComponents == null) formComponents = getFormComponents(form);
+										if (!formComponents.isEmpty())
+										{
+											componentJson.put("properties", getFormComponentPropertyNames(spec));
+										}
 									}
 									if (componentJson.has("category"))
 									{
@@ -420,6 +425,12 @@ public class DesignerFilter implements Filter
 							if (categories.length() > 0) jsonWriter.key("categories").value(categories);
 							jsonWriter.endObject();
 						}
+					}
+					if (formComponents != null)
+					{
+						jsonWriter.object();
+						jsonWriter.key("propertyValues").value(formComponents);
+						jsonWriter.endObject();
 					}
 					jsonWriter.endArray();
 				}
@@ -566,10 +577,11 @@ public class DesignerFilter implements Filter
 		while (it.hasNext())
 		{
 			Form formComponent = it.next();
+			if (form.equals(formComponent)) continue;
 			if (form.getDataSource() == null || formComponent.getDataSource() == null || formComponent.getDataSource().equals(form.getDataSource()))
 			{
 				JSONObject json = new JSONObject();
-				json.put("component", formComponent.getName());
+				json.put("displayName", formComponent.getName());
 				JSONObject propertyvalue = new JSONObject();
 				propertyvalue.put(FormComponentPropertyType.SVY_FORM, formComponent.getUUID());
 				json.put("propertyValue", propertyvalue);
