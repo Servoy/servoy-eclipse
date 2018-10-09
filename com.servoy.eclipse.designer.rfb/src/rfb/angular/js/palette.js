@@ -46,16 +46,30 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					method: 'GET',
 					url: '/designer/palette?layout=' + layoutType+'&formName='+formName
 				}).then(function(got) {
-					$scope.packages = got.data;
+					var propertyValues;
+					if(got.data[got.data.length-1] && got.data[got.data.length-1]['propertyValues'])
+					{
+						propertyValues = got.data[got.data.length-1]['propertyValues'];
+						$scope.packages = got.data.slice(0, got.data.length -1);
+					}
+					else
+					{
+						$scope.packages = got.data;
+					}
 					packageOrder = {};
 					packageOrder[layoutType] = [];
-					for(var i = 0; i < got.data.length; i++) {
-						got.data[i].isOpen = true;
-						packageOrder[layoutType].push(got.data[i].packageName);
+					for(var i = 0; i < $scope.packages.length; i++) {
+						$scope.packages[i].isOpen = true;
+						packageOrder[layoutType].push($scope.packages[i].packageName);
 						
-						for (var j = 0; j < got.data[i].components.length; j++) {
-							if (got.data[i].components[j].properties) {
-								got.data[i].components[j].isOpen = false;
+						if ($scope.packages[i].components)
+						{
+							for (var j = 0; j < $scope.packages[i].components.length; j++) {
+								if (propertyValues && $scope.packages[i].components[j].properties) {
+									$scope.packages[i].components[j].isOpen = false;
+									//we still need to have the components with properties on the component for filtering
+									$scope.packages[i].components[j].components = propertyValues;
+								}
 							}
 						}
 					}
