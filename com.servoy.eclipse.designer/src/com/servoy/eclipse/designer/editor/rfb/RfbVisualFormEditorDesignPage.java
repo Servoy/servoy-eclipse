@@ -247,9 +247,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 * @param form
 	 * @return
 	 */
-	private String computeLayout(Form form, boolean isAbsoluteLayoutDiv)
+	private String computeLayout(Form form, boolean isCSSPositionContainer)
 	{
-		if (isAbsoluteLayoutDiv) return "csspos";
+		if (isCSSPositionContainer) return "csspos";
 		if (form.isResponsiveLayout()) return "flow";
 		if (form.getUseCssPosition()) return "csspos";
 		return "absolute";
@@ -260,18 +260,18 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		Form form = editorPart.getForm();
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
 
-		boolean isAbsoluteLayoutDiv = false;
+		boolean isCSSPositionContainer = false;
 		if (showedContainer instanceof LayoutContainer)
 		{
-			isAbsoluteLayoutDiv = PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)showedContainer);
+			isCSSPositionContainer = PersistHelper.isCSSPositionContainer((LayoutContainer)showedContainer);
 		}
 
-		String newLayout = computeLayout(flattenedForm, isAbsoluteLayoutDiv);
+		String newLayout = computeLayout(flattenedForm, isCSSPositionContainer);
 		if (!Utils.equalObjects(layout, newLayout) || force)
 		{
 			layout = newLayout;
 			Dimension formSize = flattenedForm.getSize();
-			if (isAbsoluteLayoutDiv) formSize = showedContainer.getSize();
+			if (isCSSPositionContainer) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&editorid=" + editorId + "&c_sessionid=" + clientId + (showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
@@ -388,7 +388,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		if (persists != null)
 		{
 			if (persists.size() == 1 && persists.get(0) == showedContainer && showedContainer instanceof LayoutContainer &&
-				PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)showedContainer))
+				PersistHelper.isCSSPositionContainer((LayoutContainer)showedContainer))
 			{
 				// probably size has changed we need a full refresh
 				refreshBrowserUrl(true);

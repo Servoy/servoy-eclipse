@@ -148,9 +148,9 @@ public class CreateComponentHandler implements IServerService
 								IStructuredSelection structuredSelection = new StructuredSelection(newPersist);
 								selectionProvider.setSelection(structuredSelection);
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
-									PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)newPersist[0]))
+									PersistHelper.isCSSPositionContainer((LayoutContainer)newPersist[0]))
 								{
-									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(), "Edit absolute layout container",
+									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(), "Edit css position container",
 										"Do you want to zoom into the layout container so you can edit it ?"))
 									{
 										BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
@@ -273,7 +273,7 @@ public class CreateComponentHandler implements IServerService
 				}
 			}
 			if (editorPart.getForm().isResponsiveLayout() &&
-				!PersistHelper.isAbsoluteLayoutDiv(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
+				!PersistHelper.isCSSPositionContainer(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
 			{
 				List<IPersist> children = new ArrayList<IPersist>();
 				Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
@@ -814,7 +814,7 @@ public class CreateComponentHandler implements IServerService
 		parent.addChild(container);
 		container.setLocation(new Point(index, index));
 		newPersists.add(container);
-		if (PersistHelper.isAbsoluteLayoutDiv(layoutSpec)) container.setSize(new Dimension(200, 200));
+		if (PersistHelper.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)

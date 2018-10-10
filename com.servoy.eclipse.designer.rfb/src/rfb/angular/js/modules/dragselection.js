@@ -16,8 +16,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 		function onmousedown(event) {
 			dragNode = utils.getNode(event);
-			// do not allow moving elements inside absolute layout div in responsive layout
-			if (dragNode && !editorScope.isAbsoluteFormLayout() && $(dragNode).parents('.svy-absolutelayoutdiv').length)
+			// do not allow moving elements inside css position container in responsive layout
+			if (dragNode && !editorScope.isAbsoluteFormLayout() && $(dragNode).parents('.svy-csspositioncontainer').length)
 				return;
 			// skip dragging if it is an child element of a form reference
 			if (event.button == 0 && dragNode) {
