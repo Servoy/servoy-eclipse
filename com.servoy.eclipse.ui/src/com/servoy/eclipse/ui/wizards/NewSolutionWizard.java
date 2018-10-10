@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.stream.IntStream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -173,8 +174,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
 
-						if (solutionType == SolutionMetaData.SOLUTION || solutionType == SolutionMetaData.NG_CLIENT_ONLY ||
-							solutionType == SolutionMetaData.MODULE)
+						if (solutionType == SolutionMetaData.NG_CLIENT_ONLY || solutionType == SolutionMetaData.MODULE)
 						{
 							Media defaultTheme = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
 								solution.getName() + ".less");
@@ -393,10 +393,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			solutionTypeLabel.setText("Solution type");
 			solutionTypeCombo = new Combo(topLevel, SWT.DROP_DOWN | SWT.READ_ONLY);
 
-			solutionTypeCombo.setItems(SolutionMetaData.solutionTypeNames);
-			solutionTypeComboValues = SolutionMetaData.solutionTypes;
-			solutionTypeCombo.select(0);
-
+			String[] solutionTypeNames = new String[SolutionMetaData.solutionTypeNames.length - 1];
+			System.arraycopy(SolutionMetaData.solutionTypeNames, 1, solutionTypeNames, 0, solutionTypeNames.length);
+			solutionTypeCombo.setItems(solutionTypeNames);
+			solutionTypeComboValues = new int[SolutionMetaData.solutionTypes.length - 1];
+			System.arraycopy(SolutionMetaData.solutionTypes, 1, solutionTypeComboValues, 0, solutionTypeComboValues.length);
+			solutionTypeCombo.select(IntStream.range(0, solutionTypeComboValues.length).filter(
+				i -> SolutionMetaData.NG_CLIENT_ONLY == solutionTypeComboValues[i]).findFirst().getAsInt());
+			handleSolutionTypeComboSelected();
 			solutionTypeCombo.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
