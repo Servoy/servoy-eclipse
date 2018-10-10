@@ -301,7 +301,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				container.setPackageName(packageName);
 				parent.addChild(container);
 				container.setLocation(new Point(index, index));
-				if (PersistHelper.isAbsoluteLayoutDiv(container)) container.setSize(new Dimension(200, 200));
+				if (PersistHelper.isCSSPositionContainer(container)) container.setSize(new Dimension(200, 200));
 				if (configJson != null)
 				{
 					Iterator keys = configJson.keys();

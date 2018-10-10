@@ -199,7 +199,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
 							{
 								AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
-								if (container instanceof LayoutContainer && PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)container))
+								if (container instanceof LayoutContainer && PersistHelper.isCSSPositionContainer((LayoutContainer)container))
 								{
 									responsive = false;
 								}
