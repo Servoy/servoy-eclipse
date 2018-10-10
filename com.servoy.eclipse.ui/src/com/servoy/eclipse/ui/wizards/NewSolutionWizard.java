@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.stream.IntStream;
@@ -43,6 +44,7 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -174,19 +176,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
 
-						if (solutionType == SolutionMetaData.NG_CLIENT_ONLY || solutionType == SolutionMetaData.MODULE)
-						{
-							Media defaultTheme = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
-								solution.getName() + ".less");
-							defaultTheme.setMimeType("text/css");
-							try (InputStream is = NewSolutionWizard.class.getResource("resources/default-theme.less").openStream())
-							{
-								defaultTheme.setPermMediaData(Utils.getBytesFromInputStream(is));
-							}
-
-							solution.setStyleSheetID(defaultTheme.getID());
-							repository.updateRootObject(solution);
-						}
+						addDefaultThemeIfNeeded(repository, solution);
 					}
 					monitor.worked(1);
 
@@ -215,6 +205,23 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 							MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot create new solution", e.getMessage());
 						}
 					});
+				}
+			}
+
+			private void addDefaultThemeIfNeeded(EclipseRepository repository, Solution solution) throws RepositoryException, IOException
+			{
+				if (page1.shouldAddDefaultTheme())
+				{
+					Media defaultTheme = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
+						solution.getName() + ".less");
+					defaultTheme.setMimeType("text/css");
+					try (InputStream is = NewSolutionWizard.class.getResource("resources/default-theme.less").openStream())
+					{
+						defaultTheme.setPermMediaData(Utils.getBytesFromInputStream(is));
+					}
+
+					solution.setStyleSheetID(defaultTheme.getID());
+					repository.updateRootObject(solution);
 				}
 			}
 		};
@@ -321,6 +328,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		private int[] solutionTypeComboValues;
 		private ResourcesProjectChooserComposite resourceProjectComposite;
 		private ProjectLocationComposite projectLocationComposite;
+		private Button defaultThemeCheck;
+		private Boolean addDefaultTheme = null;
 
 
 		/**
@@ -333,6 +342,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			super(pageName);
 			setTitle("Create a new solution");
 			setDescription("- a new Servoy solution project will be created");
+		}
+
+		public boolean shouldAddDefaultTheme()
+		{
+			return addDefaultTheme != null
+				? addDefaultTheme.booleanValue() && (solutionType == SolutionMetaData.NG_CLIENT_ONLY || solutionType == SolutionMetaData.NG_MODULE)
+				: solutionType == SolutionMetaData.NG_CLIENT_ONLY;
 		}
 
 		public String getProjectLocation()
@@ -392,6 +408,18 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					handleSolutionNameChanged();
 				}
 			});
+
+			defaultThemeCheck = new Button(topLevel, SWT.CHECK);
+			defaultThemeCheck.setText("Add default .less theme");
+			defaultThemeCheck.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					addDefaultTheme = Boolean.valueOf(defaultThemeCheck.getSelection());
+				}
+			});
+			defaultThemeCheck.setSelection(true);//ng solution is selected by default
 
 			// solution type
 			Label solutionTypeLabel = new Label(topLevel, SWT.NONE);
@@ -459,8 +487,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			formData.left = new FormAttachment(0, 0);
 			formData.right = new FormAttachment(100, 0);
 			formData.top = new FormAttachment(projectLocationComposite, 30);
-			formData.bottom = new FormAttachment(100, 0);
 			resourceProjectComposite.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.top = new FormAttachment(resourceProjectComposite, 20);
+			formData.bottom = new FormAttachment(100, 0);
+			defaultThemeCheck.setLayoutData(formData);
+
+			topLevel.pack();
 		}
 
 		@Override
@@ -477,6 +512,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		private void handleSolutionTypeComboSelected()
 		{
 			solutionType = solutionTypeComboValues[solutionTypeCombo.getSelectionIndex()];
+			defaultThemeCheck.setEnabled(solutionType == SolutionMetaData.NG_CLIENT_ONLY || solutionType == SolutionMetaData.NG_MODULE);
+			defaultThemeCheck.setSelection(shouldAddDefaultTheme());
 		}
 
 		private void handleSolutionNameChanged()
