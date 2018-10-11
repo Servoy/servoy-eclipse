@@ -3500,7 +3500,8 @@ public class SolutionExplorerView extends ViewPart
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||
 					(doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM && !expandable &&
 						(SolutionMetaData.isImportHook(((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData()) ||
-							((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.MODULE)))
+							((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.MODULE ||
+							((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.NG_MODULE)))
 				{
 					Object clickedRealObject = doubleClickedItem.getRealObject();
 					if (clickedRealObject instanceof ServoyProject)

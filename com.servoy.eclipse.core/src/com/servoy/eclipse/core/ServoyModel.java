@@ -3674,6 +3674,7 @@ public class ServoyModel extends AbstractServoyModel
 				return ClientSupport.sc;
 
 			case SolutionMetaData.NG_CLIENT_ONLY :
+			case SolutionMetaData.NG_MODULE :
 				return ClientSupport.ng;
 		}
 

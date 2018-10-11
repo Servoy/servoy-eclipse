@@ -200,7 +200,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 
 		if (formEditorDesignerPreference == FormEditorDesignerPreference.Automatic && fs != null && fs.getSolution() != null &&
-			fs.getSolution().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY)
+			SolutionMetaData.isNGOnlySolution(fs.getSolution().getSolutionType()))
 		{
 			return DesignPagetype.Rfb;
 		}

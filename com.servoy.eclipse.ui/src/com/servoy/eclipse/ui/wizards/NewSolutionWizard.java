@@ -309,8 +309,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	 */
 	protected boolean shouldAddAsModule(final Solution activeEditingSolution)
 	{
-		return (page1.getSolutionType() == SolutionMetaData.MODULE || page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK ||
-			page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) && activeEditingSolution != null;
+		return (page1.getSolutionType() == SolutionMetaData.MODULE || page1.getSolutionType() == SolutionMetaData.NG_MODULE ||
+			page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) &&
+			activeEditingSolution != null;
 	}
 
 	public static class NewSolutionWizardPage extends WizardPage implements Listener, IValidator
@@ -341,8 +342,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		public boolean shouldAddDefaultTheme()
 		{
-			return addDefaultTheme != null
-				? addDefaultTheme.booleanValue() && (solutionType == SolutionMetaData.NG_CLIENT_ONLY || solutionType == SolutionMetaData.NG_MODULE)
+			return addDefaultTheme != null ? (addDefaultTheme.booleanValue() && SolutionMetaData.isNGOnlySolution(solutionType))
 				: solutionType == SolutionMetaData.NG_CLIENT_ONLY;
 		}
 
@@ -507,7 +507,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		private void handleSolutionTypeComboSelected()
 		{
 			solutionType = solutionTypeComboValues[solutionTypeCombo.getSelectionIndex()];
-			defaultThemeCheck.setEnabled(solutionType == SolutionMetaData.NG_CLIENT_ONLY || solutionType == SolutionMetaData.NG_MODULE);
+			defaultThemeCheck.setEnabled(SolutionMetaData.isNGOnlySolution(solutionType));
 			defaultThemeCheck.setSelection(shouldAddDefaultTheme());
 		}
 
