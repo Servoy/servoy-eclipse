@@ -47,14 +47,14 @@ public class ToggleFormCommandsAction extends Action implements ISelectionChange
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		if (node == null || !(node.getRealObject() instanceof Form)) return;
-		setEnabled(node.getRealObject() instanceof Form);
+		setEnabled(node.getRealObject() instanceof Form && !((Form)node.getRealObject()).isFormComponent());
 	}
 
 	@Override
 	public boolean isEnabled()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
-		if (node == null || !(node.getRealObject() instanceof Form)) return false;
+		if (node == null || !(node.getRealObject() instanceof Form) || ((Form)node.getRealObject()).isFormComponent()) return false;
 		return node.getRealObject() instanceof Form;
 	}
 

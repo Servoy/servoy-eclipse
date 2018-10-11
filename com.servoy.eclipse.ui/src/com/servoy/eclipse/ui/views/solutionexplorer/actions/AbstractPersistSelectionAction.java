@@ -33,6 +33,7 @@ import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.AggregateVariable;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
@@ -66,6 +67,7 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 	{
 		nodeType = null;
 		selection = null;
+		boolean isFormComponent = false;
 		ServoyProject project = null;
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		boolean state = (sel.size() > 0);
@@ -92,6 +94,10 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 					if (nodeType == null)
 					{
 						nodeType = type;
+						if (nodeType == UserNodeType.FORM && node.getRealObject() instanceof Form)
+						{
+							isFormComponent = ((Form)node.getRealObject()).isFormComponent();
+						}
 					}
 					if (!isEnabledForNode(type))
 					{
@@ -110,8 +116,11 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 		if (nodeType == UserNodeType.INMEMORY_DATASOURCE) persistString = "in memory datasource";
 		if (nodeType == UserNodeType.VALUELIST_ITEM) persistString = "valuelist";
 		if (nodeType == UserNodeType.MEDIA_IMAGE) persistString = "media";
-		if (nodeType == UserNodeType.FORM) persistString = "form";
-
+		if (nodeType == UserNodeType.FORM)
+		{
+			if (isFormComponent) persistString = "form component";
+			else persistString = "form";
+		}
 		setEnabled(state);
 	}
 

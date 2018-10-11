@@ -844,6 +844,17 @@ public class SolutionExplorerView extends ViewPart
 							break;
 					}
 					openNewSubFormWizardAction.setImageDescriptor(imgd);
+					if (f.isFormComponent())
+					{
+						openNewSubFormWizardAction.setText("Create new sub form component");
+						openNewSubFormWizardAction.setToolTipText("Create new sub form component");
+					}
+					else
+					{
+						openNewSubFormWizardAction.setText("Create new sub form");
+						openNewSubFormWizardAction.setToolTipText("Create new sub form");
+					}
+
 				}
 				list.setInput(selFirstEl);
 			}

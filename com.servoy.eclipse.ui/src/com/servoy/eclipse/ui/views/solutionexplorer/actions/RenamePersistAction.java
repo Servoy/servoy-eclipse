@@ -56,8 +56,16 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
 			persist = (IPersist)node.getRealObject();
 			enabled = true;
-			setText("Rename form");
-			setToolTipText("Rename form");
+			if (persist instanceof Form && ((Form)persist).isFormComponent())
+			{
+				setText("Rename form component");
+				setToolTipText("Rename form component");
+			}
+			else
+			{
+				setText("Rename form");
+				setToolTipText("Rename form");
+			}
 		}
 		setEnabled(enabled);
 	}
