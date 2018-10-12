@@ -835,17 +835,22 @@ public class NewFormWizard extends Wizard implements INewWizard
 				bTypeAbstract = new Button(grpType, SWT.RADIO);
 				bTypeAbstract.setText("Abstract (no UI)");
 				bTypeAbstract.addSelectionListener(typeSelectionListener);
+				bTypeCSSPosition = new Button(grpType, SWT.RADIO);
+				bTypeCSSPosition.setText("CSS Position (NG Client only)");
+				bTypeCSSPosition.addSelectionListener(typeSelectionListener);
+				bTypeResponsive = new Button(grpType, SWT.RADIO);
+				bTypeResponsive.setText("Responsive (NG Client only)");
+				bTypeResponsive.addSelectionListener(typeSelectionListener);
 				bTypeAnchored = new Button(grpType, SWT.RADIO);
 				bTypeAnchored.setText("Anchored");
 				bTypeAnchored.addSelectionListener(typeSelectionListener);
 				bTypeAnchored.setSelection(true);
-				bTypeCSSPosition = new Button(grpType, SWT.RADIO);
-				bTypeCSSPosition.setText("CSS Position");
-				bTypeCSSPosition.addSelectionListener(typeSelectionListener);
-				bTypeResponsive = new Button(grpType, SWT.RADIO);
-				bTypeResponsive.setText("Responsive");
-				bTypeResponsive.addSelectionListener(typeSelectionListener);
 				typeFormControl = grpType;
+				if (getActiveSolution() != null && SolutionMetaData.isNGOnlySolution(getActiveSolution().getSolutionType()))
+				{
+					bTypeAnchored.setVisible(false);
+					bTypeCSSPosition.setSelection(true);
+				}
 
 			}
 			else
@@ -1085,6 +1090,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			if (SolutionMetaData.isServoyNGSolution(getActiveSolution()))
 			{
+				boolean isNGOnly = getActiveSolution() != null && SolutionMetaData.isNGOnlySolution(getActiveSolution().getSolutionType());
+				if (isNGOnly)
+				{
+					bTypeAnchored.setVisible(false);
+				}
 				if (superForm != null)
 				{
 					boolean isParentLogicalForm = !superForm.isResponsiveLayout() && !superForm.getParts().hasNext();
@@ -1113,7 +1123,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 				else
 				{
-					setTypeButtonSelection(bTypeAnchored);
+					if (isNGOnly)
+					{
+						setTypeButtonSelection(bTypeCSSPosition);
+					}
+					else
+					{
+						setTypeButtonSelection(bTypeAnchored);
+					}
 					setTypeButtonsEnabled(true);
 					typeFormControl.setEnabled(true);
 				}
@@ -1126,6 +1143,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			// copy a few properties from the template to the page
 			Template template = getTemplate();
+			boolean isNGOnly = getActiveSolution() != null && SolutionMetaData.isNGOnlySolution(getActiveSolution().getSolutionType());
+			if (isNGOnly) bTypeAnchored.setVisible(false);
 			if (template != null)
 			{
 				JSONObject json = new ServoyJSONObject(template.getContent(), false);
@@ -1180,10 +1199,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 					// type
 					if (SolutionMetaData.isServoyNGSolution(getActiveSolution()))
 					{
-						boolean isResponsive = false, isAbstract = false;
+						boolean isResponsive = false, isAbstract = false, isCSSPosition = false;
 						if (json.has(Template.PROP_LAYOUT))
 						{
 							isResponsive = Template.LAYOUT_TYPE_RESPONSIVE.equals(json.getString(Template.PROP_LAYOUT));
+							isCSSPosition = Template.LAYOUT_TYPE_CSS_POSITION.equals(json.getString(Template.PROP_LAYOUT));
 							if (!isResponsive)
 							{
 								isAbstract = !formObject.has(SolutionSerializer.PROP_ITEMS);
@@ -1198,6 +1218,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						{
 							setTypeButtonSelection(bTypeResponsive);
 						}
+						else if (isCSSPosition)
+						{
+							setTypeButtonSelection(bTypeCSSPosition);
+						}
 						else
 						{
 							setTypeButtonSelection(bTypeAnchored);
@@ -1210,8 +1234,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 			else if (SolutionMetaData.isServoyNGSolution(getActiveSolution()))
 			{
-				// type is anchored if no template is selected
-				setTypeButtonSelection(bTypeAnchored);
+				if (isNGOnly)
+				{
+					setTypeButtonSelection(bTypeCSSPosition);
+				}
+				else
+				{
+					setTypeButtonSelection(bTypeAnchored);
+				}
 				setTypeButtonsEnabled(true);
 				typeFormControl.setEnabled(true);
 			}
@@ -1262,6 +1292,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		private void setTypeButtonSelection(Button b)
 		{
 			bTypeAbstract.setSelection(bTypeAbstract == b);
+			if (bTypeAnchored == b) bTypeAnchored.setVisible(true);
 			bTypeAnchored.setSelection(bTypeAnchored == b);
 			bTypeResponsive.setSelection(bTypeResponsive == b);
 			bTypeCSSPosition.setSelection(bTypeCSSPosition == b);

@@ -1293,6 +1293,7 @@ public class ElementFactory
 		json.put(Template.PROP_GROUPING, groupingState);
 
 		if (form.isResponsiveLayout()) json.put(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_RESPONSIVE);
+		if (form.getUseCssPosition()) json.put(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_CSS_POSITION);
 		else json.put(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE);
 
 		return ServoyJSONObject.toString(json, false, true, false);
