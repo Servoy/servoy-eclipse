@@ -75,6 +75,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -212,17 +213,22 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				if (page1.shouldAddDefaultTheme())
 				{
-					Media defaultTheme = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
-						solution.getName() + ".less");
-					defaultTheme.setMimeType("text/css");
-					try (InputStream is = NewSolutionWizard.class.getResource("resources/default-theme.less").openStream())
-					{
-						defaultTheme.setPermMediaData(Utils.getBytesFromInputStream(is));
-					}
-
+					Media defaultTheme = addMediaFile(solution, "resources/default-theme.less", solution.getName() + ".less");
+					addMediaFile(solution, "resources/" + ResourceProvider.PROPERTIES_LESS, ResourceProvider.PROPERTIES_LESS);
 					solution.setStyleSheetID(defaultTheme.getID());
 					repository.updateRootObject(solution);
 				}
+			}
+
+			private Media addMediaFile(Solution solution, String path, String fileName) throws RepositoryException, IOException
+			{
+				Media defaultTheme = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), fileName);
+				defaultTheme.setMimeType("text/css");
+				try (InputStream is = NewSolutionWizard.class.getResource(path).openStream())
+				{
+					defaultTheme.setPermMediaData(Utils.getBytesFromInputStream(is));
+				}
+				return defaultTheme;
 			}
 		};
 

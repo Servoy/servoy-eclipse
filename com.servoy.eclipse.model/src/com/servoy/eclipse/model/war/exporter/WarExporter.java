@@ -264,7 +264,7 @@ public class WarExporter
 			Media media = it.next();
 			if (media.getName().endsWith(".less"))
 			{
-				String content = ResourceProvider.compileLessWithNashorn(new String(media.getMediaData()));
+				String content = ResourceProvider.compileSolutionLessFile(media, fs);
 				if (content != null)
 				{
 					File folder = new File(tmpWarDir, NGClientWebsocketSession.SERVOY_SOLUTION_CSS);

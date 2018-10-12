@@ -177,7 +177,7 @@ public class NewStylesheetWizard extends Wizard implements INewWizard
 			String mediaPath = page1.solution + "/" + SolutionSerializer.MEDIAS_DIR + "/" + page1.path;
 			if (page1.path.length() > 0) mediaPath += "/";
 			wsa.createFolder(mediaPath);
-			IPath solutionCSSPath = new Path(mediaPath + page1.styleName + ".css");
+			IPath solutionCSSPath = new Path(mediaPath + page1.styleName + (!page1.styleName.contains(".") ? ".css" : ""));
 			IFile solutionCSSFile = ResourcesPlugin.getWorkspace().getRoot().getFile(solutionCSSPath);
 			if (solutionCSSFile != null && !solutionCSSFile.exists())
 			{
