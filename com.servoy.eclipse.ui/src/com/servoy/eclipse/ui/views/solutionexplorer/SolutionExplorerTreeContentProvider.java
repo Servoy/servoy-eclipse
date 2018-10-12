@@ -220,6 +220,8 @@ public class SolutionExplorerTreeContentProvider
 
 	private final PlatformSimpleUserNode[] resourceNodes;
 
+	private final PlatformSimpleUserNode plugins;
+
 	private final SolutionExplorerView view;
 
 	private Solution solutionOfCalculation;
@@ -344,8 +346,7 @@ public class SolutionExplorerTreeContentProvider
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.png"));
 		servers.parent = resources;
 
-		final PlatformSimpleUserNode plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null,
-			uiActivator.loadImageFromBundle("plugins.png"));
+		plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null, uiActivator.loadImageFromBundle("plugins.png"));
 		plugins.parent = invisibleRootNode;
 
 
@@ -3504,6 +3505,8 @@ public class SolutionExplorerTreeContentProvider
 
 		/* if (componentsChanged) */refreshTreeNode(componentsFromResourcesNode);
 		/* if (servicesChanged) */ refreshTreeNode(servicesFromResourcesNode);
+
+		refreshTreeNode(plugins);
 	}
 
 	private void refreshTreeNode(SimpleUserNode nodeToRefresh)
