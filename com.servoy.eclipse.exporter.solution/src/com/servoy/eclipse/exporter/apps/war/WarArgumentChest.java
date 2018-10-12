@@ -90,7 +90,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String overwriteAllProperties = "overwriteAllProperties";
 
 	private static final String webXmlFileName = "webXmlFileName";
-	private static final String log4jXmlFileName = "log4jXmlFileName";
+	private static final String log4jConfigurationFile = "log4jConfigurationFile";
 
 	private static final String noneActiveSolutions = "nas";
 	private static final String excludeDrivers = "excludeDrivers";
@@ -224,7 +224,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             deployed app. by using the DB servers from the servoy.properties of the war.\n"
 			+ "        -" + overwriteAllProperties + " overwrite all properties of  an already deployed application\n"
 			+ "             by using the values from the servoy.properties of the war.\n"
-			+ "        -" + log4jXmlFileName + " a path to a log4j.xml that should be included instead of the default one.\n"
+			+ "        -" + log4jConfigurationFile + " a path to a log4j configuration file that should be included instead of the default one.\n"
 			+ "        -" + webXmlFileName + " a path to a web.xml  that should be included instead of default one;\n"
 			+ "             it should be a web.xml file previously generated via a Servoy WAR export.\n"
 			+ getHelpMessageExistCodes();
@@ -265,7 +265,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
 		if (argsMap.containsKey("warFileName")) warFileName = parseArg("warFileName", null, argsMap, false);
 		parseArg(webXmlFileName, null, argsMap, false);
-		parseArg(log4jXmlFileName, null, argsMap, false);
+		parseArg(log4jConfigurationFile, null, argsMap, false);
 
 		parseArg("defaultAdminUser", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
 		parseArg("defaultAdminPassword", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
@@ -600,9 +600,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return argumentsMap.get(webXmlFileName);
 	}
 
-	public String getLog4jXMLFileName()
+	public String getLog4jConfigurationFile()
 	{
-		return argumentsMap.get(log4jXmlFileName);
+		return argumentsMap.get(log4jConfigurationFile);
 	}
 
 	/**

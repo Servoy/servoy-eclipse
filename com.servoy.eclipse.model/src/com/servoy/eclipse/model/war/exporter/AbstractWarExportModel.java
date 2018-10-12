@@ -531,26 +531,26 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	}
 
 	@Override
-	public String checkLog4jXML()
+	public String checkLog4jConfigurationFile()
 	{
 		String message = null;
-		if (getLog4jXMLFileName() != null)
+		if (getLog4jConfigurationFile() != null)
 		{
-			File f = new File(getLog4jXMLFileName());
+			File f = new File(getLog4jConfigurationFile());
 			if (!f.exists())
 			{
-				message = "Specified log4j.xml file doesn't exist.";
+				message = "Specified log4j configuration file doesn't exist.";
 			}
 			else if (f.isDirectory())
 			{
-				message = "Specified log4j.xml file is a folder.";
+				message = "Specified log4j configuration file is a folder.";
 			}
 			else
 			{
 				String content = Utils.getTXTFileContent(f, Charset.forName("UTF8"));
 				if (content == null || content.trim().length() == 0)
 				{
-					message = "Specified log4j.xml file has no content";
+					message = "Specified log4j configuration file has no content";
 				}
 			}
 		}

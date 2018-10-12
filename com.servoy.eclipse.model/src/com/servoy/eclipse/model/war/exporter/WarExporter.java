@@ -70,6 +70,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -207,8 +208,8 @@ public class WarExporter
 		monitor.subTask("Creating web.xml");
 		copyWebXml(tmpWarDir);
 		monitor.worked(2);
-		monitor.subTask("Creating log4j.xml");
-		copyLog4jXml(tmpWarDir);
+		monitor.subTask("Creating log4j configuration file");
+		copyLog4jConfigurationFile(tmpWarDir);
 		monitor.worked(2);
 		monitor.subTask("Creating context.xml");
 		createTomcatContextXML(tmpWarDir);
@@ -1125,19 +1126,19 @@ public class WarExporter
 	}
 
 
-	private void copyLog4jXml(File tmpWarDir) throws ExportException
+	private void copyLog4jConfigurationFile(File tmpWarDir) throws ExportException
 	{
-		// copy war log4j.xml
-		File log4jXMLFile = new File(tmpWarDir, "WEB-INF/log4j.xml");
-		String name = exportModel.getLog4jXMLFileName();
+		// copy war log4j configuration file
+		String name = exportModel.getLog4jConfigurationFile();
 		InputStream logXmlIS = null;
 		if (name == null)
 		{
-			logXmlIS = WarExporter.class.getResourceAsStream("resources/log4j.xml");
+			name = "resources/log4j.xml";
+			logXmlIS = WarExporter.class.getResourceAsStream(name);
 		}
 		else try
 		{
-			String message = exportModel.checkLog4jXML();
+			String message = exportModel.checkLog4jConfigurationFile();
 			if (message != null)
 			{
 				throw new ExportException(message);
@@ -1146,15 +1147,18 @@ public class WarExporter
 		}
 		catch (FileNotFoundException fnfe)
 		{
-			throw new ExportException("Can't create the log4j.xml file, couldn't read" + name, fnfe);
+			throw new ExportException("Can't create the log4j configuration file, couldn't read" + name, fnfe);
 		}
-		try (InputStream is = logXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(log4jXMLFile)))
+
+		// Log4j will search for a file that starts with "log4j2" in the WEB-INF directory.
+		File log4jConfigurationFile = new File(tmpWarDir, "WEB-INF/log4j2." + FilenameUtils.getExtension(name));
+		try (InputStream is = logXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(log4jConfigurationFile)))
 		{
 			copyStream(is, bos);
 		}
 		catch (Exception e)
 		{
-			throw new ExportException("Can't create the log4j.xml file: " + log4jXMLFile.getAbsolutePath(), e);
+			throw new ExportException("Can't create the log4j configuration file: " + log4jConfigurationFile.getAbsolutePath(), e);
 		}
 	}
 

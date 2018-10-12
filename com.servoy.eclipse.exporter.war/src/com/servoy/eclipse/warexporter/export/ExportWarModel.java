@@ -107,7 +107,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean useAsRealAdminUser;
 	private boolean searchProblem = false;
 	private String webXMLFileName;
-	private String log4jXMLFileName;
+	private String log4jConfigurationFile;
 	private boolean exportNoneActiveSolutions;
 
 	/**
@@ -160,7 +160,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		warFileName = settings.get("export.warfilename");
 		webXMLFileName = settings.get("export.webxmlfilename");
-		log4jXMLFileName = settings.get("export.log4jxmlfilename");
+		log4jConfigurationFile = settings.get("export.log4jConfigurationFile");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
 		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
@@ -359,7 +359,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		settings.put("export.warfilename", warFileName);
 		settings.put("export.webxmlfilename", webXMLFileName);
-		settings.put("export.log4jxmlfilename", log4jXMLFileName);
+		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
 		settings.put("export.exportActiveSolution", exportActiveSolution);
 		settings.put("export.exportNoneActiveSolutions", exportNoneActiveSolutions);
 		settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
@@ -1236,19 +1236,19 @@ public class ExportWarModel extends AbstractWarExportModel
 	}
 
 	/**
-	 * @return the log4jXMLFileName
+	 * @return the log4jConfigurationFile
 	 */
-	public String getLog4jXMLFileName()
+	public String getLog4jConfigurationFile()
 	{
-		return log4jXMLFileName;
+		return log4jConfigurationFile;
 	}
 
 	/**
-	 * @param log4jXMLFileName the log4jXMLFileName to set
+	 * @param log4jConfigurationFile the log4jConfigurationFile to set
 	 */
-	public void setLog4jXMLFileName(String log4jXMLFileName)
+	public void setLog4jConfigurationFile(String log4jConfigurationFile)
 	{
-		this.log4jXMLFileName = log4jXMLFileName;
+		this.log4jConfigurationFile = log4jConfigurationFile;
 	}
 
 	public void clearLicenses()
