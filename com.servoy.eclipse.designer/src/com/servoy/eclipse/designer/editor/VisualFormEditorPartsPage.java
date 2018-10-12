@@ -118,7 +118,7 @@ public class VisualFormEditorPartsPage extends Composite
 	{
 		super(parent, style);
 		this.editor = editor;
-		isNGClientOnly = editor.getForm().getSolution().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY;
+		isNGClientOnly = SolutionMetaData.isNGOnlySolution(editor.getForm().getSolution().getSolutionType());
 
 		createContents();
 		m_bindingContext = initDataBindings();

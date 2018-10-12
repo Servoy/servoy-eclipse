@@ -274,9 +274,8 @@ public class BasePropertyHandler implements IPropertyHandler
 			if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(name) && persist instanceof Form)
 			{
 				Form form = (Form)persist;
-				int type = form.getSolution().getSolutionType();
-				return (type == SolutionMetaData.SOLUTION || type == SolutionMetaData.NG_CLIENT_ONLY || type == SolutionMetaData.MODULE) &&
-					form.getView() != IFormConstants.VIEW_TYPE_RECORD && form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
+				return SolutionMetaData.isServoyNGSolution(form.getSolution()) && form.getView() != IFormConstants.VIEW_TYPE_RECORD &&
+					form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
 			}
 			if (persist instanceof Form && ((Form)persist).isFormComponent() && BaseComponent.isEventOrCommandProperty(name))
 			{
@@ -292,7 +291,7 @@ public class BasePropertyHandler implements IPropertyHandler
 				if (!(persist instanceof IFormElement)) return false;
 				Form form = (Form)((IFormElement)persist).getAncestor(IRepository.FORMS);
 				int type = form.getSolution().getSolutionType();
-				return (persist instanceof WebComponent || type == SolutionMetaData.NG_CLIENT_ONLY);
+				return (persist instanceof WebComponent || SolutionMetaData.isNGOnlySolution(type));
 			}
 			if (!RepositoryHelper.shouldShow(name, element, persist.getClass(), dispType))
 			{

@@ -112,6 +112,19 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 							state = false;
 						}
 					}
+					if (type == UserNodeType.FORM && persist instanceof Form)
+					{
+						if (((Form)persist).isFormComponent())
+						{
+							setText("Delete form component");
+							setToolTipText("Delete form component");
+						}
+						else
+						{
+							setText("Delete form");
+							setToolTipText("Delete form");
+						}
+					}
 				}
 			}
 			if (state)

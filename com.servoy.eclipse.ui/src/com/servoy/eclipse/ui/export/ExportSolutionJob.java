@@ -185,7 +185,7 @@ final public class ExportSolutionJob extends WorkspaceJob
 
 		ArrayList<String> allModules = new ArrayList<String>();
 		allModules.add(activeSolution.getName());
-		if (exportModel.isExportReferencedModules())
+		if (exportModel.isExportReferencedModules() && exportModel.getModulesToExport() != null && exportModel.getModulesToExport().length > 0)
 		{
 			allModules.addAll(Arrays.asList(exportModel.getModulesToExport()));
 		}

@@ -65,6 +65,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -180,6 +181,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 		editorWebsocketSession.registerServerService("formeditor", editorServiceHandler);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(partListener);
+		ServoyModelFinder.getServoyModel().addFormComponentListener(partListener);
 		try
 		{
 			browser = new Browser(parent, SWT.NONE);
@@ -245,9 +247,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 * @param form
 	 * @return
 	 */
-	private String computeLayout(Form form, boolean isAbsoluteLayoutDiv)
+	private String computeLayout(Form form, boolean isCSSPositionContainer)
 	{
-		if (isAbsoluteLayoutDiv) return "csspos";
+		if (isCSSPositionContainer) return "csspos";
 		if (form.isResponsiveLayout()) return "flow";
 		if (form.getUseCssPosition()) return "csspos";
 		return "absolute";
@@ -258,18 +260,18 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		Form form = editorPart.getForm();
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
 
-		boolean isAbsoluteLayoutDiv = false;
+		boolean isCSSPositionContainer = false;
 		if (showedContainer instanceof LayoutContainer)
 		{
-			isAbsoluteLayoutDiv = PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)showedContainer);
+			isCSSPositionContainer = PersistHelper.isCSSPositionContainer((LayoutContainer)showedContainer);
 		}
 
-		String newLayout = computeLayout(flattenedForm, isAbsoluteLayoutDiv);
+		String newLayout = computeLayout(flattenedForm, isCSSPositionContainer);
 		if (!Utils.equalObjects(layout, newLayout) || force)
 		{
 			layout = newLayout;
 			Dimension formSize = flattenedForm.getSize();
-			if (isAbsoluteLayoutDiv) formSize = showedContainer.getSize();
+			if (isCSSPositionContainer) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
 				"&editorid=" + editorId + "&c_sessionid=" + clientId + (showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
@@ -327,6 +329,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		WebsocketSessionManager.removeSession(editorWebsocketSession.getUuid());
 		WebsocketSessionManager.removeSession(designerWebsocketSession.getUuid());
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(partListener);
+		ServoyModelFinder.getServoyModel().removeFormComponentListener(partListener);
 	}
 
 //	protected IWebsocketSession getContentWebsocketSession()
@@ -385,7 +388,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		if (persists != null)
 		{
 			if (persists.size() == 1 && persists.get(0) == showedContainer && showedContainer instanceof LayoutContainer &&
-				PersistHelper.isAbsoluteLayoutDiv((LayoutContainer)showedContainer))
+				PersistHelper.isCSSPositionContainer((LayoutContainer)showedContainer))
 			{
 				// probably size has changed we need a full refresh
 				refreshBrowserUrl(true);
@@ -586,7 +589,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		return showedContainer;
 	}
 
-	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener
+	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener
 	{
 		private boolean hidden = false;
 		private boolean refresh = false;
@@ -602,6 +605,15 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				}
 				else refresh = true;
 			}
+		}
+
+		public void formComponentChanged()
+		{
+			if (!hidden)
+			{
+				refresh();
+			}
+			else refresh = true;
 		}
 
 		private void refresh()

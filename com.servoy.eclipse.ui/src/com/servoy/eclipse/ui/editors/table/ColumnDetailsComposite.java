@@ -35,6 +35,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
@@ -217,6 +219,32 @@ public class ColumnDetailsComposite extends Composite
 		excludedCheckBox = new Button(this, SWT.CHECK);
 		uuidCheckBox = new Button(this, SWT.CHECK);
 		tenantCheckBox = new Button(this, SWT.CHECK);
+
+		tenantCheckBox.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (tenantCheckBox.getSelection())
+				{
+					for (Column col : column.getTable().getColumns())
+					{
+						if (col.getColumnInfo().hasFlag(IBaseColumn.TENANT_COLUMN) && col != column)
+						{
+							UIUtils.reportWarning("Warning", "There is already another column marked as tenant: " + col.getName());
+							break;
+						}
+					}
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+
+			}
+		});
 
 		uuidCheckBox.addListener(SWT.Selection, new Listener()
 		{

@@ -1707,7 +1707,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			boolean multiSelect = solution.getSolutionType() != SolutionMetaData.MOBILE &&
 				PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(persist)).size() > 0;
-			if (!multiSelect && ((form != null && form.isResponsiveLayout()) || solution.getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY))
+			if (!multiSelect && ((form != null && form.isResponsiveLayout()) || SolutionMetaData.isNGOnlySolution(solution.getSolutionType())))
 			{
 				// responsive forms or ng-client solution: use multi-select for style class
 				multiSelect = true;
@@ -1770,7 +1770,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	//remove some properties based on the 'known' name
 	protected boolean shouldShow(PropertyDescriptorWrapper propertyDescriptor)
 	{
-		if (((SolutionMetaData)persistContext.getPersist().getRootObject().getMetaData()).getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY &&
+		if (SolutionMetaData.isNGOnlySolution(((SolutionMetaData)persistContext.getPersist().getRootObject().getMetaData()).getSolutionType()) &&
 			!propertyDescriptor.propertyDescriptor.hasSupportForClientType(persistContext.getPersist(), ClientSupport.ng))
 		{
 			return false;

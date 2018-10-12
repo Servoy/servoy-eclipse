@@ -27,6 +27,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -55,8 +56,16 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 			SimpleUserNode node = ((SimpleUserNode)sel.getFirstElement());
 			persist = (IPersist)node.getRealObject();
 			enabled = true;
-			setText("Rename form");
-			setToolTipText("Rename form");
+			if (persist instanceof Form && ((Form)persist).isFormComponent())
+			{
+				setText("Rename form component");
+				setToolTipText("Rename form component");
+			}
+			else
+			{
+				setText("Rename form");
+				setToolTipText("Rename form");
+			}
 		}
 		setEnabled(enabled);
 	}
@@ -70,8 +79,8 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 			{
 				public String isValid(String newText)
 				{
-					return IdentDocumentValidator.isJavaIdentifier(newText) ? (newText.equals(form.getName()) ? "" : null) : (newText.length() == 0
-						? "" : "Invalid form name");
+					return IdentDocumentValidator.isJavaIdentifier(newText) ? (newText.equals(form.getName()) ? "" : null)
+						: (newText.length() == 0 ? "" : "Invalid form name");
 				}
 			});
 		int res = nameDialog.open();
@@ -86,6 +95,10 @@ public class RenamePersistAction extends Action implements ISelectionChangedList
 				{
 					((ISupportUpdateableName)editingPersist).updateName(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name);
 					project.saveEditingSolutionNodes(new IPersist[] { editingPersist }, true);
+					if (form.isFormComponent().booleanValue())
+					{
+						ServoyModelFinder.getServoyModel().fireFormComponentChanged();
+					}
 				}
 			}
 			catch (RepositoryException e)

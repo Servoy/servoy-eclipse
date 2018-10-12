@@ -844,6 +844,17 @@ public class SolutionExplorerView extends ViewPart
 							break;
 					}
 					openNewSubFormWizardAction.setImageDescriptor(imgd);
+					if (f.isFormComponent())
+					{
+						openNewSubFormWizardAction.setText("Create new sub form component");
+						openNewSubFormWizardAction.setToolTipText("Create new sub form component");
+					}
+					else
+					{
+						openNewSubFormWizardAction.setText("Create new sub form");
+						openNewSubFormWizardAction.setToolTipText("Create new sub form");
+					}
+
 				}
 				list.setInput(selFirstEl);
 			}
@@ -3489,7 +3500,8 @@ public class SolutionExplorerView extends ViewPart
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||
 					(doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM && !expandable &&
 						(SolutionMetaData.isImportHook(((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData()) ||
-							((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.MODULE)))
+							((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.MODULE ||
+							((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.NG_MODULE)))
 				{
 					Object clickedRealObject = doubleClickedItem.getRealObject();
 					if (clickedRealObject instanceof ServoyProject)

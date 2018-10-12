@@ -120,6 +120,7 @@ import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
@@ -220,6 +221,7 @@ public class ServoyModel extends AbstractServoyModel
 	private final List<IPersistChangeListener> editingPersistChangeListeners;
 	private final List<ISolutionMetaDataChangeListener> solutionMetaDataChangeListener;
 	private final List<I18NChangeListener> i18nChangeListeners;
+	private final List<IFormComponentListener> formComponentListeners;
 
 	private final Job fireRealPersistchangesJob;
 	private List<IPersist> realOutstandingChanges;
@@ -257,6 +259,7 @@ public class ServoyModel extends AbstractServoyModel
 		editingPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		solutionMetaDataChangeListener = new ArrayList<ISolutionMetaDataChangeListener>();
 		i18nChangeListeners = new ArrayList<I18NChangeListener>();
+		formComponentListeners = new ArrayList<>();
 		fireRealPersistchangesJob = createFireRealPersistchangesJob();
 		realOutstandingChanges = new ArrayList<IPersist>();
 
@@ -3671,6 +3674,7 @@ public class ServoyModel extends AbstractServoyModel
 				return ClientSupport.sc;
 
 			case SolutionMetaData.NG_CLIENT_ONLY :
+			case SolutionMetaData.NG_MODULE :
 				return ClientSupport.ng;
 		}
 
@@ -3845,4 +3849,42 @@ public class ServoyModel extends AbstractServoyModel
 		return new NGPackageManager();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.extensions.IServoyModel#fireFormComponentChanged()
+	 */
+	@Override
+	public void fireFormComponentChanged()
+	{
+		for (IFormComponentListener listener : formComponentListeners)
+		{
+			listener.formComponentChanged();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.extensions.IServoyModel#addFormComponentListener(com.servoy.eclipse.model.IFormComponentListener)
+	 */
+	@Override
+	public void addFormComponentListener(IFormComponentListener listener)
+	{
+		if (!formComponentListeners.contains(listener))
+		{
+			formComponentListeners.add(listener);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.extensions.IServoyModel#removeFormComponentListener(com.servoy.eclipse.model.IFormComponentListener)
+	 */
+	@Override
+	public void removeFormComponentListener(IFormComponentListener listener)
+	{
+		formComponentListeners.remove(listener);
+	}
 }
