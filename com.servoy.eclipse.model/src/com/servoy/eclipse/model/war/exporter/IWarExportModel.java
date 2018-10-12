@@ -123,7 +123,11 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public String getWebXMLFileName();
 
+	public String getLog4jConfigurationFile();
+
 	public String checkWebXML();
+
+	public String checkLog4jConfigurationFile();
 
 	public List<String> getNoneActiveSolutions();
 
