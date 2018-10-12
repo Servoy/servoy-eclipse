@@ -149,7 +149,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 	private String[] getElementsIDs()
 	{
-		return solutionType == SolutionMetaData.NG_CLIENT_ONLY ? NG_ELEMENTS_IDS : ELEMENTS_IDS;
+		return SolutionMetaData.isNGOnlySolution(solutionType) ? NG_ELEMENTS_IDS : ELEMENTS_IDS;
 	}
 
 	@Override
@@ -176,7 +176,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		addTemplates(drawers, drawerEntries, entryProperties);
 
 
-		if (solutionType != SolutionMetaData.NG_CLIENT_ONLY)
+		if (!SolutionMetaData.isNGOnlySolution(solutionType))
 		{
 			// add servoy beans
 			addBeans(true, drawers, drawerEntries, entryProperties);

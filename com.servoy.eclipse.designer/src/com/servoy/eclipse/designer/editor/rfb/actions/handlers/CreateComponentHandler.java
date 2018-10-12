@@ -145,7 +145,7 @@ public class CreateComponentHandler implements IServerService
 							if (newPersist != null)
 							{
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(newPersist));
-								IStructuredSelection structuredSelection = new StructuredSelection(newPersist);
+								IStructuredSelection structuredSelection = new StructuredSelection(newPersist.length > 0 ? newPersist[0] : newPersist);
 								selectionProvider.setSelection(structuredSelection);
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
 									PersistHelper.isCSSPositionContainer((LayoutContainer)newPersist[0]))

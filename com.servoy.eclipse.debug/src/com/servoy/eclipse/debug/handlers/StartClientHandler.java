@@ -150,6 +150,7 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 				case SolutionMetaData.WEB_CLIENT_ONLY :
 					return START_WEB_CLIENT;
 				case SolutionMetaData.NG_CLIENT_ONLY :
+				case SolutionMetaData.NG_MODULE :
 					return START_NG_CLIENT;
 				case SolutionMetaData.MOBILE :
 					return START_MOBILE_CLIENT;
