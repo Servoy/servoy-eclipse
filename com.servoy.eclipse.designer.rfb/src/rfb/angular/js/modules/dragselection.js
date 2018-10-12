@@ -15,6 +15,11 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		var dragCopy = false; // whatever dragged elment is cloned, because of using ctrl+mouse move
 
 		function onmousedown(event) {
+			if(editorScope.getSelection()!= null && editorScope.getSelection().length > 1 && !editorScope.isAbsoluteFormLayout())
+			{
+				// do not allow drag of multiple elements in responsive design
+				return;
+			}
 			dragNode = utils.getNode(event);
 			// do not allow moving elements inside css position container in responsive layout
 			if (dragNode && !editorScope.isAbsoluteFormLayout() && $(dragNode).parents('.svy-csspositioncontainer').length)
