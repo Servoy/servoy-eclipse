@@ -107,6 +107,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean useAsRealAdminUser;
 	private boolean searchProblem = false;
 	private String webXMLFileName;
+	private String log4jConfigurationFile;
 	private boolean exportNoneActiveSolutions;
 
 	/**
@@ -159,6 +160,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		warFileName = settings.get("export.warfilename");
 		webXMLFileName = settings.get("export.webxmlfilename");
+		log4jConfigurationFile = settings.get("export.log4jConfigurationFile");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
 		exportNoneActiveSolutions = Utils.getAsBoolean(settings.get("export.exportNoneActiveSolutions"));
@@ -357,6 +359,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		settings.put("export.warfilename", warFileName);
 		settings.put("export.webxmlfilename", webXMLFileName);
+		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
 		settings.put("export.exportActiveSolution", exportActiveSolution);
 		settings.put("export.exportNoneActiveSolutions", exportNoneActiveSolutions);
 		settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
@@ -560,11 +563,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	 */
 	public void setServoyPropertiesFileName(String servoyPropertiesFileName)
 	{
-		this.servoyPropertiesFileName = servoyPropertiesFileName;
-		if (this.servoyPropertiesFileName != null && this.servoyPropertiesFileName.trim().length() == 0)
-		{
-			this.servoyPropertiesFileName = null;
-		}
+		this.servoyPropertiesFileName = nonEmpty(servoyPropertiesFileName);
 	}
 
 	/**
@@ -1233,11 +1232,23 @@ public class ExportWarModel extends AbstractWarExportModel
 	 */
 	public void setWebXMLFileName(String webXMLFileName)
 	{
-		this.webXMLFileName = webXMLFileName;
-		if (this.webXMLFileName != null && this.webXMLFileName.trim().length() == 0)
-		{
-			this.webXMLFileName = null;
-		}
+		this.webXMLFileName = nonEmpty(webXMLFileName);
+	}
+
+	/**
+	 * @return the log4jConfigurationFile
+	 */
+	public String getLog4jConfigurationFile()
+	{
+		return log4jConfigurationFile;
+	}
+
+	/**
+	 * @param log4jConfigurationFile the log4jConfigurationFile to set
+	 */
+	public void setLog4jConfigurationFile(String log4jConfigurationFile)
+	{
+		this.log4jConfigurationFile = log4jConfigurationFile;
 	}
 
 	public void clearLicenses()
@@ -1252,4 +1263,14 @@ public class ExportWarModel extends AbstractWarExportModel
 	{
 		return noneActiveSolutions;
 	}
+
+	private static String nonEmpty(String name)
+	{
+		if (name != null && name.trim().length() == 0)
+		{
+			return null;
+		}
+		return name;
+	}
+
 }

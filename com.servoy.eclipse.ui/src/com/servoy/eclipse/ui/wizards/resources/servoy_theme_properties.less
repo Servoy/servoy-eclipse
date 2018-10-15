@@ -1,0 +1,77 @@
+/* THE THEME COLORS CAN BE CONFIGURED BY EDITING THE VALUES OF THE PROPERTIES IN THIS FILE.
+ * THE NAMES OF THE PROPERTIES SHOULD NOT BE CHANGED.
+ * NEW PROPERTIES SHOULD BE ADDED TO YOUR SOLUTION LESS FILE.
+ */
+/* main theme color; should be called primary ? */
+@main-color: #E9720B;							/* Main color */
+@main-color-inverse: #FFF;						/* Main color inverse */
+@main-color-light: lighten(@main-color, 10%); 	/* Main color light lighten(@main-color, 28%); #F9DB89 */
+@main-color-dark: darken(@main-color, 15%); 	/* Main color dark EB8C39 */
+
+@secondary-color: #18222C;						/* Secondary color */
+@secondary-color-inverse: #FFF;					/* Secondary color inverse */
+@secondary-color-light: #464E56;				/* Secondary color light*/
+@secondary-color-dark: #364453;					/* Secondary color dark*/
+
+
+/* Sidenav colors */
+@sidenav-color: @secondary-color;
+@sidenav-text-color: @secondary-color-inverse;
+@sidenav-selected-color: @secondary-color-light;
+@sidenav-selected-text-color: @sidenav-text-color;
+
+/* Body bg */
+@body-bg: #FFF;									/* Body bg */
+@body-bg-inverse: #DDD;							/* Body bg inverse */
+
+/* TODO setup borders for colors */
+/* Borders */
+@border-color : #DBDBDB; 						/* Border color */
+@border-width : 1px; 							/* Border width */
+@border-style : solid;							/* Border style */
+@border-radius: 2px;							/* Border radius */
+
+/* Colors for labels and inputs */
+@text-color : #777777;							/* Text color */
+@text-color-inverse: @text-color;				/* Text color inverse */
+
+/* Fields */
+@field-bg : #FFF;								/* Field bg */
+@field-disabled-bg : @field-bg;					/* Field disabled bg */
+@field-color: @text-color;  					/* Field color #4A4A4A */
+@field-addon-bg: @field-bg;						/* Field addon bg */
+@field-border-width: 1px 1px @border-width 1px;		/* Field width */
+
+/* Tabs */
+@tab-bg: @body-bg-inverse;
+@tab-text-color: @text-color;
+@tab-border: 0;
+@tab-border-radius: 0;
+
+@tab-active-bg: @main-color;
+@tab-active-text-color: @main-color-inverse;
+@tab-active-border: 0;
+
+/* Windows */
+@window-header-bg : @body-bg-inverse;			/* Window header bg */
+@window-body-bg: @body-bg;						/* Window body bg */
+@window-footer-bg: @body-bg;					/* Window footer bg */
+@window-header-color: @text-color-inverse;		/* Window header color */
+
+/* Tables */
+@table-border-width: 0;							/* Table boder width */
+@table-header-bg: inherit;						/* Table header bg */
+@table-header-font-style: normal;				/* Table header font style */
+@table-header-text-transform: uppercase;		/* Table header text transform */
+
+/* Brand colors applicable to labels and buttons */
+@brand-primary: #428bca;
+@brand-success: #5cb85c;
+@brand-info:    #5bc0de;
+@brand-warning: #f0ad4e;
+@brand-danger:  #d9534f;
+
+/* Margin sizing applicable to margins and padding */
+@box-size-10 : 10px;
+@box-size-20 : 20px;
+@box-size-30 : 30px;

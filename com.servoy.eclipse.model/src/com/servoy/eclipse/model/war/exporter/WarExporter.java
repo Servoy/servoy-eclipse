@@ -28,6 +28,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -69,6 +70,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -145,7 +147,7 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
 public class WarExporter
 {
 	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
-	private static final String[] NG_LIBS = new String[] { "org.slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "servoy_ngclient_" +
+	private static final String[] NG_LIBS = new String[] { "slf4j.api_*.jar", "org.apache.logging.log4j.*.jar", "org.freemarker*.jar", "servoy_ngclient_" +
 		ClientVersion.getBundleVersionWithPostFix() +
 		".jar", "sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
 
@@ -174,7 +176,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 37);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 39);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -205,6 +207,9 @@ public class WarExporter
 		monitor.worked(2);
 		monitor.subTask("Creating web.xml");
 		copyWebXml(tmpWarDir);
+		monitor.worked(2);
+		monitor.subTask("Creating log4j configuration file");
+		copyLog4jConfigurationFile(tmpWarDir);
 		monitor.worked(2);
 		monitor.subTask("Creating context.xml");
 		createTomcatContextXML(tmpWarDir);
@@ -259,7 +264,7 @@ public class WarExporter
 			Media media = it.next();
 			if (media.getName().endsWith(".less"))
 			{
-				String content = ResourceProvider.compileLessWithNashorn(new String(media.getMediaData()));
+				String content = ResourceProvider.compileSolutionLessFile(media, fs);
 				if (content != null)
 				{
 					File folder = new File(tmpWarDir, NGClientWebsocketSession.SERVOY_SOLUTION_CSS);
@@ -1112,17 +1117,59 @@ public class WarExporter
 		}
 		try (InputStream is = webXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
 		{
-			byte[] buffer = new byte[8096];
-			int read = webXmlIS.read(buffer);
-			while (read != -1)
-			{
-				bos.write(buffer, 0, read);
-				read = webXmlIS.read(buffer);
-			}
+			copyStream(webXmlIS, bos);
 		}
 		catch (Exception e)
 		{
 			throw new ExportException("Can't create the web.xml file: " + webXMLFile.getAbsolutePath(), e);
+		}
+	}
+
+
+	private void copyLog4jConfigurationFile(File tmpWarDir) throws ExportException
+	{
+		// copy war log4j configuration file
+		String name = exportModel.getLog4jConfigurationFile();
+		InputStream logXmlIS = null;
+		if (name == null)
+		{
+			name = "resources/log4j.xml";
+			logXmlIS = WarExporter.class.getResourceAsStream(name);
+		}
+		else try
+		{
+			String message = exportModel.checkLog4jConfigurationFile();
+			if (message != null)
+			{
+				throw new ExportException(message);
+			}
+			logXmlIS = new FileInputStream(name);
+		}
+		catch (FileNotFoundException fnfe)
+		{
+			throw new ExportException("Can't create the log4j configuration file, couldn't read" + name, fnfe);
+		}
+
+		// Log4j will search for a file that starts with "log4j2" in the WEB-INF directory.
+		File log4jConfigurationFile = new File(tmpWarDir, "WEB-INF/log4j2." + FilenameUtils.getExtension(name));
+		try (InputStream is = logXmlIS; BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(log4jConfigurationFile)))
+		{
+			copyStream(is, bos);
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Can't create the log4j configuration file: " + log4jConfigurationFile.getAbsolutePath(), e);
+		}
+	}
+
+	private static void copyStream(InputStream inputStream, OutputStream outputStream) throws IOException
+	{
+		byte[] buffer = new byte[8096];
+		int read = inputStream.read(buffer);
+		while (read != -1)
+		{
+			outputStream.write(buffer, 0, read);
+			read = inputStream.read(buffer);
 		}
 	}
 
@@ -1853,7 +1900,7 @@ public class WarExporter
 		}
 		catch (Exception e)
 		{
-			throw new ExportException("Cant'copy file from " + sourceFile + " to " + destFile, e);
+			throw new ExportException("Can't copy file from " + sourceFile + " to " + destFile, e);
 		}
 
 	}

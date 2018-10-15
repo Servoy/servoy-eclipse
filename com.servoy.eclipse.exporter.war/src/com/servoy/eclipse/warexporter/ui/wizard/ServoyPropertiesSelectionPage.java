@@ -22,11 +22,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -56,17 +59,19 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
-	private final ExportWarWizard wizard;
+	private Text log4jConfigurationFileText;
+	private Button browseLog4jConfigurationFileButton;
 	private Text fileWebXmlNameText;
 	private Button browseWebXmlButton;
+	private final ExportWarWizard wizard;
 
 	public ServoyPropertiesSelectionPage(ExportWarModel exportModel, ExportWarWizard wizard)
 	{
 		super("servoypropertyselection");
 		this.exportModel = exportModel;
 		this.wizard = wizard;
-		setTitle("Choose an existing servoy properties file or web.xml (skip to generate default)");
-		setDescription("Select the servoy properties file or web,xml that you want to use, skip if default should be generated");
+		setTitle("Choose an existing servoy properties file, log4j configuration file or web.xml (skip to generate default)");
+		setDescription("Select the servoy properties file, log4j configuration file or web.xml that you want to use, skip if default should be generated");
 	}
 
 	public void createControl(Composite parent)
@@ -75,6 +80,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 
+		// servoy.properties
 		Label propertiesText = new Label(composite, NONE);
 		propertiesText.setText("Servoy properties file:");
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -90,6 +96,24 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		browseButton.setText("Browse...");
 		browseButton.addListener(SWT.Selection, this);
 
+		// Log4jConfigurationFile
+		Label log4jConfigurationText = new Label(composite, NONE);
+		log4jConfigurationText.setText("Apache Log4j2 configuration file:");
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		log4jConfigurationText.setLayoutData(gd);
+
+		log4jConfigurationFileText = new Text(composite, SWT.BORDER);
+		log4jConfigurationFileText.addListener(SWT.KeyUp, this);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		log4jConfigurationFileText.setLayoutData(gd);
+		if (exportModel.getLog4jConfigurationFile() != null) log4jConfigurationFileText.setText(exportModel.getLog4jConfigurationFile());
+
+		browseLog4jConfigurationFileButton = new Button(composite, SWT.PUSH);
+		browseLog4jConfigurationFileButton.setText("Browse...");
+		browseLog4jConfigurationFileButton.addListener(SWT.Selection, this);
+
+		// web.xml
 		Label webXmlText = new Label(composite, NONE);
 		webXmlText.setText(
 			"Take a web.xml from a generated war for adjustment and include it here, it must be a servoy war generated web.xml file to begin with:");
@@ -108,6 +132,25 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		browseWebXmlButton.setText("Browse...");
 		browseWebXmlButton.addListener(SWT.Selection, this);
 
+		Button restoreDefaults = new Button(composite, SWT.PUSH);
+		restoreDefaults.setText("Restore Defaults");
+		restoreDefaults.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				fileNameText.setText("");
+				log4jConfigurationFileText.setText("");
+				fileWebXmlNameText.setText("");
+				exportModel.setServoyPropertiesFileName(null);
+				exportModel.setLog4jConfigurationFile(null);
+				exportModel.setWebXMLFileName(null);
+				canFlipToNextPage();
+				getWizard().getContainer().updateButtons();
+				getWizard().getContainer().updateMessage();
+			}
+		});
+
 		setControl(composite);
 	}
 
@@ -119,12 +162,17 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			exportModel.setServoyPropertiesFileName(potentialFileName);
 			exportModel.setOverwriteSocketFactoryProperties(false);
 		}
-		if (event.widget == fileWebXmlNameText)
+		else if (event.widget == log4jConfigurationFileText)
+		{
+			String potentialFileName = log4jConfigurationFileText.getText();
+			exportModel.setLog4jConfigurationFile(potentialFileName);
+		}
+		else if (event.widget == fileWebXmlNameText)
 		{
 			String potentialFileName = fileWebXmlNameText.getText();
 			exportModel.setWebXMLFileName(potentialFileName);
 		}
-		else if (event.widget == browseButton || event.widget == browseWebXmlButton)
+		else if (event.widget == browseButton || event.widget == browseLog4jConfigurationFileButton || event.widget == browseWebXmlButton)
 		{
 			Shell shell = new Shell();
 			GridLayout gridLayout = new GridLayout();
@@ -135,12 +183,18 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 				String fileName = null;
 				if (event.widget == browseButton)
 				{
-					exportModel.getServoyPropertiesFileName();
+					fileName = exportModel.getServoyPropertiesFileName();
 					if (fileName == null) fileName = "servoy.properties";
 				}
-				else
+				else if (event.widget == browseLog4jConfigurationFileButton)
 				{
-					exportModel.getWebXMLFileName();
+					fileName = exportModel.getLog4jConfigurationFile();
+					if (fileName == null) fileName = "log4j.xml";
+
+				}
+				else if (event.widget == browseWebXmlButton)
+				{
+					fileName = exportModel.getWebXMLFileName();
 					if (fileName == null) fileName = "web.xml";
 
 				}
@@ -161,6 +215,11 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 				String[] extensions = { "*.properties" };
 				dlg.setFilterExtensions(extensions);
 			}
+			else if (event.widget == browseLog4jConfigurationFileButton)
+			{
+				String[] extensions = { "*.xml", "*.json", "*.jsn", "*.yaml", "*.yml", "*.properties" };
+				dlg.setFilterExtensions(extensions);
+			}
 			else
 			{
 				String[] extensions = { "*.xml" };
@@ -174,7 +233,12 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 					exportModel.setServoyPropertiesFileName(chosenFileName);
 					fileNameText.setText(chosenFileName);
 				}
-				else
+				else if (event.widget == browseLog4jConfigurationFileButton)
+				{
+					exportModel.setLog4jConfigurationFile(chosenFileName);
+					log4jConfigurationFileText.setText(chosenFileName);
+				}
+				else if (event.widget == browseWebXmlButton)
 				{
 					exportModel.setWebXMLFileName(chosenFileName);
 					fileWebXmlNameText.setText(chosenFileName);
@@ -288,8 +352,8 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 
 		if (!messageSet)
 		{
-			exportModel.setWebXMLFileName(fileWebXmlNameText.getText());
-			String message = exportModel.checkWebXML();
+			exportModel.setLog4jConfigurationFile(StringUtils.defaultIfBlank(log4jConfigurationFileText.getText(), null));
+			String message = exportModel.checkLog4jConfigurationFile();
 			if (message != null)
 			{
 				setMessage(message, WARNING);
@@ -297,6 +361,16 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			}
 		}
 
+		if (!messageSet)
+		{
+			exportModel.setWebXMLFileName(StringUtils.defaultIfBlank(fileWebXmlNameText.getText(), null));
+			String message = exportModel.checkWebXML();
+			if (message != null)
+			{
+				setMessage(message, WARNING);
+				messageSet = true;
+			}
+		}
 
 		if (!messageSet)
 		{
@@ -319,6 +393,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		fileNameText.setText("");
 		fileWebXmlNameText.setText("");
 		exportModel.setServoyPropertiesFileName(null);
+		exportModel.setLog4jConfigurationFile(null);
 		exportModel.setWebXMLFileName(null);
 		canFlipToNextPage();
 		getWizard().getContainer().updateButtons();

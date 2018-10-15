@@ -1647,7 +1647,7 @@ public class ServoyModel extends AbstractServoyModel
 	{
 		for (ServoyProject p : getModulesOfActiveProject())
 		{
-			p.resetEditingFlattenedSolution(true, true);
+			p.resetEditingFlattenedSolution(true);
 		}
 	}
 
@@ -2249,7 +2249,7 @@ public class ServoyModel extends AbstractServoyModel
 						// a project was deleted, closed, or it does not have Servoy nature; see if it is was part of the repository and if so, remove it
 						if (getServoyProject(resource.getName()) != null)
 						{
-							getServoyProject(resource.getName()).resetEditingFlattenedSolution(false, false);
+							getServoyProject(resource.getName()).resetEditingFlattenedSolution(false);
 							refreshServoyProjects();
 						}
 						boolean isLoaded = eclipseRepository.isSolutionMetaDataLoaded(resource.getName());
