@@ -428,7 +428,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		public void paste()
 		{
 			super.paste();
-			cellEditor.getContentProposalAdapter().closeProposalPopup();
+			if (cellEditor.getContentProposalAdapter() != null) cellEditor.getContentProposalAdapter().closeProposalPopup();
 		}
 
 		@Override

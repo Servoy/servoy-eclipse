@@ -514,8 +514,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"
-         unpack="false"/>
+		unpack="false"/>
 
    <plugin
          id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
