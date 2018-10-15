@@ -339,6 +339,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private ReplaceTableAction replaceActionInTree;
 	private ReplaceServerAction replaceServerAction;
+	private ConvertAllFormsToCSSPosition convertFormsToCSSPosition;
 
 	private OpenSqlEditorAction openSqlEditorAction;
 
@@ -421,6 +422,7 @@ public class SolutionExplorerView extends ViewPart
 	private LoadRelationsAction loadRelationsAction;
 
 	private ToggleFormCommandsAction toggleFormCommandsActions;
+	private ConvertToCSSPositionFormAction convertToCSSPositionForm;
 	private AddFormsToWorkingSet addFormsToWorkingSet;
 
 	private ReferenceToRegularFormAction referenceToRegularFormAction;
@@ -2608,11 +2610,13 @@ public class SolutionExplorerView extends ViewPart
 
 		manager.add(new Separator());
 		if (toggleFormCommandsActions.isEnabled()) manager.add(toggleFormCommandsActions);
+		if (convertToCSSPositionForm.isEnabled()) manager.add(convertToCSSPositionForm);
 		if (addFormsToWorkingSet.isEnabled()) manager.add(addFormsToWorkingSet);
 		if (referenceToRegularFormAction.isEnabled()) manager.add(referenceToRegularFormAction);
 		if (changeResourcesProjectAction.isEnabled()) manager.add(changeResourcesProjectAction);
 		if (replaceServerAction.isEnabled()) manager.add(replaceServerAction);
 		if (replaceActionInTree.isEnabled()) manager.add(replaceActionInTree);
+		if (convertFormsToCSSPosition.isEnabled()) manager.add(convertFormsToCSSPosition);
 		if (removeSolutionProtectionAction.isEnabled()) manager.add(removeSolutionProtectionAction);
 		if (duplicateServer.isEnabled()) manager.add(duplicateServer);
 
@@ -2986,11 +2990,13 @@ public class SolutionExplorerView extends ViewPart
 		enableServer = new EnableServerAction(shell);
 		flagTenantColumn = new FlagTenantColumnAction(this);
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
+		convertToCSSPositionForm = new ConvertToCSSPositionFormAction(this);
 		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
 		referenceToRegularFormAction = new ReferenceToRegularFormAction(this);
 
 		replaceActionInTree = new ReplaceTableAction(this);
 		replaceServerAction = new ReplaceServerAction(this);
+		convertFormsToCSSPosition = new ConvertAllFormsToCSSPosition(this);
 
 		openSqlEditorAction = new OpenSqlEditorAction();
 
@@ -3360,6 +3366,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(setActive);
 		addTreeSelectionChangedListener(replaceActionInTree);
 		addTreeSelectionChangedListener(replaceServerAction);
+		addTreeSelectionChangedListener(convertFormsToCSSPosition);
 		addTreeSelectionChangedListener(openSqlEditorAction);
 		addTreeSelectionChangedListener(duplicateFormAction);
 		addTreeSelectionChangedListener(exportComponentPackage);
@@ -3375,6 +3382,7 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(enableServer);
 		addTreeSelectionChangedListener(flagTenantColumn);
 		addTreeSelectionChangedListener(toggleFormCommandsActions);
+		addTreeSelectionChangedListener(convertToCSSPositionForm);
 		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);
 
