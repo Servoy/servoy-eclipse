@@ -533,7 +533,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 		return AbstractRepository.searchPersist(getEditingSolution(), uuid);
 	}
 
-	public synchronized FlattenedSolution getEditingFlattenedSolution(boolean loadLoginSolution, boolean loadMainSolution)
+	public synchronized FlattenedSolution getEditingFlattenedSolution(boolean loadMainSolution)
 	{
 		try
 		{
@@ -546,33 +546,32 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 			{
 				IApplicationServer as = ApplicationServerRegistry.getService(IApplicationServer.class);
 				// new or flattened solution was reset
-				editingFlattenedSolution.setSolution(getEditingSolution().getSolutionMetaData(), loadLoginSolution, loadMainSolution,
-					new AbstractActiveSolutionHandler(as)
+				editingFlattenedSolution.setSolution(getEditingSolution().getSolutionMetaData(), false, loadMainSolution, new AbstractActiveSolutionHandler(as)
+				{
+					@Override
+					public IRepository getRepository()
 					{
-						@Override
-						public IRepository getRepository()
-						{
-							return ApplicationServerRegistry.get().getDeveloperRepository();
-						}
+						return ApplicationServerRegistry.get().getDeveloperRepository();
+					}
 
-						@Override
-						protected Solution loadSolution(RootObjectMetaData solutionDef) throws RemoteException, RepositoryException
+					@Override
+					protected Solution loadSolution(RootObjectMetaData solutionDef) throws RemoteException, RepositoryException
+					{
+						ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionDef.getName());
+						if (servoyProject != null)
 						{
-							ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionDef.getName());
-							if (servoyProject != null)
-							{
-								return servoyProject.getEditingSolution();
-							}
-							return null;
+							return servoyProject.getEditingSolution();
 						}
+						return null;
+					}
 
-						@Override
-						protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
-							throws RemoteException, RepositoryException
-						{
-							return loadSolution(loginSolutionDef);
-						}
-					});
+					@Override
+					protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
+						throws RemoteException, RepositoryException
+					{
+						return loadSolution(loginSolutionDef);
+					}
+				});
 			}
 		}
 		catch (RemoteException e)
@@ -588,17 +587,17 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	public synchronized FlattenedSolution getEditingFlattenedSolution()
 	{
-		return getEditingFlattenedSolution(true, true);
+		return getEditingFlattenedSolution(true);
 	}
 
-	public synchronized void resetEditingFlattenedSolution(boolean loadLoginSolution, boolean loadMainSolution)
+	public synchronized void resetEditingFlattenedSolution(boolean loadMainSolution)
 	{
 		if (this.editingFlattenedSolution != null)
 		{
 			editingFlattenedSolution.close(null);
 			// do not set editingFlattenedSolution to null, in several places a reference is kept (like in FormLabelProvider)
 			// make sure the editing flattened solution is filled ok, otherwise references to it cannot use it.
-			getEditingFlattenedSolution(loadLoginSolution, loadMainSolution);
+			getEditingFlattenedSolution(loadMainSolution);
 		}
 	}
 
@@ -711,7 +710,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 	/**
 	 * Returns a list of all IProjects referenced by this solution's project (both static references (.project) and dynamic ones (dltk js build refs)) and it's modules, in-depth, including the solution project itself and it's modules.
 	 * Modules are computed correctly via solution property instead of via project references which are not reliable.
-	 * 
+	 *
 	 * @return the full list of referenced projects no matter how deep the module nesting is (including this solution's project); only goes in depth in modules.
 	 * @throws CoreException if something went wrong.
 	 */
