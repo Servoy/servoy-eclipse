@@ -176,9 +176,9 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 		};
 		// make sure sub-properties are sorted in defined order
 		return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new PropertyController<String, String>(TOP, TOP, null,
-			CSSPositionLabelProvider.INSTANCE, factory), new PropertyController<String, String>(LEFT, LEFT, null, CSSPositionLabelProvider.INSTANCE,
+			CSSPositionLabelProvider.INSTANCE, factory), new PropertyController<String, String>(RIGHT, RIGHT, null, CSSPositionLabelProvider.INSTANCE,
 				factory), new PropertyController<String, String>(BOTTOM, BOTTOM, null, CSSPositionLabelProvider.INSTANCE,
-					factory), new PropertyController<String, String>(RIGHT, RIGHT, null, CSSPositionLabelProvider.INSTANCE,
+					factory), new PropertyController<String, String>(LEFT, LEFT, null, CSSPositionLabelProvider.INSTANCE,
 						factory), new PropertyController<String, String>(WIDTH, WIDTH, null, CSSPositionLabelProvider.INSTANCE,
 							factory), new PropertyController<String, String>(HEIGHT, HEIGHT, null, CSSPositionLabelProvider.INSTANCE, factory) });
 	}
@@ -295,7 +295,7 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 		{
 			if (value != null && value.trim().length() > 0 && convertToObject(value) == null)
 			{
-				return "Expecting 6 items \"top,left,bottom,right,width,height\"";
+				return "Expecting 6 items \"top,right,bottom,left,width,height\"";
 			}
 			return null;
 		}
@@ -318,12 +318,12 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 			String width;
 			String height;
 			top = tok.nextToken().trim();
-			left = tok.nextToken().trim();
-			bottom = tok.nextToken().trim();
 			right = tok.nextToken().trim();
+			bottom = tok.nextToken().trim();
+			left = tok.nextToken().trim();
 			width = tok.nextToken().trim();
 			height = tok.nextToken().trim();
-			return new CSSPosition(top, left, bottom, right, width, height);
+			return new CSSPosition(top, right, bottom, left, width, height);
 		}
 
 		public String isCorrectObject(Object value)
@@ -341,7 +341,7 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 			{
 				return "";
 			}
-			return ((CSSPosition)value).top + "," + ((CSSPosition)value).left + "," + ((CSSPosition)value).bottom + "," + ((CSSPosition)value).right + "," +
+			return ((CSSPosition)value).top + "," + ((CSSPosition)value).right + "," + ((CSSPosition)value).bottom + "," + ((CSSPosition)value).left + "," +
 				((CSSPosition)value).width + "," + ((CSSPosition)value).height;
 		}
 
