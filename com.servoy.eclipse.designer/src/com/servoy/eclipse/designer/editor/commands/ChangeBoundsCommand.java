@@ -28,6 +28,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -38,9 +39,9 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 
 /**
  * Command to apply dragging changes to the PersistPropertySource object. Children of the persist are moved along.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class ChangeBoundsCommand extends BaseRestorableCommand implements ISupportModels
 {
@@ -53,7 +54,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 
 	/**
 	 * Create a command that can resize and/or move ISupportBound objects.
-	 * 
+	 *
 	 */
 	public ChangeBoundsCommand(EditPart editPart, Point moveDelta, Dimension sizeDelta)
 	{
@@ -137,7 +138,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 
 	/**
 	 * Adds corresponding EditPart children of model <b>parrentModel</b> to the list <b>childrenList</b>.
-	 * 
+	 *
 	 * @param childrenList
 	 * @param parentModel
 	 */
@@ -175,8 +176,8 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 	protected boolean changeBounds(GraphicalEditPart ep, boolean change, boolean allowResize)
 	{
 		ISupportBounds model = (ISupportBounds)ep.getModel();
-		java.awt.Point location = model.getLocation();
-		java.awt.Dimension size = model.getSize();
+		java.awt.Point location = CSSPosition.getLocation(model);
+		java.awt.Dimension size = CSSPosition.getSize(model);
 
 		boolean moved = false;
 		int x = location.x;
@@ -209,7 +210,7 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 
 		if (change)
 		{
-			IPropertySource propertySource = (IPropertySource)ep.getAdapter(IPropertySource.class);
+			IPropertySource propertySource = ep.getAdapter(IPropertySource.class);
 			if (moved)
 			{
 				setBoundsProperty(ep, propertySource, StaticContentSpecLoader.PROPERTY_LOCATION, new java.awt.Point(x, y));

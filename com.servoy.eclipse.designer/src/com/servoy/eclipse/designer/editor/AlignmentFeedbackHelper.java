@@ -32,11 +32,12 @@ import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.CreateRequest;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ISupportBounds;
 
 /**
  * Helper for adding/removing of alignment feedback figures from the feedback layer.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -128,7 +129,7 @@ public class AlignmentFeedbackHelper
 
 			if (editPart.getModel() instanceof ISupportBounds)
 			{
-				java.awt.Point location = ((ISupportBounds)editPart.getModel()).getLocation();
+				java.awt.Point location = CSSPosition.getLocation(((ISupportBounds)editPart.getModel()));
 				sb.append(" (");
 				if (move)
 				{
@@ -136,7 +137,7 @@ public class AlignmentFeedbackHelper
 				}
 				if (resize)
 				{
-					java.awt.Dimension size = ((ISupportBounds)editPart.getModel()).getSize();
+					java.awt.Dimension size = CSSPosition.getSize((ISupportBounds)editPart.getModel());
 					if (move) sb.append(' ');
 					sb.append(size.width + request.getSizeDelta().width).append('x').append(size.height + request.getSizeDelta().height);
 				}
