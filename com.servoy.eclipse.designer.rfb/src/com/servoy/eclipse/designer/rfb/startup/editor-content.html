@@ -58,6 +58,10 @@
 				editorNode.trigger('updateForm.content', data)
 			}
 
+			function flushGhostContainerElements() {
+				editorNode.trigger('flushGhostContainerElements.content');
+			}
+	
 			$(document).ready(function(){
 				editorNode.trigger('documentReady.content', document)
 
