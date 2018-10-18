@@ -13,11 +13,12 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 	BRING_TO_FRONT_ID: "com.servoy.eclipse.designer.rfb.bringtofront", 
 	SEND_TO_BACK_ID: "com.servoy.eclipse.designer.rfb.sendtoback",
 	OPEN_SCRIPT_ID: "com.servoy.eclipse.ui.OpenFormJsAction",
+	OPEN_SUPER_SCRIPT_ID: "com.servoy.eclipse.designer.rfb.OpenScriptHandler",
 	GROUP_ID: "com.servoy.eclipse.designer.rfb.group",
 	UNGROUP_ID: "com.servoy.eclipse.designer.rfb.ungroup",
 	OPEN_FORM_HIERARCHY_ID: "com.servoy.eclipse.ui.OpenFormHierarchyAction"
 })
-.run(function($rootScope, $pluginRegistry,$contextmenu, $editorService,EDITOR_EVENTS,SHORTCUT_IDS,EDITOR_CONSTANTS){
+.run(function($rootScope, $pluginRegistry,$contextmenu, $editorService,EDITOR_EVENTS,SHORTCUT_IDS,EDITOR_CONSTANTS,$q){
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var selection = null;
 		var beanAnchor = 0;
@@ -83,8 +84,11 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 		}
 		
 		var promise = $editorService.getShortcuts();
-		promise.then(function (shortcuts){
+		var pr = $editorService.getSuperForms();
+		$q.all([promise, pr]).then(function (result){
 		
+			var shortcuts = result[0];
+			var forms = result[1];
 			$contextmenu.add({
 				text: "Set Tab Sequence",
 				getIconStyle: function(){ return {'background-image':"url(images/th_horizontal.png)"};},
@@ -373,9 +377,8 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 					}
 				}
 			);			
-			
-			$contextmenu.add(
-				{
+				
+			var openAction = {
 					text: "Open in Script Editor",
 					getIconStyle: function(){ return {'background-image':"url(images/js.png)"}},
 					shortcut: shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID],
@@ -384,8 +387,26 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						$("#contextMenu").hide();
 						$editorService.executeAction('openScript');
 					}
+				};
+			if (forms.length > 1){
+				var superFormsActions = [];
+				for (var i =0; i<forms.length; i++) {
+					superFormsActions.push({
+						text: forms[i]+".js",
+						getIconStyle: function(){ return {'background-image':"url(images/js.png)"}},
+						shortcut: i==0 ? shortcuts[SHORTCUT_IDS.OPEN_SUPER_SCRIPT_ID] : undefined,
+						form: forms[i],
+						execute:function()
+						{
+							$("#contextMenu").hide();
+							$editorService.executeAction('openScript', {'f': this.form});
+						}
+					});
 				}
-			);
+				openAction.subMenu = superFormsActions;
+				openAction.getItemClass = function() { return "dropdown-submenu";};
+			}
+			$contextmenu.add(openAction);
 			
 			$contextmenu.add(
 				{

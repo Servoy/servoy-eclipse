@@ -17,7 +17,9 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.eclipse.jface.resource.JFaceResources;
@@ -27,6 +29,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPage;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
@@ -64,8 +67,12 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Handle requests from the rfb html editor.
@@ -344,6 +351,26 @@ public class EditorServiceHandler implements IServerService
 				}
 				return null;
 			}
+		});
+
+		configuredHandlers.put("getSuperForms", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				final Form openForm = editorPart != null ? editorPart.getForm() : null;
+				if (openForm == null) return null;
+				
+				List<AbstractBase> forms = PersistHelper.getOverrideHierarchy(openForm);
+				Collections.sort(forms, NameComparator.INSTANCE);
+				JSONArray superforms = new JSONArray();
+				for (int i = 0; i < forms.size(); i++)
+				{
+					superforms.put(((ISupportName)forms.get(i)).getName());
+				}
+				return superforms;
+			}
+
 		});
 
 	}

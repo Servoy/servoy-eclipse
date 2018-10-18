@@ -35,6 +35,7 @@ import com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegate
 import com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler.ToggleAnchoringLeft;
 import com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler.ToggleAnchoringRight;
 import com.servoy.eclipse.designer.editor.commands.ToggleAnchoringActionDelegateHandler.ToggleAnchoringTop;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
 import com.servoy.eclipse.ui.actions.OpenFormHierarchyActionDelegate;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
 
@@ -48,7 +49,7 @@ public class ShortcutsHandler implements IServerService
 	private final BaseVisualFormEditor editorPart;
 
 	private static final Set<String> shortcutNames = new HashSet<String>(Arrays.asList(
-		new String[] { OpenScriptAction.OPEN_SCRIPT_ID, DesignerActionFactory.SET_TAB_SEQUENCE_ID, DesignerActionFactory.SAME_WIDTH_ID, DesignerActionFactory.SAME_HEIGHT_ID, ToggleAnchoringTop.TOGGLE_ANCHORING_TOP_ID, ToggleAnchoringRight.TOGGLE_ANCHORING_RIGHT_ID, ToggleAnchoringBottom.TOGGLE_ANCHORING_BOTTOM_ID, ToggleAnchoringLeft.TOGGLE_ANCHORING_LEFT_ID, DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_ID, DesignerActionFactory.SEND_TO_BACK_ONE_STEP_ID, DesignerActionFactory.BRING_TO_FRONT_ID, DesignerActionFactory.SEND_TO_BACK_ID, DesignerActionFactory.GROUP_ID, DesignerActionFactory.UNGROUP_ID, OpenFormHierarchyActionDelegate.OPEN_FORM_HIERARCHY_ID }));
+		new String[] { OpenScriptAction.OPEN_SCRIPT_ID, DesignerActionFactory.SET_TAB_SEQUENCE_ID, DesignerActionFactory.SAME_WIDTH_ID, DesignerActionFactory.SAME_HEIGHT_ID, ToggleAnchoringTop.TOGGLE_ANCHORING_TOP_ID, ToggleAnchoringRight.TOGGLE_ANCHORING_RIGHT_ID, ToggleAnchoringBottom.TOGGLE_ANCHORING_BOTTOM_ID, ToggleAnchoringLeft.TOGGLE_ANCHORING_LEFT_ID, DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_ID, DesignerActionFactory.SEND_TO_BACK_ONE_STEP_ID, DesignerActionFactory.BRING_TO_FRONT_ID, DesignerActionFactory.SEND_TO_BACK_ID, DesignerActionFactory.GROUP_ID, DesignerActionFactory.UNGROUP_ID, OpenFormHierarchyActionDelegate.OPEN_FORM_HIERARCHY_ID, OpenScriptHandler.OPEN_SUPER_SCRIPT_ID }));
 
 	public ShortcutsHandler(BaseVisualFormEditor editorPart)
 	{
