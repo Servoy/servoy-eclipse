@@ -35,6 +35,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.FormXYLayoutPolicy;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -99,7 +100,7 @@ public class SpacingCentersPack implements IServerService
 					CompoundCommand cc = new CompoundCommand();
 					for (int i = 0; i < elements.size(); i++)
 					{
-						Point newLocation = new Point((elements.get(i)).getLocation());
+						Point newLocation = new Point(CSSPosition.getLocation(elements.get(i)));
 						newLocation.x += deltas.get(i).x;
 						newLocation.y += deltas.get(i).y;
 						cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource((IPersist)elements.get(i), false),

@@ -52,6 +52,7 @@ import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IPersist;
@@ -228,8 +229,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 		for (ISupportBounds supportBounds : elements)
 		{
-			Rectangle r = new Rectangle(supportBounds.getLocation().x, supportBounds.getLocation().y, supportBounds.getSize().width,
-				supportBounds.getSize().height);
+			Rectangle r = new Rectangle(CSSPosition.getLocation(supportBounds).x, CSSPosition.getLocation(supportBounds).y,
+				CSSPosition.getSize(supportBounds).width, CSSPosition.getSize(supportBounds).height);
 			_bbox = _bbox == null ? r : _bbox.getUnion(r);
 			leftMostCenter = Math.min(leftMostCenter, r.x + r.width / 2);
 			rightMostCenter = Math.max(rightMostCenter, r.x + r.width / 2);
@@ -237,8 +238,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			bottomMostCenter = Math.max(bottomMostCenter, r.y + r.height / 2);
 
 			// find the sum of the widths and heights of all selected objects
-			totalWidth += supportBounds.getSize().width;
-			totalHeight += supportBounds.getSize().height;
+			totalWidth += CSSPosition.getSize(supportBounds).width;
+			totalHeight += CSSPosition.getSize(supportBounds).height;
 		}
 
 
@@ -283,24 +284,24 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				int a, b;
 				if (distribution == DistributeRequest.Distribution.HORIZONTAL_SPACING || distribution == DistributeRequest.Distribution.HORIZONTAL_PACK)
 				{
-					a = o1.getLocation().x;
-					b = o2.getLocation().x;
+					a = CSSPosition.getLocation(o1).x;
+					b = CSSPosition.getLocation(o2).x;
 				}
 				else if (distribution == DistributeRequest.Distribution.VERTICAL_SPACING || distribution == DistributeRequest.Distribution.VERTICAL_PACK)
 				{
-					a = o1.getLocation().y;
-					b = o2.getLocation().y;
+					a = CSSPosition.getLocation(o1).y;
+					b = CSSPosition.getLocation(o2).y;
 				}
 				else if (distribution == DistributeRequest.Distribution.HORIZONTAL_CENTERS)
 				{
-					a = o1.getLocation().x + o1.getSize().width / 2;
-					b = o2.getLocation().x + o2.getSize().width / 2;
+					a = CSSPosition.getLocation(o1).x + CSSPosition.getSize(o1).width / 2;
+					b = CSSPosition.getLocation(o2).x + CSSPosition.getSize(o2).width / 2;
 				}
 				else
 				//VERTICAL_CENTERS
 				{
-					a = o1.getLocation().y + o1.getSize().height / 2;
-					b = o2.getLocation().y + o2.getSize().height / 2;
+					a = CSSPosition.getLocation(o1).y + CSSPosition.getSize(o1).height / 2;
+					b = CSSPosition.getLocation(o2).y + CSSPosition.getSize(o2).height / 2;
 				}
 				if (a > b) return 1;
 				if (a < b) return -1;
@@ -316,20 +317,20 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			{
 				case HORIZONTAL_SPACING :
 				case HORIZONTAL_PACK :
-					moveDelta = new java.awt.Point((int)xNext - supportBounds.getLocation().x, 0);
-					xNext += supportBounds.getSize().width + gap;
+					moveDelta = new java.awt.Point((int)xNext - CSSPosition.getLocation(supportBounds).x, 0);
+					xNext += CSSPosition.getSize(supportBounds).width + gap;
 					break;
 				case HORIZONTAL_CENTERS :
-					moveDelta = new java.awt.Point((int)xNext - supportBounds.getSize().width / 2 - supportBounds.getLocation().x, 0);
+					moveDelta = new java.awt.Point((int)xNext - CSSPosition.getSize(supportBounds).width / 2 - CSSPosition.getLocation(supportBounds).x, 0);
 					xNext += oncenter;
 					break;
 				case VERTICAL_SPACING :
 				case VERTICAL_PACK :
-					moveDelta = new java.awt.Point(0, (int)yNext - supportBounds.getLocation().y);
-					yNext += supportBounds.getSize().height + gap;
+					moveDelta = new java.awt.Point(0, (int)yNext - CSSPosition.getLocation(supportBounds).y);
+					yNext += CSSPosition.getSize(supportBounds).height + gap;
 					break;
 				case VERTICAL_CENTERS :
-					moveDelta = new java.awt.Point(0, (int)yNext - supportBounds.getSize().height / 2 - supportBounds.getLocation().y);
+					moveDelta = new java.awt.Point(0, (int)yNext - CSSPosition.getSize(supportBounds).height / 2 - CSSPosition.getLocation(supportBounds).y);
 					yNext += oncenter;
 					break;
 			}

@@ -226,8 +226,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			ISupportBounds element = (ISupportBounds)model;
 
-			Dimension oldElementSize = element.getSize();
-			java.awt.Point oldElementLocation = element.getLocation();
+			Dimension oldElementSize = CSSPosition.getSize(element);
+			java.awt.Point oldElementLocation = CSSPosition.getLocation(element);
 
 			Dimension newElementSize = new Dimension((int)(oldElementSize.width * factorW), (int)(oldElementSize.height * factorH));
 
@@ -441,8 +441,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			if (location == null)
 			{
 				int copyPasteOffset = new DesignerPreferences().getCopyPasteOffset();
-				x = supportBounds.getLocation().x + copyPasteOffset;
-				y = supportBounds.getLocation().y + copyPasteOffset;
+				x = CSSPosition.getLocation(supportBounds).x + copyPasteOffset;
+				y = CSSPosition.getLocation(supportBounds).y + copyPasteOffset;
 			}
 			else
 			{
@@ -482,7 +482,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			{
 				((ISupportTabSeq)persist).setTabSeq(ISupportTabSeq.DEFAULT);
 			}
-			origLocations.put((ISupportBounds)persist, supportBounds.getLocation());
+			origLocations.put((ISupportBounds)persist, CSSPosition.getLocation(supportBounds));
 			return toArrAy(persist);
 		}
 

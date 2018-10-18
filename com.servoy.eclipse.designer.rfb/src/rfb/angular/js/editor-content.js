@@ -729,9 +729,12 @@ angular.module('editorContent',['servoyApp'])
             }
           }
           
-          for (var index in domElementsToRemove) {
+          if(domElementsToRemove.length) {
+            for (var index in domElementsToRemove) {
               domElementsToRemove[index].remove();
-          }  
+            }
+            flushGhostContainerElements();
+          }
           
           for (var template in data.formcomponenttemplates) {
         	  $templateCache.put(template,data.formcomponenttemplates[template] )

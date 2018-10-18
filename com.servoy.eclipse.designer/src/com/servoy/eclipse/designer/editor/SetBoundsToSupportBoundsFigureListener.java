@@ -25,6 +25,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import com.servoy.eclipse.designer.property.FormElementGroupPropertySource;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -32,7 +33,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 /**
  * Temporary class used by mobile form editor to save location and size of edit part figure in underlying persist.
  * Added to be able to debug mobile forms in developer
- * 
+ *
  * @author rgansevles
  *
  */
@@ -60,7 +61,7 @@ public class SetBoundsToSupportBoundsFigureListener implements FigureListener
 			bounds.translate(-parentBounds.x, -parentBounds.y);
 		}
 
-		Point loc = element.getLocation();
+		Point loc = CSSPosition.getLocation(element);
 		if (loc == null || loc.x != bounds.x || loc.y != bounds.y)
 		{
 			Point newLocation = new Point(bounds.x, bounds.y);
@@ -74,7 +75,7 @@ public class SetBoundsToSupportBoundsFigureListener implements FigureListener
 				element.setLocation(newLocation);
 			}
 		}
-		Dimension dim = element.getSize();
+		Dimension dim = CSSPosition.getSize(element);
 		if (dim == null || dim.width != bounds.width || dim.height != bounds.height)
 		{
 			Dimension newSize = new Dimension(bounds.width, bounds.height);

@@ -1085,6 +1085,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				});
 			});
 
+			$element.on('flushGhostContainerElements.content', function(event) {
+				$scope.ghostContainerElements = {};
+			});
+
 			$element.on('renderDecorators.content', function(event) {
 				var toRun = function() {
 					var shouldSetContentSizes = $scope.isAbsoluteFormLayout() || $scope.isContentSizeFull();

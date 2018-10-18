@@ -31,6 +31,7 @@ import com.servoy.eclipse.designer.property.PropertyDirectEditPolicy;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -40,7 +41,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 
 /**
  * Graphical editpart for a IPersist.
- * 
+ *
  * @author rgansevles
  */
 public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
@@ -117,13 +118,13 @@ public class PersistGraphicalEditPart extends BasePersistGraphicalEditPart
 			int y = 0;
 			int width = 60;
 			int height = 20;
-			java.awt.Point loc = ((ISupportBounds)model).getLocation();
+			java.awt.Point loc = CSSPosition.getLocation((ISupportBounds)model);
 			if (loc != null)
 			{
 				x = loc.x > 0 ? loc.x : x;
 				y = loc.y > 0 ? loc.y : y;
 			}
-			java.awt.Dimension size = ((ISupportBounds)model).getSize();
+			java.awt.Dimension size = CSSPosition.getSize((ISupportBounds)model);
 			if (size != null)
 			{
 				width = size.width > 0 ? size.width : width;
