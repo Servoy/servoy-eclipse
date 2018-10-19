@@ -47,6 +47,8 @@ import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.eclipse.ui.util.ScopeWithContext;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -57,6 +59,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
@@ -118,6 +121,10 @@ public class MethodDialog extends TreeSelectDialog
 			{
 				lst.add((MethodWithArguments)o);
 			}
+			else if (o instanceof ScriptMethod)
+			{
+				lst.add(MethodWithArguments.create((ScriptMethod)o, null));
+			}
 		}
 		return new StructuredSelection(lst.toArray(new MethodWithArguments[lst.size()]));
 	}
@@ -126,6 +133,7 @@ public class MethodDialog extends TreeSelectDialog
 	{
 		private final PersistContext persistContext;
 		private Map<Object, Object> parents;
+		private Form currentFlattenedForm;
 
 		public MethodTreeContentProvider(PersistContext persistContext)
 		{
@@ -229,12 +237,22 @@ public class MethodDialog extends TreeSelectDialog
 
 			IPersist parent;
 			Iterator<ScriptMethod> scriptMethods = null;
+			List<AbstractBase> nodes = null;
 			if (FORM_METHODS == parentElement)
 			{
 				parent = context.getAncestor(IRepository.FORMS);
 				if (parent != null)
 				{
-					scriptMethods = ModelUtils.getEditingFlattenedSolution(context).getFlattenedForm(parent).getScriptMethods(true);
+					//add superforms
+					Form form = (Form)parent;
+					scriptMethods = form.getScriptMethods(true);
+					currentFlattenedForm = ModelUtils.getEditingFlattenedSolution(context).getFlattenedForm(parent);
+					List<AbstractBase> forms = PersistHelper.getOverrideHierarchy(form);
+					if (forms.size() > 2)
+					{
+						forms.remove(0);
+						nodes = forms;
+					}
 				}
 			}
 			else if (parentElement instanceof ScopeWithContext)
@@ -274,12 +292,16 @@ public class MethodDialog extends TreeSelectDialog
 
 				return scopesArray.toArray();
 			}
+			else if (parentElement instanceof Form)
+			{
+				scriptMethods = getFormScriptMethods(parentElement).iterator();
+			}
 			else
 			{
 				return null;
 			}
 
-			List<MethodWithArguments> lst = new ArrayList<MethodWithArguments>();
+			List<Object> lst = new ArrayList<Object>();
 			if (scriptMethods != null)
 			{
 				while (scriptMethods.hasNext())
@@ -291,7 +313,33 @@ public class MethodDialog extends TreeSelectDialog
 					}
 				}
 			}
+			if (nodes != null)
+			{
+				for (AbstractBase form : nodes)
+				{
+					lst.add(form);
+				}
+			}
 			return lst.toArray();
+		}
+
+		private List<ScriptMethod> getFormScriptMethods(Object parentElement)
+		{
+			List<ScriptMethod> methods = new ArrayList<>();
+			Form form = (Form)parentElement;
+			if (form.getScriptMethods(false).hasNext())
+			{
+				Iterator<ScriptMethod> it = currentFlattenedForm.getScriptMethods(false);
+				while (it.hasNext())
+				{
+					ScriptMethod sm = it.next();
+					if (sm.getParent().equals(form))
+					{
+						methods.add(form.getScriptMethod(sm.getName()));
+					}
+				}
+			}
+			return methods;
 		}
 
 		public Object getParent(Object element)
@@ -302,7 +350,28 @@ public class MethodDialog extends TreeSelectDialog
 		public boolean hasChildren(Object element)
 		{
 			return FORM_METHODS == element || SCOPE_METHODS == element || element instanceof Solution || element instanceof ITable ||
-				element instanceof ScopeWithContext;
+				element instanceof ScopeWithContext || hasMethods(element);
+		}
+
+		private boolean hasMethods(Object element)
+		{
+			if (element instanceof Form)
+			{
+				Form form = (Form)element;
+				if (form.getScriptMethods(false).hasNext())
+				{
+					Iterator<ScriptMethod> it = currentFlattenedForm.getScriptMethods(false);
+					while (it.hasNext())
+					{
+						ScriptMethod sm = it.next();
+						if (sm.getParent().equals(form))
+						{
+							return true;
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 		public boolean isKeyword(Object element)
@@ -361,7 +430,7 @@ public class MethodDialog extends TreeSelectDialog
 			String methodDialogText = getMethodDialogText(value);
 			if (methodDialogText == null)
 			{
-				return super.getText(value);
+				return super.getText(value).split(" ")[0];//TODO temp solution to remove the parent form name
 			}
 			return methodDialogText;
 		}
@@ -407,7 +476,7 @@ public class MethodDialog extends TreeSelectDialog
 		protected Image getMethodDialogImage(Object value)
 		{
 			if (value instanceof Solution) return solutionImage;
-			if (FORM_METHODS == value) return formMethodsImage;
+			if (FORM_METHODS == value || value instanceof Form) return formMethodsImage;
 			if (SCOPE_METHODS == value) return scopeMethodsImage;
 			if (value instanceof ScopeWithContext) return scopeMethodsImage;
 			if (value instanceof ITable) return foundsetMethodsImage;

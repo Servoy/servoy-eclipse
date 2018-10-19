@@ -261,6 +261,16 @@ public class AddMethodButtonsComposite extends Composite
 						setSelectedScope((ScopeWithContext)paths[0].getSegment(i));
 						break;
 					}
+					else if (paths[0].getSegment(i) instanceof Form)
+					{
+						persistContext = PersistContext.create((Form)paths[0].getSegment(i));
+						break;
+					}
+					else if (paths[0].getSegment(i) instanceof ScriptMethod)
+					{
+						persistContext = PersistContext.create(((ScriptMethod)paths[0].getSegment(i)).getParent());
+						break;
+					}
 				}
 			}
 		}
