@@ -6240,6 +6240,27 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
 				Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+				if (persist instanceof IFormElement && persist.getParent() instanceof Form && ((Form)persist.getParent()).isFormComponent())
+				{
+					String name = ((IFormElement)persist).getName();
+					if (name != null)
+					{
+						String[] nameParts = name.split("\\$");
+						if (nameParts.length == 3)
+						{
+							UUID uuid = Utils.getAsUUID(nameParts[0], false);
+							if (uuid != null)
+							{
+								// look for real form to add marker on it
+								IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(uuid);
+								pathPair = SolutionSerializer.getFilePath(form, true);
+								path = new Path(pathPair.getLeft() + pathPair.getRight());
+								file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+							}
+						}
+					}
+
+				}
 				if (file.exists())
 				{
 					marker = file.createMarker(type);
