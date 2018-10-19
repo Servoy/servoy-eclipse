@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -71,7 +70,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
-import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.util.PersistHelper;
 
 /**
@@ -360,9 +358,8 @@ public class EditorServiceHandler implements IServerService
 			{
 				final Form openForm = editorPart != null ? editorPart.getForm() : null;
 				if (openForm == null) return null;
-				
+
 				List<AbstractBase> forms = PersistHelper.getOverrideHierarchy(openForm);
-				Collections.sort(forms, NameComparator.INSTANCE);
 				JSONArray superforms = new JSONArray();
 				for (int i = 0; i < forms.size(); i++)
 				{

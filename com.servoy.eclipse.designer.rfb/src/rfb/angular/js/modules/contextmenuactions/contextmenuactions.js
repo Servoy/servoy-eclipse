@@ -381,7 +381,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			var openAction = {
 					text: "Open in Script Editor",
 					getIconStyle: function(){ return {'background-image':"url(images/js.png)"}},
-					shortcut: shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID],
+					shortcut: forms.length > 1 ? shortcuts[SHORTCUT_IDS.OPEN_SUPER_SCRIPT_ID] : shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID],
 					execute:function()
 					{
 						$("#contextMenu").hide();
@@ -394,7 +394,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 					superFormsActions.push({
 						text: forms[i]+".js",
 						getIconStyle: function(){ return {'background-image':"url(images/js.png)"}},
-						shortcut: i==0 ? shortcuts[SHORTCUT_IDS.OPEN_SUPER_SCRIPT_ID] : undefined,
+						shortcut: i==0 ? shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID] : undefined,
 						form: forms[i],
 						execute:function()
 						{
