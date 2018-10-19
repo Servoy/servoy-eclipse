@@ -411,7 +411,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			});
 
 			defaultThemeCheck = new Button(topLevel, SWT.CHECK);
-			defaultThemeCheck.setText("Add default .less theme");
+			defaultThemeCheck.setText("Add default servoy .less theme (configurable by a less properties file)");
 			defaultThemeCheck.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
