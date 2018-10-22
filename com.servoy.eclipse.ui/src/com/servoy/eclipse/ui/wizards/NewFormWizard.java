@@ -836,10 +836,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				bTypeAbstract.setText("Abstract (no UI)");
 				bTypeAbstract.addSelectionListener(typeSelectionListener);
 				bTypeCSSPosition = new Button(grpType, SWT.RADIO);
-				bTypeCSSPosition.setText("CSS Position (NG Client only)");
+				bTypeCSSPosition.setText("Simple (CSS Position, NG Client only)");
 				bTypeCSSPosition.addSelectionListener(typeSelectionListener);
 				bTypeResponsive = new Button(grpType, SWT.RADIO);
-				bTypeResponsive.setText("Responsive (NG Client only)");
+				bTypeResponsive.setText("Advanced (Responsive, NG Client only)");
 				bTypeResponsive.addSelectionListener(typeSelectionListener);
 				bTypeAnchored = new Button(grpType, SWT.RADIO);
 				bTypeAnchored.setText("Anchored");

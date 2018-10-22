@@ -1528,7 +1528,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				editorScope.getEditorContentRootScope().hideInherited = hide;
 				editorScope.getEditorContentRootScope().$digest();
 			}
-		}
+		},
+		
+		getSuperForms: function() {
+			return wsSession.callService('formeditor', 'getSuperForms');
+		},
 
 		// add more service methods here
 	}

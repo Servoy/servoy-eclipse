@@ -73,6 +73,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
@@ -222,7 +223,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 			private Media addMediaFile(Solution solution, String path, String fileName) throws RepositoryException, IOException
 			{
-				Media defaultTheme = solution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), fileName);
+				Media defaultTheme = solution.createNewMedia(new ScriptNameValidator(), fileName);
 				defaultTheme.setMimeType("text/css");
 				try (InputStream is = NewSolutionWizard.class.getResource(path).openStream())
 				{
@@ -416,7 +417,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			});
 
 			defaultThemeCheck = new Button(topLevel, SWT.CHECK);
-			defaultThemeCheck.setText("Add default .less theme");
+			defaultThemeCheck.setText("Add default servoy .less theme (configurable by a less properties file)");
 			defaultThemeCheck.addSelectionListener(new SelectionAdapter()
 			{
 				@Override

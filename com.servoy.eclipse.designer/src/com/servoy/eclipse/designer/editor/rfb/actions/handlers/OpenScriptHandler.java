@@ -19,14 +19,23 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.ContentOutlineCommand;
+import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
+import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * @author gganea@servoy.com
@@ -35,6 +44,7 @@ import com.servoy.j2db.persistence.Form;
 public class OpenScriptHandler extends ContentOutlineCommand implements IServerService
 {
 	private final BaseVisualFormEditor editorPart;
+	public static String OPEN_SUPER_SCRIPT_ID = "com.servoy.eclipse.designer.rfb.OpenScriptHandler";
 
 	public OpenScriptHandler()
 	{
@@ -48,7 +58,12 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 
 	public Object executeMethod(String methodName, JSONObject args)
 	{
-		final Form openForm = editorPart != null ? editorPart.getForm() : getEditorPart().getForm();
+		Form form = editorPart != null ? editorPart.getForm() : getEditorPart().getForm();
+		if (args != null && args.has("f"))
+		{
+			form = form.getSolution().getForm(args.optString("f"));
+		}
+		final Form openForm = form;
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
@@ -68,6 +83,27 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
 		Form openForm = editorPart != null ? editorPart.getForm() : getEditorPart().getForm();
+		if (openForm.getExtendsID() > 0)
+		{
+			TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS, FlatTreeContentProvider.INSTANCE,
+				new LabelProvider()
+				{
+					@Override
+					public String getText(Object element)
+					{
+						return ((Form)element).getName();
+					};
+				}, null, null, SWT.NONE, "Open Form in Script Editor", PersistHelper.getOverrideHierarchy(openForm), null, false, "Superform Dialog", null);
+			dialog.open();
+			if (dialog.getReturnCode() == Window.OK)
+			{
+				openForm = (Form)((StructuredSelection)dialog.getSelection()).getFirstElement();
+			}
+			else
+			{
+				return null;
+			}
+		}
 		EditorUtil.openScriptEditor(openForm, null, true);
 		return null;
 	}
