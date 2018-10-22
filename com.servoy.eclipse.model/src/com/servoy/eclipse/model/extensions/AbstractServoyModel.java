@@ -512,15 +512,35 @@ public abstract class AbstractServoyModel implements IServoyModel
 	 */
 	public boolean isSolutionActive(String name)
 	{
-		ServoyProject[] activeModules = getModulesOfActiveProject();
-		for (ServoyProject p : activeModules)
+		ServoyProject servoyProject = getServoyProject(name);
+		if (servoyProject != null)
 		{
-			if (p.getProject().getName().equals(name))
+			// first check it is not just the main solution.
+			if (name.equals(getFlattenedSolution().getName())) return true;
+			// check all the modules (these dont include the import hooks)
+			Solution[] modules = getFlattenedSolution().getModules();
+			for (Solution solution : modules)
 			{
-				return true;
+				if (name.equals(solution.getName()))
+				{
+					return true;
+				}
+			}
+			// now check all modules (including module hooks)
+			if (hasModuleName(getFlattenedSolution().getSolution(), name)) return true;
+			for (Solution solution : modules)
+			{
+				if (hasModuleName(solution, name)) return true;
 			}
 		}
 		return false;
+	}
+
+	private boolean hasModuleName(Solution sol, String name)
+	{
+		String[] moduleNames = Utils.getTokenElements(sol.getModulesNames(), ",", true);
+		Arrays.sort(moduleNames);
+		return Arrays.binarySearch(moduleNames, name) >= 0;
 	}
 
 	/**
