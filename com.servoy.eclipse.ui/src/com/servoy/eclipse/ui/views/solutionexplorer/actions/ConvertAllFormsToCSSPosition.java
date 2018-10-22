@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -75,7 +76,8 @@ public class ConvertAllFormsToCSSPosition extends Action implements ISelectionCh
 			{
 				public Object visit(IPersist object)
 				{
-					if (object instanceof Form && !((Form)object).isResponsiveLayout())
+					if (object instanceof Form && !((Form)object).isResponsiveLayout() &&
+						(((Form)object).getView() == IFormConstants.VIEW_TYPE_RECORD || ((Form)object).getView() == IFormConstants.VIEW_TYPE_RECORD_LOCKED))
 					{
 						Form form = (Form)object;
 						form.setUseCssPosition(true);
