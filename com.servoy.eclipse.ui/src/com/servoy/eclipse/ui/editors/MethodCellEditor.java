@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Control;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodTreeContentProvider;
+import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.IControlFactory;
@@ -66,8 +67,8 @@ public class MethodCellEditor extends DialogCellEditor
 	@Override
 	public MethodWithArguments openDialogBox(Control cellEditorWindow)
 	{
-		final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), labelProvider, new MethodTreeContentProvider(persistContext), getSelection(),
-			options, SWT.NONE, "Select Method", this.valueEditor);
+		final MethodDialog dialog = new MethodDialog(cellEditorWindow.getShell(), new MethodLabelProvider(persistContext, false, !options.includeDefault),
+			new MethodTreeContentProvider(persistContext), getSelection(), options, SWT.NONE, "Select Method", this.valueEditor);
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)
