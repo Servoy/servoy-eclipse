@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.ContentOutlineCommand;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
@@ -44,7 +45,8 @@ import com.servoy.j2db.util.PersistHelper;
 public class OpenScriptHandler extends ContentOutlineCommand implements IServerService
 {
 	private final BaseVisualFormEditor editorPart;
-	public static String OPEN_SUPER_SCRIPT_ID = "com.servoy.eclipse.designer.rfb.OpenScriptHandler";
+	public static final String OPEN_SUPER_SCRIPT_ID = "com.servoy.eclipse.designer.rfb.openscripteditor";
+	public static final String FORM_PARAMETER_NAME = "com.servoy.eclipse.designer.rfb.openscripteditor.form";
 
 	public OpenScriptHandler()
 	{
@@ -61,7 +63,7 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 		Form form = editorPart != null ? editorPart.getForm() : getEditorPart().getForm();
 		if (args != null && args.has("f"))
 		{
-			form = form.getSolution().getForm(args.optString("f"));
+			form = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForm(args.optString("f"));
 		}
 		final Form openForm = form;
 		Display.getDefault().asyncExec(new Runnable()
@@ -83,28 +85,40 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
 		Form openForm = editorPart != null ? editorPart.getForm() : getEditorPart().getForm();
-		if (openForm.getExtendsID() > 0)
+		if (event.getParameter(FORM_PARAMETER_NAME) != null)
 		{
-			TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS, FlatTreeContentProvider.INSTANCE,
-				new LabelProvider()
-				{
-					@Override
-					public String getText(Object element)
+			openForm = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForm(event.getParameter(FORM_PARAMETER_NAME));
+		}
+		else
+		{
+			if (openForm.getExtendsID() > 0)
+			{
+				TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS, FlatTreeContentProvider.INSTANCE,
+					new LabelProvider()
 					{
-						return ((Form)element).getName();
-					};
-				}, null, null, SWT.NONE, "Open Form in Script Editor", PersistHelper.getOverrideHierarchy(openForm), null, false, "Superform Dialog", null);
-			dialog.open();
-			if (dialog.getReturnCode() == Window.OK)
-			{
-				openForm = (Form)((StructuredSelection)dialog.getSelection()).getFirstElement();
-			}
-			else
-			{
-				return null;
+						@Override
+						public String getText(Object element)
+						{
+							return ((Form)element).getName();
+						};
+					}, null, null, SWT.NONE, "Open Form in Script Editor", PersistHelper.getOverrideHierarchy(openForm), null, false, "Superform Dialog", null);
+				dialog.open();
+				if (dialog.getReturnCode() == Window.OK)
+				{
+					openForm = (Form)((StructuredSelection)dialog.getSelection()).getFirstElement();
+				}
+				else
+				{
+					return null;
+				}
 			}
 		}
-		EditorUtil.openScriptEditor(openForm, null, true);
+		if (openForm != null)
+		{
+			EditorUtil.openScriptEditor(openForm, null, true);
+		}
 		return null;
 	}
+
+
 }

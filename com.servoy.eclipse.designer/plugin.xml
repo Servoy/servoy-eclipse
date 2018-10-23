@@ -566,7 +566,7 @@
             sequence="M1+U">
       </key>
             <key
-              commandId="com.servoy.eclipse.designer.rfb.OpenScriptHandler"
+              commandId="com.servoy.eclipse.designer.rfb.openscripteditor"
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
               sequence="M1+O">
        </key>
@@ -898,6 +898,11 @@
             defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler"
             id="com.servoy.eclipse.designer.rfb.openscripteditor"
             name="OpenScriptEditor">
+            <commandParameter
+               id="com.servoy.eclipse.designer.rfb.openscripteditor.form"
+               name="Form name"
+               optional="true">
+         	</commandParameter>
       </command>
       <command
             defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.SaveAsTemplateCommand"
@@ -923,11 +928,6 @@
             defaultHandler="com.servoy.eclipse.designer.editor.commands.ShowContainerInFormEditor"
             id="com.servoy.eclipse.designer.rfb.showcontainer"
             name="ShowContainer">
-      </command>
-      <command 
-      		defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler"
-            id="com.servoy.eclipse.designer.rfb.OpenScriptHandler"
-            name="Open Super Form in Script Editor">
       </command>
    </extension>
       <extension
@@ -1486,6 +1486,37 @@
                </visibleWhen>
             </command>
          </menuContribution>
+         <menuContribution
+               allPopups="false"
+               locationURI="popup:#FormDesignerContext?after=open.ext">
+               <menu
+                     commandId="com.servoy.eclipse.designer.rfb.openscripteditor"
+                     icon="icons/js.png"
+                     label="Open Superform in Script Editor"
+                     id="opensuperforminscript">
+                <visibleWhen
+                      checkEnabled="false">
+                   <with
+                         variable="activeMenuSelection">
+                      <and>
+                         <iterate
+                               operator="and">
+                            <test
+                                  property="com.servoy.eclipse.designer.editor.rfb.hassuperform">
+                            </test>
+                         </iterate>
+                         <count
+                               value="1">
+                         </count>
+                      </and>
+                   </with>
+                </visibleWhen>
+               <dynamic
+                     class="com.servoy.eclipse.designer.editor.rfb.menu.OpenSuperformsInScriptEditor"
+                     id="com.servoy.eclipse.designer.rfb.OpenSuperformsInScriptEditor">
+               </dynamic>
+            </menu>
+         </menuContribution>
       </extension>
       
 
@@ -1522,4 +1553,15 @@
                type="java.lang.Object">
          </propertyTester>
       </extension> 
+      
+      <extension
+            point="org.eclipse.core.expressions.propertyTesters">
+         <propertyTester
+               class="com.servoy.eclipse.designer.editor.rfb.menu.HasSuperFormPropertyTester"
+               id="com.servoy.eclipse.designer.rfb.hassuperform"
+               namespace="com.servoy.eclipse.designer.editor.rfb"
+               properties="hassuperform"
+               type="java.lang.Object">
+         </propertyTester>
+      </extension>
 </plugin>

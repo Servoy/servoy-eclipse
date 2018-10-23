@@ -19,10 +19,16 @@ package com.servoy.eclipse.designer.editor;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.actions.ActionFactory;
 
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
+import com.servoy.eclipse.designer.editor.rfb.menu.OpenSuperformsInScriptEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.persistence.Form;
 
 
 /**
@@ -53,5 +59,16 @@ class VisualFormEditorContextMenuProvider extends BaseVisualFormEditorContextMen
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.PASTE.getId()));
 		menu.appendToGroup(GEFActionConstants.GROUP_COPY, actionRegistry.getAction(ActionFactory.DELETE.getId()));
 		menu.appendToGroup(IWorkbenchActionConstants.SAVE_EXT, actionRegistry.getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
+
+		//we need to set the action definition id for "Open super in script editor" because it doesn't work setting it in plugin.xml
+		Form form = DesignerUtil.getActiveEditor().getForm();
+		if (form != null && form.getExtendsID() > 0)
+		{
+			MenuManager openSubmenu = new MenuManager(OpenSuperformsInScriptEditor.OPEN_SUPER_SCRIPT_MENU_LABEL,
+				OpenSuperformsInScriptEditor.OPEN_SUPER_SCRIPT_MENU_ID);
+			openSubmenu.setActionDefinitionId(OpenScriptHandler.OPEN_SUPER_SCRIPT_ID);
+			openSubmenu.setImageDescriptor(Activator.loadImageDescriptorFromBundle("js.png"));
+			menu.add(openSubmenu);
+		}
 	}
 }
