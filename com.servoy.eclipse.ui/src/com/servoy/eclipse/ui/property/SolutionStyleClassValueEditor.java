@@ -63,7 +63,7 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 				try
 				{
 					cssContent = media.getName().endsWith(".less")
-						? ResourceProvider.compileSolutionLessFile(media, ModelUtils.getEditingFlattenedSolution(solution))
+						? ResourceProvider.compileSolutionLessFile(media, ModelUtils.getEditingFlattenedSolution(solution), false)
 						: new String(media.getMediaData(), "UTF-8");
 				}
 				catch (UnsupportedEncodingException e)
