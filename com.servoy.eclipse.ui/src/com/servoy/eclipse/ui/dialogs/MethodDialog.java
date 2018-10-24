@@ -430,7 +430,7 @@ public class MethodDialog extends TreeSelectDialog
 			String methodDialogText = getMethodDialogText(value);
 			if (methodDialogText == null)
 			{
-				return super.getText(value).split(" ")[0];//TODO temp solution to remove the parent form name
+				return super.getText(value);
 			}
 			return methodDialogText;
 		}
