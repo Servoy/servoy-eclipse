@@ -13,7 +13,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 	BRING_TO_FRONT_ID: "com.servoy.eclipse.designer.rfb.bringtofront", 
 	SEND_TO_BACK_ID: "com.servoy.eclipse.designer.rfb.sendtoback",
 	OPEN_SCRIPT_ID: "com.servoy.eclipse.ui.OpenFormJsAction",
-	OPEN_SUPER_SCRIPT_ID: "com.servoy.eclipse.designer.rfb.OpenScriptHandler",
+	OPEN_SUPER_SCRIPT_ID: "com.servoy.eclipse.designer.rfb.openscripteditor",
 	GROUP_ID: "com.servoy.eclipse.designer.rfb.group",
 	UNGROUP_ID: "com.servoy.eclipse.designer.rfb.ungroup",
 	OPEN_FORM_HIERARCHY_ID: "com.servoy.eclipse.ui.OpenFormHierarchyAction"
