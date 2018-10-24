@@ -402,8 +402,9 @@ public class ElementResolver implements IElementResolver
 		IResource ctxResource = context.getModelElement().getResource();
 		try
 		{
-			if (ctxResource != null && ctxResource.getProject() != null && ctxResource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID) &&
-				ctxResource.getName().endsWith("_server.js") && serversideScriptingNames.contains(name))
+			if (ctxResource != null && ctxResource.exists() && ctxResource.getProject() != null &&
+				ctxResource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID) && ctxResource.getName().endsWith("_server.js") &&
+				serversideScriptingNames.contains(name))
 			{
 				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 				property.setName(name);
@@ -417,7 +418,7 @@ public class ElementResolver implements IElementResolver
 			ServoyLog.logError("Cannot resolve " + name, e);
 		}
 		// try to resolve first based on existing types as defined by TypeCreator (so that deprecated & other things are in sync)
-		if (ctxResource != null && fs != null && fs.getSolution() != null)
+		if (ctxResource != null && ctxResource.exists() && fs != null && fs.getSolution() != null)
 		{
 			IPath path = ctxResource.getProjectRelativePath();
 			if (path.segmentCount() == 1)
