@@ -104,11 +104,15 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 				for (String projectName : selectedProjects)
 				{
 					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-					DirPackageReader reader = new DirPackageReader(new File(project.getLocationURI()));
-					if (packageName.equals(reader.getPackageName()))
+					File dir = new File(project.getLocationURI());
+					if (dir.exists())
 					{
-						setEnabled(false);
-						return;
+						DirPackageReader reader = new DirPackageReader(dir);
+						if (packageName.equals(reader.getPackageName()))
+						{
+							setEnabled(false);
+							return;
+						}
 					}
 				}
 			}
