@@ -108,7 +108,19 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			else if (type.equals(ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE))
 			{
-				fixes = new IMarkerResolution[] { new OpenUsingEditor("com.servoy.eclipse.ui.editors.ValueListEditor", null) };
+				String uuid = (String)marker.getAttribute("Uuid");
+				String solName = (String)marker.getAttribute("SolutionName");
+				IFile file = null;
+				if (uuid != null && solName != null)
+				{
+					final UUID id = UUID.fromString(uuid);
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+					Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, false);
+					Path path = new Path(pathPair.getLeft() + pathPair.getRight());
+					file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+				}
+				fixes = new IMarkerResolution[] { new OpenUsingEditor("com.servoy.eclipse.ui.editors.ValueListEditor", null, file) };
 			}
 			else if (type.equals(ServoyBuilder.INVALID_TABLE_NODE_PROBLEM) || type.equals(ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE))
 			{
@@ -296,7 +308,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			possibleSecurityFixes = new SecurityQuickFix[] { RemoveAllButOneOfTheAccessMasksForElement.getInstance(), RemoveAccessMaskForMissingElement.getInstance(), RenameGroupWithInvalidNameInUserListAndAdd.getInstance(), RenameGroupWithInvalidName.getInstance(), RemoveGroupWithInvalidName.getInstance(), RenameSomeDuplicateUsers.getInstance(), RemoveSomeOfDuplicateUsers.getInstance(), ReplaceUUIDForOneOfUsersWithDuplicateUUID.getInstance(), RemoveSomeUsersWithDuplicateUUID.getInstance(), RemoveGroupWithInvalidNameFromUserList.getInstance(), DeclareGroupReferencedInPermissions.getInstance(), RemoveGroupReferencedInPermission.getInstance(), CreateUserFromGroupReferenceUUID.getInstance(), RemoveUserReferenceInGroup.getInstance(), CorrectInvalidUser.getInstance(), RemoveInvalidUser.getInstance(), DiscardExistingSecurityInfo.getInstance() };
 		}
 		List<IMarkerResolution> fixes = new ArrayList<IMarkerResolution>();
-		fixes.add(new OpenUsingEditor(null, "Open file in text editor in order to manually fix the problem."));
+		fixes.add(new OpenUsingEditor(null, "Open file in text editor in order to manually fix the problem.", null));
 		for (SecurityQuickFix possibleFix : possibleSecurityFixes)
 		{
 			if (possibleFix.canHandleMarker(marker))
