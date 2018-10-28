@@ -116,6 +116,8 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 		{
 			public void run()
 			{
+				IServiceProvider prevThreadServiceProvider = J2DBGlobals.getThreadServiceProvider();
+				J2DBGlobals.setServiceProvider(client);
 				IServiceProvider prevServiceProvider = J2DBGlobals.setSingletonServiceProvider(client);
 				try
 				{
@@ -123,6 +125,7 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 				}
 				finally
 				{
+					J2DBGlobals.setServiceProvider(prevThreadServiceProvider);
 					J2DBGlobals.setSingletonServiceProvider(prevServiceProvider);
 				}
 			}
