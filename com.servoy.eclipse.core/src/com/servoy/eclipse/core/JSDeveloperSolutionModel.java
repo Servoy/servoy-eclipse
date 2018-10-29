@@ -63,10 +63,14 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
+import com.servoy.j2db.scripting.solutionmodel.JSRelation;
+import com.servoy.j2db.scripting.solutionmodel.JSValueList;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -179,10 +183,10 @@ public class JSDeveloperSolutionModel
 	}
 
 	/**
-	 * Saves just the given form or in memory datasource into the developers workspace.
+	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
 	 * This must be a solution created or altered form/in memory datasource.
 	 *
-	 * @param obj The formname, JSForm, datasource name or JSDataSource object to save.
+	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
 	 */
 	public void js_save(Object obj)
 	{
@@ -190,10 +194,10 @@ public class JSDeveloperSolutionModel
 	}
 
 	/**
-	 * Saves just the given form or in memory datasource into the developers workspace.
+	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
 	 * This must be a solution created or altered form/in memory datasource.
 	 *
-	 * @param obj The formname, JSForm, datasource name or JSDataSource object to save.
+	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
 	 * @param override Override an existing in memory table.
 	 */
 	public void js_save(Object obj, final boolean override)
@@ -202,13 +206,13 @@ public class JSDeveloperSolutionModel
 	}
 
 	/**
-	 * Saves just the given form or in memory datasource into the developers workspace.
+	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
 	 * This must be a solution created form/in memory datasource.
 	 * NOTE: The current method can only be used for new objects.
 	 * For existing objects, please use the save method with the override flag set to true.
 	 * It is not needed to specify the solution, because the object to be updated will be saved in the right solution.
 	 *
-	 * @param obj The formname, JSForm, datasource name or JSDataSource object to save.
+	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
 	 * @param solutionName The destination solution, a module of the active solution.
 	 */
 	public void js_save(Object obj, String solutionName)
@@ -242,6 +246,14 @@ public class JSDeveloperSolutionModel
 		else if (obj instanceof JSDataSource)
 		{
 			name = ((JSDataSource)obj).getDatasource();
+		}
+		else if (obj instanceof JSValueList)
+		{
+			name = ((JSValueList)obj).getName();
+		}
+		else if (obj instanceof JSRelation)
+		{
+			name = ((JSRelation)obj).getName();
 		}
 		if (name != null)
 		{
@@ -357,19 +369,30 @@ public class JSDeveloperSolutionModel
 						else
 						{
 							solutionCopy = state.getFlattenedSolution().getSolutionCopy();
-							saveObj = solutionCopy.getForm(objName);
-							if (saveObj == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form");
+							if (obj instanceof JSForm || obj instanceof String)
+							{
+								saveObj = solutionCopy.getForm(objName);
+							}
+							else if (obj instanceof JSValueList)
+							{
+								saveObj = solutionCopy.getValueList(objName);
+							}
+							else if (obj instanceof JSRelation)
+							{
+								saveObj = solutionCopy.getRelation(objName);
+							}
+							if (saveObj == null) throw new IllegalArgumentException("The object "+objName+" is not solution model created/altered.");
 
 							if (solutionName != null)
 							{
-								Solution solution = searchForm((ISupportName)saveObj);
+								Solution solution = searchPersist((ISupportName)saveObj);
 								if (solution == null)
 								{
 									solution = (Solution)eclipseRepository.getActiveRootObject(solutionName, IRepository.SOLUTIONS);
 								}
 								else if (!solutionName.equals(solution.getName()))
 								{
-									throw new IllegalArgumentException("Solution name should not be specified for existing persists. Form '" + objName +
+									throw new IllegalArgumentException("Solution name should not be specified for existing persists. The object '" + objName +
 										"' already exists in solution '" + solution.getName() + "'");
 								}
 								solutionCopy = eclipseRepository.createSolutionCopy(solution);
@@ -393,20 +416,23 @@ public class JSDeveloperSolutionModel
 					return Status.OK_STATUS;
 				}
 
-				private Solution searchForm(ISupportName saveObj)
+				private Solution searchPersist(ISupportName saveObj)
 				{
 					ServoyProject[] projects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 					for (ServoyProject servoyProject : projects)
 					{
-						if (servoyProject.getSolution().getForm(saveObj.getName()) != null)
+						Solution solution = servoyProject.getSolution();
+						if (saveObj instanceof Form && solution.getForm(saveObj.getName()) != null ||
+							saveObj instanceof ValueList && solution.getValueList(saveObj.getName()) != null ||
+							saveObj instanceof Relation && solution.getRelation(saveObj.getName()) != null)
 						{
-							return servoyProject.getSolution();
+							return solution;
 						}
 					}
 					return null;
 				}
 
-				private ServoyProject searchTable(String tableName) throws CoreException, RepositoryException
+				private ServoyProject searchTable(String tableName) throws RepositoryException
 				{
 					ServoyProject[] projects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 					for (ServoyProject servoyProject : projects)
