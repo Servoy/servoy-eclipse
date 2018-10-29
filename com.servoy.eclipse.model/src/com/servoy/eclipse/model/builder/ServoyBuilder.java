@@ -181,6 +181,7 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -3834,7 +3835,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 											}
 										}
-										else checkDataProvider(o, context, (String)propertyValue, pd);
+										else if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > && pd.getConfig() instanceof FoundsetLinkedConfig &&
+											(((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof ValueListPropertyType))
+										{
+											continue;
+										}
+										else
+										{
+											checkDataProvider(o, context, (String)propertyValue, pd);
+										}
 									}
 								}
 							}
