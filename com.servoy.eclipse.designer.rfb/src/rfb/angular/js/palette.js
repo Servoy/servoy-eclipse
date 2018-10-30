@@ -95,10 +95,10 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 			/**
 			 * TODO refactor this; currently it is extremely ambiguous
 			* enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.topContainer,layoutName)  for new components from the palette
-			* enterDragMode($event,ghost.type,null,null,null,ghost.type,null,null,propertyName) for a ghost
+			* enterDragMode($event,ghost.type,null,null,null,ghost.type,null,null,ghostPropertyName) for a ghost
 			*/
 			$scope.enterDragMode = function(event, componentName, packageName, tagName, model, type, topContainer,
-				layoutName, propertyName,componentTagName, propName, propValue) {
+				layoutName, ghostPropertyName,componentTagName, propertyName, propertyValue) {
 					var dragClone = null;
 					var angularElement = null;
 					var mouseentercallback;
@@ -117,7 +117,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						if (dragClone) {
 						    if (layoutName)
 						   	    editorScope.getEditorContentRootScope().drop_highlight = packageName + "." + layoutName;
-						   	else if (propertyName)
+						   	else if (ghostPropertyName)
 						   	    editorScope.getEditorContentRootScope().drop_highlight = componentName + "." + type;
 						   	else
 						   	    editorScope.getEditorContentRootScope().drop_highlight = packageName + "." + type;
@@ -326,8 +326,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 
 							component.x = ev.pageX;
 							component.y = ev.pageY;
-							if (propertyName) component.propertyName = propertyName;
-							if (propName) component[propName] = propValue;							
+							if (ghostPropertyName) component.ghostPropertyName = ghostPropertyName;
+							if (propertyName) component[propertyName] = propertyValue;							
 							if (angularElement && $scope.isAbsoluteFormLayout()) {
 								var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
 								var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
