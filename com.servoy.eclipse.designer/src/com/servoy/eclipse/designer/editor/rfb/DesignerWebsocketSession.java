@@ -148,6 +148,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return false;
 	}
 
+	// designer never expires
+	@Override
+	public boolean shouldTest()
+	{
+		return false;
+	}
+
 	@Override
 	public Object executeMethod(String methodName, JSONObject args) throws Exception
 	{

@@ -3872,7 +3872,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 											}
 										}
-										else checkDataProvider(o, context, (String)propertyValue, pd);
+										else if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > && pd.getConfig() instanceof FoundsetLinkedConfig &&
+											(((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof ValueListPropertyType))
+										{
+											continue;
+										}
+										else
+										{
+											checkDataProvider(o, context, (String)propertyValue, pd);
+										}
 									}
 								}
 							}

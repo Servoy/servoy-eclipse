@@ -184,8 +184,8 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		return "USAGE:\n\n"
 			+ "   -help or -? or /? or no arguments ... shows current help message.\n\n"
 			+ "                  OR\n\n"
-			+ getMandatoryArgumentsMessage() + " [optional_args]\n\n"
-
+			+ getMandatoryArgumentsMessage() + " [optional_args]\n"
+			+ "    An export will be done for each solution in the list\n\n"
 			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
 			+ "        -p <properties_file> ... path and name of properties file used to start exporter.\n"
