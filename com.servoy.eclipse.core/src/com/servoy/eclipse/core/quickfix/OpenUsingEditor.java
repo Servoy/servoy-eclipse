@@ -31,7 +31,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Quick fix that opens the file using a kind of editor, so user can fix the problem using that editor.
- * 
+ *
  * @author acostescu
  */
 public class OpenUsingEditor implements IMarkerResolution
@@ -39,13 +39,14 @@ public class OpenUsingEditor implements IMarkerResolution
 
 	private final String editorId;
 	private String quickFixLabel;
+	private IResource resource;
 
 	/**
 	 * Create a new instance of this quick fix.
-	 * 
+	 *
 	 * @param editorId the editor type used to open the file.
 	 */
-	public OpenUsingEditor(String editorId, String quickFixLabel)
+	public OpenUsingEditor(String editorId, String quickFixLabel, IResource resource)
 	{
 		if (editorId == null)
 		{
@@ -63,6 +64,7 @@ public class OpenUsingEditor implements IMarkerResolution
 		{
 			this.quickFixLabel = quickFixLabel;
 		}
+		this.resource = resource;
 	}
 
 	public void run(final IMarker marker)
@@ -73,7 +75,10 @@ public class OpenUsingEditor implements IMarkerResolution
 			public void run()
 			{
 				IEditorPart part = null;
-				IResource resource = marker.getResource();
+				if (resource == null)
+				{
+					resource = marker.getResource();
+				}
 				if (resource instanceof IFile)
 				{
 					try

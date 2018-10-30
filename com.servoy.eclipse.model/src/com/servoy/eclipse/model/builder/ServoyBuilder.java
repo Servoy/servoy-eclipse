@@ -3925,7 +3925,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 											}
 										}
-										else checkDataProvider(o, context, (String)propertyValue, pd);
+										else if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > && pd.getConfig() instanceof FoundsetLinkedConfig &&
+											(((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof ValueListPropertyType))
+										{
+											continue;
+										}
+										else
+										{
+											checkDataProvider(o, context, (String)propertyValue, pd);
+										}
 									}
 								}
 							}
@@ -4039,8 +4047,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															{
 																ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
 																	elementName != null ? elementName : "", inForm);
-																addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
-																	IMarker.PRIORITY_NORMAL, null, o);
+																IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+																	VALUELIST_DATAPROVIDER_TYPE_MISMATCH, IMarker.PRIORITY_NORMAL, null, o);
+																marker.setAttribute("Uuid", valuelistUUID.toString());
+																marker.setAttribute("SolutionName", project.getName());
 															}
 														}
 													}

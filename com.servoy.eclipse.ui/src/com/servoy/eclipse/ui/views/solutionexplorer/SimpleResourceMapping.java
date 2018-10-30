@@ -97,6 +97,7 @@ public class SimpleResourceMapping extends ResourceMapping
 	@Override
 	public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor)
 	{
+		if (resource == null) return new ResourceTraversal[] { };
 		if (resource.getType() == IResource.ROOT)
 		{
 			return new ResourceTraversal[] { new ResourceTraversal(((IWorkspaceRoot)resource).getProjects(), IResource.DEPTH_INFINITE, IResource.NONE) };

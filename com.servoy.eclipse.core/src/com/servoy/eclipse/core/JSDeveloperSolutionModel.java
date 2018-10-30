@@ -60,11 +60,17 @@ import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
+import com.servoy.j2db.scripting.solutionmodel.JSRelation;
+import com.servoy.j2db.scripting.solutionmodel.JSValueList;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -177,10 +183,10 @@ public class JSDeveloperSolutionModel
 	}
 
 	/**
-	 * Saves just the given form or in memory datasource into the developers workspace.
+	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
 	 * This must be a solution created or altered form/in memory datasource.
 	 *
-	 * @param obj The formname, JSForm, datasource name or JSDataSource object to save.
+	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
 	 */
 	public void js_save(Object obj)
 	{
@@ -188,15 +194,30 @@ public class JSDeveloperSolutionModel
 	}
 
 	/**
-	 * Saves just the given form or in memory datasource into the developers workspace.
+	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
 	 * This must be a solution created or altered form/in memory datasource.
 	 *
-	 * @param obj The formname, JSForm, datasource name or JSDataSource object to save.
+	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
 	 * @param override Override an existing in memory table.
 	 */
 	public void js_save(Object obj, final boolean override)
 	{
-		save(obj, override, null, null);
+		save(obj, null, override, null, null);
+	}
+
+	/**
+	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
+	 * This must be a solution created form/in memory datasource.
+	 * NOTE: The current method can only be used for new objects.
+	 * For existing objects, please use the save method with the override flag set to true.
+	 * It is not needed to specify the solution, because the object to be updated will be saved in the right solution.
+	 *
+	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
+	 * @param solutionName The destination solution, a module of the active solution.
+	 */
+	public void js_save(Object obj, String solutionName)
+	{
+		save(obj, solutionName, false, null, null);
 	}
 
 	/**
@@ -208,10 +229,10 @@ public class JSDeveloperSolutionModel
 	 */
 	public void js_updateInMemDataSource(Object dataSource, JSDataSet dataSet, Object types)
 	{
-		save(dataSource, true, dataSet, types);
+		save(dataSource, null, true, dataSet, types);
 	}
 
-	private void save(Object obj, final boolean override, JSDataSet updateDataSet, Object updateDataSetTypes)
+	private void save(Object obj, String solutionName, final boolean override, JSDataSet updateDataSet, Object updateDataSetTypes)
 	{
 		String name = null;
 		if (obj instanceof String)
@@ -226,6 +247,14 @@ public class JSDeveloperSolutionModel
 		{
 			name = ((JSDataSource)obj).getDatasource();
 		}
+		else if (obj instanceof JSValueList)
+		{
+			name = ((JSValueList)obj).getName();
+		}
+		else if (obj instanceof JSRelation)
+		{
+			name = ((JSRelation)obj).getName();
+		}
 		if (name != null)
 		{
 			final String objName = name;
@@ -236,7 +265,7 @@ public class JSDeveloperSolutionModel
 				{
 					final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 					Solution solutionCopy = null;
-					EclipseRepository eclipseRepository = null;
+					EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
 					try
 					{
 						AbstractBase saveObj = null;
@@ -245,10 +274,22 @@ public class JSDeveloperSolutionModel
 							ITable table = state.getFoundSetManager().getTable(objName);
 							if (table == null) throw new IllegalArgumentException("Datasource is not a solution model created/altered datasource");
 
-							ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(state.getSolutionName());
+							String tableName = DataSourceUtils.getDataSourceTableName(objName);
+							ServoyProject servoyProject = searchTable(tableName);
+							if (solutionName != null && servoyProject != null && !solutionName.equals(servoyProject.getProject().getName()))
+							{
+								throw new IllegalArgumentException("Solution name should not be specified for existing tables. Table '" + tableName +
+									"' already exists in solution '" + servoyProject.getProject().getName() + "'");
+							}
+
+							if (servoyProject == null)
+							{
+								servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(
+									solutionName != null ? solutionName : state.getSolutionName());
+							}
 							solutionCopy = servoyProject.getEditingSolution();
 							MemServer memServer = servoyProject.getMemServer();
-							String tableName = DataSourceUtils.getDataSourceTableName(objName);
+
 							ITable memTable = memServer.getTable(tableName);
 							if (memTable == null)
 							{
@@ -328,17 +369,41 @@ public class JSDeveloperSolutionModel
 						else
 						{
 							solutionCopy = state.getFlattenedSolution().getSolutionCopy();
-							saveObj = solutionCopy.getForm(objName);
-							if (saveObj == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form");
+							if (obj instanceof JSForm || obj instanceof String)
+							{
+								saveObj = solutionCopy.getForm(objName);
+							}
+							else if (obj instanceof JSValueList)
+							{
+								saveObj = solutionCopy.getValueList(objName);
+							}
+							else if (obj instanceof JSRelation)
+							{
+								saveObj = solutionCopy.getRelation(objName);
+							}
+							if (saveObj == null) throw new IllegalArgumentException("The object "+objName+" is not solution model created/altered.");
+
+							if (solutionName != null)
+							{
+								Solution solution = searchPersist((ISupportName)saveObj);
+								if (solution == null)
+								{
+									solution = (Solution)eclipseRepository.getActiveRootObject(solutionName, IRepository.SOLUTIONS);
+								}
+								else if (!solutionName.equals(solution.getName()))
+								{
+									throw new IllegalArgumentException("Solution name should not be specified for existing persists. The object '" + objName +
+										"' already exists in solution '" + solution.getName() + "'");
+								}
+								solutionCopy = eclipseRepository.createSolutionCopy(solution);
+							}
 						}
 
+						saveObj.setParent(solutionCopy);
 						checkParent(saveObj);
 
-						eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
 						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(saveObj));
 						SolutionSerializer.writePersist(saveObj, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
-
-						saveObj.setParent(solutionCopy);
 					}
 					catch (RepositoryException | SQLException e)
 					{
@@ -349,6 +414,35 @@ public class JSDeveloperSolutionModel
 						if (eclipseRepository != null) eclipseRepository.clearForeignElementsIds();
 					}
 					return Status.OK_STATUS;
+				}
+
+				private Solution searchPersist(ISupportName saveObj)
+				{
+					ServoyProject[] projects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+					for (ServoyProject servoyProject : projects)
+					{
+						Solution solution = servoyProject.getSolution();
+						if (saveObj instanceof Form && solution.getForm(saveObj.getName()) != null ||
+							saveObj instanceof ValueList && solution.getValueList(saveObj.getName()) != null ||
+							saveObj instanceof Relation && solution.getRelation(saveObj.getName()) != null)
+						{
+							return solution;
+						}
+					}
+					return null;
+				}
+
+				private ServoyProject searchTable(String tableName) throws RepositoryException
+				{
+					ServoyProject[] projects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+					for (ServoyProject servoyProject : projects)
+					{
+						if (servoyProject.getMemServer().getTable(tableName) != null)
+						{
+							return servoyProject;
+						}
+					}
+					return null;
 				}
 			};
 			saveJob.setUser(false);

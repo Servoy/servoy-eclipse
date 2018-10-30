@@ -32,6 +32,7 @@ import org.eclipse.ui.actions.ActionFactory;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.actions.PasteCommand;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.commands.SelectModelsCommandWrapper;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
@@ -114,7 +115,9 @@ public class PasteAction extends SelectionAction
 	@Override
 	protected boolean calculateEnabled()
 	{
-		return getSelectedObjects().size() > 0;
+		boolean isDesignerContextActive = getWorkbenchPart() instanceof BaseVisualFormEditor &&
+			((BaseVisualFormEditor)getWorkbenchPart()).isDesignerContextActive();
+		return isDesignerContextActive ? getSelectedObjects().size() > 0 : false;
 	}
 
 	@Override

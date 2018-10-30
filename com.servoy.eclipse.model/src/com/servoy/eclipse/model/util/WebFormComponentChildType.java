@@ -472,7 +472,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	@Override
 	public String toString()
 	{
-		return getKey();
+		return getParentComponent().getName() + "." + getKey();
 	}
 
 	@Override
