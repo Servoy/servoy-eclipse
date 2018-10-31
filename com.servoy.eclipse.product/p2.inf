@@ -5,7 +5,6 @@ addRepository(type:0,name:Oxygen,location:http${#58}//download.eclipse.org/relea
 addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.7);addRepository(type:1,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.7);\
 addRepository(type:0,name:Subclipse Latest Update Site,location:https${#58}//dl.bintray.com/subclipse/releases/subclipse/latest/);addRepository(type:1,name:Subclipse Latest Update Site,location:https${#58}//dl.bintray.com/subclipse/releases/subclipse/latest/);\
 addRepository(type:0,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);addRepository(type:1,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);\
-addRepository(type:0,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updates);addRepository(type:1,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updates);\
 addRepository(type:0,name:Servoy Release Candidate Update Site,location:http${#58}//download.servoy.com/developer/8xx_updates/releasecandidate,enabled:false);addRepository(type:1,name:Servoy Release Candidate Update Site,location:http${#58}//download.servoy.com/developer/8xx_updates/releasecandidate,enabled:false);
 
 #Adding description for the Servoy updates
