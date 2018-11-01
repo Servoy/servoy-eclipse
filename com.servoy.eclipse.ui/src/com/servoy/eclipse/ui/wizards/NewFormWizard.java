@@ -407,11 +407,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
-
-			if (superForm != null)
+			String parentWorkingSet = newFormWizardPage.getWorkingSet();
+			if (superForm != null || parentWorkingSet != null)
 			{
-				String parentWorkingSet = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getContainingWorkingSet(
-					superForm.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
+				if (parentWorkingSet == null && superForm != null)
+				{
+					parentWorkingSet = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getContainingWorkingSet(
+						superForm.getName(), ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
+				}
 				if (parentWorkingSet != null)
 				{
 					IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(parentWorkingSet);
@@ -477,6 +480,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		private ComboViewer styleNameCombo;
 
 		private ComboViewer templateNameCombo;
+
+		private ComboViewer workingSetNameCombo;
 
 		private ComboViewer projectCombo;
 
@@ -593,6 +598,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (firstElement instanceof Template)
 			{
 				return (Template)firstElement;
+			}
+			return null;
+		}
+
+		public String getWorkingSet()
+		{
+			Object firstElement = ((IStructuredSelection)workingSetNameCombo.getSelection()).getFirstElement();
+			if (firstElement instanceof String)
+			{
+				return (String)firstElement;
 			}
 			return null;
 		}
@@ -807,6 +822,21 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 
+			Label workingSetLabel = new Label(topLevel, SWT.NONE);
+			workingSetLabel.setText("Working Set");
+
+			workingSetNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
+			workingSetNameCombo.setContentProvider(new ArrayContentProvider());
+			workingSetNameCombo.setLabelProvider(new LabelProvider()
+			{
+				@Override
+				public String getText(Object value)
+				{
+					if (value == SELECTION_NONE) return Messages.LabelNone;
+					return super.getText(value);
+				}
+			});
+
 			boolean isNgClient = SolutionMetaData.isServoyNGSolution(getActiveSolution());
 			Label typeFormLabel = new Label(topLevel, SWT.NONE);
 			typeFormLabel.setText(isNgClient ? "&Type" : "&Listform");
@@ -863,13 +893,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
-					styleLabel).add(templateLabel).add(typeFormLabel)).add(15, 15, 15).add(
+					styleLabel).add(templateLabel).add(workingSetLabel).add(typeFormLabel)).add(15, 15, 15).add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(typeFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
 							projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
-								Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl,
-									GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
-										groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE).addPreferredGap(
-											LayoutStyle.RELATED))).addContainerGap()));
+								Short.MAX_VALUE).add(workingSetNameCombo.getCombo(), GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(styleNameComboControl,
+									GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+										dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+											groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374,
+												Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED))).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(formNameLabel).add(
 					formNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
@@ -886,14 +917,18 @@ public class NewFormWizard extends Wizard implements INewWizard
 																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
 																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(typeFormLabel).add(
-																			typeFormControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																			GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																				groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(100,
-																					Short.MAX_VALUE)));
+																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(workingSetNameCombo.getCombo(),
+																			GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																			GroupLayout.PREFERRED_SIZE).add(workingSetLabel)).addPreferredGap(
+																				LayoutStyle.RELATED).add(
+																					groupLayout.createParallelGroup(GroupLayout.CENTER).add(typeFormLabel).add(
+																						typeFormControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																						GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																							groupLayout.createParallelGroup(
+																								GroupLayout.CENTER)).addContainerGap(100, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
-				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, typeFormControl });
+				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, workingSetNameCombo.getCombo(), typeFormControl });
 		}
 
 		/**
@@ -947,6 +982,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				fillStyleCombo();
 				fillTemplateCombo(superForm == null ? settings.get("templatename") : null);
 				fillProjectCombo();
+				fillWorkingSets();
 				if (superForm != null)
 				{
 					handleExtendsFormChanged();
@@ -1043,6 +1079,23 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 			templateNameCombo.setInput(formTemplates.toArray());
 			templateNameCombo.setSelection(new StructuredSelection(selected));
+		}
+
+		public void fillWorkingSets()
+		{
+			List<Object> workingSets = new ArrayList<Object>();
+			workingSets.add(SELECTION_NONE);
+			if (servoyProject != null)
+			{
+				List<String> existingWorkingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
+					new String[] { servoyProject.getProject().getName() });
+				if (existingWorkingSets != null)
+				{
+					workingSets.addAll(existingWorkingSets);
+				}
+			}
+			workingSetNameCombo.setInput(workingSets.toArray());
+			workingSetNameCombo.setSelection(new StructuredSelection(SELECTION_NONE));
 		}
 
 		private void handleDataSourceSelected()
