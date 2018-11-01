@@ -1,10 +1,11 @@
-import { Injector, Pipe, PipeTransform } from '@angular/core';
+import { Injector, Pipe, PipeTransform} from '@angular/core';
 import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
+import {SabloService} from '../../sablo/sablo.service';
 
 @Pipe( { name: 'formatFilter'} )
 export class FormatFilterPipe implements PipeTransform {
     
-    public constructor(private injector: Injector) {
+    public constructor(private injector: Injector, private sabloService: SabloService) {
     }
 
     transform( input:any, servoyFormat:string, type:string, fullFormat:{uppercase:boolean,lowercase:boolean, type:string}): any{
@@ -22,6 +23,7 @@ export class FormatFilterPipe implements PipeTransform {
 // TODO formatter utils
 //            ret = $formatterUtils.format(input, servoyFormat, type);
             if (ret && fullFormat) {
+                var locale = this.sabloService.getLocale().full;//can be the one from browser or set on solution open
                 if (type == 'TEXT' && fullFormat.uppercase)
                 {
                     ret = this.injector.get(UpperCasePipe).transform(ret);
@@ -32,7 +34,7 @@ export class FormatFilterPipe implements PipeTransform {
                 }
                 else if (type == 'DATETIME')
                 {
-                    ret = this.injector.get(DatePipe).transform(ret, servoyFormat);
+                    ret = this.injector.get(DatePipe).transform(ret, servoyFormat, null, locale); // TODO timezone?
                 }
                 else if (type == 'NUMBER' || type == 'INTEGER')
                 {
@@ -40,13 +42,13 @@ export class FormatFilterPipe implements PipeTransform {
                     {
                         servoyFormat = this.convertFormat(servoyFormat);
                     }
-                    ret = this.injector.get(DecimalPipe).transform(ret, servoyFormat);//TODO locale
+                    ret = this.injector.get(DecimalPipe).transform(ret, servoyFormat, locale);
                 }
             }            
                 
         } catch (e) {
             console.log(e);
-            //TODO decide what to do when string doesn't correspod to format
+            return input;
         }
         return ret;
     }

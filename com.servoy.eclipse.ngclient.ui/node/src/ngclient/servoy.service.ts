@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
 
 import { AllServiceService } from './allservices.service';
 import { WebsocketService } from '../sablo/websocket.service';
@@ -7,6 +8,7 @@ import { ConverterService } from '../sablo/converter.service'
 import { WindowRefService } from '../sablo/util/windowref.service';
 import { LoggerService, LoggerFactory  } from '../sablo/logger.service'
 import { SabloDeferHelper} from '../sablo/defer.service';
+import { Deferred } from '../sablo/util/deferred';
 
 import { SessionStorageService } from 'angular-web-storage';
 
@@ -26,6 +28,8 @@ import  'numeral/locales';
 import * as moment from 'moment';
 import  'moment/min/locales.min'; 
 
+declare const System: any;
+
 @Injectable()
 export class ServoyService {
     private solutionSettings: SolutionSettings = new SolutionSettings();
@@ -33,6 +37,7 @@ export class ServoyService {
 
     private findModeShortCutAdded = false;
     private log: LoggerService;
+    private loadedLocale: Deferred<any>;
 
     constructor( private websocketService: WebsocketService,
             private sabloService: SabloService,
@@ -111,44 +116,60 @@ export class ServoyService {
     }
     
     public setLocale(language, country, initializing?) {
-        try{
        // TODO angular $translate and our i18n service
 //            $translate.refresh();
+        this.loadedLocale = new Deferred<any>();
+        this.setAngularLocale(language, country).then( localeId => {     
             this.i18nProvider.flush();
-            this.setAngularLocale(language);
+            this.sabloService.setLocale({ language : language, country : country , full: localeId});
+            if (!initializing)
+            {
+                //in the session storage we always have the value set via applicationService.setLocale
+                this.sessionStorageService.set("locale", language + '-' + country);
+            }
+       
+            this.loadedLocale.resolve(localeId);
+        }, () => { 
+            this.loadedLocale.reject("Could not set Locale because angular locale could not be loaded.");
+        });
+        this.setNumeralAndMomentLocale(language, country);
+    }
+    
+    public loaded() : Promise<any> {
+        return this.loadedLocale.promise;
+    }
+    
+    private setNumeralAndMomentLocale(language, country)
+    {
+        try{
             numeral.localeData((language + '-' + country).toLowerCase());
             numeral.locale((language + '-' + country).toLowerCase());
-            if (!initializing) this.sessionStorageService.set("locale", (language + '-' + country).toLowerCase());
         } catch(e) {
             try {
                 numeral.localeData(language + '-' + country);
                 numeral.locale(language + '-' + country);
-                if (!initializing) this.sessionStorageService.set("locale", language + '-' + country);
             } catch(e2) {
                 try {
                     //try it with just the language part
                     numeral.localeData(language);
                     numeral.locale(language);
-                    if (!initializing) this.sessionStorageService.set("locale", language);
                 } catch(e3) {
                     try {
                         //try it with just the language part but lowercase
                         numeral.localeData(language.toLowerCase());
                         numeral.locale(language.toLowerCase());
-                        if (!initializing) this.sessionStorageService.set("locale", language);
                     } catch(e4) {
                         try {
                             //try to duplicate the language in case it's only defined like that
                             numeral.localeData(language.toLowerCase() + "-" + language.toLowerCase()); // nl-nl for example is defined but browser only says 'nl' (this won't work for all languages for example "en-en" I don't think even exists)
                             numeral.locale(language.toLowerCase() + "-" + language.toLowerCase()); 
-                            if (!initializing) this.sessionStorageService.set("locale", language);
                         } catch(e5) {
                             // we can't find a suitable locale defined in locales.js; get the needed things from server (Java knows more locales)
                             // and create the locate info from that
                             var promise = this.sabloService.callService("i18nService", "generateLocaleForNumeralJS", country ? {'language' : language, 'country' : country} : {'language' : language}, false);
                             // TODO should we always do this (get stuff from server side java) instead of trying first to rely on numeral.js and locales.js provided langs?
                             var numeralLanguage = language + (country ? '-' + country : "");
-                            promise.then(function(numeralLocaleInfo) {
+                            promise.then(numeralLocaleInfo => {
                               this.log.debug(this.log.buildMessage(() => ("Locale '" + numeralLanguage + "' not found in client js lib, but it was constructed based on server Java locale-specific information: " + JSON.stringify(numeralLocaleInfo))));
                                 numeralLocaleInfo.ordinal = function (number) {
                                     return ".";
@@ -156,11 +177,7 @@ export class ServoyService {
                                 numeral.register('locale',numeralLanguage,numeralLocaleInfo);
                                 numeral.locale(numeralLanguage);
                                 moment.locale( numeral.locale() )
-                                if (!initializing) {
-                                    this.sessionStorageService.set("locale", numeralLanguage);
-                                    this.sabloService.setLocale({ language : language, country : country , full: language + "-" + country});
-                                }
-                            }, function(reason) {
+                            }, (reason) => {
                                 this.log.warn(this.log.buildMessage(() => ("Cannot properly handle locale '" + numeralLanguage + "'. It is not available in js libs and it could not be loaded from server...")));
                             });
                         }
@@ -168,27 +185,25 @@ export class ServoyService {
                 }
             }
         }
-        moment.locale( numeral.locale() )
-        var lang = this.sessionStorageService.get("locale");
-        if (lang) {
-            var array = lang.split('-');
-            this.sabloService.setLocale({ language : array[0], country : (array[1] ?  array[1] : country), full: (array[1] ?  lang :  (array[0] +"-"+country))});
-        }
+        moment.locale( numeral.locale())
     }
     
-    private setAngularLocale(language){
-        // TODO how does locale work in angular 2+
-//        var fileref= this.windowRefService.nativeWindow.document.createElement('script');
-//        fileref.setAttribute("type","text/javascript");
-//        fileref.setAttribute("src", "js/angular_i18n/angular-locale_"+language+".js");
-//        fileref.onload = function () {
-//            var localInjector = angular.injector(['ngLocale']),
-//            externalLocale = localInjector.get('$locale');
-//            angular.forEach(externalLocale, function(value, key) {
-//                $locale[key] = externalLocale[key];
-//            });
-//        }
-//        this.windowRefService.nativeWindow.document.getElementsByTagName("head")[0].appendChild(fileref);
+    private setAngularLocale(language: string, country: string){
+       //angular locales are either <language lowercase> or <language lowercase> - <country uppercase> 
+       var localeId =  country !== undefined && country.length > 0 ? language.toLowerCase() +"-"+country.toUpperCase() : language.toLowerCase();  
+       return new Promise((resolve, reject) => {
+            System.import(`@angular/common/locales/${localeId}.js`).then(
+            	module => {
+                registerLocaleData(module.default, localeId);
+                	resolve(localeId);
+                },
+                () => {
+            	    System.import(`@angular/common/locales/${language.toLowerCase()}.js`).then(module => {
+                	registerLocaleData(module.default, localeId.split('-')[0]);
+                 	resolve(language.toLowerCase());
+                }, reject);
+			});
+       });
     }
     
 
