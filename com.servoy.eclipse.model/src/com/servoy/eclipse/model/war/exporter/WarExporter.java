@@ -148,7 +148,7 @@ public class WarExporter
 {
 	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
 	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", "servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() +
-		".jar", "sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
+		".jar", "sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "commons-lang3_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
 
