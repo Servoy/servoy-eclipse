@@ -28,8 +28,6 @@ import  'numeral/locales';
 import * as moment from 'moment';
 import  'moment/min/locales.min'; 
 
-declare const System: any;
-
 @Injectable()
 export class ServoyService {
     private solutionSettings: SolutionSettings = new SolutionSettings();
@@ -192,18 +190,18 @@ export class ServoyService {
        //angular locales are either <language lowercase> or <language lowercase> - <country uppercase> 
        var localeId =  country !== undefined && country.length > 0 ? language.toLowerCase() +"-"+country.toUpperCase() : language.toLowerCase();  
        return new Promise((resolve, reject) => {
-            System.import(`@angular/common/locales/${localeId}.js`).then(
+            import(`@angular/common/locales/${localeId}.js`).then(
             	module => {
                 registerLocaleData(module.default, localeId);
                 	resolve(localeId);
                 },
                 () => {
-            	    System.import(`@angular/common/locales/${language.toLowerCase()}.js`).then(module => {
+            	    import(`@angular/common/locales/${language.toLowerCase()}.js`).then(module => {
                 	registerLocaleData(module.default, localeId.split('-')[0]);
                  	resolve(language.toLowerCase());
                 }, reject);
 			});
-       });
+       }); 
     }
     
 
