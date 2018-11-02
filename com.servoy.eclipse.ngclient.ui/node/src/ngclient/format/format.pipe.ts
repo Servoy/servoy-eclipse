@@ -61,7 +61,7 @@ export class FormatFilterPipe implements PipeTransform {
         {
             var minFractionDigits = (digits[1].match(/0/g)||[]).length;
             format += "."+minFractionDigits;
-            if (minFractionDigits != digits[1].length) format += "-" + digits[1].length;
+            format += "-" + digits[1].length;
         }
         return format;
     }

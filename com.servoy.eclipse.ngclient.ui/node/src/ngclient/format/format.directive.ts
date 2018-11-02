@@ -117,13 +117,13 @@ export class SvyFormat implements OnChanges{
               }
               return;
           }
-          else if (this.mask) {
+          else if (this.svyFormat.isMask) {
               this.setCaret(this.checkVal(true));
           }
       }
       
       @HostListener('focus') onFocus() {
-          if (!this.mask) return;
+          if (!this.svyFormat.isMask) return; 
           
           this.focusText = this.element.value;
           var pos = this.checkVal(true);
@@ -141,7 +141,7 @@ export class SvyFormat implements OnChanges{
       }
       
       @HostListener('blur') onBlur() {
-          if (!this.mask) return;
+          if (!this.svyFormat.isMask) return;
           
           this.checkVal(true);
           if (this.element.value != this.focusText) {
@@ -150,7 +150,7 @@ export class SvyFormat implements OnChanges{
       }
       
       @HostListener('keypress',['$event']) onKeypress(e:KeyboardEvent) {          
-          if (!this.mask) return;
+          if (!this.svyFormat.isMask) return;
 
           if (this.ignore) {
               this.ignore = false;
@@ -186,7 +186,7 @@ export class SvyFormat implements OnChanges{
       }
       
       @HostListener('keydown',['$event']) onKeydown(e:KeyboardEvent) {
-          if (!this.mask) return;
+          if (!this.svyFormat.isMask) return;
           
           var iPhone = (window.orientation != undefined);
           this.focusText = this.element.value;
