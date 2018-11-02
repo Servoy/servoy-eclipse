@@ -32,6 +32,10 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -343,11 +347,20 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	@Override
 	public void webObjectSpecificationReloaded()
 	{
-		JSONArray packages = executeMethod(null);
-		JSONObject jsonResult = new JSONObject();
-		jsonResult.put("method", CLIENT_SERVER_METHOD);
-		jsonResult.put("result", packages);
-		endpoint.send(jsonResult.toString());
+		Job job = new Job("reload specifications")
+		{
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				JSONArray packages = executeMethod(null);
+				JSONObject jsonResult = new JSONObject();
+				jsonResult.put("method", CLIENT_SERVER_METHOD);
+				jsonResult.put("result", packages);
+				endpoint.send(jsonResult.toString());
+				return Status.OK_STATUS;
+			}
+		};
+		job.schedule();
 	}
 
 	@Override
