@@ -10,6 +10,7 @@
   <!-- Servoy related servlets -->
   
   <absolute-ordering>
+    <name>j2db_log4j</name>
     <name>log4j</name>
     <name>servoy_ngclient</name>
   </absolute-ordering>

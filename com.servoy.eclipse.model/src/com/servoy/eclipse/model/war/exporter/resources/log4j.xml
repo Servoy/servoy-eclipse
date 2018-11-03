@@ -8,8 +8,8 @@
 		<SlidingWindow name="configservlet" windowSize="1000"
 			dateTimeFormat="yyyy-MM-dd HH:mm" />
 		<RollingFile name="file"
-			fileName="${sys:user.home}/.servoy/server/${web:contextPath}/servoy_log.txt"
-			filePattern="${sys:user.home}/.servoy/server/${web:contextPath}/servoy_log-%i.txt.zip"
+			fileName="${web:attr.servoy.application_server.dir}/servoy_log.txt"
+			filePattern="${web:attr.servoy.application_server.dir}/servoy_log-%i.txt.zip"
 			immediateFlush="true" append="true">
 			<Policies>
 				<SizeBasedTriggeringPolicy size="10MB" />

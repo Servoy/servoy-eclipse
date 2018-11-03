@@ -21,6 +21,7 @@ import com.servoy.extension.install.UninstallZipEntries;
 import com.servoy.extension.parser.EXPParser;
 import com.servoy.extension.parser.ExtensionConfiguration;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 public class ProcessPendingInstall implements Runnable
@@ -53,7 +54,7 @@ public class ProcessPendingInstall implements Runnable
 		// we are not using ApplicationServerSingleton.get().getServoyApplicationServerDirectory() cause that would init the app. server and load all plugins, beans...
 		// which negates the purpose of this restart-install
 		File f = null;
-		String location = System.getProperty("servoy.application_server.dir");
+		String location = System.getProperty(Settings.SERVOY_APPLICATION_SERVER_DIR);
 		if (location == null)
 		{
 			location = System.getProperty("eclipse.home.location");
@@ -113,7 +114,8 @@ public class ProcessPendingInstall implements Runnable
 			}
 			catch (RuntimeException e)
 			{
-				error = "Failed to check for/install pending extension operations. Pending operations will be discarded. Check logs for more info. Reason: " + e.getMessage();
+				error = "Failed to check for/install pending extension operations. Pending operations will be discarded. Check logs for more info. Reason: " +
+					e.getMessage();
 				throw e;
 			}
 			finally
