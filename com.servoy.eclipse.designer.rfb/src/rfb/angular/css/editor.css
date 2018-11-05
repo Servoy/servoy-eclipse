@@ -312,3 +312,28 @@ html, body
 	border: 0;
 	padding-left: 2px;
 }
+
+/* Menubar */
+.menubar {
+	color: white;
+	background-color:#6495ed;
+	position: relative;
+	height: 16px;
+	top: -18px;
+	margin-left: 2px;
+	margin-right: 2px;
+	pointer-events: auto;
+	cursor: default;
+}
+
+.menubar .containerType {
+	font-weight: bold;
+}
+
+.menubar .containerName {
+
+}
+
+.menubar .containerAction {
+	display: inline-block;
+}
