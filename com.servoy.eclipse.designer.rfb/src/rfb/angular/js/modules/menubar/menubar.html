@@ -1,0 +1,5 @@
+<div class="menubar" ng-mousedown="onmousedown($event)">
+    <span class="containerType" ng-bind="getContainerType()"></span>
+    <span class="containerName" ng-bind="getContainerName()"></span>
+    <div class="containerAction" ng-repeat="action in actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></div>
+</div>
