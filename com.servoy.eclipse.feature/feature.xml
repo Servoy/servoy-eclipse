@@ -403,12 +403,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          install-size="0"
          version="1.6.2"
          unpack="false"/>
- 	<plugin
+
+   <plugin
          id="com.sun.activation.javax.activation"
          download-size="0"
          install-size="0"
-         version="1.2"
+         version="1.2.0"
          unpack="false"/>
+
    <plugin
          id="org.apache.commons.lang"
          download-size="0"
