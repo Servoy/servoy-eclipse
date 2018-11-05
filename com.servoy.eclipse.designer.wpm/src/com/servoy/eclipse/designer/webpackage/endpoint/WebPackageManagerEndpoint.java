@@ -18,8 +18,7 @@
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.io.IOException;
 
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -69,12 +68,11 @@ public class WebPackageManagerEndpoint
 	{
 		if (message != null && session != null && session.isOpen())
 		{
-			Future<Void> sendObject = session.getAsyncRemote().sendText(message);
 			try
 			{
-				sendObject.get();
+				session.getBasicRemote().sendText(message);
 			}
-			catch (InterruptedException | ExecutionException e)
+			catch (IOException e)
 			{
 				Debug.log(e);
 			}

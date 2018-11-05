@@ -68,7 +68,10 @@ public class GetSolutionList implements IDeveloperService, IActiveProjectListene
 	@Override
 	public void activeProjectChanged(ServoyProject activeProject)
 	{
-		sendSolutionList();
+		if (activeProject != null && !"import_placeholder".equals(activeProject.getSolution().getName()))
+		{
+			sendSolutionList();
+		}
 	}
 
 	@Override

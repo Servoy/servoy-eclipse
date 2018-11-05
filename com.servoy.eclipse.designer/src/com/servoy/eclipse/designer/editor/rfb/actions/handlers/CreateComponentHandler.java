@@ -218,7 +218,7 @@ public class CreateComponentHandler implements IServerService
 				if (next instanceof IBasicWebComponent)
 				{
 					IBasicWebComponent parentBean = (IBasicWebComponent)next;
-					String propertyName = args.getString("propertyName");
+					String propertyName = args.getString("ghostPropertyName");
 					String compName = "component_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
 					{
