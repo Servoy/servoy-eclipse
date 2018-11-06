@@ -1,0 +1,7 @@
+.horizontaldirection > label{
+  float:left;
+  margin-right: 2px;
+}
+.svy-checkgroup{
+	display: grid;
+}

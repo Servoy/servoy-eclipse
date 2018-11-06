@@ -1,6 +1,6 @@
 export { ServoyApi } from './servoy_api'
 export { PropertyUtils } from './utils/property_utils'
-export { MnemonicletterFilterPipe} from './pipes/pipes'
+export { MnemonicletterFilterPipe, NotNullOrEmptyPipe} from './pipes/pipes'
 export { SvyFormat } from './format/format.directive'
 export { DecimalkeyconverterDirective } from './utils/decimalkeyconverter.directive'
 export { StartEditDirective } from './utils/startedit.directive'

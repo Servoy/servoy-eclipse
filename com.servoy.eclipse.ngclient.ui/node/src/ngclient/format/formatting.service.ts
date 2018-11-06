@@ -8,7 +8,7 @@ const MILLSIGN : string = '\u2030';
 export class FormattingService {   
 
    parse(value:string, format:{display:string, type:string}, currentValue : Object):Object {
-       var result = value;
+       let result = value;
        if (format.type == "DATETIME")
        {
            return this.parseDate(value,format.display, currentValue as Date);
@@ -22,10 +22,10 @@ export class FormattingService {
    
    private parseDate(value:string, servoyFormat:string, currentValue : Date) : Date {
        // some compatibility issues, see http://momentjs.com/docs/ and http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html 
-       var format = servoyFormat.replace(/d/g,'D');
+       let format = servoyFormat.replace(/d/g,'D');
        format = format.replace(/y/g,'Y');
-       var m = moment(value, format);
-       var date = m.isValid() ? m.toDate() : new Date(value);
+       let m = moment(value, format);
+       let date = m.isValid() ? m.toDate() : new Date(value);
        if (date)
        {
            // if format has not year/month/day use the one from the current model value
@@ -59,7 +59,7 @@ export class FormattingService {
            multFactor = 100
        }
 
-       var ret = numeral(value).value();
+       let ret = numeral(value).value();
        ret *= multFactor;
        return ret
    }

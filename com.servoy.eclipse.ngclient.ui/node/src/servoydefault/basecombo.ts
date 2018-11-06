@@ -31,7 +31,7 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   }
   
   onChanges() {
-    defer(() => this.servoyApi.getDataProviderID()).subscribe((d: number) => {
+    defer(() => this.servoyApi.getDataProviderID()).subscribe((d: any) => {
       this.selectedItemIndex = d - 1;
     });
 
@@ -67,11 +67,7 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   
   public onInputKeyDown(event: KeyboardEvent): void {
     const keyCode = event.keyCode;
-    if (keyCode === 38 || keyCode === 40) {
-      event.preventDefault();
-    } else {
-      this.onNavigateAvay(event);
-    }
+    keyCode === 38 || keyCode === 40 ? event.preventDefault(): this.onNavigateAvay(event);
   }
   
   public filterList(valueToFilterBy) {
@@ -92,10 +88,7 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   }
 
   public isElementFocused(target) {
-    if (document.activeElement === target) {
-      return true;
-    }
-    return false;
+     return document.activeElement === target
   }
 
   public getTabindex() {

@@ -27,6 +27,7 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
     @Input() toolTipText
     @Input() transparent
     @Input() visible
+    @Input() scrollbars;
     
     @ViewChild('element') elementRef:ElementRef;
 
@@ -69,6 +70,9 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
                     break;
                 case "horizontalAlignment":
                     PropertyUtils.setHorizontalAlignment(  this.getNativeChild(),this.renderer ,change.currentValue);
+                    break;
+                case "scrollbars":
+                    PropertyUtils.setScrollbars(this.getNativeChild(), change.currentValue);
                     break;
                 case "enabled":
                     if ( change.currentValue )

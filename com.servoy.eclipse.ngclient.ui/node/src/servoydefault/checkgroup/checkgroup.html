@@ -1,0 +1,17 @@
+<div class='svy-checkgroup input-sm svy-padding-xs'
+     sablo-tabseq='tabSeq'
+     [id]="servoyApi.getMarkupId()" 
+     [hidden]=!visible
+     #element>
+  <label class='svy-check-radio' *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;">
+    <input type="checkbox" 
+    		[(ngModel)]="selection[i]"
+            [value]="item.realValue"
+            [disabled]="!enabled || !editable"
+            (click)='itemClicked($event,i)'
+            (focus)='focus($event)'
+            (blur)='blur($event)'
+            #input />
+    <span [innerHtml]="item.displayValue"></span>
+  </label>
+</div>

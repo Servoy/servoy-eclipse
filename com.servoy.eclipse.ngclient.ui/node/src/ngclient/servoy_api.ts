@@ -55,7 +55,7 @@ export class ServoyApi {
         return this.item.model.valuelistID;
     }
 
-    public getDataProviderID(): Observable<number> {
+    public getDataProviderID(): Observable<any> {
         return of(this.item.model.dataProviderID);
     }
 }

@@ -50,7 +50,8 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
     }
 
     update( val: string ) {
-        this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
+        if(this.format)
+            this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
         this.dataProviderIDChange.emit( this.dataProviderID );
     }
 }

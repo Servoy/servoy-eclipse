@@ -1,5 +1,14 @@
 import { Renderer2 } from '@angular/core';
 
+const scrollbarConstants = {
+        SCROLLBARS_WHEN_NEEDED: 0,
+        VERTICAL_SCROLLBAR_AS_NEEDED: 1,
+        VERTICAL_SCROLLBAR_ALWAYS: 2,
+        VERTICAL_SCROLLBAR_NEVER: 4,
+        HORIZONTAL_SCROLLBAR_AS_NEEDED: 8,
+        HORIZONTAL_SCROLLBAR_ALWAYS: 16,
+        HORIZONTAL_SCROLLBAR_NEVER: 32
+}
 export class PropertyUtils {
 
     public static setHorizontalAlignment( element: any, renderer: Renderer2, halign ) {
@@ -71,5 +80,50 @@ export class PropertyUtils {
             }, 0 );
         } );
     }
+    public static getScrollbarsStyleObj(scrollbars) {
+       let style = {};
+       if ((scrollbars & scrollbarConstants.HORIZONTAL_SCROLLBAR_NEVER) == scrollbarConstants.HORIZONTAL_SCROLLBAR_NEVER) {
+         style['overflowX'] = 'hidden';
+       }
+       else if ((scrollbars & scrollbarConstants.HORIZONTAL_SCROLLBAR_ALWAYS) == scrollbarConstants.HORIZONTAL_SCROLLBAR_ALWAYS) {
+         style['overflowX'] = 'scroll';
+       }
+       else {
+         style['overflowX'] = 'auto';
+       }
 
+       if ((scrollbars & scrollbarConstants.VERTICAL_SCROLLBAR_NEVER) == scrollbarConstants.VERTICAL_SCROLLBAR_NEVER) {
+         style['overflowY'] = 'hidden';
+       }
+       else if ((scrollbars & scrollbarConstants.VERTICAL_SCROLLBAR_ALWAYS) == scrollbarConstants.VERTICAL_SCROLLBAR_ALWAYS) {
+         style['overflowY'] = 'scroll'; //$NON-NLS-1$
+       }
+       else {
+         style['overflowY'] = 'auto'; //$NON-NLS-1$
+       }
+
+       return style;
+     }
+
+     public static setScrollbars(element, value) {
+       let style = this.getScrollbarsStyleObj(value);
+       Object.keys(style).forEach(key => {
+           element.style[key] = style[key];
+       });
+     };
+     // internal function
+     public static getPropByStringPath(o, s) {
+       s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+       s = s.replace(/^\./, '');           // strip a leading dot
+       var a = s.split('.');
+       while (a.length) {
+         var n = a.shift();
+         if (n in o) {
+           o = o[n];
+         } else {
+           return;
+         }
+         return o;
+       }
+     }
 }

@@ -1,30 +1,32 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import {FormsModule}        from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 
-import {BGPane} from './splitpane/bg_splitter/bg_pane.component';
-import {BGSplitter} from './splitpane/bg_splitter/bg_splitter.component';
+import { BGPane } from './splitpane/bg_splitter/bg_pane.component';
+import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
 
 import { ServoyDefaultTextField } from './textfield/textfield';
 import { ServoyDefaultButton } from './button/button';
-import { ServoyDefaultLabel} from './label/label';
-import { ServoyDefaultTabpanel} from './tabpanel/tabpanel';
-import { ServoyDefaultTablesspanel} from './tabpanel/tablesspanel';
-import {ServoyDefaultSplitpane} from './splitpane/splitpane';
-import {ServoyDefaultCalendar} from './calendar/calendar';
-import {ServoyDefaultCombobox} from './combobox/combobox';
-import {ServoyDefaultTypeahead} from './typeahead/typeahead';
+import { ServoyDefaultLabel } from './label/label';
+import { ServoyDefaultTabpanel } from './tabpanel/tabpanel';
+import { ServoyDefaultTablesspanel } from './tabpanel/tablesspanel';
+import { ServoyDefaultSplitpane } from './splitpane/splitpane';
+import { ServoyDefaultCalendar } from './calendar/calendar';
+import { ServoyDefaultCombobox } from './combobox/combobox';
+import { ServoyDefaultTypeahead } from './typeahead/typeahead';
+import { ServoyDefaultCheckGroup } from './checkgroup/checkgroup';
+import { ServoyDefaultRadiogroup } from './radiogroup/radiogroup';
 
-import {SabloModule} from '../sablo/sablo.module'
+import { SabloModule } from '../sablo/sablo.module'
 
-import {FormatFilterPipe,MnemonicletterFilterPipe,SvyFormat,FormattingService,I18NProvider,DecimalkeyconverterDirective,StartEditDirective} from '../ngclient/servoy_public'
+import { FormatFilterPipe,NotNullOrEmptyPipe,MnemonicletterFilterPipe,SvyFormat,FormattingService,I18NProvider,DecimalkeyconverterDirective,StartEditDirective } from '../ngclient/servoy_public'
 
-import {OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
+import { OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
 import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-datetime-moment';
 
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 @NgModule({
@@ -38,13 +40,16 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
     ServoyDefaultCalendar,
     ServoyDefaultCombobox,
     ServoyDefaultTypeahead,
+    ServoyDefaultCheckGroup,
+    ServoyDefaultRadiogroup,
     FormatFilterPipe,
     MnemonicletterFilterPipe,
+    NotNullOrEmptyPipe,
     SvyFormat,
     DecimalkeyconverterDirective,
     StartEditDirective,
-	  BGSplitter,
-    BGPane
+	BGSplitter,
+    BGPane,
   ],
   imports:[
     FormsModule,
@@ -64,7 +69,9 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
             ServoyDefaultSplitpane,
             ServoyDefaultCalendar,
             ServoyDefaultCombobox,
-            ServoyDefaultTypeahead
+            ServoyDefaultTypeahead,
+            ServoyDefaultCheckGroup,
+            ServoyDefaultRadiogroup,
   ],
   providers: [
               FormattingService,
