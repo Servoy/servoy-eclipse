@@ -101,3 +101,4 @@
 .paletteItem:hover {
 	background-color: lightblue;
 }
+.paletteContent > input[type=text]::-ms-clear { display: none; }
