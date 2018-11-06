@@ -1,5 +1,5 @@
-<li ng-repeat="item in items | filter:{$:searchText}  | orderBy:'displayName'" style="position:relative;">
-    <div uib-accordion-group is-disabled="!item.properties" is-open="item.isOpen" ng-attr-style="{{item.properties ? 'margin-left:-19px' : ''}}">    
+<li ng-repeat="item in items | filterByNested:['displayName','propertyName']:searchText  | orderBy:'displayName'" style="position:relative;">
+    <div uib-accordion-group is-disabled="!item.properties" is-open="item.isOpen || searchText" ng-click="item.isOpen=!item.isOpen" ng-attr-style="{{item.properties ? 'margin-left:-19px' : ''}}">    
 		<uib-accordion-heading> 
 			<span class="palette-heading" title="Drag component {{item.displayName}} to form to add it"  ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName,null,item.componentTagName)"
 			 ng-attr-style="{{systemFont}}"><img draggable="false" ng-if="item.properties" ng-src="{{item.isOpen ? 'templates/images/chevron_down.png' : 'templates/images/chevron_right.png'}}" style="margin-right:0"/>
@@ -12,8 +12,8 @@
 				</li>
 			</ul>
 		</uib-accordion-heading>
-		<ul ng-repeat="propertyName in item.properties ">
-			<li ng-repeat="comp in item.components | filter:{displayName:searchText}" ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName,null,item.componentTagName, propertyName, comp.propertyValue) " class="paletteItem" title="Drag component {{item.displayName + '-' + propertyName + ':' + comp.displayName}} to form to add it"> 
+		<ul ng-repeat="propertyName in item.properties">
+			<li ng-repeat="comp in item.components" ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName,null,item.componentTagName, propertyName, comp.propertyValue) " class="paletteItem" title="Drag component {{item.displayName + '-' + propertyName + ':' + comp.displayName}} to form to add it"> 
 				<img draggable="false" style="align:center" ng-src="/{{item.icon}}" alt=""/>{{propertyName + ': ' + comp.displayName}}
 			</li>
 		</ul>
