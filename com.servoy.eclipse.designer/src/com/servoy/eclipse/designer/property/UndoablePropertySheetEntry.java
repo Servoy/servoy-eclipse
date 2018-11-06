@@ -190,7 +190,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 		for (int i = 0; i < getValues().length; i++)
 		{
 			IPropertySource target = getPropertySource(getValues()[i]);
-			Object value = child.getValues()[0];
+			Object value = child.getValues()[i];
 			Object entryValue = value;
 			IPropertyDescriptor desc = child.getDescriptor();
 			if (desc instanceof IMergedPropertyDescriptor && getValues().length > 1)
