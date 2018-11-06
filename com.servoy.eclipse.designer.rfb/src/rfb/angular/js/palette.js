@@ -397,4 +397,44 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 	},
 	templateUrl: 'templates/palettecomponents.html'
     };
-})
+}).filter('filterByNested', ['$parse','$filter', function( $parse, $filter ) {
+	
+	//Object.values is not supported in IE and Object.keys does not always work
+    Object.values = Object.values || function values(obj) {
+    	  var ret = [];
+    	  for (var prop in obj) if (obj.hasOwnProperty(prop)) ret.push(obj[prop])
+    	  return ret;
+    }
+	
+    return function(collection, properties, search, strict) {
+    	
+        search = (typeof search === 'string' || typeof search === 'number') ?
+          String(search).toLowerCase() : undefined;
+       
+        if(!Array.isArray(collection) || search == undefined) {
+          return collection;
+        }
+        if (!Array.isArray(properties) && properties)
+        {
+        	properties = [properties];
+        }
+        
+        return collection.filter(function(elm) {
+          return properties.some(function(prop) {
+        	  var comparator = String($parse(prop)(elm)).toLowerCase();
+              var found = strict ? comparator === search : comparator.indexOf(search) >= 0;
+              if (!found)
+              { 
+            	  //search property in nested arrays
+            	  return Object.values(elm).some(function(val) {
+            		  if (Array.isArray(val) && val.length > 0)
+            		  {
+            			  return $filter('filterByNested')(val, properties, search, strict).length > 0;
+            		  }
+            	  });
+              }
+              return found;
+          });
+        });
+      }
+    }])
