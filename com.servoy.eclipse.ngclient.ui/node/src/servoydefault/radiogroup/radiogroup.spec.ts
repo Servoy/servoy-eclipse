@@ -22,7 +22,7 @@ describe('ServoyDefaultRadiogroup', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultRadiogroup);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml","getApiData", "getDataProviderID"]);
+    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
     fixture.detectChanges();
   });
 

@@ -33,12 +33,10 @@ describe('ServoyDefaultCheckGroup', () => {
   let servoyApi;
 
   beforeEach(async(() => {
-      servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml","getApiData", "getDataProviderID"]);
-      servoyApi.getApiData.and.returnValue( mockData );
-      servoyApi.getDataProviderID.and.returnValue( of(1) );
+      servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
       
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultCheckGroup,NotNullOrEmptyPipe, SvyFormat,DecimalkeyconverterDirective, StartEditDirective ],
+      declarations: [ ServoyDefaultCheckGroup,NotNullOrEmptyPipe, SvyFormat, StartEditDirective ],
       imports: [SabloModule, FormsModule],
       providers: [NotNullOrEmptyPipe,FormattingService]
     })

@@ -18,6 +18,7 @@ import { ServoyDefaultCombobox } from './combobox/combobox';
 import { ServoyDefaultTypeahead } from './typeahead/typeahead';
 import { ServoyDefaultCheckGroup } from './checkgroup/checkgroup';
 import { ServoyDefaultRadiogroup } from './radiogroup/radiogroup';
+import { ServoyDefaultCheck } from './check/check';
 
 import { SabloModule } from '../sablo/sablo.module'
 
@@ -42,6 +43,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ServoyDefaultTypeahead,
     ServoyDefaultCheckGroup,
     ServoyDefaultRadiogroup,
+    ServoyDefaultCheck,
     FormatFilterPipe,
     MnemonicletterFilterPipe,
     NotNullOrEmptyPipe,
@@ -72,6 +74,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
             ServoyDefaultTypeahead,
             ServoyDefaultCheckGroup,
             ServoyDefaultRadiogroup,
+            ServoyDefaultCheck,
   ],
   providers: [
               FormattingService,

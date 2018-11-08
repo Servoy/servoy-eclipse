@@ -15,7 +15,6 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice implements 
     super(renderer, formattingService);
   }
   ngOnInit(){
-    this.valuelistID = this.servoyApi.getApiData();
     this.onValuelistChange();
     this.setSelectionFromDataprovider();
     this.setInitialStyles();
