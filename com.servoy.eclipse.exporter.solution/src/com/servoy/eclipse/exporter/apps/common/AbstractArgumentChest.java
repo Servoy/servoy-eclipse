@@ -184,8 +184,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		return "USAGE:\n\n"
 			+ "   -help or -? or /? or no arguments ... shows current help message.\n\n"
 			+ "                  OR\n\n"
-			+ getMandatoryArgumentsMessage() + " [optional_args]\n"
-			+ "    An export will be done for each solution in the list\n\n"
+			+ getMandatoryArgumentsMessage() + " [optional_args]\n\n"
 			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
 			+ "        -p <properties_file> ... path and name of properties file used to start exporter.\n"
@@ -194,7 +193,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "             Default: '../../application_server'.\n"
 			+ "        -pl alternate project locations; solution, resources and  other needed projects will\n"
 			+ "             be searched for in subfolders (deep) of the given 'workspace_location' as well.\n"
-			+ "                                                                             Example: if the\n"
+			+ "                                                                         For example: if the\n"
 			+ "             workspace needs to contain projects from different git repositories,  those can\n"
 			+ "             be checked out in '<workspace_loc>', '<workspace_loc>/a', '<workspace_loc>/b/c'\n"
 			+ "             and so on.\n"
@@ -206,7 +205,13 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 
 	protected String getMandatoryArgumentsMessage()
 	{
-		return MANDATORY_ARGS_INDENT + "-s <solutions_separated_by_comma> -o <out_dir> -data <workspace_location>";
+		return getMandatoryArgumentsMessage(true);
+	}
+
+	protected String getMandatoryArgumentsMessage(boolean advertiseThatMultipleSolutionsAreSupported)
+	{
+		return MANDATORY_ARGS_INDENT + "-s " + (advertiseThatMultipleSolutionsAreSupported ? "<solutions_separated_by_comma>" : "<solution_name>") +
+			" -o <out_dir> -data <workspace_location>";
 	}
 
 	// dbi and dbd are implemented by mobile exporter, but hardcoded, not configurable - so not part of the help message; allow extending classes to suppress these

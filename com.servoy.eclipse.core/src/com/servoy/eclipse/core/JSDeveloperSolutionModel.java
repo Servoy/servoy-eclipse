@@ -54,7 +54,6 @@ import com.servoy.j2db.IForm;
 import com.servoy.j2db.dataprocessing.BufferedDataSetInternal;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
-import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.Form;
@@ -68,6 +67,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ColumnType;
+import com.servoy.j2db.scripting.solutionmodel.IJSDeveloperSolutionModel;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.JSRelation;
 import com.servoy.j2db.scripting.solutionmodel.JSValueList;
@@ -82,8 +82,7 @@ import com.servoy.j2db.util.Utils;
  * @author jcompagner
  * @since 6.0
  */
-@ServoyDocumented(category = ServoyDocumented.RUNTIME, publicName = "servoyDeveloper", scriptingName = "servoyDeveloper")
-public class JSDeveloperSolutionModel
+public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 {
 
 	private final IDebugClient state;
@@ -95,21 +94,23 @@ public class JSDeveloperSolutionModel
 		this.state = state;
 	}
 
-	/**
-	 * Saves all changes made through the solution model into the workspace.
-	 * Please note that this method only saves the new in memory datasources,
-	 * if you would like to override the existing ones use servoyDeveloper.save(true).
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save()
 	 */
+	@Override
 	public void js_save()
 	{
 		js_save(false);
 	}
 
-	/**
-	 * Saves all changes made through the solution model into the workspace.
+	/*
+	 * (non-Javadoc)
 	 *
-	 * @param override Override existing in memory tables.
+	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(boolean)
 	 */
+	@Override
 	public void js_save(final boolean override)
 	{
 		IWorkspaceRunnable saveJob = new IWorkspaceRunnable()
@@ -182,51 +183,46 @@ public class JSDeveloperSolutionModel
 		job.schedule();
 	}
 
-	/**
-	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
-	 * This must be a solution created or altered form/in memory datasource.
+	/*
+	 * (non-Javadoc)
 	 *
-	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
+	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object)
 	 */
+	@Override
 	public void js_save(Object obj)
 	{
 		js_save(obj, false);
 	}
 
-	/**
-	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
-	 * This must be a solution created or altered form/in memory datasource.
+	/*
+	 * (non-Javadoc)
 	 *
-	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
-	 * @param override Override an existing in memory table.
+	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object, boolean)
 	 */
+	@Override
 	public void js_save(Object obj, final boolean override)
 	{
 		save(obj, null, override, null, null);
 	}
 
-	/**
-	 * Saves just the given form, valuelist, relation or in memory datasource into the developers workspace.
-	 * This must be a solution created form/in memory datasource.
-	 * NOTE: The current method can only be used for new objects.
-	 * For existing objects, please use the save method with the override flag set to true.
-	 * It is not needed to specify the solution, because the object to be updated will be saved in the right solution.
+	/*
+	 * (non-Javadoc)
 	 *
-	 * @param obj The formname, JSForm, JSValueList, JSRelation, datasource name or JSDataSource object to save.
-	 * @param solutionName The destination solution, a module of the active solution.
+	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_save(java.lang.Object, java.lang.String)
 	 */
+	@Override
 	public void js_save(Object obj, String solutionName)
 	{
 		save(obj, solutionName, false, null, null);
 	}
 
-	/**
-	 * Updates the given in memory datasource and saves it into the developers workspace.
+	/*
+	 * (non-Javadoc)
 	 *
-	 * @param dataSource datasource name or JSDataSource object to save.
-	 * @param dataset the dataset with the update columns
-	 * @param types array of the update columns types
+	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_updateInMemDataSource(java.lang.Object, com.servoy.j2db.dataprocessing.JSDataSet,
+	 * java.lang.Object)
 	 */
+	@Override
 	public void js_updateInMemDataSource(Object dataSource, JSDataSet dataSet, Object types)
 	{
 		save(dataSource, null, true, dataSet, types);
@@ -381,7 +377,7 @@ public class JSDeveloperSolutionModel
 							{
 								saveObj = solutionCopy.getRelation(objName);
 							}
-							if (saveObj == null) throw new IllegalArgumentException("The object "+objName+" is not solution model created/altered.");
+							if (saveObj == null) throw new IllegalArgumentException("The object " + objName + " is not solution model created/altered.");
 
 							if (solutionName != null)
 							{
@@ -474,11 +470,12 @@ public class JSDeveloperSolutionModel
 		}
 	}
 
-	/**
-	 * Opens the form FormEditor in the developer.
+	/*
+	 * (non-Javadoc)
 	 *
-	 * @param form The form name or JSForm object to open in an editor.
+	 * @see com.servoy.eclipse.core.IJSDeveloperSolutionModel#js_openForm(java.lang.Object)
 	 */
+	@Override
 	public void js_openForm(Object form)
 	{
 		String name = null;
