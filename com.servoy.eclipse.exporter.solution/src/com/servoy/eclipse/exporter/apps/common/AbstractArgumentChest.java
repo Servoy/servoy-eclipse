@@ -193,7 +193,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "             Default: '../../application_server'.\n"
 			+ "        -pl alternate project locations; solution, resources and  other needed projects will\n"
 			+ "             be searched for in subfolders (deep) of the given 'workspace_location' as well.\n"
-			+ "                                                                             Example: if the\n"
+			+ "                                                                         For example: if the\n"
 			+ "             workspace needs to contain projects from different git repositories,  those can\n"
 			+ "             be checked out in '<workspace_loc>', '<workspace_loc>/a', '<workspace_loc>/b/c'\n"
 			+ "             and so on.\n"
@@ -205,7 +205,13 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 
 	protected String getMandatoryArgumentsMessage()
 	{
-		return MANDATORY_ARGS_INDENT + "-s <solution_name> -o <out_dir> -data <workspace_location>";
+		return getMandatoryArgumentsMessage(true);
+	}
+
+	protected String getMandatoryArgumentsMessage(boolean advertiseThatMultipleSolutionsAreSupported)
+	{
+		return MANDATORY_ARGS_INDENT + "-s " + (advertiseThatMultipleSolutionsAreSupported ? "<solutions_separated_by_comma>" : "<solution_name>") +
+			" -o <out_dir> -data <workspace_location>";
 	}
 
 	// dbi and dbd are implemented by mobile exporter, but hardcoded, not configurable - so not part of the help message; allow extending classes to suppress these

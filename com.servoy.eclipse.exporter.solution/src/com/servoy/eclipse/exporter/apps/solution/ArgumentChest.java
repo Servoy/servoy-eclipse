@@ -138,9 +138,10 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			+ "             in export. If only '-modules' is used,  it will export all  referenced modules.\n"
 			+ "             If a list of  modules is also included, it  will export only  modules from this\n"
 			+ "             list, provided they are referenced by exported solution.\n"
-			+ "        -isf <import_options_file> ... path to import options file. Default value is null.\n"
-			+ "             If present, will be added to export file as import_settings.json. This file should\n"
-			+ "             be taken from developer export (import_settings.json) - inside .servoy file \n"
+			+ "        -isf <import_options_file> ... path  to import options file.  Default value is null.\n"
+			+ "             If present, will  be added to  export  file as  import_settings.json. This file\n"
+			+ "             should be  taken from a  developer export  (import_settings.json inside .servoy\n"
+			+ "             file).\n"
 			+ getHelpMessageExistCodes();
 		// @formatter:on
 	}
