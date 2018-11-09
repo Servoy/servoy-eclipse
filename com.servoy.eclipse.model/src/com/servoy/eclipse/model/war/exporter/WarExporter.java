@@ -894,6 +894,12 @@ public class WarExporter
 						throw new ExportException("Can't export none active soluton with the name: " + name +
 							" it couildn't be found in the workspace or the solution couldnt be loaded");
 					}
+					if (!Utils.equalObjects(servoyProject.getResourcesProject() != null ? servoyProject.getResourcesProject().getProject().getName() : null,
+						servoyModel.getActiveResourcesProject() != null ? servoyModel.getActiveResourcesProject().getProject().getName() : null))
+					{
+						ServoyLog.logWarning("Solution '" + name +
+							"' has different resources project than active solution, this could lead to unpredictable behavior at runtime.", null);
+					}
 					copy[start++] = servoyProject.getSolution();
 				}
 				modules = copy;
