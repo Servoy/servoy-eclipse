@@ -1,5 +1,5 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
@@ -19,6 +19,7 @@ import { ServoyDefaultTypeahead } from './typeahead/typeahead';
 import { ServoyDefaultCheckGroup } from './checkgroup/checkgroup';
 import { ServoyDefaultRadiogroup } from './radiogroup/radiogroup';
 import { ServoyDefaultCheck } from './check/check';
+import { ServoyDefaultPassword } from './password/password';
 
 import { SabloModule } from '../sablo/sablo.module'
 
@@ -44,6 +45,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ServoyDefaultCheckGroup,
     ServoyDefaultRadiogroup,
     ServoyDefaultCheck,
+    ServoyDefaultPassword,
     FormatFilterPipe,
     MnemonicletterFilterPipe,
     NotNullOrEmptyPipe,
@@ -75,6 +77,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
             ServoyDefaultCheckGroup,
             ServoyDefaultRadiogroup,
             ServoyDefaultCheck,
+            ServoyDefaultPassword
   ],
   providers: [
               FormattingService,
