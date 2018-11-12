@@ -18,12 +18,17 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
     @Input() selectOnEnter
     @Input() valuelistID
     
+    valueBeforeChange: any;
+
     constructor(renderer: Renderer2, private formattingService : FormattingService) {
         super(renderer);
     }
 
     ngOnInit() {
         // attach focus gained/lost
+        this.renderer.listen( this.getNativeElement(), 'focus', ( e ) => {
+            this.valueBeforeChange = this.getNativeElement().value;
+        } );
     }
 
     ngOnChanges( changes: SimpleChanges ) {
@@ -50,8 +55,15 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
     }
 
     update( val: string ) {
-        if(this.format)
-            this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
+        if(this.format) {
+            var newDataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
+            if(this.dataProviderID == newDataProviderID) {
+                this.getNativeElement().value = this.valueBeforeChange;
+            }
+            else {
+                this.dataProviderID = newDataProviderID;
+            }
+        }
         this.dataProviderIDChange.emit( this.dataProviderID );
     }
 }
