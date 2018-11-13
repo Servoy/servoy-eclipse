@@ -49,6 +49,7 @@ import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -118,6 +119,7 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.Resources
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.IFormComponentListener;
@@ -3404,6 +3406,55 @@ public class ServoyModel extends AbstractServoyModel
 				handleOutstandingChangedFiles(null);
 			}
 		});
+		if (dataModelManager != null)
+		{
+			IServerManagerInternal serverManager = getServerManager();
+
+			// add listeners to initial server list
+			String[] array = serverManager.getServerNames(true, true, true, true);
+			for (String server_name : array)
+			{
+				IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
+				if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()))
+				{
+					IFolder serverInformationFolder = dataModelManager.getDBIFileContainer(server.getName());
+					if (serverInformationFolder.exists())
+					{
+						try
+						{
+							serverInformationFolder.accept((IResource resource) -> {
+								String extension = resource.getFileExtension();
+								if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
+								{
+									String tableName = resource.getName().substring(0,
+										resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+									IFile file = dataModelManager.getDBIFile(server.getName(), tableName);
+									if (file.exists())
+									{
+										try
+										{
+											InputStream is = file.getContents(true);
+											String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+											Utils.closeInputStream(is);
+											DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, false);
+										}
+										catch (CoreException e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+								}
+								return true;
+							});
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
