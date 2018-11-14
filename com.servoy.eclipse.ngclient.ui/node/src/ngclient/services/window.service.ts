@@ -39,6 +39,10 @@ export class WindowService {
             }
        });
     }
+
+   public reload(){
+       window.location.reload(true);
+   }
    
    public destroyController(formName:string){
        this.formService.destroyFormCache(formName);
