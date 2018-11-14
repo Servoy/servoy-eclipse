@@ -17,8 +17,6 @@ export class ServoyDefaultPassword extends ServoyDefaultBaseField implements OnI
     super.ngOnChanges(changes);
   }
 
-  findMode = false;
-
   onClick(event) {
     if (this.editable == false && this.onActionMethodID) {
       this.onActionMethodID(event);
