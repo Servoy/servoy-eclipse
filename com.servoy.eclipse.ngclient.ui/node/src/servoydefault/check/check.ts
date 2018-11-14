@@ -41,7 +41,9 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice implements OnIni
       }
   }
   
+  //TODO refactor after tableview impl
   isInPortal() {
-      return !!this.element.nativeElement.closest('.svy-portal') && !this.element.nativeElement.closest('.svy-listviewwrapper');
+      return false;
+    //return !!this.element.nativeElement.closest('.svy-portal') && !this.element.nativeElement.closest('.svy-listviewwrapper');
    }
 }
