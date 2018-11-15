@@ -367,6 +367,17 @@
                contentTypeId="org.eclipse.wst.html.core.htmlsource">
          </contentTypeBinding>
       </editor>
+       <editor
+             class="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
+             default="true"
+             filenames="servoy_theme_properties.less"
+             id="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
+             matchingStrategy="com.servoy.eclipse.ui.editors.less.PropertiesLessMatchingStrategy"
+             name="Servoy Theme Properties">
+         <contentTypeBinding
+               contentTypeId="com.servoy.eclipse.core.resource.media">
+         </contentTypeBinding>
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
