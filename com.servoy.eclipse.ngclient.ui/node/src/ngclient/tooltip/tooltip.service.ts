@@ -1,13 +1,18 @@
-import {Injectable} from "@angular/core";
+import { Injectable} from "@angular/core";
+import { Subject} from "rxjs";
 
 @Injectable()
 export class TooltipService {
+   isTooltipActive: Subject<boolean>;
   private tooltipDiv: HTMLDivElement;
   private tipmousemouveEventX: any;
   private tipmousemouveEventY: any;
   private tipmousemouveEventIsPage: boolean;
   tipInitialTimeout: any;
   tipTimeout: any;
+  constructor(){
+    this.isTooltipActive = new Subject<boolean>();
+  }
 
   private getTooltipDiv(): HTMLDivElement {
     if (!this.tooltipDiv) {
@@ -82,6 +87,7 @@ export class TooltipService {
       let newTop = y - 10 - tDiv.offsetHeight;
       tDiv.style.top = newTop + "px";
     }
+    this.isTooltipActive.next(true);
     this.tipTimeout = setTimeout(() => this.hideTooltip(), dismissDelay);
 
 
@@ -99,6 +105,7 @@ export class TooltipService {
 
     let tDiv = this.getTooltipDiv();
     tDiv.style.display = "none";
+    this.isTooltipActive.next(false);
   }
 
   public showTooltip(event, message, initialDelay, dismissDelay) {

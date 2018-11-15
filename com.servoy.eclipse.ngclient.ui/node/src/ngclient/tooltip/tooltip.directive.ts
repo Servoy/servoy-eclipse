@@ -6,14 +6,18 @@ import {ServoyService} from "../servoy.service"
 export class TooltipDirective implements OnDestroy {
 
   @Input('svyTooltip') tooltipText: string;
+  isActive: boolean = false;
 
   constructor(private tooltipService: TooltipService){
+    this.tooltipService.isTooltipActive.subscribe(a => {
+      this.isActive = a
+    });
   }
 
-  @HostListener('mouseover')
+  @HostListener('mouseenter')
   onMouseEnter(event): void {
-    if(this.tooltipText)  
-        this.tooltipService.showTooltip(event, this.tooltipText,750, 5000);
+    if(this.tooltipText)
+        this.tooltipService.showTooltip(event, this.tooltipText, 750, 5000);
   }
 
   @HostListener('mouseout')
