@@ -25,7 +25,7 @@ public class LessPropertyEntry
 {
 	private final String name;
 	private String value;
-	String initialValue;
+	private String lastTxtValue;
 	private final LessPropertyType type;
 
 	static enum LessPropertyType
@@ -37,7 +37,7 @@ public class LessPropertyEntry
 	{
 		this.name = name;
 		this.value = value;
-		this.initialValue = value;
+		this.lastTxtValue = value;
 		this.type = type;
 	}
 
@@ -67,8 +67,13 @@ public class LessPropertyEntry
 		return type;
 	}
 
-	public String getInitialValue()
+	public String getLastTxtValue()
 	{
-		return initialValue;
+		return lastTxtValue;
+	}
+
+	public void resetLastTxtValue()
+	{
+		lastTxtValue = value;
 	}
 }
