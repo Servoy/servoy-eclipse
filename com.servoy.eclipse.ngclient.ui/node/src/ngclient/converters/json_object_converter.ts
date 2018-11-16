@@ -17,7 +17,7 @@ export class JSONObjectConverter implements IConverter {
     constructor( private converterService: ConverterService, private specTypesService: SpecTypesService ) {
     }
 
-    fromServerToClient( serverJSONValue, currentClientValue?: BaseCustomObject, componentScope?, componentModelGetter?) {
+    fromServerToClient( serverJSONValue, currentClientValue?: BaseCustomObject) {
         let newValue = currentClientValue;
         // remove old watches (and, at the end create new ones) to avoid old watches getting triggered by server side change
         // TODO  removeAllWatches(currentClientValue);
@@ -39,7 +39,7 @@ export class JSONObjectConverter implements IConverter {
 
                 if ( conversionInfo ) {
                     internalState.conversionInfo[c] = conversionInfo;
-                    newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined, componentScope, componentModelGetter );
+                    newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined);
                 }
                 clientObject[c] = elem;
             }
@@ -73,7 +73,7 @@ export class JSONObjectConverter implements IConverter {
 
                     if ( conversionInfo ) {
                         internalState.conversionInfo[key] = conversionInfo;
-                        currentClientValue[key] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[key], componentScope, componentModelGetter );
+                        currentClientValue[key] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[key] );
                     } else currentClientValue[key] = val;
                 }
                 internalState.ignoreChanges = false;

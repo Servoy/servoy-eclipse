@@ -39,7 +39,7 @@ export class FormService {
                                 for ( var property in formData[beanname] ) {
                                     let value = formData[beanname][property];
                                     if ( beanConversion && beanConversion[property] ) {
-                                        value = this.converterService.convertFromServerToClient( value, beanConversion[property], comp.model[property], null, null );
+                                        value = this.converterService.convertFromServerToClient( value, beanConversion[property], comp.model[property]);
                                     }
                                     comp.model[property] = value;
                                 }
@@ -92,7 +92,7 @@ export class FormService {
             }
             else {
                 if ( elem.model[ConverterService.TYPES_KEY] != null ) {
-                    this.converterService.convertFromServerToClient( elem.model, elem.model[ConverterService.TYPES_KEY], null, null, null );
+                    this.converterService.convertFromServerToClient( elem.model, elem.model[ConverterService.TYPES_KEY], null );
                     formCache.addConversionInfo( elem.name, elem.model[ConverterService.TYPES_KEY] );
                 }
                 const comp = new ComponentCache( elem.name, elem.type, elem.model, elem.handlers, elem.position );

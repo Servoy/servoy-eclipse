@@ -4,7 +4,7 @@ import * as moment from 'moment';
 
 export class DateConverter implements IConverter {
     
-    fromServerToClient( serverJSONValue, currentClientValue?, componentScope?, componentModelGetter? ) {
+    fromServerToClient( serverJSONValue, currentClientValue?) {
         var dateObj = new Date( serverJSONValue );
         return dateObj;
     }

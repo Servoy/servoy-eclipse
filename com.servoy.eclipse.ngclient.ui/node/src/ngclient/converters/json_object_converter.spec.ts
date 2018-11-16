@@ -151,7 +151,7 @@ describe( 'JSONObjectConverter', () => {
         msgFromServer[TYPES_KEY] = { 0: {} };
         msgFromServer[TYPES_KEY]['0'][VALUE] = "JSON_obj";
 
-        converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder, null, null );
+        converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder );
         expect( tabHolder.getStateHolder()[CONTENT_VERSION] ).toBe( 1, "it got the new version from server" );
         expect( tabHolder.tab2.getStateHolder()[CONTENT_VERSION] ).toBe( 2, "it got the new version from server" );
 
@@ -184,7 +184,7 @@ describe( 'JSONObjectConverter', () => {
         msgFromServer[TYPES_KEY] = { 0: {} };
         msgFromServer[TYPES_KEY]['0'][VALUE] = "JSON_obj";
 
-        converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder, null, null );
+        converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder );
         expect( tabHolder.getStateHolder()[CONTENT_VERSION] ).toBe( 1, "it got the new version from server" );
         expect( tabHolder.tab3.getStateHolder()[CONTENT_VERSION] ).toBe( 3, "it got the new version from server" );
         expect( tabHolder.getStateHolder().getChangedKeys().length ).toBe( 0, "it should have no more outgoing changes" );
@@ -213,7 +213,7 @@ describe( 'JSONObjectConverter', () => {
         msgFromServer[TYPES_KEY] = { 0: {} };
         msgFromServer[TYPES_KEY]['0'][VALUE] = "JSON_obj";
 
-        converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder, null, null );
+        converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder);
         expect( tabHolder.getStateHolder()[CONTENT_VERSION] ).toBe( 1, "it got the new version from server" );
         expect( tabHolder.tab.getStateHolder()[CONTENT_VERSION] ).toBe( 3, "it got the new version from server" );
 
@@ -299,7 +299,7 @@ describe( 'JSONObjectConverter', () => {
         msgFromServer[TYPES_KEY]['0'][VALUE] = "JSON_obj";
         msgFromServer[TYPES_KEY]['1'][VALUE] = "JSON_obj";
 
-        converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder, null, null );
+        converterService.convertFromServerToClient( msgFromServer, "JSON_obj", tabHolder);
         expect( tabHolder.getStateHolder()[CONTENT_VERSION] ).toBe( 1, "it got the new version from server" );
         expect( tabHolder.tab2.getStateHolder()[CONTENT_VERSION] ).toBe( 3, "it got the new version from server" );
         expect( tabHolder.tab3.getStateHolder()[CONTENT_VERSION] ).toBe( 4, "it got the new version from server" );

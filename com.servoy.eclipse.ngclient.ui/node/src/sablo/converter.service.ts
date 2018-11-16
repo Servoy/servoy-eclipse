@@ -17,16 +17,16 @@ export class ConverterService {
         this.log = logFactory.getLogger("ConverterService");
     }
 
-    public convertFromServerToClient( serverSentData, conversionInfo, currentClientData?, scope?, modelGetter?) {
+    public convertFromServerToClient( serverSentData, conversionInfo, currentClientData?) {
         if ( typeof conversionInfo === 'string' || typeof conversionInfo === 'number' ) {
             var customConverter = this.customPropertyConverters[conversionInfo];
-            if ( customConverter ) serverSentData = customConverter.fromServerToClient( serverSentData, currentClientData, scope, modelGetter );
+            if ( customConverter ) serverSentData = customConverter.fromServerToClient( serverSentData, currentClientData);
             else { //converter not found - will not convert
                 this.log.error(this.log.buildMessage(() => ("cannot find type converter (s->c) for: '" + conversionInfo + "'.")));
             }
         } else if ( conversionInfo ) {
             for ( var conKey in conversionInfo ) {
-                serverSentData[conKey] = this.convertFromServerToClient( serverSentData[conKey], conversionInfo[conKey], currentClientData ? currentClientData[conKey] : undefined, scope, modelGetter ); // TODO should componentScope really stay the same here? 
+                serverSentData[conKey] = this.convertFromServerToClient( serverSentData[conKey], conversionInfo[conKey], currentClientData ? currentClientData[conKey] : undefined ); 
             }
         }
         return serverSentData;
@@ -159,48 +159,7 @@ export class ConverterService {
         return ret;
     }
 
-    /**
-     * Registers a custom client side property handler into the system. These handlers are useful
-     * for custom property types that require some special handling when received through JSON from server-side
-     * or for sending content updates back. (for example convert received JSON into a different JS object structure that will be used
-     * by beans or just implement partial updates for more complex property contents)
-     *  
-     * @param customHandler an object with the following methods/fields:
-     * {
-     * 
-     *              // Called when a JSON update is received from the server for a property
-     *              // @param serverSentJSONValue the JSON value received from the server for the property
-     *              // @param currentClientValue the JS value that is currently used for that property in the client; can be null/undefined if
-     *              //        conversion happens for service API call parameters for example...
-     *              // @param scope scope that can be used to add component/service and property related watches; can be null/undefined if
-     *              //        conversion happens for service/component API call parameters for example...
-     *              // @param modelGetter a function that returns the model that can be used to find other properties of the service/component if needed (if the
-     *              //        property is 'linked' to another one); can be null/undefined if conversion happens for service/component API call parameters for example...
-     *              // @return the new/updated client side property value; if this returned value is interested in triggering
-     *              //         updates to server when something changes client side it must have these member functions in this[$sabloConverters.INTERNAL_IMPL]:
-     *              //              setChangeNotifier: function(changeNotifier) - where changeNotifier is a function that can be called when
-     *              //                                                          the value needs to send updates to the server; this method will
-     *              //                                                          not be called when value is a call parameter for example, but will
-     *              //                                                          be called when set into a component's/service's property/model
-     *              //              isChanged: function() - should return true if the value needs to send updates to server // TODO this could be kept track of internally
-     *              fromServerToClient: function (serverSentJSONValue, currentClientValue, scope, modelGetter) { (...); return newClientValue; },
-     * 
-     *              // Converts from a client property JS value to a JSON that will be sent to the server.
-     *              // @param newClientData the new JS client side property value
-     *              // @param oldClientData the old JS JS client side property value; can be null/undefined if
-     *              //        conversion happens for service API call parameters for example...
-     *              // @return the JSON value to send to the server.
-     *              fromClientToServer: function(newClientData, oldClientData) { (...); return sendToServerJSON; }
-     * 
-     *              // Some 'smart' property types need an angular scope to register watches to; this method will get called on them
-     *              // when the scope that they should use changed (old scope could get destroyed and then after a while a new one takes it's place).
-     *              // This gives such property types a way to keep their watches operational even on the new scope.
-     *              // @param clientValue the JS client side property value
-     *              // @param scope the new scope. If null it means that the previous scope just got destroyed and property type should perform needed cleanup.
-     *              updateAngularScope: function(clientValue, scope) { (...); }
-     * 
-     * }
-     */
+
     public registerCustomPropertyHandler( propertyTypeID: string, customHandler: IConverter, overwrite?: boolean ) {
         if ( overwrite == false && this.customPropertyConverters[propertyTypeID] ) return;
         this.customPropertyConverters[propertyTypeID] = customHandler;
@@ -261,7 +220,7 @@ export class ConverterService {
 }
 
 export interface IConverter {
-    fromServerToClient( serverSentData: Object, currentClientData: Object, scope?: Object, modelGetter?: Object ): Object;
+    fromServerToClient( serverSentData: Object, currentClientData: Object ): Object;
     fromClientToServer( newClientData: Object, oldClientData: Object ): Object;
 }
 

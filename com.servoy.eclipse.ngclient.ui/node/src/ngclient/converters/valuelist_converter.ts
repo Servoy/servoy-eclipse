@@ -17,7 +17,7 @@ export class ValuelistConverter implements IConverter {
     constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper) {
     }
      
-    fromServerToClient( serverJSONValue, currentClientValue?: Valuelist, componentScope?, componentModelGetter? ) : IValuelist {
+    fromServerToClient( serverJSONValue, currentClientValue?: Valuelist) : IValuelist {
         let newValue : Valuelist = currentClientValue; 
         let state: ValuelistState = null;
 
