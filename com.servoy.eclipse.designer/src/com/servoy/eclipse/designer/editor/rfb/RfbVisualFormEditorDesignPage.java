@@ -255,6 +255,19 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		return "absolute";
 	}
 
+	public void refreshPalette()
+	{
+		CurrentWindow.runForWindow(new WebsocketSessionWindows(editorWebsocketSession), new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("refreshPalette", new Object[] { });
+				editorWebsocketSession.valueChanged();
+			}
+		});
+	}
+
 	public void refreshBrowserUrl(boolean force)
 	{
 		Form form = editorPart.getForm();
@@ -623,7 +636,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				@Override
 				public void run()
 				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshPalette();
 				}
 			});
 		}

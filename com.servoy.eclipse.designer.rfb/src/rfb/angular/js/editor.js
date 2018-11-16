@@ -30,7 +30,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	SELECTION_MOVED: "SELECTION_MOVED",
 	INITIALIZED: "INITIALIZED",
 	RENDER_DECORATORS: "RENDER_DECORATORS",
-	HIDE_DECORATORS: "HIDE_DECORATORS"
+	HIDE_DECORATORS: "HIDE_DECORATORS",
+	RENDER_PALETTE: "RENDER_PALETTE"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 100,
 	PART_LABEL_HEIGHT: 22,
@@ -1439,7 +1440,13 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				if (changed) editorScope.setSelection(selection);
 			}, 400);
 		},
-
+		
+		refreshPalette: function()
+		{
+			$rootScope.$broadcast(EDITOR_EVENTS.RENDER_PALETTE);
+			return true;
+		},
+		
 		openContainedForm: function(ghost) {
 			wsSession.callService('formeditor', 'openContainedForm', {
 				"uuid": ghost.uuid

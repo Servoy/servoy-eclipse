@@ -76,6 +76,10 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 				});
 			}
 
+			$rootScope.$on(EDITOR_EVENTS.RENDER_PALETTE, function(event, selection) {
+				loadPalette();
+			})
+			
 			$pluginRegistry.registerPlugin(function(scope) {
 				editorScope = scope;
 				if (scope.isAbsoluteFormLayout())
