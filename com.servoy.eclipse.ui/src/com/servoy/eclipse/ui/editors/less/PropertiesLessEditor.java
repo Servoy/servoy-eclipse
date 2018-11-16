@@ -48,8 +48,13 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 			{
 				updateTextEditorFromProperties();
 			}
+			else
+			{
+				updatePropertiesFromTextEditor();
+			}
 			textEditor.doSave(monitor);
 			isPageModified = false;
+			editorInput.clearChanges();
 			firePropertyChange(PROP_DIRTY);
 		}
 	}
@@ -57,7 +62,6 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 	private void updateTextEditorFromProperties()
 	{
 		textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput()).set(editorInput.getText());
-		editorInput.clearChanges();
 	}
 
 	@Override
@@ -159,7 +163,6 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 				if (isPageModified) updateTextEditorFromProperties();
 				break;
 		}
-		isPageModified = false;
 		super.pageChange(newPageIndex);
 	}
 

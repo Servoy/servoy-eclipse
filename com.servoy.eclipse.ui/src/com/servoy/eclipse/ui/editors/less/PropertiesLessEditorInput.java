@@ -52,6 +52,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	private LessPropertyEntry[] properties;
 	private final Set<LessPropertyEntry> modified = new HashSet<>();
 	private final static Map<LessPropertyType, TreeSet<String>> typesToProperties = new HashMap<>();
+	private final static Pattern lessVariablePattern = Pattern.compile("@([\\w-_]+)\\s*:\\s*(.*);");
 
 	private PropertiesLessEditorInput(IFile file, LessPropertyEntry[] properties)
 	{
@@ -96,8 +97,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	{
 		List<LessPropertyEntry> properties = new ArrayList<>();
 		String content = text.replaceAll("/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/", "").trim();
-		Pattern pattern = Pattern.compile("@([\\w-_]+):\\s*(.*);");
-		Matcher m = pattern.matcher(content);
+		Matcher m = lessVariablePattern.matcher(content);
 		while (m.find())
 		{
 			String name = m.group(1);
@@ -116,23 +116,43 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	private static LessPropertyType inferType(String name, String value)
 	{
 		//TODO infer types or load from some file
-		LessPropertyType type = LessPropertyType.TEXT;
+		LessPropertyType type = null;
 		String nameLowerCase = name.toLowerCase();
 		if (nameLowerCase.contains("color") || nameLowerCase.contains("fg") || nameLowerCase.contains("bg") || value.contains("#"))
 		{
 			type = LessPropertyType.COLOR;
 		}
-		else if (nameLowerCase.contains("radius") || nameLowerCase.contains("width") || nameLowerCase.contains("size"))
+		if (nameLowerCase.contains("radius") || nameLowerCase.contains("width") || nameLowerCase.contains("size"))
 		{
 			type = LessPropertyType.NUMBER;
 		}
-		else if (nameLowerCase.contains("font"))
+		if (nameLowerCase.contains("font"))
 		{
-			type = LessPropertyType.FONT;
+			if (type == null)
+			{
+				type = LessPropertyType.FONT;
+			}
+			else
+			{
+				//stuff like "font-size" have the actual type number, but they should be in allowed as content proposals for font properties
+				typesToProperties.get(LessPropertyType.FONT).add("@" + name);
+			}
 		}
-		else if (nameLowerCase.contains("border"))
+		if (nameLowerCase.contains("border"))
 		{
-			type = LessPropertyType.BORDER;
+			if (type == null)
+			{
+				type = LessPropertyType.BORDER;
+			}
+			else
+			{
+				//stuff like "border-width" have the actual type number, but they should be in allowed as content proposals for border properties
+				typesToProperties.get(LessPropertyType.BORDER).add("@" + name);
+			}
+		}
+		if (type == null)
+		{
+			type = LessPropertyType.TEXT;
 		}
 		return type;
 	}
@@ -203,13 +223,18 @@ public class PropertiesLessEditorInput extends FileEditorInput
 
 	public String getText()
 	{
-		String content = getFileContent(this);
+		StringBuilder content = new StringBuilder(getFileContent(this));
 		for (LessPropertyEntry prop : modified)
 		{
-			//TODO investigate if there is an optimal way to replace the old value with the new value
-			content = content.replaceFirst("@" + prop.getName() + ": " + prop.initialValue, "@" + prop.getName() + ": " + prop.getValue());
+			int start = content.indexOf("@" + prop.getName() + ":");
+			if (start > 0)
+			{
+				int end = content.indexOf(";", start);
+				content.replace(start, end, "@" + prop.getName() + ": " + prop.getValue());
+				prop.resetLastTxtValue();
+			}
 		}
-		return content;
+		return content.toString();
 	}
 
 	public LessPropertyEntry[] getProperties()

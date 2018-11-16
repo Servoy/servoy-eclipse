@@ -69,15 +69,17 @@ public class LessPropertiesComposite extends Composite
 		}
 	}
 
+	private static final Pattern pattern = Pattern.compile("[@\\w]([\\w-]*)");
+
 	private String getWordAt(String txt, int pos)
 	{
-		Pattern pattern = Pattern.compile("[@\\w]([\\w-]*)");
 		Matcher matcher = pattern.matcher(txt.substring(pos));
 		return matcher.find() ? matcher.group() : "";
 	}
 
-	private int getBeginIndex(String txt, int fromIndex)
+	private int getBeginIndex(String txt, int idx)
 	{
+		int fromIndex = idx - 1;
 		int lastIndexOf = txt.lastIndexOf(' ', fromIndex);
 		if (lastIndexOf < 0) lastIndexOf = txt.lastIndexOf('(', fromIndex);
 		if (lastIndexOf < 0) lastIndexOf = txt.lastIndexOf(')', fromIndex);
@@ -88,18 +90,15 @@ public class LessPropertiesComposite extends Composite
 
 	private final class LessPropertiesContentProposalProvider extends SimpleContentProposalProvider
 	{
-		private final Text txtName;
-
-		private LessPropertiesContentProposalProvider(String[] proposals, Text txtName)
+		private LessPropertiesContentProposalProvider(String[] proposals)
 		{
 			super(proposals);
-			this.txtName = txtName;
 		}
 
 		@Override
 		public IContentProposal[] getProposals(String contents, int position)
 		{
-			int beginIndex = getBeginIndex(contents, txtName.getCaretPosition());
+			int beginIndex = getBeginIndex(contents, position);
 			String word = getWordAt(contents, beginIndex);
 			IContentProposal[] contentProposals;
 			if (word != null && word.length() > 0)
@@ -158,14 +157,14 @@ public class LessPropertiesComposite extends Composite
 					String newVal = txtName.getText().trim();
 					if (newVal.equals(""))
 					{
-						txtName.setText(property.getInitialValue());
+						txtName.setText(property.getLastTxtValue());
 					}
 				});
 
 				String[] contentProposals = propertiesLessEditorInput.getContentProposals(property.getType(), property.getName());
 				if (contentProposals != null && contentProposals.length > 0)
 				{
-					LessPropertiesContentProposalProvider proposalProvider = new LessPropertiesContentProposalProvider(contentProposals, txtName);
+					LessPropertiesContentProposalProvider proposalProvider = new LessPropertiesContentProposalProvider(contentProposals);
 					ContentProposalAdapter adapter = new ContentProposalAdapter(txtName, new TextContentAdapter(), proposalProvider, keyStroke,
 						autoActivationCharacters);
 					adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
