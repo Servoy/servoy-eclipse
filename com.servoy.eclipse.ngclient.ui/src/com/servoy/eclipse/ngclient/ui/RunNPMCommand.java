@@ -37,8 +37,9 @@ import org.eclipse.core.runtime.jobs.Job;
 public class RunNPMCommand extends WorkspaceJob
 {
 
-	private final File projectNodeFolder;
+	private final File projectFolder;
 	private final String[] commands;
+	private final File nodePath;
 	private final File npmPath;
 	private Job nextJob;
 	private Process process;
@@ -46,27 +47,30 @@ public class RunNPMCommand extends WorkspaceJob
 	/**
 	 * @param name
 	 */
-	public RunNPMCommand(File npmPath, File projectNodeFolder, String... commands)
+	public RunNPMCommand(File nodePath, File npmPath, File projectFolder, String... commands)
 	{
 		super("Execute NPM command: " + Arrays.toString(commands));
 		this.commands = commands;
+		this.nodePath = nodePath;
 		this.npmPath = npmPath;
-		this.projectNodeFolder = projectNodeFolder;
+		this.projectFolder = projectFolder;
 	}
 
 	@Override
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 	{
 		ProcessBuilder builder = new ProcessBuilder();
-		builder.directory(projectNodeFolder);
+		builder.directory(projectFolder);
 		try
 		{
 			builder.redirectErrorStream(true);
 			for (String command : commands)
 			{
 				List<String> lst = new ArrayList<>();
-				lst.add(npmPath.toString());
+				lst.add(nodePath.getCanonicalPath());
+				lst.add(npmPath.getCanonicalPath());
 				lst.addAll(Arrays.asList(command.split(" ")));
+				lst.add("--scripts-prepend-node-path");
 				builder.command(lst);
 				process = builder.start();
 				InputStream inputStream = process.getInputStream();

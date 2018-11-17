@@ -6,8 +6,9 @@
       <nodejs
             id="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
             name="com.servoy.eclipse.nodejs.macosx.cocoa.x86_64"
-            path="node-v10.0.0-darwin-x64/bin/npm"
-            zip="node-v10.0.0-darwin-x64.tar.gz">
+            nodePath="node-v10.0.0-darwin-x64/bin/node"
+            npmPath="node-v10.0.0-darwin-x64/bin/npm"
+            archive="node-v10.0.0-darwin-x64.tar.gz">
       </nodejs>
    </extension>
 

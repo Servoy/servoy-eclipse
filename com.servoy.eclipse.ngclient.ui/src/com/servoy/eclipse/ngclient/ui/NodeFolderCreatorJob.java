@@ -74,7 +74,7 @@ public class NodeFolderCreatorJob extends Job
 		{
 			try
 			{
-				String fileContent = FileUtils.readFileToString(packageJsonFile);
+				String fileContent = FileUtils.readFileToString(packageJsonFile, "UTF-8");
 				URL packageJsonUrl = Activator.getInstance().getBundle().getEntry("/node/package.json");
 				String bundleContent = Utils.getURLContent(packageJsonUrl);
 				executeInstall = !fileContent.equals(bundleContent);
@@ -117,7 +117,7 @@ public class NodeFolderCreatorJob extends Job
 		System.err.println("copied " + (System.currentTimeMillis() - time));
 		if (executeInstall) Activator.getInstance().executeNPMInstall();
 		else Activator.getInstance().executeNPMBuild();
-		createFileWatcher(nodeFolder);
+		createFileWatcher();
 		System.err.println("done " + (System.currentTimeMillis() - time));
 		return Status.OK_STATUS;
 	}
@@ -132,7 +132,7 @@ public class NodeFolderCreatorJob extends Job
 	 * This is is really only for using the developer in source mode. so that it will watch the node folder.
 	 * @param nodeFolder
 	 */
-	private void createFileWatcher(final File nodeFolder)
+	private void createFileWatcher()
 	{
 		String location = Activator.getInstance().getBundle().getLocation();
 		int index = location.indexOf("file:/");

@@ -51,8 +51,8 @@ public class IndexPageFilter implements Filter
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException
 	{
-		File nodeFolder = Activator.getInstance().getNodeFolder();
-		File distFolder = new File(nodeFolder, "dist");
+		File projectFolder = Activator.getInstance().getProjectFolder();
+		File distFolder = new File(projectFolder, "dist");
 		if (distFolder.exists())
 		{
 			HttpServletRequest request = (HttpServletRequest)servletRequest;
@@ -62,7 +62,7 @@ public class IndexPageFilter implements Filter
 				(requestURI.endsWith("/") || requestURI.endsWith("/" + solutionName) || requestURI.toLowerCase().endsWith("/index.html")))
 			{
 				File file = new File(distFolder, "index.html");
-				String indexHtml = FileUtils.readFileToString(file);
+				String indexHtml = FileUtils.readFileToString(file, "UTF-8");
 				indexHtml = indexHtml.replace("<base href=\"/\">", "<base href=\"/solution/\">");
 				servletResponse.setCharacterEncoding("UTF-8");
 				servletResponse.setContentType("text/html");

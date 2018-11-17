@@ -26,10 +26,11 @@ public class Activator extends Plugin
 	// The shared instance
 	private static Activator plugin;
 
+	private File nodePath;
 	private File npmPath;
 	private Job extractingNode;
 	private RunNPMCommand buildCommand;
-	private File nodeFolder;
+	private File projectFolder;
 
 	public static Activator getInstance()
 	{
@@ -50,13 +51,17 @@ public class Activator extends Plugin
 				{
 					IExtensionRegistry registry = Platform.getExtensionRegistry();
 					IConfigurationElement[] cf = registry.getConfigurationElementsFor(PLUGIN_ID, NODEJS_EXTENSION);
+					File node = null;
 					File npm = null;
 					if (cf.length > 0)
 					{
-						npm = extractNodeJS(cf[0]);
+						node = extractPath(cf[0], "nodePath");
+						node.setExecutable(true);
+						npm = extractPath(cf[0], "npmPath");
 					}
 					synchronized (plugin)
 					{
+						nodePath = node;
 						npmPath = npm;
 						extractingNode = null;
 						plugin.notifyAll();
@@ -68,73 +73,65 @@ public class Activator extends Plugin
 		extractingNode.schedule();
 
 		File stateLocation = Activator.getInstance().getStateLocation().toFile();
-		this.nodeFolder = new File(stateLocation, "target");
+		this.projectFolder = new File(stateLocation, "target");
 
-		new NodeFolderCreatorJob(this.nodeFolder).schedule();
+		new NodeFolderCreatorJob(this.projectFolder).schedule();
 	}
 
 	/**
-	 * @return the nodeFolder
+	 * @return the projectFolder
 	 */
-	public File getNodeFolder()
+	public File getProjectFolder()
 	{
-		return nodeFolder;
+		return projectFolder;
 	}
 
-	/**
-	 * @param cf
-	 */
-	private static File extractNodeJS(IConfigurationElement element)
+	private static File extractPath(IConfigurationElement element, String attribute)
 	{
 		String pluginId = element.getNamespaceIdentifier();
-		String path = element.getAttribute("path");
+		String path = element.getAttribute(attribute);
 		IPath stateLocation = plugin.getStateLocation();
 		File baseDir = stateLocation.toFile();
-		File npm = new File(baseDir, path);
-		if (!npm.exists())
+		File file = new File(baseDir, path);
+		if (!file.exists())
 		{
-			String zip = element.getAttribute("zip");
-			URL zipUrl = Platform.getBundle(pluginId).getResource(zip);
-			if (zipUrl != null)
+			String archive = element.getAttribute("archive");
+			URL archiveUrl = Platform.getBundle(pluginId).getResource(archive);
+			if (archiveUrl != null)
 			{
 				try
 				{
-					if (ZipUtils.isZipFile(zipUrl))
+					if (ZipUtils.isZipFile(archiveUrl))
 					{
-						ZipUtils.extractZip(zipUrl, baseDir);
+						ZipUtils.extractZip(archiveUrl, baseDir);
 					}
-					else if (ZipUtils.isTarGZFile(zipUrl))
+					else if (ZipUtils.isTarGZFile(archiveUrl))
 					{
-						ZipUtils.extractTarGZ(zipUrl, baseDir);
+						ZipUtils.extractTarGZ(archiveUrl, baseDir);
 					}
-					else if (ZipUtils.isTarXZFile(zipUrl))
+					else if (ZipUtils.isTarXZFile(archiveUrl))
 					{
-						ZipUtils.extractTarXZ(zipUrl, baseDir);
+						ZipUtils.extractTarXZ(archiveUrl, baseDir);
 					}
 				}
 				catch (IOException e)
 				{
 					ServoyLog.logError(e);
 				}
-
-				if (npm.exists())
-				{
-					npm.setExecutable(true);
-				}
 			}
 			else
 			{
-				ServoyLog.logWarning("couldn't create nodejs install from plugin " + pluginId + " and zip: " + zip, null);
+				ServoyLog.logWarning("couldn't create nodejs install from plugin " + pluginId + " and archive: " + archive, null);
 				return null;
 			}
 		}
-		return npm;
+		return file;
 	}
 
 	public void executeNPMInstall()
 	{
 		waitFormNodeExtraction();
-		RunNPMCommand installCommand = new RunNPMCommand(npmPath, nodeFolder, "install");
+		RunNPMCommand installCommand = new RunNPMCommand(nodePath, npmPath, projectFolder, "install");
 		installCommand.setUser(false);
 		createBuildCommand();
 		installCommand.setNextJob(buildCommand);
@@ -155,7 +152,7 @@ public class Activator extends Plugin
 	 */
 	private void createBuildCommand()
 	{
-		buildCommand = new RunNPMCommand(npmPath, nodeFolder, "run-script build_debug --scripts-prepend-node-path");
+		buildCommand = new RunNPMCommand(nodePath, npmPath, projectFolder, "run-script build_debug");
 		buildCommand.setUser(false);
 		buildCommand.setSystem(true);
 	}

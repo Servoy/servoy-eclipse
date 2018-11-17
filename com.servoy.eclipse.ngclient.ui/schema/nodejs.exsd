@@ -68,20 +68,27 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="zip" type="string" use="required">
+         <attribute name="archive" type="string" use="required">
             <annotation>
                <documentation>
-                  If path doesn&apos;t exist, specify a ZIP archive within the bundle that contains the node program. This extension will unzip it and look for the node path.
+                  If path doesn&apos;t exist, specify a zip or (compressed) tar archive within the bundle that contains the node program. This extension will unpack it and look for the node and npm paths.
                </documentation>
                <appinfo>
                   <meta.attribute kind="resource"/>
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="path" type="string" use="required">
+         <attribute name="nodePath" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Relative path to the node binary.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="npmPath" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Relative path to the npm cli js script.
                </documentation>
             </annotation>
          </attribute>
