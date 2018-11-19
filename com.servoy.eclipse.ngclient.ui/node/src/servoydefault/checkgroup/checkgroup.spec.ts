@@ -3,14 +3,11 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ServoyDefaultCheckGroup} from './checkgroup';
 import {SabloModule} from "../../sablo/sablo.module";
 import {
-  DecimalkeyconverterDirective,
-  FormatFilterPipe,
-  FormattingService, StartEditDirective,ServoyApi,
-  SvyFormat
+  FormattingService, StartEditDirective, ServoyApi,
+  SvyFormat, TooltipDirective, TooltipService
 } from "../../ngclient/servoy_public";
 import {FormsModule} from "@angular/forms";
 import {NotNullOrEmptyPipe} from "../../ngclient/pipes/pipes";
-import { of } from 'rxjs';
 
 const mockData = [
                           {
@@ -36,9 +33,9 @@ describe('ServoyDefaultCheckGroup', () => {
       servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
       
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultCheckGroup,NotNullOrEmptyPipe, SvyFormat, StartEditDirective ],
+      declarations: [ ServoyDefaultCheckGroup,NotNullOrEmptyPipe, SvyFormat, StartEditDirective, TooltipDirective ],
       imports: [SabloModule, FormsModule],
-      providers: [NotNullOrEmptyPipe,FormattingService]
+      providers: [NotNullOrEmptyPipe,FormattingService, TooltipService]
     })
     .compileComponents();
   }));

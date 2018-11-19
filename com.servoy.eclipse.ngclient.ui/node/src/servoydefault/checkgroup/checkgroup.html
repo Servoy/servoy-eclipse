@@ -8,9 +8,6 @@
     		[(ngModel)]="selection[i]"
             [value]="item.realValue"
             [disabled]="!enabled || !editable"
-            (click)='itemClicked($event,i)'
-            (focus)='focus($event)'
-            (blur)='blur($event)'
             #input />
     <span [innerHtml]="item.displayValue"></span>
   </label>

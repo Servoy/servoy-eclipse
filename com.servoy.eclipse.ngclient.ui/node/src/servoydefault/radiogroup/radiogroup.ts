@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, Renderer2} from '@angular/core';
+import {Component, OnInit, Renderer2} from '@angular/core';
 import {ServoyDefaultBaseChoice} from "../basechoice";
 import {FormattingService, PropertyUtils} from "../../ngclient/servoy_public";
 
@@ -9,34 +9,45 @@ import {FormattingService, PropertyUtils} from "../../ngclient/servoy_public";
 })
 export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice implements OnInit {
 
-  formattingSvc: any;
-  value: any[];
+  value: any;
   constructor(renderer: Renderer2, formattingService: FormattingService) {
     super(renderer, formattingService);
   }
+
   ngOnInit(){
-    this.onValuelistChange();
     this.setSelectionFromDataprovider();
-    this.setInitialStyles();
+    super.ngOnInit();
   }
 
   setSelectionFromDataprovider(){
-    this.value = [this.dataProviderID];
+    this.value = this.dataProviderID;
     if (this.valuelistID)
     {
-      for(var i=0;i < this.valuelistID.length;i++){
-        var item= this.valuelistID[i];
+      for(let i=0;i < this.valuelistID.length;i++){
+        let item= this.valuelistID[i];
         if((item.realValue+'') === (this.dataProviderID+''))
         {
-          this.value = [item.realValue];
+          this.value = item.realValue;
           break;
         }
       }
     }
   }
 
-  itemClicked (event,val) {
-    super.itemClicked(event, true, val);
+  itemClicked (event,index) {
+    let newValue = event.target.value ? event.target.value : event.target.innerText;
+    let changed = !(newValue === this.value);
+    this.value = newValue;
+
+    super.baseItemClicked(event, changed, newValue,index);
+  }
+
+  attachEventHandlers(element, index){
+    this.renderer.listen( element, 'click', ( e ) => {
+      this.itemClicked(e,index);
+      this.onActionMethodID( e );
+    });
+    super.attachEventHandlers(element,index);
   }
 
 }

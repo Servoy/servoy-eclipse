@@ -1,4 +1,4 @@
-import {Renderer2, Component, OnInit } from '@angular/core';
+import {Renderer2, Component, OnInit, SimpleChanges} from '@angular/core';
 import {FormattingService} from "../../ngclient/servoy_public";
 import {ServoyDefaultBaseChoice} from "../basechoice";
 
@@ -16,8 +16,19 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice implements OnIni
 
   ngOnInit() {
       this.selected = this.getSelectionFromDataprovider();
+      super.ngOnInit();
   }
   
+
+  attachEventHandlers(element, index){
+    this.renderer.listen( element, 'click', ( e ) => {
+      this.itemClicked(e);
+      if(this.onFocusLostMethodID) this.onFocusLostMethodID(e);
+      if(this.onActionMethodID) this.onActionMethodID(e);
+    });
+    super.attachEventHandlers(element,index);
+  }
+
   itemClicked(event) {
       if (this.valuelistID && this.valuelistID[0]) 
           this.dataProviderID = this.dataProviderID == this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
@@ -25,8 +36,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice implements OnIni
           this.dataProviderID = this.dataProviderID == "1" ? "0" : "1";
       else
           this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;      
-      if(this.onActionMethodID) this.onActionMethodID(event);
-      super.itemClicked(event,true, this.dataProviderID);
+      super.baseItemClicked(event,true, this.dataProviderID,0);
   }
   
   getSelectionFromDataprovider() {

@@ -13,9 +13,8 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice implements 
     super(renderer, formattingService);
   }
   ngOnInit(){
-    this.onValuelistChange();
     this.setSelectionFromDataprovider();
-    this.setInitialStyles();
+    super.ngOnInit();
   }
 
   getDataproviderFromSelection() {
@@ -55,7 +54,15 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice implements 
       event.target.checked = this.selection[index] = this.allowNullinc === 0 && checkedTotal <= 1 && !this.findmode;
       changed = !event.target.checked;
     }
-    super.itemClicked(event,changed, this.getDataproviderFromSelection());
+    super.baseItemClicked(event,changed, this.getDataproviderFromSelection(),index);
+  }
+
+  attachEventHandlers(element, index){
+    this.renderer.listen( element, 'click', ( event ) => {
+      this.itemClicked(event,index);
+      this.onActionMethodID( event );
+    });
+    super.attachEventHandlers(element,index);
   }
 }
 

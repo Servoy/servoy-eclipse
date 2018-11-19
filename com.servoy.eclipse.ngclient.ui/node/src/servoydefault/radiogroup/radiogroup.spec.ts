@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ServoyDefaultRadiogroup } from './radiogroup';
 import {SabloModule} from "../../sablo/sablo.module";
 import {FormsModule} from "@angular/forms";
-import {FormattingService, SvyFormat} from "../../ngclient/servoy_public";
+import {FormattingService, SvyFormat, TooltipDirective, TooltipService} from "../../ngclient/servoy_public";
 import {NotNullOrEmptyPipe} from "../../ngclient/pipes/pipes";
 
 describe('ServoyDefaultRadiogroup', () => {
@@ -12,9 +12,9 @@ describe('ServoyDefaultRadiogroup', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultRadiogroup, NotNullOrEmptyPipe, SvyFormat],
+      declarations: [ ServoyDefaultRadiogroup, NotNullOrEmptyPipe, SvyFormat, TooltipDirective],
       imports: [SabloModule, FormsModule],
-      providers: [NotNullOrEmptyPipe,FormattingService]
+      providers: [NotNullOrEmptyPipe,FormattingService, TooltipService]
     })
     .compileComponents();
   }));
