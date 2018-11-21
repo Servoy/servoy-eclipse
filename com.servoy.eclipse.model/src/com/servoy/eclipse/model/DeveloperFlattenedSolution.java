@@ -23,19 +23,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -54,13 +50,9 @@ import com.servoy.j2db.util.Utils;
  */
 public class DeveloperFlattenedSolution extends FlattenedSolution
 {
-	private volatile Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
-	private volatile Map<Form, String> formToDataSource = new HashMap<>();
-	private static final String ALL_FORMS = "";
-
 	public DeveloperFlattenedSolution(boolean cacheFlattenedForms)
 	{
-		super(cacheFlattenedForms);
+		super(cacheFlattenedForms, new DeveloperPersistIndex());
 	}
 
 	/*
@@ -160,151 +152,10 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 		return (IServer)ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(dataSource);
 	}
 
-	@Override
-	public synchronized void flushAllCachedData()
-	{
-		super.flushAllCachedData();
-		formCacheByDataSource.clear();
-		formToDataSource.clear();
-	}
-
-	@Override
-	public void itemChanged(IPersist persist)
-	{
-		super.itemChanged(persist);
-		if (persist instanceof Form)
-		{
-			updateDataSourceCache((Form)persist);
-		}
-	}
-
-	private void updateDataSourceCache(Form form)
-	{
-		String oldDataSource = formToDataSource.get(form);
-		String newDataSource = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
-		if (oldDataSource != null && !oldDataSource.equals(newDataSource) || oldDataSource == null && newDataSource != null)
-		{
-			getFormsByDatasource(oldDataSource, false).remove(form);
-			getFormsByDatasource(newDataSource, false).add(form);
-			formToDataSource.put(form, newDataSource);
-
-			if (form.isFormComponent().booleanValue())
-			{
-				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
-			}
-		}
-	}
 
 	@Override
 	public Iterator<Form> getForms(String datasource, boolean sort)
 	{
-		return getFormsByDatasource(datasource, true).iterator();
-	}
-
-	private Set<Form> getFormsByDatasource(String datasource, boolean includeNone)
-	{
-		String ds = datasource == null ? ALL_FORMS : datasource;
-		Set<Form> datasourceSet = formCacheByDataSource.get(ds);
-		if (datasourceSet == null)
-		{
-			datasourceSet = fillSet(datasource);
-			formCacheByDataSource.put(ds, datasourceSet);
-		}
-		if (includeNone)
-		{
-			Set<Form> datasourceNoneSet = formCacheByDataSource.get(Form.DATASOURCE_NONE);
-			if (datasourceNoneSet == null)
-			{
-				datasourceNoneSet = fillSet(Form.DATASOURCE_NONE);
-				formCacheByDataSource.put(Form.DATASOURCE_NONE, datasourceNoneSet);
-			}
-			Set<Form> result = new TreeSet<Form>(NameComparator.INSTANCE);
-			result.addAll(datasourceSet);
-			result.addAll(datasourceNoneSet);
-			return result;
-		}
-		return datasourceSet;
-	}
-
-	/**
-	 * @param datasource
-	 * @return
-	 */
-	private Set<Form> fillSet(String datasource)
-	{
-		Set<Form> result = new TreeSet<Form>(NameComparator.INSTANCE);
-		Iterator<Form> forms = super.getForms(datasource, false);
-		while (forms.hasNext())
-		{
-			Form f = forms.next();
-			result.add(f);
-			formToDataSource.put(f, f.getDataSource() != null ? f.getDataSource() : Form.DATASOURCE_NONE);
-		}
-		return result;
-	}
-
-	@Override
-	public void itemCreated(IPersist persist)
-	{
-		super.itemCreated(persist);
-		if (persist instanceof Form)
-		{
-			Form form = (Form)persist;
-			getFormsByDatasource(null, false).add(form);
-			String ds = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
-			formToDataSource.put(form, ds);
-			getFormsByDatasource(ds, false).add(form);
-
-			if (form.isFormComponent().booleanValue())
-			{
-				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
-			}
-		}
-	}
-
-	@Override
-	public void itemRemoved(IPersist persist)
-	{
-		super.itemRemoved(persist);
-		if (persist instanceof Form)
-		{
-			Form form = (Form)persist;
-			getFormsByDatasource(null, false).remove(form);
-			formToDataSource.remove(form);
-			getFormsByDatasource(form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE, false).remove(form);
-
-			if (form.isFormComponent().booleanValue())
-			{
-				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
-			}
-		}
-	}
-
-	@Override
-	protected void fillFormCaches()
-	{
-		super.fillFormCaches();
-		if (formCacheByDataSource.isEmpty()) //cache by datasource
-		{
-			Set<Form> allforms = new TreeSet<Form>(NameComparator.INSTANCE);
-			Iterator<Form> it = Solution.getForms(getAllObjectsAsList(), null, true);
-			while (it.hasNext())
-			{
-				Form f = it.next();
-				allforms.add(f);
-				formToDataSource.put(f, f.getDataSource() != null ? f.getDataSource() : Form.DATASOURCE_NONE);
-
-				String ds = f.getDataSource();
-				if (ds == null) ds = Form.DATASOURCE_NONE;
-				Set<Form> set = formCacheByDataSource.get(ds);
-				if (set == null)
-				{
-					set = new TreeSet<>(NameComparator.INSTANCE);
-					formCacheByDataSource.put(ds, set);
-				}
-				set.add(f);
-			}
-			formCacheByDataSource.put(ALL_FORMS, allforms);
-		}
+		return ((DeveloperPersistIndex)index).getFormsByDatasource(datasource, true).iterator();
 	}
 }

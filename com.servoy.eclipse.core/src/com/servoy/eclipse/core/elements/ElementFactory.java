@@ -1346,16 +1346,7 @@ public class ElementFactory
 			else if (key.endsWith("FormID") || (typeId == IRepository.FORMS && StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(key)))
 			{
 				// replace form references with their string name to be resolved when template is applied
-				UUID uuid;
-				try
-				{
-					uuid = UUID.fromString(object.getString(key));
-				}
-				catch (IllegalArgumentException e)
-				{
-					// not a uuid
-					continue;
-				}
+				String uuid = object.optString(key);
 				IPersist persist = flattenedSolution.searchPersist(uuid);
 				if (persist instanceof ISupportName)
 				{

@@ -44,7 +44,6 @@ import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.UUID;
 
 /**
  * Property handler for web components
@@ -113,7 +112,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				if (value instanceof Integer) return value;
 
 
-				IPersist persist = ModelUtils.getEditingFlattenedSolution(webObject, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
+				IPersist persist = ModelUtils.getEditingFlattenedSolution(webObject, persistContext.getContext()).searchPersist((String)value);
 				if (persist instanceof AbstractBase)
 				{
 					return new Integer(persist.getID());

@@ -3872,7 +3872,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												}
 											}
 										}
-										else if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > && pd.getConfig() instanceof FoundsetLinkedConfig &&
+										else if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > &&
+											pd.getConfig() instanceof FoundsetLinkedConfig &&
 											(((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof ValueListPropertyType))
 										{
 											continue;
@@ -3983,10 +3984,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												if (pd1.getType() instanceof ValueListPropertyType &&
 													pd.getName().equals(((ValueListConfig)pd1.getConfig()).getFor()))
 												{
-													UUID valuelistUUID = Utils.getAsUUID(((AbstractBase)o).getProperty(pd1.getName()), false);
+													Object valuelistUUID = ((AbstractBase)o).getProperty(pd1.getName());
 													if (valuelistUUID != null)
 													{
-														ValueList valuelist = (ValueList)flattenedSolution.searchPersist(valuelistUUID);
+														ValueList valuelist = (ValueList)flattenedSolution.searchPersist(valuelistUUID.toString());
 														if (valuelist != null)
 														{
 															int realValueType = valuelist.getRealValueType();
@@ -6258,11 +6259,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						String[] nameParts = name.split("\\$");
 						if (nameParts.length == 3)
 						{
-							UUID uuid = Utils.getAsUUID(nameParts[0], false);
-							if (uuid != null)
+							// look for real form to add marker on it
+							IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
+							if (form != null)
 							{
-								// look for real form to add marker on it
-								IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(uuid);
 								pathPair = SolutionSerializer.getFilePath(form, true);
 								path = new Path(pathPair.getLeft() + pathPair.getRight());
 								file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);

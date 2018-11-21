@@ -482,7 +482,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						String uuid = wfcName.substring(0, first$);
 						if (uuid.startsWith("_")) uuid = uuid.substring(1);
 						uuid = uuid.replace('_', '-');
-						persist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(UUID.fromString(uuid));
+						persist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(uuid);
 					}
 				}
 				if (persist != null)
