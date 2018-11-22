@@ -73,9 +73,9 @@ public class DeveloperPersistIndex extends PersistIndex
 	}
 
 	@Override
-	protected void destroy()
+	protected void flush()
 	{
-		super.destroy();
+		super.flush();
 		formCacheByDataSource.clear();
 		formToDataSource.clear();
 	}
