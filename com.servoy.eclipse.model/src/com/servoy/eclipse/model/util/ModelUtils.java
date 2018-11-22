@@ -394,14 +394,14 @@ public class ModelUtils
 			return null;
 		}
 
-		// is it a global method?
+		// This will normally now return any method now..
 		FlattenedSolution editingFlattenedSolution = getEditingFlattenedSolution(persist, context);
 		ScriptMethod sm = editingFlattenedSolution.getScriptMethod(methodId);
 		if (sm != null)
 		{
 			return sm;
 		}
-
+		// this code shouldn't be hit anymore
 		if (table != null)
 		{
 			try

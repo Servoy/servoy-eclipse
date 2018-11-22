@@ -32,7 +32,6 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -52,8 +51,9 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 		super(id, displayName);
 		this.persistContext = persistContext;
 		this.includeNone = includeNone;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(
-			persistContext.getPersist(), persistContext.getContext())), persistContext.getContext()));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(
+			new ValuelistLabelProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext())),
+			persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
@@ -95,13 +95,13 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 
 		public void openEditor(Integer value)
 		{
-			EditorUtil.openValueListEditor(AbstractBase.selectById(flattenedEditingSolution.getValueLists(false), value.intValue()));
+			EditorUtil.openValueListEditor(flattenedEditingSolution.getValueList(value.intValue()));
 		}
 
 		public boolean canEdit(Integer value)
 		{
 			return value != null && value.intValue() != ValuelistLabelProvider.VALUELIST_NONE &&
-				AbstractBase.selectById(flattenedEditingSolution.getValueLists(false), value.intValue()) != null;
+				flattenedEditingSolution.getValueList(value.intValue()) != null;
 		}
 	}
 
