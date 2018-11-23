@@ -152,6 +152,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	 */
 	private static final String DEPLOY_PASSWORD = "deployPassword";
 
+	/**
+	 *
+	 */
+	private static final String SAVE_IMPORT_SETTINGS_TO_DISK = "saveImportSettingsToDisk";
+
+
 	private Solution activeSolution;
 	private ExportSolutionModel exportModel;
 	private FileSelectionPage fileSelectionPage;
@@ -222,7 +228,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			ServoyLog.logError(ex);
 		}
-
+		dialogSettings.put(SAVE_IMPORT_SETTINGS_TO_DISK, exportModel.isSaveImportSettingsToDisk());
 
 		IWizardPage currentPage = this.getContainer().getCurrentPage();
 		if (currentPage != deployProgressPage)
@@ -326,6 +332,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			deployPassword = "";
 		}
+
+		exportModel.setSaveImportSettingsToDisk(dialogSettings.getBoolean(SAVE_IMPORT_SETTINGS_TO_DISK));
 	}
 
 	/*

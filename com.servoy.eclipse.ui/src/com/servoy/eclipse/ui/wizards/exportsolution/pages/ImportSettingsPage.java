@@ -304,6 +304,22 @@ public class ImportSettingsPage extends WizardPage implements Listener
 			}
 		});
 
+		gd = new GridData();
+		gd.horizontalSpan = 3;
+		final Button saveToDiskButton = new Button(composite, SWT.CHECK);
+		saveToDiskButton.setLayoutData(gd);
+		saveToDiskButton.setText("Save import settings to disk (beside the exported solution file)");
+		saveToDiskButton.setSelection(exportSolutionWizard.getModel().isSaveImportSettingsToDisk());
+		saveToDiskButton.addListener(SWT.Selection, new Listener()
+		{
+			@Override
+			public void handleEvent(Event event)
+			{
+				exportSolutionWizard.getModel().setSaveImportSettingsToDisk(saveToDiskButton.getSelection());
+				getWizard().getContainer().updateButtons();
+			}
+		});
+
 		myScrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		setControl(myScrolledComposite);

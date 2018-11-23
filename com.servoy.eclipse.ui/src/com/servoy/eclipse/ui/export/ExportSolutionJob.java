@@ -39,7 +39,6 @@ import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
@@ -48,6 +47,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
+import com.servoy.eclipse.ui.wizards.ExportSolutionModel;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -57,6 +57,7 @@ import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
 import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
@@ -66,7 +67,7 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
  */
 final public class ExportSolutionJob extends WorkspaceJob
 {
-	private final IExportSolutionModel exportModel;
+	private final ExportSolutionModel exportModel;
 	private final boolean dbDown;
 	private final IFileAccess workspace;
 	private final Solution activeSolution;
@@ -76,7 +77,7 @@ final public class ExportSolutionJob extends WorkspaceJob
 	 * @param name
 	 * @param exportModel
 	 */
-	public ExportSolutionJob(String name, IExportSolutionModel exportModel, Solution activeSolution, boolean dbDown, boolean exportSolution,
+	public ExportSolutionJob(String name, ExportSolutionModel exportModel, Solution activeSolution, boolean dbDown, boolean exportSolution,
 		IFileAccess workspace)
 	{
 		super(name);
@@ -138,11 +139,18 @@ final public class ExportSolutionJob extends WorkspaceJob
 				});
 			}
 
-			exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(), ClientVersion.getReleaseNumber(),
+			File exportFile = new File(exportModel.getFileName());
+			exporter.exportSolutionToFile(activeSolution, exportFile, ClientVersion.getVersion(), ClientVersion.getReleaseNumber(),
 				exportModel.isExportMetaData() && !dbDown, exportModel.isExportSampleData() && !dbDown, exportModel.getNumberOfSampleDataExported(),
 				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
 				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null,
 				exportModel.isExportReferencedWebPackages() ? getModulesWebPackages() : null);
+
+			if (exportModel.isSaveImportSettingsToDisk() && exportModel.useImportSettings())
+			{
+				Utils.writeTXTFile(new File(exportFile.getParent(), exportFile.getName() + "_import_settings.json"),
+					exportModel.getImportSettings().toString());
+			}
 
 			monitor.done();
 
