@@ -1,4 +1,4 @@
-import {Renderer2, Component, OnInit, SimpleChanges} from '@angular/core';
+import {Renderer2, Component, OnInit, SimpleChanges, AfterViewInit} from '@angular/core';
 import {FormattingService} from "../../ngclient/servoy_public";
 import {ServoyDefaultBaseChoice} from "../basechoice";
 
@@ -7,7 +7,7 @@ import {ServoyDefaultBaseChoice} from "../basechoice";
   templateUrl: './check.html',
   styleUrls: ['./check.css']
 })
-export class ServoyDefaultCheck extends ServoyDefaultBaseChoice implements OnInit{
+export class ServoyDefaultCheck extends ServoyDefaultBaseChoice implements OnInit, AfterViewInit{
 
   selected:boolean = false;
   constructor(renderer: Renderer2, formattingService: FormattingService) {
@@ -16,27 +16,33 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice implements OnIni
 
   ngOnInit() {
       this.selected = this.getSelectionFromDataprovider();
-      super.ngOnInit();
+      this.setInitialStyles();
   }
-  
+
+  ngAfterViewInit(){
+    this.attachEventHandlers(this.getNativeElement(), 0)
+  }
 
   attachEventHandlers(element, index){
+    if(!element)
+      element = this.getNativeElement();
     this.renderer.listen( element, 'click', ( e ) => {
       this.itemClicked(e);
-      if(this.onFocusLostMethodID) this.onFocusLostMethodID(e);
       if(this.onActionMethodID) this.onActionMethodID(e);
     });
-    super.attachEventHandlers(element,index);
   }
 
   itemClicked(event) {
-      if (this.valuelistID && this.valuelistID[0]) 
+      if(event.target.localName === 'span' || event.target.localName === 'label')
+        this.selected = !this.selected;
+
+      if (this.valuelistID && this.valuelistID[0])
           this.dataProviderID = this.dataProviderID == this.valuelistID[0].realValue ? null : this.valuelistID[0].realValue;
       else if (typeof this.dataProviderID  === "string")
           this.dataProviderID = this.dataProviderID == "1" ? "0" : "1";
       else
           this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;      
-      super.baseItemClicked(event,true, this.dataProviderID,0);
+      super.baseItemClicked(event,true, this.dataProviderID);
   }
   
   getSelectionFromDataprovider() {

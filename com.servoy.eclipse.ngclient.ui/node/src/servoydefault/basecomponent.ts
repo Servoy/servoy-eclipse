@@ -1,6 +1,6 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
+import {OnInit, Input, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
 
-import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
+import {PropertyUtils} from '../ngclient/servoy_public'
 
 export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
     @Input() name;
@@ -9,24 +9,24 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
 
-    @Input() background
-    @Input() borderType
-    @Input() dataProviderID
-    @Input() displaysTags
-    @Input() enabled
-    @Input() fontType
-    @Input() foreground
-    @Input() format
-    @Input() horizontalAlignment
-    @Input() location
-    @Input() margin
-    @Input() size
-    @Input() styleClass
-    @Input() tabSeq
-    @Input() text
-    @Input() toolTipText
-    @Input() transparent
-    @Input() visible
+    @Input() background;
+    @Input() borderType;
+    @Input() dataProviderID;
+    @Input() displaysTags;
+    @Input() enabled;
+    @Input() fontType;
+    @Input() foreground;
+    @Input() format;
+    @Input() horizontalAlignment;
+    @Input() location;
+    @Input() margin;
+    @Input() size;
+    @Input() styleClass;
+    @Input() tabSeq;
+    @Input() text;
+    @Input() toolTipText;
+    @Input() transparent;
+    @Input() visible;
     @Input() scrollbars;
     
     @ViewChild('element') elementRef:ElementRef;
@@ -34,16 +34,20 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
     constructor(protected readonly renderer: Renderer2) { }
 
     ngOnInit() {
-        if ( this.onActionMethodID ) {
-            this.renderer.listen( this.getNativeElement(), 'click', ( e ) => {
-                this.onActionMethodID( e );
-            } );
-        }
-        if ( this.onRightClickMethodID ) {
-            this.renderer.listen( this.getNativeElement(), 'contextmenu', ( e ) => {
-                this.onRightClickMethodID( e );
-            } );
-        }
+      this.attachHandlers();
+    }
+
+    protected attachHandlers(){
+      if ( this.onActionMethodID ) {
+        this.renderer.listen( this.getNativeElement(), 'click', ( e ) => {
+          this.onActionMethodID( e );
+        } );
+      }
+      if ( this.onRightClickMethodID ) {
+        this.renderer.listen( this.getNativeElement(), 'contextmenu', ( e ) => {
+          this.onRightClickMethodID( e );
+        } );
+      }
     }
 
     ngOnChanges( changes: SimpleChanges ) {

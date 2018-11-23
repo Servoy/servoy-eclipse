@@ -54,7 +54,7 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice implements 
       event.target.checked = this.selection[index] = this.allowNullinc === 0 && checkedTotal <= 1 && !this.findmode;
       changed = !event.target.checked;
     }
-    super.baseItemClicked(event,changed, this.getDataproviderFromSelection(),index);
+    super.baseItemClicked(event,changed, this.getDataproviderFromSelection());
   }
 
   attachEventHandlers(element, index){

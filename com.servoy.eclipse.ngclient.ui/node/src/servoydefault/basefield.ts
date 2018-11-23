@@ -1,23 +1,30 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
+import {
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  SimpleChanges,
+  Renderer2,
+} from '@angular/core';
 
 import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
 
 import {ServoyDefaultBaseComponent} from './basecomponent'
 
-export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
+export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implements OnInit{
 
     @Input() onDataChangeMethodID;
     @Input() onFocusGainedMethodID;
     @Input() onFocusLostMethodID;
 
     @Output() dataProviderIDChange = new EventEmitter();
-    @Input() editable
-    @Input() findmode
-    @Input() placeholderText
-    @Input() readOnly
-    @Input() selectOnEnter
-    @Input() valuelistID
-    
+    @Input() editable;
+    @Input() findmode;
+    @Input() placeholderText;
+    @Input() readOnly;
+    @Input() selectOnEnter;
+    @Input() valuelistID;
+
     valueBeforeChange: any;
 
     constructor(renderer: Renderer2, private formattingService : FormattingService) {
@@ -25,10 +32,17 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
     }
 
     ngOnInit() {
-        // attach focus gained/lost
+      if(this.onFocusGainedMethodID)
         this.renderer.listen( this.getNativeElement(), 'focus', ( e ) => {
-            this.valueBeforeChange = this.getNativeElement().value;
+          this.onFocusGainedMethodID(e);
+          this.valueBeforeChange = this.getNativeElement().value;
         } );
+      if(this.onFocusLostMethodID)
+        this.renderer.listen( this.getNativeElement(), 'blur', ( e ) => {
+          this.onFocusLostMethodID(e);
+          this.valueBeforeChange = this.getNativeElement().value;
+        } );
+      super.ngOnInit();
     }
 
     ngOnChanges( changes: SimpleChanges ) {
@@ -64,6 +78,7 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
                 this.dataProviderID = newDataProviderID;
             }
         }
+        else this.dataProviderID = val;
         this.dataProviderIDChange.emit( this.dataProviderID );
     }
 }

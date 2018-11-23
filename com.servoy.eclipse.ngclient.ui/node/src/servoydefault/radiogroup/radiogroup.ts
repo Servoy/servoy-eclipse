@@ -39,7 +39,7 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice implements 
     let changed = !(newValue === this.value);
     this.value = newValue;
 
-    super.baseItemClicked(event, changed, newValue,index);
+    super.baseItemClicked(event, changed, newValue);
   }
 
   attachEventHandlers(element, index){
