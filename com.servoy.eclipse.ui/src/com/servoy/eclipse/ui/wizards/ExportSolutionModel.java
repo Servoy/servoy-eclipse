@@ -45,6 +45,8 @@ public class ExportSolutionModel implements IExportSolutionModel
 	private boolean useImportSettings;
 	private JSONObject importSettings;
 
+	private boolean saveImportSettingsToDisk;
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -365,5 +367,15 @@ public class ExportSolutionModel implements IExportSolutionModel
 	public void setImportSettings(JSONObject importSettings)
 	{
 		this.importSettings = importSettings;
+	}
+
+	public boolean isSaveImportSettingsToDisk()
+	{
+		return saveImportSettingsToDisk;
+	}
+
+	public void setSaveImportSettingsToDisk(boolean saveImportSettingsToDisk)
+	{
+		this.saveImportSettingsToDisk = saveImportSettingsToDisk;
 	}
 }
