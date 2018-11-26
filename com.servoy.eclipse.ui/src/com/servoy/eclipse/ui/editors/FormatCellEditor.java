@@ -55,7 +55,6 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -196,10 +195,10 @@ public class FormatCellEditor extends TextDialogCellEditor
 							ValueList vl = null;
 							if (persist instanceof WebCustomType)
 							{
-								UUID valuelistUUID = Utils.getAsUUID(((WebCustomType)persist).getProperty(propertyName), false);
-								if (valuelistUUID != null)
+								Object property = ((WebCustomType)persist).getProperty(propertyName);
+								if (property != null)
 								{
-									vl = (ValueList)flattenedSolution.searchPersist(valuelistUUID);
+									vl = (ValueList)flattenedSolution.searchPersist(property.toString());
 								}
 							}
 							else

@@ -69,7 +69,7 @@ public class PersistFinder
 			if (uuid.startsWith("_")) start = 1;
 			uuid = uuid.substring(start, index).replace('_', '-');
 		}
-		IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
+		IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(uuid);
 		if (index > 1)
 		{
 			searchPersist = new WebFormComponentChildType((WebComponent)searchPersist, fullUUID.substring(index + 1).replace('$', '.'),

@@ -439,7 +439,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			return null;
 		}
 
-		IPersist pp = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(uuid));
+		IPersist pp = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(uuid);
 		if (pp instanceof GraphicalComponent && ((GraphicalComponent)pp).getCustomMobileProperty(IMobileProperties.HEADER_TEXT.propertyName) != null)
 		{
 			// header title, use header part
@@ -708,7 +708,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		String servoyuuid = json.optString(ID_KEY);
 		if (servoyuuid.length() > 0)
 		{
-			return getPersistModel(editorPart.getForm(), ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(servoyuuid)));
+			return getPersistModel(editorPart.getForm(), ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(servoyuuid));
 		}
 		return null;
 	}
@@ -1324,7 +1324,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		try
 		{
 			ServoyJSONObject json = getChildJson(
-				getPersistModel(editorPart.getForm(), ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(uuid))));
+				getPersistModel(editorPart.getForm(), ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(uuid)));
 			if (json != null)
 			{
 				return json.toString();

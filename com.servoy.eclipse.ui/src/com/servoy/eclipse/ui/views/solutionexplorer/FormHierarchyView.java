@@ -124,7 +124,6 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.UUID;
-import com.servoy.j2db.util.Utils;
 
 
 public class FormHierarchyView extends ViewPart implements ISelectionChangedListener, IOrientedView, ITreeListView
@@ -732,7 +731,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		if (memento == null) return;
 		String formUuid = memento.getString(SELECTED_FORM);
 		if (formUuid == null) return;
-		IPersist persist = getActiveSolution().searchPersist(Utils.getAsUUID(formUuid, false));
+		IPersist persist = getActiveSolution().searchPersist(formUuid);
 		if (persist instanceof Form)
 		{
 			Form form = (Form)persist;

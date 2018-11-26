@@ -25,14 +25,13 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ValueList;
 
 /**
  * Label provider for value lists.
- * 
+ *
  * @author rgansevles
  */
 
@@ -84,14 +83,14 @@ public class ValuelistLabelProvider extends LabelProvider implements IFontProvid
 	{
 		if (value instanceof Integer)
 		{
-			return AbstractBase.selectById(flattenedSolution.getValueLists(false), ((Integer)value).intValue());
+			return flattenedSolution.getValueList(((Integer)value).intValue());
 		}
 		return null;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.util.IDeprecationProvider#isDeprecated(java.lang.Object)
 	 */
 	@Override

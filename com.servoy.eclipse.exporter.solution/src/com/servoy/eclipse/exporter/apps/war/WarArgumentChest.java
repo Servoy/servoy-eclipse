@@ -136,7 +136,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return  "WAR exporter. Exports workspace solutions into .war files.\n"
 			+ super.getHelpMessageCore()
 			+ "        -active <true/false> ... export  given solution  (and its modules) as part  of .war.\n"
-			+ "             That means the (current if more) solution  from -s parameter and  it's modules.\n"
+			+ "             That means the (current if more) solution  from -s  parameter and  its modules.\n"
 			+ "             If false,  it will create a war with no solution  included. If false,  you will\n"
 			+ "             have to import  solutions using the admin page. It does  not make sense  to use\n"
 			+ "             false if multiple solutions were given at -s.\n"
