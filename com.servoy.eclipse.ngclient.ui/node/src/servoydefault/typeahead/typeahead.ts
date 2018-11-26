@@ -12,26 +12,18 @@ import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';
   ]
 })
 export class ServoyDefaultTypeahead extends ServoyDefaultBaseCombo implements OnInit {
-  activeItemIndex = this.selectedItemIndex;
-  @Input() state: any;
- 
-  constructor(renderer: Renderer2,    
-              formattingService : FormattingService,
-              private el: ElementRef) { 
+  constructor(renderer: Renderer2,
+              formattingService : FormattingService) {
     super(renderer,formattingService);
   }
  
   ngOnInit() {
     super.onChanges();
-    super.setInitialStyles(this.state);
+    super.setInitialStyles();
     
     this.selectedItem.subscribe(item => {
       if (item) {
-        this.update(item.realValue);
         this.setInputValue();
-        
-        this.filteredValueList = this.valueList;
-
         const shortInterval = interval(100).subscribe(() => {
           this.isOpen = false;
           shortInterval.unsubscribe();
@@ -41,11 +33,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseCombo implements On
   }
  
   @HostListener('document:click', ['$event']) onOutsideClick(event): void {
-    if (!this.el.nativeElement.contains(event.target) ) {
-      this.isOpen = false;
-    } else {
-      this.isOpen = true;
-    }
+    this.isOpen = this.getNativeElement().contains(event.target);
   }
  
   onInputKeyup(event): void {
@@ -63,13 +51,13 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseCombo implements On
       } else if (keyCode <= 47 && keyCode >= 91) {
         this.isOpen = false;
       }
-      this.scrollIntoView(this.el);
+      this.scrollIntoView(this.getNativeElement());
     }
   }
  
   selectItem(item, index): void {
     this.selectedItemIndex = index - 1;
-    this.selectedItem.next(item);
+    this.update(item.realValue);
     this.setInputValue();
     this.focusElement(this.inputElement.nativeElement);
   }

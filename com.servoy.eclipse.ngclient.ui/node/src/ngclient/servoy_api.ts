@@ -50,12 +50,5 @@ export class ServoyApi {
     public getMarkupId() {
         return this.item.model.svyMarkupId;
     }
-
-    public getApiData() {
-        return this.item.model.valuelistID;
-    }
-
-    public getDataProviderID(): Observable<any> {
-        return of(this.item.model.dataProviderID);
-    }
 }
+

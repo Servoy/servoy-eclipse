@@ -1,9 +1,9 @@
-import { Renderer2, ElementRef, ViewChild, SimpleChanges, AfterViewInit, AfterContentInit } from '@angular/core';
+import { Renderer2, ElementRef, ViewChild, SimpleChanges } from '@angular/core';
 
 import { FormattingService } from '../ngclient/servoy_public'
 
 import { ServoyDefaultBaseField } from './basefield';
-import { interval, BehaviorSubject, Observable, defer } from 'rxjs';
+import { interval, BehaviorSubject } from 'rxjs';
 
 export interface Item {
   displayValue: any,
@@ -11,7 +11,7 @@ export interface Item {
 };
 
 export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
-  @ViewChild('inputElement') inputElement: ElementRef;
+  @ViewChild('input') inputElement: ElementRef;
 
   styles: Object = {};
   valueList: Item[];
@@ -31,24 +31,21 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   }
   
   onChanges() {
-    defer(() => this.servoyApi.getDataProviderID()).subscribe((d: any) => {
-      this.selectedItemIndex = d - 1;
-    });
-
-    this.activeItemIndex = this.selectedItemIndex;
-    this.valueList = this.servoyApi.getApiData();
-    this.filteredValueList = this.valueList;
-    this.selectTheItem();
+    this.selectedItemIndex = this.dataProviderID;
+    this.filteredValueList = this.valuelistID;
+    if(this.filteredValueList)
+      this.selectTheItem();
   }
 
   selectTheItem() {
-    this.selectedItem.next(this.filteredValueList[this.activeItemIndex]);
+    this.selectedItem.next(this.filteredValueList.filter(item => item.realValue === this.dataProviderID)[0]);
   }
 
-  setInitialStyles(state): void {
-    Object.keys(state.model.size).forEach(key => {
-        this.styles[key.toString()] = state.model.size[key] + 'px';
-    });
+  setInitialStyles(): void {
+    if(this.size)
+      Object.keys(this.size).forEach(key => {
+          this.styles[key.toString()] = this.size[key] + 'px';
+      });
   } 
 
   public scrollIntoView(el): void {
@@ -103,4 +100,4 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
 
   closeDropdown() {};
   
-}
+}

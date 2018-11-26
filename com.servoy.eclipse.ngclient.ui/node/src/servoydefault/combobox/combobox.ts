@@ -1,7 +1,7 @@
-import { Component, OnInit, HostListener, ElementRef, Renderer2, Input } from '@angular/core';
-import { BehaviorSubject, of } from 'rxjs';
+import { Component, OnInit, HostListener, Renderer2 } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { ServoyDefaultBaseCombo, Item } from '../basecombo';
-import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';
+import { FormattingService } from '../../ngclient/servoy_public';
  
 @Component({
   selector: 'servoydefault-combo',
@@ -13,40 +13,27 @@ import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseCombo implements OnInit {
   isInputFocused: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  @Input() state: any;
-
   isLabelFocused = false;
 
   constructor(renderer: Renderer2,    
-              formattingService : FormattingService,
-              private el: ElementRef) { 
+              formattingService : FormattingService) {
     super(renderer,formattingService);
   }
   
   ngOnInit() {
     super.onChanges();
-    super.setInitialStyles(this.state);
+    super.setInitialStyles();
 
     this.isInputFocused.subscribe(isFocused => {
       this.isOpen = isFocused;
       if (isFocused) {
-        this.focusElement(this.inputElement.nativeElement);
+        this.focusElement(this.getNativeChild());
       }
-      this.filteredValueList = this.valueList;
-    });
-
-    this.selectedItem.subscribe(d => {
-      this.update(d.realValue);
-      this.isInputFocused.next(false);
     });
   }
  
   @HostListener('document:click', ['$event']) onClick(event): void {
-    if (!this.el.nativeElement.contains(event.target) ) {
-      this.isInputFocused.next(false);
-    } else {
-      this.isInputFocused.next(true);
-    }
+    this.getNativeElement().contains(event.target) ? this.isInputFocused.next(true): this.isInputFocused.next(false);
   }
  
   onLabelKeyup(event: KeyboardEvent): void {
@@ -57,8 +44,8 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseCombo implements OnI
         this.isInputFocused.next(true);
       } else if (keyCode > 47 && keyCode < 91) {
         this.isInputFocused.next(true);
-        this.inputElement.nativeElement.value = event.key;
-        this.filteredValueList = this.filterList(this.inputElement.nativeElement.value);
+        this.getNativeChild().value = event.key;
+        this.filteredValueList = this.filterList(this.getNativeChild().value);
         if (this.filteredValueList.length < this.activeItemIndex) {
           this.activeItemIndex = 0;
         }
@@ -79,12 +66,12 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseCombo implements OnI
     } else if (keyCode === 40) { // Down key
       this.activateNextListItem();
     }
-    this.scrollIntoView(this.el);
+    this.scrollIntoView(this.getNativeElement());
   }
  
   selectItem(item: Item, index): void {
     this.selectedItemIndex = (index === 0 ? this.filteredValueList.length - 1 : index - 1);
-    this.selectedItem.next(item);
+    this.update(item.realValue);
   }
  
   onInput(event): void {
@@ -99,7 +86,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseCombo implements OnI
  
   onLabelClick(): void {
     this.isInputFocused.next(true);
-    this.inputElement.nativeElement.value = '';
+    this.getNativeChild().value = "";
   }
 
   closeDropdown() {

@@ -2,7 +2,8 @@
 <div class="svy-combobox ui-select-bootstrap dropdown ng-empty ng-valid"
     [ngStyle]="styles"
     [class.open]="isOpen"
-    appendTo="body">
+    appendTo="body"
+     #element>
   <input type="search"
         class="form-control ui-select-search ng-pristine ng-valid ng-empty ng-touched"
         [ngStyle]="styles"
@@ -12,7 +13,7 @@
         (keydown)="onInputKeyDown($event)"
         (keyup)="onInputKeyup($event)"
         (focus)="onInputFocus()"
-        #inputElement>
+        #input>
   <ul class="ui-select-choices ui-select-choices-content ui-select-dropdown dropdown-menu ng-scope"
       *ngIf="isOpen">
     <li class="ui-select-choices-row ng-scope"

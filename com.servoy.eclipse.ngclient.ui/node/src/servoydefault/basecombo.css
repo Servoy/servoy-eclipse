@@ -1,9 +1,6 @@
 
 .svy-combobox .ui-select-toggle {
-  border: 0;
-  border-style: solid;
-  border-color: #DBDBDB;
-  border-width: 1px 1px 1px 1px;
+  border: 1px solid #DBDBDB;
   border-radius: 0;
   box-shadow: none;
 }
@@ -19,9 +16,7 @@
 .svy-combobox input:focus {
   -webkit-box-shadow: none;
   box-shadow: none;
-  border-style: solid;
-  border-color: #f58c32;
-  border-width: 1px 1px 1px 1px;
+  border: 1px solid #f58c32;
 }
 
 .dropdown-menu > li > a {
@@ -42,8 +37,6 @@
   border-radius: 0px;
   background: #FFF;
   border: 0 solid #DBDBDB;
-  border-top: 0;
-  border-bottom: 0;
 }
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
