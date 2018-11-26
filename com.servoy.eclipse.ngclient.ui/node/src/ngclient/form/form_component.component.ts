@@ -44,7 +44,6 @@ import { ServoyApi } from '../servoy_api'
       </ng-template>
       <ng-template #servoydefaultCombobox let-state="state">
         <servoydefault-combo [servoyApi]="getServoyApi(state)"
-                                   [state]="state"
                                    [onActionMethodID]="getHandler(state,'onActionMethodID')"
                                    [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')"
                                    [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')"
@@ -53,11 +52,11 @@ import { ServoyApi } from '../servoy_api'
                                    [dataProviderID]="state.model.dataProviderID"
                                    (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)"
                                    [format]="state.model.format"
-                                   [name]="state.name" #cmp></servoydefault-combo>
+                                   [name]="state.name"
+                                    [valuelistID]="state.model.valuelistID" #cmp></servoydefault-combo>
       </ng-template>
       <ng-template #servoydefaultTypeahead let-state="state">
         <servoydefault-typeahead [servoyApi]="getServoyApi(state)"
-                                   [state]="state"
                                    [onActionMethodID]="getHandler(state,'onActionMethodID')"
                                    [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')"
                                    [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')"
@@ -66,7 +65,8 @@ import { ServoyApi } from '../servoy_api'
                                    [dataProviderID]="state.model.dataProviderID"
                                    (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)"
                                    [format]="state.model.format"
-                                   [name]="state.name" #cmp></servoydefault-typeahead>
+                                   [name]="state.name"
+                                   [valuelistID]="state.model.valuelistID"#cmp></servoydefault-typeahead>
       </ng-template>
       <ng-template #servoydefaultLabel let-state="state"><servoydefault-label  [borderType]="state.model.borderType" [labelFor]="state.model.labelFor" [foreground]="state.model.foreground" [hideText]="state.model.hideText" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [textRotation]="state.model.textRotation" [mnemonic]="state.model.mnemonic" [text]="state.model.text" [toolTipText]="state.model.toolTipText" [imageMediaID]="state.model.imageMediaID" [fontType]="state.model.fontType" [margin]="state.model.margin" [visible]="state.model.visible" [format]="state.model.format" [mediaOptions]="state.model.mediaOptions" [dataProviderID]="state.model.dataProviderID" [showFocus]="state.model.showFocus" [horizontalAlignment]="state.model.horizontalAlignment" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [displaysTags]="state.model.displaysTags" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [rolloverCursor]="state.model.rolloverCursor" [rolloverImageMediaID]="state.model.rolloverImageMediaID" [tabSeq]="state.model.tabSeq" [verticalAlignment]="state.model.verticalAlignment" [onDoubleClickMethodID]="getHandler(state,'onDoubleClickMethodID')" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoydefault-label></ng-template>
       <ng-template #servoydefaultTabpanel let-state="state">
