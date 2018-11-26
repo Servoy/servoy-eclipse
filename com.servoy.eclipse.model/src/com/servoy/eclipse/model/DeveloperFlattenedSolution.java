@@ -26,6 +26,7 @@ import java.util.Map;
 
 import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.ISolutionModelPersistIndex;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -52,7 +53,24 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 {
 	public DeveloperFlattenedSolution(boolean cacheFlattenedForms)
 	{
-		super(cacheFlattenedForms, new DeveloperPersistIndex());
+		super(cacheFlattenedForms);
+	}
+
+
+	@Override
+	protected ISolutionModelPersistIndex createPersistIndex()
+	{
+		List<Solution> solutions = new ArrayList<>();
+		solutions.add(getSolution());
+		Solution[] mods = getModules();
+		if (mods != null)
+		{
+			for (Solution mod : mods)
+			{
+				solutions.add(mod);
+			}
+		}
+		return new DeveloperPersistIndex(solutions);
 	}
 
 	/*
