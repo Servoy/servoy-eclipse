@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
+import com.servoy.eclipse.model.DeveloperFlattenedSolution;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.MemServer;
@@ -367,7 +368,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	protected FlattenedSolution createFlattenedSolution()
 	{
-		return new FlattenedSolution();
+		return new DeveloperFlattenedSolution(true);
 	}
 
 	public FlattenedSolution getFlattenedSolution()

@@ -17,17 +17,20 @@
 
 package com.servoy.eclipse.model;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.ISolutionModelPersistIndex;
 import com.servoy.j2db.PersistIndex;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -35,17 +38,20 @@ import com.servoy.j2db.util.Utils;
  * @since 8.4
  *
  */
-public class DeveloperPersistIndex extends PersistIndex
+public class DeveloperPersistIndex extends PersistIndex implements ISolutionModelPersistIndex
 {
 	private volatile Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
 	private volatile Map<Form, String> formToDataSource = new HashMap<>();
 	private static final String ALL_FORMS = "";
 
-
-	@Override
-	protected void load(FlattenedSolution fs)
+	public DeveloperPersistIndex(List<Solution> solutions)
 	{
-		super.load(fs);
+		super(solutions);
+		createDatasources();
+	}
+
+	private void createDatasources()
+	{
 		final Set<Form> allforms = new TreeSet<Form>(NameComparator.INSTANCE);
 
 		visit((persist) -> {
@@ -73,9 +79,9 @@ public class DeveloperPersistIndex extends PersistIndex
 	}
 
 	@Override
-	protected void flush()
+	public void destroy()
 	{
-		super.flush();
+		super.destroy();
 		formCacheByDataSource.clear();
 		formToDataSource.clear();
 	}
@@ -187,5 +193,33 @@ public class DeveloperPersistIndex extends PersistIndex
 				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
 			}
 		}
+	}
+
+	// below method are teh one of the ISoluitonModelPersistIndex. they are just empty in the developer fs.
+	@Override
+	public void setSolutionModelSolution(Solution solution)
+	{
+	}
+
+	@Override
+	public void addRemoved(IPersist persist)
+	{
+	}
+
+	@Override
+	public Set<IPersist> getRemoved()
+	{
+		return Collections.emptySet();
+	}
+
+	@Override
+	public void removeRemoved(IPersist persist)
+	{
+	}
+
+	@Override
+	public boolean isRemoved(IPersist persist)
+	{
+		return false;
 	}
 }

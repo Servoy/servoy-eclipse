@@ -149,6 +149,7 @@ import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.debug.DebugClientHandler;
@@ -1327,6 +1328,12 @@ public class ServoyModel extends AbstractServoyModel
 						updateWorkingSet();
 						testBuildPathsAndBuild(project, buildProject);
 
+						// now make sure all FS are recreated because now the custom types
+						// should be there because of the above fireActiveProjectChanged(); that forces load of the packages.
+						PersistIndexCache.flush();
+						resetActiveEditingFlattenedSolutions();
+						updateFlattenedSolution();
+
 						progressMonitor.worked(1);
 					}
 				}
@@ -1912,12 +1919,6 @@ public class ServoyModel extends AbstractServoyModel
 		};
 		refreshJob.setSystem(true);
 		return refreshJob;
-	}
-
-	@Override
-	protected FlattenedSolution createFlattenedSolution()
-	{
-		return new FlattenedSolution(true); // flattened form cache will be flushed when persists changes
 	}
 
 	public void revertEditingPersist(ServoyProject sp, IPersist persist) throws RepositoryException
