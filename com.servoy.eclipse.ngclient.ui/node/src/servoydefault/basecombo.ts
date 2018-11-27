@@ -31,10 +31,11 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   }
   
   onChanges() {
-    this.selectedItemIndex = this.dataProviderID;
     this.filteredValueList = this.valuelistID;
-    if(this.filteredValueList)
+    if(this.filteredValueList){
+      this.selectedItemIndex = this.filteredValueList.map((a) => a.realValue).indexOf(this.dataProviderID);
       this.selectTheItem();
+    }
   }
 
   selectTheItem() {
@@ -49,7 +50,7 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   } 
 
   public scrollIntoView(el): void {
-    const elementToScrollTo = el.nativeElement.getElementsByClassName('ui-select-choices-row')[this.activeItemIndex];
+    const elementToScrollTo = el.getElementsByClassName('ui-select-choices-row')[this.activeItemIndex];
     if (elementToScrollTo) {
       elementToScrollTo.scrollIntoView({behavior: 'smooth', block: 'nearest'});
     }
@@ -57,8 +58,10 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
 
   public focusElement(elementToFocusOn): void {
     const interv = interval(10).subscribe(() => {
-      elementToFocusOn.focus();
-      interv.unsubscribe();
+      if(elementToFocusOn){
+        elementToFocusOn.focus();
+        interv.unsubscribe();
+      }
     });
   }
   
@@ -68,7 +71,7 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   }
   
   public filterList(valueToFilterBy) {
-    return this.valueList.filter(d =>
+    return this.valuelistID.filter(d =>
       d.displayValue.toLowerCase().indexOf(valueToFilterBy.toLowerCase()) !== -1);
   }
   
@@ -77,6 +80,7 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   }
 
   public activatePreviousListItem() {
+    if(!this.activeItemIndex) this.activeItemIndex = 0;
     this.activeItemIndex = (this.activeItemIndex <= 1 ? this.filteredValueList.length - 1 : this.activeItemIndex - 1);
   }
 
@@ -97,7 +101,11 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
       this.closeDropdown();
     }
   }
+  protected getNativeChild():any {
+    if(this.inputElement)
+      return this.inputElement.nativeElement;
+  }
 
   closeDropdown() {};
   
-}
+}

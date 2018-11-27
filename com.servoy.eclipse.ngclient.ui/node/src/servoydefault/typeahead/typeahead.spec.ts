@@ -4,8 +4,7 @@ import { By } from '@angular/platform-browser';
 import { Item } from '../basecombo';
 import { ServoyDefaultTypeahead } from './typeahead';
 import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';
-import { of } from 'rxjs';
- 
+
 const eventEnter: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'Enter'});
 const eventC: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'c'});
 const eventInput: Event = new Event('input');
@@ -75,7 +74,7 @@ describe('TypeaheadComponent', () => {
     
     component = fixture.componentInstance;
     component.valuelistID = mockData;
-    component.dataProviderID = "Cluj";
+    component.dataProviderID = 3;
     component.ngOnInit();
 
     fixture.detectChanges();
@@ -129,7 +128,7 @@ describe('TypeaheadComponent', () => {
     });
   });
  
-  xdescribe('on keyboard events', () => {
+  describe('on keyboard events', () => {
     describe('on Down key', () => {
       let itemPossitionAfterDownKey;
       beforeEach(() => {
@@ -172,7 +171,7 @@ describe('TypeaheadComponent', () => {
       });
  
       it('should only show matching items', () => {
-        const matchingItems = component.valueList.filter(d => d.displayValue.toLowerCase().indexOf(keyToSearchBy) !== -1);
+        const matchingItems = component.valuelistID.filter(d => d.displayValue.toLowerCase().indexOf(keyToSearchBy) !== -1);
         expect( component.filterList(inputElement.value)).toEqual(matchingItems);
       });
     });
@@ -188,7 +187,7 @@ describe('TypeaheadComponent', () => {
       });
  
       it('should have empty filtered list', () => {
-        const matchingItems = component.valueList.filter(d => d.displayValue.toLowerCase().indexOf(keyToSearchBy) !== -1);
+        const matchingItems = component.valuelistID.filter(d => d.displayValue.toLowerCase().indexOf(keyToSearchBy) !== -1);
         expect(component.filterList(inputElement.value).length).toEqual(matchingItems.length);
       });
  

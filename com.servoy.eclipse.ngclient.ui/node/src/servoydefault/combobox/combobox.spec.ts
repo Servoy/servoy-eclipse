@@ -23,7 +23,7 @@ const mockData: Item[] = [
   },
 ];
 
-const mockDataProviderID = 'Timisoara';
+const mockDataProviderID = 3;
 
 Object.defineProperty(eventEnter, 'keyCode', {
   get : function() {
@@ -127,7 +127,7 @@ describe('ComboboxComponent', () => {
     });
   });
  
-  xdescribe('on keyboard events', () => {
+  describe('on keyboard events', () => {
     describe('on Down key', () => {
       let itemPossitionAfterDownKey;
       beforeEach(() => {
@@ -155,7 +155,7 @@ describe('ComboboxComponent', () => {
         expect(activeItemPosition).toEqual(itemPossitionAfterUpKey);
       });
  
-      xdescribe('on Enter key', () => {
+      describe('on Enter key', () => {
         beforeEach(() => {
           const inputElement = fixture.debugElement.query(By.css('input')).nativeElement;
           component.onInputKeyup(eventEnter, inputElement);

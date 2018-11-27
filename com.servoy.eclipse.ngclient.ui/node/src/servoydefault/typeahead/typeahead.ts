@@ -57,9 +57,10 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseCombo implements On
  
   selectItem(item, index): void {
     this.selectedItemIndex = index - 1;
+    this.selectedItem.next(item);
     this.update(item.realValue);
     this.setInputValue();
-    this.focusElement(this.inputElement.nativeElement);
+    this.focusElement(this.getNativeChild());
   }
  
   onInput(event): void {
@@ -89,7 +90,7 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseCombo implements On
  
   setInputValue(): void {
     const interv = interval(100).subscribe(() => {
-      this.inputElement.nativeElement.value = this.selectedItem.getValue() ? this.selectedItem.getValue().displayValue : '';
+      this.getNativeChild().value = this.selectedItem.getValue() ? this.selectedItem.getValue().displayValue : '';
       interv.unsubscribe();
     });
   }

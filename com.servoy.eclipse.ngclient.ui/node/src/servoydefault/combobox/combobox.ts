@@ -71,6 +71,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseCombo implements OnI
  
   selectItem(item: Item, index): void {
     this.selectedItemIndex = (index === 0 ? this.filteredValueList.length - 1 : index - 1);
+    this.selectedItem.next(item);
     this.update(item.realValue);
   }
  
