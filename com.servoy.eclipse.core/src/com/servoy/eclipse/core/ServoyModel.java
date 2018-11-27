@@ -1906,12 +1906,6 @@ public class ServoyModel extends AbstractServoyModel
 		return refreshJob;
 	}
 
-	@Override
-	protected FlattenedSolution createFlattenedSolution()
-	{
-		return new FlattenedSolution(true); // flattened form cache will be flushed when persists changes
-	}
-
 	public void revertEditingPersist(ServoyProject sp, IPersist persist) throws RepositoryException
 	{
 		if (sp.getEditingSolution() == null) return;
