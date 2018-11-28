@@ -72,6 +72,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -432,7 +433,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 		}
 
-		if (draggedPersist instanceof IFormElement || draggedPersist instanceof Tab)
+		if (draggedPersist instanceof IFormElement || draggedPersist instanceof Tab || draggedPersist instanceof LayoutContainer)
 		{
 			setLabel("paste component");
 			ISupportBounds supportBounds = (ISupportBounds)draggedPersist;
@@ -473,6 +474,10 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			else if (!(parent instanceof Portal) && alternativeParent instanceof Portal)
 			{
 				persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (AbstractBase)draggedPersist, x, y, IRepository.ELEMENTS, groupMap);
+			}
+			else if (parent instanceof LayoutContainer)
+			{
+				persist = ElementFactory.copyComponent(parent, (LayoutContainer)draggedPersist, x, y, IRepository.LAYOUTCONTAINERS, groupMap);
 			}
 			else
 			{

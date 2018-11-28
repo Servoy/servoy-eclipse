@@ -40,6 +40,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.VisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.commands.MoveDownCommand;
 import com.servoy.eclipse.designer.editor.commands.MoveUpCommand;
+import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.GroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.UngroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
@@ -197,6 +198,18 @@ public class EditorServiceHandler implements IServerService
 			public Object executeMethod(String methodName, JSONObject args)
 			{
 				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).showContainer(null);
+				return null;
+			}
+		});
+
+		configuredHandlers.put("copy", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				CopyAction cp = new CopyAction(editorPart);
+				cp.update();
+				cp.run();
 				return null;
 			}
 		});
