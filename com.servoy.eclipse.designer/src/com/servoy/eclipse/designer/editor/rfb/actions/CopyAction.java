@@ -35,6 +35,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.util.Utils;
 
 /** Command to copy selected editor models.
@@ -87,7 +88,7 @@ public class CopyAction extends SelectionAction
 			{
 				IPersist persist = ((PersistContext)modelObject).getPersist();
 				toCopy.add(persist);
-				if (persist instanceof ISupportChilds)
+				if (persist instanceof ISupportChilds && !(persist instanceof LayoutContainer))
 				{
 					// also copy children
 					Iterator<IPersist> it = ((ISupportChilds)persist).getAllObjects();

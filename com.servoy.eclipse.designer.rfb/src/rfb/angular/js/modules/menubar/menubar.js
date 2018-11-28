@@ -22,6 +22,40 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         e.stopPropagation();
                         $editorService.executeAction('zoomIn');
                     }
+                },
+                {
+                    label: "",
+                    style: {
+                        float: "right",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center top",
+                        backgroundImage: 'url("images/delete.gif")',
+                        backgroundSize: "contain",
+                        width: "20px",
+                        height: "16px"
+                    },
+                    execute: function(e)
+                    {
+                        e.stopPropagation();
+						$editorService.keyPressed({"keyCode":46});
+                    }
+                },
+                {
+                    label: "",
+                    style: {
+                        float: "right",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center top",
+                        backgroundImage: 'url("images/copy_edit.png")',
+                        backgroundSize: "contain",
+                        width: "20px",
+                        height: "16px"
+                    },
+                    execute: function(e)
+                    {
+                        e.stopPropagation();
+                        $editorService.executeAction('copy');
+                    }
                 }
             ];
             
