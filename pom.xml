@@ -8,7 +8,7 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>8.4.0.3400_b1</version>
+	<version>8.4.0.3400_rc1</version>
 	<properties>
 		<tycho.version>1.2.0</tycho.version>
 		<tycho.extra.version>1.2.0</tycho.extra.version>
