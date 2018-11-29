@@ -118,7 +118,13 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		fileNameText.addListener(SWT.KeyUp, this);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		fileNameText.setLayoutData(gd);
-		if (exportModel.getWarFileName() != null) fileNameText.setText(exportModel.getWarFileName());
+
+		if (exportModel.getWarFileName() == null)
+		{
+			exportModel.setWarFileName(
+				System.getProperty("user.home") + "/" + ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getName() + ".war");
+		}
+		fileNameText.setText(exportModel.getWarFileName());
 
 		browseButton = new Button(fileBrowsePanel, SWT.PUSH);
 		browseButton.setText("Browse...");
