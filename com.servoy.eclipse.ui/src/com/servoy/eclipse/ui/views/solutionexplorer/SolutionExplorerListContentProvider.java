@@ -1295,8 +1295,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		String prefix = relation == null ? "" : relation.getName() + '.';
 		HashMap<String, Solution> modulesOfSolution = new HashMap<String, Solution>();
-		solution.getReferencedModulesRecursive(modulesOfSolution);
-		modulesOfSolution.put(solution.getName(), solution);
+		if (solution != null)
+		{
+			solution.getReferencedModulesRecursive(modulesOfSolution);
+			modulesOfSolution.put(solution.getName(), solution);
+		}
 
 		Iterator<Column> cols = EditorUtil.getTableColumns(table);
 		while (cols.hasNext())
