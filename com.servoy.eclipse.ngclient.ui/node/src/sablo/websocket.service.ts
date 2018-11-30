@@ -164,7 +164,7 @@ export class WebsocketSession {
     private onOpenHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
     private onErrorHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
     private onCloseHandlers: Array<( evt: WebsocketCustomEvent ) => void> = new Array()
-    private onMessageObjectHandlers: Array<( msg: any, conversionInfo: any ) => void> = new Array()
+    private onMessageObjectHandlers: Array<( msg: any, conversionInfo: any ) => any> = new Array()
 
     private functionsToExecuteAfterIncommingMessageWasHandled = undefined;
 
