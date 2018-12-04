@@ -111,6 +111,7 @@ public class DataModelManager implements IColumnInfoManager
 	private boolean writeDBIFiles = true;
 	private final IServerListener serverListener;
 	private final ITableListener tableListener;
+	private boolean doNotShowProblemMarkers;
 
 	public DataModelManager(IProject resourceProject, IServerManagerInternal sm)
 	{
@@ -212,7 +213,6 @@ public class DataModelManager implements IColumnInfoManager
 			}
 		};
 		sm.addServerListener(serverListener);
-
 	}
 
 	public void loadAllColumnInfo(final ITable t) throws RepositoryException
@@ -479,7 +479,7 @@ public class DataModelManager implements IColumnInfoManager
 				if (file.exists())
 				{
 					int differenceType = differences.getDifferenceTypeForTable(t);
-					if (checkForMarkers)
+					if (checkForMarkers && !doNotShowProblemMarkers) // if doNotShowProblemMarkers == true then (at least when this flag was added) a .servoy import is in progress
 					{
 						if (differenceType == TableDifference.COLUMN_CONFLICT || differenceType == TableDifference.COLUMN_MISSING_FROM_DB ||
 							differenceType == TableDifference.DESERIALIZE_PROBLEM)
@@ -1020,7 +1020,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	public void dispose()
 	{
-		clearProblemMarkers();
+		clearProblemMarkers(true);
 		sm.removeServerListener(serverListener);
 		// add listeners to initial server list
 		String[] array = sm.getServerNames(false, false, true, true);
@@ -1060,6 +1060,11 @@ public class DataModelManager implements IColumnInfoManager
 
 	private void addDifferenceMarker(final TableDifference columnDifference)
 	{
+		addDifferenceMarker(columnDifference, false);
+	}
+
+	private void addDifferenceMarker(final TableDifference columnDifference, boolean onlyRestoreMarker)
+	{
 		int markerSeverity = columnDifference.getSeverity();
 		if (markerSeverity < 0) return;
 		else
@@ -1072,7 +1077,7 @@ public class DataModelManager implements IColumnInfoManager
 		}
 		final int severity = markerSeverity;
 
-		differences.addDifference(columnDifference);
+		if (!onlyRestoreMarker) differences.addDifference(columnDifference);
 		final IResource resource;
 		if (columnDifference.type == TableDifference.MISSING_DBI_FILE)
 		{
@@ -1153,7 +1158,12 @@ public class DataModelManager implements IColumnInfoManager
 
 	private void addDeserializeErrorMarker(String serverName, String tableName, final String message)
 	{
-		differences.addDifference(new TableDifference(serverName, tableName));
+		addDeserializeErrorMarker(serverName, tableName, message, false);
+	}
+
+	private void addDeserializeErrorMarker(String serverName, String tableName, final String message, boolean onlyRestoreMarker)
+	{
+		if (!onlyRestoreMarker) differences.addDifference(new TableDifference(serverName, tableName, message));
 		final IFile file = getDBIFile(serverName, tableName);
 		updateProblemMarkers(new Runnable()
 		{
@@ -1316,9 +1326,9 @@ public class DataModelManager implements IColumnInfoManager
 	}
 
 
-	private void clearProblemMarkers()
+	private void clearProblemMarkers(boolean clearAlsoDifferences)
 	{
-		differences.removeAllDifferences();
+		if (clearAlsoDifferences) differences.removeAllDifferences();
 		updateProblemMarkers(new Runnable()
 		{
 			public void run()
@@ -1341,6 +1351,8 @@ public class DataModelManager implements IColumnInfoManager
 
 	private void updateProblemMarkers(final Runnable r)
 	{
+		if (doNotShowProblemMarkers) return;
+
 		if (updateMarkersJob == null)
 		{
 			updateMarkersJob = new UpdateMarkersJob("Updating database information problem markers", resourceProject, true);
@@ -1376,14 +1388,21 @@ public class DataModelManager implements IColumnInfoManager
 		private final ColumnInfoDef tableDefinition;
 		private final ColumnInfoDef dbiFileDefinition;
 		private boolean renamable;
+		private final String customMessage; // initially used only for .dbi deserialize error markers
 
-		private TableDifference(String serverName, String tableName)
+		private TableDifference(String serverName, String tableName, String customDBIDeserializeErrorMessage)
 		{
-			this(serverName, tableName, null, DESERIALIZE_PROBLEM, null, null);
+			this(serverName, tableName, null, DESERIALIZE_PROBLEM, null, null, customDBIDeserializeErrorMessage);
 		}
 
 		private TableDifference(String serverName, String tableName, String columnName, int type, ColumnInfoDef tableDefinition,
 			ColumnInfoDef dbiFileDefinition)
+		{
+			this(serverName, tableName, columnName, type, tableDefinition, dbiFileDefinition, null);
+		}
+
+		private TableDifference(String serverName, String tableName, String columnName, int type, ColumnInfoDef tableDefinition,
+			ColumnInfoDef dbiFileDefinition, String customDBIDeserializeErrorMessage)
 		{
 			this.serverName = serverName;
 			this.tableName = tableName;
@@ -1391,6 +1410,7 @@ public class DataModelManager implements IColumnInfoManager
 			this.type = type;
 			this.tableDefinition = tableDefinition;
 			this.dbiFileDefinition = dbiFileDefinition;
+			this.customMessage = customDBIDeserializeErrorMessage;
 		}
 
 		private TableDifference(ITable table, String columnName, int type, ColumnInfoDef tableDefinition, ColumnInfoDef dbiFileDefinition)
@@ -1438,6 +1458,11 @@ public class DataModelManager implements IColumnInfoManager
 		public ColumnInfoDef getDbiFileDefinition()
 		{
 			return dbiFileDefinition;
+		}
+
+		public String getCustomMessage()
+		{
+			return customMessage;
 		}
 
 		public boolean isRenamable()
@@ -1813,23 +1838,44 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	/*
-	 * @see com.servoy.j2db.persistence.IColumnInfoManager#createNewColumnInfo(com.servoy.j2db.persistence.Column, boolean)
-	 */
 	@Override
 	public void createNewColumnInfo(Column c, boolean createMissingServoySequence) throws RepositoryException
 	{
 		DatabaseUtils.createNewColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository(), c, createMissingServoySequence);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IColumnInfoManager#setTableColumnInfos(com.servoy.j2db.persistence.ITable, java.util.HashMap)
-	 */
 	@Override
 	public void setTableColumnInfos(ITable t, HashMap<String, ColumnInfoDef> columnInfoDefinitions) throws RepositoryException
 	{
 		DatabaseUtils.updateTableColumnInfos(ApplicationServerRegistry.get().getDeveloperRepository(), t, columnInfoDefinitions);
 	}
+
+	/**
+	 * Call this method to temporarily suppress generation of problem markers about dbi files - this is useful to not show temporary error markers during solution import for example.
+	 * @param solutionImportInProgress
+	 */
+	public void suppressProblemMarkers(boolean shouldSuppress)
+	{
+		if (shouldSuppress)
+		{
+			clearProblemMarkers(false);
+			doNotShowProblemMarkers = true; // set this only after clearing problem markers - so that it does not block markers
+		}
+		else
+		{
+			doNotShowProblemMarkers = false; // set this before adding markers - so that it does not block markers
+			restoreProblemMarkersFromDifferences();
+		}
+	}
+
+	private void restoreProblemMarkersFromDifferences()
+	{
+		for (TableDifference difference : differences.differences)
+		{
+			if (difference.getType() == TableDifference.DESERIALIZE_PROBLEM)
+				addDeserializeErrorMarker(difference.getServerName(), difference.getTableName(), difference.getCustomMessage(), true);
+			else addDifferenceMarker(difference, true);
+		}
+	}
+
 }

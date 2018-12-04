@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.json.JSONException;
 
@@ -132,10 +133,11 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
-		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
+		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateImportedSolutionAfterwards, final boolean cleanImport,
 		final String projectLocation) throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		try
 		{
 			m.beginTask("Importing...", 5);
@@ -161,25 +163,29 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			final IProject[] mainProject = new IProject[1];
 			final IRootObject[][] rootObjects = new IRootObject[1][];
 			final boolean[] finishedFlag = new boolean[] { false };
-			final ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+			final ServoyProject previouslyActiveProject = servoyModel.getActiveProject();
 			final IFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 
-			// the following jobs will be executed backwards (starting from 1 not from 3)
-			final IWorkspaceRunnable importJob3 = new IWorkspaceRunnable()
+			// the following jobs will be executed backwards (starting from 1 not from 5)
+			final Job importJob5 = new RunInWorkspaceJob(new IWorkspaceRunnable()
 			{
 				public void run(IProgressMonitor monitor) throws CoreException
 				{
-					m.setTaskName("Finalizing import and activating solution");
+					m.setTaskName("Finalizing import");
 					m.worked(1);
 					try
 					{
-						ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-						ServoyProject servoyProject = servoyModel.getServoyProject(mainProject[0].getName());
 						if (resourcesProject == null) userManager.setResourcesProject(rProject[0]);
-
-						servoyModel.setActiveProject(servoyProject, true);
 						userManager.writeAllSecurityInformation(true);
-						if (!activateSolution) servoyModel.setActiveProject(activeProject, true);
+						if (!activateImportedSolutionAfterwards)
+						{
+							// job 6
+							Job job = new WorkspaceImporterActivateSolutionJob("Re-activating previously active solution", previouslyActiveProject.getProject(),
+								null, null, null, null);
+							job.setUser(false);
+							job.setSystem(true);
+							job.schedule();
+						}
 					}
 					catch (Exception e)
 					{
@@ -204,27 +210,20 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					m.worked(1);
 				}
 
-			};
-			final IWorkspaceRunnable importJob2 = new IWorkspaceRunnable()
+			});
+			importJob5.setRule(ServoyModel.getWorkspace().getRoot());
+			importJob5.setUser(false);
+			importJob5.setSystem(true);
+
+			final Job importJob3 = new RunInWorkspaceJob(new IWorkspaceRunnable()
 			{
 				public void run(IProgressMonitor monitor) throws CoreException
 				{
 					m.setTaskName("Reading solution & modules, updating tables");
 					m.worked(1);
-					RunInWorkspaceJob job = null;
+					Job job = null;
 					try
 					{
-						// activate dummy
-						ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-						ServoyProject dummyServoyProject = servoyModel.getServoyProject(dummySolProject[0].getName());
-						servoyModel.setActiveProject(dummyServoyProject, false);
-
-						// verify that correct resources project is active
-						if (rProject[0] != null && servoyModel.getActiveResourcesProject().getProject() != rProject[0])
-						{
-							throw new RepositoryException("Cannot activate resources project " + rProject[0].getName() + ".");
-						}
-
 						XMLEclipseWorkspaceImportHandlerVersions11AndHigher eclipseWorkspaceImportHandler = new XMLEclipseWorkspaceImportHandlerVersions11AndHigher(
 							x11handler, repository, resourcesProject, userManager, m, createdProjects);
 						// read jar file & import some stuff into resources project
@@ -311,8 +310,9 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 						m.setTaskName("Updating workbench state");
 
-						job = new RunInWorkspaceJob(importJob3);
-						job.setRule(ServoyModel.getWorkspace().getRoot());
+						// job 4
+						job = new WorkspaceImporterActivateSolutionJob("Activating imported solution project", mainProject[0], importJob5, exception,
+							finishedFlag, dummySolProject[0]);
 						job.setUser(false);
 						job.setSystem(true);
 					}
@@ -338,16 +338,20 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					if (job != null) job.schedule();
 				}
 
-			};
+			});
+			importJob3.setRule(ServoyModel.getWorkspace().getRoot());
+			importJob3.setUser(false);
+			importJob3.setSystem(true);
+
 			// need to call following code in a set of jobs through an IWorkspaceRunnable because some operations need the resource listeners to update stuff before running other stuff;
 			// by doing it through IWorkspaceRunnable we really make sure that there are no concurrent threads/jobs running in the workspace (Eclipse Notification Manager)
-			final IWorkspaceRunnable importJob1 = new IWorkspaceRunnable()
+			final Job importJob1 = new RunInWorkspaceJob(new IWorkspaceRunnable()
 			{
 				public void run(IProgressMonitor monitor) throws CoreException
 				{
 					m.setTaskName("Preparing for import (activating needed resources project)");
 					m.worked(1);
-					RunInWorkspaceJob job = null;
+					Job job = null;
 					try
 					{
 						// create/use resources project - and make sure it is active before super.importFromJarFile(...) is called because that changes .dbi files - and those changes
@@ -396,8 +400,22 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
 
 						m.setTaskName("Updating workbench state");
-						job = new RunInWorkspaceJob(importJob2);
-						job.setRule(ServoyModel.getWorkspace().getRoot());
+
+						// job 2
+						job = new WorkspaceImporterActivateSolutionJob("Activating resources project", dummySolProject[0], importJob3, exception, finishedFlag,
+							dummySolProject[0])
+						{
+							@Override
+							protected void runCodeAfterActivation() throws RepositoryException
+							{
+								// verify that correct resources project is active
+								if (rProject[0] != null &&
+									ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject() != rProject[0])
+								{
+									throw new RepositoryException("Cannot activate resources project " + rProject[0].getName() + ".");
+								}
+							}
+						};
 						job.setUser(false);
 						job.setSystem(true);
 					}
@@ -423,13 +441,12 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					if (job != null) job.schedule();
 				}
 
-			};
+			});
 
-			RunInWorkspaceJob job = new RunInWorkspaceJob(importJob1);
-			job.setRule(ServoyModel.getWorkspace().getRoot());
-			job.setUser(false);
-			job.setSystem(true);
-			job.schedule();
+			importJob1.setRule(ServoyModel.getWorkspace().getRoot());
+			importJob1.setUser(false);
+			importJob1.setSystem(true);
+			importJob1.schedule();
 
 			synchronized (finishedFlag)
 			{

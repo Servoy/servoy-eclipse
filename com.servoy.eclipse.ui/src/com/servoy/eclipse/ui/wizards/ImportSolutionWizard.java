@@ -388,8 +388,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 				}
 			};
+			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			try
 			{
+				servoyModel.setSolutionImportInProgressFlag(true); // suspended many of Solex's listeners to avoid unwanted flickers and unneded code running
 				getContainer().run(true, false, runnable);
 			}
 			catch (InvocationTargetException e)
@@ -400,9 +402,13 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			{
 				ServoyLog.logError(e);
 			}
+			finally
+			{
+				servoyModel.setSolutionImportInProgressFlag(false); // resumes Solex listeners that were suspended above and does a full refresh
+			}
 
 			// trigger start debug action delegate for refreshing enablement of debug client buttons by refreshing selection
-			Display.getDefault().syncExec(new Runnable()
+			Display.getDefault().asyncExec(new Runnable()
 			{
 				@Override
 				public void run()

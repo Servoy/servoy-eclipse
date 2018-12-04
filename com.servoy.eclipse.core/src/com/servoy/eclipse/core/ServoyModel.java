@@ -249,6 +249,9 @@ public class ServoyModel extends AbstractServoyModel
 	private IPropertyChangeListener workingSetChangeListener;
 	private final List<IWorkingSetChangedListener> workingSetChangedListeners = new ArrayList<IWorkingSetChangedListener>();
 
+	private boolean solutionImportInProgress;
+	private final List<ISolutionImportListener> solutionImportListeners = new ArrayList<>(1);
+
 	protected ServoyModel()
 	{
 		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
@@ -1462,6 +1465,7 @@ public class ServoyModel extends AbstractServoyModel
 						{
 							projectName = activeResourcesProject.getProject().getName();
 							dataModelManager = new DataModelManager(activeResourcesProject.getProject(), serverManager);
+							dataModelManager.suppressProblemMarkers(solutionImportInProgress);
 							sequenceProvider = new EclipseSequenceProvider(dataModelManager);
 							readWorkingSetsFromResourcesProject();
 							activeResourcesProject.setListeners(workingSetChangedListeners);
@@ -2270,7 +2274,8 @@ public class ServoyModel extends AbstractServoyModel
 
 					// DO STUFF RELATED TO RESOURCES PROJECTS
 					checkForResourcesProjectRename(element, project);
-					if (activeResourcesProject != null && project == activeResourcesProject.getProject() && project.hasNature(ServoyResourcesProject.NATURE_ID))
+					if (activeResourcesProject != null && project == activeResourcesProject.getProject() && project.isOpen() &&
+						project.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						modifyDBIFilesToAllClones(element);
 					}
@@ -3888,4 +3893,32 @@ public class ServoyModel extends AbstractServoyModel
 	{
 		formComponentListeners.remove(listener);
 	}
+
+	public void setSolutionImportInProgressFlag(boolean solutionImportInProgress)
+	{
+		boolean notify = (this.solutionImportInProgress != solutionImportInProgress);
+		this.solutionImportInProgress = solutionImportInProgress;
+		if (notify)
+		{
+			for (ISolutionImportListener l : solutionImportListeners)
+				l.solutionImportInProgressFlagChanged(solutionImportInProgress);
+			if (dataModelManager != null) dataModelManager.suppressProblemMarkers(solutionImportInProgress);
+		}
+	}
+
+	public boolean isSolutionImportInProgress()
+	{
+		return this.solutionImportInProgress;
+	}
+
+	public void addSolutionImportInProgressListener(ISolutionImportListener l)
+	{
+		if (!solutionImportListeners.contains(l)) solutionImportListeners.add(l);
+	}
+
+	public void removeSolutionImportInProgressListener(ISolutionImportListener l)
+	{
+		solutionImportListeners.remove(l);
+	}
+
 }
