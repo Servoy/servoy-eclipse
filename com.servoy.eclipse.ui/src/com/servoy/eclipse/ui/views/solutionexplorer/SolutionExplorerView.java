@@ -179,6 +179,7 @@ import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.ISolutionImportListener;
 import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -453,7 +454,6 @@ public class SolutionExplorerView extends ViewPart
 
 	private IActiveProjectListener activeProjectListener;
 
-//	private IPersistListener persistListener;
 	private IPersistChangeListener persistChangeListener;
 
 	private ISolutionMetaDataChangeListener solutionMetaDataChangeListener;
@@ -543,37 +543,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private HashMap<String, Image> swtImageCache = new HashMap<String, Image>();
 
-	private final IWorkingSetChangedListener workingSetChangedListener = new IWorkingSetChangedListener()
-	{
-		@Override
-		public void workingSetChanged(String[] affectedSolutions)
-		{
-			if (affectedSolutions != null)
-			{
-				SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
-				for (String solutionName : affectedSolutions)
-				{
-					PlatformSimpleUserNode solutionNode = cp.getSolutionNode(solutionName);
-					if (solutionNode != null)
-					{
-						PlatformSimpleUserNode formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
-						if (formsNode != null)
-						{
-							cp.refreshFormsNode(formsNode, false);
-						}
-						else
-						{
-							formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_FormComponents);
-							if (formsNode != null)
-							{
-								cp.refreshFormsNode(formsNode, true);
-							}
-						}
-					}
-				}
-			}
-		}
-	};
+	private IWorkingSetChangedListener workingSetChangedListener;
 
 	public SolutionExplorerTreeContentProvider getTreeContentProvider()
 	{
@@ -925,10 +895,9 @@ public class SolutionExplorerView extends ViewPart
 			{
 				if (statusBarUpdater == null) return Status.OK_STATUS; // the workbench is already closed/closing
 				initTreeViewer();
-				addActiveProjectListener();
-				addResourceListener();
-				addServerAndTableListeners();
-				addI18NChangeListener();
+
+				addSolutionImportListener();
+				addAllModelChangeListeners(false);
 
 				SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
 				// expand the resources node after startup
@@ -938,8 +907,7 @@ public class SolutionExplorerView extends ViewPart
 					tree.setExpandedState(rootNodes[0], true);
 				}
 
-
-				//expand the solution node after startup
+				// expand the solution node after startup
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 				if (servoyProject != null)
 				{
@@ -953,7 +921,7 @@ public class SolutionExplorerView extends ViewPart
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(servoyProject != null);
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(servoyProject != null);
 
-				//expand the servers node if we have invalid (but enabled) servers (expansion will occur after startup)
+				// expand the servers node if we have invalid (but enabled) servers (expansion will occur after startup)
 				IServerManagerInternal serverManager = ServoyModel.getServerManager();
 				String[] array = serverManager.getServerNames(true, false, true, true);
 				for (String server_name : array)
@@ -969,6 +937,7 @@ public class SolutionExplorerView extends ViewPart
 
 				return Status.OK_STATUS;
 			}
+
 		};
 		siteService.schedule(job);
 	}
@@ -1715,6 +1684,7 @@ public class SolutionExplorerView extends ViewPart
 	private ImportZipPackageAsProjectAction importComponentAsProject;
 	private IAction importComponentInSolution;
 	private IntroViewListener introViewListener;
+	private ISolutionImportListener solutionImportListener;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -1829,8 +1799,100 @@ public class SolutionExplorerView extends ViewPart
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] roots = servoyModel.getServoyProjects();
 
+		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(initialActiveProject));
+
+
+		ClientSupport activeSolutionClientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
+		clientSupportViewerFilter.setClientType(activeSolutionClientType);
+
+		if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
+		{
+			if (activeSolutionClientType == ClientSupport.mc)
+			{
+				newActionInTreeSecondary.unregisterAction(UserNodeType.FORM);
+			}
+			else
+			{
+				newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
+			}
+		}
+
+		tree.setInput(roots);
+		drillDownAdapter.reset();
+		treeRoots = roots;
+		tree.refresh();
+		selectionChanged(new SelectionChangedEvent(tree, tree.getSelection())); // set initial state for actions
+	}
+
+	private void addWorkingSetChangedListener(boolean reregisterExistingListener)
+	{
+		boolean wasNull = false;
+		if (workingSetChangedListener == null)
+		{
+			wasNull = true;
+			workingSetChangedListener = new IWorkingSetChangedListener()
+			{
+				@Override
+				public void workingSetChanged(String[] affectedSolutions)
+				{
+					if (affectedSolutions != null)
+					{
+						SolutionExplorerTreeContentProvider cp = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
+						for (String solutionName : affectedSolutions)
+						{
+							PlatformSimpleUserNode solutionNode = cp.getSolutionNode(solutionName);
+							if (solutionNode != null)
+							{
+								PlatformSimpleUserNode formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
+								if (formsNode != null)
+								{
+									cp.refreshFormsNode(formsNode, false);
+								}
+								else
+								{
+									formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_FormComponents);
+									if (formsNode != null)
+									{
+										cp.refreshFormsNode(formsNode, true);
+									}
+								}
+							}
+						}
+					}
+				}
+			};
+		}
+		if (wasNull || reregisterExistingListener)
+			ServoyModelManager.getServoyModelManager().getServoyModel().addWorkingSetChangedListener(workingSetChangedListener);
+	}
+
+	private void addSolutionMetaDataChangeListener(boolean reregisterExistingListener)
+	{
+		boolean wasNull = false;
+		if (solutionMetaDataChangeListener == null)
+		{
+			wasNull = true;
+			solutionMetaDataChangeListener = new ISolutionMetaDataChangeListener()
+			{
+				public void solutionMetaDataChanged(Solution changedSolution)
+				{
+					SolutionExplorerView.this.refreshTreeCompletely(); // do this all the time to refresh "all solutions" node as well (for example in case the solution type changed)
+					// TODO can we refresh less nodes? like only change icons of existing solution nodes or anything else that could change and is not dealt with in other listeners?
+				}
+
+			};
+		}
+		if (wasNull || reregisterExistingListener)
+			ServoyModelManager.getServoyModelManager().getServoyModel().addSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
+	}
+
+	private void addPersistChangeListener(boolean reregisterExistingListener)
+	{
+		boolean wasNull = false;
 		if (persistChangeListener == null)
 		{
+			wasNull = true;
 			persistChangeListener = new IPersistChangeListener()
 			{
 				public void persistChanges(Collection<IPersist> changes)
@@ -1876,48 +1938,9 @@ public class SolutionExplorerView extends ViewPart
 					}
 				}
 			};
-			servoyModel.addPersistChangeListener(true, persistChangeListener);
 		}
-
-		servoyModel.addWorkingSetChangedListener(workingSetChangedListener);
-
-		if (solutionMetaDataChangeListener == null)
-		{
-			solutionMetaDataChangeListener = new ISolutionMetaDataChangeListener()
-			{
-				public void solutionMetaDataChanged(Solution changedSolution)
-				{
-					SolutionExplorerView.this.refreshTreeCompletely(); // do this all the time to refresh "all solutions" node as well (for example in case the solution type changed)
-					// TODO can we refresh less nodes? like only change icons of existing solution nodes or anything else that could change and is not dealt with in other listeners?
-				}
-
-			};
-			servoyModel.addSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
-		}
-
-		ClientSupport activeSolutionClientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
-		clientSupportViewerFilter.setClientType(activeSolutionClientType);
-
-		if (openNewSubFormWizardAction != null && newActionInTreeSecondary != null)
-		{
-			if (activeSolutionClientType == ClientSupport.mc)
-			{
-				newActionInTreeSecondary.unregisterAction(UserNodeType.FORM);
-			}
-			else
-			{
-				newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
-			}
-		}
-
-		tree.setInput(roots);
-		drillDownAdapter.reset();
-		treeRoots = roots;
-		selectionChanged(new SelectionChangedEvent(tree, tree.getSelection())); // set
-		// initial
-		// state
-		// for
-		// actions
+		if (wasNull || reregisterExistingListener)
+			ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(true, persistChangeListener);
 	}
 
 	private String getResourcesProjectName(ServoyProject sp)
@@ -1931,169 +1954,225 @@ public class SolutionExplorerView extends ViewPart
 		return Messages.TreeStrings_NoActiveResourcesProject;
 	}
 
-	private void addActiveProjectListener()
+	private void addActiveProjectListener(boolean reregisterExistingListener)
 	{
-		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(initialActiveProject));
-		tree.refresh();
-		activeProjectListener = new IActiveProjectListener()
+		boolean wasNull = false;
+		if (activeProjectListener == null)
 		{
-			/**
-			 * @see com.servoy.eclipse.model.nature.IActiveProjectListener#activeProjectWillChange(com.servoy.eclipse.model.nature.ServoyProject,
-			 *      com.servoy.eclipse.model.nature.ServoyProject)
-			 */
-			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+			wasNull = true;
+			activeProjectListener = new IActiveProjectListener()
 			{
-				return true;
-			}
-
-			public void activeProjectChanged(final ServoyProject activeProject)
-			{
-				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(activeProject));
-				refreshTreeCompletely();
-
-				// expand and select new active project node
-				Runnable runnable = new Runnable()
+				/**
+				 * @see com.servoy.eclipse.model.nature.IActiveProjectListener#activeProjectWillChange(com.servoy.eclipse.model.nature.ServoyProject,
+				 *      com.servoy.eclipse.model.nature.ServoyProject)
+				 */
+				public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 				{
-					public void run()
+					return true;
+				}
+
+				public void activeProjectChanged(final ServoyProject activeProject)
+				{
+					handleActiveProjectChanged(activeProject);
+				}
+
+				public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+				{
+					if (updateInfo == IActiveProjectListener.MODULES_UPDATED || updateInfo == IActiveProjectListener.SCOPE_NAMES_CHANGED)
 					{
-						String activeProjectName;
-						if (activeProject != null)
-						{
-							activeProjectName = activeProject.getProject().getName();
-						}
-						else
-						{
-							activeProjectName = "";
-						}
-						Object activeProjectNode = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getSolutionNode(activeProjectName);
-						if (activeProjectNode != null)
-						{
-							tree.expandToLevel(activeProjectNode, 1);
-							ISelection newSelection = new StructuredSelection(activeProjectNode);
-							// force selection change, as it may have not been changed if import place holder project was active before
-							// causing solution properties view to be not updated
-							if (newSelection.equals(tree.getSelection()))
-							{
-								tree.setSelection(null);
-							}
-							tree.setSelection(newSelection, false);
-
-
-							// try to make the solution's contents visible (if they fit in the tree area);
-							// if they do not fit scroll to make the active solution the first visible node
-							Object[] children = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getChildren(activeProjectNode);
-							if (children != null && children.length > 0)
-							{
-								tree.reveal(children[children.length - 1]);
-							}
-							TreeItem[] treeSelection = tree.getTree().getSelection();
-							if (treeSelection.length == 1 && treeSelection[0].getBounds().y < tree.getTree().getVerticalBar().getSelection())
-							{
-								tree.getTree().setTopItem(treeSelection[0]);
-							}
-							Object AllSolutionsNode = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getAllSolutionsNode();
-							tree.collapseToLevel(AllSolutionsNode, 1);
-
-
-							DesignerPreferences dp = new DesignerPreferences();
-							Form firstForm = null;
-
-							if (dp.getOpenFirstFormDesigner())
-							{
-								Solution activeSolution = activeProject.getSolution();
-								firstForm = activeSolution.getForm(activeSolution.getFirstFormID());
-								if (firstForm == null)
-								{
-									Iterator<Form> formIterator = activeSolution.getForms(null, false);
-									if (formIterator.hasNext())
-									{
-										firstForm = formIterator.next();
-									}
-								}
-							}
-							if (firstForm != null)
-							{
-								final Form ff = firstForm;
-								WorkbenchJob j = new WorkbenchJob("Opening form...")
-								{
-
-									@Override
-									public IStatus runInUIThread(IProgressMonitor monitor)
-									{
-										EditorUtil.openFormDesignEditor(ff);
-										return Status.OK_STATUS;
-									}
-								};
-								// we are already in UI thread here but sometimes under a pretty big stack already
-								// made it work later in a job because it would generate an exception due to locking in AWT stuff happening in form editor at import
-								j.setRule(ResourcesPlugin.getWorkspace().getRoot()); // don't display until builder is complete
-								j.schedule();
-							}
-						}
-						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(activeProject != null);
-						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(activeProject != null);
+						refreshTreeCompletely();
 					}
-				};
-				if (Display.getCurrent() != null)
+					else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED ||
+						updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED || updateInfo == IActiveProjectListener.TEMPLATES_ADDED_OR_REMOVED)
+					{
+						refreshList();
+					}
+					else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
+					{
+						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(
+							getResourcesProjectName(activeProject));
+						refreshList();
+					}
+				}
+
+			};
+		}
+		if (wasNull || reregisterExistingListener) ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(activeProjectListener);
+	}
+
+	private void handleActiveProjectChanged(final ServoyProject activeProject)
+	{
+		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(activeProject));
+		refreshTreeCompletely();
+
+		// expand and select new active project node
+		Runnable runnable = new Runnable()
+		{
+			public void run()
+			{
+				String activeProjectName;
+				if (activeProject != null)
 				{
-					runnable.run();
+					activeProjectName = activeProject.getProject().getName();
 				}
 				else
 				{
-					Display.getDefault().asyncExec(runnable);
+					activeProjectName = "";
 				}
-			}
+				Object activeProjectNode = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getSolutionNode(activeProjectName);
+				if (activeProjectNode != null)
+				{
+					tree.expandToLevel(activeProjectNode, 1);
+					ISelection newSelection = new StructuredSelection(activeProjectNode);
+					// force selection change, as it may have not been changed if import place holder project was active before
+					// causing solution properties view to be not updated
+					if (newSelection.equals(tree.getSelection()))
+					{
+						tree.setSelection(null);
+					}
+					tree.setSelection(newSelection, false);
 
-			public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-			{
-				if (updateInfo == IActiveProjectListener.MODULES_UPDATED || updateInfo == IActiveProjectListener.SCOPE_NAMES_CHANGED)
-				{
-					refreshTreeCompletely();
-				}
-				else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED ||
-					updateInfo == IActiveProjectListener.STYLES_ADDED_OR_REMOVED || updateInfo == IActiveProjectListener.TEMPLATES_ADDED_OR_REMOVED)
-				{
-					refreshList();
-				}
-				else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
-				{
-					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(activeProject));
-					refreshList();
-				}
-			}
 
+					// try to make the solution's contents visible (if they fit in the tree area);
+					// if they do not fit scroll to make the active solution the first visible node
+					Object[] children = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getChildren(activeProjectNode);
+					if (children != null && children.length > 0)
+					{
+						tree.reveal(children[children.length - 1]);
+					}
+					TreeItem[] treeSelection = tree.getTree().getSelection();
+					if (treeSelection.length == 1 && treeSelection[0].getBounds().y < tree.getTree().getVerticalBar().getSelection())
+					{
+						tree.getTree().setTopItem(treeSelection[0]);
+					}
+					Object AllSolutionsNode = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getAllSolutionsNode();
+					tree.collapseToLevel(AllSolutionsNode, 1);
+
+
+					DesignerPreferences dp = new DesignerPreferences();
+					Form firstForm = null;
+
+					if (dp.getOpenFirstFormDesigner())
+					{
+						Solution activeSolution = activeProject.getSolution();
+						firstForm = activeSolution.getForm(activeSolution.getFirstFormID());
+						if (firstForm == null)
+						{
+							Iterator<Form> formIterator = activeSolution.getForms(null, false);
+							if (formIterator.hasNext())
+							{
+								firstForm = formIterator.next();
+							}
+						}
+					}
+					if (firstForm != null)
+					{
+						final Form ff = firstForm;
+						WorkbenchJob j = new WorkbenchJob("Opening form...")
+						{
+
+							@Override
+							public IStatus runInUIThread(IProgressMonitor monitor)
+							{
+								EditorUtil.openFormDesignEditor(ff);
+								return Status.OK_STATUS;
+							}
+						};
+						// we are already in UI thread here but sometimes under a pretty big stack already
+						// made it work later in a job because it would generate an exception due to locking in AWT stuff happening in form editor at import
+						j.setRule(ResourcesPlugin.getWorkspace().getRoot()); // don't display until builder is complete
+						j.schedule();
+					}
+				}
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setScriptingNodesEnabled(activeProject != null);
+				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(activeProject != null);
+			}
 		};
-		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(activeProjectListener);
+		if (Display.getCurrent() != null)
+		{
+			runnable.run();
+		}
+		else
+		{
+			Display.getDefault().asyncExec(runnable);
+		}
 	}
 
-	private void addResourceListener()
+	private void addSolutionImportListener()
 	{
 		// we monitor the changes to eclipse projects in order to keep the list of
 		// projects in the tree up to date
-		resourceChangeListener = new IResourceChangeListener()
+		solutionImportListener = new ISolutionImportListener()
 		{
-			public void resourceChanged(IResourceChangeEvent event)
+
+			@Override
+			public void solutionImportInProgressFlagChanged(boolean solutionImportInProgress)
 			{
-				if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
+				if (solutionImportInProgress) removeAllModelChangeListeners(false);
+				else
 				{
-					boolean mustRefresh = false;
-					IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren();
-					for (IResourceDelta element : affectedChildren)
+					refreshAfterPendingChangesWereTreatedInModel(() -> {
+						addAllModelChangeListeners(true);
+						handleActiveProjectChanged(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject());
+					});
+				}
+			}
+		};
+
+		ServoyModelManager.getServoyModelManager().getServoyModel().addSolutionImportInProgressListener(solutionImportListener);
+	}
+
+	protected void refreshAfterPendingChangesWereTreatedInModel(Runnable refreshRunnable)
+	{
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				// we are in UI thread, but we must wait for ServoyModel to be updated by a fellow resources listener (so we do this by running the
+				// update)
+				try
+				{
+					ServoyModel.getWorkspace().run(new IWorkspaceRunnable() // TODO this should be done nicer by controlling the sequence resource listeners execute; maybe add a proxy resource listener mechanism to ServoyModel that is able to do that
 					{
-						IResource resource = element.getResource();
-						// do not refresh import placeholder during import, will cause exceptions
-						if (resource instanceof IProject)
+
+						public void run(IProgressMonitor monitor) throws CoreException
 						{
-							if (((IProject)resource).getName().startsWith("import_placeholder"))
-							{
-								if (element.getKind() == IResourceDelta.REMOVED && isSolutionInTree(resource))
-								{
-									mustRefresh = true;
-									break;
-								}
-							}
-							else
+							refreshRunnable.run();
+						}
+					}, null);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError("Cannot update SolEx content", e);
+				}
+			}
+		});
+	}
+
+	private void addResourceListener(boolean reregisterExistingListener)
+	{
+		boolean wasNull = false;
+
+		if (resourceChangeListener == null)
+		{
+			wasNull = true;
+			// we monitor the changes to eclipse projects in order to keep the list of
+			// projects in the tree up to date
+			resourceChangeListener = new IResourceChangeListener()
+			{
+				public void resourceChanged(IResourceChangeEvent event)
+				{
+					if (ServoyModelManager.getServoyModelManager().getServoyModel().isSolutionImportInProgress()) return; // while importing avoid unneeded Solex refreshes that cause flickering + unexpected thread locks being acquired
+
+					if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
+					{
+						boolean mustRefresh = false;
+						IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren();
+						for (IResourceDelta element : affectedChildren)
+						{
+							IResource resource = element.getResource();
+							// do not refresh import placeholder during import, will cause exceptions
+							if (resource instanceof IProject)
 							{
 								// see if it is a Servoy project that changed
 								try
@@ -2128,186 +2207,182 @@ public class SolutionExplorerView extends ViewPart
 								}
 							}
 						}
+						if (mustRefresh)
+						{
+							refreshAfterPendingChangesWereTreatedInModel(() -> {
+								refreshTreeCompletely();
+							});
+						}
 					}
-					if (mustRefresh)
+					else if ((event.getType() & IResourceChangeEvent.POST_BUILD) != 0)
 					{
+						ProblemDecorator problemDecorator = (ProblemDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(
+							ProblemDecorator.ID);
+						if (problemDecorator != null)
+						{
+							IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
+							HashSet<IResource> changedProblemResources = new HashSet<IResource>();
+							for (IMarkerDelta md : markersDelta)
+							{
+								IResource r = md.getResource();
+								do
+								{
+									if (!changedProblemResources.add(r))
+									{
+										break;
+									}
+									r = r.getParent();
+								}
+								while (r != null && r.getType() != IResource.ROOT);
+							}
+
+							problemDecorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
+						}
+
 						Display.getDefault().asyncExec(new Runnable()
 						{
 							public void run()
 							{
-								// we are in UI thread, but we must wait for ServoyModel to be updated by a fellow resources listener (so we do this by running the
-								// update)
-								try
-								{
-									ServoyModel.getWorkspace().run(new IWorkspaceRunnable() // TODO this should be done nicer by controlling the sequence resource listeners execute; maybe add a proxy resource listener mechanism to ServoyModel that is able to do that
-									{
-
-										public void run(IProgressMonitor monitor) throws CoreException
-										{
-											refreshTreeCompletely();
-										}
-									}, null);
-								}
-								catch (CoreException e)
-								{
-									ServoyLog.logError("Cannot update SolEx content", e);
-								}
+								if (list != null && list.getControl() != null && !list.getControl().isDisposed()) list.refresh();
 							}
 						});
 					}
 				}
-				else if ((event.getType() & IResourceChangeEvent.POST_BUILD) != 0)
+			};
+		}
+		if (wasNull || reregisterExistingListener) ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
+			IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+	}
+
+	private void addServerAndTableListeners(boolean reregisterExistingListener)
+	{
+		boolean wasNull = false;
+
+		IServerManagerInternal serverManager = ServoyModel.getServerManager();
+		if (tableListener == null && serverListener == null)
+		{
+			wasNull = true;
+			tableListener = new ITableListener.TableListener()
+			{
+				@Override
+				public void tablesAdded(IServerInternal server, String[] tableNames)
 				{
-					ProblemDecorator problemDecorator = (ProblemDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(
-						ProblemDecorator.ID);
-					if (problemDecorator != null)
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
+					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+				}
+
+				public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
+				{
+					if (tables != null && tables.length > 0 && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 					{
-						IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
-						HashSet<IResource> changedProblemResources = new HashSet<IResource>();
-						for (IMarkerDelta md : markersDelta)
+						List<String> names = new ArrayList<String>();
+						for (ITable table : tables)
 						{
-							IResource r = md.getResource();
-							do
-							{
-								if (!changedProblemResources.add(r))
-								{
-									break;
-								}
-								r = r.getParent();
-							}
-							while (r != null && r.getType() != IResource.ROOT);
+							names.add(table.getName());
 						}
-
-						problemDecorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
 					}
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
+					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+				}
 
+				@Override
+				public void hiddenTableChanged(IServerInternal server, Table table)
+				{
+					if (table.getTableType() == ITable.VIEW)
+					{
+						((SolutionExplorerListContentProvider)list.getContentProvider()).refreshContent();
+					}
+					else
+					{
+						((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+					}
+				}
+
+				@Override
+				public void serverStateChanged(IServerInternal server, int oldState, int newState)
+				{
+					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+					if ((oldState & ITableListener.VALID) == ITableListener.VALID && (newState & ITableListener.VALID) != ITableListener.VALID)
+					{
+						SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
+						final Object serversNode = treeContentProvider.getServers();
+						UIJob expandServersNode = new UIJob(tree.getControl().getDisplay(), "Expand servers node")
+						{
+							@Override
+							public IStatus runInUIThread(IProgressMonitor monitor)
+							{
+								if (tree.isBusy())
+								{
+									schedule(1000);
+								}
+								else
+								{
+									((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
+									tree.setExpandedState(serversNode, true);
+								}
+								return Status.OK_STATUS;
+							}
+						};
+						expandServersNode.setSystem(true);
+						expandServersNode.schedule();
+					}
+				}
+			};
+
+			// monitor changes in server list
+			serverListener = new IServerListener()
+			{
+
+				public void serverAdded(IServerInternal s)
+				{
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
+					s.addTableListener(tableListener);
+				}
+
+				public void serverRemoved(IServerInternal s)
+				{
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
+					s.removeTableListener(tableListener);
+				}
+			};
+		}
+		if (wasNull || reregisterExistingListener)
+		{
+			// add listeners to initial server list
+			String[] array = serverManager.getServerNames(false, false, true, true);
+			for (String server_name : array)
+			{
+				((IServerInternal)serverManager.getServer(server_name, false, false)).addTableListener(tableListener);
+			}
+
+			serverManager.addServerListener(serverListener);
+		}
+	}
+
+	private void addI18NChangeListener(boolean reregisterExistingListener)
+	{
+		boolean wasNull = false;
+
+		if (i18nChangeListener == null)
+		{
+			wasNull = true;
+			i18nChangeListener = new I18NChangeListener()
+			{
+				PlatformSimpleUserNode i18nFilesNode = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getI18NFilesNode();
+
+				public void i18nChanged()
+				{
 					Display.getDefault().asyncExec(new Runnable()
 					{
 						public void run()
 						{
-							if (list != null && list.getControl() != null && !list.getControl().isDisposed()) list.refresh();
+							if (i18nFilesNode.equals(getSelectedTreeNode())) refreshList();
 						}
 					});
 				}
-			}
-		};
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
-	}
-
-	private void addServerAndTableListeners()
-	{
-		IServerManagerInternal serverManager = ServoyModel.getServerManager();
-		tableListener = new ITableListener.TableListener()
-		{
-			@Override
-			public void tablesAdded(IServerInternal server, String[] tableNames)
-			{
-				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
-				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
-			}
-
-			public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
-			{
-				if (tables != null && tables.length > 0 && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
-				{
-					List<String> names = new ArrayList<String>();
-					for (ITable table : tables)
-					{
-						names.add(table.getName());
-					}
-				}
-				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
-				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
-			}
-
-			@Override
-			public void hiddenTableChanged(IServerInternal server, Table table)
-			{
-				if (table.getTableType() == ITable.VIEW)
-				{
-					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshContent();
-				}
-				else
-				{
-					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
-				}
-			}
-
-			@Override
-			public void serverStateChanged(IServerInternal server, int oldState, int newState)
-			{
-				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
-				if ((oldState & ITableListener.VALID) == ITableListener.VALID && (newState & ITableListener.VALID) != ITableListener.VALID)
-				{
-					SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
-					final Object serversNode = treeContentProvider.getServers();
-					UIJob expandServersNode = new UIJob(tree.getControl().getDisplay(), "Expand servers node")
-					{
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor)
-						{
-							if (tree.isBusy())
-							{
-								schedule(1000);
-							}
-							else
-							{
-								((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
-								tree.setExpandedState(serversNode, true);
-							}
-							return Status.OK_STATUS;
-						}
-					};
-					expandServersNode.setSystem(true);
-					expandServersNode.schedule();
-				}
-			}
-		};
-		// add listeners to initial server list
-		String[] array = serverManager.getServerNames(false, false, true, true);
-		for (String server_name : array)
-		{
-			((IServerInternal)serverManager.getServer(server_name, false, false)).addTableListener(tableListener);
+			};
 		}
-
-		// monitor changes in server list
-		serverListener = new IServerListener()
-		{
-
-			public void serverAdded(IServerInternal s)
-			{
-				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
-				s.addTableListener(tableListener);
-			}
-
-			public void serverRemoved(IServerInternal s)
-			{
-				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
-				s.removeTableListener(tableListener);
-			}
-		};
-		serverManager.addServerListener(serverListener);
-
-	}
-
-	private void addI18NChangeListener()
-	{
-		i18nChangeListener = new I18NChangeListener()
-		{
-			PlatformSimpleUserNode i18nFilesNode = ((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getI18NFilesNode();
-
-			public void i18nChanged()
-			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						if (i18nFilesNode.equals(getSelectedTreeNode())) refreshList();
-					}
-				});
-			}
-		};
-		ServoyModelManager.getServoyModelManager().getServoyModel().addI18NChangeListener(i18nChangeListener);
+		if (wasNull || reregisterExistingListener) ServoyModelManager.getServoyModelManager().getServoyModel().addI18NChangeListener(i18nChangeListener);
 	}
 
 	public boolean isNonEmptyPlugin(SimpleUserNode un)
@@ -3573,11 +3648,14 @@ public class SolutionExplorerView extends ViewPart
 	{
 		beanCache.clear();
 
-		if (resourceChangeListener != null)
+		removeAllModelChangeListeners(true);
+
+		if (solutionImportListener != null)
 		{
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
-			resourceChangeListener = null;
+			ServoyModelManager.getServoyModelManager().getServoyModel().removeSolutionImportInProgressListener(solutionImportListener);
+			solutionImportListener = null;
 		}
+
 		if (fPartListener != null)
 		{
 			getViewSite().getPage().removePartListener(fPartListener);
@@ -3596,9 +3674,47 @@ public class SolutionExplorerView extends ViewPart
 			fParent.removeControlListener(resizeListener);
 		}
 
+
+		if (introViewListener != null)
+		{
+			getSite().getPage().removePartListener(introViewListener);
+			introViewListener = null;
+		}
+
+		if (clientSupportViewerFilter != null) clientSupportViewerFilter = null;
+
+		yellow.dispose();
+
+		labelProvider.dispose();
+		if (decoratingLabelProvider != null) decoratingLabelProvider.removeListener(labelProviderListener);
+		clearFolderCache(swtImageCache);
+		super.dispose();
+	}
+
+	private void addAllModelChangeListeners(boolean reregisterExistingListeners)
+	{
+		addWorkingSetChangedListener(reregisterExistingListeners);
+		addSolutionMetaDataChangeListener(reregisterExistingListeners);
+		addPersistChangeListener(reregisterExistingListeners);
+
+		addServerAndTableListeners(reregisterExistingListeners);
+		addI18NChangeListener(reregisterExistingListeners);
+		addResourceListener(reregisterExistingListeners);
+		addActiveProjectListener(reregisterExistingListeners);
+	}
+
+	private void removeAllModelChangeListeners(boolean discardListenerReferences)
+	{
 		if (activeProjectListener != null)
 		{
 			ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(activeProjectListener);
+			if (discardListenerReferences) activeProjectListener = null;
+		}
+
+		if (resourceChangeListener != null)
+		{
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+			if (discardListenerReferences) resourceChangeListener = null;
 		}
 
 		if (i18nChangeListener != null)
@@ -3609,7 +3725,7 @@ public class SolutionExplorerView extends ViewPart
 		if (serverListener != null)
 		{
 			ServoyModel.getServerManager().removeServerListener(serverListener);
-			serverListener = null;
+			if (discardListenerReferences) serverListener = null;
 		}
 
 		if (tableListener != null)
@@ -3623,29 +3739,26 @@ public class SolutionExplorerView extends ViewPart
 				server.removeTableListener(tableListener);
 			}
 
-			tableListener = null;
+			if (discardListenerReferences) tableListener = null;
 		}
 
-		if (introViewListener != null)
+		if (persistChangeListener != null)
 		{
-			getSite().getPage().removePartListener(introViewListener);
-			introViewListener = null;
+			ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
+			if (discardListenerReferences) persistChangeListener = null;
 		}
 
-		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, persistChangeListener);
-		ServoyModelManager.getServoyModelManager().getServoyModel().removeSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
-		ServoyModelManager.getServoyModelManager().getServoyModel().removeWorkingSetChangedListener(workingSetChangedListener);
-//		ServoyProject[] currentRoots = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-//		registerPersistListener(currentRoots, null);
+		if (solutionMetaDataChangeListener != null)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().removeSolutionMetaDataChangeListener(solutionMetaDataChangeListener);
+			if (discardListenerReferences) solutionMetaDataChangeListener = null;
+		}
 
-		if (clientSupportViewerFilter != null) clientSupportViewerFilter = null;
-
-		yellow.dispose();
-
-		labelProvider.dispose();
-		if (decoratingLabelProvider != null) decoratingLabelProvider.removeListener(labelProviderListener);
-		clearFolderCache(swtImageCache);
-		super.dispose();
+		if (workingSetChangedListener != null)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().removeWorkingSetChangedListener(workingSetChangedListener);
+			if (discardListenerReferences) workingSetChangedListener = null;
+		}
 	}
 
 	@Override
