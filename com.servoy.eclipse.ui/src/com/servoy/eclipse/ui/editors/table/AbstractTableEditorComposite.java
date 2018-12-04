@@ -17,8 +17,8 @@
 
 package com.servoy.eclipse.ui.editors.table;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.TreeSet;
 
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -44,7 +44,7 @@ public class AbstractTableEditorComposite extends Composite
 {
 	protected final Composite treeContainer;
 	protected final TreeViewer treeViewer;
-	protected TreeSet<Solution> rows;
+	protected ArrayList<Solution> rows;
 	protected ScrolledComposite myScrolledComposite;
 	protected Composite container;
 
@@ -68,7 +68,7 @@ public class AbstractTableEditorComposite extends Composite
 
 	protected void setRows(ITable t)
 	{
-		rows = new TreeSet<Solution>();
+		rows = new ArrayList<Solution>();
 		try
 		{
 			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
