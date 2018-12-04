@@ -761,8 +761,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			Label styleLabel = new Label(topLevel, SWT.NONE);
 			styleLabel.setText("St&yle");
-			styleLabel.setEnabled(!activeSolutionMobile && !SolutionMetaData.isServoyNGSolution(getActiveSolution()));
-
+			styleLabel.setEnabled(!activeSolutionMobile && !SolutionMetaData.isNGOnlySolution(getActiveSolution().getSolutionType()));
 			styleNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
 			styleNameCombo.setContentProvider(new ArrayContentProvider());
 			styleNameCombo.addSelectionChangedListener(new ISelectionChangedListener()
@@ -773,7 +772,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 			Combo styleNameComboControl = styleNameCombo.getCombo();
-			styleNameComboControl.setEnabled(!activeSolutionMobile && !SolutionMetaData.isServoyNGSolution(getActiveSolution()));
+			styleNameComboControl.setEnabled(!activeSolutionMobile && !SolutionMetaData.isNGOnlySolution(getActiveSolution().getSolutionType()));
 
 			Label templateLabel = new Label(topLevel, SWT.NONE);
 			templateLabel.setText("T&emplate");
@@ -881,9 +880,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 					bTypeAnchored.setVisible(false);
 					bTypeCSSPosition.setSelection(true);
 				}
-
-				styleNameComboControl.setVisible(false);
-				styleLabel.setVisible(false);
 			}
 			else
 			{
