@@ -71,7 +71,7 @@ import com.servoy.j2db.util.Utils;
  *
  * @author jblok
  */
-public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
+public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>, Comparable<ServoyProject>
 {
 	/**
 	 * ID of this project nature
@@ -743,6 +743,12 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 				(ServoyProject)servoyProject.getProject().getWorkspace().getRoot().getProject(module.getName()).getNature(ServoyProject.NATURE_ID),
 				visitedModules, allSolutionAndModuleReferencedProjects);
 		}
+	}
+
+	@Override
+	public int compareTo(ServoyProject o)
+	{
+		return project.getName().compareTo(o.getProject().getName());
 	}
 
 }

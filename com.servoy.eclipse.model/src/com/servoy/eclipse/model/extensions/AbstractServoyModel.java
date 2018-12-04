@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -221,7 +222,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 		// this means that the only expandable solution nodes will be the active solution and it's referenced modules;
 		// all other solutions will appear grayed-out and not-expandable (still allows the user to activate them if necessary)
 
-		List<ServoyProject> moduleProjects = new ArrayList<ServoyProject>();
+		TreeSet<ServoyProject> moduleProjects = new TreeSet<ServoyProject>();
 		addFlattenedSolutionModules(moduleProjects);
 		addImportHookModules(getActiveProject(), moduleProjects);
 		return moduleProjects.toArray(new ServoyProject[moduleProjects.size()]);
@@ -235,7 +236,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Usually you would use {@link #getModulesOfActiveProject()} or {@link #getModulesOfActiveProjectWithImportHooks()} instead.
 	 */
-	public void addFlattenedSolutionModules(List<ServoyProject> moduleProjects)
+	public void addFlattenedSolutionModules(TreeSet<ServoyProject> moduleProjects)
 	{
 		// get all modules of the active solution (related solutions)
 		FlattenedSolution flatActiveSolution = getFlattenedSolution();
@@ -266,7 +267,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	public ServoyProject[] getImportHookModulesOfActiveProject()
 	{
-		List<ServoyProject> importHookModules = new ArrayList<ServoyProject>();
+		TreeSet<ServoyProject> importHookModules = new TreeSet<ServoyProject>();
 		addImportHookModules(getActiveProject(), importHookModules);
 		return importHookModules.toArray(new ServoyProject[importHookModules.size()]);
 	}
@@ -274,12 +275,12 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Usually you would use {@link #getModulesOfActiveProjectWithImportHooks()} or {@link #getImportHookModulesOfActiveProject()} instead.
 	 */
-	public void addImportHookModules(ServoyProject p, List<ServoyProject> importHookModules)
+	public void addImportHookModules(ServoyProject p, TreeSet<ServoyProject> importHookModules)
 	{
 		addImportHookModules(p, importHookModules, new HashSet<ServoyProject>());
 	}
 
-	private void addImportHookModules(ServoyProject p, List<ServoyProject> importHookModules, Set<ServoyProject> visited)
+	private void addImportHookModules(ServoyProject p, TreeSet<ServoyProject> importHookModules, Set<ServoyProject> visited)
 	{
 		if (p != null && !visited.contains(p))
 		{
