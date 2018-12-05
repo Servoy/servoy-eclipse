@@ -100,7 +100,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 	protected static final String WIDTH = "shellWidth";
 	protected static final String HEIGHT = "shellHeight";
 
-	public static final int SERIAL_RULE_ID = 1017;
+	public static final SerialRule SERIAL_RULE = SerialRule.getNewSerialRule();
 
 	public static WeakReference<InstalledExtensionsDialog> createdInstance;
 
@@ -767,7 +767,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 			};
 			job.setSystem(false);
 			job.setUser(true);
-			job.setRule(new SerialRule(SERIAL_RULE_ID));
+			job.setRule(SERIAL_RULE);
 			job.schedule();
 		}
 	}

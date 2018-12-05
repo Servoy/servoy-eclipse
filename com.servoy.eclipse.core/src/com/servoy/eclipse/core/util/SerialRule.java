@@ -29,20 +29,18 @@ public class SerialRule implements ISchedulingRule
 
 	public static SerialRule getNewSerialRule()
 	{
+		if (uniqueID == 0) uniqueID++;
 		return new SerialRule(uniqueID++);
 	}
 
-	/**
-	 * Serial rules with the same id conflict. INSTANCE has id 0.
-	 */
-	public SerialRule(int id)
+	private SerialRule(int id)
 	{
 		this.id = id;
 	}
 
 	public boolean contains(ISchedulingRule rule)
 	{
-		return (rule == this);
+		return equals(rule);
 	}
 
 	public boolean isConflicting(ISchedulingRule rule)
@@ -53,7 +51,7 @@ public class SerialRule implements ISchedulingRule
 	@Override
 	public boolean equals(Object obj)
 	{
-		return obj instanceof SerialRule && ((SerialRule)obj).id == id;
+		return this == obj || (obj instanceof SerialRule && ((SerialRule)obj).id == id);
 	}
 
 }
