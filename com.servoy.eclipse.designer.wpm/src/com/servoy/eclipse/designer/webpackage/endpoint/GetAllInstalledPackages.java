@@ -349,23 +349,51 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		resourceListenersOff();
 	}
 
+	private final int[] specReloadsWanted = new int[] { 0 };
+
 	@Override
 	public void webObjectSpecificationReloaded()
 	{
-		Job job = new Job("reload specifications")
+		// TODO should we use some workspace rule instead or as well here?
+
+		// sometimes for example 3 reloads were triggered in a short amount of time; keep the full reloads to a minimum;
+		// only keep 1 reload and if that is in progress and another one is needed remember to trigger it only once
+		// the first reload is over
+		synchronized (specReloadsWanted)
 		{
-			@Override
-			protected IStatus run(IProgressMonitor monitor)
+			if (specReloadsWanted[0] == 0)
 			{
-				JSONArray packages = executeMethod(null);
-				JSONObject jsonResult = new JSONObject();
-				jsonResult.put("method", CLIENT_SERVER_METHOD);
-				jsonResult.put("result", packages);
-				endpoint.send(jsonResult.toString());
-				return Status.OK_STATUS;
+				specReloadsWanted[0] = 1;
+				Job job = new Job("Reloading Web Package Manager specs...")
+				{
+					@Override
+					protected IStatus run(IProgressMonitor monitor)
+					{
+						synchronized (specReloadsWanted)
+						{
+							specReloadsWanted[0] = 1; // we are starting this one reload now; all potential other wanted reloads are satisfied by this one
+						}
+						JSONArray packages = executeMethod(null);
+						JSONObject jsonResult = new JSONObject();
+						jsonResult.put("method", CLIENT_SERVER_METHOD);
+						jsonResult.put("result", packages);
+						endpoint.send(jsonResult.toString());
+
+						synchronized (specReloadsWanted)
+						{
+							specReloadsWanted[0]--;
+							if (specReloadsWanted[0] > 0) schedule(); // schedule reload again as one was needed while current one is in progress
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				job.schedule(100);
 			}
-		};
-		job.schedule();
+			else
+			{
+				specReloadsWanted[0]++;
+			}
+		}
 	}
 
 	@Override

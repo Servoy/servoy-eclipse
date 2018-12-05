@@ -283,7 +283,7 @@ public class SolutionExplorerTreeContentProvider
 		resources.parent = invisibleRootNode;
 
 		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.png"));
-		stylesNode.setClientSupport(ClientSupport.ng_wc_sc);
+		stylesNode.setClientSupport(ClientSupport.mc_wc_sc);
 		stylesNode.parent = resources;
 
 		componentsFromResourcesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS_FROM_RESOURCES,

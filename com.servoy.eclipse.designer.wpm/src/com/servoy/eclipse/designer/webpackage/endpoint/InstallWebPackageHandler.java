@@ -19,7 +19,6 @@ package com.servoy.eclipse.designer.webpackage.endpoint;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,8 +34,14 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
@@ -312,7 +317,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 	}
 
 	private static void importSolution(InputStream is, final String name, final String version, final String targetSolution,
-		IWPMController resourceListenerSwitch) throws IOException, FileNotFoundException
+		final IWPMController resourceListenerSwitch) throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -320,6 +325,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 		{
 			importSolutionFile.delete();
 		}
+		boolean asyncExecWillExecute = false;
 		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
 		{
 			if (resourceListenerSwitch != null)
@@ -327,66 +333,111 @@ public class InstallWebPackageHandler implements IDeveloperService
 				resourceListenerSwitch.resourceListenersOff();
 			}
 			Utils.streamCopy(is, fos);
-			Display.getDefault().syncExec(new Runnable()
+
+			asyncExecWillExecute = true;
+			Display.getDefault().asyncExec(new Runnable()
 			{
 				public void run()
 				{
-					ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
-					importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
-					importSolutionWizard.setAllowSolutionFilePathSelection(false);
-					importSolutionWizard.setActivateSolution(false);
-					importSolutionWizard.init(PlatformUI.getWorkbench(), null);
-					WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
-					if (dialog.open() == Window.OK)
+					boolean jobWillExecute = false;
+					try
 					{
-						ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
-						if (targetServoyProject != null)
+						// import the .servoy solution into workspace
+						ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+						importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
+						importSolutionWizard.setAllowSolutionFilePathSelection(false);
+						importSolutionWizard.setActivateSolution(false);
+						importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+						WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
+						if (dialog.open() == Window.OK)
 						{
-							Solution editingSolution = targetServoyProject.getEditingSolution();
-							if (editingSolution != null)
+							final IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
+							final ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+								targetSolution);
+							if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() && importedProject.isOpen())
 							{
-								String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
-								List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
-								if (!modulesList.contains(name))
+								Job job = new WorkspaceJob("Adding '" + name + "' as module of '" + targetSolution + "'...")
 								{
-									modulesList.add(name);
-								}
-								String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
-								editingSolution.setModulesNames(modulesTokenized);
+									@Override
+									public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+									{
+										try
+										{
+											if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() &&
+												importedProject.isOpen())
+											{
+												Solution editingSolution = targetServoyProject.getEditingSolution();
+												if (editingSolution != null)
+												{
+													String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+													List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
+													if (!modulesList.contains(name))
+													{
+														modulesList.add(name);
+													}
+													String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+													editingSolution.setModulesNames(modulesTokenized);
 
-								try
-								{
-									targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
-								}
-								catch (RepositoryException e)
-								{
-									ServoyLog.logError("Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
-								}
+													try
+													{
+														targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
+													}
+													catch (RepositoryException e)
+													{
+														ServoyLog.logError(
+															"Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
+													}
 
-								// save version
-								Properties wpmProperties = new Properties();
-								wpmProperties.put("version", version);
+													// save version // TODO if SVY-13102 is implemented then the code below needs to execute even if targetSolution is null!
+													setName("Storing WPM metadata for '" + name + "'...");
+													Properties wpmProperties = new Properties();
+													wpmProperties.put("version", version);
 
-								try (ByteArrayOutputStream wpmbos = new ByteArrayOutputStream())
-								{
-									wpmProperties.store(wpmbos, "");
-									byte[] wpmPropertiesBytes = wpmbos.toByteArray();
-									IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
-									WorkspaceFileAccess importedProjectFA = new WorkspaceFileAccess(importedProject.getWorkspace());
-									importedProjectFA.setContents(importedProject.getFullPath().append("wpm.properties").toOSString(), wpmPropertiesBytes);
-								}
-								catch (Exception ex)
-								{
-									Debug.log(ex);
-								}
+													try (ByteArrayOutputStream wpmbos = new ByteArrayOutputStream())
+													{
+														wpmProperties.store(wpmbos, "");
+														byte[] wpmPropertiesBytes = wpmbos.toByteArray();
+														WorkspaceFileAccess importedProjectFA = new WorkspaceFileAccess(importedProject.getWorkspace());
+														importedProjectFA.setContents(importedProject.getFullPath().append("wpm.properties").toOSString(),
+															wpmPropertiesBytes);
+													}
+													catch (Exception ex)
+													{
+														Debug.log(ex);
+													}
+												}
+											}
+											return Status.OK_STATUS;
+										}
+										finally
+										{
+											cleanUPImportSolution(resourceListenerSwitch, importSolutionFile);
+										}
+									}
+								};
+								job.setUser(true);
+								job.setRule(MultiRule.combine(targetServoyProject.getProject(), importedProject));
+								job.schedule();
+								jobWillExecute = true;
 							}
 						}
 					}
-
+					finally
+					{
+						if (!jobWillExecute) cleanUPImportSolution(resourceListenerSwitch, importSolutionFile);
+					}
 				}
 			});
 		}
 		finally
+		{
+			if (!asyncExecWillExecute) cleanUPImportSolution(resourceListenerSwitch, importSolutionFile);
+		}
+	}
+
+	private static void cleanUPImportSolution(IWPMController resourceListenerSwitch, File importSolutionFile)
+	{
+		try
 		{
 			if (resourceListenerSwitch != null)
 			{
@@ -397,6 +448,10 @@ public class InstallWebPackageHandler implements IDeveloperService
 			{
 				importSolutionFile.delete();
 			}
+		}
+		catch (RuntimeException e)
+		{
+			ServoyLog.logError(e);
 		}
 	}
 

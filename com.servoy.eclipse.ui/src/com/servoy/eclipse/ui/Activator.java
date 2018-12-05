@@ -55,7 +55,6 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
 import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -278,7 +277,7 @@ public class Activator extends AbstractUIPlugin
 		{
 			Job updateCheckJob = new ExtensionUpdateAndIncompatibilityCheckJob(
 				"Checking for Servoy Extension " + (applicationServer.hadIncompatibleExtensionsWhenStarted() ? " incompatibilities." : "updates."));
-			updateCheckJob.setRule(new SerialRule(InstalledExtensionsDialog.SERIAL_RULE_ID));
+			updateCheckJob.setRule(InstalledExtensionsDialog.SERIAL_RULE);
 			updateCheckJob.setUser(false);
 			updateCheckJob.setSystem(false);
 			updateCheckJob.schedule();
