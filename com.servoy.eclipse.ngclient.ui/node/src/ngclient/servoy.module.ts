@@ -23,6 +23,8 @@ import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/com
 import {I18NProvider} from './services/i18n_provider.service'
 import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
 
+import { ComponentContributor } from './component_contributor.service';
+
 @NgModule( {
     declarations: [
         MainComponent,
@@ -41,7 +43,7 @@ import { DefaultNavigator } from '../servoycore/default-navigator/default-naviga
         AllServicesModules,
         HttpClientModule
     ],
-    providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe],
+    providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe, ComponentContributor],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent]
 } )

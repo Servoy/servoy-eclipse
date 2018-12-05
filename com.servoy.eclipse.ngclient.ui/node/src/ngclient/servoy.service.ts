@@ -113,6 +113,12 @@ export class ServoyService {
         return this.uiProperties;
     }
     
+    public executeInlineScript(formname:string, script:string, params: any[])
+    {
+        return this.sabloService.callService("formService", "executeInlineScript", {'formname': formname, 'script': script, 'params':params}, false);
+    }
+    
+        
     public setLocale(language, country, initializing?) {
        // TODO angular $translate and our i18n service
 //            $translate.refresh();

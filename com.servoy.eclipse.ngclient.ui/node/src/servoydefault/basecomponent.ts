@@ -1,10 +1,12 @@
 import {OnInit, Input, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
 
 import {PropertyUtils} from '../ngclient/servoy_public'
+import {ComponentContributor} from '../ngclient/component_contributor.service';
 
 export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
     @Input() name;
     @Input() servoyApi;
+    @Input() servoyAttributes;
 
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
@@ -30,11 +32,16 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
     @Input() scrollbars;
     
     @ViewChild('element') elementRef:ElementRef;
+    private componentContributor:ComponentContributor;
 
-    constructor(protected readonly renderer: Renderer2) { }
+    constructor(protected readonly renderer: Renderer2) { 
+        this.componentContributor = new ComponentContributor();
+    }
 
     ngOnInit() {
-      this.attachHandlers();
+      this.attachHandlers(); 
+      this.addAttributes(); 
+      this.componentContributor.componentCreated(this.getNativeChild(), this.renderer);
     }
 
     protected attachHandlers(){
@@ -48,6 +55,11 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
           this.onRightClickMethodID( e );
         } );
       }
+    }
+    
+    protected addAttributes() {
+        if (!this.servoyAttributes) return;
+        this.servoyAttributes.forEach( attribute => this.renderer.setAttribute(this.getNativeElement(), attribute.key,  attribute.value));
     }
 
     ngOnChanges( changes: SimpleChanges ) {
