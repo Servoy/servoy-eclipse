@@ -1,6 +1,6 @@
-import { Input, ContentChild, TemplateRef, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Input, ContentChild, TemplateRef, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2 } from '@angular/core';
 
-import { PropertyUtils, ServoyApi } from '../../ngclient/servoy_public'
+import { PropertyUtils, ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public'
 
 import { WindowRefService } from '../../sablo/util/windowref.service'
 
@@ -8,10 +8,11 @@ import { BaseCustomObject } from '../../sablo/spectypes.service'
 
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
 
+import { ServoyDefaultBaseComponent } from '../basecomponent';
 
-export abstract class BaseTabpanel implements OnChanges {
-    @Input() name: string;
-    @Input() servoyApi: ServoyApi;
+
+
+export abstract class BaseTabpanel extends ServoyBaseComponent implements OnChanges {
 
     @Input() onChangeMethodID;
 
@@ -44,7 +45,8 @@ export abstract class BaseTabpanel implements OnChanges {
     protected selectedTab: Tab;
     private log: LoggerService;
 
-    constructor( private windowRefService: WindowRefService, private logFactory : LoggerFactory ) {
+    constructor( private windowRefService: WindowRefService, private logFactory : LoggerFactory, renderer:Renderer2 ) {
+        super(renderer);
         this.log = logFactory.getLogger("BaseTabpanel");
     }
 

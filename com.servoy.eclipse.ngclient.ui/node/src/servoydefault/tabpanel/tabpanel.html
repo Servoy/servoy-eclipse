@@ -6,7 +6,7 @@
         	  [innerHTML]='tab?.text'></span>
       </ng-template>
       <ng-template ngbTabContent>
-      <div style="position: absolute;overflow: auto;top: 41px;bottom: 0px;left: 0px;right: 0px;">
+      <div #element style="position: absolute;overflow: auto;top: 41px;bottom: 0px;left: 0px;right: 0px;">
       	<ng-template [ngTemplateOutlet]="templateRef" [ngTemplateOutletContext]="{name:getForm(tab)}"></ng-template>
       </div>
       

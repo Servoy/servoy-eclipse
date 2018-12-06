@@ -1,12 +1,9 @@
 import {OnInit, Input, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
 
-import {PropertyUtils} from '../ngclient/servoy_public'
-import {ComponentContributor} from '../ngclient/component_contributor.service';
+import {PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public'
 
-export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
-    @Input() name;
-    @Input() servoyApi;
-    @Input() servoyAttributes;
+
+export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements OnInit, OnChanges {
 
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
@@ -30,38 +27,25 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
     @Input() transparent;
     @Input() visible;
     @Input() scrollbars;
-    
-    @ViewChild('element') elementRef:ElementRef;
-    private componentContributor:ComponentContributor;
 
     constructor(protected readonly renderer: Renderer2) { 
-        this.componentContributor = new ComponentContributor();
+        super(renderer);
     }
 
     ngOnInit() {
+      super.ngOnInit();
       this.attachHandlers(); 
-      this.addAttributes(); 
-      this.componentContributor.componentCreated(this.getNativeChild(), this.renderer);
     }
 
     protected attachHandlers(){
       if ( this.onActionMethodID ) {
-        this.renderer.listen( this.getNativeElement(), 'click', ( e ) => {
-          this.onActionMethodID( e );
-        } );
+        this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
       }
       if ( this.onRightClickMethodID ) {
-        this.renderer.listen( this.getNativeElement(), 'contextmenu', ( e ) => {
-          this.onRightClickMethodID( e );
-        } );
+        this.renderer.listen( this.getNativeElement(), 'contextmenu', e => this.onRightClickMethodID( e ));
       }
     }
     
-    protected addAttributes() {
-        if (!this.servoyAttributes) return;
-        this.servoyAttributes.forEach( attribute => this.renderer.setAttribute(this.getNativeElement(), attribute.key,  attribute.value));
-    }
-
     ngOnChanges( changes: SimpleChanges ) {
         for ( let property in changes ) {
             let change = changes[property];
@@ -111,20 +95,5 @@ export class ServoyDefaultBaseComponent implements OnInit, OnChanges {
                     break;
             }
         }
-    }
-    
-    /**
-     * this should return the main native element (like the first div) 
-     */
-    protected getNativeElement():any {
-        return this.elementRef.nativeElement;
-    }
-
-   /**
-    * sub classes can return a different native child then the default main element.
-    * used currently only for horizontal aligment
-    */
-    protected getNativeChild():any {
-        return this.elementRef.nativeElement;
     }
 }

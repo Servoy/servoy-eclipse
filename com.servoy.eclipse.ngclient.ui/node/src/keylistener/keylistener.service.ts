@@ -1,4 +1,4 @@
-import { Injectable, Renderer2, ElementRef } from '@angular/core';
+import { Injectable, Renderer2 } from '@angular/core';
 
 import { ComponentContributor, IComponentContributorListener } from '../ngclient/component_contributor.service';
 import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';

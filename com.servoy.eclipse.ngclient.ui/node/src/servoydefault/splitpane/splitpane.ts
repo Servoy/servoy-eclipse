@@ -1,6 +1,6 @@
-import { Component, ViewChild, Input, Output, EventEmitter, ContentChild, TemplateRef , OnInit,OnChanges,SimpleChanges} from '@angular/core';
+import { Component, ViewChild, Input, Output, EventEmitter, ContentChild, TemplateRef, OnInit, OnChanges, SimpleChanges, Renderer2} from '@angular/core';
 
-import { ServoyApi } from '../../ngclient/servoy_public'
+import { ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public'
 
 import { Tab } from '../tabpanel/basetabpanel'
 
@@ -8,9 +8,7 @@ import { Tab } from '../tabpanel/basetabpanel'
     selector: 'servoydefault-splitpane',
     templateUrl: './splitpane.html'
 } )
-export class ServoyDefaultSplitpane  implements  OnInit, OnChanges {
-    @Input() name: string;
-    @Input() servoyApi: ServoyApi;
+export class ServoyDefaultSplitpane extends ServoyBaseComponent implements  OnInit, OnChanges {
 
     @Input() onChangeMethodID;
 
@@ -32,7 +30,7 @@ export class ServoyDefaultSplitpane  implements  OnInit, OnChanges {
     @Input() visible;
 
     @Input() divLocation;
-    @Output() divLocationChange = new EventEmitter();;
+    @Output() divLocationChange = new EventEmitter();
     @Input() divSize;
     @Input() pane1MinSize;
     @Input() pane2MinSize
@@ -45,7 +43,8 @@ export class ServoyDefaultSplitpane  implements  OnInit, OnChanges {
     private leftTab:Tab;
     private rightTab:Tab;
 
-    constructor() {
+    constructor(renderer:Renderer2) {
+        super(renderer);
     }
     
     ngOnInit() {
