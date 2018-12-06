@@ -1,14 +1,13 @@
 import { Injectable, Renderer2 } from '@angular/core';
 
-import { ComponentContributor, IComponentContributorListener } from '../ngclient/component_contributor.service';
-import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
+import { SvyUtilsService, ComponentContributor, IComponentContributorListener } from '../ngclient/servoy_public';
 import { ServoyService } from '../ngclient/servoy.service'
 
 @Injectable()
 export class KeyListener implements IComponentContributorListener {   
     private static callbacks: any[] = []; //TODO getServiceScope??
     
-    constructor(private componentContributor: ComponentContributor, private servoyService: ServoyService, private utils: NGUtilsService){
+    constructor(private componentContributor: ComponentContributor, private servoyService: ServoyService, private utils: SvyUtilsService){
         componentContributor.addComponentListener(this);
     }
     
