@@ -2909,8 +2909,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					sample = scriptObject.getSample(name);
 				}
-				sample = Text.processTags(sample, resolver);
-				return HtmlUtils.escapeMarkup(sample).toString();
+				CharSequence escapedSample = HtmlUtils.escapeMarkup(Text.processTags(sample, resolver));
+				return escapedSample != null ? escapedSample.toString() : null;
 			}
 			return null;
 		}
