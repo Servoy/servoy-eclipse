@@ -15,7 +15,8 @@ public class ActiveProjectListener implements IActiveProjectListener
 	@Override
 	public void activeProjectChanged(final ServoyProject activeProject)
 	{
-		if (SolutionMetaData.isServoyNGSolution(activeProject.getSolution()) && !activeProject.getSolution().getName().equals("import_placeholder"))
+		if (activeProject != null && SolutionMetaData.isServoyNGSolution(activeProject.getSolution()) &&
+			!activeProject.getSolution().getName().equals("import_placeholder"))
 		{
 			// TODO if project is changed the projects web packages should be copied into something..
 		}
