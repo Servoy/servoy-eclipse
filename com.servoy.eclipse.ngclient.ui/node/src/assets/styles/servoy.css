@@ -1,5 +1,9 @@
 /* Default buttons (used in login, file upload)
 -------------------------------------------------- */
+body {
+	font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+}
 
 .svy-btn {
     display: inline-block;

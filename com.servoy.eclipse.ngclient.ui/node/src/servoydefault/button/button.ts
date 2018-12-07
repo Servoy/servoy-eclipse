@@ -4,7 +4,8 @@ import {ServoyDefaultBaseLabel} from  '../baselabel'
 
 @Component( {
     selector: 'servoydefault-button',
-    templateUrl: './button.html'
+    templateUrl: './button.html',
+    styleUrls: ['./style.scss']
 } )
 export class ServoyDefaultButton extends ServoyDefaultBaseLabel {
 
