@@ -106,6 +106,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
 
@@ -609,6 +610,16 @@ public class CreateComponentHandler implements IServerService
 									if (args.has(string) && webComponent.getProperty(string) == null)
 									{
 										webComponent.setProperty(string, args.opt(string));
+										if (property.getType() == FormComponentPropertyType.INSTANCE)
+										{
+											FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+											Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(string), flattenedSolution);
+											if (form != null)
+											{
+												Dimension size = form.getSize();
+												CSSPosition.setSize(webComponent, size.width, size.height);
+											}
+										}
 									}
 									else if (property.getInitialValue() != null)
 									{
