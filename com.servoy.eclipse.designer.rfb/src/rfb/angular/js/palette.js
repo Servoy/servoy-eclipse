@@ -335,11 +335,12 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								component.y = component.y - y;
 							}
 
+							// default sizes should be the same as the one we create the dragging component with above.
 							if (model) {
-								component.w = model.size ? model.size.width : 100;
+								component.w = model.size ? model.size.width : 200;
 								component.h = model.size ? model.size.height : 100;
 							} else {
-								component.w = 100;
+								component.w = 200;
 								component.h = 100;
 							}
 							if (type != "component" && type != "layout" && type != "template") {
