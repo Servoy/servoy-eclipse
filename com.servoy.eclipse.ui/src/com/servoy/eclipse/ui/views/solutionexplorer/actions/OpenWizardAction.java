@@ -214,7 +214,8 @@ public class OpenWizardAction extends Action
 				public void updateButtons()
 				{
 					super.updateButtons();
-					copyWarToCmd.setEnabled(this.getButton(IDialogConstants.FINISH_ID).isEnabled());
+					Button fns = this.getButton(IDialogConstants.FINISH_ID);
+					if (fns != null && copyWarToCmd != null) copyWarToCmd.setEnabled(fns.isEnabled());
 				}
 
 			};
