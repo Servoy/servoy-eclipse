@@ -17,9 +17,14 @@
 package com.servoy.eclipse.warexporter.ui.wizard;
 
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -50,6 +55,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
@@ -64,7 +70,7 @@ import com.servoy.j2db.util.Debug;
  * @author jcompagner
  * @since 6.1
  */
-public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDefaultWizard
+public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDefaultWizard, ICopyWarToCommandLineWizard
 {
 
 	private FileSelectionPage fileSelectionPage;
@@ -424,6 +430,167 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		{
 			((IRestoreDefaultPage)getContainer().getCurrentPage()).restoreDefaults();
 		}
+	}
+
+	@Override
+	public void copyWarToCommandLine()
+	{
+		noneActiveSolutionPage.storeInput();
+		driverSelectionPage.storeInput();
+		pluginSelectionPage.storeInput();
+		beanSelectionPage.storeInput();
+		lafSelectionPage.storeInput();
+		serversSelectionPage.storeInput();
+
+
+		boolean multipleSolutions = false;
+		StringBuilder sb = new StringBuilder("./war_export.");
+		if (System.getProperty("os.name").indexOf("win") > -1) sb.append("bat");
+		else sb.append("sh");
+
+		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
+		if (exportModel.isExportNoneActiveSolutions())
+		{
+			sb.append(",");
+			appendToBuilder(sb, "", exportModel.getNoneActiveSolutions(), ",");
+			multipleSolutions = true;
+		}
+
+		appendToBuilder(sb, " -o ", exportModel.getWarFileName());
+		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
+		appendToBuilder(sb, " -defaultAdminUser ", exportModel.getDefaultAdminUser());
+		appendToBuilder(sb, " -defaultAdminPassword ", exportModel.getDefaultAdminPassword());
+		appendToBuilder(sb, " -p ", exportModel.getServoyPropertiesFileName());
+		appendToBuilder(sb, " -as ", exportModel.getServoyApplicationServerDir());
+		appendToBuilder(sb, " -dbi ", exportModel.isExportUsingDbiFileInfoOnly());
+		if (!exportModel.isExportActiveSolution() && !multipleSolutions) appendToBuilder(sb, " -active ", exportModel.isExportActiveSolution());
+		appendToBuilder(sb, " -pfw ", exportModel.getServoyPropertiesFileName());
+		appendToBuilder(sb, " -b ", exportModel.getBeans(), " ");
+		appendToBuilder(sb, " -l ", exportModel.getLafs(), " ");
+		appendToBuilder(sb, " -d ", exportModel.getDrivers(), " ");
+		appendToBuilder(sb, " -pi ", exportModel.getPlugins(), " ");
+
+		if (exportModel.isExportNoneActiveSolutions() && !multipleSolutions)
+		{
+			appendToBuilder(sb, " -nas ", exportModel.getNoneActiveSolutions(), " ");
+		}
+
+
+		appendToBuilder(sb, " -pluginLocations ", exportModel.getPluginLocations(), " ");
+
+		appendToBuilder(sb, " -crefs ", exportModel.getExportedComponents(), " ");
+		appendToBuilder(sb, " -excludeComponentPkgs ", exportModel.getExcludedComponentPackages(), " ");
+
+		appendToBuilder(sb, " -srefs ", exportModel.getExportedServices(), " ");
+		appendToBuilder(sb, " -excludeServicePkgs ", exportModel.getExcludedServicePackages(), " ");
+		appendToBuilder(sb, " -md ", exportModel.isExportMetaData());
+		appendToBuilder(sb, " -checkmd ", exportModel.isCheckMetadataTables());
+		appendToBuilder(sb, " -sd ", exportModel.isExportSampleData());
+		appendToBuilder(sb, " -sdcount ", exportModel.isExportSampleData());
+
+		if (exportModel.isAllRows()) appendToBuilder(sb, " -sdcount ", "all");
+		else appendToBuilder(sb, " -sdcount ", String.valueOf(exportModel.getNumberOfSampleDataExported()));
+
+		appendToBuilder(sb, " -sdcount ", exportModel.isExportSampleData());
+		appendToBuilder(sb, " -i18n ", exportModel.isExportI18NData());
+		appendToBuilder(sb, " -users ", exportModel.isExportUsers());
+
+		appendToBuilder(sb, " -tables ", exportModel.isExportAllTablesFromReferencedServers());
+
+		if (!multipleSolutions) appendToBuilder(sb, " -warFileName ", exportModel.getWarFileName());
+
+		appendToBuilder(sb, " -overwriteGroups ", exportModel.isOverwriteGroups());
+		appendToBuilder(sb, " -allowSQLKeywords ", exportModel.isExportSampleData());
+		appendToBuilder(sb, " -stopOnDataModelChanges", exportModel.getAllowDataModelChanges());
+		appendToBuilder(sb, " -overrideSequenceTypes ", exportModel.isOverrideSequenceTypes());
+		appendToBuilder(sb, " -overrideDefaultValues ", exportModel.isOverrideDefaultValues());
+		appendToBuilder(sb, " -insertNewI18NKeysOnly ", exportModel.isInsertNewI18NKeysOnly());
+		appendToBuilder(sb, " -importUserPolicy ", String.valueOf(exportModel.getImportUserPolicy()));
+		appendToBuilder(sb, " -addUsersToAdminGroup ", exportModel.isAddUsersToAdminGroup());
+		appendToBuilder(sb, " -updateSequence ", exportModel.isUpdateSequences());
+		appendToBuilder(sb, " -upgradeRepository ", exportModel.isAutomaticallyUpgradeRepository());
+
+		appendToBuilder(sb, " -antiResourceLocking ", exportModel.isAntiResourceLocking());
+		appendToBuilder(sb, " -clearReferencesStatic ", exportModel.isClearReferencesStatic());
+		appendToBuilder(sb, " -clearReferencesStopThreads ", exportModel.isClearReferencesStopThreads());
+		appendToBuilder(sb, " -clearReferencesStopTimerThreads ", exportModel.isClearReferencesStopTimerThreads());
+		appendToBuilder(sb, " -useAsRealAdminUser ", exportModel.isUseAsRealAdminUser());
+		appendToBuilder(sb, " -minimize ", exportModel.isMinimizeJsCssResources());
+
+		sb.append(" -licenses ");
+		exportModel.getLicenses().forEach((license) -> {
+			sb.append(license.getCompanyKey() + " " + license.getNumberOfLicenses() + " " + license.getCode() + ", ");
+		});
+		sb.replace(sb.length() - 2, sb.length() - 1, "");
+
+		appendToBuilder(sb, " -userHomeDirectory ", exportModel.getUserHome());
+		appendToBuilder(sb, " -overwriteDBServerProperties ", exportModel.isOverwriteDeployedDBServerProperties());
+		appendToBuilder(sb, " -overwriteAllProperties ", exportModel.isOverwriteDeployedServoyProperties());
+		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
+		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
+
+		StringSelection selection = new StringSelection(sb.toString());
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(selection, selection);
+	}
+
+	public void appendToBuilderMethodResult(StringBuilder sb, String prop, Object o, String argument)
+
+	{
+		String methodName = prop.substring(0, 1).toUpperCase() + prop.substring(1, prop.length());
+		if (o.equals("boolean"))
+		{
+			methodName = "is" + methodName;
+		}
+		else if (o.toString().contains("String"))
+		{
+			methodName = "get" + methodName;
+		}
+		try
+		{
+			Method m = exportModel.getClass().getMethod(methodName);
+			try
+			{
+				Object methodResult = m.invoke(exportModel);
+				if (methodResult instanceof String)
+				{
+					sb.append(argument + methodResult);
+				}
+				else if (methodResult instanceof Boolean)
+				{
+					if ((boolean)methodResult) sb.append(argument);
+				}
+			}
+			catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+			{
+			}
+
+		}
+		catch (NoSuchMethodException | SecurityException e)
+		{
+		}
+	}
+
+	public void appendToBuilder(StringBuilder sb, String argument, String property)
+	{
+		if (property != null) sb.append(argument).append(property);
+	}
+
+	public void appendToBuilder(StringBuilder sb, String argument, boolean property)
+	{
+		if (property) appendToBuilder(sb, argument, "");
+	}
+
+	public void appendToBuilder(StringBuilder sb, String argument, Collection< ? > property, String separator)
+	{
+
+		if (property.size() > 0)
+		{
+			sb.append(argument);
+			property.forEach(prop -> sb.append(prop).append(separator));
+			sb.replace(sb.length() - 1, sb.length(), "");
+		}
+		else if (argument.equals(" -b ") || argument.equals(" -pi ")) sb.append(argument).append("none");
 	}
 
 }
