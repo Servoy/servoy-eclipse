@@ -142,6 +142,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
+import com.servoy.eclipse.model.util.AvoidMultipleExecutionsWorkspaceJob;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -253,6 +254,12 @@ public class ServoyModel extends AbstractServoyModel
 
 	private boolean solutionImportInProgress;
 	private final List<ISolutionImportListener> solutionImportListeners = new ArrayList<>(1);
+
+	private AvoidMultipleExecutionsWorkspaceJob updateServoyWorkingSetJob;
+
+	private AvoidMultipleExecutionsWorkspaceJob testBuildPaths;
+	private String testBuildPathsPrjName;
+	private boolean testBuildPathsPrjShouldBuildPrj;
 
 	protected ServoyModel()
 	{
@@ -1247,7 +1254,7 @@ public class ServoyModel extends AbstractServoyModel
 						{
 							resetActiveEditingFlattenedSolutions();
 						}
-						activeProject = project;
+						setActiveProjectReferenceInternal(project);
 						activatingProject.set(false);
 
 						progressMonitor.subTask("Loading modules...");
@@ -1388,6 +1395,15 @@ public class ServoyModel extends AbstractServoyModel
 		}
 	}
 
+	private void setActiveProjectReferenceInternal(final ServoyProject project)
+	{
+		activeProject = project;
+		synchronized (this)
+		{
+			testBuildPathsPrjName = null; // TODO does this member even have to exist or could we always use activeProject instead of project argument in testBuildPathsAndBuild(...)?
+		}
+	}
+
 	public void buildActiveProjectsInJob()
 	{
 		if (activeProject != null && getWorkspace().isAutoBuilding())
@@ -1439,19 +1455,22 @@ public class ServoyModel extends AbstractServoyModel
 	// updates current styles and column info
 	private void updateResources(final int type, IProgressMonitor progressMonitor)
 	{
+		ServoyResourcesProject old = activeResourcesProject;
+		activeResourcesProject = null;
+		if (activeProject != null)
+		{
+			activeResourcesProject = activeProject.getResourcesProject();
+		}
+
+		if (old == activeResourcesProject && type != IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED) return; // nothing to do; avoid calling IRunnableWithProgress below, showing dialogs and so on
+
 		final IRunnableWithProgress op = new IRunnableWithProgress()
 		{
-			public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				try
 				{
-					progressMonitor.beginTask("Reading resources project", 5);
-					ServoyResourcesProject old = activeResourcesProject;
-					activeResourcesProject = null;
-					if (activeProject != null)
-					{
-						activeResourcesProject = activeProject.getResourcesProject();
-					}
+					monitor.beginTask("Reading resources project", 5);
 
 					if (old != activeResourcesProject)
 					{
@@ -1515,7 +1534,7 @@ public class ServoyModel extends AbstractServoyModel
 						}
 
 						// refresh all tables - because the column info changed
-						progressMonitor.subTask("Loading database column information from resources project");
+						monitor.subTask("Loading database column information from resources project");
 						if (serverManager != null)
 						{
 							// we cannot allow background loading of servers/tables to continue
@@ -1540,9 +1559,9 @@ public class ServoyModel extends AbstractServoyModel
 								backgroundTableLoader.resume();
 							}
 						}
-						progressMonitor.worked(1);
+						monitor.worked(1);
 
-						progressMonitor.subTask("Loading user/group/permission information");
+						monitor.subTask("Loading user/group/permission information");
 						if (activeResourcesProject != null)
 						{
 							getUserManager().setResourcesProject(activeResourcesProject.getProject());
@@ -1551,15 +1570,15 @@ public class ServoyModel extends AbstractServoyModel
 						{
 							getUserManager().setResourcesProject(null);
 						}
-						progressMonitor.worked(1);
+						monitor.worked(1);
 
-						progressMonitor.subTask("Loading styles from resources project");
+						monitor.subTask("Loading styles from resources project");
 						((EclipseRepository)getDeveloperRepository()).registerResourceMetaDatas(projectName, IRepository.STYLES);
-						progressMonitor.worked(1);
-						progressMonitor.subTask("Loading templates from resources project");
+						monitor.worked(1);
+						monitor.subTask("Loading templates from resources project");
 						((EclipseRepository)getDeveloperRepository()).registerResourceMetaDatas(projectName, IRepository.TEMPLATES);
-						progressMonitor.worked(1);
-						progressMonitor.subTask("Announcing resources project change");
+						monitor.worked(1);
+						monitor.subTask("Announcing resources project change");
 						Display.getDefault().syncExec(new Runnable()
 						{
 							public void run()
@@ -1567,20 +1586,20 @@ public class ServoyModel extends AbstractServoyModel
 								fireActiveProjectUpdated(type);
 							}
 						});
-						progressMonitor.worked(1);
+						monitor.worked(1);
 					}
 					else if (type == IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED)
 					{
-						progressMonitor.subTask("Loading form security information");
+						monitor.subTask("Loading form security information");
 						// this means that the active project changed, but the resources project remained the same
 						// so we must reload the form security access info
 						getUserManager().reloadAllFormInfo();
-						progressMonitor.worked(4);
+						monitor.worked(4);
 					}
 				}
 				finally
 				{
-					progressMonitor.done();
+					monitor.done();
 				}
 			}
 		};
@@ -2172,7 +2191,7 @@ public class ServoyModel extends AbstractServoyModel
 								activeProject.getProject() != getWorkspace().getRoot().getProject(activeProject.getProject().getName()))
 							{
 								// in case active project was replaced/overwritten we must update the reference as well (so we don't have trouble when comparing IProject instances)
-								activeProject = getServoyProject(activeProject.getProject().getName());
+								setActiveProjectReferenceInternal(getServoyProject(activeProject.getProject().getName()));
 							}
 						}
 						else if ((element.getFlags() & IResourceDelta.REPLACED) != 0)
@@ -2183,7 +2202,7 @@ public class ServoyModel extends AbstractServoyModel
 								activeProject.getProject() != getWorkspace().getRoot().getProject(activeProject.getProject().getName()))
 							{
 								// in case active project was replaced/overwritten we must update the reference as well (so we don't have trouble when comparing IProject instances)
-								activeProject = getServoyProject(activeProject.getProject().getName());
+								setActiveProjectReferenceInternal(getServoyProject(activeProject.getProject().getName()));
 							}
 						}
 
@@ -3508,20 +3527,29 @@ public class ServoyModel extends AbstractServoyModel
 		super.dispose();
 	}
 
-	public void testBuildPathsAndBuild(final ServoyProject project, final boolean buildProject)
+	public synchronized void testBuildPathsAndBuild(final ServoyProject project, final boolean buildProject)
 	{
-		WorkspaceJob testBuildPaths = new WorkspaceJob("Test Build Paths")
+		String projectName = null;
+		if (project != null) projectName = project.getProject().getName();
+
+		if (testBuildPaths == null || !Utils.stringSafeEquals(projectName, testBuildPathsPrjName) || testBuildPathsPrjShouldBuildPrj != buildProject) // check if the arguments have changed compared to previous time this method was called
 		{
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			testBuildPathsPrjName = projectName;
+			testBuildPathsPrjShouldBuildPrj = buildProject;
+			testBuildPaths = new AvoidMultipleExecutionsWorkspaceJob("Test Build Paths")
 			{
-				testBuildPaths(project, new HashSet<ServoyProject>());
-				if (buildProject) buildActiveProjectsInJob();
-				return Status.OK_STATUS;
-			}
-		};
-		testBuildPaths.setRule(getWorkspace().getRoot());
-		testBuildPaths.schedule();
+
+				@Override
+				protected IStatus runInWWorkspaceAvoidingMultipleExecutions(IProgressMonitor monitor)
+				{
+					testBuildPaths(project, new HashSet<ServoyProject>());
+					if (buildProject) buildActiveProjectsInJob();
+					return Status.OK_STATUS;
+				}
+			};
+			testBuildPaths.setRule(getWorkspace().getRoot());
+		}
+		testBuildPaths.scheduleIfNeeded();
 	}
 
 	private IProject[] getAllReferencedProjectsOfActiveProject()
@@ -3567,42 +3595,44 @@ public class ServoyModel extends AbstractServoyModel
 
 	public void updateWorkingSet()
 	{
-		WorkspaceJob updateServoyWorkingSet = new WorkspaceJob("Servoy active solution workingset updater")
+		if (updateServoyWorkingSetJob == null)
 		{
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			updateServoyWorkingSetJob = new AvoidMultipleExecutionsWorkspaceJob("Servoy active solution workingset updater")
 			{
-				if (getActiveProject() != null)
+				@Override
+				protected IStatus runInWWorkspaceAvoidingMultipleExecutions(IProgressMonitor monitor)
 				{
-					IAdaptable[] projects = getAllReferencedProjectsOfActiveProject();
+					if (getActiveProject() != null)
+					{
+						IAdaptable[] projects = getAllReferencedProjectsOfActiveProject();
 
-					IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
-					IWorkingSet ws = workingSetManager.getWorkingSet("Servoy Active Solution");
-					if (ws == null)
-					{
-						ws = workingSetManager.createWorkingSet("Servoy Active Solution", projects);
-						workingSetManager.addWorkingSet(ws);
-					}
-					else
-					{
-						ws.setElements(projects);
-					}
-					final IWorkingSet[] wsa = new IWorkingSet[1];
-					wsa[0] = ws;
-					Display.getDefault().asyncExec(new Runnable()
-					{
-						public void run()
+						IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
+						IWorkingSet ws = workingSetManager.getWorkingSet("Servoy Active Solution");
+						if (ws == null)
 						{
-//						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().setWorkingSets(null);
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().setWorkingSets(wsa);
+							ws = workingSetManager.createWorkingSet("Servoy Active Solution", projects);
+							workingSetManager.addWorkingSet(ws);
 						}
-					});
+						else
+						{
+							ws.setElements(projects);
+						}
+						final IWorkingSet[] wsa = new IWorkingSet[1];
+						wsa[0] = ws;
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().setWorkingSets(wsa);
+							}
+						});
+					}
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;
-			}
-		};
-		updateServoyWorkingSet.setRule(getWorkspace().getRoot());
-		updateServoyWorkingSet.schedule();
+			};
+			updateServoyWorkingSetJob.setRule(getWorkspace().getRoot());
+		}
+		updateServoyWorkingSetJob.scheduleIfNeeded();
 
 	}
 

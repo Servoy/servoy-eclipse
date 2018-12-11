@@ -35,7 +35,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -55,6 +54,7 @@ import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.AvoidMultipleExecutionsJob;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Debug;
@@ -70,6 +70,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public static final String MAIN_WEBPACKAGEINDEX = "https://servoy.github.io/webpackageindex/";
 	private final WebPackageManagerEndpoint endpoint;
 	private static String selectedWebPackageIndex = MAIN_WEBPACKAGEINDEX;
+	private AvoidMultipleExecutionsJob reloadWPMSpecsJob;
 
 	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
 	{
@@ -349,51 +350,29 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		resourceListenersOff();
 	}
 
-	private final int[] specReloadsWanted = new int[] { 0 };
-
 	@Override
 	public void webObjectSpecificationReloaded()
 	{
-		// TODO should we use some workspace rule instead or as well here?
-
 		// sometimes for example 3 reloads were triggered in a short amount of time; keep the full reloads to a minimum;
 		// only keep 1 reload and if that is in progress and another one is needed remember to trigger it only once
 		// the first reload is over
-		synchronized (specReloadsWanted)
+		if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Web Package Manager specs...")
 		{
-			if (specReloadsWanted[0] == 0)
-			{
-				specReloadsWanted[0] = 1;
-				Job job = new Job("Reloading Web Package Manager specs...")
-				{
-					@Override
-					protected IStatus run(IProgressMonitor monitor)
-					{
-						synchronized (specReloadsWanted)
-						{
-							specReloadsWanted[0] = 1; // we are starting this one reload now; all potential other wanted reloads are satisfied by this one
-						}
-						JSONArray packages = executeMethod(null);
-						JSONObject jsonResult = new JSONObject();
-						jsonResult.put("method", CLIENT_SERVER_METHOD);
-						jsonResult.put("result", packages);
-						endpoint.send(jsonResult.toString());
 
-						synchronized (specReloadsWanted)
-						{
-							specReloadsWanted[0]--;
-							if (specReloadsWanted[0] > 0) schedule(); // schedule reload again as one was needed while current one is in progress
-						}
-						return Status.OK_STATUS;
-					}
-				};
-				job.schedule(100);
-			}
-			else
+			@Override
+			protected IStatus runAvoidingMultipleExecutions(IProgressMonitor monitor)
 			{
-				specReloadsWanted[0]++;
+				JSONArray packages = executeMethod(null);
+				JSONObject jsonResult = new JSONObject();
+				jsonResult.put("method", CLIENT_SERVER_METHOD);
+				jsonResult.put("result", packages);
+				endpoint.send(jsonResult.toString());
+
+				return Status.OK_STATUS;
 			}
-		}
+		};
+
+		reloadWPMSpecsJob.scheduleIfNeeded();
 	}
 
 	@Override

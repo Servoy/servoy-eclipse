@@ -39,7 +39,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,6 +48,7 @@ import org.eclipse.core.runtime.Status;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.util.AvoidMultipleExecutionsWorkspaceJob;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -69,6 +69,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 public class EclipseMessages implements ICustomMessageLoader
 {
@@ -78,6 +79,11 @@ public class EclipseMessages implements ICustomMessageLoader
 	private final IFileAccess workspaceDir;
 	private final HashMap<String, TreeMap<String, I18NUtil.MessageEntry>> i18nDatasourceMessages = new HashMap<String, TreeMap<String, I18NUtil.MessageEntry>>();
 	private final HashMap<String, Boolean> hasI18nDatasourceUnsavedMessages = new HashMap<String, Boolean>();
+
+	private static AvoidMultipleExecutionsWorkspaceJob writingI18NJobForAllActiveSolutionAndModules;
+	private static String writingI18NJobForAllActiveSolutionAndModules_lastProjectName;
+	private static boolean writingI18NJobForAllActiveSolutionAndModules_lastOverwriteExisting;
+	private static boolean writingI18NJobForAllActiveSolutionAndModules_lastDeleteNonExistingKeys;
 
 	public EclipseMessages()
 	{
@@ -298,49 +304,63 @@ public class EclipseMessages implements ICustomMessageLoader
 	}
 
 	// write project solution & its modules i18n files to the resource project
-	public static void writeProjectI18NFiles(final ServoyProject servoyProject, final boolean overwriteExisting, final boolean deleteNonExistingKeys)
+	public synchronized static void writeProjectI18NFiles(final ServoyProject servoyProject, final boolean overwriteExisting,
+		final boolean deleteNonExistingKeys)
 	{
-		WorkspaceJob writingI18NJob = new WorkspaceJob("Writing project I18N files")
-		{
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-			{
-				Solution[] modules = servoyProject.getModules();
-				Solution[] allSolutions = new Solution[modules.length + 1];
-				allSolutions[0] = servoyProject.getSolution();
-				System.arraycopy(modules, 0, allSolutions, 1, modules.length);
+		String projectName = null;
+		if (servoyProject != null) projectName = servoyProject.getProject().getName();
 
-				try
+		if (writingI18NJobForAllActiveSolutionAndModules == null ||
+			!Utils.stringSafeEquals(writingI18NJobForAllActiveSolutionAndModules_lastProjectName, projectName) ||
+			overwriteExisting != writingI18NJobForAllActiveSolutionAndModules_lastOverwriteExisting ||
+			deleteNonExistingKeys != writingI18NJobForAllActiveSolutionAndModules_lastDeleteNonExistingKeys)
+		{
+			writingI18NJobForAllActiveSolutionAndModules_lastProjectName = projectName;
+			writingI18NJobForAllActiveSolutionAndModules_lastOverwriteExisting = overwriteExisting;
+			writingI18NJobForAllActiveSolutionAndModules_lastDeleteNonExistingKeys = deleteNonExistingKeys;
+			writingI18NJobForAllActiveSolutionAndModules = new AvoidMultipleExecutionsWorkspaceJob("Writing I18N files for active solution & modules...")
+			{
+
+				@Override
+				protected IStatus runInWWorkspaceAvoidingMultipleExecutions(IProgressMonitor monitor)
 				{
-					for (Solution s : allSolutions)
+					Solution[] modules = servoyProject.getModules();
+					Solution[] allSolutions = new Solution[modules.length + 1];
+					allSolutions[0] = servoyProject.getSolution();
+					System.arraycopy(modules, 0, allSolutions, 1, modules.length);
+
+					try
 					{
-						String i18nDataSource = s.getI18nDataSource();
-						if (i18nDataSource != null)
+						for (Solution s : allSolutions)
 						{
-							ServoyResourcesProject resourceProject = servoyProject.getResourcesProject();
-							if (resourceProject != null)
+							String i18nDataSource = s.getI18nDataSource();
+							if (i18nDataSource != null)
 							{
-								String[] serverTableNames = DataSourceUtils.getDBServernameTablename(i18nDataSource);
-								TreeMap<String, I18NUtil.MessageEntry> messages = I18NUtil.loadSortedMessagesFromRepository(
-									ApplicationServerRegistry.get().getDeveloperRepository(), ApplicationServerRegistry.get().getDataServer(),
-									ApplicationServerRegistry.get().getClientId(), serverTableNames[0], serverTableNames[1], null, null, null);
-								writeMessages(serverTableNames[0], serverTableNames[1], messages, new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
-									resourceProject.getProject(), false, overwriteExisting, deleteNonExistingKeys);
+								ServoyResourcesProject resourceProject = servoyProject.getResourcesProject();
+								if (resourceProject != null)
+								{
+									String[] serverTableNames = DataSourceUtils.getDBServernameTablename(i18nDataSource);
+									TreeMap<String, I18NUtil.MessageEntry> messages = I18NUtil.loadSortedMessagesFromRepository(
+										ApplicationServerRegistry.get().getDeveloperRepository(), ApplicationServerRegistry.get().getDataServer(),
+										ApplicationServerRegistry.get().getClientId(), serverTableNames[0], serverTableNames[1], null, null, null);
+									writeMessages(serverTableNames[0], serverTableNames[1], messages, new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
+										resourceProject.getProject(), false, overwriteExisting, deleteNonExistingKeys);
+								}
 							}
 						}
 					}
+					catch (final Exception ex)
+					{
+						ServoyLog.logError(ex);
+						ModelUtils.getUnexpectedSituationHandler().cannotWriteI18NFiles(ex);
+					}
+					return Status.OK_STATUS;
 				}
-				catch (final Exception ex)
-				{
-					ServoyLog.logError(ex);
-					ModelUtils.getUnexpectedSituationHandler().cannotWriteI18NFiles(ex);
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		writingI18NJob.setUser(false);
-		writingI18NJob.setRule(ResourcesPlugin.getWorkspace().getRoot()); // prevent from running at the same time as builder that may be reading the messages
-		writingI18NJob.schedule();
+			};
+			writingI18NJobForAllActiveSolutionAndModules.setUser(false);
+			writingI18NJobForAllActiveSolutionAndModules.setRule(ResourcesPlugin.getWorkspace().getRoot()); // prevent from running at the same time as builder that may be reading the messages
+		}
+		writingI18NJobForAllActiveSolutionAndModules.schedule();
 	}
 
 	public static void writeMessages(String i18nServer, String i18nTable, TreeMap<String, I18NUtil.MessageEntry> messages, final IFileAccess workspaceDir)

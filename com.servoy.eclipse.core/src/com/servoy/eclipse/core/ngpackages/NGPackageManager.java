@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.PlatformUI;
@@ -37,12 +35,12 @@ import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.model.util.AvoidMultipleExecutionsJob;
 import com.servoy.j2db.persistence.WebObjectRegistry;
 
 import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
@@ -57,12 +55,10 @@ public class NGPackageManager extends BaseNGPackageManager
 {
 
 	private IActiveProjectListener activeProjectListenerForRegisteringResources;
-	private final SerialRule serialRule;
+	private AvoidMultipleExecutionsJob reloadAllNGPackagesJob;
 
 	public NGPackageManager()
 	{
-		serialRule = SerialRule.getNewSerialRule();
-
 		PlatformUI.getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener()
 		{
 
@@ -118,19 +114,23 @@ public class NGPackageManager extends BaseNGPackageManager
 		else
 		{
 			// do what super does but in a job; this is what code prior to the refactor did as well
-			Job registerAllNGPackagesJob = new Job("Reading ng packages from resources project...")
+			// do this in such a way that if 100 reloadAllNGPackages calls happen before the actual reload happens/finishes in the job, the reload only occurs once/twice
+			if (reloadAllNGPackagesJob == null)
 			{
-				@Override
-				public IStatus run(IProgressMonitor monitor)
+				reloadAllNGPackagesJob = new AvoidMultipleExecutionsJob("Reading ng packages from resources project...")
 				{
-					// do the actual work
-					NGPackageManager.super.reloadAllNGPackages(changeReason, monitor);
-					return Status.OK_STATUS;
-				}
 
-			};
-			registerAllNGPackagesJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), serialRule));
-			registerAllNGPackagesJob.schedule();
+					@Override
+					protected IStatus runAvoidingMultipleExecutions(IProgressMonitor monitor)
+					{
+						// do the actual work
+						NGPackageManager.super.reloadAllNGPackages(changeReason, monitor);
+						return Status.OK_STATUS;
+					}
+				};
+				reloadAllNGPackagesJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			}
+			reloadAllNGPackagesJob.scheduleIfNeeded();
 		}
 	}
 
