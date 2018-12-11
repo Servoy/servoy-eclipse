@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.DialogTray;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -35,6 +36,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 
 /**
@@ -85,6 +87,7 @@ public class OpenWizardAction extends Action
 			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
 			{
 				private Button restoreDefault = null;
+				private Button copyWarToCmd = null;
 
 				@Override
 				protected IDialogSettings getDialogBoundsSettings()
@@ -153,6 +156,25 @@ public class OpenWizardAction extends Action
 							}
 						});
 					}
+					if (wizard instanceof ICopyWarToCommandLineWizard)
+					{
+						copyWarToCmd = createButton(parent, 2, "Copy War", false);
+						copyWarToCmd.setEnabled(false);
+						copyWarToCmd.addSelectionListener(new SelectionListener()
+						{
+
+							@Override
+							public void widgetSelected(SelectionEvent e)
+							{
+								((ICopyWarToCommandLineWizard)wizard).copyWarToCommandLine();
+							}
+
+							@Override
+							public void widgetDefaultSelected(SelectionEvent e)
+							{
+							}
+						});
+					}
 					super.createButtonsForButtonBar(parent);
 				}
 
@@ -186,6 +208,13 @@ public class OpenWizardAction extends Action
 					{
 						getCurrentPage().performHelp();
 					}
+				}
+
+				@Override
+				public void updateButtons()
+				{
+					super.updateButtons();
+					copyWarToCmd.setEnabled(this.getButton(IDialogConstants.FINISH_ID).isEnabled());
 				}
 
 			};
