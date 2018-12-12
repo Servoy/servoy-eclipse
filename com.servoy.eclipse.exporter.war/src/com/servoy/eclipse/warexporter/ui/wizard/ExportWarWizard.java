@@ -455,8 +455,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			appendToBuilder(sb, "", exportModel.getNoneActiveSolutions(), ",");
 			multipleSolutions = true;
 		}
-
-		appendToBuilder(sb, " -o ", exportModel.getWarFileName());
+		if (exportModel.getUserHome() != null) appendToBuilder(sb, " -o ", exportModel.getUserHome());
+		else appendToBuilder(sb, " -o ", System.getProperty("user.home"));
 		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
 		appendToBuilder(sb, " -defaultAdminUser ", exportModel.getDefaultAdminUser());
 		appendToBuilder(sb, " -defaultAdminPassword ", exportModel.getDefaultAdminPassword());
