@@ -248,7 +248,7 @@ public class MethodDialog extends TreeSelectDialog
 					scriptMethods = form.getScriptMethods(true);
 					currentFlattenedForm = ModelUtils.getEditingFlattenedSolution(context).getFlattenedForm(parent);
 					List<AbstractBase> forms = PersistHelper.getOverrideHierarchy(form);
-					if (forms.size() > 2)
+					if (forms.size() >= 2)
 					{
 						forms.remove(0);
 						nodes = forms;

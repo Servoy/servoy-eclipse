@@ -241,7 +241,6 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 			String userTemplate = JSDocScriptTemplates.getTemplates(servoyProject.getProject(), true).getVariableTemplate();
 
 			String code = SolutionSerializer.serializePersist(var, true, ServoyModel.getDeveloperRepository(), userTemplate).toString();
-			((ISupportChilds)parent).removeChild(var);
 
 			String scriptPath = SolutionSerializer.getScriptPath(var, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));

@@ -655,6 +655,11 @@ angular.module('editorContent',['servoyApp'])
         	  toDeleteA = toDeleteA.concat(data.deleted);
           }
           
+          if (toDeleteA.length > 0)
+          {
+        	  flushGhostContainerElements();
+          }	  
+          
           for (var index in toDeleteA) {
               var toDelete = angular.element('[svy-id="' + toDeleteA[index] + '"]');
               toDelete.remove();
