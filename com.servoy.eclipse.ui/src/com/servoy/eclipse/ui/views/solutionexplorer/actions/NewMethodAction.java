@@ -94,7 +94,6 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IValidateName;
@@ -417,8 +416,6 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					met.setDeclaration(declaration);
 
 					String code = SolutionSerializer.serializePersist(met, true, ServoyModel.getDeveloperRepository(), null).toString();
-					((ISupportChilds)parent).removeChild(met);
-
 					final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(
 						FileEditorInputFactory.createFileEditorInput(file));
 					if (openEditor instanceof ScriptEditor)
