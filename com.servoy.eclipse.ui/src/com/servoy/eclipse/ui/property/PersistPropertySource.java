@@ -1594,9 +1594,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 											MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(
 												IScriptProvider.METHOD_ARGUMENTS);
 											params = new SafeArrayList<String>();
-											for (MethodArgument methodArgument : formalArguments)
+											if (formalArguments != null)
 											{
-												params.add(methodArgument.getName());
+												for (MethodArgument methodArgument : formalArguments)
+												{
+													params.add(methodArgument.getName());
+												}
 											}
 										}
 										else
