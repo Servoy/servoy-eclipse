@@ -6983,6 +6983,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.debounce', 'ui.bootstrap
 
       debouncedRecalculate();
     }
+    originalScope.fireRecalculating = fireRecalculating;
 
     // recalculate actual position and set new values to scope
     // after digest loop is popup in right position
