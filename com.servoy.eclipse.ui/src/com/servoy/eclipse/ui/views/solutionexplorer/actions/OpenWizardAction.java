@@ -26,11 +26,13 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
@@ -167,6 +169,10 @@ public class OpenWizardAction extends Action
 							public void widgetSelected(SelectionEvent e)
 							{
 								((ICopyWarToCommandLineWizard)wizard).copyWarToCommandLine();
+								MessageBox box = new MessageBox(parent.getShell(), SWT.OK);
+								box.setText("War Export");
+								box.setMessage("War export command was copied to clipboard");
+								box.open();
 							}
 
 							@Override
