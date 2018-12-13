@@ -86,7 +86,8 @@ export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements 
   getSelectedElements()
   {
     return this.selection
-      .filter(item => item === true)
-      .map((item, index) =>  this.valuelistID[index+this.allowNullinc].realValue);
+      .map((item,index) =>  {
+        if(item === true) return this.valuelistID[index+this.allowNullinc].realValue;})
+      .filter(item => item !== null)
   }
 }
