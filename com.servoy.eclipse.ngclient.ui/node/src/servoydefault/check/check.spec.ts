@@ -1,21 +1,15 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import { By }              from '@angular/platform-browser';
 import { ServoyDefaultCheck } from './check';
 import {SabloModule} from "../../sablo/sablo.module";
-import {
-  DecimalkeyconverterDirective,
-  FormatFilterPipe,
-  FormattingService, StartEditDirective, ServoyApi,
-  SvyFormat, TooltipDirective, TooltipService
-} from "../../ngclient/servoy_public";
+import { FormattingService, ServoyApi, TooltipDirective, TooltipService} from "../../ngclient/servoy_public";
 import {FormsModule} from "@angular/forms";
-import {ServoyService} from "../../ngclient/servoy.service";
 
 describe('CheckComponent', () => {
   let component: ServoyDefaultCheck;
   let fixture: ComponentFixture<ServoyDefaultCheck>;
   let servoyApi;
-  let input;
+  let input, label,span;
   beforeEach(async(() => {
   servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
     TestBed.configureTestingModule({
@@ -30,7 +24,13 @@ describe('CheckComponent', () => {
     fixture = TestBed.createComponent(ServoyDefaultCheck);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
     component = fixture.componentInstance;
+    component.text = "Check me";
+    component.enabled = true;
+    component.editable = true;
+
     input = fixture.debugElement.query(By.css('input')).nativeElement;
+    label = fixture.debugElement.query(By.css('label')).nativeElement;
+    span = fixture.debugElement.query(By.css('span')).nativeElement;
     fixture.detectChanges();
 
   });
@@ -45,7 +45,24 @@ describe('CheckComponent', () => {
       
       fixture.detectChanges();
       expect(input.checked).toBeTruthy(); // state after click
+
+      input.click();
+      fixture.detectChanges();
+      expect(input.checked).toBeFalsy();
   });
+
+  it('should click on span and change value', fakeAsync(() => {
+
+    expect(input.checked).toBeFalsy(); // default state
+    clickOnElement(span, fixture, input,true);
+    clickOnElement(span, fixture, input,false);
+  }));
+
+  it('should click on label and change', fakeAsync(() => {
+    expect(input.checked).toBeFalsy(); // default state
+    clickOnElement(label, fixture, input, true);
+    clickOnElement(label, fixture, input, false);
+  }));
   
   it('should getSelectionFromDP', () => {
       component.dataProviderID = 1;
@@ -72,6 +89,12 @@ describe('CheckComponent', () => {
       component.dataProviderID = undefined;
       expect(component.getSelectionFromDataprovider()).toBeFalsy();
   })
-  
-  
+
 });
+
+async function clickOnElement(element, fixture: ComponentFixture<ServoyDefaultCheck>, checkInput, toTestFlag) {
+  element.click();
+  fixture.detectChanges();
+  tick();
+  expect(checkInput.checked).toBe(toTestFlag);
+}

@@ -6,8 +6,7 @@
          [(ngModel)]="selected"
          [svyTooltip]="toolTipText"
          [disabled]="!enabled || !editable"
-         (click)="itemClicked($event)"
-	 	 [id]="servoyApi.getMarkupId()"
+    	 	 [id]="servoyApi.getMarkupId()"
          #input />
 	 <span [innerHtml]="isInPortal() ? '' : text"></span>
 </label>
