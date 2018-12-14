@@ -27,11 +27,10 @@ export class AllServiceService implements ServiceProvider {
     constructor( private services: ServicesService,
         private $applicationService: ApplicationService,
         private $windowService: WindowService,
-        private keyListener: KeyListener,
-        private componentContributor: ComponentContributor,
         // generated services start
         private ngclientutils: NGUtilsService,
-        private servoydefaultTypesRegisterService: TypesRegisterService
+        private servoydefaultTypesRegisterService: TypesRegisterService,
+        private keyListener: KeyListener
         // generated services end
     ) {
         services.setServiceProvider( this );
