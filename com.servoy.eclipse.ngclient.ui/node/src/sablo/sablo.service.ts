@@ -243,4 +243,11 @@ export class SabloService {
     private resolveFormIfNeededAndExecuteAPICall( call ) {
         // TODO API CALLS
     }
+    
+    public sendServiceChanges (serviceName : string, propertyName : string, value : any)
+    {
+        let changes = {};
+        changes[propertyName] = this.converterService.convertClientObject(value);
+        this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes: changes });
+    }
 }

@@ -2,13 +2,15 @@ import { Injectable } from '@angular/core';
 
 import {WindowRefService} from '../../sablo/util/windowref.service'
 
+import {ServiceChangeHandler} from '../../sablo/util/servicechangehandler'
+
 @Injectable()
-export class NGUtilsService {
+export class NGUtilsService{
     private _tags:Tag[];
     private _styleclasses:Object;
     private confirmMessage:string;
 
-    constructor(private windowRef:WindowRefService) {
+    constructor(private windowRef:WindowRefService, private changeHandler : ServiceChangeHandler) {
     }
     
     get contributedTags():Tag[] {
@@ -25,8 +27,8 @@ export class NGUtilsService {
     }
     
     set styleclasses(styleclasses) {
-         this._styleclasses= styleclasses;
-         // do something with it.
+         this._styleclasses = styleclasses;
+         this.changeHandler.changed("ngclientutils","styleclasses", styleclasses);
     }
 
     private beforeUnload(e) {
@@ -187,6 +189,11 @@ export class NGUtilsService {
     public removeFormStyleClass(formname,styleclass)
     {
         // implemented in ngutils_server.js
+    }
+    
+    public setServiceChangeHandler(changeHandler : ServiceChangeHandler)
+    {
+        this.changeHandler = changeHandler;
     }
 }
 

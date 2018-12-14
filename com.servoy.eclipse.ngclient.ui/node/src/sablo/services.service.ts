@@ -44,12 +44,6 @@ export class ServicesService {
                             // convert property, remember type for when a client-server conversion will be needed
                             if ( !this.serviceScopesConversionInfo[servicename] ) this.serviceScopesConversionInfo[servicename] = {};
                             serviceData[key] = this.converterService.convertFromServerToClient( serviceData[key], conversionInfo[servicename][key], service[key])
-
-                            // TODO datachange should be through EventEmitter...
-                            //                        if ((serviceData[key] !== serviceScope.model[key] || this.serviceScopesConversionInfo[servicename][key] !== conversionInfo[servicename][key]) && serviceData[key]
-                            //                        && serviceData[key][$sabloConverters.INTERNAL_IMPL] && serviceData[key][$sabloConverters.INTERNAL_IMPL].setChangeNotifier) {
-                            //                            serviceData[key][$sabloConverters.INTERNAL_IMPL].setChangeNotifier(getChangeNotifier(servicename, key));
-                            //                        }
                             this.serviceScopesConversionInfo[servicename][key] = conversionInfo[servicename][key];
                         } else if ( this.serviceScopesConversionInfo[servicename] && this.serviceScopesConversionInfo[servicename][key] ) {
                             delete this.serviceScopesConversionInfo[servicename][key];

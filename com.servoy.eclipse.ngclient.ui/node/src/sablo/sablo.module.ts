@@ -9,6 +9,7 @@ import { WebsocketService } from './websocket.service';
 import { ConverterService } from './converter.service'
 import { ServicesService } from './services.service'
 import { SabloService } from './sablo.service'
+import { ServiceChangeHandler } from './util/servicechangehandler'
 import { LoggerFactory } from './logger.service'
 
 import { SpecTypesService } from './spectypes.service'
@@ -27,7 +28,8 @@ import { SabloDeferHelper} from './defer.service';
         WebsocketService,
         WindowRefService,
         LoggerFactory,
-        SabloDeferHelper],
+        SabloDeferHelper,
+        ServiceChangeHandler],
     exports: [TrustAsHtmlPipe]
 } )
 
