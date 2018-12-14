@@ -169,6 +169,7 @@ public class SolutionExplorerTreeContentProvider
 	private static final String IMG_SOLUTION = "solution.png";
 	private static final String IMG_SOLUTION_M = "module.png";
 	private static final String IMG_SOLUTION_MODULE = "module.png";
+	private static final String IMG_SOLUTION_NG_MODULE = "ng_module.png";
 	private static final String IMG_SOLUTION_LOGIN = "solution_login.png";
 	private static final String IMG_SOLUTION_AUTHENTICATOR = "solution_auth.png";
 	private static final String IMG_SOLUTION_SMART_ONLY = "solution_smart_only.png";
@@ -569,6 +570,9 @@ public class SolutionExplorerTreeContentProvider
 				{
 					case SolutionMetaData.MODULE :
 						imgName = IMG_SOLUTION_MODULE;
+						break;
+					case SolutionMetaData.NG_MODULE :
+						imgName = IMG_SOLUTION_NG_MODULE;
 						break;
 					case SolutionMetaData.LOGIN_SOLUTION :
 						imgName = IMG_SOLUTION_LOGIN;
