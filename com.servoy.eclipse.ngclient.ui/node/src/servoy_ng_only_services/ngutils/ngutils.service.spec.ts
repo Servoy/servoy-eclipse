@@ -1,17 +1,28 @@
 import { TestBed, inject } from '@angular/core/testing';
 
+import { SessionStorageService } from 'angular-web-storage';
+
 import { NGUtilsService } from './ngutils.service';
 
 import {WindowRefService} from '../../sablo/util/windowref.service'
 
+import {ServiceChangeHandler} from '../../sablo/util/servicechangehandler'
+
+import { SabloService } from '../../sablo/sablo.service';
+
+import { WebsocketService } from '../../sablo/websocket.service';
+import { ConverterService } from '../../sablo/converter.service';
+import { LoggerFactory } from '../../sablo/logger.service'
+import { ServicesService } from '../../sablo/services.service'
 
 describe('NGUtilsService', () => {
   let windowRef;
   beforeEach(() => {
-     windowRef =  {}
+     windowRef =  {};
+     windowRef.nativeWindow = {};
      // we use a useFactory because when using useValue that will be cloned, so you can adjust windowRef later on.
     TestBed.configureTestingModule({
-      providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef }]
+      providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef }, ServiceChangeHandler, SabloService, WebsocketService, SessionStorageService, ConverterService, LoggerFactory,ServicesService]
     });
   });
 
