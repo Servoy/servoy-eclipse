@@ -6,17 +6,17 @@ import { ServoyService } from '../ngclient/servoy.service'
 
 @Injectable()
 export class KeyListener implements IComponentContributorListener {   
-    private _callbacks: any[] = [];
+    private _callbacks: Callback[] = [];
     
     constructor(private componentContributor: ComponentContributor, private servoyService: ServoyService, private utils: SvyUtilsService, private changeHandler : ServiceChangeHandler){
         componentContributor.addComponentListener(this);
     }
     
-    get callbacks(): any[] {
+    get callbacks(): Callback[] {
         return this._callbacks;
     }
     
-    set callbacks(callbacks: any[]) {
+    set callbacks(callbacks:Callback[]) {
         this._callbacks = callbacks;
     } 
     
@@ -35,14 +35,24 @@ export class KeyListener implements IComponentContributorListener {
         }
     }
     
-    public addKeyListener(callbackKey:string, callback:Object, clearCB?: boolean) {
+    public addKeyListener(callbackKey:string, callback:Function, clearCB?: boolean) {
         if (clearCB) this._callbacks = [];
-        this._callbacks.push({ 'callbackKey': callbackKey, 'callback': callback });
+        this._callbacks.push({'callbackKey':callbackKey,'callback': callback });
         this.changeHandler.changed("keyListener","callbacks", this._callbacks);
     }
     
-    public getCallback(callbackKey: String) {
+    public getCallback(callbackKey: String): Function {
         let cb = this._callbacks.find( c => c.callbackKey === callbackKey);
         return cb ? cb.callback : undefined;
     }
+}
+
+class Callback {
+    public callbackKey:string;
+    public callback: Function;
+}
+
+class Function {
+    public formname: string;
+    public script: string
 }
