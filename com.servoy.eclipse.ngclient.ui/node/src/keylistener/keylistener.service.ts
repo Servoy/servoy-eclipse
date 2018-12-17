@@ -1,15 +1,24 @@
 import { Injectable, Renderer2 } from '@angular/core';
 
 import { SvyUtilsService, ComponentContributor, IComponentContributorListener } from '../ngclient/servoy_public';
+import {ServiceChangeHandler} from '../sablo/util/servicechangehandler'
 import { ServoyService } from '../ngclient/servoy.service'
 
 @Injectable()
 export class KeyListener implements IComponentContributorListener {   
-    private static callbacks: any[] = []; //TODO getServiceScope??
+    private _callbacks: any[] = [];
     
-    constructor(private componentContributor: ComponentContributor, private servoyService: ServoyService, private utils: SvyUtilsService){
+    constructor(private componentContributor: ComponentContributor, private servoyService: ServoyService, private utils: SvyUtilsService, private changeHandler : ServiceChangeHandler){
         componentContributor.addComponentListener(this);
     }
+    
+    get callbacks(): any[] {
+        return this._callbacks;
+    }
+    
+    set callbacks(callbacks: any[]) {
+        this._callbacks = callbacks;
+    } 
     
     public componentCreated(element:any, renderer:Renderer2) {
         let attribute = element.getAttribute('keylistener');
@@ -27,12 +36,13 @@ export class KeyListener implements IComponentContributorListener {
     }
     
     public addKeyListener(callbackKey:string, callback:Object, clearCB?: boolean) {
-        if (!KeyListener.callbacks || clearCB) KeyListener.callbacks = [];
-        KeyListener.callbacks.push({ 'callbackKey': callbackKey, 'callback': callback });
+        if (clearCB) this._callbacks = [];
+        this._callbacks.push({ 'callbackKey': callbackKey, 'callback': callback });
+        this.changeHandler.changed("keyListener","callbacks", this._callbacks);
     }
     
     public getCallback(callbackKey: String) {
-        let cb = KeyListener.callbacks.find( c => c.callbackKey === callbackKey);
+        let cb = this._callbacks.find( c => c.callbackKey === callbackKey);
         return cb ? cb.callback : undefined;
     }
 }
