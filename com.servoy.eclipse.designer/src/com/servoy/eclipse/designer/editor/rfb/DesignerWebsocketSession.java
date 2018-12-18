@@ -287,17 +287,147 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		writer.endObject();
 	}
 
-	private void checkLayoutHierarchyRecursively(IPersist layout, List<LayoutContainer> containers, Set<IFormElement> components)
+	/**
+	 * Function that check recursively childrens of a LayoutContainer .
+	 * If LayoutContainer childrens contains BaseComponent element, will call parseFormElements and will return it's value.
+	 *
+	 * @param layout
+	 * @param containers
+	 * @param components
+	 * @param compAttributes
+	 * @param deletedComponents
+	 * @param formComponentChild
+	 * @param refreshTemplate
+	 * @param updatedFormComponentsDesignId
+	 * @param formComponentsComponents
+	 * @param renderGhosts
+	 * @param fs
+	 * @return ghost
+	 */
+	private boolean checkLayoutHierarchyRecursively(IPersist layout, List<LayoutContainer> containers, Set<IFormElement> components, Class layoutClass,
+		Set<IFormElement> compAttributes, Set<IFormElement> deletedComponents, boolean formComponentChild, Set<IFormElement> refreshTemplate,
+		Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, boolean renderGhosts, FlattenedSolution fs)
 	{
+		boolean ghost = false;
 		if (layout instanceof LayoutContainer && !containers.contains(layout))
 		{
-			containers.add((LayoutContainer)layout);//
-			List<IPersist> childs = ((LayoutContainer)layout).getAllObjectsAsList();
-			childs.forEach(child -> {
-				if (child != null) checkLayoutHierarchyRecursively(child, containers, components);
-			});
+			containers.add((LayoutContainer)layout);
+			List<IPersist> children = ((LayoutContainer)layout).getAllObjectsAsList();
+			for (int i = 0; i < children.size(); i++)
+			{
+				if (children.get(i) != null)
+				{
+					boolean auxGhost = checkLayoutHierarchyRecursively(children.get(i), containers, components, children.get(i).getClass(), compAttributes,
+						deletedComponents, formComponentChild, refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
+					if (auxGhost) ghost = auxGhost;
+				}
+			}
+			return ghost;
 		}
-		if (layout instanceof BaseComponent && !components.contains(layout)) components.add((IFormElement)layout);
+		if (layout instanceof IFormElement && !components.contains(layout) && !compAttributes.contains(layout))
+		{
+			ghost = parseIFormElement((IFormElement)layout, components, compAttributes, deletedComponents, formComponentChild, refreshTemplate,
+				updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
+			return ghost;
+		}
+		return false;
+	}
+
+	/**
+	 * Function that parse an IPersist when instance is IFormElement
+	 * @param persist
+	 * @param baseComponents
+	 * @param compAttributes
+	 * @param deletedComponents
+	 * @param formComponentChild
+	 * @param refreshTemplate
+	 * @param updatedFormComponentsDesignId
+	 * @param formComponentsComponents
+	 * @param renderGhosts
+	 * @param fs
+	 * @return ghost
+	 */
+	private boolean parseIFormElement(IFormElement persist, Set<IFormElement> baseComponents, Set<IFormElement> compAttributes,
+		Set<IFormElement> deletedComponents, boolean formComponentChild, Set<IFormElement> refreshTemplate, Set<String> updatedFormComponentsDesignId,
+		Set<IFormElement> formComponentsComponents, boolean renderGhosts, FlattenedSolution fs)
+	{
+		boolean ghost = renderGhosts;
+		IFormElement baseComponent = persist;
+		if (baseComponent.getGroupID() != null)
+		{
+			compAttributes.add(baseComponent);
+		}
+
+		if (persist instanceof ISupportExtendsID)
+		{
+			IPersist superPersist = PersistHelper.getSuperPersist(persist);
+			if (superPersist instanceof IFormElement) deletedComponents.add((IFormElement)superPersist);
+		}
+
+
+		if (formComponentChild || persist.getParent().getChild(persist.getUUID()) != null)
+		{
+			ISupportChilds parent = persist.getParent();
+			if (parent instanceof AbstractContainer)
+			{
+				baseComponents.add(baseComponent);
+			}
+			else if (parent instanceof Form)
+			{
+				baseComponents.add(baseComponent);
+			}
+			else while (parent instanceof BaseComponent)
+			{
+				if (parent.getParent() instanceof Form)
+				{
+					baseComponents.add((IFormElement)parent);
+					IPersist oldPersist = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
+					if (oldPersist == null) // a new child was added, force parent refresh
+					{
+						refreshTemplate.add((IFormElement)parent);
+					}
+					break;
+				}
+				else
+				{
+					parent = parent.getParent();
+				}
+			}
+			if (persist instanceof Field)
+			{
+				Field oldField = (Field)ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
+				if (oldField != null && ((Field)persist).getDisplayType() != oldField.getDisplayType())
+				{
+					refreshTemplate.add(baseComponent);
+				}
+			}
+			if (persist instanceof ChildWebComponent || persist.getParent() instanceof Portal)
+			{
+				ghost = true;
+			}
+			checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
+				FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs);
+		}
+		else
+		{
+			deletedComponents.add(baseComponent);
+			// if it has parent, make sure it refreshes
+			ISupportChilds parent = persist.getParent();
+			while (parent instanceof BaseComponent)
+			{
+				if (parent.getParent() instanceof Form)
+				{
+					baseComponents.add((IFormElement)parent);
+					refreshTemplate.add((IFormElement)parent);
+					break;
+				}
+				else
+				{
+					parent = parent.getParent();
+				}
+			}
+		}
+		return ghost;
 	}
 
 	public String getComponentsJSON(FlattenedSolution fs, Set<IPersist> persists)
@@ -330,82 +460,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			if (persist instanceof IFormElement)
 			{
-				IFormElement baseComponent = (IFormElement)persist;
-				if (baseComponent.getGroupID() != null)
-				{
-					compAttributes.add(baseComponent);
-				}
-
-				if (persist instanceof ISupportExtendsID)
-				{
-					IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
-					if (superPersist instanceof IFormElement) deletedComponents.add((IFormElement)superPersist);
-				}
-
-
-				if (formComponentChild || persist.getParent().getChild(persist.getUUID()) != null)
-				{
-					ISupportChilds parent = persist.getParent();
-					if (parent instanceof AbstractContainer)
-					{
-						baseComponents.add(baseComponent);
-					}
-					else if (parent instanceof Form)
-					{
-						baseComponents.add(baseComponent);
-					}
-					else while (parent instanceof BaseComponent)
-					{
-						if (parent.getParent() instanceof Form)
-						{
-							baseComponents.add((IFormElement)parent);
-							IPersist oldPersist = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
-							if (oldPersist == null) // a new child was added, force parent refresh
-							{
-								refreshTemplate.add((IFormElement)parent);
-							}
-							break;
-						}
-						else
-						{
-							parent = parent.getParent();
-						}
-
-					}
-					if (persist instanceof Field)
-					{
-						Field oldField = (Field)ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
-						if (oldField != null && ((Field)persist).getDisplayType() != oldField.getDisplayType())
-						{
-							refreshTemplate.add(baseComponent);
-						}
-					}
-					if (persist instanceof ChildWebComponent || persist.getParent() instanceof Portal)
-					{
-						renderGhosts = true;
-					}
-					checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
-						FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs);
-				}
-				else
-				{
-					deletedComponents.add(baseComponent);
-					// if it has parent, make sure it refreshes
-					ISupportChilds parent = persist.getParent();
-					while (parent instanceof BaseComponent)
-					{
-						if (parent.getParent() instanceof Form)
-						{
-							baseComponents.add((IFormElement)parent);
-							refreshTemplate.add((IFormElement)parent);
-							break;
-						}
-						else
-						{
-							parent = parent.getParent();
-						}
-					}
-				}
+				renderGhosts = parseIFormElement((IFormElement)persist, baseComponents, compAttributes, deletedComponents, formComponentChild, refreshTemplate,
+					updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
 			}
 			else if (persist instanceof Part)
 			{
@@ -420,7 +476,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
-					checkLayoutHierarchyRecursively(persist, containers, baseComponents);
+					renderGhosts = checkLayoutHierarchyRecursively(persist, containers, baseComponents, persist.getClass(), compAttributes, deletedComponents,
+						formComponentChild, refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
 				}
 				else
 				{
