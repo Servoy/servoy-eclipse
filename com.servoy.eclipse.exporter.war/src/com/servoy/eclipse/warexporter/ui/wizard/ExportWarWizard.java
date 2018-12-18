@@ -484,18 +484,20 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			appendToBuilder(sb, " -crefs ", exportModel.getExportedComponents(), -1, " ");
 			appendToBuilder(sb, " -excludeComponentPkgs ", exportModel.getExcludedComponentPackages(), -1, " ");
 		}
+		else sb.append(" -crefs all ");
 		if (exportModel.getExcludedServicePackages().size() != 0)
 		{
 			appendToBuilder(sb, " -srefs ", exportModel.getExportedServices(), -1, " ");
 			appendToBuilder(sb, " -excludeServicePkgs ", exportModel.getExcludedServicePackages(), -1, " ");
 		}
+		else sb.append(" -srefs all ");
 
 		appendToBuilder(sb, " -md ", exportModel.isExportMetaData());
 		appendToBuilder(sb, " -checkmd ", exportModel.isCheckMetadataTables());
 		appendToBuilder(sb, " -sd ", exportModel.isExportSampleData());
 
 
-		if (exportModel.getNumberOfSampleDataExported() != 5000) appendToBuilder(sb, " -sdcount ", String.valueOf(exportModel.getNumberOfSampleDataExported()));
+		appendToBuilder(sb, " -sdcount ", String.valueOf(exportModel.getNumberOfSampleDataExported()));
 
 		appendToBuilder(sb, " -i18n ", exportModel.isExportI18NData());
 		appendToBuilder(sb, " -users ", exportModel.isExportUsers());
