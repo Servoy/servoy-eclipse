@@ -509,4 +509,11 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="javax.transaction"
+         download-size="0"
+         install-size="0"
+         version="1.1.0"
+         unpack="false"/>
+
 </feature>
