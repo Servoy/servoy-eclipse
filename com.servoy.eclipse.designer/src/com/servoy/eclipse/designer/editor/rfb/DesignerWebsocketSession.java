@@ -287,6 +287,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		writer.endObject();
 	}
 
+	private void checkLayoutHierarchyRecursively(IPersist layout, List<LayoutContainer> containers, Set<IFormElement> components)
+	{
+		if (layout instanceof LayoutContainer && !containers.contains(layout))
+		{
+			containers.add((LayoutContainer)layout);//
+			List<IPersist> childs = ((LayoutContainer)layout).getAllObjectsAsList();
+			childs.forEach(child -> {
+				if (child != null) checkLayoutHierarchyRecursively(child, containers, components);
+			});
+		}
+		if (layout instanceof BaseComponent && !components.contains(layout)) components.add((IFormElement)layout);
+	}
+
 	public String getComponentsJSON(FlattenedSolution fs, Set<IPersist> persists)
 	{
 		Set<IFormElement> baseComponents = new HashSet<>();
@@ -407,7 +420,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
-					containers.add((LayoutContainer)persist);
+					checkLayoutHierarchyRecursively(persist, containers, baseComponents);
 				}
 				else
 				{
