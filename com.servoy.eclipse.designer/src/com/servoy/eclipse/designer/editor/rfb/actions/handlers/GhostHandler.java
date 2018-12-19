@@ -44,11 +44,13 @@ import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.rfb.startup.RFBDesignerUtils;
 import com.servoy.eclipse.designer.util.DeveloperUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.CSSPosition;
@@ -370,9 +372,24 @@ public class GhostHandler implements IServerService
 				writeGhostForPersist(o, null, null);
 			}
 
+			private boolean isInShowedContainer(IPersist o)
+			{
+				IPersist parent = o;
+				AbstractContainer container = ((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer();
+				if (container != null)
+				{
+					do
+					{
+						parent = parent.getParent();
+					}
+					while (parent != null && parent != container);
+				}
+				return parent != null;
+			}
+
 			private void writeGhostForPersist(IPersist o, String parentID, ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
-				if (o instanceof TabPanel)
+				if (o instanceof TabPanel && isInShowedContainer(o))
 				{
 					try
 					{
@@ -439,7 +456,7 @@ public class GhostHandler implements IServerService
 						writePartGhosts(writer, f);
 					}
 				}
-				else if (o instanceof Portal)
+				else if (o instanceof Portal && isInShowedContainer(o))
 				{
 					try
 					{
@@ -508,7 +525,7 @@ public class GhostHandler implements IServerService
 						Debug.error(e);
 					}
 				}
-				else if (o instanceof IBasicWebComponent)
+				else if (o instanceof IBasicWebComponent && isInShowedContainer(o))
 				{
 					writeGhostsForWebcomponentBeans((IBasicWebComponent)o, parentID, parentFormComponentPath);
 
