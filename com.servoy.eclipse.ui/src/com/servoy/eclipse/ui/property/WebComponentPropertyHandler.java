@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.ui.property;
 
+import java.awt.Dimension;
+import java.awt.Point;
+
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
@@ -27,9 +30,12 @@ import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IDesignValueConverter;
@@ -37,6 +43,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
@@ -44,6 +51,7 @@ import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Property handler for web components
@@ -140,8 +148,34 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	@Override
 	public void setValue(Object obj, Object value, PersistContext persistContext)
 	{
-		IBasicWebObject bean = (IBasicWebObject)obj;
 
+		if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
+			((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition().booleanValue()) ||
+				PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist())))
+		{
+			if (obj instanceof WebFormComponentChildType)
+			{
+				BaseComponent formComponent = (BaseComponent)((WebFormComponentChildType)obj).getParent();
+				CSSPosition.setLocationEx(formComponent, (WebFormComponentChildType)obj, ((Point)value).x, ((Point)value).y, formComponent.getSize());
+				return;
+			}
+			// are there other components where we should convert to cssposition?
+		}
+		else if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(getName()) && value instanceof Dimension && persistContext != null &&
+			((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition().booleanValue()) ||
+				PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist())))
+		{
+			if (obj instanceof WebFormComponentChildType)
+			{
+				BaseComponent formComponent = (BaseComponent)((WebFormComponentChildType)obj).getParent();
+				CSSPosition.setSizeEx(formComponent, (WebFormComponentChildType)obj, ((Dimension)value).width, ((Dimension)value).height,
+					formComponent.getSize());
+				return;
+			}
+			// are there other components where we should convert to cssposition?
+		}
+
+		IBasicWebObject bean = (IBasicWebObject)obj;
 		Object convertedValue = value;
 		IPropertyType< ? > type = propertyDescription.getType();
 		if (type instanceof IYieldingType) type = ((IYieldingType< ? , ? >)type).getPossibleYieldType();

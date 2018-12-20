@@ -91,6 +91,7 @@ import com.servoy.eclipse.model.util.ISupportInheritedPropertyCheck;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -1783,8 +1784,20 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	protected boolean hideForProperties(PropertyDescriptorWrapper propertyDescriptor)
 	{
-		return RepositoryHelper.hideForProperties(propertyDescriptor.propertyDescriptor.getName(), persistContext.getPersist().getClass(),
-			persistContext.getPersist());
+		String name = propertyDescriptor.propertyDescriptor.getName();
+		Class< ? > clazz = persistContext.getPersist().getClass();
+		IPersist persist = persistContext.getPersist();
+
+		if (persist instanceof WebFormComponentChildType &&
+			(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(name) || StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(name) ||
+				StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(name) ||
+				StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(name)))
+		{
+			persist = ((WebFormComponentChildType)persist).getParent();
+			clazz = persist.getClass();
+		}
+
+		return RepositoryHelper.hideForProperties(name, clazz, persist);
 	}
 
 	public Object getPersistPropertyValue(Object id)
