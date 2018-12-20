@@ -39,6 +39,7 @@ import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IDesignValueConverter;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
@@ -51,7 +52,6 @@ import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Property handler for web components
@@ -148,24 +148,18 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	@Override
 	public void setValue(Object obj, Object value, PersistContext persistContext)
 	{
-
-		if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
-			((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition().booleanValue()) ||
-				PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist())))
+		if (obj instanceof WebFormComponentChildType)
 		{
-			if (obj instanceof WebFormComponentChildType)
+			IFormElement fe = ((WebFormComponentChildType)obj).getElement();
+			if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point &&
+				((fe.getParent() instanceof Form && ((Form)fe.getParent()).getUseCssPosition().booleanValue())))
 			{
 				BaseComponent formComponent = (BaseComponent)((WebFormComponentChildType)obj).getParent();
 				CSSPosition.setLocationEx(formComponent, (WebFormComponentChildType)obj, ((Point)value).x, ((Point)value).y, formComponent.getSize());
 				return;
 			}
-			// are there other components where we should convert to cssposition?
-		}
-		else if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(getName()) && value instanceof Dimension && persistContext != null &&
-			((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition().booleanValue()) ||
-				PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist())))
-		{
-			if (obj instanceof WebFormComponentChildType)
+			else if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(getName()) && value instanceof Dimension &&
+				((fe.getParent() instanceof Form && ((Form)fe.getParent()).getUseCssPosition().booleanValue())))
 			{
 				BaseComponent formComponent = (BaseComponent)((WebFormComponentChildType)obj).getParent();
 				CSSPosition.setSizeEx(formComponent, (WebFormComponentChildType)obj, ((Dimension)value).width, ((Dimension)value).height,

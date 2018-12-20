@@ -1793,7 +1793,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(name) ||
 				StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName().equals(name)))
 		{
-			persist = ((WebFormComponentChildType)persist).getParent();
+			persist = ((WebFormComponentChildType)persist).getElement();
 			clazz = persist.getClass();
 		}
 
