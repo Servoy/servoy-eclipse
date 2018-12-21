@@ -23,6 +23,7 @@ import java.util.Iterator;
 
 import org.json.JSONException;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -112,7 +113,7 @@ public final class DatabaseUtils
 				}
 			};
 			ITable table = server.createNewTable(validator, tableName, false);
-			table.setMarkedAsMetaData(tableInfo.isMetaData);
+			table.setMarkedAsMetaData(Boolean.TRUE.equals(tableInfo.isMetaData));
 			server.setTableMarkedAsHiddenInDeveloper(tableName, tableInfo.hiddenInDeveloper);
 
 			// Warn if the table types are different.
@@ -142,7 +143,7 @@ public final class DatabaseUtils
 				// Add the column with the appropriate information.
 				IColumn column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
 					columnInfoInfo.columnType.getLength(), columnInfoInfo.columnType.getScale());
-				column.setDatabasePK((columnInfoInfo.flags & Column.PK_COLUMN) != 0);
+				column.setDatabasePK((columnInfoInfo.flags & IBaseColumn.PK_COLUMN) != 0);
 				column.setAllowNull(columnInfoInfo.allowNull);
 
 				// update the auto enter type

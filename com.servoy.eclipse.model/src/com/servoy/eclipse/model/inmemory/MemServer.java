@@ -1007,6 +1007,18 @@ public class MemServer implements IServerInternal, IServer
 
 	/*
 	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.persistence.IServerInternal#isTableMarkedAsMetaData(java.lang.String)
+	 */
+	@Override
+	public boolean isTableMarkedAsMetaData(String tableName)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
 	 *
 	 * @see com.servoy.j2db.persistence.IServerInternal#getTableAndViewNames(boolean, boolean)
 	 */
