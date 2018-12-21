@@ -36,6 +36,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
+import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 
@@ -171,9 +172,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		rowsPerTableRadioButton.setLayoutData(data2);
 		rowsPerTableRadioButton.addListener(SWT.Selection, this);
 		rowsPerTableRadioButton.setEnabled(exportSolutionWizard.getModel().isExportSampleData());
-		rowsPerTableRadioButton.setSelection(exportSolutionWizard.getModel().isExportSampleData() &&
-			exportSolutionWizard.getModel().getNumberOfSampleDataExported() != IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
-
+		rowsPerTableRadioButton.setSelection(exportSolutionWizard.getModel().getNumberOfSampleDataExported() != IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 
 		GridData data3 = new GridData();
 		Label textLabel = new Label(horizontalComposite, SWT.NONE);
@@ -184,7 +183,8 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		nrOfExportedSampleDataSpinner = new Spinner(horizontalComposite, SWT.BORDER);
 		nrOfExportedSampleDataSpinner.setMinimum(1);
 		nrOfExportedSampleDataSpinner.setMaximum(IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
-		nrOfExportedSampleDataSpinner.setSelection(10000);
+		nrOfExportedSampleDataSpinner.setSelection(exportSolutionWizard.getModel().getNumberOfSampleDataExported() != IDataServerInternal.MAX_ROWS_TO_RETRIEVE
+			? exportSolutionWizard.getModel().getNumberOfSampleDataExported() : IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED);
 		nrOfExportedSampleDataSpinner.setIncrement(100);
 		nrOfExportedSampleDataSpinner.setEnabled(exportSolutionWizard.getModel().isExportSampleData() &&
 			exportSolutionWizard.getModel().getNumberOfSampleDataExported() != IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
@@ -196,13 +196,9 @@ public class ExportOptionsPage extends WizardPage implements Listener
 
 			public void modifyText(ModifyEvent e)
 			{
-				int maxRowToRetrieve = nrOfExportedSampleDataSpinner.getSelection();
-				if (maxRowToRetrieve == 0)
-				{
-					maxRowToRetrieve = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
-				}
-				exportSolutionWizard.getModel().setNumberOfSampleDataExported(maxRowToRetrieve);
+				applyNrOfExportedSampleDataSpinnerValue();
 			}
+
 		});
 
 		GridData data5 = new GridData();
@@ -213,11 +209,11 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		GridData data6 = new GridData();
 		allRowsRadioButton = new Button(horizontalComposite, SWT.RADIO);
 		allRowsRadioButton.setEnabled(exportSolutionWizard.getModel().isExportSampleData());
-		allRowsRadioButton.setSelection(exportSolutionWizard.getModel().isExportSampleData() &&
-			exportSolutionWizard.getModel().getNumberOfSampleDataExported() == IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
+		allRowsRadioButton.setSelection(exportSolutionWizard.getModel().getNumberOfSampleDataExported() == IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 		allRowsRadioButton.setLayoutData(data6);
 		allRowsRadioButton.addListener(SWT.Selection, this);
-
+		allRowsRadioButton.setToolTipText("As this is not meant as a DB export/import tool, the number if exported rows will still be limited but to a very high number (" +
+				IDataServerInternal.MAX_ROWS_TO_RETRIEVE + ")");
 
 		GridData data7 = new GridData();
 		Label textLabel4 = new Label(horizontalComposite, SWT.NONE);
@@ -246,6 +242,16 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		useImportSettingsButton.addListener(SWT.Selection, this);
 
 		setControl(composite);
+	}
+
+	private void applyNrOfExportedSampleDataSpinnerValue()
+	{
+		int maxRowToRetrieve = nrOfExportedSampleDataSpinner.getSelection();
+		if (maxRowToRetrieve == 0) // spinner has minimum of 1 so how can this be 0?
+		{
+			maxRowToRetrieve = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
+		}
+		exportSolutionWizard.getModel().setNumberOfSampleDataExported(maxRowToRetrieve);
 	}
 
 	public void refreshDBIDownFlag(boolean dbiDown)
@@ -305,19 +311,14 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		else if (event.widget == exportSampleDataButton)
 		{
 			exportSolutionWizard.getModel().setExportSampleData(exportSampleDataButton.getSelection());
-			exportSolutionWizard.getModel().setNumberOfSampleDataExported(10000);
 
-			nrOfExportedSampleDataSpinner.setEnabled(exportSampleDataButton.getSelection());
+			nrOfExportedSampleDataSpinner.setEnabled(exportSampleDataButton.getSelection() && !allRowsRadioButton.getSelection());
 			allRowsRadioButton.setEnabled(exportSampleDataButton.getSelection());
-			allRowsRadioButton.setSelection(false);
 			rowsPerTableRadioButton.setEnabled(exportSampleDataButton.getSelection());
-			rowsPerTableRadioButton.setSelection(exportSampleDataButton.getSelection());
 		}
 		else if (event.widget == allRowsRadioButton)
 		{
-			nrOfExportedSampleDataSpinner.setSelection(IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 			nrOfExportedSampleDataSpinner.setEnabled(!allRowsRadioButton.getSelection());
-
 			rowsPerTableRadioButton.setSelection(!allRowsRadioButton.getSelection());
 
 			exportSolutionWizard.getModel().setExportSampleData(exportSampleDataButton.getSelection());
@@ -326,7 +327,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		else if (event.widget == rowsPerTableRadioButton)
 		{
 			allRowsRadioButton.setSelection(!rowsPerTableRadioButton.getSelection());
-			nrOfExportedSampleDataSpinner.setSelection(10000);
+			applyNrOfExportedSampleDataSpinnerValue();
 		}
 		else if (event.widget == exportI18NDataButton) exportSolutionWizard.getModel().setExportI18NData(exportI18NDataButton.getSelection());
 		else if (event.widget == exportUsersButton) exportSolutionWizard.getModel().setExportUsers(exportUsersButton.getSelection());

@@ -27,9 +27,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.util.ILogLevel;
@@ -51,7 +53,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 
 	private boolean exportSampleData = false;
 	private int metadataSource = META_DATA_WS;
-	private int sampleDataCount = 10000;
+	private int sampleDataCount = IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED;
 	private boolean exportI18N = false;
 	private boolean exportUsers = false;
 	private boolean exportModules = false;
@@ -127,7 +129,9 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			+ "        -sd ... exports sample data. IMPORTANT: all needed DB\n"
 			+ "             servers must already be started\n"
 			+ "        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n"
-			+ "             is also present. Can be 'all' (without the '). Default: 10000\n"
+			+ "             is also present. Can be 'all' (without the ') in which  case  it will  still be\n"
+			+ "             limited but to a very high number: " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + "\n"
+			+ "             Default: " + IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED + "\n"
 			+ "        -i18n ... exports i18n data\n"
 			+ "        -users ... exports users\n"
 			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"

@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
@@ -198,14 +199,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			public void widgetSelected(SelectionEvent e)
 			{
 				exportModel.setExportUsingDbiFileInfoOnly(exportUsingDbiFileInfoOnlyButton.getSelection());
-				if (exportUsingDbiFileInfoOnlyButton.getSelection())
-				{
-					exportMetadataTablesButton.setText("Export metadata tables(from workspace)");
-				}
-				else
-				{
-					exportMetadataTablesButton.setText("Export metadata tables(from database)");
-				}
 			}
 		});
 
@@ -269,7 +262,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		});
 
 		exportMetadataTablesButton = new Button(composite, SWT.CHECK);
-		exportMetadataTablesButton.setText("Export metadata tables(from database)");
+		exportMetadataTablesButton.setText("Export metadata from metadata tables (based on workspace files)");
 		exportMetadataTablesButton.setSelection(exportModel.isExportMetaData());
 		exportMetadataTablesButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -321,13 +314,14 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		rowsPerTableRadioButton = new Button(horizontalComposite, SWT.RADIO);
 		rowsPerTableRadioButton.setEnabled(false);
 		rowsPerTableRadioButton.setLayoutData(data2);
-		rowsPerTableRadioButton.setSelection(!exportModel.isAllRows());
+		rowsPerTableRadioButton.setSelection(exportModel.getNumberOfSampleDataExported() != IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 		rowsPerTableRadioButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
 				allRowsRadioButton.setSelection(!rowsPerTableRadioButton.getSelection());
+				applyNrOfExportedSampleDataSpinnerValue();
 			}
 		});
 
@@ -342,7 +336,8 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		nrOfExportedSampleDataSpinner.setMaximum(IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 		nrOfExportedSampleDataSpinner.setIncrement(100);
 		nrOfExportedSampleDataSpinner.setEnabled(false);
-		nrOfExportedSampleDataSpinner.setSelection(exportModel.getNumberOfSampleDataExported());
+		nrOfExportedSampleDataSpinner.setSelection(exportModel.getNumberOfSampleDataExported() == IDataServerInternal.MAX_ROWS_TO_RETRIEVE
+			? IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED : exportModel.getNumberOfSampleDataExported());
 
 		nrOfExportedSampleDataSpinner.setLayoutData(data4);
 
@@ -351,13 +346,9 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 
 			public void modifyText(ModifyEvent e)
 			{
-				int maxRowToRetrieve = nrOfExportedSampleDataSpinner.getSelection();
-				if (maxRowToRetrieve == 0)
-				{
-					maxRowToRetrieve = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
-				}
-				exportModel.setNumberOfSampleDataExported(maxRowToRetrieve);
+				applyNrOfExportedSampleDataSpinnerValue();
 			}
+
 		});
 
 		GridData data5 = new GridData();
@@ -369,7 +360,10 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		allRowsRadioButton = new Button(horizontalComposite, SWT.RADIO);
 		allRowsRadioButton.setEnabled(false);
 		allRowsRadioButton.setLayoutData(data6);
-		allRowsRadioButton.setSelection(exportModel.isAllRows());
+		allRowsRadioButton.setSelection(exportModel.getNumberOfSampleDataExported() == IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
+		allRowsRadioButton.setToolTipText(
+			"As this is not meant as a DB export/import tool, the number if exported rows will still be limited but to a very high number (" +
+				IDataServerInternal.MAX_ROWS_TO_RETRIEVE + ")");
 		allRowsRadioButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -378,7 +372,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 				nrOfExportedSampleDataSpinner.setEnabled(!allRowsRadioButton.getSelection());
 				rowsPerTableRadioButton.setSelection(!allRowsRadioButton.getSelection());
 
-				exportModel.setAllRows(allRowsRadioButton.getSelection());
+				exportModel.setNumberOfSampleDataExported(IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 			}
 		});
 
@@ -659,6 +653,16 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		setControl(composite);
 	}
 
+	private void applyNrOfExportedSampleDataSpinnerValue()
+	{
+		int maxRowToRetrieve = nrOfExportedSampleDataSpinner.getSelection();
+		if (maxRowToRetrieve == 0) // spinner has a minimum of 1 so how could this happen?
+		{
+			maxRowToRetrieve = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
+		}
+		exportModel.setNumberOfSampleDataExported(maxRowToRetrieve);
+	}
+
 	private void refreshDBIDownFlag(boolean dbiDown)
 	{
 		exportUsingDbiFileInfoOnlyButton.setEnabled(!dbiDown);
@@ -686,11 +690,11 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		checkMetadataTablesButton.setSelection(dbiDown ? false : exportModel.isExportMetaData());
 		if (dbiDown)
 		{
-			checkMetadataTablesButton.setText("Check metadata tables (one or more used databases is unreacheable)");
+			checkMetadataTablesButton.setText("Check metadata tables (one or more used databases is unreacheable!)");
 		}
 		else
 		{
-			checkMetadataTablesButton.setText("Check metadata tables (compare workspace and database table)");
+			checkMetadataTablesButton.setText("Check metadata for metadata tables (compare metadata from workspace to the one from database for each table)");
 		}
 	}
 
@@ -858,10 +862,9 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		exportSampleDataButton.setSelection(false);
 		exportModel.setExportSampleData(false);
 		rowsPerTableRadioButton.setSelection(true);
-		nrOfExportedSampleDataSpinner.setSelection(5000);
-		exportModel.setNumberOfSampleDataExported(5000);
+		nrOfExportedSampleDataSpinner.setSelection(IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED);
+		exportModel.setNumberOfSampleDataExported(IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED);
 		allRowsRadioButton.setSelection(false);
-		exportModel.setAllRows(false);
 		exportI18NDataButton.setSelection(false);
 		exportModel.setExportI18NData(false);
 		insertNewI18NKeysOnlyButton.setSelection(true);

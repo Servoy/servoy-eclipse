@@ -29,6 +29,7 @@ import com.servoy.j2db.util.ILogLevel;
  */
 public abstract class AbstractArgumentChest implements IArgumentChest
 {
+
 	private boolean invalidArguments = false;
 	private boolean mustShowHelp = false;
 	private String solutionNames = null;
@@ -138,7 +139,9 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			{
 				try
 				{
-					sampleDataCount = Integer.parseInt(argsMap.get("sdcount"));
+					if ("all".equals(argsMap.get("sdcount").trim())) sampleDataCount = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
+					else sampleDataCount = Integer.parseInt(argsMap.get("sdcount"));
+
 					if (sampleDataCount < 1)
 					{
 						sampleDataCount = 1;
