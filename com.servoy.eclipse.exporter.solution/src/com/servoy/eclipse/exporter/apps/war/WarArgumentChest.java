@@ -25,8 +25,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
+import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
+import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 
@@ -143,26 +145,27 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Default: true\n"
 			+ "        -pfw <properties_file> ... path & name of properties file to be included in the war.\n"
 			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
-			+ "        -b <bean_names> ... the space separated list of beans to export\n"
+			+ "        -b <bean_names> ... the space separated list of (smart / web client) beans to export\n"
 			+ "             Default: all beans from application_server/beans are exported.\n"
-			+ "             Can also use -b <none> to not export any bean\n"
+			+ "             You can use '-b <none>' to avoid exporting beans.\n"
 			+ "        -" + excludeBeans + " <bean_names> ... the  list of beans to excluded from  the export e.g.:\n"
 			+ "             -" + excludeBeans + " bean1.jar bean2.zip\n"
 			+ "             Default: none is excluded.\n"
-			+ "        -l <lafs_names> ... the space separated list of lafs to export \n"
+			+ "        -l <lafs_names> ... the space separated list of look-and-feels (smart cl.) to export\n"
 			+ "             Default: all lafs from application_server/lafs are exported.\n"
-			+ "             Can also use -l <none> to not export any laf\n"
+			+ "             You can use '-l <none>' to avoid exporting lafs.\n"
 			+ "        -" + excludeLafs + " <lafs_names> ... the list of lafs to be excluded  from  the export e.g:\n"
 			+ "             -" + excludeLafs + " laf1.jar laf2.zip\n"
 			+ "             Default: none is excluded.\n"
-			+ "        -d <jdbc_drivers> ... the space separated list of drivers to export\n"
+			+ "        -d <jdbc_drivers> ... the space separated list of  jdbc (database) drivers to export\n"
 			+ "             Default: all drivers from application_server/drivers are exported.\n"
-			+ "        -" + excludeDrivers + " <jdbc_drivers> ... the  list of plugins  to exclude from  the export\n"
+			+ "             You can use '-d <none>' to avoid exporting drivers.\n"
+			+ "        -" + excludeDrivers + " <jdbc_drivers> ... the  list of drivers  to exclude from  the export\n"
 			+ "             e.g.: -" + excludeDrivers + " driver1.jar driver2.zip\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -pi <plugin_names> ... the list of plugins to export e.g -pi plugin1.jar plugin2.zip\n"
 			+ "             Default: all plugins from application_server/plugins are exported.\n"
-			+ "             Can also use -pi <none> to not export any plugin\n"
+			+ "             You can use '-pi <none>' to avoid exporting plugins.\n"
 			+ "        -" + excludePlugins + " <plugin_names> ... the  list of plugins  to exclude from  the export\n"
 			+ "             e.g.: -" + excludePlugins + " plugin1.jar plugin2.zip\n"
 			+ "             Default: none is excluded.\n"
@@ -190,12 +193,17 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Default: all services are exported.\n"
 			+ "        -excludeServicePkgs ... space separated list of excluded service packages.\n"
 			+ "             Default: none is excluded.\n"
-			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
-			+ "             Usually you will want to use 'ws'.\n"
-			+ "        -checkmd ... check metadata tables, default false\n"
+			+ "        -md ... export metadata tables (tables marked as metadata); uses the metadata stored\n"
+			+ "             in workspace files for each metadata table.\n"
+			+ "        -checkmd ... check that metadata for metadata tables is the same for each table both\n"
+			+ "             in the according workspace file and in the actual table in the  database before\n"
+			+ "             exporting; this only makes sense if -md was specified\n"
+			+ "             Default: false\n"
 			+ "        -sd ... exports sample data. IMPORTANT all needed DB servers must already be started\n"
 			+ "        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n"
-			+ "             is also present. Can be 'all' (without the '). Default: 10000\n"
+			+ "             is also present. Can be 'all' (without the ') in which  case  it will  still be\n"
+			+ "             limited but to a very high number: " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + "\n"
+			+ "             Default: " + IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED + "\n"
 			+ "        -i18n ... exports i18n data\n"
 			+ "        -users ... exports users\n"
 			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"

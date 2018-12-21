@@ -73,6 +73,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableMetaInfo;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -288,9 +289,9 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	public boolean isHiddenInDeveloper(IServerInternal server, String tableName)
+	public TableMetaInfo getTableMetainfo(IServerInternal server, String tableName)
 	{
-		if (server == null || tableName == null || !server.getConfig().isEnabled() || !server.isValid()) return false; // this should never happen
+		if (server == null || tableName == null || !server.getConfig().isEnabled() || !server.isValid()) return TableMetaInfo.DEFAULT; // this should never happen
 		IFile file = getDBIFile(server.getName(), tableName);
 		if (file.exists())
 		{
@@ -305,7 +306,7 @@ public class DataModelManager implements IColumnInfoManager
 					TableDef tableInfo = deserializeTableInfo(json_table);
 					if (tableName.equals(tableInfo.name))
 					{
-						return tableInfo.hiddenInDeveloper;
+						return new TableMetaInfo(tableInfo.hiddenInDeveloper, Boolean.TRUE.equals(tableInfo.isMetaData));
 					}
 				}
 			}
@@ -335,7 +336,7 @@ public class DataModelManager implements IColumnInfoManager
 			}
 		}
 
-		return false; // file does not exist, is empty or something unexpected happened
+		return TableMetaInfo.DEFAULT; // file does not exist, is empty or something unexpected happened
 	}
 
 	// delete file
@@ -765,7 +766,7 @@ public class DataModelManager implements IColumnInfoManager
 		}
 		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
 
-		t.setMarkedAsMetaData(tableInfo.isMetaData);
+		t.setMarkedAsMetaData(Boolean.TRUE.equals(tableInfo.isMetaData));
 
 		// let table editors and so on now that a columns are loaded
 		if (changedColumns != null)
@@ -918,7 +919,7 @@ public class DataModelManager implements IColumnInfoManager
 		tobj.put(SolutionSerializer.PROP_NAME, tableInfo.name);
 		tobj.put(TableDef.PROP_TABLE_TYPE, tableInfo.tableType);
 		if (tableInfo.hiddenInDeveloper) tobj.put(TableDef.HIDDEN_IN_DEVELOPER, true);
-		if (tableInfo.isMetaData) tobj.put(TableDef.IS_META_DATA, true);
+		if (Boolean.TRUE.equals(tableInfo.isMetaData)) tobj.put(TableDef.IS_META_DATA, true);
 
 		JSONArray carray = new ServoyJSONArray();
 		Iterator<ColumnInfoDef> it = tableInfo.columnInfoDefSet.iterator();
@@ -1106,8 +1107,9 @@ public class DataModelManager implements IColumnInfoManager
 						{
 							// this does actual parsing of the .dbi file, but it seems like the Table doesn't exist in the DB so the flag is not cached anywhere;
 							// currently this will only happen when a missing table is used in a solution or when the user manually chooses to sync tables
-							hiddenInDeveloper = isHiddenInDeveloper((IServerInternal)sm.getServer(columnDifference.getServerName()),
+							TableMetaInfo tableMetaInfo = getTableMetainfo((IServerInternal)sm.getServer(columnDifference.getServerName()),
 								columnDifference.getTableName());
+							hiddenInDeveloper = tableMetaInfo.hiddenInDeveloper;
 						}
 
 						if (!hiddenInDeveloper)

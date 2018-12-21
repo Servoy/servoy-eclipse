@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
@@ -73,7 +74,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private final List<String> pluginLocations;
 	private boolean exportAllTablesFromReferencedServers;
 	private boolean exportI18NData;
-	private int sampleRows = 5000;
+	private int sampleRows = IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED;
 	private boolean exportSampleData;
 	private boolean checkMetadataTables;
 	private boolean exportMetaData;
@@ -110,10 +111,6 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String log4jConfigurationFile;
 	private boolean exportNoneActiveSolutions;
 
-	/**
-	 * @param isNGExport
-	 * @param dialogSettings
-	 */
 	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
 		super(isNGExport);
@@ -536,9 +533,6 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.fileName = fileName;
 	}
 
-	/**
-	 * @return the warFileName
-	 */
 	public String getWarFileName()
 	{
 		return warFileName;
@@ -549,99 +543,61 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.warFileName = warFileName;
 	}
 
-
-	/**
-	 * @return
-	 */
 	public String getServoyPropertiesFileName()
 	{
 		return servoyPropertiesFileName;
 	}
 
-	/**
-	 * @param servoyPropertiesFileName the servoyPropertiesFileName to set
-	 */
 	public void setServoyPropertiesFileName(String servoyPropertiesFileName)
 	{
 		this.servoyPropertiesFileName = nonEmpty(servoyPropertiesFileName);
 	}
 
-	/**
-	 * @return the exportNoneActiveSolutions
-	 */
 	public boolean isExportNoneActiveSolutions()
 	{
 		return exportNoneActiveSolutions;
 	}
 
-	/**
-	 * @param exportNoneActiveSolutions the exportNoneActiveSolutions to set
-	 */
 	public void setExportNoneActiveSolutions(boolean exportNoneActiveSolutions)
 	{
 		this.exportNoneActiveSolutions = exportNoneActiveSolutions;
 	}
 
-	/**
-	 * @return the exportActiveSolution
-	 */
 	public boolean isExportActiveSolution()
 	{
 		return exportActiveSolution;
 	}
 
-	/**
-	 * @param exportActiveSolution the exportActiveSolution to set
-	 */
 	public void setExportActiveSolution(boolean exportActiveSolution)
 	{
 		this.exportActiveSolution = exportActiveSolution;
 	}
 
-	/**
-	 * @return the plugins
-	 */
 	public List<String> getPlugins()
 	{
 		return plugins;
 	}
 
-	/**
-	 * @return the beans
-	 */
 	public List<String> getBeans()
 	{
 		return beans;
 	}
 
-	/**
-	 * @return
-	 */
 	public List<String> getLafs()
 	{
 		return lafs;
 	}
 
-	/**
-	 * @return
-	 */
 	public List<String> getDrivers()
 	{
 		return drivers;
 	}
 
-	/**
-	 * @return
-	 */
 	public SortedSet<String> getSelectedServerNames()
 	{
 		return selectedServerNames;
 	}
 
-	/**
-	 * @param serverName
-	 * @return
-	 */
 	public ServerConfiguration getServerConfiguration(String serverName)
 	{
 		ServerConfiguration serverConfiguration = servers.get(serverName);
@@ -699,9 +655,6 @@ public class ExportWarModel extends AbstractWarExportModel
 		return ApplicationServerRegistry.get().getServoyApplicationServerDirectory();
 	}
 
-	/**
-	 * @param chosenFileName
-	 */
 	public void addPluginLocations(String pluginsDir)
 	{
 		pluginLocations.add(pluginsDir);
@@ -713,268 +666,156 @@ public class ExportWarModel extends AbstractWarExportModel
 		return pluginLocations;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isExportAllTablesFromReferencedServers()
 	{
 		return exportAllTablesFromReferencedServers;
 	}
 
-	/**
-	 * @param exportAllTablesFromReferencedServers the exportAllTablesFromReferencedServers to set
-	 */
 	public void setExportAllTablesFromReferencedServers(boolean exportAllTablesFromReferencedServers)
 	{
 		this.exportAllTablesFromReferencedServers = exportAllTablesFromReferencedServers;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isExportMetaData()
 	{
 		return exportMetaData;
 	}
 
-	/**
-	 * @param exportMetaData the exportMetaData to set
-	 */
 	public void setExportMetaData(boolean exportMetaData)
 	{
 		this.exportMetaData = exportMetaData;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isCheckMetadataTables()
 	{
 		return checkMetadataTables;
 	}
 
-	/**
-	 * @param checkMetadataTables the checkMetadataTables to set
-	 */
 	public void setCheckMetadataTables(boolean checkMetadataTables)
 	{
 		this.checkMetadataTables = checkMetadataTables;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isExportSampleData()
 	{
 		return exportSampleData;
 	}
 
-	/**
-	 * @param exportSampleData the exportSampleData to set
-	 */
 	public void setExportSampleData(boolean exportSampleData)
 	{
 		this.exportSampleData = exportSampleData;
 	}
 
-
-	/**
-	 * @param maxRowToRetrieve
-	 */
 	public void setNumberOfSampleDataExported(int sampleRows)
 	{
 		this.sampleRows = sampleRows;
 	}
 
-	/**
-	 * @return the sampleRows
-	 */
 	public int getNumberOfSampleDataExported()
 	{
 		return sampleRows;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isExportI18NData()
 	{
 		return exportI18NData;
 	}
 
-	/**
-	 * @param exportI18NData the exportI18NData to set
-	 */
 	public void setExportI18NData(boolean exportI18NData)
 	{
 		this.exportI18NData = exportI18NData;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isExportUsingDbiFileInfoOnly()
 	{
 		return usingDbiFileInfoOnly;
 	}
 
-	/**
-	 * @param usingDbiFileInfoOnly the usingDbiFileInfoOnly to set
-	 */
 	public void setExportUsingDbiFileInfoOnly(boolean usingDbiFileInfoOnly)
 	{
 		this.usingDbiFileInfoOnly = usingDbiFileInfoOnly;
 	}
 
-	/**
-	 * @return
-	 */
-	public boolean isAllRows()
-	{
-		return allRows;
-	}
-
-	/**
-	 * @param allRows the allRows to set
-	 */
-	public void setAllRows(boolean allRows)
-	{
-		this.allRows = allRows;
-	}
-
-	/**
-	 * @return
-	 */
 	public String getAllowDataModelChanges()
 	{
 		return allowDataModelChanges;
 	}
 
-	/**
-	 * @param selection
-	 */
 	public void setAllowDataModelChanges(String allowDataModelChanges)
 	{
 		this.allowDataModelChanges = allowDataModelChanges;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isAllowSQLKeywords()
 	{
 		return allowSQLKeywords;
 	}
 
-	/**
-	 * @param allowKeywords the allowKeywords to set
-	 */
 	public void setAllowSQLKeywords(boolean allowSQLKeywords)
 	{
 		this.allowSQLKeywords = allowSQLKeywords;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isUpdateSequences()
 	{
 		return updateSequences;
 	}
 
-	/**
-	 * @param selection
-	 */
 	public void setUpdateSequences(boolean updateSequences)
 	{
 		this.updateSequences = updateSequences;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isOverrideSequenceTypes()
 	{
 		return overrideSequenceTypes;
 	}
 
-	/**
-	 * @param overrideSequenceTypes the overrideSequenceTypes to set
-	 */
 	public void setOverrideSequenceTypes(boolean overrideSequenceTypes)
 	{
 		this.overrideSequenceTypes = overrideSequenceTypes;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isOverrideDefaultValues()
 	{
 		return overrideDefaultValues;
 	}
 
-	/**
-	 * @param overrideDefaultValues the overrideDefaultValues to set
-	 */
 	public void setOverrideDefaultValues(boolean overrideDefaultValues)
 	{
 		this.overrideDefaultValues = overrideDefaultValues;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isInsertNewI18NKeysOnly()
 	{
 		return insertNewI18NKeysOnly;
 	}
 
-	/**
-	 * @param insertNewI18NKeysOnly the insertNewI18NKeysOnly to set
-	 */
 	public void setInsertNewI18NKeysOnly(boolean insertNewI18NKeysOnly)
 	{
 		this.insertNewI18NKeysOnly = insertNewI18NKeysOnly;
 	}
 
-	/**
-	 * @return the overwriteGroups
-	 */
 	public boolean isOverwriteGroups()
 	{
 		return overwriteGroups;
 	}
 
-	/**
-	 * @param selection
-	 */
 	public void setOverwriteGroups(boolean overwriteGroups)
 	{
 		this.overwriteGroups = overwriteGroups;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isAddUsersToAdminGroup()
 	{
 		return addUsersToAdminGroup;
 	}
 
-	/**
-	 * @param addUsersToAdminGroup the addUsersToAdminGroup to set
-	 */
 	public void setAddUsersToAdminGroup(boolean addUsersToAdminGroup)
 	{
 		this.addUsersToAdminGroup = addUsersToAdminGroup;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsers()
-	 */
 	@Override
 	public boolean isExportUsers()
 	{
@@ -982,156 +823,94 @@ public class ExportWarModel extends AbstractWarExportModel
 	}
 
 
-	/**
-	 * @return
-	 */
 	public int getImportUserPolicy()
 	{
 		return importUserPolicy;
 	}
 
-	/**
-	 * @param createNoneExistingUsers the createNoneExistingUsers to set
-	 */
 	public void setImportUserPolicy(int importUserPolicy)
 	{
 		this.importUserPolicy = importUserPolicy;
 	}
 
-	/**
-	 * @param selectedComponents
-	 */
 	public void setExportedComponents(Set<String> selectedComponents)
 	{
 		this.exportedComponents = selectedComponents;
 	}
 
-	/**
-	 * @param selectedServices
-	 */
 	public void setExportedServices(Set<String> selectedServices)
 	{
 		this.exportedServices = selectedServices;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedComponents()
-	 */
 	@Override
 	public Set<String> getExportedComponents()
 	{
 		return exportedComponents;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedServices()
-	 */
 	@Override
 	public Set<String> getExportedServices()
 	{
 		return exportedServices;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.AbstractWarExportModel#setAutomaticallyUpgradeRepository()
-	 */
 	public void setAutomaticallyUpgradeRepository(boolean upgrade)
 	{
 		upgradeRepository = upgrade;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#isAutomaticallyUpgradeRepository()
-	 */
 	@Override
 	public boolean isAutomaticallyUpgradeRepository()
 	{
 		return upgradeRepository;
 	}
 
-	/**
-	 * @return the createTomcatContextXML
-	 */
 	public boolean isCreateTomcatContextXML()
 	{
 		return createTomcatContextXML;
 	}
 
-	/**
-	 * @param createTomcatContextXML the createTomcatContextXML to set
-	 */
 	public void setCreateTomcatContextXML(boolean createTomcatContextXML)
 	{
 		this.createTomcatContextXML = createTomcatContextXML;
 	}
 
-	/**
-	 * @return the clearReferencesStatic
-	 */
 	public boolean isClearReferencesStatic()
 	{
 		return clearReferencesStatic;
 	}
 
-	/**
-	 * @param clearReferencesStatic the clearReferencesStatic to set
-	 */
 	public void setClearReferencesStatic(boolean clearReferencesStatic)
 	{
 		this.clearReferencesStatic = clearReferencesStatic;
 	}
 
-	/**
-	 * @return the clearReferencesStopThreads
-	 */
 	public boolean isClearReferencesStopThreads()
 	{
 		return clearReferencesStopThreads;
 	}
 
-	/**
-	 * @param clearReferencesStopThreads the clearReferencesStopThreads to set
-	 */
 	public void setClearReferencesStopThreads(boolean clearReferencesStopThreads)
 	{
 		this.clearReferencesStopThreads = clearReferencesStopThreads;
 	}
 
-	/**
-	 * @return the clearReferencesStopTimerThreads
-	 */
 	public boolean isClearReferencesStopTimerThreads()
 	{
 		return clearReferencesStopTimerThreads;
 	}
 
-	/**
-	 * @param clearReferencesStopTimerThreads the clearReferencesStopTimerThreads to set
-	 */
 	public void setClearReferencesStopTimerThreads(boolean clearReferencesStopTimerThreads)
 	{
 		this.clearReferencesStopTimerThreads = clearReferencesStopTimerThreads;
 	}
 
-	/**
-	 * @return the clearReferencesStopTimerThreads
-	 */
 	public boolean isAntiResourceLocking()
 	{
 		return antiResourceLocking;
 	}
 
-	/**
-	 * @param clearReferencesStopTimerThreads the clearReferencesStopTimerThreads to set
-	 */
 	public void setAntiResourceLocking(boolean antiResourceLocking)
 	{
 		this.antiResourceLocking = antiResourceLocking;
@@ -1149,50 +928,35 @@ public class ExportWarModel extends AbstractWarExportModel
 		return excludedPackages;
 	}
 
-	/**
-	 * @return the defaultAdminUser
-	 */
 	public String getDefaultAdminUser()
 	{
 		return defaultAdminUser;
 	}
 
-	/**
-	 * @param defaultAdminPassword the defaultAdminPassword to set
-	 */
 	public void setDefaultAdminPassword(String defaultAdminPassword)
 	{
 		this.defaultAdminPassword = defaultAdminPassword;
 	}
 
-	/**
-	 * @return the defaultAdminPassword
-	 */
 	public String getDefaultAdminPassword()
 	{
 		return defaultAdminPassword;
 	}
 
-	/**
-	 * @param defaultAdminUser the defaultAdminUser to set
-	 */
 	public void setDefaultAdminUser(String defaultAdminUser)
 	{
 		this.defaultAdminUser = defaultAdminUser;
 	}
-
 
 	public void setUseAsRealAdminUser(boolean useAsRealAdminUser)
 	{
 		this.useAsRealAdminUser = useAsRealAdminUser;
 	}
 
-
 	public boolean isUseAsRealAdminUser()
 	{
 		return useAsRealAdminUser;
 	}
-
 
 	public boolean isMinimizeJsCssResources()
 	{
@@ -1219,33 +983,21 @@ public class ExportWarModel extends AbstractWarExportModel
 		return searchProblem;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getWebXMLFileName()
 	{
 		return webXMLFileName;
 	}
 
-	/**
-	 * @param webXMLFileName
-	 */
 	public void setWebXMLFileName(String webXMLFileName)
 	{
 		this.webXMLFileName = nonEmpty(webXMLFileName);
 	}
 
-	/**
-	 * @return the log4jConfigurationFile
-	 */
 	public String getLog4jConfigurationFile()
 	{
 		return log4jConfigurationFile;
 	}
 
-	/**
-	 * @param log4jConfigurationFile the log4jConfigurationFile to set
-	 */
 	public void setLog4jConfigurationFile(String log4jConfigurationFile)
 	{
 		this.log4jConfigurationFile = log4jConfigurationFile;
@@ -1256,9 +1008,6 @@ public class ExportWarModel extends AbstractWarExportModel
 		licenses.clear();
 	}
 
-	/**
-	 * @return
-	 */
 	public List<String> getNoneActiveSolutions()
 	{
 		return noneActiveSolutions;

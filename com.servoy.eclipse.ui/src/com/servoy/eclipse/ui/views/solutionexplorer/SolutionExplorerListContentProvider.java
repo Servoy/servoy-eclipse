@@ -1134,7 +1134,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						if (hiddenTables == null) hiddenTables = new ArrayList<String>();
 						hiddenTables.add(tableName);
 					}
-					else if (s.getTable(tableName).isMarkedAsMetaData())
+					else if (s.isTableMarkedAsMetaData(tableName))
 					{
 						if (metadataTables == null) metadataTables = new ArrayList<String>();
 						metadataTables.add(tableName);
@@ -1155,7 +1155,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					for (String name : metadataTables)
 					{
-						String dataSource = s.getTable(name).getDataSource();
+						String dataSource = s.getTableDatasource(name);
 
 						Image image = uiActivator.loadImageFromBundle("metadata_table.png");
 						if (image == null)

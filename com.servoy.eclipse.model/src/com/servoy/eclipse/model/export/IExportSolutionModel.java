@@ -26,6 +26,8 @@ import org.json.JSONObject;
 public interface IExportSolutionModel
 {
 
+	public static final int DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED = 5000;
+
 	public abstract String getFileName();
 
 	public abstract boolean isProtectWithPassword();
