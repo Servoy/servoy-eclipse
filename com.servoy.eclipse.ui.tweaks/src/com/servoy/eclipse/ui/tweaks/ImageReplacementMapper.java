@@ -589,6 +589,42 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/debug.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/etool16/run_exc.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/run.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/rem_co.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/rem.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/dlcl16/rem_co.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/rem-disabled.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/skip_brkp.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/skip_breakpoints.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/ovr16/skip_breakpoint_ov.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/skip_breakpoints.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/brkp_grp.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/skip_breakpoints.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/expandall.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/expandall.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/collapseall.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/collapseall.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/synced.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/link_to_editor.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/dlcl16/synced.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/link_to_editor.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/debugt_obj.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/debugt_obj.png"));//TODO ask icon
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/dlcl16/gotoobj_tsk.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/gotoobj_tsk-disabled.png"));//TODO ask icon
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/elcl16/gotoobj_tsk.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/gotoobj_tsk.png"));//TODO ask icon
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/file_obj.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/file_obj.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/prj_obj.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/project.png"));//TODO ask icon
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/fldr_obj.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/project.png"));//TODO ask icon
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/brkp_grp.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/brkp_grp.png"));//TODO ask icon
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/brkp_grp_disabled.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/brkp_grp-disabled.png"));//TODO ask icon
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/brkp_type.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/brkp_type.png"));//TODO ask icon
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/designer.png"));
