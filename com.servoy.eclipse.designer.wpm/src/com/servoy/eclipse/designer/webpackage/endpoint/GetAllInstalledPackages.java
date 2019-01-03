@@ -353,24 +353,27 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	@Override
 	public void webObjectSpecificationReloaded()
 	{
-		// sometimes for example 3 reloads were triggered in a short amount of time; keep the full reloads to a minimum;
-		// only keep 1 reload and if that is in progress and another one is needed remember to trigger it only once
-		// the first reload is over
-		if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Web Package Manager specs...")
+		synchronized (this)
 		{
-
-			@Override
-			protected IStatus runAvoidingMultipleExecutions(IProgressMonitor monitor)
+			// sometimes for example 3 reloads were triggered in a short amount of time; keep the full reloads to a minimum;
+			// only keep 1 reload and if that is in progress and another one is needed remember to trigger it only once
+			// the first reload is over
+			if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Web Package Manager specs...")
 			{
-				JSONArray packages = executeMethod(null);
-				JSONObject jsonResult = new JSONObject();
-				jsonResult.put("method", CLIENT_SERVER_METHOD);
-				jsonResult.put("result", packages);
-				endpoint.send(jsonResult.toString());
 
-				return Status.OK_STATUS;
-			}
-		};
+				@Override
+				protected IStatus runAvoidingMultipleExecutions(IProgressMonitor monitor)
+				{
+					JSONArray packages = executeMethod(null);
+					JSONObject jsonResult = new JSONObject();
+					jsonResult.put("method", CLIENT_SERVER_METHOD);
+					jsonResult.put("result", packages);
+					endpoint.send(jsonResult.toString());
+
+					return Status.OK_STATUS;
+				}
+			};
+		}
 
 		reloadWPMSpecsJob.scheduleIfNeeded();
 	}

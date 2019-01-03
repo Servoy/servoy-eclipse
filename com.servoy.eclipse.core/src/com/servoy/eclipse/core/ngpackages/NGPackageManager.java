@@ -113,22 +113,28 @@ public class NGPackageManager extends BaseNGPackageManager
 		}
 		else
 		{
-			// do what super does but in a job; this is what code prior to the refactor did as well
-			// do this in such a way that if 100 reloadAllNGPackages calls happen before the actual reload happens/finishes in the job, the reload only occurs once/twice
-			if (reloadAllNGPackagesJob == null)
+			synchronized (this)
 			{
-				reloadAllNGPackagesJob = new AvoidMultipleExecutionsJob("Reading ng packages from resources project...")
+				// do what super does but in a job; this is what code prior to the refactor did as well
+				// do this in such a way that if 100 reloadAllNGPackages calls happen before the actual reload happens/finishes in the job, the reload only occurs once/twice
+				if (reloadAllNGPackagesJob == null)
 				{
-
-					@Override
-					protected IStatus runAvoidingMultipleExecutions(IProgressMonitor monitor)
+					// TODO should we explicitly provide an NGPackageManager.runAfterReloadIsDone for code such
+					// as the one in Activator that checks for missing packages ("Missing package was detected in solution...")
+					// instead of letting it rely on the fact that this job was scheduled first with delay 0 an uses the same (workspace) rule?
+					reloadAllNGPackagesJob = new AvoidMultipleExecutionsJob("Reading ng packages from resources project...", 0)
 					{
-						// do the actual work
-						NGPackageManager.super.reloadAllNGPackages(changeReason, monitor);
-						return Status.OK_STATUS;
-					}
-				};
-				reloadAllNGPackagesJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+
+						@Override
+						protected IStatus runAvoidingMultipleExecutions(IProgressMonitor monitor)
+						{
+							// do the actual work
+							NGPackageManager.super.reloadAllNGPackages(changeReason, monitor);
+							return Status.OK_STATUS;
+						}
+					};
+					reloadAllNGPackagesJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+				}
 			}
 			reloadAllNGPackagesJob.scheduleIfNeeded();
 		}
