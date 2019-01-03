@@ -21,7 +21,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -442,20 +441,14 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
-		boolean multipleSolutions = false;
 		StringBuilder sb = new StringBuilder("./war_export.");
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") > -1) sb.append("bat");
 		else sb.append("sh");
 
 		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
-		if (exportModel.isExportNoneActiveSolutions())
-		{
-			sb.append(",");
-			appendToBuilder(sb, "", exportModel.getNoneActiveSolutions(), -1, ",");
-			multipleSolutions = true;
-		}
-		if (exportModel.getUserHome() != null) appendToBuilder(sb, " -o ", exportModel.getUserHome());
-		else appendToBuilder(sb, " -o ", System.getProperty("user.home"));
+
+		int fileNameStartIndex = exportModel.getWarFileName().lastIndexOf("/") + 1;
+		appendToBuilder(sb, " -o ", exportModel.getWarFileName().substring(0, fileNameStartIndex - 1));
 
 		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
 		appendToBuilder(sb, " -defaultAdminUser ", exportModel.getDefaultAdminUser());
@@ -464,47 +457,39 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		appendToBuilder(sb, " -as ", exportModel.getServoyApplicationServerDir());
 		appendToBuilder(sb, " -dbi ", exportModel.isExportUsingDbiFileInfoOnly());
 
-		if (!exportModel.isExportActiveSolution() && !multipleSolutions) appendToBuilder(sb, " -active ", exportModel.isExportActiveSolution());
+		if (!exportModel.isExportActiveSolution()) appendToBuilder(sb, " -active ", exportModel.isExportActiveSolution());
 
-		appendToBuilder(sb, " -pfw ", exportModel.getServoyPropertiesFileName());
-		appendToBuilder(sb, " -b ", exportModel.getBeans(), beanSelectionPage.getSelectedCheckboxesNumber(), " ");
-		appendToBuilder(sb, " -l ", exportModel.getLafs(), lafSelectionPage.getSelectedCheckboxesNumber(), " ");
-		appendToBuilder(sb, " -d ", exportModel.getDrivers(), driverSelectionPage.getSelectedCheckboxesNumber(), " ");
-		appendToBuilder(sb, " -pi ", exportModel.getPlugins(), pluginSelectionPage.getSelectedCheckboxesNumber(), " ");
+		appendToBuilder(sb, " -b ", exportModel.getBeans(), beanSelectionPage.getCheckboxesNumber(), " ");
+		appendToBuilder(sb, " -l ", exportModel.getLafs(), lafSelectionPage.getCheckboxesNumber(), " ");
+		appendToBuilder(sb, " -d ", exportModel.getDrivers(), driverSelectionPage.getCheckboxesNumber(), " ");
+		appendToBuilder(sb, " -pi ", exportModel.getPlugins(), pluginSelectionPage.getCheckboxesNumber(), " ");
+		System.out.println(exportModel.getExportedComponents());
 
-		if (exportModel.isExportNoneActiveSolutions() && !multipleSolutions)
-		{
-			appendToBuilder(sb, " -nas ", exportModel.getNoneActiveSolutions(), -1, " ");
-		}
+		if (exportModel.isExportNoneActiveSolutions()) appendToBuilder(sb, " -nas ", exportModel.getNoneActiveSolutions(), -1, " ");
+
 		if (exportModel.getPluginLocations().size() > 1 && !exportModel.getPluginLocations().get(0).equals("plugins/"))
-			appendToBuilder(sb, " -pluginLocations ", exportModel.getPluginLocations(), pluginSelectionPage.getSelectedCheckboxesNumber(), " ");
+			appendToBuilder(sb, " -pluginLocations ", exportModel.getPluginLocations(), pluginSelectionPage.getCheckboxesNumber(), " ");
 
-		if (exportModel.getExcludedComponentPackages().size() != 0)
-		{
-			appendToBuilder(sb, " -crefs ", exportModel.getExportedComponents(), -1, " ");
-			appendToBuilder(sb, " -excludeComponentPkgs ", exportModel.getExcludedComponentPackages(), -1, " ");
-		}
-		else sb.append(" -crefs all ");
-		if (exportModel.getExcludedServicePackages().size() != 0)
-		{
-			appendToBuilder(sb, " -srefs ", exportModel.getExportedServices(), -1, " ");
-			appendToBuilder(sb, " -excludeServicePkgs ", exportModel.getExcludedServicePackages(), -1, " ");
-		}
-		else sb.append(" -srefs all ");
+		if (exportModel.getUsedComponents().size() == exportModel.getExportedComponents().size()) sb.append(" -crefs ");
+		else if (componentsSelectionPage.getAvailableItems().size() == 0) sb.append(" -crefs all ");
+		else appendToBuilder(sb, " -crefs ", exportModel.getExportedComponents(), -1, " ");
+
+		if (exportModel.getUsedServices().size() == exportModel.getExportedServices().size()) sb.append(" -srefs ");
+		else if (servicesSelectionPage.getAvailableItems().size() == 0) sb.append(" -srefs all");
+		else appendToBuilder(sb, " -srefs ", exportModel.getExportedServices(), -1, " ");
 
 		appendToBuilder(sb, " -md ", exportModel.isExportMetaData());
-		appendToBuilder(sb, " -checkmd ", exportModel.isCheckMetadataTables());
+		appendToBuilder(sb, " -checkmd ", exportModel.isExportMetaData() && exportModel.isCheckMetadataTables());
 		appendToBuilder(sb, " -sd ", exportModel.isExportSampleData());
-
-
-		appendToBuilder(sb, " -sdcount ", String.valueOf(exportModel.getNumberOfSampleDataExported()));
+		if (exportModel.isExportSampleData()) appendToBuilder(sb, " -sdcount ", String.valueOf(exportModel.getNumberOfSampleDataExported()));
 
 		appendToBuilder(sb, " -i18n ", exportModel.isExportI18NData());
 		appendToBuilder(sb, " -users ", exportModel.isExportUsers());
-
 		appendToBuilder(sb, " -tables ", exportModel.isExportAllTablesFromReferencedServers());
 
-		if (!multipleSolutions) appendToBuilder(sb, " -warFileName ", exportModel.getWarFileName());
+		if (exportModel.getWarFileName() != null &&
+			!exportModel.getWarFileName().substring(fileNameStartIndex, exportModel.getWarFileName().length()).equals(""))
+			appendToBuilder(sb, " -warFileName ", exportModel.getWarFileName().substring(fileNameStartIndex, exportModel.getWarFileName().length()));
 
 		appendToBuilder(sb, " -overwriteGroups ", exportModel.isOverwriteGroups());
 		appendToBuilder(sb, " -allowSQLKeywords ", exportModel.isExportSampleData());
@@ -512,71 +497,44 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		appendToBuilder(sb, " -overrideSequenceTypes ", exportModel.isOverrideSequenceTypes());
 		appendToBuilder(sb, " -overrideDefaultValues ", exportModel.isOverrideDefaultValues());
 		appendToBuilder(sb, " -insertNewI18NKeysOnly ", exportModel.isInsertNewI18NKeysOnly());
-		appendToBuilder(sb, " -importUserPolicy ", String.valueOf(exportModel.getImportUserPolicy()));
+
+		if (exportModel.getImportUserPolicy() != 1) appendToBuilder(sb, " -importUserPolicy ", String.valueOf(exportModel.getImportUserPolicy()));
+
 		appendToBuilder(sb, " -addUsersToAdminGroup ", exportModel.isAddUsersToAdminGroup());
 		appendToBuilder(sb, " -updateSequence ", exportModel.isUpdateSequences());
 		appendToBuilder(sb, " -upgradeRepository ", exportModel.isAutomaticallyUpgradeRepository());
 
-		appendToBuilder(sb, " -antiResourceLocking ", exportModel.isAntiResourceLocking());
-		appendToBuilder(sb, " -clearReferencesStatic ", exportModel.isClearReferencesStatic());
-		appendToBuilder(sb, " -clearReferencesStopThreads ", exportModel.isClearReferencesStopThreads());
-		appendToBuilder(sb, " -clearReferencesStopTimerThreads ", exportModel.isClearReferencesStopTimerThreads());
+		if (exportModel.isCreateTomcatContextXML())
+		{
+			appendToBuilder(sb, " -antiResourceLocking ", exportModel.isAntiResourceLocking());
+			appendToBuilder(sb, " -clearReferencesStatic ", exportModel.isClearReferencesStatic());
+			appendToBuilder(sb, " -clearReferencesStopThreads ", exportModel.isClearReferencesStopThreads());
+			appendToBuilder(sb, " -clearReferencesStopTimerThreads ", exportModel.isClearReferencesStopTimerThreads());
+		}
+
 		appendToBuilder(sb, " -useAsRealAdminUser ", exportModel.isUseAsRealAdminUser());
 		appendToBuilder(sb, " -minimize ", exportModel.isMinimizeJsCssResources());
 
-		sb.append(" -licenses ");
-		exportModel.getLicenses().forEach((license) -> {
-			sb.append(license.getCompanyKey() + " " + license.getNumberOfLicenses() + " " + license.getCode() + ", ");
-		});
-		sb.replace(sb.length() - 2, sb.length() - 1, "");
+		if (exportModel.getLicenses() != null && exportModel.getLicenses().size() > 0)
+		{
+			sb.append(" -licenses ");
+			exportModel.getLicenses().forEach((license) -> {
+				sb.append(license.getCompanyKey() + " " + license.getNumberOfLicenses() + " " + license.getCode() + ", ");
+			});
+			sb.replace(sb.length() - 2, sb.length() - 1, "");
+		}
 
-		appendToBuilder(sb, " -userHomeDirectory ", exportModel.getUserHome());
+		if (exportModel.getUserHome() != null && !exportModel.getUserHome().equals("") && !exportModel.getUserHome().equals(System.getProperty("user.home")))
+			appendToBuilder(sb, " -userHomeDirectory ", exportModel.getUserHome());
+
 		appendToBuilder(sb, " -overwriteDBServerProperties ", exportModel.isOverwriteDeployedDBServerProperties());
 		appendToBuilder(sb, " -overwriteAllProperties ", exportModel.isOverwriteDeployedServoyProperties());
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
 
-
 		StringSelection selection = new StringSelection(sb.toString());
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(selection, selection);
-	}
-
-	public void appendToBuilderMethodResult(StringBuilder sb, String prop, Object o, String argument)
-
-	{
-		String methodName = prop.substring(0, 1).toUpperCase() + prop.substring(1, prop.length());
-		if (o.equals("boolean"))
-		{
-			methodName = "is" + methodName;
-		}
-		else if (o.toString().contains("String"))
-		{
-			methodName = "get" + methodName;
-		}
-		try
-		{
-			Method m = exportModel.getClass().getMethod(methodName);
-			try
-			{
-				Object methodResult = m.invoke(exportModel);
-				if (methodResult instanceof String)
-				{
-					sb.append(argument + methodResult);
-				}
-				else if (methodResult instanceof Boolean)
-				{
-					if ((boolean)methodResult) sb.append(argument);
-				}
-			}
-			catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-			{
-			}
-
-		}
-		catch (NoSuchMethodException | SecurityException e)
-		{
-		}
 	}
 
 	public void appendToBuilder(StringBuilder sb, String argument, String property)
@@ -602,7 +560,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			}
 
 		}
-		else if (argument.equals(" -b ") || argument.equals(" -pi ")) sb.append(argument).append("none");
+		else if (argument.equals(" -b ") || argument.equals(" -pi ") || argument.equals(" -l ") || argument.equals(" -d ")) sb.append(argument).append("none");
 	}
 
 }

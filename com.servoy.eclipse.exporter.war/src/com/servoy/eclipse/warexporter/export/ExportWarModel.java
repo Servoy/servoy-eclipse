@@ -846,13 +846,13 @@ public class ExportWarModel extends AbstractWarExportModel
 	@Override
 	public Set<String> getExportedComponents()
 	{
-		return exportedComponents;
+		return exportedComponents != null ? exportedComponents : new TreeSet<String>();
 	}
 
 	@Override
 	public Set<String> getExportedServices()
 	{
-		return exportedServices;
+		return exportedServices != null ? exportedServices : new TreeSet<String>();
 	}
 
 	public void setAutomaticallyUpgradeRepository(boolean upgrade)

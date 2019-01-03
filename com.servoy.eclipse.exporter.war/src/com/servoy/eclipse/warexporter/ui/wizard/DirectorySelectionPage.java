@@ -133,7 +133,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 			files.add(el);
 	}
 
-	public int getSelectedCheckboxesNumber()
+	public int getCheckboxesNumber()
 	{
 		return checkboxTableViewer.getTable().getItemCount();
 	}
