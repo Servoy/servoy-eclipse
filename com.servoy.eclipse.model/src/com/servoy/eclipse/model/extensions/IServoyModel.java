@@ -58,6 +58,17 @@ public interface IServoyModel
 	ServoyProject[] getModulesOfActiveProject();
 
 	/**
+	 * Returns a treeset containing the sorted modules of the active project (including the active project). If there is no active project, will return an array of size
+	 * 0.<br>
+	 *
+	 * The result does also include the active solution's import hooks (which are not part of the flattened solution).
+	 *
+	 * @param boolean needSortedModules - flag in order to retrieve sorted elements
+	 * @return an array containing the modules of the active project.
+	 */
+	ServoyProject[] getModulesOfActiveProject(boolean needSortedModules);
+
+	/**
 	 * Returns the flattened solution for the active project.
 	 * @return the flattened solution for the active project.
 	 */

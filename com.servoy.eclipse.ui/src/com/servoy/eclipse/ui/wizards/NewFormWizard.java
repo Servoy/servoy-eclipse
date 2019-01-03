@@ -1022,7 +1022,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		public void fillProjectCombo()
 		{
-			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+			ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject(true);
 			if (SolutionMetaData.isServoyMobileSolution(getActiveSolution()))
 			{
 				ArrayList<ServoyProject> mobileModules = new ArrayList<ServoyProject>();
