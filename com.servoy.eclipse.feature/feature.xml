@@ -359,7 +359,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.codec"
          download-size="0"
          install-size="0"
-         version="1.9.0.v20170208-1614"
+         version="1.10.0.v20180409-1845"
          unpack="false"/>
 
    <plugin
@@ -387,14 +387,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.httpcomponents.httpcore"
          download-size="0"
          install-size="0"
-         version="4.4.6.v20170210-0925"
+         version="4.4.9.v20180409-1525"
          unpack="false"/>
 
    <plugin
          id="org.apache.httpcomponents.httpclient"
          download-size="0"
          install-size="0"
-         version="4.5.2.v20170210-0925"
+         version="4.5.5.v20180409-1525"
          unpack="false"/>
 
    <plugin
@@ -422,7 +422,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.equinox.concurrent"
          download-size="0"
          install-size="0"
-         version="1.1.100.v20171221-2204"
+         version="1.1.200.v20180827-1235"
          unpack="false"/>
 
    <plugin
