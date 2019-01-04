@@ -20,12 +20,14 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.DialogSettings;
@@ -447,8 +449,9 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 
 		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
 
-		int fileNameStartIndex = exportModel.getWarFileName().lastIndexOf("/") + 1;
-		appendToBuilder(sb, " -o ", exportModel.getWarFileName().substring(0, fileNameStartIndex - 1));
+		String warFilePath = !exportModel.getWarFileName().endsWith(".war") ? exportModel.getWarFileName() + ".war" : exportModel.getWarFileName();
+		File warFile = new File(warFilePath);
+		appendToBuilder(sb, " -o ", warFile.getParentFile().getPath() != null ? warFile.getParentFile().getPath() : " . ");
 
 		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
 		appendToBuilder(sb, " -defaultAdminUser ", exportModel.getDefaultAdminUser());
@@ -463,7 +466,6 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		appendToBuilder(sb, " -l ", exportModel.getLafs(), lafSelectionPage.getCheckboxesNumber(), " ");
 		appendToBuilder(sb, " -d ", exportModel.getDrivers(), driverSelectionPage.getCheckboxesNumber(), " ");
 		appendToBuilder(sb, " -pi ", exportModel.getPlugins(), pluginSelectionPage.getCheckboxesNumber(), " ");
-		System.out.println(exportModel.getExportedComponents());
 
 		if (exportModel.isExportNoneActiveSolutions()) appendToBuilder(sb, " -nas ", exportModel.getNoneActiveSolutions(), -1, " ");
 
@@ -471,12 +473,20 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			appendToBuilder(sb, " -pluginLocations ", exportModel.getPluginLocations(), pluginSelectionPage.getCheckboxesNumber(), " ");
 
 		if (exportModel.getUsedComponents().size() == exportModel.getExportedComponents().size()) sb.append(" -crefs ");
-		else if (componentsSelectionPage.getAvailableItems().size() == 0) sb.append(" -crefs all ");
-		else appendToBuilder(sb, " -crefs ", exportModel.getExportedComponents(), -1, " ");
+		else if (componentsSelectionPage.getAvailableItems().size() != 0)
+		{
+			List<String> notUsedComponents = exportModel.getExportedComponents().stream().filter(
+				comp -> !exportModel.getUsedComponents().contains(comp)).collect(Collectors.toList());
+			appendToBuilder(sb, " -crefs ", notUsedComponents, -1, " ");
+		}
 
 		if (exportModel.getUsedServices().size() == exportModel.getExportedServices().size()) sb.append(" -srefs ");
-		else if (servicesSelectionPage.getAvailableItems().size() == 0) sb.append(" -srefs all");
-		else appendToBuilder(sb, " -srefs ", exportModel.getExportedServices(), -1, " ");
+		else if (servicesSelectionPage.getAvailableItems().size() != 0)
+		{
+			List<String> notUsedServices = exportModel.getExportedServices().stream().filter(svc -> !exportModel.getUsedServices().contains(svc)).collect(
+				Collectors.toList());
+			appendToBuilder(sb, " -srefs ", notUsedServices, -1, " ");
+		}
 
 		appendToBuilder(sb, " -md ", exportModel.isExportMetaData());
 		appendToBuilder(sb, " -checkmd ", exportModel.isExportMetaData() && exportModel.isCheckMetadataTables());
@@ -487,9 +497,12 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		appendToBuilder(sb, " -users ", exportModel.isExportUsers());
 		appendToBuilder(sb, " -tables ", exportModel.isExportAllTablesFromReferencedServers());
 
-		if (exportModel.getWarFileName() != null &&
-			!exportModel.getWarFileName().substring(fileNameStartIndex, exportModel.getWarFileName().length()).equals(""))
-			appendToBuilder(sb, " -warFileName ", exportModel.getWarFileName().substring(fileNameStartIndex, exportModel.getWarFileName().length()));
+		if (exportModel.getWarFileName() != null)
+		{
+			String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName();
+			if (!"".equals(warFile.getName()) && !warFile.getName().replace(".war", "").equals(solutionName))
+				appendToBuilder(sb, " -warFileName ", warFile.getName());
+		}
 
 		appendToBuilder(sb, " -overwriteGroups ", exportModel.isOverwriteGroups());
 		appendToBuilder(sb, " -allowSQLKeywords ", exportModel.isExportSampleData());
@@ -560,7 +573,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			}
 
 		}
-		else if (argument.equals(" -b ") || argument.equals(" -pi ") || argument.equals(" -l ") || argument.equals(" -d ")) sb.append(argument).append("none");
+		else if (argument.equals(" -b ") || argument.equals(" -pi ") || argument.equals(" -l ") || argument.equals(" -d "))
+			sb.append(argument).append("<none>");
 	}
 
 }
