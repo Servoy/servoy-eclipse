@@ -26,6 +26,7 @@ public class Location
 {
 	private final ServoyProject project;
 	private final String persistName;
+	private final String workingSetName;
 
 	/**
 	 * @param value
@@ -33,8 +34,14 @@ public class Location
 	 */
 	public Location(String persistName, ServoyProject servoyProject)
 	{
+		this(persistName, servoyProject, null);
+	}
+
+	public Location(String persistName, ServoyProject servoyProject, String workingSetName)
+	{
 		this.persistName = persistName;
 		this.project = servoyProject;
+		this.workingSetName = workingSetName;
 	}
 
 	/**
@@ -51,5 +58,13 @@ public class Location
 	public ServoyProject getServoyProject()
 	{
 		return project;
+	}
+
+	/**
+	 * @return the workingSetName
+	 */
+	public String getWorkingSetName()
+	{
+		return workingSetName;
 	}
 }
