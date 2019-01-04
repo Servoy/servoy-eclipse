@@ -451,7 +451,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 
 		String warFilePath = !exportModel.getWarFileName().endsWith(".war") ? exportModel.getWarFileName() + ".war" : exportModel.getWarFileName();
 		File warFile = new File(warFilePath);
-		appendToBuilder(sb, " -o ", warFile.getParentFile().getPath() != null ? warFile.getParentFile().getPath() : " . ");
+		appendToBuilder(sb, " -o ", warFile.getParentFile() != null ? warFile.getParentFile().getPath() : " . ");
 
 		sb.append(" -data ").append(ServoyModel.getWorkspace().getRoot().getLocation());
 		appendToBuilder(sb, " -defaultAdminUser ", exportModel.getDefaultAdminUser());
