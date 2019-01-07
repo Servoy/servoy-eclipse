@@ -508,6 +508,18 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		RootObjectMetaData rootObjectMetaData = null;
 		if (typeId == IRepository.SOLUTIONS)
 		{
+			RootObjectMetaData[] solutionMetadatas = repository.getRootObjectMetaDatasForType(typeId);
+			if (solutionMetadatas != null)
+			{
+				for (RootObjectMetaData metadata : solutionMetadatas)
+				{
+					if (!Utils.equalObjects(name, metadata.getName()) && Utils.equalObjects(name.toLowerCase(), metadata.getName().toLowerCase()))
+					{
+						throw new RepositoryException("A different solution with the name '" + metadata.getName() +
+							"' already exists, cannot create solution '" + name + "'. Rename or remove the solution in the workspace.");
+					}
+				}
+			}
 			rootObjectMetaData = repository.getRootObjectMetaData(uuid);
 		}
 		else if (typeId == IRepository.STYLES && resourcesProject != null)
@@ -524,6 +536,11 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			{
 				for (RootObjectMetaData meta : metadatas)
 				{
+					if (!Utils.equalObjects(name, meta.getName()) && Utils.equalObjects(name.toLowerCase(), meta.getName().toLowerCase()))
+					{
+						throw new RepositoryException("A different style with the name '" + meta.getName() +
+							"' already exists in resources project, cannot create style '" + name + "'. Rename or remove the style in the workspace.");
+					}
 					if (meta.getRootObjectUuid().equals(uuid))
 					{
 						rootObjectMetaData = meta;
