@@ -337,7 +337,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				}
 				catch (NumberFormatException ex)
 				{
-					cv = v1Split[1].compareTo(v2Split[0]);
+					cv = v1Split[i].compareTo(v2Split[i]);
 				}
 				if (cv == 0) continue;
 				return cv;
