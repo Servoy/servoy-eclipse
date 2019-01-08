@@ -270,7 +270,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 						{
 							String servoyVersion = jsonObject.getString("servoy-version");
 							String[] minAndMax = servoyVersion.split(" - ");
-							if (minAndMax[0].compareTo(currentVersion) <= 0)
+							if (versionCompare(minAndMax[0], currentVersion) <= 0)
 							{
 								toSort.add(jsonObject);
 							}
@@ -295,7 +295,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							{
 								String servoyVersion = jsonObject.getString("servoy-version");
 								String[] minAndMax = servoyVersion.split(" - ");
-								if (minAndMax.length > 1 && minAndMax[1].compareTo(currentVersion) <= 0)
+								if (minAndMax.length > 1 && versionCompare(minAndMax[1], currentVersion) <= 0)
 								{
 									break;
 								}
@@ -317,6 +317,35 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			}
 		}
 		return result;
+	}
+
+	private static int versionCompare(String v1, String v2)
+	{
+		String[] v1Split = v1.split("\\.");
+		String[] v2Split = v2.split("\\.");
+
+		for (int i = 0; i < v1Split.length; i++)
+		{
+			if (v2Split.length > i)
+			{
+				int cv = 0;
+				try
+				{
+					int v1Nr = Integer.parseInt(v1Split[i]);
+					int v2Nr = Integer.parseInt(v2Split[i]);
+					cv = v1Nr - v2Nr;
+				}
+				catch (NumberFormatException ex)
+				{
+					cv = v1Split[1].compareTo(v2Split[0]);
+				}
+				if (cv == 0) continue;
+				return cv;
+			}
+			else return 1;
+		}
+
+		return v1.compareTo(v2);
 	}
 
 	private static String getUrlContents(String urlToRead)
