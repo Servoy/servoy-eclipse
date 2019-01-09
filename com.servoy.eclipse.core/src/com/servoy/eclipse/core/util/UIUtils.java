@@ -112,7 +112,7 @@ public class UIUtils
 		private final String listDescriptionText;
 		private final String[] listOptions;
 		private String listValue;
-		private ListViewer listViewer;
+		protected ListViewer listViewer;
 
 		public InputAndListDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialTextValue, IInputValidator validator,
 			String[] listOptions, String listValue, String listDescriptionText)
@@ -164,6 +164,8 @@ public class UIUtils
 			gd.heightHint = 200;
 			listViewer.getControl().setLayoutData(gd);
 
+			addExtraComponents(area);
+
 			layout = (GridLayout)((Composite)super.createDialogArea(area)).getLayout();
 			layout.marginHeight = layout.marginWidth = 0;
 
@@ -174,6 +176,11 @@ public class UIUtils
 		public String getExtendedValue()
 		{
 			return listValue;
+		}
+
+		protected void addExtraComponents(Composite parent)
+		{
+
 		}
 
 	}

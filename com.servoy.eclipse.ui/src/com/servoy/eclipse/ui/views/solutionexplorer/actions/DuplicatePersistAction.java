@@ -17,28 +17,48 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils.ExtendedInputDialog;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -68,15 +88,32 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 		setToolTipText("Duplicates the " + persistString + " to a different solution/module");
 	}
 
-	private ExtendedInputDialog<String> createDialog(final IPersist persist, final IValidateName nameValidator, String[] solutionNames,
-		String initialSolutionName)
+	private Location askForNewLocation(final IPersist persist, final IValidateName nameValidator)
 	{
+		// populate combo with available solutions
+		final ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+		if (activeModules.length == 0)
+		{
+			ServoyLog.logError("No active modules on duplicate/move persist?!", null);
+		}
+		String[] solutionNames = new String[activeModules.length];
+		String initialSolutionName = persist.getRootObject().getName();
+
+		for (int i = activeModules.length - 1; i >= 0; i--)
+		{
+			solutionNames[i] = activeModules[i].getProject().getName();
+
+		}
+		Arrays.sort(solutionNames);
+
+		//ExtendedInputDialog<String> dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionName);
 		String newName = null;
 		String oldName = getName(persist);
 		if (persist instanceof Media) newName = "copy_" + oldName;
 		else newName = oldName + "_copy";
+		final String[] workingSetName = new String[] { null };
 		// prepare dialog
-		InputAndListDialog dialog = new InputAndListDialog(shell, "Duplicate " + persistString + getName(persist),
+		InputAndListDialog dialog = new InputAndListDialog(shell, "Duplicate " + persistString + " " + getName(persist),
 			"Name of the duplicated " + persistString + ": ", newName, new IInputValidator()
 			{
 				public String isValid(String newText)
@@ -102,6 +139,8 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 
 			}, solutionNames, initialSolutionName, "Please select the destination solution:")
 		{
+			private final Object SELECTION_NONE = new Object();
+
 			@Override
 			protected void validateInput()
 			{
@@ -111,29 +150,72 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 					setErrorMessage("Select a module");
 				}
 			}
+
+			@Override
+			protected void addExtraComponents(Composite parent)
+			{
+				if (persist instanceof Form)
+				{
+					Label workingSetLabel = new Label(parent, SWT.NONE);
+					workingSetLabel.setText("Working Set");
+
+					final ComboViewer workingSetNameCombo = new ComboViewer(parent, SWT.BORDER | SWT.READ_ONLY);
+					workingSetNameCombo.setContentProvider(new ArrayContentProvider());
+					workingSetNameCombo.setLabelProvider(new LabelProvider()
+					{
+						@Override
+						public String getText(Object value)
+						{
+							if (value == SELECTION_NONE) return Messages.LabelNone;
+							return super.getText(value);
+						}
+					});
+					workingSetNameCombo.getControl().setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+					fillWorkingSetCombo(workingSetNameCombo);
+					listViewer.addSelectionChangedListener(new ISelectionChangedListener()
+					{
+						public void selectionChanged(SelectionChangedEvent event)
+						{
+							fillWorkingSetCombo(workingSetNameCombo);
+						}
+					});
+					workingSetNameCombo.addSelectionChangedListener(new ISelectionChangedListener()
+					{
+						public void selectionChanged(SelectionChangedEvent event)
+						{
+							Object firstElement = ((IStructuredSelection)workingSetNameCombo.getSelection()).getFirstElement();
+							if (firstElement instanceof String)
+							{
+								workingSetName[0] = (String)firstElement;
+							}
+						}
+					});
+				}
+			}
+
+			private void fillWorkingSetCombo(ComboViewer workingSetNameCombo)
+			{
+				List<Object> workingSets = new ArrayList<Object>();
+				workingSets.add(SELECTION_NONE);
+				String listValue = null;
+				IStructuredSelection selection = (IStructuredSelection)listViewer.getSelection();
+				if (!selection.isEmpty())
+				{
+					listValue = (String)selection.getFirstElement();
+				}
+				if (listValue != null)
+				{
+					List<String> existingWorkingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
+						new String[] { listValue });
+					if (existingWorkingSets != null)
+					{
+						workingSets.addAll(existingWorkingSets);
+					}
+				}
+				workingSetNameCombo.setInput(workingSets.toArray());
+				workingSetNameCombo.setSelection(new StructuredSelection(SELECTION_NONE));
+			}
 		};
-		return dialog;
-	}
-
-	private Location askForNewLocation(final IPersist persist, final IValidateName nameValidator)
-	{
-		// populate combo with available solutions
-		final ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-		if (activeModules.length == 0)
-		{
-			ServoyLog.logError("No active modules on duplicate/move persist?!", null);
-		}
-		String[] solutionNames = new String[activeModules.length];
-		String initialSolutionName = persist.getRootObject().getName();
-
-		for (int i = activeModules.length - 1; i >= 0; i--)
-		{
-			solutionNames[i] = activeModules[i].getProject().getName();
-
-		}
-		Arrays.sort(solutionNames);
-
-		ExtendedInputDialog<String> dialog = createDialog(persist, nameValidator, solutionNames, initialSolutionName);
 		dialog.open();
 		if (dialog.getExtendedValue() == null)
 		{
@@ -141,7 +223,7 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 		}
 		String projectName = dialog.getExtendedValue();
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(projectName);
-		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Location(dialog.getValue(), servoyProject);
+		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Location(dialog.getValue(), servoyProject, workingSetName[0]);
 	}
 
 	/**
@@ -160,6 +242,19 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				{
 					IPersist duplicate = PersistCloner.intelligentClonePersist(persist, location.getPersistName(), location.getServoyProject(), nameValidator,
 						true);
+					String parentWorkingSet = location.getWorkingSetName();
+					if (parentWorkingSet != null)
+					{
+						IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(parentWorkingSet);
+						if (ws != null)
+						{
+							List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+							Pair<String, String> formFilePath = SolutionSerializer.getFilePath(duplicate, false);
+							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+							files.add(file);
+							ws.setElements(files.toArray(new IAdaptable[0]));
+						}
+					}
 					EditorUtil.openPersistEditor(duplicate);
 				}
 				catch (RepositoryException e)

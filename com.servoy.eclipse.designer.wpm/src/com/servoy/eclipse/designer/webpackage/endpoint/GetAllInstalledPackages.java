@@ -270,7 +270,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 						{
 							String servoyVersion = jsonObject.getString("servoy-version");
 							String[] minAndMax = servoyVersion.split(" - ");
-							if (minAndMax[0].compareTo(currentVersion) <= 0)
+							if (versionCompare(minAndMax[0], currentVersion) <= 0)
 							{
 								toSort.add(jsonObject);
 							}
@@ -295,7 +295,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							{
 								String servoyVersion = jsonObject.getString("servoy-version");
 								String[] minAndMax = servoyVersion.split(" - ");
-								if (minAndMax.length > 1 && minAndMax[1].compareTo(currentVersion) <= 0)
+								if (minAndMax.length > 1 && versionCompare(minAndMax[1], currentVersion) <= 0)
 								{
 									break;
 								}
@@ -317,6 +317,35 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			}
 		}
 		return result;
+	}
+
+	private static int versionCompare(String v1, String v2)
+	{
+		String[] v1Split = v1.split("\\.");
+		String[] v2Split = v2.split("\\.");
+
+		for (int i = 0; i < v1Split.length; i++)
+		{
+			if (v2Split.length > i)
+			{
+				int cv = 0;
+				try
+				{
+					int v1Nr = Integer.parseInt(v1Split[i]);
+					int v2Nr = Integer.parseInt(v2Split[i]);
+					cv = v1Nr - v2Nr;
+				}
+				catch (NumberFormatException ex)
+				{
+					cv = v1Split[i].compareTo(v2Split[i]);
+				}
+				if (cv == 0) continue;
+				return cv;
+			}
+			else return 1;
+		}
+
+		return v1.compareTo(v2);
 	}
 
 	private static String getUrlContents(String urlToRead)
@@ -353,24 +382,27 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	@Override
 	public void webObjectSpecificationReloaded()
 	{
-		// sometimes for example 3 reloads were triggered in a short amount of time; keep the full reloads to a minimum;
-		// only keep 1 reload and if that is in progress and another one is needed remember to trigger it only once
-		// the first reload is over
-		if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Web Package Manager specs...")
+		synchronized (this)
 		{
-
-			@Override
-			protected IStatus runAvoidingMultipleExecutions(IProgressMonitor monitor)
+			// sometimes for example 3 reloads were triggered in a short amount of time; keep the full reloads to a minimum;
+			// only keep 1 reload and if that is in progress and another one is needed remember to trigger it only once
+			// the first reload is over
+			if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Web Package Manager specs...")
 			{
-				JSONArray packages = executeMethod(null);
-				JSONObject jsonResult = new JSONObject();
-				jsonResult.put("method", CLIENT_SERVER_METHOD);
-				jsonResult.put("result", packages);
-				endpoint.send(jsonResult.toString());
 
-				return Status.OK_STATUS;
-			}
-		};
+				@Override
+				protected IStatus runAvoidingMultipleExecutions(IProgressMonitor monitor)
+				{
+					JSONArray packages = executeMethod(null);
+					JSONObject jsonResult = new JSONObject();
+					jsonResult.put("method", CLIENT_SERVER_METHOD);
+					jsonResult.put("result", packages);
+					endpoint.send(jsonResult.toString());
+
+					return Status.OK_STATUS;
+				}
+			};
+		}
 
 		reloadWPMSpecsJob.scheduleIfNeeded();
 	}

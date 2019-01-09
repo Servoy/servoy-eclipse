@@ -221,8 +221,15 @@ public abstract class AbstractServoyModel implements IServoyModel
 		// the set of solutions a user can work with at a given time is determined by the active solution;
 		// this means that the only expandable solution nodes will be the active solution and it's referenced modules;
 		// all other solutions will appear grayed-out and not-expandable (still allows the user to activate them if necessary)
+		return getModulesOfActiveProject(false);
+	}
 
-		TreeSet<ServoyProject> moduleProjects = new TreeSet<ServoyProject>();
+	public ServoyProject[] getModulesOfActiveProject(boolean needSortedModules)
+	{
+		// the set of solutions a user can work with at a given time is determined by the active solution;
+		// this means that the only expandable solution nodes will be the active solution and it's referenced modules;
+		// all other solutions will appear grayed-out and not-expandable (still allows the user to activate them if necessary)
+		AbstractCollection<ServoyProject> moduleProjects = needSortedModules ? new TreeSet<ServoyProject>() : new ArrayList<ServoyProject>();
 		addFlattenedSolutionModules(moduleProjects);
 		addImportHookModules(getActiveProject(), moduleProjects);
 		return moduleProjects.toArray(new ServoyProject[moduleProjects.size()]);
@@ -236,7 +243,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Usually you would use {@link #getModulesOfActiveProject()} or {@link #getModulesOfActiveProjectWithImportHooks()} instead.
 	 */
-	public void addFlattenedSolutionModules(TreeSet<ServoyProject> moduleProjects)
+	public void addFlattenedSolutionModules(AbstractCollection<ServoyProject> moduleProjects)
 	{
 		// get all modules of the active solution (related solutions)
 		FlattenedSolution flatActiveSolution = getFlattenedSolution();
@@ -267,7 +274,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	public ServoyProject[] getImportHookModulesOfActiveProject()
 	{
-		TreeSet<ServoyProject> importHookModules = new TreeSet<ServoyProject>();
+		AbstractCollection<ServoyProject> importHookModules = new ArrayList<ServoyProject>();
 		addImportHookModules(getActiveProject(), importHookModules);
 		return importHookModules.toArray(new ServoyProject[importHookModules.size()]);
 	}
@@ -275,12 +282,12 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Usually you would use {@link #getModulesOfActiveProjectWithImportHooks()} or {@link #getImportHookModulesOfActiveProject()} instead.
 	 */
-	public void addImportHookModules(ServoyProject p, TreeSet<ServoyProject> importHookModules)
+	public void addImportHookModules(ServoyProject p, AbstractCollection<ServoyProject> importHookModules)
 	{
 		addImportHookModules(p, importHookModules, new HashSet<ServoyProject>());
 	}
 
-	private void addImportHookModules(ServoyProject p, TreeSet<ServoyProject> importHookModules, Set<ServoyProject> visited)
+	private void addImportHookModules(ServoyProject p, AbstractCollection<ServoyProject> importHookModules, Set<ServoyProject> visited)
 	{
 		if (p != null && !visited.contains(p))
 		{
