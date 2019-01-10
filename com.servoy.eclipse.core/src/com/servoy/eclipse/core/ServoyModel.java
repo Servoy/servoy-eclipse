@@ -3787,9 +3787,6 @@ public class ServoyModel extends AbstractServoyModel
 		else return false;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isActiveSolutionSmartClient()
 	{
 		if (getActiveSolutionClientType() != null) return getActiveSolutionClientType().supports(ClientSupport.sc);
@@ -3936,11 +3933,6 @@ public class ServoyModel extends AbstractServoyModel
 		return new NGPackageManager();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.extensions.IServoyModel#fireFormComponentChanged()
-	 */
 	@Override
 	public void fireFormComponentChanged()
 	{
@@ -3950,11 +3942,6 @@ public class ServoyModel extends AbstractServoyModel
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.extensions.IServoyModel#addFormComponentListener(com.servoy.eclipse.model.IFormComponentListener)
-	 */
 	@Override
 	public void addFormComponentListener(IFormComponentListener listener)
 	{
@@ -3964,11 +3951,6 @@ public class ServoyModel extends AbstractServoyModel
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.extensions.IServoyModel#removeFormComponentListener(com.servoy.eclipse.model.IFormComponentListener)
-	 */
 	@Override
 	public void removeFormComponentListener(IFormComponentListener listener)
 	{

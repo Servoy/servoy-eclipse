@@ -66,7 +66,7 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 		Map<String, Object> map = new HashMap<String, Object>(2);
 		map.put(MOBILE_STATE, getMobileVariableState());
 		map.put(WEB_STATE, getWebVariableState());
-		map.put(SMART_STATE, getWebVariableState());
+		map.put(SMART_STATE, getSmartClientVariableState());
 		map.put(NG_STATE, getNGVariableState());
 		return map;
 	}
