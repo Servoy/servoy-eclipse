@@ -625,6 +625,16 @@ public class ImageReplacementMapper
 //				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/brkp_grp-disabled.png"));//TODO ask icon
 //			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/brkp_type.png"),
 //				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/brkp_type.png"));//TODO ask icon
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/hierarchicalLayout.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/advanced.png"));//TODO ask icon
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/det_pane_auto.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_automatic.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/det_pane_under.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_vertical.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/det_pane_right.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/th_horizontal.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/det_pane_hide.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/det_pane_hide.png"));//TODO ask icon
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/designer.png"));
