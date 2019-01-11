@@ -1,5 +1,5 @@
 instructions.configure=addRepository(type:0,name:Servoy update site,location:http${#58}//download.servoy.com/developer/8xx_updates);addRepository(type:1,name:Servoy update site,location:http${#58}//download.servoy.com/developer/8xx_updates);\
-addRepository(type:0,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);addRepository(type:1,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);\
+addRepository(type:0,name:SQLExplorer Updates,location:http${#58}//developer.servoy.com/sqlexplorer/);addRepository(type:1,name:SQLExplorer Updates,location:http${#58}//developer.servoy.com/sqlexplorer/);\
 addRepository(type:0,name:Xulrunner Plugin,location:http${#58}//download.servoy.com/developer/xulrunner/);addRepository(type:1,name:Xulrunner Plugin,location:http${#58}//download.servoy.com/developer/xulrunner/);\
 addRepository(type:0,name:Oxygen,location:http${#58}//download.eclipse.org/releases/oxygen);addRepository(type:1,name:Oxygen,location:http${#58}//download.eclipse.org/releases/oxygen);\
 addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.7);addRepository(type:1,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.7);\
