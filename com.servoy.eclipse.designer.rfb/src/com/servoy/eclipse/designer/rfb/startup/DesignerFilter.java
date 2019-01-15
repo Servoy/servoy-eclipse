@@ -224,6 +224,10 @@ public class DesignerFilter implements Filter
 								IRepository.TEMPLATES);
 							if (templates.size() > 0)
 							{
+								FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+								Form form = fl.getForm(formName);
+								String layout = form.getUseCssPosition().booleanValue() ? Template.LAYOUT_TYPE_CSS_POSITION : layoutType;
+
 								jsonWriter.object();
 								jsonWriter.key("packageName").value("Templates");
 								jsonWriter.key("packageDisplayname").value("Templates");
@@ -238,8 +242,8 @@ public class DesignerFilter implements Filter
 										try
 										{
 											JSONObject templateJSON = new ServoyJSONObject(content, false);
-											if ((layoutType.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) ||
-												(templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(Template.PROP_LAYOUT).equals(layoutType))))
+											if ((layout.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) ||
+												(templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(Template.PROP_LAYOUT).equals(layout))))
 											{
 												jsonWriter.object();
 												jsonWriter.key("name").value(iRootObject.getName());
