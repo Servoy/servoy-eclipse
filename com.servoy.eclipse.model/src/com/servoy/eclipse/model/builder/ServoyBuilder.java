@@ -4018,8 +4018,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
 														elementName != null ? elementName : "", inForm);
-													addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+													IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
 														IMarker.PRIORITY_NORMAL, null, o);
+													marker.setAttribute("Uuid", valuelist.getUUID().toString());
+													marker.setAttribute("SolutionName", project.getName());
 												}
 											}
 
