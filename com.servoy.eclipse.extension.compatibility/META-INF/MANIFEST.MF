@@ -19,11 +19,11 @@ Require-Bundle: servoy_shared,
  com.sun.activation.javax.activation,
  org.apache.httpcomponents.httpclient,
  org.apache.httpcomponents.httpcore,
- org.apache.commons.pool2,
+ org.apache.commons.commons-pool2,
  j2db_server,
  org.apache.commons.codec,
  org.apache.commons.io;bundle-version="2.6.0",
- org.apache.commons.collections
+ org.apache.commons.commons-collections4
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

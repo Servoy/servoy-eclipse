@@ -86,10 +86,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.gef"
          version="0.0.0"/>
 
-   <includes
-         id="org.sweetlemonade.eclipse.json.feature"
-         version="0.0.0"/>
-
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
@@ -345,7 +341,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.freemarker.freemarker"
          download-size="0"
          install-size="0"
-         version="2.3.21.stable"
+         version="2.3.28.stable"
          unpack="false"/>
 
    <plugin
@@ -360,27 +356,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="1.10.0.v20180409-1845"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.collections"
-         download-size="0"
-         install-size="0"
-         version="4.1.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.dbcp2"
-         download-size="0"
-         install-size="0"
-         version="2.3.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.pool2"
-         download-size="0"
-         install-size="0"
-         version="2.5.0"
          unpack="false"/>
 
    <plugin
@@ -412,13 +387,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.lang"
-         download-size="0"
-         install-size="0"
-         version="2.6.0.v201205030909"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.equinox.concurrent"
          download-size="0"
          install-size="0"
@@ -437,13 +405,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="1.3.0.s2"
-         unpack="false"/>
-
-   <plugin
-         id="commons-lang3"
-         download-size="0"
-         install-size="0"
-         version="3.7.0"
          unpack="false"/>
 
    <plugin
@@ -471,14 +432,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="6.2.0"
+         version="7.0.0.v20181030-2244"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="6.2.0"
+         version="7.0.0.v20181030-2244"
          unpack="false"/>
 
    <plugin
@@ -492,21 +453,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.logging.log4j.api"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.11.2.SNAPSHOT"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.11.2.SNAPSHOT"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j18-impl"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.11.2.SNAPSHOT"
          unpack="false"/>
 
    <plugin
@@ -514,6 +475,55 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="1.1.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.sweetlemonade.eclipse.json"
+         download-size="0"
+         install-size="0"
+         version="1.0.4"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.lang3"
+         download-size="0"
+         install-size="0"
+         version="3.8.1"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.commons-collections4"
+         download-size="0"
+         install-size="0"
+         version="4.2.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.commons-dbcp2"
+         download-size="0"
+         install-size="0"
+         version="2.5.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.commons-pool2"
+         download-size="0"
+         install-size="0"
+         version="2.6.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.aries.spifly.dynamic.bundle"
+         download-size="0"
+         install-size="0"
+         version="1.2.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.aries.util"
+         download-size="0"
+         install-size="0"
+         version="1.1.3"
          unpack="false"/>
 
 </feature>

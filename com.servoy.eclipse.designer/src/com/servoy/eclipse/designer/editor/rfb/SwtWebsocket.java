@@ -43,7 +43,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 import javax.websocket.server.ServerEndpoint;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.events.DisposeEvent;
@@ -422,7 +422,7 @@ public class SwtWebsocket
 				{
 					if (!browser.isDisposed())
 					{
-						browser.execute("SwtWebsocketClient('receive', '" + StringEscapeUtils.escapeJavaScript(text) + "',null, " + id + ")");
+						browser.execute("SwtWebsocketClient('receive', '" + StringEscapeUtils.escapeEcmaScript(text) + "',null, " + id + ")");
 					}
 				}
 			});
