@@ -891,7 +891,7 @@ public class WarExporter
 					ServoyProject servoyProject = servoyModel.getServoyProject(name);
 					if (servoyProject == null || servoyProject.getSolution() == null)
 					{
-						throw new ExportException("Can't export none active soluton with the name: " + name +
+						throw new ExportException("Can't export non-active soluton with the name: " + name +
 							" it couildn't be found in the workspace or the solution couldnt be loaded");
 					}
 					if (!Utils.equalObjects(servoyProject.getResourcesProject() != null ? servoyProject.getResourcesProject().getProject().getName() : null,

@@ -301,7 +301,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 					tmp.add(servoyProject.getProject().getName());
 				}
 			}
-			noneActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the none active solutions",
+			noneActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the non-active solutions",
 				"Select the solutions that you want to include in this WAR. Be aware that these solutions are not checked for builder markers!", tmp,
 				exportModel.getNoneActiveSolutions(), false, "export_war_none_active_solutions");
 			fileSelectionPage = new FileSelectionPage(exportModel);

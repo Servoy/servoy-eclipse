@@ -146,7 +146,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		});
 
 		exportNoneActiveSolutions = new Button(composite, SWT.CHECK);
-		exportNoneActiveSolutions.setText(" Include none active solutions.");
+		exportNoneActiveSolutions.setText(" Include non-active solutions.");
 		exportNoneActiveSolutions.setSelection(exportModel.isExportNoneActiveSolutions());
 		exportNoneActiveSolutions.addSelectionListener(new SelectionAdapter()
 		{
