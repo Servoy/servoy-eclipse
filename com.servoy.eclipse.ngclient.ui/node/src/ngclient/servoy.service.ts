@@ -33,7 +33,7 @@ export class ServoyService {
     private solutionSettings: SolutionSettings = new SolutionSettings();
     private uiProperties: UIProperties;
 
-    private findModeShortCutAdded = false;
+    private findModeShortCutCallback: any = null;
     private log: LoggerService;
     private loadedLocale: Deferred<any>;
 
@@ -211,38 +211,20 @@ export class ServoyService {
     }
     
 
-    private setFindMode( beanData ) {
-        if ( beanData['findmode'] ) {
-            if ( this.windowRefService.nativeWindow['shortcut'].all_shortcuts['ENTER'] === undefined ) {
-                this.findModeShortCutAdded = true;
-
-                this.windowRefService.nativeWindow['shortcut'].add( 'ENTER', this.performFind );
+    public setFindMode( formName: string, findmode: boolean ) {
+        if(findmode && this.findModeShortCutCallback == null) {
+            this.findModeShortCutCallback = (event: KeyboardEvent) => {
+                // perform find on ENTER
+                if(event.keyCode === 13) {
+                    this.sabloService.callService( "formService", "performFind", { 'formname': formName, 'clear': true, 'reduce': true, 'showDialogOnNoResults': true }, true );
+                }
             }
+            this.windowRefService.nativeWindow.addEventListener('keyup', this.findModeShortCutCallback);
         }
-        else if ( beanData['findmode'] == false && this.findModeShortCutAdded ) {
-            this.findModeShortCutAdded = false;
-            this.windowRefService.nativeWindow['shortcut'].remove( 'ENTER' );
+        else if(findmode == false && this.findModeShortCutCallback != null ) {
+            this.windowRefService.nativeWindow.removeEventListener('keyup', this.findModeShortCutCallback);
+            this.findModeShortCutCallback = null;
         }
-    }
-
-    private performFind( event ) {
-        // TODO this was:  angular.element( event.srcElement ? event.srcElement : event.target );
-        var element = event.srcElement ? event.srcElement : event.target
-        // TODO this whole looking of ng-model and servoy api from the attribute...;
-        //        if ( element && element.attr( 'ng-model' ) ) {
-        //            var dataproviderString = element.attr( 'ng-model' );
-        //            var index = dataproviderString.indexOf( '.' );
-        //            if ( index > 0 ) {
-        //                var modelString = dataproviderString.substring( 0, index );
-        //                var propertyname = dataproviderString.substring( index + 1 );
-        //                var svyServoyApi = $utils.findAttribute( element, element.scope(), "svy-servoyApi" );
-        //                if ( svyServoyApi && svyServoyApi.apply ) {
-        //                    svyServoyApi.apply( propertyname );
-        //                }
-        //            }
-        //        }
-        //
-        //        this.sabloService.callService( "formService", "performFind", { 'formname': formname, 'clear': true, 'reduce': true, 'showDialogOnNoResults': true }, true );
     }
 }
 

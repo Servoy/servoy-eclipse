@@ -9,6 +9,8 @@ import { FormComponent } from './form/form_component.component'
 import { ConverterService } from '../sablo/converter.service'
 import { LoggerService, LoggerFactory} from '../sablo/logger.service'
 
+import { ServoyService } from './servoy.service'
+
 @Injectable()
 export class FormService {
 
@@ -17,7 +19,8 @@ export class FormService {
 
 //    private touchedForms:Map<String,boolean>;
 
-    constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, private logFactory: LoggerFactory ) {
+    constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, private logFactory: LoggerFactory,
+        private servoyService: ServoyService ) {
         this.log = logFactory.getLogger("FormService");
         this.formsCache = new Map();
 
@@ -42,6 +45,9 @@ export class FormService {
                                         value = this.converterService.convertFromServerToClient( value, beanConversion[property], comp.model[property]);
                                     }
                                     comp.model[property] = value;
+                                }
+                                if(beanname === "") {
+                                    servoyService.setFindMode(formname, formData[beanname]["findmode"]);
                                 }
                             }
                         }
