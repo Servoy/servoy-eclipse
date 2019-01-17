@@ -48,6 +48,7 @@ import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.outline.FormOutlineContentProvider;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
@@ -60,12 +61,15 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -350,6 +354,8 @@ public class DesignerUtil
 				if (co1 && co2) return 0;
 				else if (co1) return -1;
 				else if (co2) return 1;
+				else if ("template".equals(n1)) return -1;
+				else if ("template".equals(n2)) return 1;
 				else return n1.compareTo(n2);
 			}
 
@@ -457,6 +463,10 @@ public class DesignerUtil
 					//add component if both excluded and allowed children are missing
 					allowedChildren.add("component");
 				}
+				if (hasResponsiveLayoutTemplates())
+				{
+					allowedChildren.add("template");
+				}
 
 				mapFiller.add(spec.getPackageName() + "." + spec.getName(), allowedChildren);
 			}
@@ -492,5 +502,37 @@ public class DesignerUtil
 	private interface AllowChildrenMapFiller
 	{
 		void add(String key, Set<String> values);
+	}
+
+	public static TemplateElementHolder[] getResponsiveLayoutTemplates()
+	{
+		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+		List<TemplateElementHolder> elements = new ArrayList<>();
+		for (int i = 0; i < templates.size(); i++)
+		{
+			Template template = (Template)templates.get(i);
+			JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
+			if (templateJSON.get(Template.PROP_LAYOUT).equals(Template.LAYOUT_TYPE_RESPONSIVE))
+			{
+				elements.add(new TemplateElementHolder(template));
+			}
+		}
+		TemplateElementHolder[] templ = elements.toArray(new TemplateElementHolder[elements.size()]);
+		return templ;
+	}
+
+	private static boolean hasResponsiveLayoutTemplates()
+	{
+		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+		for (int i = 0; i < templates.size(); i++)
+		{
+			Template template = (Template)templates.get(i);
+			JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
+			if (templateJSON.get(Template.PROP_LAYOUT).equals(Template.LAYOUT_TYPE_RESPONSIVE))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -22,8 +22,10 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -545,11 +547,12 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
+					IHandlerService handlerService = PlatformUI.getWorkbench().getService(IHandlerService.class);
 					if ("*".equals(name) || "component".equals(name))
 					{
 						Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand(AddContainerCommand.COMMAND_ID);
 						final Event trigger = new Event();
-						ExecutionEvent executionEvent = (PlatformUI.getWorkbench().getService(IHandlerService.class)).createExecutionEvent(command, trigger);
+						ExecutionEvent executionEvent = handlerService.createExecutionEvent(command, trigger);
 						try
 						{
 							command.executeWithChecks(executionEvent);
@@ -557,6 +560,21 @@ public class CreateComponentHandler implements IServerService
 						catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e)
 						{
 							Debug.log(e);
+						}
+					}
+					else if ("template".equals(name))
+					{
+						Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand(AddContainerCommand.COMMAND_ID);
+						try
+						{
+							Map<String, String> parameters = new HashMap<>();
+							parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.template", "*");
+							ExecutionEvent executionEvent = new ExecutionEvent(command, parameters, new Event(), null);
+							command.executeWithChecks(executionEvent);
+						}
+						catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e1)
+						{
+							Debug.log(e1);
 						}
 					}
 					else

@@ -33,6 +33,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 {
 
 	private static final String ADD_COMPONENT_SUBMENU_ITEM_TEXT = "Component [...]";
+	private static final String ADD_TEMPLATE_SUBMENU_ITEM_TEXT = "Template [...]";
 
 	public AddContainerContributionItem()
 	{
@@ -67,6 +68,10 @@ public class AddContainerContributionItem extends CompoundContributionItem
 						if ("component".equalsIgnoreCase(allowedChildName))
 						{
 							addMenuItem(list, null, null, null);
+						}
+						if ("template".equalsIgnoreCase(allowedChildName))
+						{
+							addTemplatesMenuItem(list);
 						}
 						else
 						{
@@ -117,6 +122,17 @@ public class AddContainerContributionItem extends CompoundContributionItem
 			}
 		}
 		return list.toArray(new IContributionItem[list.size()]);
+	}
+
+	private void addTemplatesMenuItem(List<IContributionItem> list)
+	{
+		final CommandContributionItemParameter commandContributionItemParameter = new CommandContributionItemParameter(
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow(), null, AddContainerCommand.COMMAND_ID, CommandContributionItem.STYLE_PUSH);
+		commandContributionItemParameter.label = ADD_TEMPLATE_SUBMENU_ITEM_TEXT;
+		commandContributionItemParameter.visibleEnabled = true;
+		commandContributionItemParameter.parameters = new HashMap<String, String>();
+		commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.template", "*");
+		list.add(new CommandContributionItem(commandContributionItemParameter));
 	}
 
 	private void addMenuItem(List<IContributionItem> list, WebLayoutSpecification specification, String config, String displayName)
