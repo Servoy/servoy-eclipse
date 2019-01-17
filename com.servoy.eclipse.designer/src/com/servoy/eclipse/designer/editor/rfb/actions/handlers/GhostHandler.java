@@ -218,37 +218,40 @@ public class GhostHandler implements IServerService
 
 								for (IChildWebObject ghostWebObject : ghostsOfThisProp)
 								{
-									String ghostCaptionText = null;
-
-									if (ghostWebObject instanceof WebCustomType)
+									if (ghostWebObject != null)
 									{
-										ghostCaptionText = DeveloperUtils.getCustomObjectTypeCaptionFromTaggedSubproperties((WebCustomType)ghostWebObject);
-									}
+										String ghostCaptionText = null;
 
-									if (ghostCaptionText == null)
-									{
-										ghostCaptionText = dropPropEntry.getKey() +
-											(ghostWebObject.getIndex() >= 0 ? "[" + ghostWebObject.getIndex() + "]" : "");
-
-										// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
-										if (ghostWebObject instanceof WebCustomType && ghostWebObject.hasProperty("text"))
+										if (ghostWebObject instanceof WebCustomType)
 										{
-											Object val = ghostWebObject.getProperty("text");
-											if (val instanceof String && ((String)val).trim().length() > 0) ghostCaptionText = (String)val;
+											ghostCaptionText = DeveloperUtils.getCustomObjectTypeCaptionFromTaggedSubproperties((WebCustomType)ghostWebObject);
 										}
-									}
 
-									try
-									{
-										String parentKey = parentID != null ? parentID + ghostWebObject.getJsonKey()
-											: basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
-										String ghostID = parentID != null ? parentID + "#" + ghostWebObject.getUUID() : ghostWebObject.getUUID().toString();
-										writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(), ghostWebObject.getTypeName(),
-											inherited);
-									}
-									catch (JSONException e1)
-									{
-										Debug.error(e1);
+										if (ghostCaptionText == null)
+										{
+											ghostCaptionText = dropPropEntry.getKey() +
+												(ghostWebObject.getIndex() >= 0 ? "[" + ghostWebObject.getIndex() + "]" : "");
+
+											// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
+											if (ghostWebObject instanceof WebCustomType && ghostWebObject.hasProperty("text"))
+											{
+												Object val = ghostWebObject.getProperty("text");
+												if (val instanceof String && ((String)val).trim().length() > 0) ghostCaptionText = (String)val;
+											}
+										}
+
+										try
+										{
+											String parentKey = parentID != null ? parentID + ghostWebObject.getJsonKey()
+												: basicWebComponent.getUUID() + ghostWebObject.getJsonKey();
+											String ghostID = parentID != null ? parentID + "#" + ghostWebObject.getUUID() : ghostWebObject.getUUID().toString();
+											writeGhostToJSON(parentKey, writer, ghostCaptionText, ghostID, ghostWebObject.getIndex(),
+												ghostWebObject.getTypeName(), inherited);
+										}
+										catch (JSONException e1)
+										{
+											Debug.error(e1);
+										}
 									}
 								}
 							}

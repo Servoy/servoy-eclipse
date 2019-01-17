@@ -16,13 +16,18 @@
  */
 package com.servoy.eclipse.designer.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.json.JSONObject;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DataRequest;
@@ -30,14 +35,20 @@ import com.servoy.eclipse.ui.dialogs.TemplateContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Present the user available templates via a dialog.
  * <p>
  * The actual command is performed via the selected edit parts' edit policy.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class ApplyTemplateActionDelegate extends AbstractEditpartActionDelegate
 {
@@ -51,8 +62,36 @@ public class ApplyTemplateActionDelegate extends AbstractEditpartActionDelegate
 	@Override
 	protected Request createRequest(EditPart editPart)
 	{
-		TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, TemplateContentProvider.DEFAULT,
-			new LabelProvider()
+		Object model = editPart.getModel();
+		if (model instanceof IPersist)
+		{
+			Form f = (Form)((IPersist)model).getAncestor(IRepository.FORMS);
+			String layout = f.getUseCssPosition().booleanValue() ? Template.LAYOUT_TYPE_CSS_POSITION : Template.LAYOUT_TYPE_ABSOLUTE;
+			TreeSelectDialog dialog = new TreeSelectDialog(getShell(), true, false, TreePatternFilter.FILTER_LEAFS, new TemplateContentProvider()
+			{
+				@Override
+				public Object[] getElements(Object inputElement)
+				{
+					if (inputElement == TEMPLATES_DUMMY_INPUT)
+					{
+						List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+						List<TemplateElementHolder> elements = new ArrayList<>();
+						for (int i = 0; i < templates.size(); i++)
+						{
+							Template template = (Template)templates.get(i);
+							JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
+							if (!templateJSON.has(Template.PROP_LAYOUT) && Template.LAYOUT_TYPE_ABSOLUTE.equals(layout) ||
+								templateJSON.get(Template.PROP_LAYOUT).equals(layout))
+							{
+								elements.add(new TemplateElementHolder(template));
+							}
+						}
+						return elements.toArray();
+					}
+
+					return new Object[0];
+				}
+			}, new LabelProvider()
 			{
 				@Override
 				public String getText(Object element)
@@ -68,14 +107,16 @@ public class ApplyTemplateActionDelegate extends AbstractEditpartActionDelegate
 					else return element.toString();
 				}
 			}, null, null, SWT.NONE, "Select template", TemplateContentProvider.TEMPLATES_DUMMY_INPUT, null, false, TreeSelectDialog.TEMPLATE_DIALOG, null);
-		dialog.open();
+			dialog.open();
 
-		if (dialog.getReturnCode() == Window.CANCEL)
-		{
-			return null;
+			if (dialog.getReturnCode() == Window.CANCEL)
+			{
+				return null;
+			}
+
+			// single selection
+			return new DataRequest(getRequestType(), ((IStructuredSelection)dialog.getSelection()).getFirstElement());
 		}
-
-		// single selection
-		return new DataRequest(getRequestType(), ((IStructuredSelection)dialog.getSelection()).getFirstElement());
+		return null;
 	}
 }

@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.ui,
  com.servoy.eclipse.model,
  org.eclipse.ui.forms,
  slf4j.api,
- commons-lang3
+ org.apache.commons.lang3
 Export-Package: com.servoy.eclipse.notification.rss
 Bundle-ClassPath: .,
  lib/rome-1.7.5-SNAPSHOT.jar,

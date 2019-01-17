@@ -192,7 +192,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			return;
 		}
 
-		refreshBrowserUrl(false);
 		try
 		{
 			// install fake WebSocket in case browser does not support it
@@ -227,6 +226,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			ServoyLog.logError("couldn't load the editor: ", e);
 		}
 
+		refreshBrowserUrl(false);
 		openViewers();
 	}
 
