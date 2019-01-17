@@ -67,6 +67,7 @@ import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataui.IServoyAwareBean;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.NameComparator;
@@ -141,10 +142,12 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private SpecProviderState componentsSpecProviderState;
 
 	private final int solutionType;
+	private final Form form;
 
-	public VisualFormEditorPaletteFactory(int solutionType)
+	public VisualFormEditorPaletteFactory(int solutionType, Form form)
 	{
 		this.solutionType = solutionType;
+		this.form = form;
 	}
 
 	private String[] getElementsIDs()
@@ -312,7 +315,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 	}
 
-	private static PaletteEntry createPaletteEntry(String drawerId, String id, SpecProviderState componentsSpecProviderState)
+	private static PaletteEntry createPaletteEntry(String drawerId, String id, SpecProviderState componentsSpecProviderState, Form form)
 	{
 		if (ELEMENTS_ID.equals(drawerId))
 		{
@@ -331,7 +334,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		if (TEMPLATES_ID.equals(drawerId))
 		{
-			return createTemplatesEntry(id);
+			return createTemplatesEntry(id, form);
 		}
 
 		if (drawerId.startsWith(COMPONENTS_ID))
@@ -356,7 +359,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				ServoyLog.logError(e);
 				return null;
 			}
-			return createTemplateToolEntry(drawerId.substring(TEMPLATE_ID_PREFIX.length()), element);
+			return createTemplateToolEntry(drawerId.substring(TEMPLATE_ID_PREFIX.length()), element, form);
 		}
 
 		ServoyLog.logError("Unknown palette drawer: '" + drawerId + "'", null);
@@ -690,7 +693,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		return new ElementCreationToolEntry("", "", factory, iconSmall, iconLarge);
 	}
 
-	private static PaletteEntry createTemplatesEntry(String id)
+	private static PaletteEntry createTemplatesEntry(String id, Form form)
 	{
 		Template template = (Template)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(id, IRepository.TEMPLATES);
 		if (template == null)
@@ -700,7 +703,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		TemplateElementHolder data = new TemplateElementHolder(template);
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
-			DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data)));
+			DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data, form)));
 		factory.setData(data);
 		ImageDescriptor icon = getTemplateIcon(data);
 		if (icon == null)
@@ -751,7 +754,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		return dimension;
 	}
 
-	private static PaletteEntry createTemplateToolEntry(String templateName, int element)
+	private static PaletteEntry createTemplateToolEntry(String templateName, int element, Form form)
 	{
 		Template template = (Template)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(templateName, IRepository.TEMPLATES);
 		if (template == null)
@@ -762,7 +765,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		List<JSONObject> templateElements = ElementFactory.getTemplateElements(template, element);
 		if (templateElements != null && templateElements.size() > 0)
 		{
-			return createTemplateToolEntry(template, templateElements.get(0), null, element);
+			return createTemplateToolEntry(template, templateElements.get(0), null, element, form);
 		}
 
 		return null;
@@ -772,11 +775,11 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	 * @param json
 	 * @return
 	 */
-	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String displayName, int element)
+	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String displayName, int element, Form form)
 	{
 		TemplateElementHolder data = new TemplateElementHolder(template, element);
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
-			DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data)));
+			DesignerUtil.convertDimension(ElementFactory.getTemplateBoundsize(data, form)));
 		factory.setData(data);
 		ImageDescriptor icon = getTemplateIcon(json);
 		if (icon == null)
@@ -913,7 +916,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 				for (String itemId : itemIds)
 				{
-					PaletteEntry entry = createPaletteEntry(drawerId, itemId, componentsSpecProviderState);
+					PaletteEntry entry = createPaletteEntry(drawerId, itemId, componentsSpecProviderState, form);
 					if (entry != null)
 					{
 						entry.setId(itemId);
