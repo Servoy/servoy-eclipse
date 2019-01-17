@@ -336,7 +336,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			// relocate relative to the upper-left corner of the original selection
 			for (Entry<ISupportBounds, java.awt.Point> entry : entrySet)
 			{
-				entry.getKey().setLocation(new java.awt.Point(location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny));
+				CSSPosition.setLocation(entry.getKey(), location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny);
 			}
 		}
 		return res.toArray();
