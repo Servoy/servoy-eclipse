@@ -88,9 +88,9 @@ import com.servoy.j2db.util.SortedList;
 @SuppressWarnings("nls")
 public class DesignerFilter implements Filter
 {
-	private static final List<String> IGNORE_PACKAGE_LIST = Arrays.asList(new String[] { "servoycore" });
+	private static final List<String> IGNORE_PACKAGE_LIST = Arrays.asList(new String[] { "servoycore" }); // IMPORTANT! all servoycore components (of course except ones in IGNORE_COMPONENT_LIST) WILL be added to servoydefault package in palette (there is custom code for that below)
 	private static final List<String> IGNORE_COMPONENT_LIST = Arrays.asList(
-		new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoycore-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "colorthefoundset" });
+		new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoycore-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "servoycore-defaultLoadingIndicator" });
 
 	public static final String PREFERENCE_KEY = "com.servoy.eclipse.designer.rfb.palette.order";
 	@SuppressWarnings("nls")
@@ -348,7 +348,6 @@ public class DesignerFilter implements Filter
 							{
 								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()))
 								{
-
 									JSONObject componentJson = new JSONObject();
 									componentJson.put("name", spec.getName());
 									componentJson.put("componentType", "component");
