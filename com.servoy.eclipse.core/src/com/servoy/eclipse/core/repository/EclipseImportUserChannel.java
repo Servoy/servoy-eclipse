@@ -400,10 +400,12 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						}
 					}
 				}
-				String[] buttons = serverConfig != null ? new String[] { "OK", "Create Server", "Cancel" } : new String[] { "OK", "Cancel" };
+				String[] buttons = serverConfig != null ? new String[] { "Replace Server", "Create Server", "Cancel" }
+					: new String[] { "Replace Server", "Cancel" };
+				int defaultOption = serverConfig != null ? 1 : 0;
 				final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null, "Server with name '" + name +
 					"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
-					MessageDialog.WARNING, buttons, 0, serverNames, 0);
+					MessageDialog.WARNING, buttons, defaultOption, serverNames, defaultOption);
 				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
