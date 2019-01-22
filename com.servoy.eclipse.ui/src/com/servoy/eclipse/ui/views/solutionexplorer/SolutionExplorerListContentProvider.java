@@ -1226,6 +1226,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static SimpleUserNode[] createInMemTables(ServoyProject servoyProject, boolean bIncludeModules)
 	{
+		return createTables(servoyProject, bIncludeModules, UserNodeType.INMEMORY_DATASOURCE);
+	}
+
+	public static SimpleUserNode[] createViewFoundsets(ServoyProject servoyProject, boolean bIncludeModules)
+	{
+		return createTables(servoyProject, bIncludeModules, UserNodeType.VIEW_FOUNDSET);
+	}
+
+	private static SimpleUserNode[] createTables(ServoyProject servoyProject, boolean bIncludeModules, UserNodeType nodeType)
+	{
 		ArrayList<SimpleUserNode> serverNodeChildren = new ArrayList<SimpleUserNode>();
 		try
 		{
@@ -1244,7 +1254,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
 				{
 					SimpleUserNode[] moduleTables = SolutionExplorerListContentProvider.createTables(
-						((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer(), UserNodeType.INMEMORY_DATASOURCE);
+						((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer(), nodeType);//TODO getViewFoundsetsServer
 
 					for (SimpleUserNode moduleTable : moduleTables)
 					{

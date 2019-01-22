@@ -56,6 +56,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetTable;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.table.AggregationsComposite;
 import com.servoy.eclipse.ui.editors.table.CalculationsComposite;
@@ -158,7 +159,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	protected void createPages()
 	{
 		createColumnPage();
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
+		if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()) &&
+			ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 		{
 			createDynamicPages();
 
@@ -571,6 +573,11 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				MemTable memTable = (MemTable)table;
 				server = memTable.getParent();
+			}
+			else if (DataSourceUtils.VIEW_DATASOURCE.equals(table.getServerName()))
+			{
+				ViewFoundsetTable viewTable = (ViewFoundsetTable)table;
+				server = viewTable.getParent();
 			}
 			if (server == null)
 			{

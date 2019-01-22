@@ -43,6 +43,7 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -85,6 +86,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 	private final HashMap<File, String> deserializeExceptions = new HashMap<File, String>();
 
 	private MemServer memServer = null;
+	private ViewFoundsetsServer viewServer = null;
 
 	public ServoyProject()
 
@@ -749,6 +751,18 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 	public int compareTo(ServoyProject o)
 	{
 		return project.getName().compareTo(o.getProject().getName());
+	}
+
+	public ViewFoundsetsServer getViewFoundsetsServer()
+	{
+		if (viewServer == null) refreshViewServer();
+		return viewServer;
+	}
+
+	public void refreshViewServer()
+	{
+		if (viewServer == null) viewServer = new ViewFoundsetsServer(this);
+		else viewServer.init();
 	}
 
 }

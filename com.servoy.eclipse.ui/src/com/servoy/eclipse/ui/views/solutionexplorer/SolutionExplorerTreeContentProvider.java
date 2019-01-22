@@ -94,6 +94,7 @@ import com.servoy.eclipse.model.ngpackages.IAvailableNGPackageProjectsListener;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -1911,6 +1912,11 @@ public class SolutionExplorerTreeContentProvider
 			serverNode.children = SolutionExplorerListContentProvider.createInMemTables(((MemServer)serverNode.getRealObject()).getServoyProject(),
 				includeModules);
 		}
+		if (serverNode.getType() == UserNodeType.VIEW_FOUNDSETS)
+		{
+			serverNode.children = SolutionExplorerListContentProvider.createViewFoundsets(((ViewFoundsetsServer)serverNode.getRealObject()).getServoyProject(),
+				includeModules);
+		}
 		else
 		{
 			IServerInternal server = (IServerInternal)serverNode.getRealObject();
@@ -2283,7 +2289,12 @@ public class SolutionExplorerTreeContentProvider
 				servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));
 			solutionMemoryDataSources.parent = solutionDataSources;
 
-			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources };
+			PlatformSimpleUserNode viewFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
+				servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSDataSources.class));//TODO icons
+			viewFoundsets.parent = solutionDataSources;
+
+			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets };
+
 
 			PlatformSimpleUserNode solutionWebPackages = new PlatformSimpleUserNode(Messages.TreeStrings_Web_Packages,
 				UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, solution, uiActivator.loadImageFromBundle("all_packages.png"));

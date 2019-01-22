@@ -169,6 +169,7 @@ public class Messages extends NLS
 	public static String TreeStrings_XMLMethods;
 	public static String TreeStrings_XMLListMethods;
 	public static String TreeStrings_RegExp;
+	public static String TreeStrings_ViewFoundsets;
 
 	public static String LabelTemplatesPalette;
 	public static String LabelElementsPalette;

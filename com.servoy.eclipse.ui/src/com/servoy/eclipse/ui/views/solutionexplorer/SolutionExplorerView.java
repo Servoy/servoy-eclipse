@@ -3141,7 +3141,10 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVER, new NewTableAction(this));
-		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, new NewInMemoryDataSourceAction(this));
+		NewInMemoryDataSourceAction newMem = new NewInMemoryDataSourceAction(this, "Create in memory datasource", UserNodeType.INMEMORY_DATASOURCES);
+		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, newMem);
+		NewInMemoryDataSourceAction newViewFS = new NewInMemoryDataSourceAction(this, "Create view foundset", UserNodeType.VIEW_FOUNDSETS);
+		newActionInTreePrimary.registerAction(UserNodeType.VIEW_FOUNDSETS, newViewFS);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
@@ -3223,7 +3226,8 @@ public class SolutionExplorerView extends ViewPart
 		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
 		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM_CALCULATION_MODE, newScope);
 		newActionInListPrimary.registerAction(UserNodeType.MODULES, newModule);
-		newActionInListPrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, new NewInMemoryDataSourceAction(this));
+		newActionInListPrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, newMem);
+		newActionInListPrimary.registerAction(UserNodeType.VIEW_FOUNDSETS, newViewFS);
 
 		newActionInListSecondary.registerAction(UserNodeType.TABLE, newForm);
 		newActionInListSecondary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newForm);
