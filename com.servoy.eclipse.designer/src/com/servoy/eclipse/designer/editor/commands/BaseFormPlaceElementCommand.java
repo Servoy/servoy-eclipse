@@ -477,6 +477,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			else if (parent instanceof LayoutContainer && draggedPersist instanceof LayoutContainer)
 			{
+				if (parent == draggedPersist) parent = draggedPersist.getParent();
 				persist = ElementFactory.copyComponent(parent, (LayoutContainer)draggedPersist, x, y, IRepository.LAYOUTCONTAINERS, groupMap);
 			}
 			else
