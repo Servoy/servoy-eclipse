@@ -78,7 +78,8 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 	{
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		selectedFile = null;
-		if (sel.size() == 1 && (SimpleUserNode)sel.getFirstElement() != null && (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA))
+		if (sel.size() == 1 && (SimpleUserNode)sel.getFirstElement() != null && ((((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA) ||
+			(((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.MEDIA_FOLDER)))
 		{
 			selectedFile = ((SimpleUserNode)sel.getFirstElement());
 		}
