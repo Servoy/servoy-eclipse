@@ -77,6 +77,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.solution.integration.RunDesignClientDialog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -351,6 +352,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			ServoyLog.logError(e);
 		}
 
+//		RunDesignClientDialog dialog = new RunDesignClientDialog(getShell());
+//		dialog.setBlockOnOpen(true);
+//		dialog.open();
+//		dialog.close();
 		return true;
 	}
 
@@ -365,80 +370,81 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
 		{
 			Utils.streamCopy(is, fos);
+		}
 
-			Display.getDefault().asyncExec(new Runnable()
+
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
 			{
-				public void run()
+				// import the .servoy solution into workspace
+				ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+				importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
+				importSolutionWizard.setAllowSolutionFilePathSelection(false);
+				importSolutionWizard.setActivateSolution(false);
+				importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+
+				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
+				if (dialog.open() == Window.OK)
 				{
-					// import the .servoy solution into workspace
-					ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
-					importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
-					importSolutionWizard.setAllowSolutionFilePathSelection(false);
-					importSolutionWizard.setActivateSolution(false);
-					importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+					//TODO addAsModule(name, targetSolution, importSolutionFile);
 
-					WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
-					if (dialog.open() == Window.OK)
+					final IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
+					final ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
+					if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() && importedProject.isOpen())
 					{
-						//TODO addAsModule(name, targetSolution, importSolutionFile);
-
-						final IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
-						final ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
-						if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() && importedProject.isOpen())
+						Job job = new WorkspaceJob("Adding '" + name + "' as module of '" + targetSolution + "'...")
 						{
-							Job job = new WorkspaceJob("Adding '" + name + "' as module of '" + targetSolution + "'...")
+							@Override
+							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 							{
-								@Override
-								public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+								try
 								{
-									try
+									if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() &&
+										importedProject.isOpen())
 									{
-										if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() &&
-											importedProject.isOpen())
+										Solution editingSolution = targetServoyProject.getEditingSolution();
+										if (editingSolution != null)
 										{
-											Solution editingSolution = targetServoyProject.getEditingSolution();
-											if (editingSolution != null)
+											String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+											List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
+											if (!modulesList.contains(name))
 											{
-												String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
-												List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
-												if (!modulesList.contains(name))
-												{
-													modulesList.add(name);
-												}
-												String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
-												editingSolution.setModulesNames(modulesTokenized);
+												modulesList.add(name);
+											}
+											String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+											editingSolution.setModulesNames(modulesTokenized);
 
-												try
-												{
-													targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
-												}
-												catch (RepositoryException e)
-												{
-													ServoyLog.logError(
-														"Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
-												}
+											try
+											{
+												targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
+											}
+											catch (RepositoryException e)
+											{
+												ServoyLog.logError(
+													"Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
 											}
 										}
-										return Status.OK_STATUS;
 									}
-									finally
-									{
-										cleanUPImportSolution(importSolutionFile);
-									}
+									return Status.OK_STATUS;
 								}
-							};
-							job.setUser(true);
-							job.setRule(MultiRule.combine(targetServoyProject.getProject(), importedProject));
-							job.schedule();
-						}
+								finally
+								{
+									cleanUPImportSolution(importSolutionFile);
+								}
+							}
+						};
+						job.setUser(true);
+						job.setRule(MultiRule.combine(targetServoyProject.getProject(), importedProject));
+						job.schedule();
+					}
+					else
+					{
+						cleanUPImportSolution(importSolutionFile);
 					}
 				}
-			});
-		}
-		finally
-		{
-			cleanUPImportSolution(importSolutionFile);
-		}
+			}
+		});
 	}
 
 	public static void addAsModule(final String name, final String targetSolution, final File importSolutionFile)
