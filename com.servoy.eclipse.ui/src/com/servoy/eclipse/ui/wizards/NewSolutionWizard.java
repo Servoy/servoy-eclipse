@@ -16,28 +16,37 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormAttachment;
@@ -65,10 +74,10 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.RepositorySettingsDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Media;
@@ -78,7 +87,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Utils;
-import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Wizard used in order to create a new Servoy solution project. Will optionally create linked resource project (with styles & other info).
@@ -91,6 +99,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected NewSolutionWizardPage page1;
 
+	private GenerateSolutionWizardPage configPage;
+
 	/**
 	 * Creates a new wizard.
 	 */
@@ -102,12 +112,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
+		configPage = new GenerateSolutionWizardPage("Configure Solution");
 		page1 = new NewSolutionWizardPage("New Solution");
 	}
 
 	@Override
 	public void addPages()
 	{
+		addPage(configPage);
 		addPage(page1);
 	}
 
@@ -126,7 +138,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
 				try
 				{
-					Solution solution = (Solution)repository.createNewRootObject(page1.getNewSolutionName(), IRepository.SOLUTIONS);
+					Solution solution = (Solution)repository.createNewRootObject(configPage.getNewSolutionName(), IRepository.SOLUTIONS);
 
 					monitor.setTaskName("Setting up resource project and reference");
 					IProject resourceProject;
@@ -156,13 +168,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					monitor.setTaskName("Creating and opening project");
 					// as the serialization is done using java.io, we must make sure the Eclipse resource structure
 					// stays up to date; we create a project, then we must open it and add servoy solution nature
-					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(page1.getNewSolutionName());
+					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(configPage.getNewSolutionName());
 					String location = page1.getProjectLocation();
-					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(page1.getNewSolutionName());
+					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(configPage.getNewSolutionName());
 					if (location != null)
 					{
 						IPath path = new Path(location);
-						path = path.append(page1.getNewSolutionName());
+						path = path.append(configPage.getNewSolutionName());
 						description.setLocation(path);
 					}
 					newProject.create(description, null);
@@ -253,7 +265,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				monitor.beginTask(jobName, 1);
 				// set this solution as the new active solution or add it as a module
-				ServoyProject newProject = servoyModel.getServoyProject(page1.getNewSolutionName());
+				ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
 				if (newProject != null)
 				{
 					if (addAsModuleToActiveSolution)
@@ -297,10 +309,42 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
+		final List<String> solutions = configPage.getSolutionsToImport();
+		IRunnableWithProgress importSolutionsRunnable = new IRunnableWithProgress()
+		{
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+			{
+				monitor.beginTask(jobName, 1);
+				try
+				{
+					ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+					String newSolutionName = configPage.getNewSolutionName();
+					for (String name : solutions)
+					{
+						if (sm.getServoyProject(name) == null)
+						{
+							InputStream is = NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy");
+							importSolution(is, name, newSolutionName);
+						}
+						else
+						{
+							addAsModule(name, newSolutionName, null);
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		};
+
 		try
 		{
 			PlatformUI.getWorkbench().getProgressService().run(true, false, newSolutionRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, solutionActivationRunnable);
+			PlatformUI.getWorkbench().getProgressService().run(true, false, importSolutionsRunnable);
+			//TODO import packages
 		}
 		catch (Exception e)
 		{
@@ -309,6 +353,160 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		return true;
 	}
+
+	private static void importSolution(InputStream is, final String name, final String targetSolution) throws IOException
+	{
+		if (name.equals(targetSolution)) return; // import solution and target can't be the same
+		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
+		if (importSolutionFile.exists())
+		{
+			importSolutionFile.delete();
+		}
+		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
+		{
+			Utils.streamCopy(is, fos);
+
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					// import the .servoy solution into workspace
+					ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+					importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
+					importSolutionWizard.setAllowSolutionFilePathSelection(false);
+					importSolutionWizard.setActivateSolution(false);
+					importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+
+					WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
+					if (dialog.open() == Window.OK)
+					{
+						//TODO addAsModule(name, targetSolution, importSolutionFile);
+
+						final IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
+						final ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
+						if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() && importedProject.isOpen())
+						{
+							Job job = new WorkspaceJob("Adding '" + name + "' as module of '" + targetSolution + "'...")
+							{
+								@Override
+								public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+								{
+									try
+									{
+										if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() &&
+											importedProject.isOpen())
+										{
+											Solution editingSolution = targetServoyProject.getEditingSolution();
+											if (editingSolution != null)
+											{
+												String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+												List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
+												if (!modulesList.contains(name))
+												{
+													modulesList.add(name);
+												}
+												String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+												editingSolution.setModulesNames(modulesTokenized);
+
+												try
+												{
+													targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
+												}
+												catch (RepositoryException e)
+												{
+													ServoyLog.logError(
+														"Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
+												}
+											}
+										}
+										return Status.OK_STATUS;
+									}
+									finally
+									{
+										cleanUPImportSolution(importSolutionFile);
+									}
+								}
+							};
+							job.setUser(true);
+							job.setRule(MultiRule.combine(targetServoyProject.getProject(), importedProject));
+							job.schedule();
+						}
+					}
+				}
+			});
+		}
+		finally
+		{
+			cleanUPImportSolution(importSolutionFile);
+		}
+	}
+
+	public static void addAsModule(final String name, final String targetSolution, final File importSolutionFile)
+	{
+		final IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
+		final ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
+		if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() && importedProject.isOpen())
+		{
+			Job job = new WorkspaceJob("Adding '" + name + "' as module of '" + targetSolution + "'...")
+			{
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				{
+					try
+					{
+						if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() && importedProject.isOpen())
+						{
+							Solution editingSolution = targetServoyProject.getEditingSolution();
+							if (editingSolution != null)
+							{
+								String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+								List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
+								if (!modulesList.contains(name))
+								{
+									modulesList.add(name);
+								}
+								String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+								editingSolution.setModulesNames(modulesTokenized);
+
+								try
+								{
+									targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
+								}
+								catch (RepositoryException e)
+								{
+									ServoyLog.logError("Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
+								}
+							}
+						}
+						return Status.OK_STATUS;
+					}
+					finally
+					{
+						cleanUPImportSolution(importSolutionFile);
+					}
+				}
+			};
+			job.setUser(true);
+			job.setRule(MultiRule.combine(targetServoyProject.getProject(), importedProject));
+			job.schedule();
+		}
+	}
+
+	private static void cleanUPImportSolution(File importSolutionFile)
+	{
+		try
+		{
+			if (importSolutionFile != null && importSolutionFile.exists())
+			{
+				importSolutionFile.delete();
+			}
+		}
+		catch (RuntimeException e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
 
 	/**
 	 * @param activeEditingSolution
@@ -323,7 +521,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	public static class NewSolutionWizardPage extends WizardPage implements Listener, IValidator
 	{
-		private String solutionName;
 		private int solutionType = SolutionMetaData.SOLUTION;
 
 		private Text solutionNameField;
@@ -369,16 +566,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 
 		/**
-		 * Returns the name of the new solution.
-		 *
-		 * @return the name of the new solution.
-		 */
-		public String getNewSolutionName()
-		{
-			return solutionName;
-		}
-
-		/**
 		 * Returns the selected solution type. One of {@link SolutionMetaData#MODULE} or {@link SolutionMetaData#SOLUTION} constants.
 		 *
 		 * @return the selected solution type. One of {@link SolutionMetaData#MODULE} or {@link SolutionMetaData#SOLUTION} constants.
@@ -396,20 +583,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			Composite topLevel = new Composite(parent, SWT.NONE);
 			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 			setControl(topLevel);
-
-			// solution name UI
-			Label solutionLabel = new Label(topLevel, SWT.NONE);
-			solutionLabel.setText("Solution name");
-
-			solutionNameField = new Text(topLevel, SWT.BORDER);
-			solutionNameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
-			solutionNameField.addModifyListener(new ModifyListener()
-			{
-				public void modifyText(ModifyEvent e)
-				{
-					handleSolutionNameChanged();
-				}
-			});
 
 			defaultThemeCheck = new Button(topLevel, SWT.CHECK);
 			defaultThemeCheck.setText("Add default servoy .less theme (configurable by a less properties file)");
@@ -458,24 +631,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			topLevel.setLayout(formLayout);
 
 			FormData formData = new FormData();
-			formData.left = new FormAttachment(0, 0);
-			formData.top = new FormAttachment(solutionNameField, 0, SWT.CENTER);
-			solutionLabel.setLayoutData(formData);
-
-			formData = new FormData();
-			formData.left = new FormAttachment(solutionLabel, 0);
-			formData.top = new FormAttachment(0, 0);
-			formData.right = new FormAttachment(100, 0);
-			solutionNameField.setLayoutData(formData);
-
-			formData = new FormData();
-			formData.left = new FormAttachment(0, 0);
-			formData.top = new FormAttachment(solutionTypeCombo, 0, SWT.CENTER);
-			solutionTypeLabel.setLayoutData(formData);
-
-			formData = new FormData();
-			formData.left = new FormAttachment(solutionNameField, 0, SWT.LEFT);
-			formData.top = new FormAttachment(solutionNameField, 0, SWT.BOTTOM);
+			formData.left = new FormAttachment(solutionTypeLabel, 0, SWT.LEFT);
+			formData.top = new FormAttachment(solutionTypeLabel, 0, SWT.BOTTOM);
 			formData.right = new FormAttachment(100, 0);
 			solutionTypeCombo.setLayoutData(formData);
 
@@ -506,7 +663,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			super.setVisible(visible);
 			if (visible)
 			{
-				solutionNameField.setFocus();
 				setPageComplete(validatePage());
 			}
 		}
@@ -516,12 +672,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			solutionType = solutionTypeComboValues[solutionTypeCombo.getSelectionIndex()];
 			defaultThemeCheck.setEnabled(SolutionMetaData.isNGOnlySolution(solutionType));
 			defaultThemeCheck.setSelection(shouldAddDefaultTheme());
-		}
-
-		private void handleSolutionNameChanged()
-		{
-			solutionName = solutionNameField.getText();
-			setPageComplete(validatePage());
 		}
 
 		public void setSolutionTypes(int[] solTypes, int selected, boolean fixedType)
@@ -559,44 +709,17 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		protected boolean validatePage()
 		{
 			String error = null;
-			if (solutionNameField.getText().trim().length() == 0)
-			{
-				error = "Please give a name for the new solution";
-			}
-			else
+			if (resourceProjectComposite != null)
 			{
 				error = resourceProjectComposite.validate();
 				if (error == null && resourceProjectComposite.getNewResourceProjectName() != null &&
-					(resourceProjectComposite.getNewResourceProjectName().equalsIgnoreCase(solutionName)))
+					(resourceProjectComposite.getNewResourceProjectName().equalsIgnoreCase(
+						((GenerateSolutionWizardPage)getWizard().getPage("Configure Solution")).getNewSolutionName())))
 				{
 					error = "You cannot give the same name to the solution and the resource project to be created";
 				}
+				setErrorMessage(error);
 			}
-			if (error == null)
-			{
-				// see if solution name is OK
-				if (!IdentDocumentValidator.isJavaIdentifier(solutionName))
-				{
-					error = "Solution name has unsupported characters";
-				}
-				else if (solutionName.length() > IRepository.MAX_ROOT_OBJECT_NAME_LENGTH)
-				{
-					error = "Solution name is too long";
-				}
-				else if (ServoyModel.getWorkspace().getRoot().getProject(solutionName).exists())
-				{
-					error = "A project with this name already exists in the workspace";
-				}
-				else
-				{
-					IStatus validationResult = ServoyModel.getWorkspace().validateName(solutionName, IResource.PROJECT);
-					if (!validationResult.isOK())
-					{
-						error = "The name of the solution project to be created is not valid: " + validationResult.getMessage();
-					}
-				}
-			}
-			setErrorMessage(error);
 			return error == null;
 		}
 
