@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -107,6 +108,7 @@ public class GenerateSolutionWizardPage extends WizardPage
 			public void widgetSelected(SelectionEvent e)
 			{
 				isAdvanced = Boolean.valueOf(isAdvancedCheck.getSelection());
+				getWizard().getContainer().updateButtons();
 			}
 		});
 		isAdvancedCheck.setSelection(false);
@@ -221,13 +223,23 @@ public class GenerateSolutionWizardPage extends WizardPage
 		return result;
 	}
 
-//	@Override
-//	public IWizardPage getNextPage()
-//	{
-//		if (isAdvanced)
-//		{
-//			return getWizard().getNextPage(this);
-//		}
-//		return null;
-//	}
+	public List<String> getWebPackagesToImport()
+	{
+		List<String> result = new ArrayList<>();
+		result.add("12grid");
+		result.add("aggrid");
+		result.add("bootstrapcomponents");
+		result.add("servoy-extra-components");
+		return result;
+	}
+
+	@Override
+	public IWizardPage getNextPage()
+	{
+		if (isAdvanced)
+		{
+			return getWizard().getNextPage(this);
+		}
+		return null;
+	}
 }

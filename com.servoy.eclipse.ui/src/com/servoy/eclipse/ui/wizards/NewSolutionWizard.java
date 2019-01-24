@@ -26,14 +26,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -77,7 +81,6 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.eclipse.solution.integration.RunDesignClientDialog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -87,6 +90,7 @@ import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -337,6 +341,47 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				{
 					ServoyLog.logError(e);
 				}
+				monitor.done();
+			}
+		};
+
+		final List<String> packs = configPage.getWebPackagesToImport();
+		IRunnableWithProgress importPackagesRunnable = new IRunnableWithProgress()
+		{
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+			{
+				IProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(configPage.getNewSolutionName()).getProject();
+				try
+				{
+					project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+				}
+				catch (CoreException e1)
+				{
+					e1.printStackTrace();
+				}
+				IFolder folder = project.getFolder(SolutionSerializer.NG_PACKAGES_DIR_NAME);
+
+				try
+				{
+					folder.create(true, true, new NullProgressMonitor());
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+				for (String name : packs)
+				{
+					InputStream is = NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip");
+					IFile eclipseFile = folder.getFile(name + ".zip");
+					try
+					{
+						eclipseFile.create(is, IResource.NONE, new NullProgressMonitor());
+					}
+					catch (CoreException e)
+					{
+						Debug.log(e);
+					}
+				}
 			}
 		};
 
@@ -345,7 +390,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			PlatformUI.getWorkbench().getProgressService().run(true, false, newSolutionRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, solutionActivationRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, importSolutionsRunnable);
-			//TODO import packages
+			PlatformUI.getWorkbench().getProgressService().run(true, false, importPackagesRunnable);
 		}
 		catch (Exception e)
 		{
@@ -387,61 +432,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
 				if (dialog.open() == Window.OK)
 				{
-					//TODO addAsModule(name, targetSolution, importSolutionFile);
-
-					final IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
-					final ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
-					if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() && importedProject.isOpen())
-					{
-						Job job = new WorkspaceJob("Adding '" + name + "' as module of '" + targetSolution + "'...")
-						{
-							@Override
-							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-							{
-								try
-								{
-									if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() &&
-										importedProject.isOpen())
-									{
-										Solution editingSolution = targetServoyProject.getEditingSolution();
-										if (editingSolution != null)
-										{
-											String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
-											List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
-											if (!modulesList.contains(name))
-											{
-												modulesList.add(name);
-											}
-											String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
-											editingSolution.setModulesNames(modulesTokenized);
-
-											try
-											{
-												targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
-											}
-											catch (RepositoryException e)
-											{
-												ServoyLog.logError(
-													"Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
-											}
-										}
-									}
-									return Status.OK_STATUS;
-								}
-								finally
-								{
-									cleanUPImportSolution(importSolutionFile);
-								}
-							}
-						};
-						job.setUser(true);
-						job.setRule(MultiRule.combine(targetServoyProject.getProject(), importedProject));
-						job.schedule();
-					}
-					else
-					{
-						cleanUPImportSolution(importSolutionFile);
-					}
+					addAsModule(name, targetSolution, importSolutionFile);
 				}
 			}
 		});
