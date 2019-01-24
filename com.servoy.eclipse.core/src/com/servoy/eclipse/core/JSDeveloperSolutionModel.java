@@ -543,4 +543,9 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		});
 		return foreignElementUUIDs;
 	}
+
+	public String[] js_getServerNames()
+	{
+		return ServoyModel.getServerManager().getServerNames(true, true, true, false);
+	}
 }
