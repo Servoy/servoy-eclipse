@@ -1083,7 +1083,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			List<Object> workingSets = new ArrayList<Object>();
 			workingSets.add(SELECTION_NONE);
-			if (servoyProject != null)
+			if (servoyProject != null && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 			{
 				List<String> existingWorkingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
 					new String[] { servoyProject.getProject().getName() });
