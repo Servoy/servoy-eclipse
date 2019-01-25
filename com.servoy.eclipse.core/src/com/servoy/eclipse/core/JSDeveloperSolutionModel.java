@@ -640,4 +640,9 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		saveJob.setRule(ServoyModel.getWorkspace().getRoot());
 		saveJob.schedule();
 	}
+
+	public void js_close()
+	{
+
+	}
 }
