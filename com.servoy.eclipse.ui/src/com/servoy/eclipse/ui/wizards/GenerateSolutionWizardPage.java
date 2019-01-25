@@ -224,6 +224,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		if (isChecked(SECURITY)) result.add("svySecurity");
 		if (isChecked(UTILS)) result.add("svyUtils");
 		if (isChecked(SEARCH)) result.add("svySearch");
+		result.add("svyNavigation");
 		return result;
 	}
 
