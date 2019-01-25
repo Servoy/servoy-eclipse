@@ -46,9 +46,7 @@ import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -133,6 +131,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	{
 		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
+		final List<String> solutions = configPage.getSolutionsToImport();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
 		{
 
@@ -144,6 +143,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				try
 				{
 					Solution solution = (Solution)repository.createNewRootObject(configPage.getNewSolutionName(), IRepository.SOLUTIONS);
+
+					String modulesTokenized = ModelUtils.getTokenValue(solutions.toArray(new String[] { }), ",");
+					solution.setModulesNames(modulesTokenized);
+
 
 					monitor.setTaskName("Setting up resource project and reference");
 					IProject resourceProject;
@@ -314,7 +317,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
-		final List<String> solutions = configPage.getSolutionsToImport();
+
 		IRunnableWithProgress importSolutionsRunnable = new IRunnableWithProgress()
 		{
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
@@ -329,11 +332,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						if (sm.getServoyProject(name) == null)
 						{
 							InputStream is = NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy");
-							importSolution(is, name, newSolutionName);
-						}
-						else
-						{
-							addAsModule(name, newSolutionName, null);
+							importSolution(is, name, newSolutionName, monitor);
 						}
 					}
 				}
@@ -388,9 +387,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		try
 		{
 			PlatformUI.getWorkbench().getProgressService().run(true, false, newSolutionRunnable);
+			PlatformUI.getWorkbench().getProgressService().run(true, false, importPackagesRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, solutionActivationRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, importSolutionsRunnable);
-			PlatformUI.getWorkbench().getProgressService().run(true, false, importPackagesRunnable);
 		}
 		catch (Exception e)
 		{
@@ -404,7 +403,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	private static void importSolution(InputStream is, final String name, final String targetSolution) throws IOException
+	private void importSolution(InputStream is, final String name, final String targetSolution, IProgressMonitor monitor) throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -418,24 +417,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 
 
-		Display.getDefault().asyncExec(new Runnable()
-		{
-			public void run()
-			{
-				// import the .servoy solution into workspace
-				ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
-				importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
-				importSolutionWizard.setAllowSolutionFilePathSelection(false);
-				importSolutionWizard.setActivateSolution(false);
-				importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+		// import the .servoy solution into workspace
+		ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+		importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
+		importSolutionWizard.setAllowSolutionFilePathSelection(false);
+		importSolutionWizard.setActivateSolution(false);
+		importSolutionWizard.init(PlatformUI.getWorkbench(), null);
 
-				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
-				if (dialog.open() == Window.OK)
-				{
-					addAsModule(name, targetSolution, importSolutionFile);
-				}
-			}
-		});
+		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
+		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);
+		cleanUPImportSolution(importSolutionFile);
 	}
 
 	public static void addAsModule(final String name, final String targetSolution, final File importSolutionFile)
