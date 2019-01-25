@@ -46,7 +46,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 /**
  * @author emera
  */
-public class GenerateSolutionWizardPage extends WizardPage
+public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxView
 {
 
 	private String solutionName;
@@ -55,6 +55,7 @@ public class GenerateSolutionWizardPage extends WizardPage
 	private CheckboxTableViewer checkboxTableViewer;
 	private Button isAdvancedCheck;
 	private boolean isAdvanced = false;
+	private SelectAllButtonsBar selectAllButtons;
 
 	protected static final String SECURITY = "security";
 	protected static final String UTILS = "utils";
@@ -99,6 +100,9 @@ public class GenerateSolutionWizardPage extends WizardPage
 		checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		checkboxTableViewer.setInput(toImport);
 		checkboxTableViewer.setAllChecked(true);
+
+		selectAllButtons = new SelectAllButtonsBar(this, topLevel, false);
+		selectAllButtons.disableSelectAll();
 
 		isAdvancedCheck = new Button(topLevel, SWT.CHECK);
 		isAdvancedCheck.setText("I am an advanced Servoy User");
@@ -241,5 +245,18 @@ public class GenerateSolutionWizardPage extends WizardPage
 			return getWizard().getNextPage(this);
 		}
 		return null;
+	}
+
+
+	@Override
+	public void selectAll()
+	{
+		checkboxTableViewer.setAllChecked(true);
+	}
+
+	@Override
+	public void deselectAll()
+	{
+		checkboxTableViewer.setAllChecked(false);
 	}
 }
