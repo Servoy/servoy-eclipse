@@ -55,6 +55,7 @@ import com.servoy.j2db.dataprocessing.BufferedDataSetInternal;
 import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -547,5 +548,96 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	public String[] js_getServerNames()
 	{
 		return ServoyModel.getServerManager().getServerNames(true, true, true, false);
+	}
+
+	public void js_setLoginForm(Object f)
+	{
+		WorkspaceJob saveJob = new WorkspaceJob("Save solution login form")
+		{
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			{
+				EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+				try
+				{
+					Solution solution = ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution();
+					int id = 0;
+					if (f instanceof JSForm)
+					{
+						id = ((JSForm)f).getSupportChild().getID();
+					}
+					else
+					{
+						Form form = solution.getForm((String)f);
+						if (form != null) id = form.getID();
+					}
+					if (id != 0)
+					{
+						Element loginFormEl = eclipseRepository.getContentSpec().getPropertyForObjectTypeByName(solution.getTypeID(), "loginFormID");
+						solution.setLoginFormID(loginFormEl.getDefaultClassValue() instanceof Integer ? id : 0);
+						ServoyModelFinder.getServoyModel().getActiveProject().saveEditingSolutionNodes(new IPersist[] { solution }, false);
+						return Status.OK_STATUS;
+					}
+				}
+				catch (RepositoryException e)
+				{
+					Debug.error(e);
+				}
+				finally
+				{
+					if (eclipseRepository != null) eclipseRepository.clearForeignElementsIds();
+				}
+				Debug.error("Form " + f + " not found, cannot set it as login form");
+				return Status.OK_STATUS;
+			}
+		};
+		saveJob.setUser(false);
+		saveJob.setRule(ServoyModel.getWorkspace().getRoot());
+		saveJob.schedule();
+	}
+
+	public void js_setFirstForm(Object f)
+	{
+		WorkspaceJob saveJob = new WorkspaceJob("Save solution first form")
+		{
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			{
+				EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+				try
+				{
+					Solution solution = ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution();
+					int id = 0;
+					if (f instanceof JSForm)
+					{
+						id = ((JSForm)f).getSupportChild().getID();
+					}
+					else
+					{
+						Form form = solution.getForm((String)f);
+						if (form != null) id = form.getID();
+					}
+					if (id != 0)
+					{
+						solution.setFirstFormID(id);
+						ServoyModelFinder.getServoyModel().getActiveProject().saveEditingSolutionNodes(new IPersist[] { solution }, false);
+						return Status.OK_STATUS;
+					}
+				}
+				catch (RepositoryException e)
+				{
+					Debug.error(e);
+				}
+				finally
+				{
+					if (eclipseRepository != null) eclipseRepository.clearForeignElementsIds();
+				}
+				Debug.error("Form " + f + " not found, cannot set it as first form");
+				return Status.OK_STATUS;
+			}
+		};
+		saveJob.setUser(false);
+		saveJob.setRule(ServoyModel.getWorkspace().getRoot());
+		saveJob.schedule();
 	}
 }
