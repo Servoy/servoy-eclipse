@@ -260,4 +260,9 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	{
 		checkboxTableViewer.setAllChecked(false);
 	}
+
+	public boolean mustAuthenticate()
+	{
+		return isChecked(SECURITY);
+	}
 }
