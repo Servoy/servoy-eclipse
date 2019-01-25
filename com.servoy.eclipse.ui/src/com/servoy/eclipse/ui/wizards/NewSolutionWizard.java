@@ -132,6 +132,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
+		final boolean mustAuthenticate = configPage.mustAuthenticate();
 		IRunnableWithProgress newSolutionRunnable = new IRunnableWithProgress()
 		{
 
@@ -198,6 +199,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
 
+						solution.setMustAuthenticate(mustAuthenticate);
 						addDefaultThemeIfNeeded(repository, solution);
 					}
 					monitor.worked(1);
