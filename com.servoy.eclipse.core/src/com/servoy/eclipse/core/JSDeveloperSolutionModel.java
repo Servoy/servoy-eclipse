@@ -479,47 +479,58 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 	@Override
 	public void js_openForm(Object form)
 	{
-		String name = null;
-		if (form instanceof String)
+		WorkspaceJob saveJob = new WorkspaceJob("Opening form in Form editor")
 		{
-			name = (String)form;
-		}
-		else if (form instanceof JSForm)
-		{
-			name = ((JSForm)form).getName();
-		}
-		else if (form instanceof IForm)
-		{
-			name = ((IForm)form).getName();
-		}
-		if (name != null)
-		{
-			final Form frm = ServoyModelFinder.getServoyModel().getFlattenedSolution().getForm(name);
-			if (frm != null)
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				Display.getDefault().asyncExec(new Runnable()
+				String name = null;
+				if (form instanceof String)
 				{
-					public void run()
+					name = (String)form;
+				}
+				else if (form instanceof JSForm)
+				{
+					name = ((JSForm)form).getName();
+				}
+				else if (form instanceof IForm)
+				{
+					name = ((IForm)form).getName();
+				}
+				if (name != null)
+				{
+					final Form frm = ServoyModelFinder.getServoyModel().getFlattenedSolution().getForm(name);
+					if (frm != null)
 					{
-						try
+						Display.getDefault().asyncExec(new Runnable()
 						{
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-								PersistEditorInput.createFormEditorInput(frm).setNew(false),
-								PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-									Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
-						}
-						catch (PartInitException ex)
-						{
-							ServoyLog.logError(ex);
-						}
+							public void run()
+							{
+								try
+								{
+									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
+										PersistEditorInput.createFormEditorInput(frm).setNew(false),
+										PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+											Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
+								}
+								catch (PartInitException ex)
+								{
+									ServoyLog.logError(ex);
+								}
+							}
+						});
 					}
-				});
+					else
+					{
+						throw new IllegalArgumentException("form " + name + " is not a workspace stored (blueprint) form");
+					}
+				}
+				return Status.OK_STATUS;
 			}
-			else
-			{
-				throw new IllegalArgumentException("form " + name + " is not a workspace stored (blueprint) form");
-			}
-		}
+		};
+		saveJob.setUser(false);
+		saveJob.setRule(ServoyModel.getWorkspace().getRoot());
+		saveJob.schedule();
 	}
 
 	private Map<UUID, Integer> loadForeignElementsIDs(final IPersist rootObject)
