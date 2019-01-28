@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Solution Integration
+Bundle-SymbolicName: com.servoy.eclipse.solution.integration
+Bundle-Version: 2019.3.0.3410_rc
+Bundle-Vendor: Servoy
+Automatic-Module-Name: com.servoy.eclipse.solution.integration
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: org.eclipse.jface,
+ org.eclipse.ui.workbench,
+ org.eclipse.core.runtime,
+ servoy_shared,
+ com.servoy.eclipse.core
+Bundle-Activator: com.servoy.eclipse.solution.integration.Activator
+Export-Package: com.servoy.eclipse.solution.integration
+Bundle-ActivationPolicy: lazy

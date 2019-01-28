@@ -49,7 +49,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.j2db.IDebugClient;
+import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IForm;
 import com.servoy.j2db.dataprocessing.BufferedDataSetInternal;
 import com.servoy.j2db.dataprocessing.JSDataSet;
@@ -86,11 +86,11 @@ import com.servoy.j2db.util.Utils;
 public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 {
 
-	private final IDebugClient state;
+	private final IApplication state;
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
 
 
-	public JSDeveloperSolutionModel(IDebugClient state)
+	public JSDeveloperSolutionModel(IApplication state)
 	{
 		this.state = state;
 	}
@@ -652,8 +652,10 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		saveJob.schedule();
 	}
 
-	public void js_close()
-	{
+	public static ICloseable wizard;
 
+	public void js_closeActiveWizard()
+	{
+		if (wizard != null) wizard.close();
 	}
 }

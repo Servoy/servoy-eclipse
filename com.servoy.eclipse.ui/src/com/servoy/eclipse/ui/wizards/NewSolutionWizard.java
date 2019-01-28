@@ -79,6 +79,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.solution.integration.RunDesignClientDialog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -392,16 +393,22 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			PlatformUI.getWorkbench().getProgressService().run(true, false, importPackagesRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, solutionActivationRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, importSolutionsRunnable);
+
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					RunDesignClientDialog dialog = new RunDesignClientDialog(Display.getDefault().getActiveShell());
+					dialog.open();
+				}
+			});
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
 		}
 
-//		RunDesignClientDialog dialog = new RunDesignClientDialog(getShell());
-//		dialog.setBlockOnOpen(true);
-//		dialog.open();
-//		dialog.close();
 		return true;
 	}
 
