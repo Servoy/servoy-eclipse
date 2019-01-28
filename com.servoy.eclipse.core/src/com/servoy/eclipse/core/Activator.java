@@ -665,7 +665,7 @@ public class Activator extends Plugin
 					});
 				}
 
-				public void addScriptObjects(IDebugClient client, Scriptable scope)
+				public void addScriptObjects(IApplication client, Scriptable scope)
 				{
 					Context.enter();
 					try
