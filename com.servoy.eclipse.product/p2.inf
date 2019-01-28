@@ -1,11 +1,13 @@
-instructions.configure=addRepository(type:0,name:Servoy update site,location:http${#58}//download.servoy.com/developer/8xx_updates);addRepository(type:1,name:Servoy update site,location:http${#58}//download.servoy.com/developer/8xx_updates);\
+instructions.configure=addRepository(type:0,name:Servoy Latest Releases,location:http${#58}//download.servoy.com/developer/latest);addRepository(type:1,name:Servoy Latest Releases,location:http${#58}//download.servoy.com/developer/latest);\
+addRepository(type:0,name:Servoy LTS Releases,location:http${#58}//download.servoy.com/developer/lts,enabled:false);addRepository(type:1,name:Servoy LTS Releases,location:http${#58}//download.servoy.com/developer/lts,enabled:false);\
 addRepository(type:0,name:SQLExplorer Updates,location:http${#58}//developer.servoy.com/sqlexplorer/);addRepository(type:1,name:SQLExplorer Updates,location:http${#58}//developer.servoy.com/sqlexplorer/);\
 addRepository(type:0,name:Xulrunner Plugin,location:http${#58}//download.servoy.com/developer/xulrunner/);addRepository(type:1,name:Xulrunner Plugin,location:http${#58}//download.servoy.com/developer/xulrunner/);\
 addRepository(type:0,name:Oxygen,location:http${#58}//download.eclipse.org/releases/oxygen);addRepository(type:1,name:Oxygen,location:http${#58}//download.eclipse.org/releases/oxygen);\
 addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.7);addRepository(type:1,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.7);\
 addRepository(type:0,name:Subclipse Latest Update Site,location:https${#58}//dl.bintray.com/subclipse/releases/subclipse/latest/);addRepository(type:1,name:Subclipse Latest Update Site,location:https${#58}//dl.bintray.com/subclipse/releases/subclipse/latest/);\
 addRepository(type:0,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);addRepository(type:1,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);\
-addRepository(type:0,name:Servoy Release Candidate Update Site,location:http${#58}//download.servoy.com/developer/8xx_updates/releasecandidate,enabled:false);addRepository(type:1,name:Servoy Release Candidate Update Site,location:http${#58}//download.servoy.com/developer/8xx_updates/releasecandidate,enabled:false);
+addRepository(type:0,name:Servoy Latest Releases (Release Candidates),location:http${#58}//download.servoy.com/developer/latest/releasecandidate,enabled:false);addRepository(type:1,name:Servoy Latest Releases (Release Candidates),location:http${#58}//download.servoy.com/developer/latest/releasecandidate,enabled:false);\
+addRepository(type:0,name:Servoy LTS Releases (Release Candidates),location:http${#58}//download.servoy.com/developer/lts/releasecandidate,enabled:false);addRepository(type:1,name:Servoy LTS Releases (Release Candidates),location:http${#58}//download.servoy.com/developer/lts/releasecandidate,enabled:false);
 
 #Adding description for the Servoy updates
 properties.0.name = org.eclipse.equinox.p2.description
