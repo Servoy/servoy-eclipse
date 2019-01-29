@@ -23,7 +23,12 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "src/servoydefault/htmlarea/tinymce/tinymce.min.js",
+              "src/servoydefault/htmlarea/tinymce/themes/modern/theme.js",
+              "src/servoydefault/htmlarea/tinymce/plugins/tabindex/plugin.js",
+              "src/servoydefault/htmlarea/tinymce/plugins/resizetocontainer/plugin.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -69,7 +74,12 @@
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
-            "scripts": [],
+            "scripts": [
+              "src/servoydefault/htmlarea/tinymce/tinymce.min.js",
+              "src/servoydefault/htmlarea/tinymce/themes/modern/theme.js",
+              "src/servoydefault/htmlarea/tinymce/plugins/tabindex/plugin.js",
+              "src/servoydefault/htmlarea/tinymce/plugins/resizetocontainer/plugin.js"
+            ],
             "styles": [
               "src/styles.css"
             ],
