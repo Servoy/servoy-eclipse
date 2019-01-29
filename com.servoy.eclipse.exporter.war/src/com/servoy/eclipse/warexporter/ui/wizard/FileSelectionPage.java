@@ -734,6 +734,26 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		{
 			String potentialFileName = fileNameText.getText();
 			exportModel.setWarFileName(potentialFileName);
+			setErrorMessage(null);
+			setPageComplete(true);
+			if (!potentialFileName.endsWith(".war"))
+			{
+				setErrorMessage("Path must be a war file.");
+				setPageComplete(false);
+			}
+			else
+			{
+				File file = new File(potentialFileName);
+				try
+				{
+					file.getCanonicalPath();
+				}
+				catch (Exception ex)
+				{
+					setErrorMessage("Invalid path.");
+					setPageComplete(false);
+				}
+			}
 		}
 		else if (event.widget == browseButton)
 		{
