@@ -57,9 +57,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private boolean isAdvanced = false;
 	private SelectAllButtonsBar selectAllButtons;
 
-	protected static final String SECURITY = "security";
-	protected static final String UTILS = "utils";
-	protected static final String SEARCH = "search";
+	protected static final String IS_ADVANCED_USER_SETTING = "is_advanced_user";
+
+	private static final String SECURITY = "security";
+	private static final String UTILS = "utils";
+	private static final String SEARCH = "search";
 
 	private static String[] toImport = new String[] { SECURITY, UTILS, SEARCH };
 
@@ -115,8 +117,9 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 				getWizard().getContainer().updateButtons();
 			}
 		});
-		isAdvancedCheck.setSelection(false);
-
+		isAdvanced = getWizard().getDialogSettings().getBoolean(IS_ADVANCED_USER_SETTING);
+		isAdvancedCheck.setSelection(isAdvanced);
+		getWizard().getContainer().updateButtons();
 
 		// layout of the page
 		GridLayout gridLayout = new GridLayout(2, false);
@@ -199,6 +202,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			}
 		}
 		setErrorMessage(error);
+		getWizard().getContainer().updateButtons();
 		return error == null;
 	}
 
@@ -261,9 +265,14 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	{
 		checkboxTableViewer.setAllChecked(false);
 	}
-
+	
 	public boolean mustAuthenticate()
 	{
 		return isChecked(SECURITY);
+	}
+
+	public boolean isAdvancedUser()
+	{
+		return isAdvanced;
 	}
 }
