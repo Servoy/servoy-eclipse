@@ -206,8 +206,8 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		else
 		{
 			// the index and json key given as arguments below might not be correct if this is the element of a WebCustomType array property; but they
-			// will automatically be updated in WebObjectImpl.updatePersistMappedPropeties
-			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)persistContext.getPersist(), propertyDescription, getId().toString(), 0, true);
+			// will automatically be updated in WebObjectImpl.updatePersistMappedPropeties which also adds the persist itself as child of it's parent persist
+			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)persistContext.getPersist(), propertyDescription, null, -1, true);
 			typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType());
 			newPropertyValue.setTypeName(typeName);
 		}
