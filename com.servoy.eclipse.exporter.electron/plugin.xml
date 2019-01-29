@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.exporter.electron.ui.wizard.ExportElectronWizard"
+            id="com.servoy.eclipse.electronexporter.ExportElectronWizard"
+            name="Export Electron File">
+      </wizard>
+   </extension>
+    <extension
+         point="com.servoy.eclipse.ui.exportSolutionProvider">
+      <provider
+            class="com.servoy.eclipse.exporter.electron.ui.wizard.ElectronExporterProvider"
+            id="com.servoy.eclipse.exporter.electron.exportSolutionProvider"
+            name="Provides Solution Electron Export">
+      </provider>
+   </extension>
+   
+   
+   <extension
+           point="org.eclipse.ui.menus">
+        <menuContribution
+              allPopups="false"
+              locationURI="menu:org.eclipse.ui.run?after=breakpointGroup">
+           <command
+                 commandId="com.servoy.eclipse.exporter.electron.ui.StartElectronClient"
+                 id="com.servoy.eclipse.exporter.electron.ui.StartElectronClient"
+                 icon="icons/launch.png"
+                 label="Launch Electron Client"
+                 style="push">
+                 <visibleWhen>
+           </visibleWhen>
+           </command>
+        </menuContribution>
+
+     </extension>
+     <extension
+           point="org.eclipse.ui.handlers">
+        <handler
+              class="com.servoy.eclipse.exporter.electron.debug.handlers.ElectronClientHandler"
+              commandId="com.servoy.eclipse.exporter.electron.ui.StartElectronClient">
+           <enabledWhen>
+              <with
+                    variable="com.servoy.eclipse.core.ngClientState">
+                 <equals
+                       value="ENABLED">
+                 </equals>
+              </with>
+           </enabledWhen>
+        </handler>
+     </extension>
+   
+</plugin>

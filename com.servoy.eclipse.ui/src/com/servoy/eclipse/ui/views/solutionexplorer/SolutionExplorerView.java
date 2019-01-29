@@ -2614,7 +2614,7 @@ public class SolutionExplorerView extends ViewPart
 		refreshView();
 	}
 
-	private IAction getExportSolutionAction()
+	private List<IAction> getExportSolutionActions()
 	{
 		IExtensionRegistry reg = Platform.getExtensionRegistry();
 		IExtensionPoint ep = reg.getExtensionPoint(IExportSolutionWizardProvider.EXTENSION_ID);
@@ -2624,12 +2624,14 @@ public class SolutionExplorerView extends ViewPart
 		{
 			return null;
 		}
+
+		ArrayList<IAction> actions = new ArrayList<IAction>();
 		for (IExtension extension : extensions)
 		{
 			IConfigurationElement[] ce = extension.getConfigurationElements();
 			if (ce == null || ce.length == 0)
 			{
-				return null;
+				continue;
 			}
 			try
 			{
@@ -2637,16 +2639,16 @@ public class SolutionExplorerView extends ViewPart
 				IAction action = exportProvider.getExportAction();
 				if (action != null)
 				{
-					return action;
+					actions.add(action);
 				}
 			}
 			catch (CoreException e)
 			{
 				ServoyLog.logWarning("Could not create solution export provider (extension point " + IExportSolutionWizardProvider.EXTENSION_ID + ")", e);
-				return null;
+				continue;
 			}
 		}
-		return null;
+		return actions;
 	}
 
 	private void fillTreeContextMenu(IMenuManager manager)
@@ -2730,10 +2732,13 @@ public class SolutionExplorerView extends ViewPart
 				{
 					manager.removeAll();
 					manager.add(exportActiveSolutionAction);
-					IAction exportAction = getExportSolutionAction();
+					List<IAction> exportAction = getExportSolutionActions();
 					if (exportAction != null)
 					{
-						manager.add(exportAction);
+						for (IAction action : exportAction)
+						{
+							manager.add(action);
+						}
 					}
 				}
 			});

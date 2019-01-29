@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy Electron Exporter Plug-in
+Bundle-SymbolicName: com.servoy.eclipse.exporter.electron;singleton:=true
+Bundle-Version: 2019.3.0.3410_rc
+Bundle-Activator: com.servoy.eclipse.exporter.electron.Activator
+Bundle-Vendor: Servoy
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ com.servoy.eclipse.ui,
+ com.servoy.eclipse.model,
+ servoy_shared,
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore,
+ com.servoy.eclipse.core,
+ com.servoy.eclipse.debug
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: com.servoy.eclipse.exporter.electron
+Bundle-ActivationPolicy: lazy
