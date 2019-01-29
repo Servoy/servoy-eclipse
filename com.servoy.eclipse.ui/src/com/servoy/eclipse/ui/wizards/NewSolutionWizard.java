@@ -43,6 +43,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
+import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -112,6 +114,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	{
 		setWindowTitle("New solution");
 		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.png"));
+		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
+		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
+		setDialogSettings(section);
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -130,6 +135,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	@Override
 	public boolean performFinish()
 	{
+		getDialogSettings().put(GenerateSolutionWizardPage.IS_ADVANCED_USER_SETTING, configPage.isAdvancedUser());
+
 		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
