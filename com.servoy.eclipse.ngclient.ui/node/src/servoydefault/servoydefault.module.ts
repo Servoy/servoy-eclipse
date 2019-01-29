@@ -20,6 +20,7 @@ import { ServoyDefaultCheckGroup } from './checkgroup/checkgroup';
 import { ServoyDefaultRadiogroup } from './radiogroup/radiogroup';
 import { ServoyDefaultCheck } from './check/check';
 import { ServoyDefaultPassword } from './password/password';
+import { ServoyDefaultHtmlarea } from "./htmlarea/htmlarea";
 
 import { SabloModule } from '../sablo/sablo.module'
 
@@ -29,6 +30,8 @@ import { OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
 import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-datetime-moment';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {EditorModule} from "@tinymce/tinymce-angular";
+import {ServoyDefaultSpinner} from "./spinner/spinner";
 
 
 @NgModule({
@@ -46,6 +49,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ServoyDefaultRadiogroup,
     ServoyDefaultCheck,
     ServoyDefaultPassword,
+    ServoyDefaultHtmlarea,
+    ServoyDefaultSpinner,
     FormatFilterPipe,
     MnemonicletterFilterPipe,
     NotNullOrEmptyPipe,
@@ -59,6 +64,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
   imports:[
     FormsModule,
     CommonModule,
+    EditorModule,
     NgbModule,
     SabloModule,
     BrowserAnimationsModule,
@@ -78,7 +84,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
             ServoyDefaultCheckGroup,
             ServoyDefaultRadiogroup,
             ServoyDefaultCheck,
-            ServoyDefaultPassword
+            ServoyDefaultPassword,
+            ServoyDefaultHtmlarea,
+            ServoyDefaultSpinner
+
   ],
   providers: [
               FormattingService,
