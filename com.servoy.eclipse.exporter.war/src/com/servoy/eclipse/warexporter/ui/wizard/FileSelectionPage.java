@@ -269,17 +269,24 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
+				checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getSelection());
+
+				if (!exportMetadataTablesButton.getSelection()) checkMetadataTablesButton.setSelection(false);
+
 				exportModel.setExportMetaData(exportMetadataTablesButton.getSelection());
 			}
 		});
 
 		checkMetadataTablesButton = new Button(composite, SWT.CHECK);
 		checkMetadataTablesButton.setSelection(exportModel.isCheckMetadataTables());
+		System.out.println(exportModel.isCheckMetadataTables());
+		checkMetadataTablesButton.setEnabled(exportModel.isCheckMetadataTables());
 		checkMetadataTablesButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
+				System.out.println(e);
 				exportModel.setCheckMetadataTables(checkMetadataTablesButton.getSelection());
 			}
 		});
@@ -712,7 +719,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		overrideSequenceTypesButton.setEnabled(exportActiveSolution.getSelection());
 		overrideDefaultValuesButton.setEnabled(exportActiveSolution.getSelection());
 		exportMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
-		checkMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
+		checkMetadataTablesButton.setEnabled(exportActiveSolution.getSelection() && exportMetadataTablesButton.getSelection());
 		exportI18NDataButton.setEnabled(exportActiveSolution.getSelection());
 		insertNewI18NKeysOnlyButton.setEnabled(exportActiveSolution.getSelection() && exportI18NDataButton.getSelection());
 		overwriteGroupsButton.setEnabled(exportActiveSolution.getSelection());
