@@ -7,7 +7,6 @@ import {
   SvyFormat, TooltipDirective, TooltipService
 } from "../../ngclient/servoy_public";
 import {FormsModule} from "@angular/forms";
-import {NotNullOrEmptyPipe} from "../../ngclient/pipes/pipes";
 import {By} from "@angular/platform-browser";
 import {DebugElement} from "@angular/core";
 
@@ -26,7 +25,7 @@ const mockData = [
   },
 ];
 
-fdescribe('ServoyDefaultCheckGroup', () => {
+describe('ServoyDefaultCheckGroup', () => {
   let component: ServoyDefaultSpinner;
   let fixture: ComponentFixture<ServoyDefaultSpinner>;
   let buttonUp :any;let buttonDown: any;
@@ -89,6 +88,35 @@ fdescribe('ServoyDefaultCheckGroup', () => {
 
   it('should getSelectionFromDP', fakeAsync(() => {
     buttonUp.nativeElement.click();
+    fixture.detectChanges();
+    tick();
+    let selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe("Amsterdam");
+  }));
+
+  xit('should change dp when press the down button', fakeAsync( () => {
+    let input = fixture.debugElement.query(By.css('input'));
+    input.nativeElement.focus();
+    input.triggerEventHandler('keyup', { key: 'ArrowDown' });
+    fixture.detectChanges();
+    tick();
+    let selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe("Bucharest");
+  }));
+
+  xit('should change dp when press the up button', fakeAsync(() => {
+    let input = fixture.debugElement.query(By.css('input'));
+    input.nativeElement.focus();
+    input.triggerEventHandler('keyup', { key: 'ArrowUp' });
+    fixture.detectChanges();
+    tick();
+    let selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe("Amsterdam");
+  }));
+
+  xit('should change dp when scroll  ', fakeAsync(() => {
+    let input = fixture.debugElement.query(By.css('input'));
+    input.nativeElement.scroll();
     fixture.detectChanges();
     tick();
     let selection = component.getSelectionFromDataprovider();
