@@ -1254,7 +1254,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
 				{
 					SimpleUserNode[] moduleTables = SolutionExplorerListContentProvider.createTables(
-						((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer(), nodeType);//TODO getViewFoundsetsServer
+						nodeType == UserNodeType.INMEMORY_DATASOURCE ? ((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer()
+							: ((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getViewFoundsetsServer(),
+						nodeType);
 
 					for (SimpleUserNode moduleTable : moduleTables)
 					{

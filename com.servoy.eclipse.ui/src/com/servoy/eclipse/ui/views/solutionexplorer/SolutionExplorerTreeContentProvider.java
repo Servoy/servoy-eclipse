@@ -85,6 +85,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
+import com.servoy.eclipse.model.inmemory.AbstractMemServer;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -864,7 +865,7 @@ public class SolutionExplorerTreeContentProvider
 						{
 							t = UserNodeType.INMEMORY_DATASOURCE;
 						}
-						else
+						else if (un.getType() == UserNodeType.VIEW_FOUNDSETS)
 						{
 							t = UserNodeType.VIEW_FOUNDSET;
 						}
@@ -1601,9 +1602,9 @@ public class SolutionExplorerTreeContentProvider
 						return false;
 					}
 				}
-				else if (un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+				else if (un.getType() == UserNodeType.INMEMORY_DATASOURCES || un.getType() == UserNodeType.VIEW_FOUNDSETS)
 				{
-					ServoyProject servoyProject = ((MemServer)un.getRealObject()).getServoyProject();
+					ServoyProject servoyProject = ((AbstractMemServer<?>)un.getRealObject()).getServoyProject();
 					try
 					{
 						List<IProject> allReferencedProjects;
@@ -1620,7 +1621,10 @@ public class SolutionExplorerTreeContentProvider
 						{
 							if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
 							{
-								if (((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer().getTableNames(true).size() > 0)
+								ServoyProject project = (ServoyProject)module.getNature(ServoyProject.NATURE_ID);
+								AbstractMemServer< ? > server = un.getType() == UserNodeType.INMEMORY_DATASOURCES ? project.getMemServer()
+									: project.getViewFoundsetsServer();
+								if (server.getTableNames(true).size() > 0)
 								{
 									return true;
 								}
