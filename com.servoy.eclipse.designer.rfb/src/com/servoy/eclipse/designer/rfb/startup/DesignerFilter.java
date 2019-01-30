@@ -242,8 +242,7 @@ public class DesignerFilter implements Filter
 										try
 										{
 											JSONObject templateJSON = new ServoyJSONObject(content, false);
-											if ((layout.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) ||
-												(templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(Template.PROP_LAYOUT).equals(layout))))
+											if (templateJSON.optString(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE).equals(layout))
 											{
 												jsonWriter.object();
 												jsonWriter.key("name").value(iRootObject.getName());
