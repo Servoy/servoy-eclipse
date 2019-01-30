@@ -9,7 +9,7 @@ import {FormattingService} from "../../ngclient/servoy_public";
 } )
 export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
 
-  private selection: any;
+  selection: any;
   private counter = 0;
   constructor(renderer: Renderer2, formattingService: FormattingService) {
     super(renderer, formattingService);
