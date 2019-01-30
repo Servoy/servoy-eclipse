@@ -238,7 +238,19 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				final UUID id = UUID.fromString(uuid);
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
 				Form form = (Form)servoyProject.getEditingPersist(id);
+				Form extendsForm = form.getExtendsForm();
 				resolutions.add(new ChangeSuperFormQuickFix(form, servoyProject));
+				if (form != null && extendsForm != null)
+				{
+					if (form.getUseCssPosition() && !extendsForm.getUseCssPosition() && !extendsForm.isResponsiveLayout())
+					{
+						resolutions.add(new ConvertToCSSPositionLayout(extendsForm, servoyProject));
+					}
+					else if (extendsForm.getUseCssPosition() && !form.getUseCssPosition() && !form.isResponsiveLayout())
+					{
+						resolutions.add(new ConvertToCSSPositionLayout(form, servoyProject));
+					}
+				}
 			}
 			else if (type.equals(BaseNGPackageManager.SPEC_READ_MARKER))
 			{

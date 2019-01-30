@@ -17,15 +17,23 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.base.persistence.constants.IFormConstants;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -69,21 +77,53 @@ public class ConvertToCSSPositionFormAction extends Action implements ISelection
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		if (node == null || !(node.getRealObject() instanceof Form)) return;
 		Form nodeForm = (Form)node.getRealObject();
-		ServoyProject activeProject = ((ServoyProject)node.getAncestorOfType(ServoyProject.class).getRealObject());
-		if (activeProject != null)
+		ServoyProject parentProject = ((ServoyProject)node.getAncestorOfType(ServoyProject.class).getRealObject());
+		if (parentProject != null)
 		{
-			try
+			if (UIUtils.askConfirmation(new Shell(), "CSS Position Conversion", "Are you sure you want to convert form '" + nodeForm.getName() +
+				"' to CSS Position? Note this action is irreversible and undoable, also all forms in inheritance hierarchy will also be converted."))
 			{
-				Form form = (Form)activeProject.getEditingPersist(nodeForm.getUUID());
-				if (form != null)
+
+				Form form = (Form)parentProject.getEditingPersist(nodeForm.getUUID());
+				if (ServoyModelFinder.getServoyModel().getActiveProject() != null)
 				{
-					CSSPosition.convertToCSSPosition(form);
-					activeProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
+					FlattenedSolution fs = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+					List<Form> toConvertForms = fs.getFormHierarchy(form);
+
+					Iterator<Form> it = fs.getForms(false);
+					while (it.hasNext())
+					{
+						Form currentForm = it.next();
+						if (!toConvertForms.contains(currentForm))
+						{
+							Form parentForm = currentForm.getExtendsForm();
+							while (parentForm != null)
+							{
+								if (toConvertForms.contains(parentForm))
+								{
+									toConvertForms.add(currentForm);
+									break;
+								}
+								parentForm = parentForm.getExtendsForm();
+							}
+						}
+					}
+					for (Form toConvert : toConvertForms)
+					{
+						try
+						{
+							ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+								toConvert.getSolution().getName());
+							CSSPosition.convertToCSSPosition(toConvert);
+							servoyProject.saveEditingSolutionNodes(new IPersist[] { toConvert }, true);
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+
 				}
-			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
 			}
 		}
 	}
