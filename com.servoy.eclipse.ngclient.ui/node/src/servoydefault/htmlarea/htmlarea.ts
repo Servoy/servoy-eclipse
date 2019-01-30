@@ -1,22 +1,22 @@
-import {Component, EventEmitter, Input, OnInit, Output, Renderer2, SimpleChanges} from '@angular/core';
-import {ServoyDefaultBaseComponent} from "../basecomponent";
+import {Component, Input, OnInit, Renderer2, SimpleChanges} from '@angular/core';
+import {ServoyDefaultBaseField} from "../basefield";
+import {FormattingService} from "../../ngclient/servoy_public";
 
 @Component({
   selector: 'servoydefault-htmlarea',
   templateUrl: './htmlarea.html',
 })
-export class ServoyDefaultHtmlarea extends ServoyDefaultBaseComponent implements OnInit {
-  lastServerValueAsSeenByTinyMCEContent;
-  findMode = false;
-  init = false;
+export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField implements OnInit {
 
-  @Output() dataProviderIDChange = new EventEmitter();
+  private lastServerValueAsSeenByTinyMCEContent: any;
+  private init = false;
+  private findMode = false;
+  private editor: any;
 
-  editor;
   @Input() editable;
 
-  constructor(renderer: Renderer2) {
-    super(renderer);
+  constructor(renderer: Renderer2, formattingService: FormattingService) {
+    super(renderer, formattingService);
   }
 
   ngOnInit(){
@@ -68,7 +68,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseComponent implements
         if (this.lastServerValueAsSeenByTinyMCEContent != edContent) {
           this.dataProviderID = '<html><body>' + edContent + '</body></html>';
           this.lastServerValueAsSeenByTinyMCEContent = edContent;
-          this.dataProviderIDChange.emit(edContent);
+          this.update(edContent);
         }
       });
 
@@ -171,7 +171,7 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseComponent implements
     if (this.lastServerValueAsSeenByTinyMCEContent != edContent) {
       this.dataProviderID = '<html><body>' + edContent + '</body></html>';
       this.lastServerValueAsSeenByTinyMCEContent = edContent;
-      this.dataProviderIDChange.emit(edContent);
+      this.update(edContent);
 
     }
   }
