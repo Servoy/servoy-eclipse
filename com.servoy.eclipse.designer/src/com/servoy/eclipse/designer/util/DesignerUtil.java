@@ -512,7 +512,7 @@ public class DesignerUtil
 		{
 			Template template = (Template)templates.get(i);
 			JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
-			if (templateJSON.get(Template.PROP_LAYOUT).equals(Template.LAYOUT_TYPE_RESPONSIVE))
+			if (templateJSON.optString(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE).equals(Template.LAYOUT_TYPE_RESPONSIVE))
 			{
 				elements.add(new TemplateElementHolder(template));
 			}
@@ -528,7 +528,7 @@ public class DesignerUtil
 		{
 			Template template = (Template)templates.get(i);
 			JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
-			if (templateJSON.get(Template.PROP_LAYOUT).equals(Template.LAYOUT_TYPE_RESPONSIVE))
+			if (templateJSON.optString(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE).equals(Template.LAYOUT_TYPE_RESPONSIVE))
 			{
 				return true;
 			}
