@@ -857,9 +857,18 @@ public class SolutionExplorerTreeContentProvider
 					{
 						addServersNodeChildren(un);
 					}
-					else if (type == UserNodeType.SERVER || un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+					else if (type == UserNodeType.SERVER || un.getType() == UserNodeType.INMEMORY_DATASOURCES || un.getType() == UserNodeType.VIEW_FOUNDSETS)
 					{
-						addServerNodeChildren(un, type == UserNodeType.SERVER ? UserNodeType.TABLE : UserNodeType.INMEMORY_DATASOURCE);
+						UserNodeType t = UserNodeType.TABLE;
+						if (un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+						{
+							t = UserNodeType.INMEMORY_DATASOURCE;
+						}
+						else
+						{
+							t = UserNodeType.VIEW_FOUNDSET;
+						}
+						addServerNodeChildren(un, t);
 					}
 					else if (type == UserNodeType.PLUGINS)
 					{

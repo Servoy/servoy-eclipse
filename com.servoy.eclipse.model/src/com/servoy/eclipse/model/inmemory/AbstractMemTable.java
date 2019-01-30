@@ -18,6 +18,7 @@
 package com.servoy.eclipse.model.inmemory;
 
 
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractTable;
 import com.servoy.j2db.persistence.Column;
@@ -379,5 +380,10 @@ public abstract class AbstractMemTable extends AbstractTable
 	public int hashCode()
 	{
 		return name.hashCode();
+	}
+
+	public ServoyProject getServoyProject()
+	{
+		return memServer.getServoyProject();
 	}
 }

@@ -117,7 +117,10 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		while (tableNodes.hasNext())
 		{
 			TableNode tableNode = (TableNode)tableNodes.next();
-			loadTable(tableNode);
+			if (tableNode.getDataSource().startsWith(datasource))
+			{
+				loadTable(tableNode);
+			}
 		}
 	}
 
@@ -618,7 +621,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	@Override
 	public boolean supportsSequenceType(int i, Column column) throws Exception
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 

@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
-import com.servoy.eclipse.model.inmemory.MemTable;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -75,9 +75,9 @@ public class AbstractTableEditorComposite extends Composite
 				flattenedSolution.getSolution().getName());
 			if (servoyProject != null)
 			{
-				if (t instanceof MemTable)
+				if (t instanceof AbstractMemTable)
 				{
-					ServoyProject owner = ((MemTable)t).getParent().getServoyProject();
+					ServoyProject owner = ((AbstractMemTable)t).getServoyProject();
 					ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 					for (ServoyProject project : projects)
 					{

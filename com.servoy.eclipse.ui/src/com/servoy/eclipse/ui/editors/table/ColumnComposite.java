@@ -68,7 +68,7 @@ import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.inmemory.MemTable;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
@@ -618,7 +618,7 @@ public class ColumnComposite extends Composite
 	protected void initDataBindings(ITable t)
 	{
 		// if there are no columns in the table create a pk column
-		if (t.getColumns().size() == 0 && !(t instanceof MemTable))
+		if (t.getColumns().size() == 0 && !(t instanceof AbstractMemTable))
 		{
 			String tname = t.getName();
 			if (tname.length() > 1 && tname.endsWith("s"))
@@ -659,7 +659,7 @@ public class ColumnComposite extends Composite
 
 	private int getDefaultFirstColumnSequenceType(ITable table)
 	{
-		if (table instanceof MemTable)
+		if (table instanceof AbstractMemTable)
 		{
 			return ColumnInfo.NO_SEQUENCE_SELECTED;
 		}
@@ -750,7 +750,7 @@ public class ColumnComposite extends Composite
 			for (int element : ColumnInfo.allDefinedSeqTypes)
 			{
 				boolean validType = true;
-				if (table instanceof MemTable)
+				if (table instanceof AbstractMemTable)
 				{
 					if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.DATABASE_SEQUENCE)
 					{

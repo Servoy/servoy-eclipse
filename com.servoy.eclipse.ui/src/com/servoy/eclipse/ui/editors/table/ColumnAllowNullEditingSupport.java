@@ -21,7 +21,7 @@ import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 
-import com.servoy.eclipse.model.inmemory.MemTable;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.j2db.persistence.Column;
 
 public class ColumnAllowNullEditingSupport extends EditingSupport
@@ -70,7 +70,7 @@ public class ColumnAllowNullEditingSupport extends EditingSupport
 		if (element instanceof Column && editor != null)
 		{
 			Column c = (Column)element;
-			if (c.getTable() instanceof MemTable)
+			if (c.getTable() instanceof AbstractMemTable)
 			{
 				//always allow edit
 				return true;

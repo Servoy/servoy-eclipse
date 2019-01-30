@@ -51,6 +51,7 @@ import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -562,7 +563,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			throw new RuntimeException("Could not initialize table editor table could not be found");
 		}
-		isModified = isModified || !table.getExistInDB() || (table instanceof MemTable && ((MemTable)table).isChanged());
+		isModified = isModified || !table.getExistInDB() || (table instanceof AbstractMemTable && ((AbstractMemTable)table).isChanged());
 
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 
@@ -739,7 +740,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				{
 					propertiesComposite.saveValues();
 				}
-				if (!(table instanceof MemTable))
+				if (!(table instanceof AbstractMemTable))
 				{
 					if (table.getRowIdentColumnsCount() == 0)
 					{
