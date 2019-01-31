@@ -117,8 +117,8 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
+import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
-import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
@@ -237,6 +237,7 @@ public class WarExporter
 			monitor.subTask("Grouping JS and CSS resources");
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.subTask("Compile less resources");
+			// TODO this only compiles the less resources of the active project (and its modules) not for the none active solutions that could also be exported
 			compileLessResources(tmpWarDir);
 			monitor.worked(1);
 		}
@@ -257,6 +258,8 @@ public class WarExporter
 	 */
 	private void compileLessResources(File tmpWarDir)
 	{
+		// this only compiles the active solution and modules less stuff in a dir
+		// not from the none active solutions, problem could be that the none active solutions can have duplicate names..
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		FlattenedSolution fs = servoyModel.getFlattenedSolution();
 		Iterator<Media> it = fs.getMedias(false);
@@ -268,7 +271,7 @@ public class WarExporter
 				String content = ResourceProvider.compileSolutionLessFile(media, fs);
 				if (content != null)
 				{
-					File folder = new File(tmpWarDir, NGClientWebsocketSession.SERVOY_SOLUTION_CSS);
+					File folder = new File(tmpWarDir, MediaResourcesServlet.SERVOY_SOLUTION_CSS);
 					if (!folder.exists() && !folder.mkdir())
 					{
 						Debug.error("Could not create folder " + folder.getName());
