@@ -19,6 +19,8 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.io.File;
 
+import javax.swing.filechooser.FileSystemView;
+
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -122,8 +124,8 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 
 		if (exportModel.getWarFileName() == null)
 		{
-			exportModel.setWarFileName(
-				System.getProperty("user.home") + "/" + ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getName() + ".war");
+			exportModel.setWarFileName(FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + File.separatorChar +
+				ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getName() + ".war");
 		}
 		fileNameText.setText(exportModel.getWarFileName());
 
