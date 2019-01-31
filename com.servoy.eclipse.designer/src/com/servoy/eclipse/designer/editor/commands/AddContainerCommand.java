@@ -137,7 +137,9 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 												{
 													return ((TemplateElementHolder)element).template.getName();
 												};
-											}, null, null, SWT.NONE, "Select template", DesignerUtil.getResponsiveLayoutTemplates(), null, false, "TemplateDialog", null);
+											}, null, null, SWT.NONE, "Select template",
+											DesignerUtil.getResponsiveLayoutTemplates((AbstractContainer)persistContext.getPersist()), null, false,
+											"TemplateDialog", null);
 										dialog.open();
 										if (dialog.getReturnCode() == Window.OK)
 										{

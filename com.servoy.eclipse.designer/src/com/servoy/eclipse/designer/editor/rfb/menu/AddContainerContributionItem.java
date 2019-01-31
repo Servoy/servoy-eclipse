@@ -94,6 +94,10 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof Form)
 		{
+			if (DesignerUtil.hasResponsiveLayoutTemplates((Form)persist))
+			{
+				addTemplatesMenuItem(list);
+			}
 			Collection<PackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values();
 			for (PackageSpecification<WebLayoutSpecification> specifications : values)
 			{
