@@ -279,14 +279,12 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 
 		checkMetadataTablesButton = new Button(composite, SWT.CHECK);
 		checkMetadataTablesButton.setSelection(exportModel.isCheckMetadataTables());
-		System.out.println(exportModel.isCheckMetadataTables());
 		checkMetadataTablesButton.setEnabled(exportModel.isCheckMetadataTables());
 		checkMetadataTablesButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				System.out.println(e);
 				exportModel.setCheckMetadataTables(checkMetadataTablesButton.getSelection());
 			}
 		});
