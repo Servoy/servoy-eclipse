@@ -1,7 +1,6 @@
 package com.servoy.eclipse.designer.editor.rfb.menu;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,20 +93,19 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof Form)
 		{
-			if (DesignerUtil.hasResponsiveLayoutTemplates((Form)persist))
+			Map<String, PackageSpecification<WebLayoutSpecification>> packages = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications();
+			for (String container : DesignerUtil.findTopContainers(false))
 			{
-				addTemplatesMenuItem(list);
-			}
-			Collection<PackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values();
-			for (PackageSpecification<WebLayoutSpecification> specifications : values)
-			{
-				for (WebLayoutSpecification specification : specifications.getSpecifications().values())
+				if ("template".equalsIgnoreCase(container))
 				{
-					if (specification.isTopContainer())
-					{
-						String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
-						addMenuItem(list, specification, config, null);
-					}
+					addTemplatesMenuItem(list);
+				}
+				else
+				{
+					String[] specNames = container.split("\\.");
+					WebLayoutSpecification specification = packages.get(specNames[0]).getSpecification(specNames[1]);
+					String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
+					addMenuItem(list, specification, config, null);
 				}
 			}
 		}

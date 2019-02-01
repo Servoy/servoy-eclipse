@@ -18,7 +18,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	var allowedChildren = {};	
 	return {
 		get: function(layoutName) {
-			return allowedChildren[layoutName];
+			return allowedChildren[layoutName ? layoutName : "topContainer"];
 		},
 		set: function(map)
 		{
