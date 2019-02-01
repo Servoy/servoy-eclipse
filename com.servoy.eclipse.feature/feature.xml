@@ -31,7 +31,7 @@ internal testing and evaluation by such company only subject to these terms and 
 limited use cannot be transferred nor sub-licensed. No commercial and/or productive use in
 whatever way is permitted. These terms and conditions are applicable as to use of this demo copy
 provided that Servoy does not provide any (level of) Support nor Services. Servoy provides the
-demo copy of the Servoy Software “as is” and makes no representation, guarantee or warranty of
+demo copy of the Servoy Software “as is�? and makes no representation, guarantee or warranty of
 any kind concerning the same. In no event shall Servoy be liable for any loss, direct and/or indirect
 damage/expense whatsoever including, without limitation, time, money or goodwill arising from or
 in connection with the use, performance or non-performance or inability to use, and operation of
@@ -40,7 +40,7 @@ the Servoy Software. Servoy is not liable for any loss/damage of data.
 
 Article 1. Definitions.
 
-1.1 Servoy Software shall mean the present and future standard proprietary computer business application platform software of Servoy which is generally commercially available and marketed under the name “SERVOY” including the related Software Product Description and the subsequent Releases. The factual description of related Servoy Software products indicated by Release number etc. as actually licensed to End-User is indicated in the Product Order Form.
+1.1 Servoy Software shall mean the present and future standard proprietary computer business application platform software of Servoy which is generally commercially available and marketed under the name “SERVOY�? including the related Software Product Description and the subsequent Releases. The factual description of related Servoy Software products indicated by Release number etc. as actually licensed to End-User is indicated in the Product Order Form.
 
 1.2 Software Product Description shall mean the on-line help text/manual being part of the Servoy Software and/or the Servoy standard user manual related to the Release concerned; contents of which can be found at: https://wiki.servoy.com/display/public/Documentation/Servoy+Documentation
 
@@ -84,10 +84,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="org.eclipse.gef"
-         version="0.0.0"/>
-
-   <includes
-         id="org.sweetlemonade.eclipse.json.feature"
          version="0.0.0"/>
 
    <requires>
@@ -345,7 +341,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.freemarker.freemarker"
          download-size="0"
          install-size="0"
-         version="2.3.21.stable"
+         version="2.3.28.stable"
          unpack="false"/>
 
    <plugin
@@ -360,27 +356,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="1.10.0.v20180409-1845"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.collections"
-         download-size="0"
-         install-size="0"
-         version="4.1.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.dbcp2"
-         download-size="0"
-         install-size="0"
-         version="2.3.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.pool2"
-         download-size="0"
-         install-size="0"
-         version="2.5.0"
          unpack="false"/>
 
    <plugin
@@ -433,13 +408,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="commons-lang3"
-         download-size="0"
-         install-size="0"
-         version="3.7.0"
-         unpack="false"/>
-
-   <plugin
          id="slf4j.api"
          download-size="0"
          install-size="0"
@@ -464,14 +432,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="6.2.0"
+         version="7.0.0.v20181030-2244"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="6.2.0"
+         version="7.0.0.v20181030-2244"
          unpack="false"/>
 
    <plugin
@@ -485,21 +453,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.logging.log4j.api"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.11.2.SNAPSHOT"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.11.2.SNAPSHOT"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j18-impl"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.11.2.SNAPSHOT"
          unpack="false"/>
 
    <plugin
@@ -507,13 +475,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="1.1.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.commons-text"
-         download-size="0"
-         install-size="0"
-         version="1.6.0"
          unpack="false"/>
 
    <plugin
@@ -564,4 +525,5 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          install-size="0"
          version="1.1.3"
          unpack="false"/>
+
 </feature>
