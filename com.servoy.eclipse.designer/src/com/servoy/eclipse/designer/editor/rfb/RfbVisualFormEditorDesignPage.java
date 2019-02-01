@@ -56,6 +56,7 @@ import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.core.resource.DesignPagetype;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
@@ -295,7 +296,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 					try
 					{
 						ServoyLog.logInfo("Browser url for editor: " + url);
-						browser.setUrl(url + "&replacewebsocket=true");
+						if (!browser.isDisposed()) browser.setUrl(url + "&replacewebsocket=true");
 					}
 					catch (Exception ex)
 					{
@@ -305,7 +306,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			};
 			if ("true".equals(System.getProperty("svy.tomcat.started")))
 			{
-				runnable.run();
+				UIUtils.runInUI(runnable, false);
 			}
 			else
 			{

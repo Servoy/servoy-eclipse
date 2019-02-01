@@ -27,6 +27,7 @@ import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 import org.json.JSONException;
@@ -140,7 +141,7 @@ public class SaveAsTemplateAction extends SelectionAction
 	@Override
 	public void run()
 	{
-		Pair<String, Boolean> result = askForTemplateName(getWorkbenchPart().getSite().getShell(), groupTemplateElements);
+		Pair<String, Boolean> result = askForTemplateName(Display.getDefault().getActiveShell(), groupTemplateElements);
 		String templateName = result.getLeft();
 		groupTemplateElements = result.getRight().booleanValue();
 

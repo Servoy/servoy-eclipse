@@ -147,7 +147,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		exportMetadataTablesButton.addListener(SWT.Selection, this);
 
 		checkMetadataTablesButton = new Button(composite, SWT.CHECK);
-		checkMetadataTablesButton.setSelection(exportSolutionWizard.getModel().isCheckMetadataTables());
+		checkMetadataTablesButton.setSelection(exportSolutionWizard.getModel().isExportMetaData() && exportSolutionWizard.getModel().isCheckMetadataTables());
 		checkMetadataTablesButton.addListener(SWT.Selection, this);
 
 		exportSampleDataButton = new Button(composite, SWT.CHECK);
@@ -277,7 +277,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		{
 			exportSampleDataButton.setText("Export solution sample data");
 		}
-		checkMetadataTablesButton.setEnabled(!dbiDown);
+		checkMetadataTablesButton.setEnabled(!dbiDown && exportMetadataTablesButton.getSelection());
 		checkMetadataTablesButton.setSelection(dbiDown ? false : exportSolutionWizard.getModel().isCheckMetadataTables());
 		if (dbiDown)
 		{
@@ -306,7 +306,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		else if (event.widget == exportMetadataTablesButton)
 		{
 			exportSolutionWizard.getModel().setExportMetaData(exportMetadataTablesButton.getSelection());
-			checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getSelection());
+			checkMetadataTablesButton.setEnabled(!exportMetadataTablesButton.getSelection());
 		}
 		else if (event.widget == exportSampleDataButton)
 		{

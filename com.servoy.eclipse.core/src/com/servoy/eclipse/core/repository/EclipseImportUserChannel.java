@@ -105,13 +105,13 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (groupsAction != OVERWRITE_ACTION && groupsAction != CANCEL_ACTION)
 		{
-			final MessageDialog dialog = new MessageDialog(shell, "User groups used by imported solution already exist", null,
-				"Do you want to configure security rights on existing groups?\nIf you choose no then no security rights will be imported for existing groups.",
-				MessageDialog.WARNING, new String[] { "Yes to all", "No to all" }, 0);
 			Display.getDefault().syncExec(new Runnable()
 			{
 				public void run()
 				{
+					final MessageDialog dialog = new MessageDialog(shell, "User groups used by imported solution already exist", null,
+						"Do you want to configure security rights on existing groups?\nIf you choose no then no security rights will be imported for existing groups.",
+						MessageDialog.WARNING, new String[] { "Yes to all", "No to all" }, 0);
 					retval = dialog.open();
 				}
 			});
@@ -132,24 +132,25 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (importI18NPolicy == null)
 		{
-			final I18NDialog dialog = new I18NDialog(shell, "Import I18N data", null,
-				"Do you wish to import the I18N data contained in the import(updates and inserts)?", MessageDialog.NONE, new String[] { "Yes", "No" }, 0);
 			Display.getDefault().syncExec(new Runnable()
 			{
 				public void run()
 				{
+					final I18NDialog dialog = new I18NDialog(shell, "Import I18N data", null,
+						"Do you wish to import the I18N data contained in the import(updates and inserts)?", MessageDialog.NONE, new String[] { "Yes", "No" },
+						0);
 					retval = dialog.open();
+					if (retval == Window.OK)
+					{
+						insertNewI18NKeysOnly = dialog.insertNewKeys();
+						importI18NPolicy = new Integer(OK_ACTION);
+					}
+					else
+					{
+						importI18NPolicy = new Integer(CANCEL_ACTION);
+					}
 				}
 			});
-			if (retval == Window.OK)
-			{
-				insertNewI18NKeysOnly = dialog.insertNewKeys();
-				importI18NPolicy = new Integer(OK_ACTION);
-			}
-			else
-			{
-				importI18NPolicy = new Integer(CANCEL_ACTION);
-			}
 		}
 		return importI18NPolicy.intValue();
 	}
@@ -226,21 +227,21 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	public int askRenameRootObjectAction(final String name, final int objectTypeId)
 	{
 		String objectType = Utils.stringInitCap(RepositoryHelper.getObjectTypeName(objectTypeId));
-		final InputDialog nameDialog = new InputDialog(shell, objectType + " exists",
-			objectType + " with name '" + name + "' already exists(or you choose clean import), specify new name:", "", new IInputValidator()
-			{
-				public String isValid(String newText)
-				{
-					if (!IdentDocumentValidator.isJavaIdentifier(newText)) return "Invalid name.";
-					if (newText != null && newText.length() > IRepository.MAX_ROOT_OBJECT_NAME_LENGTH) return "Name too long.";
-					return null;
-				}
-			});
 
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
 			{
+				final InputDialog nameDialog = new InputDialog(shell, objectType + " exists",
+					objectType + " with name '" + name + "' already exists(or you choose clean import), specify new name:", "", new IInputValidator()
+					{
+						public String isValid(String newText)
+						{
+							if (!IdentDocumentValidator.isJavaIdentifier(newText)) return "Invalid name.";
+							if (newText != null && newText.length() > IRepository.MAX_ROOT_OBJECT_NAME_LENGTH) return "Name too long.";
+							return null;
+						}
+					});
 				int res = nameDialog.open();
 				if (res == Window.OK)
 				{
@@ -275,19 +276,22 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				break;
 			}
 		}
-		final OptionDialog optionDialog = new OptionDialog(shell, "Select server for import user data", null,
-			"Please select server to be used for importing user data that were exported from a server with name : " + importServerName +
-				"\n\nIf you want to import into a new server, please press skip, create the new server and restart the import.",
-			MessageDialog.QUESTION, new String[] { "OK", "Skip" }, 0, serverNames, selectedServerIdx);
+		final int severIndex = selectedServerIdx;
+		final int[] selectedOption = new int[0];
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
 			{
+				final OptionDialog optionDialog = new OptionDialog(shell, "Select server for import user data", null,
+					"Please select server to be used for importing user data that were exported from a server with name : " + importServerName +
+						"\n\nIf you want to import into a new server, please press skip, create the new server and restart the import.",
+					MessageDialog.QUESTION, new String[] { "OK", "Skip" }, 0, serverNames, severIndex);
 				retval = optionDialog.open();
+				selectedOption[0] = optionDialog.getSelectedOption();
 			}
 		});
 
-		return retval == Window.OK ? serverNames[optionDialog.getSelectedOption()] : null;
+		return retval == Window.OK ? serverNames[selectedOption[0]] : null;
 	}
 
 	public String askServerForRepositoryUserData()
@@ -296,21 +300,23 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		{
 			if (serverNameForRepositoryUserData == null)
 			{
+				int[] selectedOption = new int[1];
 				ServoyModelManager.getServoyModelManager().getServoyModel();
 				String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
-				final OptionDialog optionDialog = new OptionDialog(shell, "User data in Repository Server", null,
-					"The solution contains user data in the repository server, this is not recommended. Choose another server for the user data if you wish.",
-					MessageDialog.WARNING, new String[] { "OK", "Skip" }, 0, serverNames, 0);
 				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
 					{
+						final OptionDialog optionDialog = new OptionDialog(shell, "User data in Repository Server", null,
+							"The solution contains user data in the repository server, this is not recommended. Choose another server for the user data if you wish.",
+							MessageDialog.WARNING, new String[] { "OK", "Skip" }, 0, serverNames, 0);
 						retval = optionDialog.open();
+						selectedOption[0] = optionDialog.getSelectedOption();
 					}
 				});
 				if (retval == Window.OK)
 				{
-					serverNameForRepositoryUserData = serverNames[optionDialog.getSelectedOption()];
+					serverNameForRepositoryUserData = serverNames[selectedOption[0]];
 				}
 			}
 			return serverNameForRepositoryUserData;
@@ -329,13 +335,13 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		{
 			return rootObjectsMap.get(name);
 		}
-		final MessageDialog dialog = new MessageDialog(shell, "Style/Solution '" + name + "' already exists", null,
-			"Style/Solution '" + name + "' exists in the workspace. Do you want to overwrite it or skip its import?", MessageDialog.WARNING,
-			new String[] { "Overwrite", "Skip", "Overwrite all", "Skip all" }, 0);
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
 			{
+				final MessageDialog dialog = new MessageDialog(shell, "Style/Solution '" + name + "' already exists", null,
+					"Style/Solution '" + name + "' exists in the workspace. Do you want to overwrite it or skip its import?", MessageDialog.WARNING,
+					new String[] { "Overwrite", "Skip", "Overwrite all", "Skip all" }, 0);
 				retval = dialog.open();
 			}
 		});
@@ -400,15 +406,19 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						}
 					}
 				}
-				String[] buttons = serverConfig != null ? new String[] { "OK", "Create Server", "Cancel" } : new String[] { "OK", "Cancel" };
-				final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null, "Server with name '" + name +
-					"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
-					MessageDialog.WARNING, buttons, 0, serverNames, 0);
+				final int[] selectedOption = new int[1];
+				String[] buttons = serverConfig != null ? new String[] { "Replace Server", "Create Server", "Cancel" }
+					: new String[] { "Replace Server", "Cancel" };
+				int defaultOption = serverConfig != null ? 1 : 0;
 				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
 					{
+						final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null, "Server with name '" + name +
+							"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
+							MessageDialog.WARNING, buttons, defaultOption, serverNames, defaultOption);
 						retval = optionDialog.open();
+						selectedOption[0] = optionDialog.getSelectedOption();
 					}
 				});
 				if (serverConfig != null && retval == 1)
@@ -455,7 +465,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				}
 				if (retval == Window.OK)
 				{
-					s = serverNames[optionDialog.getSelectedOption()];
+					s = serverNames[selectedOption[0]];
 				}
 				unknownServerNameMap.put(name, s);
 			}
@@ -484,12 +494,12 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (userImportPolicy == null)
 		{
-			final UserImportDialog dialog = new UserImportDialog(shell, "User information", null,
-				"Do you wish to import the user information contained in the import?", MessageDialog.NONE, new String[] { "Yes", "No" }, 0);
 			Display.getDefault().syncExec(new Runnable()
 			{
 				public void run()
 				{
+					final UserImportDialog dialog = new UserImportDialog(shell, "User information", null,
+						"Do you wish to import the user information contained in the import?", MessageDialog.NONE, new String[] { "Yes", "No" }, 0);
 					dialog.open();
 				}
 			});
@@ -679,15 +689,15 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			return allowDataModelChangesForServer.get(serverName).booleanValue() ? OK_ACTION : CANCEL_ACTION;
 		}
 
-		MessageDialog dialog = new MessageDialog(shell, "Allow Database Change for Server: " + serverName, null,
-			"Do you want to change database structure as in import file for server: " + serverName + "?", MessageDialog.QUESTION,
-			new String[] { "Yes for all servers", IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, "No for all servers" }, 0);
-		dialog.setBlockOnOpen(true);
 		final int[] returnValue = new int[1];
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
 			{
+				MessageDialog dialog = new MessageDialog(shell, "Allow Database Change for Server: " + serverName, null,
+					"Do you want to change database structure as in import file for server: " + serverName + "?", MessageDialog.QUESTION,
+					new String[] { "Yes for all servers", IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, "No for all servers" }, 0);
+				dialog.setBlockOnOpen(true);
 				returnValue[0] = dialog.open();
 			}
 		});

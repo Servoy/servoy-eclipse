@@ -21,8 +21,10 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.base.persistence.constants.IFormConstants;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -69,30 +71,34 @@ public class ConvertAllFormsToCSSPosition extends Action implements ISelectionCh
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		if (node.getRealObject() instanceof ServoyProject)
 		{
-			EditorUtil.saveDirtyEditors(viewer.getSite().getShell(), true);
 			final ServoyProject project = (ServoyProject)node.getRealObject();
-			final Solution solution = project.getEditingSolution();
-			solution.acceptVisitor(new IPersistVisitor()
+			if (UIUtils.askConfirmation(new Shell(), "CSS Position Conversion", "Are you sure you want to convert all forms from solution '" +
+				project.getProject().getName() + "' to CSS Position? Note this action is irreversible and undoable."))
 			{
-				public Object visit(IPersist object)
+				EditorUtil.saveDirtyEditors(viewer.getSite().getShell(), true);
+				final Solution solution = project.getEditingSolution();
+				solution.acceptVisitor(new IPersistVisitor()
 				{
-					if (object instanceof Form && !((Form)object).isResponsiveLayout() &&
-						(((Form)object).getView() == IFormConstants.VIEW_TYPE_RECORD || ((Form)object).getView() == IFormConstants.VIEW_TYPE_RECORD_LOCKED))
+					public Object visit(IPersist object)
 					{
-						Form form = (Form)object;
-						form.setUseCssPosition(true);
-						CSSPosition.convertToCSSPosition(form);
+						if (object instanceof Form && !((Form)object).isResponsiveLayout() &&
+							(((Form)object).getView() == IFormConstants.VIEW_TYPE_RECORD || ((Form)object).getView() == IFormConstants.VIEW_TYPE_RECORD_LOCKED))
+						{
+							Form form = (Form)object;
+							form.setUseCssPosition(true);
+							CSSPosition.convertToCSSPosition(form);
+						}
+						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}
-					return IPersistVisitor.CONTINUE_TRAVERSAL;
+				});
+				try
+				{
+					project.saveEditingSolutionNodes(new IPersist[] { solution }, true);
 				}
-			});
-			try
-			{
-				project.saveEditingSolutionNodes(new IPersist[] { solution }, true);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 	}

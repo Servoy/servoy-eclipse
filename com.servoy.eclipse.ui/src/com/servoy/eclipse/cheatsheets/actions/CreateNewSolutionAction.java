@@ -17,11 +17,11 @@
 
 package com.servoy.eclipse.cheatsheets.actions;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.util.IntroCloseWelcomePage;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.j2db.persistence.SolutionMetaData;
 
@@ -30,11 +30,12 @@ import com.servoy.j2db.persistence.SolutionMetaData;
  *
  * @author gerzse
  */
-public class CreateNewSolutionAction extends Action
+public class CreateNewSolutionAction extends IntroCloseWelcomePage
 {
 	@Override
 	public void run()
 	{
+		super.run();
 		NewSolutionWizard wizard = new NewSolutionWizard()
 		{
 			@Override

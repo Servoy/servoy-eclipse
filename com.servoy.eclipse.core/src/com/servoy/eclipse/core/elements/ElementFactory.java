@@ -1261,7 +1261,15 @@ public class ElementFactory
 	public static String createTemplateContent(EclipseRepository repository, Form form, List<IPersist> persists, int templateType, boolean groupingState)
 		throws JSONException, RepositoryException
 	{
-		java.awt.Point location = Utils.getBounds(persists.iterator()).getLocation();
+		java.awt.Point location = null;
+		if (form.getUseCssPosition())
+		{
+			location = CSSPosition.getLocationFromPixels(persists);
+		}
+		else
+		{
+			location = Utils.getBounds(persists.iterator()).getLocation();
+		}
 
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 
@@ -1284,7 +1292,7 @@ public class ElementFactory
 			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, true, repository, false, null);
 			if (persist instanceof ISupportSize) // some objects have default size programmed in the getter
 			{
-				object.put(Template.PROP_SIZE, repository.convertObjectToArgumentString(IRepository.DIMENSION, ((ISupportSize)persist).getSize()));
+				object.put(Template.PROP_SIZE, repository.convertObjectToArgumentString(IRepository.DIMENSION, CSSPosition.getSize((ISupportSize)persist)));
 			}
 			elements.put(cleanTemplateElement(repository, flattenedSolution, form, object, location));
 		}
@@ -1312,6 +1320,30 @@ public class ElementFactory
 		{
 			java.awt.Point location = PersistHelper.createPoint((String)object.opt("location"));
 			object.put("location", PersistHelper.createPointString(new java.awt.Point(location.x - base.x, location.y - base.y)));
+		}
+		if (base != null && object.has("cssPosition"))
+		{
+			CSSPosition cssPosition = PersistHelper.createCSSPosition((String)object.opt("cssPosition"));
+			// width, height, right , bottom stay unchanged; only modify left and top if they are pixels
+			if (base.x != 0)
+			{
+				int left = CSSPosition.getPixelsValue(cssPosition.left);
+				if (left >= 0)
+				{
+					cssPosition.left = String.valueOf(left - base.x);
+				}
+			}
+			if (base.y != 0)
+			{
+				int top = CSSPosition.getPixelsValue(cssPosition.top);
+				if (top >= 0)
+				{
+					cssPosition.top = String.valueOf(top - base.y);
+				}
+			}
+			object.put("cssPosition", PersistHelper.createCSSPositionString(cssPosition));
+			object.remove("location");
+			object.remove("size");
 		}
 
 		Iterator<String> keys = object.keys();
@@ -1479,7 +1511,7 @@ public class ElementFactory
 								int x, y;
 								if (setFormProperties || persists.size() > 1)
 								{
-									java.awt.Point ploc = ((ISupportBounds)o).getLocation();
+									java.awt.Point ploc = CSSPosition.getLocation((ISupportBounds)o);
 									x = ploc.x;
 									y = ploc.y;
 								}
@@ -1487,7 +1519,25 @@ public class ElementFactory
 								{ // if a single element is placed, do not use its relative location
 									x = y = 0;
 								}
-								CSSPosition.setLocation((ISupportBounds)o, awtLocation.x + x, awtLocation.y + y);
+								if (parentForm.getUseCssPosition() && o instanceof BaseComponent)
+								{
+									CSSPosition cssPosition = ((BaseComponent)o).getCssPosition();
+									int left = CSSPosition.getPixelsValue(cssPosition.left);
+									if (left >= 0)
+									{
+										cssPosition.left = String.valueOf(awtLocation.x + x);
+									}
+									int top = CSSPosition.getPixelsValue(cssPosition.top);
+									if (top >= 0)
+									{
+										cssPosition.top = String.valueOf(awtLocation.y + y);
+									}
+									((BaseComponent)o).setCssPosition(cssPosition);
+								}
+								else
+								{
+									CSSPosition.setLocation((ISupportBounds)o, awtLocation.x + x, awtLocation.y + y);
+								}
 							}
 							if (o instanceof ISupportUpdateableName)
 							{
@@ -1598,7 +1648,7 @@ public class ElementFactory
 		return persists.keySet().toArray();
 	}
 
-	public static Dimension getTemplateBoundsize(TemplateElementHolder templateHolder)
+	public static Dimension getTemplateBoundsize(TemplateElementHolder templateHolder, Form form)
 	{
 		if (templateHolder == null || templateHolder.template == null)
 		{
@@ -1626,35 +1676,51 @@ public class ElementFactory
 					// ignore parts
 					continue;
 				}
-
-				java.awt.Dimension size = null;
-				if (object.has(Template.PROP_SIZE))
+				Rectangle rectangle = null;
+				if (object.has("cssPosition"))
 				{
-					size = PersistHelper.createDimension((String)object.get(Template.PROP_SIZE));
-				}
-				if (size == null || size.height == 0 || size.width == 0)
-				{
-					continue;
-				}
-
-				java.awt.Point location = null;
-				if (object.has(Template.PROP_LOCATION))
-				{
-					location = PersistHelper.createPoint((String)object.get(Template.PROP_LOCATION));
-				}
-				if (location == null)
-				{
-					location = new java.awt.Point(0, 0);
-				}
-
-				Rectangle rectangle = new Rectangle(location, size);
-				if (box == null)
-				{
-					box = rectangle;
+					if (form != null)
+					{
+						CSSPosition cssPosition = PersistHelper.createCSSPosition((String)object.opt("cssPosition"));
+						java.awt.Point location = CSSPosition.getLocation(cssPosition, form.getSize());
+						Dimension size = CSSPosition.getSize(cssPosition, form.getSize());
+						rectangle = new Rectangle(location, size);
+					}
 				}
 				else
 				{
-					box.add(rectangle);
+					java.awt.Dimension size = null;
+					if (object.has(Template.PROP_SIZE))
+					{
+						size = PersistHelper.createDimension((String)object.get(Template.PROP_SIZE));
+					}
+					if (size == null || size.height == 0 || size.width == 0)
+					{
+						continue;
+					}
+
+					java.awt.Point location = null;
+					if (object.has(Template.PROP_LOCATION))
+					{
+						location = PersistHelper.createPoint((String)object.get(Template.PROP_LOCATION));
+					}
+					if (location == null)
+					{
+						location = new java.awt.Point(0, 0);
+					}
+
+					rectangle = new Rectangle(location, size);
+				}
+				if (rectangle != null)
+				{
+					if (box == null)
+					{
+						box = rectangle;
+					}
+					else
+					{
+						box.add(rectangle);
+					}
 				}
 			}
 		}

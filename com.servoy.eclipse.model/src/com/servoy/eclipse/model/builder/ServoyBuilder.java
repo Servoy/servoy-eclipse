@@ -1730,23 +1730,33 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 			if (extendsForm != null)
 			{
-				if (form.isResponsiveLayout() != extendsForm.isResponsiveLayout())
+				if ((form.isResponsiveLayout() != extendsForm.isResponsiveLayout()) || (form.getUseCssPosition() != extendsForm.getUseCssPosition()))
 				{
 					Iterator<IFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
 					// do now show if no ui is present
 					if (uiElements.hasNext())
 					{
-						String message = null;
+						String formLayoutType = "absolute layout";
 						if (form.isResponsiveLayout())
 						{
-							message = "The responsive layout form '" + form.getName() + "' should not extend the absolute layout form '" +
-								extendsForm.getName() + "'.";
+							formLayoutType = "responsive layout";
 						}
-						else
+						else if (form.getUseCssPosition())
 						{
-							message = "The absolute layout form  '" + form.getName() + "' should not extend the responsive layout form '" +
-								extendsForm.getName() + "'.";
+							formLayoutType = "css position layout";
 						}
+						String message = "The " + formLayoutType + " form '" + form.getName() + "' should not extend the ";
+						String extendsFormLayoutType = "absolute layout";
+						if (extendsForm.isResponsiveLayout())
+						{
+							extendsFormLayoutType = "responsive layout";
+						}
+						else if (extendsForm.getUseCssPosition())
+						{
+							extendsFormLayoutType = "css position layout";
+						}
+						message += extendsFormLayoutType + " form '" + extendsForm.getName() + "'.";
+
 						IMarker marker = addMarker(project, SUPERFORM_PROBLEM_TYPE, message, -1, SUPERFORM_PROBLEM, IMarker.PRIORITY_NORMAL, null, persist);
 						try
 						{

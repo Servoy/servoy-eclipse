@@ -45,6 +45,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.util.Utils;
 
 /**
  *
@@ -281,7 +282,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 					String numberOfServers = prop.getProperty("ServerManager.numberOfServers");
 					if (numberOfServers != null)
 					{
-						int nrOfServers = Integer.parseInt(numberOfServers);
+						int nrOfServers = Utils.getAsInteger(numberOfServers.trim(), false);
 						boolean repositoryExists = false;
 						for (int i = 0; i < nrOfServers && !repositoryExists; i++)
 						{

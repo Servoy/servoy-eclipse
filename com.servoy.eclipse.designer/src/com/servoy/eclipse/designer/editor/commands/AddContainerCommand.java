@@ -34,6 +34,8 @@ import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.elements.ElementFactory;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
@@ -122,6 +124,36 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									persist = addLayoutComponent(persistContext, specName, packageName,
 										new JSONObject(event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.config")),
 										computeNextLayoutContainerIndex(persistContext.getPersist()));
+								}
+								else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.template") != null)
+								{
+									if (persistContext.getPersist() instanceof AbstractContainer)
+									{
+										TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
+											FlatTreeContentProvider.INSTANCE, new LabelProvider()
+											{
+												@Override
+												public String getText(Object element)
+												{
+													return ((TemplateElementHolder)element).template.getName();
+												};
+											}, null, null, SWT.NONE, "Select template",
+											DesignerUtil.getResponsiveLayoutTemplates((AbstractContainer)persistContext.getPersist()), null, false,
+											"TemplateDialog", null);
+										dialog.open();
+										if (dialog.getReturnCode() == Window.OK)
+										{
+											AbstractContainer parentPersist = (AbstractContainer)ElementUtil.getOverridePersist(persistContext);
+											int x = parentPersist.getAllObjectsAsList().size();
+											TemplateElementHolder template = (TemplateElementHolder)((StructuredSelection)dialog.getSelection()).getFirstElement();
+											Object[] applyTemplate = ElementFactory.applyTemplate(parentPersist, template,
+												new org.eclipse.swt.graphics.Point(x + 1, x + 1), false);
+											if (applyTemplate.length > 0)
+											{
+												persist = parentPersist;
+											}
+										}
+									}
 								}
 								else
 								{

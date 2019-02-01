@@ -893,6 +893,11 @@
                name="Custom Type Property"
                optional="true">
          </commandParameter>
+         <commandParameter
+               id="com.servoy.eclipse.designer.editor.rfb.menu.add.template"
+               name="Template"
+               optional="true">
+         </commandParameter>
       </command>      
       <command
             defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler"

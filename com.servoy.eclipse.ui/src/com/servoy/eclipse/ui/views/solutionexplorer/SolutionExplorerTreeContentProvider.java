@@ -1853,27 +1853,30 @@ public class SolutionExplorerTreeContentProvider
 		{
 			Solution servoySolution = (Solution)realObject;
 			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(servoySolution.getName());
-			IProject eclipseProject = servoyProject.getProject();
-			try
+			if (servoyProject != null)
 			{
-				List<IProject> allReferencedProjects;
-				if (includeModules)
+				IProject eclipseProject = servoyProject.getProject();
+				try
 				{
-					allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
-				}
-				else
-				{
-					allReferencedProjects = Arrays.asList(eclipseProject.getReferencedProjects());
-				}
+					List<IProject> allReferencedProjects;
+					if (includeModules)
+					{
+						allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
+					}
+					else
+					{
+						allReferencedProjects = Arrays.asList(eclipseProject.getReferencedProjects());
+					}
 
-				for (IProject iProject : allReferencedProjects)
-				{
-					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID)) return true;
+					for (IProject iProject : allReferencedProjects)
+					{
+						if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID)) return true;
+					}
 				}
-			}
-			catch (CoreException e)
-			{
-				Debug.log(e);
+				catch (CoreException e)
+				{
+					Debug.log(e);
+				}
 			}
 		}
 		return false;

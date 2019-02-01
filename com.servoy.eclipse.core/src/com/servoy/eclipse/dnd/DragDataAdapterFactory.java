@@ -74,7 +74,7 @@ public class DragDataAdapterFactory implements IAdapterFactory
 				Dimension size = null;
 				if (persist instanceof Template)
 				{
-					size = ElementFactory.getTemplateBoundsize(new TemplateElementHolder((Template)persist));
+					size = ElementFactory.getTemplateBoundsize(new TemplateElementHolder((Template)persist), null);
 				}
 				else if (persist instanceof Form)
 				{
@@ -96,7 +96,7 @@ public class DragDataAdapterFactory implements IAdapterFactory
 			{
 				TemplateElementHolder templateHolder = (TemplateElementHolder)obj;
 				int width = 80, height = 20;
-				Dimension size = ElementFactory.getTemplateBoundsize(templateHolder);
+				Dimension size = ElementFactory.getTemplateBoundsize(templateHolder, null);
 				if (size != null)
 				{
 					width = size.width;

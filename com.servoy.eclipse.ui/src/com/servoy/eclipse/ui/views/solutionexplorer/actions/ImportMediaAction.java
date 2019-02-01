@@ -166,7 +166,7 @@ public class ImportMediaAction extends Action implements ISelectionChangedListen
 			{
 				public void run()
 				{
-					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
+					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.WARNING, "Warning",
 						"The folowing media files already exist in the current solution: " + editingSolutionName, text);
 					List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.YES_TO_ALL_ID, "Overwrite all"));

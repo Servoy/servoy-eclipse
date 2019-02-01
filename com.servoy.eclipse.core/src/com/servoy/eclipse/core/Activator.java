@@ -19,6 +19,7 @@ package com.servoy.eclipse.core;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -36,6 +37,7 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -1204,8 +1206,12 @@ public class Activator extends Plugin
 
 	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception
 	{
-		URLClassLoader loader = URLClassLoader.newInstance(
-			new URL[] { new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/../servoy_updater.jar").toURI().toURL() });
+		File file = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/../servoy_updater.jar");
+		try (InputStream is = Activator.class.getResourceAsStream("updater/servoy_updater.jar"))
+		{
+			FileUtils.copyInputStreamToFile(is, file);
+		}
+		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() });
 		Class< ? > versionCheckClass = loader.loadClass("com.servoy.updater.VersionCheck");
 		Method updateAppServerFromSerclipse = versionCheckClass.getMethod("updateAppServerFromSerclipse",
 			new Class[] { java.io.File.class, int.class, int.class, ActionListener.class });
