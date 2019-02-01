@@ -2653,7 +2653,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 										Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
 										if (frm == null) continue;
-										if (!Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
+										if (frm.getDataSource() != null && !Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
 										{
 											ServoyMarker mk = MarkerMessages.FormComponentInvalidDataSource.fill(((WebComponent)o).getName(), pd.getName(),
 												frm.getName(), form.getName());
