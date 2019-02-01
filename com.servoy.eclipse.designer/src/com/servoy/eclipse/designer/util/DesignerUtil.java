@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.EditPart;
@@ -326,18 +327,24 @@ public class DesignerUtil
 			@Override
 			public void add(String key, Set<String> values)
 			{
-				if (!values.isEmpty())
-				{
-					JSONArray ar = new JSONArray();
-					for (String child : values)
-					{
-						ar.put(child);
-					}
-					obj.put(key, ar);
-				}
+				setToJSONArray(obj, key, values);
 			}
 		});
+		setToJSONArray(obj, "topContainer", findTopContainers(false));
 		return obj;
+	}
+
+	public static void setToJSONArray(final JSONObject obj, String key, Set<String> values)
+	{
+		if (!values.isEmpty())
+		{
+			JSONArray ar = new JSONArray();
+			for (String child : values)
+			{
+				ar.put(child);
+			}
+			obj.put(key, ar);
+		}
 	}
 
 	// put "component" first if present and sort the others;
@@ -398,33 +405,10 @@ public class DesignerUtil
 
 	public static Set<String> findTopContainers(boolean skipTemplate)
 	{
-		Set<String> topContainers = !skipTemplate ? new TreeSet<>(comparator) : new HashSet<String>();
-		Collection<PackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values();
-		for (PackageSpecification<WebLayoutSpecification> specifications : values)
-		{
-			for (WebLayoutSpecification layoutSpec : specifications.getSpecifications().values())
-			{
-				if (layoutSpec.isTopContainer())
-				{
-					try
-					{
-						String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);
-						if (layoutName != null)
-						{
-							topContainers.add(layoutName);
-						}
-						else
-						{
-							topContainers.add(specifications.getPackageName() + "." + layoutSpec.getName());
-						}
-					}
-					catch (JSONException e)
-					{
-						Debug.log(e);
-					}
-				}
-			}
-		}
+		Set<String> topContainers = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values().stream().flatMap(
+			pack -> pack.getSpecifications().values().stream().filter(WebLayoutSpecification::isTopContainer).map(
+				layoutSpec -> pack.getPackageName() + "." + layoutSpec.getName())).collect(
+					Collectors.toCollection(() -> !skipTemplate ? new TreeSet<>(comparator) : new HashSet<String>()));
 		if (!skipTemplate && hasResponsiveLayoutTemplates(null, null))
 		{
 			topContainers.add("template");
@@ -589,15 +573,7 @@ public class DesignerUtil
 	{
 		Set<String> allowedChildren = findAllowedChildren(packName, specName, true);
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
-		for (int i = 0; i < templates.size(); i++)
-		{
-			Template template = (Template)templates.get(i);
-			if (addTemplate(allowedChildren, template))
-			{
-				return true;
-			}
-		}
-		return false;
+		return templates.stream().anyMatch(template -> addTemplate(allowedChildren, (Template)template));
 	}
 
 
