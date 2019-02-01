@@ -51,6 +51,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -150,6 +151,23 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 												new org.eclipse.swt.graphics.Point(x + 1, x + 1), false);
 											if (applyTemplate.length > 0)
 											{
+												List<IPersist> persists = new ArrayList<>();
+												for (Object o : applyTemplate)
+												{
+													if (o instanceof FormElementGroup)
+													{
+														FormElementGroup group = (FormElementGroup)o;
+														group.getElements().forEachRemaining(persists::add);
+													}
+													else if (o instanceof IPersist)
+													{
+														persists.add((IPersist)o);
+													}
+												}
+												ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, persists);
+												IStructuredSelection structuredSelection = new StructuredSelection(
+													persists.size() > 0 ? persists.get(0) : persists);
+												selectionProvider.setSelection(structuredSelection);
 												persist = parentPersist;
 											}
 										}
