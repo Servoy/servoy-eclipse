@@ -2890,10 +2890,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				persistContainingFoundsetProperty = persistContainingFoundsetProperty.getParent().getAncestor(IRepository.WEBCOMPONENTS);
 			}
 		}
+		ITable forFoundsetTable = null;
 		if (forFoundsetName != null)
 		{
-			ITable table = null;
-
 			try
 			{
 				Object object = null;
@@ -2914,20 +2913,20 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					if (foundsetValue.equals(""))
 					{
-						table = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
+						forFoundsetTable = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 					}
 					else
 					{
 						if (DataSourceUtils.isDatasourceUri(foundsetValue))
 						{
-							table = dsm.getDataSource(foundsetValue);
+							forFoundsetTable = dsm.getDataSource(foundsetValue);
 						}
 						else
 						{
 							Relation[] relations = flattenedEditingSolution.getRelationSequence(foundsetValue);
 							if (relations != null && relations.length > 0)
 							{
-								table = dsm.getDataSource(relations[relations.length - 1].getForeignDataSource());
+								forFoundsetTable = dsm.getDataSource(relations[relations.length - 1].getForeignDataSource());
 							}
 							else
 							{
@@ -2936,7 +2935,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 									IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetValue);
 									if (foundset != null)
 									{
-										table = dsm.getDataSource(foundset.getDataSource());
+										forFoundsetTable = dsm.getDataSource(foundset.getDataSource());
 									}
 								}
 								catch (Exception ex)
@@ -2955,14 +2954,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			if (propertyType instanceof TagStringPropertyType)
 			{
-				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, table);
+				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, forFoundsetTable);
 			}
 			else if (propertyType instanceof DataproviderPropertyType)
 			{
-				final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true,
-					true, table != null, table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
+				final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(true, forFoundsetTable != null, forFoundsetTable != null,
+					forFoundsetTable != null, true, true, forFoundsetTable != null, forFoundsetTable != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 
-				return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, table, options);
+				return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, forFoundsetTable, options);
 			}
 		}
 
@@ -3070,18 +3069,30 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true),
 				persistContext.getContext());
+			final ITable forFoundsetTableFinal = forFoundsetTable;
 			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
 			{
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
+					String dataSource = ((Form)persistContext.getContext()).getDataSource();
+					if (propertyDescription.getConfig() instanceof ComponentTypeConfig)
+					{
+						if (forFoundsetTableFinal != null)
+						{
+							dataSource = forFoundsetTableFinal.getDataSource();
+						}
+						else
+						{
+							dataSource = null;
+						}
+					}
 					return new ListSelectCellEditor(parent, "Select form",
 						new FormContentProvider(flattenedEditingSolution,
 							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, true,
-							((Form)persistContext.getContext()).getDataSource()),
-						SWT.NONE, null, "Select form dialog");
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, true, dataSource), SWT.NONE, null,
+						"Select form dialog");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
@@ -3209,6 +3220,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		if (propertyDescription.getType() instanceof FoundsetLinkedPropertyType< ? , ? >)
 		{
 			forFoundsetName = ((FoundsetLinkedConfig)propertyDescription.getConfig()).getForFoundsetName();
+		}
+		if (propertyDescription.getType() instanceof FormComponentPropertyType && propertyDescription.getConfig() instanceof ComponentTypeConfig)
+		{
+			forFoundsetName = ((ComponentTypeConfig)propertyDescription.getConfig()).forFoundset;
 		}
 		return forFoundsetName;
 	}
