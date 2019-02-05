@@ -107,6 +107,7 @@ import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.DBValueList;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
+import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptor;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
@@ -176,6 +177,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
+import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -2653,13 +2655,68 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 										Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
 										if (frm == null) continue;
-										if (frm.getDataSource() != null && !Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
+										if (pd.getConfig() instanceof ComponentTypeConfig)
+										{
+											String forFoundsetName = ((ComponentTypeConfig)pd.getConfig()).forFoundset;
+											String datasource = null;
+											String foundsetValue = null;
+											if (((WebComponent)o).hasProperty(forFoundsetName))
+											{
+												Object foundsetJson = ((WebComponent)o).getProperty(forFoundsetName);
+												if (foundsetJson instanceof JSONObject)
+												{
+													foundsetValue = (String)((JSONObject)foundsetJson).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
+												}
+											}
+											if (DataSourceUtils.isDatasourceUri(foundsetValue))
+											{
+												datasource = foundsetValue;
+											}
+											else if (foundsetValue.equals(""))
+											{
+												datasource = form.getDataSource();
+											}
+											else
+											{
+												Relation[] relations = flattenedSolution.getRelationSequence(foundsetValue);
+												if (relations != null && relations.length > 0)
+												{
+													datasource = relations[relations.length - 1].getForeignDataSource();
+												}
+												else
+												{
+													IFoundSet foundset;
+													try
+													{
+														foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(
+															foundsetValue);
+														if (foundset != null)
+														{
+															datasource = foundset.getDataSource();
+														}
+													}
+													catch (ServoyException e)
+													{
+														ServoyLog.logError(e);
+													}
+												}
+											}
+											if (frm.getDataSource() != null && !Utils.equalObjects(datasource, frm.getDataSource()))
+											{
+												ServoyMarker mk = MarkerMessages.FormComponentForFoundsetInvalidDataSource.fill(((WebComponent)o).getName(),
+													pd.getName(), frm.getName(), forFoundsetName);
+												addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE, IMarker.PRIORITY_NORMAL,
+													null, o);
+											}
+										}
+										else if (frm.getDataSource() != null && !Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
 										{
 											ServoyMarker mk = MarkerMessages.FormComponentInvalidDataSource.fill(((WebComponent)o).getName(), pd.getName(),
 												frm.getName(), form.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE, IMarker.PRIORITY_NORMAL, null,
 												o);
 										}
+
 										FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd,
 											(JSONObject)propertyValue, frm, flattenedSolution);
 										for (FormElement element : cache.getFormComponentElements())
