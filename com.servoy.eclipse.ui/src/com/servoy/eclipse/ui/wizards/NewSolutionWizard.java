@@ -87,7 +87,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.resources.ThemeResourceLoader;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -232,25 +232,22 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				}
 			}
 
-			private void addDefaultThemeIfNeeded(EclipseRepository repository, Solution solution) throws RepositoryException, IOException
+			private void addDefaultThemeIfNeeded(EclipseRepository repository, Solution solution) throws RepositoryException
 			{
 				if (page1.shouldAddDefaultTheme())
 				{
-					Media defaultTheme = addMediaFile(solution, "resources/default-theme.less", solution.getName() + ".less");
-					addMediaFile(solution, "resources/" + ResourceProvider.PROPERTIES_LESS, ResourceProvider.PROPERTIES_LESS);
+					Media defaultTheme = addMediaFile(solution, ThemeResourceLoader.getDefaultSolutionLess(), solution.getName() + ".less");
+					addMediaFile(solution, ThemeResourceLoader.getLatestThemeProperties(), ThemeResourceLoader.PROPERTIES_LESS);
 					solution.setStyleSheetID(defaultTheme.getID());
 					repository.updateRootObject(solution);
 				}
 			}
 
-			private Media addMediaFile(Solution solution, String path, String fileName) throws RepositoryException, IOException
+			private Media addMediaFile(Solution solution, byte[] content, String fileName) throws RepositoryException
 			{
 				Media defaultTheme = solution.createNewMedia(new ScriptNameValidator(), fileName);
 				defaultTheme.setMimeType("text/css");
-				try (InputStream is = NewSolutionWizard.class.getResource(path).openStream())
-				{
-					defaultTheme.setPermMediaData(Utils.getBytesFromInputStream(is));
-				}
+				defaultTheme.setPermMediaData(content);
 				return defaultTheme;
 			}
 		};
