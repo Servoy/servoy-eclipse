@@ -40,7 +40,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
 import com.servoy.j2db.persistence.NameComparator;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.resources.ThemeResourceLoader;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -67,7 +67,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		if (input != null)
 		{
 			String fileName = input.getName();
-			if (fileName.equals(ResourceProvider.PROPERTIES_LESS))
+			if (fileName.equals(ThemeResourceLoader.PROPERTIES_LESS))
 			{
 				String content = getFileContent(input);
 
@@ -194,7 +194,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	@Override
 	public String getName()
 	{
-		return ResourceProvider.PROPERTIES_LESS;
+		return ThemeResourceLoader.PROPERTIES_LESS;
 	}
 
 	@Override
