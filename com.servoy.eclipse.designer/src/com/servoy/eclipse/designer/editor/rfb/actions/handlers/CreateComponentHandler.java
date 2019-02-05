@@ -131,6 +131,35 @@ public class CreateComponentHandler implements IServerService
 
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
+		if (args.has("name") && ("component".equals(args.getString("name")) || "template".equals(args.getString("name")) || "*".equals(args.getString("name"))))
+		{
+			String name = args.getString("name");
+			IHandlerService handlerService = PlatformUI.getWorkbench().getService(IHandlerService.class);
+			Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand(AddContainerCommand.COMMAND_ID);
+			ExecutionEvent executionEvent = null;
+			try
+			{
+				if ("*".equals(name) || "component".equals(name))
+				{
+					final Event trigger = new Event();
+					executionEvent = handlerService.createExecutionEvent(command, trigger);
+				}
+				else if ("template".equals(name))
+				{
+
+					Map<String, String> parameters = new HashMap<>();
+					parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.template", "*");
+					executionEvent = new ExecutionEvent(command, parameters, new Event(), null);
+				}
+				command.executeWithChecks(executionEvent);
+			}
+			catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e)
+			{
+				Debug.log(e);
+			}
+			return null;
+		}
+
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
@@ -547,211 +576,177 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
-					IHandlerService handlerService = PlatformUI.getWorkbench().getService(IHandlerService.class);
-					if ("*".equals(name) || "component".equals(name))
+					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(name);
+					if (spec != null)
 					{
-						Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand(AddContainerCommand.COMMAND_ID);
-						final Event trigger = new Event();
-						ExecutionEvent executionEvent = handlerService.createExecutionEvent(command, trigger);
-						try
+						String compName = null;
+						String componentName = name;
+						int index = componentName.indexOf("-");
+						if (index != -1)
 						{
-							command.executeWithChecks(executionEvent);
+							componentName = componentName.substring(index + 1);
 						}
-						catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e)
+						componentName = componentName.replaceAll("-", "_");
+						compName = componentName + "_" + id.incrementAndGet();
+						while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
 						{
-							Debug.log(e);
-						}
-					}
-					else if ("template".equals(name))
-					{
-						Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand(AddContainerCommand.COMMAND_ID);
-						try
-						{
-							Map<String, String> parameters = new HashMap<>();
-							parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.template", "*");
-							ExecutionEvent executionEvent = new ExecutionEvent(command, parameters, new Event(), null);
-							command.executeWithChecks(executionEvent);
-						}
-						catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e1)
-						{
-							Debug.log(e1);
-						}
-					}
-					else
-					{
-						WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(name);
-						if (spec != null)
-						{
-							String compName = null;
-							String componentName = name;
-							int index = componentName.indexOf("-");
-							if (index != -1)
-							{
-								componentName = componentName.substring(index + 1);
-							}
-							componentName = componentName.replaceAll("-", "_");
 							compName = componentName + "_" + id.incrementAndGet();
-							while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
-							{
-								compName = componentName + "_" + id.incrementAndGet();
-							}
+						}
 
-							WebComponent webComponent = null;
-							if (parentSupportingElements instanceof Portal)
-							{
-								Portal portal = (Portal)parentSupportingElements;
-								webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
-									IRepository.WEBCOMPONENTS);
-								webComponent.setProperty("text", compName);
-								webComponent.setTypeName(name);
-								portal.addChild(webComponent);
-							}
-							else if (parentSupportingElements instanceof AbstractContainer)
-							{
-								webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
+						WebComponent webComponent = null;
+						if (parentSupportingElements instanceof Portal)
+						{
+							Portal portal = (Portal)parentSupportingElements;
+							webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
+								IRepository.WEBCOMPONENTS);
+							webComponent.setProperty("text", compName);
+							webComponent.setTypeName(name);
+							portal.addChild(webComponent);
+						}
+						else if (parentSupportingElements instanceof AbstractContainer)
+						{
+							webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
 
-							}
-							CSSPosition.setLocation(webComponent, x, y);
-							CSSPosition.setSize(webComponent, w, h);
-							PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-							if (description != null && description.getDefaultValue() instanceof JSONObject)
+						}
+						CSSPosition.setLocation(webComponent, x, y);
+						CSSPosition.setSize(webComponent, w, h);
+						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+						if (description != null && description.getDefaultValue() instanceof JSONObject)
+						{
+							webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
+								((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+						}
+						Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
+						for (String string : allPropertiesNames)
+						{
+							PropertyDescription property = spec.getProperty(string);
+							if (property != null)
 							{
-								webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
-									((JSONObject)description.getDefaultValue()).optInt("height", 80)));
-							}
-							Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
-							for (String string : allPropertiesNames)
-							{
-								PropertyDescription property = spec.getProperty(string);
-								if (property != null)
+								if (args.has(string) && webComponent.getProperty(string) == null)
 								{
-									if (args.has(string) && webComponent.getProperty(string) == null)
+									webComponent.setProperty(string, args.opt(string));
+									if (property.getType() == FormComponentPropertyType.INSTANCE)
 									{
-										webComponent.setProperty(string, args.opt(string));
-										if (property.getType() == FormComponentPropertyType.INSTANCE)
+										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+										Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(string), flattenedSolution);
+										if (form != null)
 										{
-											FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-											Form form = FormComponentPropertyType.INSTANCE.getForm(args.opt(string), flattenedSolution);
-											if (form != null)
-											{
-												Dimension size = form.getSize();
-												CSSPosition.setSize(webComponent, size.width, size.height);
-											}
+											Dimension size = form.getSize();
+											CSSPosition.setSize(webComponent, size.width, size.height);
 										}
 									}
-									else if (property.getInitialValue() != null)
-									{
-										Object initialValue = property.getInitialValue();
-										if (initialValue != null) webComponent.setProperty(string, initialValue);
-									}
 								}
-							}
-							List<IPersist> changes = new ArrayList<>();
-							if (editorPart.getForm().isResponsiveLayout() && initialDropTarget != null &&
-								!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
-							{
-								ISupportChilds parent = webComponent.getParent();
-								changes.add(webComponent.getParent());
-
-								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
-								parent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), parent);
-								Iterator<IPersist> it = parent.getAllObjects();
-								while (it.hasNext())
+								else if (property.getInitialValue() != null)
 								{
-									IPersist next = it.next();
-									IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, editorPart.getForm()));
-									if (child.getParent() instanceof Form)
-									{
-										child.getParent().removeChild(child);
-									}
-									changes.add(child);
-									if (child.equals(next)) continue;
-									parent.removeChild(next);
-									parent.addChild(child);
+									Object initialValue = property.getInitialValue();
+									if (initialValue != null) webComponent.setProperty(string, initialValue);
 								}
 							}
-							else
-							{
-								changes.add(webComponent);
-							}
+						}
+						List<IPersist> changes = new ArrayList<>();
+						if (editorPart.getForm().isResponsiveLayout() && initialDropTarget != null &&
+							!initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
+						{
+							ISupportChilds parent = webComponent.getParent();
+							changes.add(webComponent.getParent());
 
-							return changes.toArray(new IPersist[changes.size()]);
+							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+							parent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), parent);
+							Iterator<IPersist> it = parent.getAllObjects();
+							while (it.hasNext())
+							{
+								IPersist next = it.next();
+								IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, editorPart.getForm()));
+								if (child.getParent() instanceof Form)
+								{
+									child.getParent().removeChild(child);
+								}
+								changes.add(child);
+								if (child.equals(next)) continue;
+								parent.removeChild(next);
+								parent.addChild(child);
+							}
 						}
 						else
 						{
-							PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-								args.optString("packageName"));
-							if (specifications != null)
-							{
-								WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
-								if (layoutSpec != null)
-								{
-									Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
-									LayoutContainer sameTypeChildContainer = null;
-									while (childContainersIte.hasNext())
-									{
-										LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
-										if (layoutSpec.getName().equals(childContainer.getSpecName()))
-										{
-											sameTypeChildContainer = childContainer;
-										}
-									}
+							changes.add(webComponent);
+						}
 
-									JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-									boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
-										initialDropTarget.getParent() instanceof Form;
-									List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
-										specifications, args.optString("packageName"));
-									if (dropTarget != null && !dropTarget.equals(initialDropTarget))
+						return changes.toArray(new IPersist[changes.size()]);
+					}
+					else
+					{
+						PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
+							args.optString("packageName"));
+						if (specifications != null)
+						{
+							WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
+							if (layoutSpec != null)
+							{
+								Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
+								LayoutContainer sameTypeChildContainer = null;
+								while (childContainersIte.hasNext())
+								{
+									LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
+									if (layoutSpec.getName().equals(childContainer.getSpecName()))
 									{
-										res.add(dropTarget);
+										sameTypeChildContainer = childContainer;
 									}
-									IPersist[] result = res.toArray(new IPersist[0]);
-									if (fullRefreshNeeded)
+								}
+
+								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
+								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
+									initialDropTarget.getParent() instanceof Form;
+								List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
+									specifications, args.optString("packageName"));
+								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
+								{
+									res.add(dropTarget);
+								}
+								IPersist[] result = res.toArray(new IPersist[0]);
+								if (fullRefreshNeeded)
+								{
+									IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+									for (IEditorReference editorRef : editorRefs)
 									{
-										IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-										for (IEditorReference editorRef : editorRefs)
+										IEditorPart editor = editorRef.getEditor(false);
+										if (editor instanceof BaseVisualFormEditor)
 										{
-											IEditorPart editor = editorRef.getEditor(false);
-											if (editor instanceof BaseVisualFormEditor)
-											{
-												BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
-												if (activePage instanceof RfbVisualFormEditorDesignPage)
-													((RfbVisualFormEditorDesignPage)activePage).refreshContent();
-												break;
-											}
+											BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
+											if (activePage instanceof RfbVisualFormEditorDesignPage)
+												((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+											break;
 										}
 									}
-									return result;
 								}
+								return result;
 							}
-							else
+						}
+						else
+						{
+							for (IRootObject template : ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES))
 							{
-								for (IRootObject template : ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(
-									IRepository.TEMPLATES))
+								if (template.getName().equals(name))
 								{
-									if (template.getName().equals(name))
+									Object[] applyTemplate = ElementFactory.applyTemplate(parentSupportingElements,
+										new TemplateElementHolder((Template)template), new org.eclipse.swt.graphics.Point(x, y), false);
+									if (applyTemplate.length > 0)
 									{
-										Object[] applyTemplate = ElementFactory.applyTemplate(parentSupportingElements,
-											new TemplateElementHolder((Template)template), new org.eclipse.swt.graphics.Point(x, y), false);
-										if (applyTemplate.length > 0)
+										if (applyTemplate[0] instanceof FormElementGroup)
 										{
-											if (applyTemplate[0] instanceof FormElementGroup)
+											Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
+											//convert iterator to []
+											ArrayList<IFormElement> list = new ArrayList<>();
+											while (elements.hasNext())
 											{
-												Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
-												//convert iterator to []
-												ArrayList<IFormElement> list = new ArrayList<>();
-												while (elements.hasNext())
-												{
-													IFormElement next = elements.next();
-													list.add(next);
-												}
-												return list.toArray(new IPersist[list.size()]);
+												IFormElement next = elements.next();
+												list.add(next);
 											}
-											else
-											{ //Object[] to IPersist[]
-												return Arrays.asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
-											}
+											return list.toArray(new IPersist[list.size()]);
+										}
+										else
+										{ //Object[] to IPersist[]
+											return Arrays.asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
 										}
 									}
 								}
