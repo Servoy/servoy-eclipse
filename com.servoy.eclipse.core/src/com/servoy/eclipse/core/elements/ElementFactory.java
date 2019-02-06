@@ -249,7 +249,8 @@ public class ElementFactory
 			{
 				try
 				{
-					validator.checkName(newName, 0, new ValidatorSearchContext(parent, type), false);
+					Form form = (Form)(parent).getAncestor(IRepository.FORMS);
+					validator.checkName(newName, 0, new ValidatorSearchContext(form, type), false);
 					break;
 				}
 				catch (RepositoryException e)
