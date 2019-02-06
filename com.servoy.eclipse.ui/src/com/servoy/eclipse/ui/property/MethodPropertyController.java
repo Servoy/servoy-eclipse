@@ -65,7 +65,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object> i
 	private final MethodListOptions options;
 
 
-	public MethodPropertyController(String id, String displayName, PersistContext persistContext, MethodListOptions options)
+	public MethodPropertyController(Object id, String displayName, PersistContext persistContext, MethodListOptions options)
 	{
 		super(id, displayName);
 		this.options = options;

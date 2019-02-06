@@ -455,9 +455,10 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		}
 		if (parentBean instanceof WebComponent)
 		{
-			WebCustomType bean = WebCustomType.createNewInstance(parentBean, targetPD, propertyName, index, true);
-			bean.setName(compName);
-			bean.setTypeName(typeName);
+			WebComponent parentWebComponent = (WebComponent)parentBean;
+			WebCustomType customType = WebCustomType.createNewInstance(parentWebComponent, targetPD, propertyName, index, true);
+			customType.setName(compName);
+			customType.setTypeName(typeName);
 
 			if (targetPD.getType() instanceof NGCustomJSONObjectType)
 			{
@@ -468,44 +469,14 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					if (property != null && property.getInitialValue() != null)
 					{
 						Object initialValue = property.getInitialValue();
-						if (initialValue != null) bean.setProperty(string, initialValue);
+						if (initialValue != null) customType.setProperty(string, initialValue);
 					}
 				}
 			}
 
-			if (isArray)
-			{
-				if (arrayValue == null)
-				{
-					arrayValue = new IChildWebObject[] { bean };
-				}
-				else
-				{
-					if (index > -1)
-					{
-						ArrayList<IChildWebObject> arrayList = new ArrayList<IChildWebObject>();
-						arrayList.addAll(Arrays.asList(arrayValue));
-						arrayList.add(index, bean);
-						// update index for all elements that are after the inserted one
-						for (int i = index + 1; i < arrayList.size(); i++)
-						{
-							arrayList.get(i).setIndex(i);
-						}
-						arrayValue = arrayList.toArray(new IChildWebObject[arrayList.size()]);
-					}
-					else
-					{
-						IChildWebObject[] newArrayValue = new IChildWebObject[arrayValue.length + 1];
-						System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
-						newArrayValue[arrayValue.length] = bean;
-						arrayValue = newArrayValue;
-					}
-				}
-				((WebComponent)parentBean).setProperty(propertyName, arrayValue);
-			}
-			else((WebComponent)parentBean).setProperty(propertyName, bean);
+			parentWebComponent.insertChild(customType); // if it is array it will make use of index given above in WebCustomType.createNewInstance(...) when inserting; otherwise it's a simple set to some property name anyway
 
-			return bean;
+			return customType;
 		}
 		return null;
 	}

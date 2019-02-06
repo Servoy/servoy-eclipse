@@ -358,8 +358,8 @@ public class CreateComponentHandler implements IServerService
 				if (dropTarget instanceof WebComponent)
 				{
 					// see if target has a 'component' or 'component[]' typed property
-					WebComponent parentWC = (WebComponent)dropTarget;
-					PropertyDescription propertyDescription = ((WebObjectImpl)parentWC.getImplementation()).getPropertyDescription();
+					WebComponent parentWebComponent = (WebComponent)dropTarget;
+					PropertyDescription propertyDescription = ((WebObjectImpl)parentWebComponent.getImplementation()).getPropertyDescription();
 
 					// TODO add a visual way for the user to drop to a specific property (if there is more then one property that supports components)
 					// TODO also add a way of adding to a specific index in a component array and also just moving component ghosts in a component array property
@@ -371,21 +371,17 @@ public class CreateComponentHandler implements IServerService
 							if (property.getType() instanceof ComponentPropertyType)
 							{
 								// simple component type
-								ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC, property, name, propertyName, -1, x, y, w, h);
-								parentWC.internalAddChild(createdWebComponent);
-								return new IPersist[] { createdWebComponent };
+								return new IPersist[] { createNestedWebComponent(parentWebComponent, property, name, propertyName, -1, x, y, w, h) };
 							}
 							else if (PropertyUtils.isCustomJSONArrayPropertyType(property.getType()) &&
 								((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType)
 							{
 								// array of component types
 								int index = 0;
-								IChildWebObject[] arrayOfChildComponents = (IChildWebObject[])parentWC.getProperty(propertyName);
+								IChildWebObject[] arrayOfChildComponents = (IChildWebObject[])parentWebComponent.getProperty(propertyName);
 								if (arrayOfChildComponents != null) index = arrayOfChildComponents.length;
-								ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC,
-									((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName, index, x, y, w, h);
-								parentWC.internalAddChild(createdWebComponent);
-								return new IPersist[] { createdWebComponent };
+								return new IPersist[] { createNestedWebComponent(parentWebComponent,
+									((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName, index, x, y, w, h) };
 							}
 						}
 					} // if we found no property to drop to, just continue with code below - it will be dropped on form
@@ -788,7 +784,7 @@ public class CreateComponentHandler implements IServerService
 		return null;
 	}
 
-	protected ChildWebComponent createNestedWebComponent(WebComponent parentWC, PropertyDescription pd, String componentSpecName, String propertyName,
+	protected ChildWebComponent createNestedWebComponent(WebComponent parentWebComponent, PropertyDescription pd, String componentSpecName, String propertyName,
 		int indexIfInArray, int x, int y, int width, int height)
 	{
 		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentSpecName);
@@ -808,12 +804,12 @@ public class CreateComponentHandler implements IServerService
 				compName = componentName + "_" + id.incrementAndGet();
 			}
 
-			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWC, pd, propertyName, indexIfInArray, true);
+			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWebComponent, pd, propertyName, indexIfInArray);
 			webComponent.setTypeName(componentSpecName);
 
 			// not sure if location and size are still needed to be set in children here... maybe it is (if parent wants to use them at runtime)
-			int xRelativeToParent = Math.max(0, (int)(x - parentWC.getLocation().getX()));
-			int yRelativeToParent = Math.max(0, (int)(y - parentWC.getLocation().getY()));
+			int xRelativeToParent = Math.max(0, (int)(x - parentWebComponent.getLocation().getX()));
+			int yRelativeToParent = Math.max(0, (int)(y - parentWebComponent.getLocation().getY()));
 			webComponent.setLocation(new Point(xRelativeToParent, yRelativeToParent));
 			webComponent.setSize(new Dimension(width, height));
 			PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
@@ -822,6 +818,8 @@ public class CreateComponentHandler implements IServerService
 				webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
 					((JSONObject)description.getDefaultValue()).optInt("height", 80)));
 			}
+			parentWebComponent.insertChild(webComponent);
+
 			return webComponent;
 		}
 		return null;

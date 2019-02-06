@@ -43,7 +43,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 {
 	static final CheckboxLabelProvider LABEL_PROVIDER = new CheckboxLabelProvider();
 
-	public CheckboxPropertyDescriptor(String id, String displayName)
+	public CheckboxPropertyDescriptor(Object id, String displayName)
 	{
 		super(id, displayName);
 	}

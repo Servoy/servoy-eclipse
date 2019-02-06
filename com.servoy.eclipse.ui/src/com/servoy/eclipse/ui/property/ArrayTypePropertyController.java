@@ -223,6 +223,53 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		return cellEditor;
 	}
 
+
+	public static class ArrayPropertyChildId
+	{
+
+		public final Object arrayPropId;
+		public final int idx;
+
+		public ArrayPropertyChildId(Object id, int idx)
+		{
+			this.arrayPropId = id;
+			this.idx = idx;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((arrayPropId == null) ? 0 : arrayPropId.hashCode());
+			result = prime * result + idx;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			ArrayPropertyChildId other = (ArrayPropertyChildId)obj;
+			if (arrayPropId == null)
+			{
+				if (other.arrayPropId != null) return false;
+			}
+			else if (!arrayPropId.equals(other.arrayPropId)) return false;
+			if (idx != other.idx) return false;
+			return true;
+		}
+
+		@Override
+		public String toString()
+		{
+			return String.valueOf(idx);
+		}
+
+	}
+
 	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object> implements ISetterAwarePropertySource
 	{
 
@@ -249,9 +296,12 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 		protected abstract boolean defaultIsElementSet(final int idx);
 
-		protected abstract int getIndexFromId(String id);
+		protected int getIndexFromId(ArrayPropertyChildId id)
+		{
+			return id.idx;
+		}
 
-		protected abstract String getIdFromIndex(int idx);
+		protected abstract ArrayPropertyChildId getIdFromIndex(int idx);
 
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
@@ -285,7 +335,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			try
 			{
-				final int idx = getIndexFromId((String)id);
+				final int idx = getIndexFromId((ArrayPropertyChildId)id);
 				return getElementValue(idx);
 			}
 			catch (NumberFormatException e)
@@ -300,7 +350,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			try
 			{
-				final int idx = getIndexFromId((String)id);
+				final int idx = getIndexFromId((ArrayPropertyChildId)id);
 				if (v == ArrayItemPropertyDescriptorWrapper.DELETE_CURRENT_COMMAND_VALUE)
 				{
 					return deleteElementAtIndex(idx);
@@ -326,7 +376,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			try
 			{
-				final int idx = getIndexFromId((String)id);
+				final int idx = getIndexFromId((ArrayPropertyChildId)id);
 
 				defaultSetElement(value, idx);
 			}
@@ -341,7 +391,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			try
 			{
-				final int idx = getIndexFromId((String)id);
+				final int idx = getIndexFromId((ArrayPropertyChildId)id);
 				return defaultGetElement(idx);
 			}
 			catch (NumberFormatException e)
@@ -357,7 +407,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		{
 			try
 			{
-				final int idx = getIndexFromId((String)id);
+				final int idx = getIndexFromId((ArrayPropertyChildId)id);
 				return defaultIsElementSet(idx);
 			}
 			catch (NumberFormatException e)

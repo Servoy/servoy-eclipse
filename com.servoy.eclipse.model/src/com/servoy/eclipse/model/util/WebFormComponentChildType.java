@@ -538,11 +538,6 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 			return WebCustomType.class.getSimpleName() + " -> " + webObjectImpl.toString(); //$NON-NLS-1$
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.util.ISupportOwnPropertyCheck#isOwnProperty(java.lang.String)
-		 */
 		@Override
 		public boolean isInheritedProperty(String propertyName)
 		{

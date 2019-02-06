@@ -723,7 +723,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return beansProperties;
 	}
 
-	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
+	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final Object id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
 		throws RepositoryException
 	{
@@ -799,7 +799,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	}
 
 	private static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final PersistContext persistContext, final boolean readOnly,
-		final PropertyDescriptorWrapper propertyDescriptor, final String id, String displayName, final FlattenedSolution flattenedEditingSolution,
+		final PropertyDescriptorWrapper propertyDescriptor, final Object id, String displayName, final FlattenedSolution flattenedEditingSolution,
 		final Form form) throws RepositoryException
 	{
 		PropertyDescription propertyDescription = propertyDescriptor.propertyDescriptor.getPropertyDescription(propertyDescriptor.valueObject, propertySource,
@@ -1261,7 +1261,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
-	private static IPropertyDescriptor createOtherPropertyDescriptorIfAppropriate(String id, String displayName, PropertyDescription propertyDescription,
+	private static IPropertyDescriptor createOtherPropertyDescriptorIfAppropriate(Object id, String displayName, PropertyDescription propertyDescription,
 		Form form, PersistContext persistContext, final boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, IPropertySource propertySource,
 		FlattenedSolution flattenedEditingSolution) throws RepositoryException
 	{
@@ -1558,7 +1558,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
-	private static MethodPropertyController<Integer> createFunctionPropertyDescriptorIfAppropriate(String id, String displayName,
+	private static MethodPropertyController<Integer> createFunctionPropertyDescriptorIfAppropriate(Object id, String displayName,
 		PropertyDescription propertyDescription, Form form, final PersistContext persistContext) throws RepositoryException
 	{
 		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
@@ -1673,7 +1673,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @param id
 	 * @return
 	 */
-	private static boolean allowFoundsetMethods(PersistContext persistContext, String id)
+	private static boolean allowFoundsetMethods(PersistContext persistContext, Object id)
 	{
 		if (persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_ONLOADMETHODID.getPropertyName().equals(id))
 		{
@@ -1698,10 +1698,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @param styleLookupname
 	 * @return
 	 */
-	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, String id, String displayName,
+	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, Object id, String displayName,
 		final String styleLookupname, Form form)
 	{
-		Pair<String[], String> styleClassesInfo = ModelUtils.getStyleClasses(ModelUtils.getEditingFlattenedSolution(form), form, persist, id, styleLookupname);
+		Pair<String[], String> styleClassesInfo = ModelUtils.getStyleClasses(ModelUtils.getEditingFlattenedSolution(form), form, persist, String.valueOf(id),
+			styleLookupname);
 		String[] styleClasses = styleClassesInfo.getLeft();
 		String defaultValue = styleClassesInfo.getRight();
 
@@ -2693,7 +2694,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 	}
 
-	private static IPropertyDescriptor getGeneralPropertyDescriptor(PersistContext persistContext, final boolean readOnly, String id, String displayName,
+	private static IPropertyDescriptor getGeneralPropertyDescriptor(PersistContext persistContext, final boolean readOnly, Object id, String displayName,
 		FlattenedSolution flattenedEditingSolution)
 	{
 		// Some property types are hard-coded
@@ -2761,7 +2762,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	}
 
 	private static IPropertyDescriptor getPropertiesPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, final PersistContext persistContext,
-		final boolean readOnly, final String id, final String displayName, final PropertyDescription propertyDescription,
+		final boolean readOnly, final Object id, final String displayName, final PropertyDescription propertyDescription,
 		final FlattenedSolution flattenedEditingSolution, final Form form) throws RepositoryException
 	{
 		if (propertyDescription == null) return null;
@@ -3228,7 +3229,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return forFoundsetName;
 	}
 
-	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final String id, final String displayName,
+	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final Object id, final String displayName,
 		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final ITable finalTable)
 	{
 		final ILabelProvider titleLabelProvider = new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT, propertyDescription.getDefaultValue());
@@ -3269,7 +3270,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @param options
 	 * @return
 	 */
-	private static IPropertyDescriptor createDataproviderController(final PersistContext persistContext, final boolean readOnly, final String id,
+	private static IPropertyDescriptor createDataproviderController(final PersistContext persistContext, final boolean readOnly, final Object id,
 		final String displayName, final FlattenedSolution flattenedEditingSolution, final Form form, final ITable table, final DataProviderOptions options)
 	{
 		final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persistContext.getPersist(), table);
