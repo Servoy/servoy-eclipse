@@ -50,6 +50,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -361,7 +362,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				container.setPackageName(packageName);
 				parent.addChild(container);
 				container.setLocation(new Point(index, index));
-				if (PersistHelper.isCSSPositionContainer(container)) container.setSize(new Dimension(200, 200));
+				if (CSSPosition.isCSSPositionContainer(container)) container.setSize(new Dimension(200, 200));
 				if (configJson != null)
 				{
 					Iterator keys = configJson.keys();

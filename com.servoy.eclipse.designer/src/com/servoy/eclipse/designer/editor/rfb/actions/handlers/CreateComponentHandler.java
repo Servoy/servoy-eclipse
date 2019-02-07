@@ -180,7 +180,7 @@ public class CreateComponentHandler implements IServerService
 								IStructuredSelection structuredSelection = new StructuredSelection(newPersist.length > 0 ? newPersist[0] : newPersist);
 								selectionProvider.setSelection(structuredSelection);
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
-									PersistHelper.isCSSPositionContainer((LayoutContainer)newPersist[0]))
+									CSSPosition.isCSSPositionContainer((LayoutContainer)newPersist[0]))
 								{
 									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(), "Edit css position container",
 										"Do you want to zoom into the layout container so you can edit it ?"))
@@ -305,7 +305,7 @@ public class CreateComponentHandler implements IServerService
 				}
 			}
 			if (editorPart.getForm().isResponsiveLayout() &&
-				!PersistHelper.isCSSPositionContainer(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
+				!CSSPosition.isCSSPositionContainer(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
 			{
 				List<IPersist> children = new ArrayList<IPersist>();
 				Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
@@ -836,7 +836,7 @@ public class CreateComponentHandler implements IServerService
 		parent.addChild(container);
 		container.setLocation(new Point(index, index));
 		newPersists.add(container);
-		if (PersistHelper.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
+		if (CSSPosition.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)
