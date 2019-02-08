@@ -109,6 +109,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.search.internal.ui.SearchMessages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
@@ -210,6 +211,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.search.SearchAction;
+import com.servoy.eclipse.ui.util.AdaptableWrapper;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
@@ -347,6 +349,8 @@ public class SolutionExplorerView extends ViewPart
 	private ContextAction deleteActionInList;
 
 	private ContextAction openAction;
+
+	private ISelectionContributionItem openWithAction;
 
 	private ContextAction openActionInTree;
 
@@ -2840,6 +2844,12 @@ public class SolutionExplorerView extends ViewPart
 		if (moveSample.isEnabled()) manager.add(moveSample);
 		manager.add(new Separator());
 		if (openAction.isEnabled()) manager.add(openAction);
+		if (openWithAction.isEnabled())
+		{
+			IMenuManager submenu = new MenuManager(SearchMessages.OpenWithMenu_label);
+			submenu.add(openWithAction);
+			manager.add(submenu);
+		}
 		if (editVariableAction.isEnabled()) manager.add(editVariableAction);
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
@@ -3256,6 +3266,8 @@ public class SolutionExplorerView extends ViewPart
 		OpenComponentResourceAction openComponentResource = new OpenComponentResourceAction();
 		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
 
+		openWithAction = new OpenWithMediaFile(new AdaptableWrapper(null));
+
 		addComponentIcon = new ContextAction(this, null, "Add Icon");
 		IAction addComponentIconAction = new AddComponentIconResourceAction(this);
 		addComponentIcon.registerAction(UserNodeType.COMPONENT, addComponentIconAction);
@@ -3403,6 +3415,7 @@ public class SolutionExplorerView extends ViewPart
 		addListSelectionChangedListener(createInMemFromSPAction);
 		addListSelectionChangedListener(deleteActionInList);
 		addListSelectionChangedListener(openAction);
+		addListSelectionChangedListener(openWithAction);
 		addListSelectionChangedListener(editVariableAction);
 		addListSelectionChangedListener(debugMethodAction);
 		addListSelectionChangedListener(newActionInListSecondary);
