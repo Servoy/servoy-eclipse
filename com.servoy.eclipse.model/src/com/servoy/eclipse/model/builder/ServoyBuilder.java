@@ -2668,45 +2668,48 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													foundsetValue = (String)((JSONObject)foundsetJson).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
 												}
 											}
-											if (DataSourceUtils.isDatasourceUri(foundsetValue))
+											if (foundsetValue != null)
 											{
-												datasource = foundsetValue;
-											}
-											else if (foundsetValue.equals(""))
-											{
-												datasource = form.getDataSource();
-											}
-											else
-											{
-												Relation[] relations = flattenedSolution.getRelationSequence(foundsetValue);
-												if (relations != null && relations.length > 0)
+												if (DataSourceUtils.isDatasourceUri(foundsetValue))
 												{
-													datasource = relations[relations.length - 1].getForeignDataSource();
+													datasource = foundsetValue;
+												}
+												else if (foundsetValue.equals(""))
+												{
+													datasource = form.getDataSource();
 												}
 												else
 												{
-													IFoundSet foundset;
-													try
+													Relation[] relations = flattenedSolution.getRelationSequence(foundsetValue);
+													if (relations != null && relations.length > 0)
 													{
-														foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(
-															foundsetValue);
-														if (foundset != null)
+														datasource = relations[relations.length - 1].getForeignDataSource();
+													}
+													else
+													{
+														IFoundSet foundset;
+														try
 														{
-															datasource = foundset.getDataSource();
+															foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(
+																foundsetValue);
+															if (foundset != null)
+															{
+																datasource = foundset.getDataSource();
+															}
+														}
+														catch (ServoyException e)
+														{
+															ServoyLog.logError(e);
 														}
 													}
-													catch (ServoyException e)
-													{
-														ServoyLog.logError(e);
-													}
 												}
-											}
-											if (frm.getDataSource() != null && !Utils.equalObjects(datasource, frm.getDataSource()))
-											{
-												ServoyMarker mk = MarkerMessages.FormComponentForFoundsetInvalidDataSource.fill(((WebComponent)o).getName(),
-													pd.getName(), frm.getName(), forFoundsetName);
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE, IMarker.PRIORITY_NORMAL,
-													null, o);
+												if (frm.getDataSource() != null && !Utils.equalObjects(datasource, frm.getDataSource()))
+												{
+													ServoyMarker mk = MarkerMessages.FormComponentForFoundsetInvalidDataSource.fill(((WebComponent)o).getName(),
+														pd.getName(), frm.getName(), forFoundsetName);
+													addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE,
+														IMarker.PRIORITY_NORMAL, null, o);
+												}
 											}
 										}
 										else if (frm.getDataSource() != null && !Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
