@@ -18,12 +18,16 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -31,11 +35,12 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -56,14 +61,17 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private Button isAdvancedCheck;
 	private boolean isAdvanced = false;
 	private SelectAllButtonsBar selectAllButtons;
+	private boolean allChecked;
 
 	protected static final String IS_ADVANCED_USER_SETTING = "is_advanced_user";
+	protected static final String SELECTED_SOLUTIONS_SETTING = "selected_solutions";
 
 	private static final String SECURITY = "security";
 	private static final String UTILS = "utils";
 	private static final String SEARCH = "search";
 
 	private static String[] toImport = new String[] { SECURITY, UTILS, SEARCH };
+	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	protected GenerateSolutionWizardPage(String pageName)
 	{
@@ -78,7 +86,6 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 		// top level group
 		Composite topLevel = new Composite(parent, SWT.NONE);
-		topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		setControl(topLevel);
 
 		// solution name UI
@@ -98,13 +105,39 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		Label configLabel = new Label(topLevel, SWT.NONE);
 		configLabel.setText("Configure the new solution with ");
 
-		checkboxTableViewer = CheckboxTableViewer.newCheckList(topLevel, SWT.BORDER | SWT.FULL_SELECTION);
+		Composite tableContainer = new Composite(topLevel, SWT.NONE);
+		Table table = new Table(tableContainer, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		checkboxTableViewer = new CheckboxTableViewer(table);
 		checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		checkboxTableViewer.setInput(toImport);
-		checkboxTableViewer.setAllChecked(true);
+		if (getDialogSettings().get(SELECTED_SOLUTIONS_SETTING) != null)
+		{
+			String[] solutions = getDialogSettings().get(SELECTED_SOLUTIONS_SETTING).trim().split(" ");
+			if (solutions.length > 0) checkboxTableViewer.setCheckedElements(solutions);
+		}
+		else
+		{
+			checkboxTableViewer.setAllChecked(true);
+		}
 
-		selectAllButtons = new SelectAllButtonsBar(this, topLevel, false);
-		selectAllButtons.disableSelectAll();
+		allChecked = checkboxTableViewer.getCheckedElements().length == toImport.length;
+		TableViewerColumn col = new TableViewerColumn(checkboxTableViewer, SWT.LEAD);
+		checkboxTableViewer.getTable().setHeaderBackground(topLevel.getBackground());
+		col.getColumn().setText("Select/Deselect All");
+		col.getColumn().setImage(uiActivator.loadImageFromBundle(allChecked ? "check_on.png" : "check_off.png"));
+		col.getColumn().setToolTipText(allChecked ? "Deselect all" : "Select all");
+		col.getColumn().pack();
+
+		col.getColumn().addListener(SWT.Selection, e -> {
+			allChecked = !allChecked;
+			col.getColumn().setImage(uiActivator.loadImageFromBundle(allChecked ? "check_on.png" : "check_off.png"));
+			col.getColumn().setToolTipText(allChecked ? "Deselect all" : "Select all");
+			checkboxTableViewer.setAllChecked(allChecked);
+		});
+		final TableColumnLayout layout = new TableColumnLayout();
+		tableContainer.setLayout(layout);
+		layout.setColumnData(col.getColumn(), new ColumnWeightData(15, 50, true));
+		checkboxTableViewer.getTable().setHeaderVisible(true);
 
 		isAdvancedCheck = new Button(topLevel, SWT.CHECK);
 		isAdvancedCheck.setText("I am an advanced Servoy User");
@@ -122,36 +155,20 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		getWizard().getContainer().updateButtons();
 
 		// layout of the page
-		GridLayout gridLayout = new GridLayout(2, false);
-		topLevel.setLayout(gridLayout);
-		topLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GroupLayout groupLayout = new GroupLayout(topLevel);
+		topLevel.setLayout(groupLayout);
 
-		GridData gridData = new GridData();
-		gridData.horizontalAlignment = GridData.FILL;
-		gridData.verticalAlignment = GridData.FILL;
+		groupLayout.setAutocreateContainerGaps(true);
+		groupLayout.setAutocreateGaps(true);
 
-		solutionLabel.setLayoutData(gridData);
-		solutionNameField.setLayoutData(gridData);
-
-		gridData = new GridData();
-		gridData.horizontalAlignment = GridData.FILL;
-		gridData.verticalAlignment = GridData.FILL;
-		gridData.horizontalSpan = 2;
-		configLabel.setLayoutData(gridData);
-
-		gridData = new GridData();
-		gridData.horizontalAlignment = GridData.FILL;
-		gridData.verticalAlignment = GridData.FILL;
-		gridData.grabExcessVerticalSpace = true;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.horizontalSpan = 2;
-		checkboxTableViewer.getTable().setLayoutData(gridData);
-
-		gridData = new GridData();
-		gridData.horizontalAlignment = GridData.FILL;
-		gridData.horizontalSpan = 2;
-		isAdvancedCheck.setLayoutData(gridData);
-
+		groupLayout.setHorizontalGroup(
+			groupLayout.createParallelGroup().add(groupLayout.createSequentialGroup().add(solutionLabel).addPreferredGap(LayoutStyle.RELATED).add(
+				solutionNameField, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(configLabel).add(tableContainer,
+					GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).add(isAdvancedCheck));
+		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup().add(solutionLabel).add(solutionNameField)).addPreferredGap(LayoutStyle.UNRELATED).add(configLabel).add(
+				tableContainer, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE).addPreferredGap(LayoutStyle.UNRELATED).add(
+					isAdvancedCheck).addContainerGap());
 	}
 
 	/**
@@ -225,11 +242,14 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	public List<String> getSolutionsToImport()
 	{
 		List<String> result = new ArrayList<>();
-		if (isChecked(SECURITY)) result.add("svySecurity");
-		if (isChecked(UTILS)) result.add("svyUtils");
-		if (isChecked(SEARCH)) result.add("svySearch");
-		result.add("svyNavigation");
-		result.add("svyUtils$NGClient");
+		if (checkboxTableViewer.getCheckedElements().length > 0)
+		{
+			if (isChecked(SECURITY)) result.add("svySecurity");
+			if (isChecked(UTILS)) result.add("svyUtils");
+			if (isChecked(SEARCH)) result.add("svySearch");
+			result.add("svyNavigation");
+			result.add("svyUtils$NGClient");
+		}
 		return result;
 	}
 
@@ -265,7 +285,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	{
 		checkboxTableViewer.setAllChecked(false);
 	}
-	
+
 	public boolean mustAuthenticate()
 	{
 		return isChecked(SECURITY);
@@ -274,5 +294,10 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	public boolean isAdvancedUser()
 	{
 		return isAdvanced;
+	}
+
+	public String getSelectedSolutions()
+	{
+		return Arrays.stream(toImport).filter(sol -> isChecked(sol)).reduce("", (res, name) -> res + name + " ");
 	}
 }

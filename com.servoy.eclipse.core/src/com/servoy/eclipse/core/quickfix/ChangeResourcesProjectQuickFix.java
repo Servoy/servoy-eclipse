@@ -19,6 +19,7 @@ package com.servoy.eclipse.core.quickfix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -555,6 +556,26 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			return error;
 		}
 
+
+		public void setResourceProjectName(String name)
+		{
+			Optional<ServoyResourcesProject> resProject = Arrays.stream(
+				ServoyModelManager.getServoyModelManager().getServoyModel().getResourceProjects()).filter(p -> name.equals(p.getProject().getName())).findAny();
+			if (resProject.isPresent())
+			{
+				resourceProjectList.setSelection(new StructuredSelection(resProject.get()));
+				handleResourceProjectRadioSelected(EXISTING_RESOURCE_PROJECT);
+			}
+		}
+
+
+		public void selectNoResourceProject()
+		{
+			radio1.setSelection(false);
+			radio2.setSelection(false);
+			radio3.setSelection(true);
+			handleResourceProjectRadioSelected(NO_RESOURCE_PROJECT);
+		}
 	}
 
 	/**

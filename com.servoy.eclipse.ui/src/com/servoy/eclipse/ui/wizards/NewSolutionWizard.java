@@ -134,7 +134,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	@Override
 	public boolean performFinish()
 	{
-		getDialogSettings().put(GenerateSolutionWizardPage.IS_ADVANCED_USER_SETTING, configPage.isAdvancedUser());
+		saveAllSettings();
 
 		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
@@ -350,50 +350,55 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
-		final List<String> packs = configPage.getWebPackagesToImport();
-		IRunnableWithProgress importPackagesRunnable = new IRunnableWithProgress()
+		IRunnableWithProgress importPackagesRunnable = null;
+		if (page1.getSolutionType() != SolutionMetaData.MODULE && page1.getSolutionType() != SolutionMetaData.NG_MODULE)
 		{
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+			final List<String> packs = configPage.getWebPackagesToImport();
+			importPackagesRunnable = new IRunnableWithProgress()
 			{
-				IProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(configPage.getNewSolutionName()).getProject();
-				try
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 				{
-					project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-				}
-				catch (CoreException e1)
-				{
-					e1.printStackTrace();
-				}
-				IFolder folder = project.getFolder(SolutionSerializer.NG_PACKAGES_DIR_NAME);
-
-				try
-				{
-					folder.create(true, true, new NullProgressMonitor());
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
-				for (String name : packs)
-				{
-					InputStream is = NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip");
-					IFile eclipseFile = folder.getFile(name + ".zip");
+					IProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+						configPage.getNewSolutionName()).getProject();
 					try
 					{
-						eclipseFile.create(is, IResource.NONE, new NullProgressMonitor());
+						project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+					}
+					catch (CoreException e1)
+					{
+						e1.printStackTrace();
+					}
+					IFolder folder = project.getFolder(SolutionSerializer.NG_PACKAGES_DIR_NAME);
+
+					try
+					{
+						folder.create(true, true, new NullProgressMonitor());
 					}
 					catch (CoreException e)
 					{
-						Debug.log(e);
+						ServoyLog.logError(e);
+					}
+					for (String name : packs)
+					{
+						InputStream is = NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip");
+						IFile eclipseFile = folder.getFile(name + ".zip");
+						try
+						{
+							eclipseFile.create(is, IResource.NONE, new NullProgressMonitor());
+						}
+						catch (CoreException e)
+						{
+							Debug.log(e);
+						}
 					}
 				}
-			}
-		};
+			};
+		}
 
 		try
 		{
 			PlatformUI.getWorkbench().getProgressService().run(true, false, newSolutionRunnable);
-			PlatformUI.getWorkbench().getProgressService().run(true, false, importPackagesRunnable);
+			if (importPackagesRunnable != null) PlatformUI.getWorkbench().getProgressService().run(true, false, importPackagesRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, solutionActivationRunnable);
 			PlatformUI.getWorkbench().getProgressService().run(true, false, importSolutionsRunnable);
 		}
@@ -407,6 +412,26 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 //		dialog.open();
 //		dialog.close();
 		return true;
+	}
+
+	private void saveAllSettings()
+	{
+		IDialogSettings dialogSettings = getDialogSettings();
+		dialogSettings.put(GenerateSolutionWizardPage.IS_ADVANCED_USER_SETTING, configPage.isAdvancedUser());
+		dialogSettings.put(GenerateSolutionWizardPage.SELECTED_SOLUTIONS_SETTING, configPage.getSelectedSolutions());
+
+		boolean noResourceProject = page1.getResourceProjectData().getNewResourceProjectName() == null &&
+			page1.getResourceProjectData().getExistingResourceProject() == null;
+		dialogSettings.put(NewSolutionWizardPage.NO_RESOURCE_PROJECT_SETTING, noResourceProject);
+		if (!noResourceProject)
+		{
+			String resourcesProjectName = page1.getResourceProjectData().getNewResourceProjectName() != null
+				? page1.getResourceProjectData().getNewResourceProjectName()
+				: page1.getResourceProjectData().getExistingResourceProject().getProject().getName();
+			dialogSettings.put(NewSolutionWizardPage.RESOURCE_PROJECT_NAME_SETTING, resourcesProjectName);
+		}
+
+		dialogSettings.put(NewSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, page1.shouldAddDefaultTheme());
 	}
 
 	private void importSolution(InputStream is, final String name, final String targetSolution, IProgressMonitor monitor) throws IOException
@@ -525,6 +550,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		private Button defaultThemeCheck;
 		private Boolean addDefaultTheme = null;
 
+		protected static final String SHOULD_ADD_DEFAULT_THEME_SETTING = "should_add_default_theme";
+		protected static final String NO_RESOURCE_PROJECT_SETTING = "no_resource_project";
+		protected static final String RESOURCE_PROJECT_NAME_SETTING = "resource_project_name";
+
 
 		/**
 		 * Creates a new solution creation wizard page.
@@ -580,6 +609,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 			defaultThemeCheck = new Button(topLevel, SWT.CHECK);
 			defaultThemeCheck.setText("Add default servoy .less theme (configurable by a less properties file)");
+			addDefaultTheme = getDialogSettings().get(SHOULD_ADD_DEFAULT_THEME_SETTING) != null
+				? getDialogSettings().getBoolean(SHOULD_ADD_DEFAULT_THEME_SETTING) : true;//ng solution is selected by default
+			defaultThemeCheck.setSelection(addDefaultTheme.booleanValue());
 			defaultThemeCheck.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
@@ -588,7 +620,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					addDefaultTheme = Boolean.valueOf(defaultThemeCheck.getSelection());
 				}
 			});
-			defaultThemeCheck.setSelection(true);//ng solution is selected by default
 
 			// solution type
 			Label solutionTypeLabel = new Label(topLevel, SWT.NONE);
@@ -649,6 +680,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			defaultThemeCheck.setLayoutData(formData);
 
 			topLevel.pack();
+
+			if (getDialogSettings().get(RESOURCE_PROJECT_NAME_SETTING) != null)
+			{
+				resourceProjectComposite.setResourceProjectName(getDialogSettings().get(RESOURCE_PROJECT_NAME_SETTING));
+			}
+
+			if (getDialogSettings().getBoolean(NO_RESOURCE_PROJECT_SETTING))
+			{
+				resourceProjectComposite.selectNoResourceProject();
+			}
 		}
 
 		@Override
