@@ -68,7 +68,19 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								if (propertyValues && $scope.packages[i].components[j].properties) {
 									$scope.packages[i].components[j].isOpen = false;
 									//we still need to have the components with properties on the component for filtering
-									$scope.packages[i].components[j].components = propertyValues;
+									
+									if(propertyValues && propertyValues.length && $scope.packages[i].components[j].name == "servoycore-formcomponent") {
+										var newPropertyValues = [];
+										for(var n = 0; n < propertyValues.length; n++) {
+											if(!propertyValues[n]["isAbsoluteCSSPositionMix"]) {
+												newPropertyValues.push(propertyValues[n]);
+											}
+										} 
+										$scope.packages[i].components[j].components = newPropertyValues;
+									}
+									else {
+										$scope.packages[i].components[j].components = propertyValues;	
+									}
 								}
 							}
 						}

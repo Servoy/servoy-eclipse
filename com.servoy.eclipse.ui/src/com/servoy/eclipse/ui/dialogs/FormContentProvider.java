@@ -180,6 +180,12 @@ public class FormContentProvider implements ITreeContentProvider
 									(options.showTemplates == Utils.getAsBoolean(obj.isFormComponent())) && childForm != obj &&
 									!PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
 								{
+									// skip if form component list and isAbsoluteCSSPositionMix
+									if ((options.showTemplates == Utils.getAsBoolean(obj.isFormComponent())) && !childForm.isResponsiveLayout() &&
+										!obj.isResponsiveLayout() && (childForm.getUseCssPosition() != obj.getUseCssPosition()))
+									{
+										continue;
+									}
 									addFormInList(activeProject, obj, solutionNames, list);
 								}
 							}
