@@ -244,7 +244,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				if (page1.shouldAddDefaultTheme())
 				{
 					Media defaultTheme = addMediaFile(solution, ThemeResourceLoader.getDefaultSolutionLess(), solution.getName() + ".less");
-					addMediaFile(solution, ThemeResourceLoader.getLatestThemeProperties(), ThemeResourceLoader.PROPERTIES_LESS);
+					addMediaFile(solution, ThemeResourceLoader.getCustomProperties(), ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
 					solution.setStyleSheetID(defaultTheme.getID());
 					repository.updateRootObject(solution);
 				}

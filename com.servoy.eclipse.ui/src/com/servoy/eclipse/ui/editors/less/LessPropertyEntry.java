@@ -27,18 +27,22 @@ public class LessPropertyEntry
 	private String value;
 	private String lastTxtValue;
 	private final LessPropertyType type;
+	private String defaultValue;
+	private String storedDefault;
 
 	static enum LessPropertyType
 	{
 		COLOR, BORDER, FONT, TEXT, NUMBER
 	}
 
-	public LessPropertyEntry(String name, String value, LessPropertyType type)
+	public LessPropertyEntry(String name, String value, LessPropertyType type, String storedDefault)
 	{
 		this.name = name;
 		this.value = value;
+		this.defaultValue = value;
 		this.lastTxtValue = value;
 		this.type = type;
+		this.storedDefault = storedDefault;
 	}
 
 	public String getName()
@@ -75,5 +79,43 @@ public class LessPropertyEntry
 	public void resetLastTxtValue()
 	{
 		lastTxtValue = value;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "@" + getName() + ": " + getValue();
+	}
+
+	/**
+	 * @param defaultValue
+	 */
+	public void setDefaultValue(String defaultValue)
+	{
+		this.defaultValue = defaultValue;
+	}
+
+	/**
+	 * @return the defaultValue
+	 */
+	public String getDefaultValue()
+	{
+		return defaultValue;
+	}
+
+	/**
+	 * @return the storedDefault
+	 */
+	public String getStoredDefault()
+	{
+		return storedDefault;
+	}
+
+	/**
+	 * @param storedDefault the storedDefault to set
+	 */
+	public void setStoredDefault(String storedDefault)
+	{
+		this.storedDefault = storedDefault;
 	}
 }
