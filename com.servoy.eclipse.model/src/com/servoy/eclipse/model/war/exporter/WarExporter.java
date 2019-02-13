@@ -121,7 +121,6 @@ import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -269,7 +268,7 @@ public class WarExporter
 			Media media = it.next();
 			if (media.getName().endsWith(".less"))
 			{
-				String content = ResourceProvider.compileSolutionLessFile(media, fs);
+				String content = LessCompiler.compileSolutionLessFile(media, fs);
 				if (content != null)
 				{
 					File folder = new File(tmpWarDir, MediaResourcesServlet.SERVOY_SOLUTION_CSS);

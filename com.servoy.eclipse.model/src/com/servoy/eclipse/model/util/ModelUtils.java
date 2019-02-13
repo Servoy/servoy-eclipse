@@ -70,7 +70,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -213,7 +213,7 @@ public class ModelUtils
 					{
 						if (styleNames == null)
 						{
-							String cssContent = media.getName().endsWith(".less") ? ResourceProvider.compileSolutionLessFile(media, flattenedSolution)
+							String cssContent = media.getName().endsWith(".less") ? LessCompiler.compileSolutionLessFile(media, flattenedSolution)
 								: new String(media.getMediaData(), "UTF-8");
 							// we only use the css3 styling (getStyleNames() so that we can give a boolean to ignore/don't create the rest
 							IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
