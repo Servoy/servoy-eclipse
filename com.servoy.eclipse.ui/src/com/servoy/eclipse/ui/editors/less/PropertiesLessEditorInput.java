@@ -39,7 +39,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
 import com.servoy.j2db.persistence.NameComparator;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.resources.ThemeResourceLoader;
+import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 import com.servoy.j2db.util.Utils;
 
 /**

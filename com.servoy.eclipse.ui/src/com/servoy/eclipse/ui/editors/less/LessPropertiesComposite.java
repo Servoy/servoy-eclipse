@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.resources.ThemeResourceLoader;
+import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 
 /**
  * Editor for Servoy Theme Properties less.

@@ -89,7 +89,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.resources.ThemeResourceLoader;
+import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 

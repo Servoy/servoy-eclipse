@@ -119,6 +119,7 @@ import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
+import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
@@ -1887,7 +1888,7 @@ public class WarExporter
 			try (FileInputStream fis = new FileInputStream(sourceFile))
 			{
 				String compileLessWithNashorn = null;
-				if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(fis)) != null)
+				if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = LessCompiler.compileLessWithNashorn(fis)) != null)
 				{
 					File compiledLessFile = destFile;
 					PrintWriter printWriter = new PrintWriter(compiledLessFile);
