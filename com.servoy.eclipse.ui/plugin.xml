@@ -369,6 +369,7 @@
       </editor>
        <editor
              class="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
+             default="true"
              filenames="custom_servoy_theme_properties.less"
              icon="icons/theme_properties.png"
              id="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
