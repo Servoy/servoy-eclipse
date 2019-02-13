@@ -2655,6 +2655,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private void fillTreeContextMenu(IMenuManager manager)
 	{
+		refreshSelection();
 		SimpleUserNode selectedTreeNode = getSelectedTreeNode();
 
 		if (setActive.isEnabled()) manager.add(setActive);
