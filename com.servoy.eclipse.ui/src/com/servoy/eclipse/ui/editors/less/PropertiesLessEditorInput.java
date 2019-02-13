@@ -272,7 +272,10 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		if (lastImport > 0)
 		{
 			lastImport = content.indexOf("\n", lastImport) + 1;
-			content.setLength(lastImport);
+			if (lastImport > 0)
+			{
+				content.setLength(lastImport);
+			}
 		}
 
 		for (LessPropertyEntry prop : properties.values())
