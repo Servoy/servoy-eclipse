@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,13 +30,19 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.DeleteResourceAction;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Action for deleting the selected resource using the standard eclipse delete resource operation.
- * 
+ *
  * @author acostescu
  */
 public class DeleteSolutionAction extends Action implements ISelectionChangedListener
@@ -46,7 +53,7 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 
 	/**
 	 * Creates a new delete solution action that will use the given shell when it needs to display dialogs.
-	 * 
+	 *
 	 * @param shell used for interaction with the user.
 	 */
 	public DeleteSolutionAction(Shell shell)
@@ -62,6 +69,43 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 	{
 		deleteAction.selectionChanged(new StructuredSelection(selectedProjects));
 		deleteAction.run();
+		ServoyProject[] activeProjects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+		if (activeProjects != null)
+		{
+			outer : for (ServoyProject sp : activeProjects)
+			{
+				boolean modified = false;
+				String[] modules = Utils.getTokenElements(sp.getEditingSolution().getModulesNames(), ",", true);
+				if (modules != null)
+				{
+					List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
+					for (IProject project : selectedProjects)
+					{
+						if (Utils.equalObjects(sp.getProject().getName(), project.getName()))
+						{
+							continue outer;
+						}
+						if (modulesList.remove(project.getName()))
+						{
+							modified = true;
+						}
+					}
+					if (modified)
+					{
+						String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+						sp.getEditingSolution().setModulesNames(modulesTokenized);
+						try
+						{
+							sp.saveEditingSolutionNodes(new IPersist[] { sp.getEditingSolution() }, false);
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError("Cannot save new module list for solution " + sp.getProject().getName(), e);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
