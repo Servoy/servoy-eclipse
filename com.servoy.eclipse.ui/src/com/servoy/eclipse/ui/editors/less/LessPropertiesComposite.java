@@ -267,7 +267,7 @@ public class LessPropertiesComposite extends Composite
 						{
 							RGB rgb = dialog.getRGB();
 							//TODO insert ?
-							txtName.setText(String.format("#%02x%02x%02x", rgb.green, rgb.red, rgb.blue).toUpperCase());
+							txtName.setText(String.format("#%02x%02x%02x", rgb.red, rgb.green, rgb.blue).toUpperCase());
 						}
 					});
 				}
