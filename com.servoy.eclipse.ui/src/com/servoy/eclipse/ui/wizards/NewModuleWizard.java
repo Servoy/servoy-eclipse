@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 /**
  * The new module wizard is similar to the new solution wizard: it
  * creates a module type solution by default.
- * 
+ *
  * @author acostache
  *
  */
@@ -49,11 +49,11 @@ public class NewModuleWizard extends NewSolutionWizard
 		super.createPageControls(pageContainer);
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
 		{
-			page1.setSolutionTypes(new int[] { SolutionMetaData.MOBILE_MODULE, SolutionMetaData.MOBILE }, 0, false);
+			configPage.setSolutionTypes(new int[] { SolutionMetaData.MOBILE_MODULE, SolutionMetaData.MOBILE }, 0, false);
 		}
 		else
 		{
-			page1.setSolutionTypes(
+			configPage.setSolutionTypes(
 				new int[] { SolutionMetaData.NG_MODULE, SolutionMetaData.MODULE, SolutionMetaData.MOBILE_MODULE, SolutionMetaData.PRE_IMPORT_HOOK, SolutionMetaData.POST_IMPORT_HOOK },
 				0, false);
 		}
@@ -61,7 +61,7 @@ public class NewModuleWizard extends NewSolutionWizard
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.NewSolutionWizard#shouldAddAsModule(com.servoy.j2db.persistence.Solution)
 	 */
 	@Override
@@ -70,4 +70,9 @@ public class NewModuleWizard extends NewSolutionWizard
 		return true;
 	}
 
+	@Override
+	protected String getSettingsPrefix()
+	{
+		return "mod_";
+	}
 }

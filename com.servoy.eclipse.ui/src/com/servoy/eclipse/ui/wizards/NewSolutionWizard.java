@@ -24,7 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -49,30 +48,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
-import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -102,9 +84,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewSolutionWizard";
 
-	protected NewSolutionWizardPage page1;
 
-	private GenerateSolutionWizardPage configPage;
+	protected GenerateSolutionWizardPage configPage;
 
 	/**
 	 * Creates a new wizard.
@@ -120,15 +101,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
-		configPage = new GenerateSolutionWizardPage("Configure Solution");
-		page1 = new NewSolutionWizardPage("New Solution");
+		configPage = new GenerateSolutionWizardPage("New Solution");
 	}
 
 	@Override
 	public void addPages()
 	{
 		addPage(configPage);
-		addPage(page1);
 	}
 
 	@Override
@@ -159,10 +138,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					monitor.setTaskName("Setting up resource project and reference");
 					IProject resourceProject;
 					// create Resource project if needed
-					if (page1.getResourceProjectData().getNewResourceProjectName() != null)
+					if (configPage.getResourceProjectData().getNewResourceProjectName() != null)
 					{
 						// create a new resource project
-						String resourceProjectName = page1.getResourceProjectData().getNewResourceProjectName();
+						String resourceProjectName = configPage.getResourceProjectData().getNewResourceProjectName();
 						resourceProject = ServoyModel.getWorkspace().getRoot().getProject(resourceProjectName);
 						resourceProject.create(null);
 						resourceProject.open(null);
@@ -177,15 +156,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					}
 					else
 					{
-						resourceProject = page1.getResourceProjectData().getExistingResourceProject() != null
-							? page1.getResourceProjectData().getExistingResourceProject().getProject() : null;
+						resourceProject = configPage.getResourceProjectData().getExistingResourceProject() != null
+							? configPage.getResourceProjectData().getExistingResourceProject().getProject() : null;
 					}
 
 					monitor.setTaskName("Creating and opening project");
 					// as the serialization is done using java.io, we must make sure the Eclipse resource structure
 					// stays up to date; we create a project, then we must open it and add servoy solution nature
 					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(configPage.getNewSolutionName());
-					String location = page1.getProjectLocation();
+					String location = configPage.getProjectLocation();
 					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(configPage.getNewSolutionName());
 					if (location != null)
 					{
@@ -200,7 +179,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 					if (solution != null)
 					{
-						int solutionType = page1.getSolutionType();
+						int solutionType = configPage.getSolutionType();
 						solution.setSolutionType(solutionType);
 
 						// serialize Solution object to given project
@@ -241,7 +220,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 			private void addDefaultThemeIfNeeded(EclipseRepository repository, Solution solution) throws RepositoryException
 			{
-				if (page1.shouldAddDefaultTheme())
+				if (configPage.shouldAddDefaultTheme())
 				{
 					Media defaultTheme = addMediaFile(solution, ThemeResourceLoader.getDefaultSolutionLess(), solution.getName() + ".less");
 					addMediaFile(solution, ThemeResourceLoader.getCustomProperties(), ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
@@ -351,7 +330,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		};
 
 		IRunnableWithProgress importPackagesRunnable = null;
-		if (page1.getSolutionType() != SolutionMetaData.MODULE && page1.getSolutionType() != SolutionMetaData.NG_MODULE)
+		if (configPage.getSolutionType() != SolutionMetaData.MODULE && configPage.getSolutionType() != SolutionMetaData.NG_MODULE)
 		{
 			final List<String> packs = configPage.getWebPackagesToImport();
 			importPackagesRunnable = new IRunnableWithProgress()
@@ -414,24 +393,25 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	private void saveAllSettings()
+	protected void saveAllSettings()
 	{
 		IDialogSettings dialogSettings = getDialogSettings();
-		dialogSettings.put(GenerateSolutionWizardPage.IS_ADVANCED_USER_SETTING, configPage.isAdvancedUser());
-		dialogSettings.put(GenerateSolutionWizardPage.SELECTED_SOLUTIONS_SETTING, configPage.getSelectedSolutions());
+		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.IS_ADVANCED_USER_SETTING, configPage.isAdvancedUser());
+		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SELECTED_SOLUTIONS_SETTING, configPage.getSelectedSolutions());
+		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SOLUTION_TYPE, configPage.getSolutionType());
 
-		boolean noResourceProject = page1.getResourceProjectData().getNewResourceProjectName() == null &&
-			page1.getResourceProjectData().getExistingResourceProject() == null;
-		dialogSettings.put(NewSolutionWizardPage.NO_RESOURCE_PROJECT_SETTING, noResourceProject);
+		boolean noResourceProject = configPage.getResourceProjectData().getNewResourceProjectName() == null &&
+			configPage.getResourceProjectData().getExistingResourceProject() == null;
+		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.NO_RESOURCE_PROJECT_SETTING, noResourceProject);
 		if (!noResourceProject)
 		{
-			String resourcesProjectName = page1.getResourceProjectData().getNewResourceProjectName() != null
-				? page1.getResourceProjectData().getNewResourceProjectName()
-				: page1.getResourceProjectData().getExistingResourceProject().getProject().getName();
-			dialogSettings.put(NewSolutionWizardPage.RESOURCE_PROJECT_NAME_SETTING, resourcesProjectName);
+			String resourcesProjectName = configPage.getResourceProjectData().getNewResourceProjectName() != null
+				? configPage.getResourceProjectData().getNewResourceProjectName()
+				: configPage.getResourceProjectData().getExistingResourceProject().getProject().getName();
+			dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.RESOURCE_PROJECT_NAME_SETTING, resourcesProjectName);
 		}
 
-		dialogSettings.put(NewSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, page1.shouldAddDefaultTheme());
+		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
 	}
 
 	private void importSolution(InputStream is, final String name, final String targetSolution, IProgressMonitor monitor) throws IOException
@@ -533,257 +513,14 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	 */
 	protected boolean shouldAddAsModule(final Solution activeEditingSolution)
 	{
-		return (page1.getSolutionType() == SolutionMetaData.MODULE || page1.getSolutionType() == SolutionMetaData.NG_MODULE ||
-			page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) &&
-			activeEditingSolution != null;
+		return activeEditingSolution != null &&
+			(configPage.getSolutionType() == SolutionMetaData.MODULE || configPage.getSolutionType() == SolutionMetaData.NG_MODULE ||
+				configPage.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || configPage.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK);
 	}
 
-	public static class NewSolutionWizardPage extends WizardPage implements Listener, IValidator
+	protected String getSettingsPrefix()
 	{
-		private int solutionType = SolutionMetaData.SOLUTION;
-
-		private Text solutionNameField;
-		private Combo solutionTypeCombo;
-		private int[] solutionTypeComboValues;
-		private ResourcesProjectChooserComposite resourceProjectComposite;
-		private ProjectLocationComposite projectLocationComposite;
-		private Button defaultThemeCheck;
-		private Boolean addDefaultTheme = null;
-
-		protected static final String SHOULD_ADD_DEFAULT_THEME_SETTING = "should_add_default_theme";
-		protected static final String NO_RESOURCE_PROJECT_SETTING = "no_resource_project";
-		protected static final String RESOURCE_PROJECT_NAME_SETTING = "resource_project_name";
-
-
-		/**
-		 * Creates a new solution creation wizard page.
-		 *
-		 * @param pageName the name of the page
-		 */
-		public NewSolutionWizardPage(String pageName)
-		{
-			super(pageName);
-			setTitle("Create a new solution");
-			setDescription("- a new Servoy solution project will be created");
-		}
-
-		public boolean shouldAddDefaultTheme()
-		{
-			return addDefaultTheme != null ? (addDefaultTheme.booleanValue() && SolutionMetaData.isNGOnlySolution(solutionType))
-				: solutionType == SolutionMetaData.NG_CLIENT_ONLY;
-		}
-
-		public String getProjectLocation()
-		{
-			return projectLocationComposite.getProjectLocation();
-		}
-
-		/**
-		 * Returns the composite that handles the resources project data. It can be used to determine what the user selected.
-		 *
-		 * @return the composite that handles the resources project data. It can be used to determine what the user selected.
-		 */
-		public ResourcesProjectChooserComposite getResourceProjectData()
-		{
-			return resourceProjectComposite;
-		}
-
-		/**
-		 * Returns the selected solution type. One of {@link SolutionMetaData#MODULE} or {@link SolutionMetaData#SOLUTION} constants.
-		 *
-		 * @return the selected solution type. One of {@link SolutionMetaData#MODULE} or {@link SolutionMetaData#SOLUTION} constants.
-		 */
-		public int getSolutionType()
-		{
-			return solutionType;
-		}
-
-		public void createControl(Composite parent)
-		{
-			initializeDialogUnits(parent);
-
-			// top level group
-			Composite topLevel = new Composite(parent, SWT.NONE);
-			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
-			setControl(topLevel);
-
-			defaultThemeCheck = new Button(topLevel, SWT.CHECK);
-			defaultThemeCheck.setText("Add default servoy .less theme (configurable by a less properties file)");
-			addDefaultTheme = getDialogSettings().get(SHOULD_ADD_DEFAULT_THEME_SETTING) != null
-				? getDialogSettings().getBoolean(SHOULD_ADD_DEFAULT_THEME_SETTING) : true;//ng solution is selected by default
-			defaultThemeCheck.setSelection(addDefaultTheme.booleanValue());
-			defaultThemeCheck.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					addDefaultTheme = Boolean.valueOf(defaultThemeCheck.getSelection());
-				}
-			});
-
-			// solution type
-			Label solutionTypeLabel = new Label(topLevel, SWT.NONE);
-			solutionTypeLabel.setText("Solution type");
-			solutionTypeCombo = new Combo(topLevel, SWT.DROP_DOWN | SWT.READ_ONLY);
-
-			String[] solutionTypeNames = new String[SolutionMetaData.solutionTypeNames.length - 1];
-			System.arraycopy(SolutionMetaData.solutionTypeNames, 1, solutionTypeNames, 0, solutionTypeNames.length);
-			solutionTypeCombo.setItems(solutionTypeNames);
-			solutionTypeComboValues = new int[SolutionMetaData.solutionTypes.length - 1];
-			System.arraycopy(SolutionMetaData.solutionTypes, 1, solutionTypeComboValues, 0, solutionTypeComboValues.length);
-			solutionTypeCombo.select(IntStream.range(0, solutionTypeComboValues.length).filter(
-				i -> SolutionMetaData.NG_CLIENT_ONLY == solutionTypeComboValues[i]).findFirst().getAsInt());
-			handleSolutionTypeComboSelected();
-			solutionTypeCombo.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent event)
-				{
-					handleSolutionTypeComboSelected();
-				}
-			});
-
-			projectLocationComposite = new ProjectLocationComposite(topLevel, SWT.NONE, this.getClass().getName());
-
-			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
-				"Please choose the resources project this solution will reference (for styles, column/sequence info, security)",
-				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), false);
-
-			// layout of the page
-			FormLayout formLayout = new FormLayout();
-			formLayout.spacing = 5;
-			formLayout.marginWidth = formLayout.marginHeight = 20;
-			topLevel.setLayout(formLayout);
-
-			FormData formData = new FormData();
-			formData.left = new FormAttachment(solutionTypeLabel, 0, SWT.LEFT);
-			formData.top = new FormAttachment(solutionTypeLabel, 0, SWT.BOTTOM);
-			formData.right = new FormAttachment(100, 0);
-			solutionTypeCombo.setLayoutData(formData);
-
-			formData = new FormData();
-			formData.left = new FormAttachment(0, 0);
-			formData.right = new FormAttachment(100, 0);
-			formData.top = new FormAttachment(solutionTypeCombo, 20);
-			projectLocationComposite.setLayoutData(formData);
-
-			formData = new FormData();
-			formData.left = new FormAttachment(0, 0);
-			formData.right = new FormAttachment(100, 0);
-			formData.top = new FormAttachment(projectLocationComposite, 30);
-			resourceProjectComposite.setLayoutData(formData);
-
-			formData = new FormData();
-			formData.left = new FormAttachment(0, 0);
-			formData.top = new FormAttachment(resourceProjectComposite, 20);
-			formData.bottom = new FormAttachment(100, 0);
-			defaultThemeCheck.setLayoutData(formData);
-
-			topLevel.pack();
-
-			if (getDialogSettings().get(RESOURCE_PROJECT_NAME_SETTING) != null)
-			{
-				resourceProjectComposite.setResourceProjectName(getDialogSettings().get(RESOURCE_PROJECT_NAME_SETTING));
-			}
-
-			if (getDialogSettings().getBoolean(NO_RESOURCE_PROJECT_SETTING))
-			{
-				resourceProjectComposite.selectNoResourceProject();
-			}
-		}
-
-		@Override
-		public void setVisible(boolean visible)
-		{
-			super.setVisible(visible);
-			if (visible)
-			{
-				setPageComplete(validatePage());
-			}
-		}
-
-		private void handleSolutionTypeComboSelected()
-		{
-			solutionType = solutionTypeComboValues[solutionTypeCombo.getSelectionIndex()];
-			defaultThemeCheck.setEnabled(SolutionMetaData.isNGOnlySolution(solutionType));
-			defaultThemeCheck.setSelection(shouldAddDefaultTheme());
-		}
-
-		public void setSolutionTypes(int[] solTypes, int selected, boolean fixedType)
-		{
-			String[] solutionTypeNames = new String[solTypes.length];
-
-			for (int j = 0; j < solTypes.length; j++)
-			{
-				for (int i = 0; i < SolutionMetaData.solutionTypes.length; i++)
-				{
-					if (SolutionMetaData.solutionTypes[i] == solTypes[j])
-					{
-						solutionTypeNames[j] = SolutionMetaData.solutionTypeNames[i];
-						break;
-					}
-				}
-			}
-
-			solutionTypeComboValues = solTypes;
-			solutionTypeCombo.setItems(solutionTypeNames);
-			solutionTypeCombo.select(selected);
-
-			handleSolutionTypeComboSelected();
-			if (fixedType)
-			{
-				solutionTypeCombo.setEnabled(false);
-			}
-		}
-
-		/**
-		 * Sees if the data is filled up correctly.
-		 *
-		 * @return true if the content is OK (page ready); false otherwise.
-		 */
-		protected boolean validatePage()
-		{
-			String error = null;
-			if (resourceProjectComposite != null)
-			{
-				error = resourceProjectComposite.validate();
-				if (error == null && resourceProjectComposite.getNewResourceProjectName() != null &&
-					(resourceProjectComposite.getNewResourceProjectName().equalsIgnoreCase(
-						((GenerateSolutionWizardPage)getWizard().getPage("Configure Solution")).getNewSolutionName())))
-				{
-					error = "You cannot give the same name to the solution and the resource project to be created";
-				}
-				setErrorMessage(error);
-			}
-			return error == null;
-		}
-
-		/**
-		 * The <code>NewSolutionWizardPage</code> implementation of this <code>Listener</code> method handles all events and enablements for controls on this
-		 * page. Subclasses may extend.
-		 */
-		public void handleEvent(Event event)
-		{
-			setPageComplete(validatePage());
-		}
-
-		public String validate()
-		{
-			setPageComplete(validatePage());
-			return getErrorMessage();
-		}
-
-		@Override
-		public void performHelp()
-		{
-			boolean focusNameField = solutionNameField.isFocusControl();
-			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_solution");
-			if (focusNameField)
-			{
-				solutionNameField.setFocus();
-			}
-		}
-
+		return "sol_";
 	}
 
 }
