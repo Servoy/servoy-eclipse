@@ -647,28 +647,28 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/bookmarks.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/print_topic.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/print.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/addbkmrk_co.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/add_bookmark.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/highlight.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/highlight.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/alltopics_co.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alltopics.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/reltopics_co.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/reltopics.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/openseparate_co.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/show_ext.png"));//TODO ask icon show in external window
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/synch_toc_nav.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/show_contents.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/index_co.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/index.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/magnify_font.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/magnify_font.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/dlcl16/magnify_font.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/magnify_font-disabled.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/reduce_font.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/reduce_font.png"));//TODO ask icon
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/dlcl16/reduce_font.gif"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/reduce_font-disabled.png"));//TODO ask icon
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/addbkmrk_co.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/add_bookmark.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/highlight.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/highlight.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/alltopics_co.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alltopics.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/reltopics_co.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/reltopics.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/openseparate_co.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/show_ext.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/synch_toc_nav.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/show_contents.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/index_co.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/index.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/magnify_font.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/magnify_font.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/dlcl16/magnify_font.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/magnify_font-disabled.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/elcl16/reduce_font.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/reduce_font.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/dlcl16/reduce_font.gif"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/reduce_font-disabled.png"));
 			//icons in other plugin.xml that can have a dark theme icon -->
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.designer/icons/designer.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui/{0}/designer.png"));
