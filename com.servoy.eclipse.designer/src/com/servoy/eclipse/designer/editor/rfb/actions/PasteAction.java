@@ -34,6 +34,7 @@ import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.actions.PasteCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.commands.SelectModelsCommandWrapper;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -85,31 +86,38 @@ public class PasteAction extends SelectionAction
 	{
 		final Object selected = objects.get(0);
 
-		Form form = null;
+		Form context = null;
 		ISupportChilds parent = null;
 		if (selected instanceof FormElementGroup)
 		{
-			form = ((FormElementGroup)selected).getParent();
+			context = ((FormElementGroup)selected).getParent();
 		}
 		else
 		{
-			IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(selected, IPersist.class);
+			IPersist persist = Platform.getAdapterManager().getAdapter(selected, IPersist.class);
 			if (persist != null)
 			{
-				form = (Form)persist.getAncestor(IRepository.FORMS);
+				if (selected instanceof PersistContext)
+				{
+					context = (Form)((PersistContext)selected).getContext();
+				}
+				else
+				{
+					context = (Form)persist.getAncestor(IRepository.FORMS);
+				}
 				if (persist instanceof ISupportChilds)
 				{
 					parent = (ISupportChilds)persist;
 				}
 				else
 				{
-					parent = form;
+					parent = context;
 				}
 			}
 		}
 
-		if (form == null) return null;
-		return new SelectModelsCommandWrapper(selectionProvider, new PasteCommand(application, parent, Collections.emptyMap(), form, fieldPositioner));
+		if (context == null) return null;
+		return new SelectModelsCommandWrapper(selectionProvider, new PasteCommand(application, parent, Collections.emptyMap(), context, fieldPositioner));
 	}
 
 	@Override

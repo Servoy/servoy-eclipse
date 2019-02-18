@@ -256,6 +256,7 @@ public class CreateComponentHandler implements IServerService
 					{
 						compName = "component_" + id.incrementAndGet();
 					}
+					parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(PersistContext.create(parentBean, editorPart.getForm()));
 					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName, arrayIndex);
 					return new IPersist[] { bean };
 				}
