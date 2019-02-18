@@ -49,12 +49,14 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * @author jcompagner
@@ -69,6 +71,7 @@ public class AddMethodButtonsComposite extends Composite
 
 	private final Button createFoundsetMethodButton;
 	private final Button createFormMethodButton;
+	private PersistContext initialContext;
 
 
 	/**
@@ -170,14 +173,24 @@ public class AddMethodButtonsComposite extends Composite
 		createGlobalMethodButton.setText("Scope");
 	}
 
-	private ScriptMethod createMethod(IPersist parent)
+	private ScriptMethod createMethod(IPersist parentPersist)
 	{
 		String scopeName = null;
+		IPersist parent = parentPersist;
 		if (selectedScope != null && parent instanceof Solution)
 		{
 			parent = selectedScope.getRootObject();
 			scopeName = selectedScope.getName();
 		}
+		//check if we want to override form method
+		if (initialContext.getContext() instanceof Form && !initialContext.getContext().equals(persistContext.getContext()) &&
+			((Form)initialContext.getContext()).getExtendsID() > 0 &&
+			PersistHelper.getOverrideHierarchy((ISupportExtendsID)initialContext.getContext()).contains(persistContext.getContext()) &&
+			((Form)persistContext.getContext()).getScriptMethod(methodKey) != null)
+		{
+			parent = initialContext.getContext();
+		}
+
 		String dataSource = null;
 		if (persistContext.getContext() instanceof AbstractBase)
 		{
@@ -215,6 +228,7 @@ public class AddMethodButtonsComposite extends Composite
 
 	public void setContext(PersistContext persistContext, String methodKey)
 	{
+		if (this.initialContext == null) this.initialContext = persistContext;
 		this.persistContext = persistContext;
 		this.methodKey = methodKey;
 		Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
