@@ -1504,7 +1504,7 @@ public class SolutionExplorerTreeContentProvider
 		Image img = imageCache.get(path);
 		if (img == null)
 		{
-			Display display = Display.getCurrent();
+			Display display = Display.getDefault();
 			try
 			{
 				int px = Math.round(16 * display.getDPI().y / 96f);
