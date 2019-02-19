@@ -3934,6 +3934,7 @@ public class TypeCreator extends TypeCache
 			Form form = fs.getForm(formName);
 			if (form != null)
 			{
+				form = fs.getFlattenedForm(form);
 				List<IFormElement> formelements = form.getFlattenedObjects(PositionComparator.XY_PERSIST_COMPARATOR);
 				ElementsScopeCreator elementScopeCreator = (ElementsScopeCreator)scopeTypes.get("Elements");
 				IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
