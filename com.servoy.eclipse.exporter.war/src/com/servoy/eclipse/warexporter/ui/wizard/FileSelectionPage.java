@@ -271,10 +271,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getSelection());
-
-				if (!exportMetadataTablesButton.getSelection()) checkMetadataTablesButton.setSelection(false);
-
+				checkMetadataTablesButton.setEnabled(!exportMetadataTablesButton.getSelection());
 				exportModel.setExportMetaData(exportMetadataTablesButton.getSelection());
 			}
 		});
@@ -719,7 +716,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		overrideSequenceTypesButton.setEnabled(exportActiveSolution.getSelection());
 		overrideDefaultValuesButton.setEnabled(exportActiveSolution.getSelection());
 		exportMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
-		checkMetadataTablesButton.setEnabled(exportActiveSolution.getSelection() && exportMetadataTablesButton.getSelection());
+		checkMetadataTablesButton.setEnabled(exportActiveSolution.getSelection() && !exportMetadataTablesButton.getEnabled());
 		exportI18NDataButton.setEnabled(exportActiveSolution.getSelection());
 		insertNewI18NKeysOnlyButton.setEnabled(exportActiveSolution.getSelection() && exportI18NDataButton.getSelection());
 		overwriteGroupsButton.setEnabled(exportActiveSolution.getSelection());
