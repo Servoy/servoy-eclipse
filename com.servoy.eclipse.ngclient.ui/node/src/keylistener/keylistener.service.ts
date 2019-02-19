@@ -29,7 +29,7 @@ export class KeyListener implements IComponentContributorListener {
                 if (callback) { 
                     let ev = this.utils.createJSEvent(event, "keyup");
                     this.servoyService.executeInlineScript(callback.formname, callback.script, 
-                            [ev, element.value, event.keyCode, event.altKey]);
+                            [element.value, ev, event.keyCode, event.altKey]);
                 }
               })
         }
