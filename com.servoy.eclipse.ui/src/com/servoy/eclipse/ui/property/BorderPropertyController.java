@@ -94,7 +94,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 	 */
 	private final IPropertySource propertySource;
 
-	public BorderPropertyController(String id, String displayName, IPropertySource propertySource, PersistContext persistContext)
+	public BorderPropertyController(Object id, String displayName, IPropertySource propertySource, PersistContext persistContext)
 	{
 		super(id, displayName);
 		this.propertySource = propertySource;

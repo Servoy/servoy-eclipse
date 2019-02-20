@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.NativeJSON;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -422,11 +423,11 @@ public class SolutionJSUnitSuiteCodeBuilder
 		error.append(INVALID_APP_SUITE);
 		error.append("(name) { TestCase.call(this, name); }\nfunction ");
 		error.append(INVALID_APP_SUITE);
-		error.append("_testSystemInitFailed() { this.fail(\"");
+		error.append("_testSystemInitFailed() { this.fail(");
 
-		error.append(msg);
+		error.append(NativeJSON.stringify(null, new NativeObject(), msg, null, 0));
 
-		error.append("\"); }\n");
+		error.append("); }\n");
 		error.append(INVALID_APP_SUITE);
 		error.append(".prototype = new TestCase();\n");
 		error.append(INVALID_APP_SUITE);

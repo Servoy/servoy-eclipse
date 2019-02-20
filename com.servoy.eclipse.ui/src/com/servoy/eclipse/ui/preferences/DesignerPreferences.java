@@ -152,13 +152,13 @@ public class DesignerPreferences
 	public static final int TABLE_EVENT_HANDLER_NAMING_DEFAULT = 0;
 	public static final int TABLE_EVENT_HANDLER_NAMING_INCLUDE_TABLE_NAME = 1;
 
-	public static final boolean USE_SERVOY_SEQUENCE_DEFAULT = true;
+	public static final boolean USE_SERVOY_SEQUENCE_DEFAULT = false;
 	public static final boolean USE_DATABASE_SEQUENCE_DEFAULT = false;
-	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.SERVOY_SEQUENCE;
-	public static final boolean SHOW_NAVIGATOR_DEFAULT = true;
+	public static final int PK_SEQUENCE_TYPE_DEFAULT = ColumnInfo.UUID_GENERATOR;
+	public static final boolean SHOW_NAVIGATOR_DEFAULT = false;
 
-	public static final int ENCAPSULATION_PUBLIC_HIDE_ALL = PersistEncapsulation.HIDE_CONTROLLER | PersistEncapsulation.HIDE_DATAPROVIDERS |
-		PersistEncapsulation.HIDE_ELEMENTS | PersistEncapsulation.HIDE_FOUNDSET;
+	public static final int ENCAPSULATION_PUBLIC_HIDE_ALL = PersistEncapsulation.HIDE_DATAPROVIDERS | PersistEncapsulation.HIDE_ELEMENTS |
+		PersistEncapsulation.HIDE_FOUNDSET;
 	public static final int ENCAPSULATION_PUBLIC = PersistEncapsulation.DEFAULT;
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well

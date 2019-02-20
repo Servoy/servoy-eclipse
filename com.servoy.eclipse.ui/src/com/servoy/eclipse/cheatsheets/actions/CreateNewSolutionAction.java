@@ -42,7 +42,7 @@ public class CreateNewSolutionAction extends IntroCloseWelcomePage
 			public void createPageControls(Composite pageContainer)
 			{
 				super.createPageControls(pageContainer);
-				page1.setSolutionTypes(SolutionMetaData.solutionTypes, 10, false);
+				configPage.setSolutionTypes(SolutionMetaData.solutionTypes, 10, false);
 			}
 		};
 		wizard.init(PlatformUI.getWorkbench(), null);

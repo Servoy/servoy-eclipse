@@ -32,7 +32,7 @@ public class CustomArrayTypePropertyDescriptorFactory implements ITypePropertyDe
 {
 
 	@Override
-	public IPropertyDescriptor createPropertyDescriptor(String id, String displayName, FlattenedSolution flattenedEditingSolution,
+	public IPropertyDescriptor createPropertyDescriptor(Object id, String displayName, FlattenedSolution flattenedEditingSolution,
 		PersistContext persistContext, PropertyDescription propertyDescription)
 	{
 		return new CustomArrayTypePropertyController(id, displayName, persistContext, propertyDescription);

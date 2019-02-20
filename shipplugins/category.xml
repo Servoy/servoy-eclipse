@@ -24,15 +24,15 @@
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.logging.log4j.slf4j18-impl"
-		version="2.11.2.SNAPSHOT">
+		version="2.11.2">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.logging.log4j.api"
-		version="2.11.2.SNAPSHOT">
+		version="2.11.2">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.logging.log4j.core"
-		version="2.11.2.SNAPSHOT">
+		version="2.11.2">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.commons.io" version="2.6.0">

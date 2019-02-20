@@ -130,7 +130,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		return sb.toString();
 	}
 
-	protected static IScriptProvider getScriptProvider(MethodWithArguments mwa, PersistContext persistContext)
+	public static IScriptProvider getScriptProvider(MethodWithArguments mwa, PersistContext persistContext)
 	{
 		ITable table = mwa.table;
 		if (table == null)

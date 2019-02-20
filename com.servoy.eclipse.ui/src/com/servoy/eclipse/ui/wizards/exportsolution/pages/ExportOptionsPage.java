@@ -133,7 +133,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 
 		exportReferencedWebPackagesButton = new Button(composite, SWT.CHECK);
 		exportReferencedWebPackagesButton.setText("Export referenced web packages ( for importing ONLY into developer)");
-		exportReferencedWebPackagesButton.setSelection(exportSolutionWizard.getModel().isExportReferencedModules());
+		exportReferencedWebPackagesButton.setSelection(exportSolutionWizard.getModel().isExportReferencedWebPackages());
 		exportReferencedWebPackagesButton.addListener(SWT.Selection, this);
 
 		exportAllTablesFromReferencedServers = new Button(composite, SWT.CHECK);
@@ -212,7 +212,8 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		allRowsRadioButton.setSelection(exportSolutionWizard.getModel().getNumberOfSampleDataExported() == IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 		allRowsRadioButton.setLayoutData(data6);
 		allRowsRadioButton.addListener(SWT.Selection, this);
-		allRowsRadioButton.setToolTipText("As this is not meant as a DB export/import tool, the number if exported rows will still be limited but to a very high number (" +
+		allRowsRadioButton.setToolTipText(
+			"As this is not meant as a DB export/import tool, the number if exported rows will still be limited but to a very high number (" +
 				IDataServerInternal.MAX_ROWS_TO_RETRIEVE + ")");
 
 		GridData data7 = new GridData();

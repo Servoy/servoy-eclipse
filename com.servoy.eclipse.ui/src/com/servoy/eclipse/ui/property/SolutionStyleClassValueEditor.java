@@ -32,7 +32,7 @@ import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 
@@ -63,7 +63,7 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 				try
 				{
 					cssContent = media.getName().endsWith(".less")
-						? ResourceProvider.compileSolutionLessFile(media, ModelUtils.getEditingFlattenedSolution(solution), false)
+						? LessCompiler.compileSolutionLessFile(media, ModelUtils.getEditingFlattenedSolution(solution))
 						: new String(media.getMediaData(), "UTF-8");
 				}
 				catch (UnsupportedEncodingException e)

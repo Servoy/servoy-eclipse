@@ -22,6 +22,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertyChildId;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
@@ -31,6 +32,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ServoyJSONObject;
 
@@ -205,11 +207,25 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		}
 		else
 		{
-			// the index and json key given as arguments below might not be correct if this is the element of a WebCustomType array property; but they
-			// will automatically be updated in WebObjectImpl.updatePersistMappedPropeties which also adds the persist itself as child of it's parent persist
-			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)persistContext.getPersist(), propertyDescription, null, -1, true);
+			Object id = getId();
+			String parentKey;
+			int indexInArray;
+			if (id instanceof ArrayPropertyChildId)
+			{
+				parentKey = String.valueOf(((ArrayPropertyChildId)id).arrayPropId);
+				indexInArray = ((ArrayPropertyChildId)id).idx;
+			}
+			else
+			{
+				parentKey = String.valueOf(id);
+				indexInArray = -1;
+			}
+
+			ISupportsIndexedChildren parent = (ISupportsIndexedChildren)persistContext.getPersist();
+			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)parent, propertyDescription, parentKey, indexInArray, true);
 			typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType());
 			newPropertyValue.setTypeName(typeName);
+			parent.setChild(newPropertyValue);
 		}
 		return newPropertyValue;
 	}

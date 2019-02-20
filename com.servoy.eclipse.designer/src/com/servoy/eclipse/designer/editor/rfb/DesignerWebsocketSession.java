@@ -50,6 +50,7 @@ import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -206,7 +207,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
 							{
 								AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
-								if (container instanceof LayoutContainer && PersistHelper.isCSSPositionContainer((LayoutContainer)container))
+								if (container instanceof LayoutContainer && CSSPosition.isCSSPositionContainer((LayoutContainer)container))
 								{
 									responsive = false;
 								}

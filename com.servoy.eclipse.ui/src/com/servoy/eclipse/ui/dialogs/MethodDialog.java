@@ -344,6 +344,11 @@ public class MethodDialog extends TreeSelectDialog
 
 		public Object getParent(Object element)
 		{
+			if (parents == null)
+			{
+				parents = new HashMap<Object, Object>();
+				fillParentMap(new Object[] { element });
+			}
 			return parents.get(element);
 		}
 

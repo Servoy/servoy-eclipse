@@ -54,8 +54,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -1504,7 +1504,7 @@ public class SolutionExplorerTreeContentProvider
 		Image img = imageCache.get(path);
 		if (img == null)
 		{
-			Display display = Display.getCurrent();
+			Display display = Display.getDefault();
 			try
 			{
 				int px = Math.round(16 * display.getDPI().y / 96f);
@@ -1952,9 +1952,18 @@ public class SolutionExplorerTreeContentProvider
 					result[0] = uiActivator.loadImageFromCache(SERVER_ERROR_IMAGE);
 					if (result[0] == null)
 					{
-						ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
-						result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
-						uiActivator.putImageInCache(SERVER_ERROR_IMAGE, result[0]);
+						Image IMG_ERROR = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+						if (IMG_ERROR != null)
+						{
+							result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), ImageDescriptor.createFromImage(IMG_ERROR),
+								IDecoration.BOTTOM_LEFT).createImage();
+							uiActivator.putImageInCache(SERVER_ERROR_IMAGE, result[0]);
+						}
+						else
+						{
+							ServoyLog.logWarning("Could not load the problem decorator for the database server " + serverName,
+								new Exception("Cannot load server error image!"));
+						}
 					}
 					return;
 				}

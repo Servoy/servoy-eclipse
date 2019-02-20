@@ -723,7 +723,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return beansProperties;
 	}
 
-	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
+	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final Object id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
 		throws RepositoryException
 	{
@@ -799,7 +799,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	}
 
 	private static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final PersistContext persistContext, final boolean readOnly,
-		final PropertyDescriptorWrapper propertyDescriptor, final String id, String displayName, final FlattenedSolution flattenedEditingSolution,
+		final PropertyDescriptorWrapper propertyDescriptor, final Object id, String displayName, final FlattenedSolution flattenedEditingSolution,
 		final Form form) throws RepositoryException
 	{
 		PropertyDescription propertyDescription = propertyDescriptor.propertyDescriptor.getPropertyDescription(propertyDescriptor.valueObject, propertySource,
@@ -1261,7 +1261,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
-	private static IPropertyDescriptor createOtherPropertyDescriptorIfAppropriate(String id, String displayName, PropertyDescription propertyDescription,
+	private static IPropertyDescriptor createOtherPropertyDescriptorIfAppropriate(Object id, String displayName, PropertyDescription propertyDescription,
 		Form form, PersistContext persistContext, final boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, IPropertySource propertySource,
 		FlattenedSolution flattenedEditingSolution) throws RepositoryException
 	{
@@ -1558,7 +1558,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
-	private static MethodPropertyController<Integer> createFunctionPropertyDescriptorIfAppropriate(String id, String displayName,
+	private static MethodPropertyController<Integer> createFunctionPropertyDescriptorIfAppropriate(Object id, String displayName,
 		PropertyDescription propertyDescription, Form form, final PersistContext persistContext) throws RepositoryException
 	{
 		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
@@ -1673,7 +1673,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @param id
 	 * @return
 	 */
-	private static boolean allowFoundsetMethods(PersistContext persistContext, String id)
+	private static boolean allowFoundsetMethods(PersistContext persistContext, Object id)
 	{
 		if (persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_ONLOADMETHODID.getPropertyName().equals(id))
 		{
@@ -1698,10 +1698,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @param styleLookupname
 	 * @return
 	 */
-	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, String id, String displayName,
+	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, Object id, String displayName,
 		final String styleLookupname, Form form)
 	{
-		Pair<String[], String> styleClassesInfo = ModelUtils.getStyleClasses(ModelUtils.getEditingFlattenedSolution(form), form, persist, id, styleLookupname);
+		Pair<String[], String> styleClassesInfo = ModelUtils.getStyleClasses(ModelUtils.getEditingFlattenedSolution(form), form, persist, String.valueOf(id),
+			styleLookupname);
 		String[] styleClasses = styleClassesInfo.getLeft();
 		String defaultValue = styleClassesInfo.getRight();
 
@@ -2693,7 +2694,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 	}
 
-	private static IPropertyDescriptor getGeneralPropertyDescriptor(PersistContext persistContext, final boolean readOnly, String id, String displayName,
+	private static IPropertyDescriptor getGeneralPropertyDescriptor(PersistContext persistContext, final boolean readOnly, Object id, String displayName,
 		FlattenedSolution flattenedEditingSolution)
 	{
 		// Some property types are hard-coded
@@ -2761,7 +2762,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	}
 
 	private static IPropertyDescriptor getPropertiesPropertyDescriptor(PropertyDescriptorWrapper propertyDescriptor, final PersistContext persistContext,
-		final boolean readOnly, final String id, final String displayName, final PropertyDescription propertyDescription,
+		final boolean readOnly, final Object id, final String displayName, final PropertyDescription propertyDescription,
 		final FlattenedSolution flattenedEditingSolution, final Form form) throws RepositoryException
 	{
 		if (propertyDescription == null) return null;
@@ -2890,10 +2891,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				persistContainingFoundsetProperty = persistContainingFoundsetProperty.getParent().getAncestor(IRepository.WEBCOMPONENTS);
 			}
 		}
+		ITable forFoundsetTable = null;
 		if (forFoundsetName != null)
 		{
-			ITable table = null;
-
 			try
 			{
 				Object object = null;
@@ -2914,20 +2914,20 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					if (foundsetValue.equals(""))
 					{
-						table = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
+						forFoundsetTable = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 					}
 					else
 					{
 						if (DataSourceUtils.isDatasourceUri(foundsetValue))
 						{
-							table = dsm.getDataSource(foundsetValue);
+							forFoundsetTable = dsm.getDataSource(foundsetValue);
 						}
 						else
 						{
 							Relation[] relations = flattenedEditingSolution.getRelationSequence(foundsetValue);
 							if (relations != null && relations.length > 0)
 							{
-								table = dsm.getDataSource(relations[relations.length - 1].getForeignDataSource());
+								forFoundsetTable = dsm.getDataSource(relations[relations.length - 1].getForeignDataSource());
 							}
 							else
 							{
@@ -2936,7 +2936,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 									IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetValue);
 									if (foundset != null)
 									{
-										table = dsm.getDataSource(foundset.getDataSource());
+										forFoundsetTable = dsm.getDataSource(foundset.getDataSource());
 									}
 								}
 								catch (Exception ex)
@@ -2955,14 +2955,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			if (propertyType instanceof TagStringPropertyType)
 			{
-				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, table);
+				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, forFoundsetTable);
 			}
 			else if (propertyType instanceof DataproviderPropertyType)
 			{
-				final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true,
-					true, table != null, table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
+				final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(true, forFoundsetTable != null, forFoundsetTable != null,
+					forFoundsetTable != null, true, true, forFoundsetTable != null, forFoundsetTable != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 
-				return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, table, options);
+				return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, forFoundsetTable, options);
 			}
 		}
 
@@ -3070,18 +3070,30 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true),
 				persistContext.getContext());
+			final ITable forFoundsetTableFinal = forFoundsetTable;
 			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
 			{
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
+					String dataSource = ((Form)persistContext.getContext()).getDataSource();
+					if (propertyDescription.getConfig() instanceof ComponentTypeConfig)
+					{
+						if (forFoundsetTableFinal != null)
+						{
+							dataSource = forFoundsetTableFinal.getDataSource();
+						}
+						else
+						{
+							dataSource = null;
+						}
+					}
 					return new ListSelectCellEditor(parent, "Select form",
 						new FormContentProvider(flattenedEditingSolution,
 							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, true,
-							((Form)persistContext.getContext()).getDataSource()),
-						SWT.NONE, null, "Select form dialog");
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, true, dataSource), SWT.NONE, null,
+						"Select form dialog");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
@@ -3210,10 +3222,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			forFoundsetName = ((FoundsetLinkedConfig)propertyDescription.getConfig()).getForFoundsetName();
 		}
+		if (propertyDescription.getType() instanceof FormComponentPropertyType && propertyDescription.getConfig() instanceof ComponentTypeConfig)
+		{
+			forFoundsetName = ((ComponentTypeConfig)propertyDescription.getConfig()).forFoundset;
+		}
 		return forFoundsetName;
 	}
 
-	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final String id, final String displayName,
+	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final Object id, final String displayName,
 		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final ITable finalTable)
 	{
 		final ILabelProvider titleLabelProvider = new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT, propertyDescription.getDefaultValue());
@@ -3254,7 +3270,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @param options
 	 * @return
 	 */
-	private static IPropertyDescriptor createDataproviderController(final PersistContext persistContext, final boolean readOnly, final String id,
+	private static IPropertyDescriptor createDataproviderController(final PersistContext persistContext, final boolean readOnly, final Object id,
 		final String displayName, final FlattenedSolution flattenedEditingSolution, final Form form, final ITable table, final DataProviderOptions options)
 	{
 		final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persistContext.getPersist(), table);

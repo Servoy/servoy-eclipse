@@ -65,7 +65,6 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.CSSPositionPropertyType;
-import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Base class for property handlers base on java beans/introspection.
@@ -233,13 +232,13 @@ public class BasePropertyHandler implements IPropertyHandler
 		{
 			if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist())))
+					CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist())))
 			{
 				CSSPosition.setLocation((ISupportBounds)obj, ((Point)value).x, ((Point)value).y);
 			}
 			else if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(getName()) && value instanceof Dimension && persistContext != null &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist())))
+					CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist())))
 			{
 				CSSPosition.setSize((ISupportBounds)obj, ((Dimension)value).width, ((Dimension)value).height);
 			}
@@ -282,7 +281,7 @@ public class BasePropertyHandler implements IPropertyHandler
 				return false;
 			}
 			if (IContentSpecConstants.PROPERTY_CSS_POSITION.equals(name) && persistContext.getContext() instanceof Form &&
-				!((Form)persistContext.getContext()).getUseCssPosition() && !PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist()))
+				!((Form)persistContext.getContext()).getUseCssPosition() && !CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist()))
 			{
 				return false;
 			}

@@ -587,6 +587,8 @@ public class DesignerFilter implements Filter
 				JSONObject propertyvalue = new JSONObject();
 				propertyvalue.put(FormComponentPropertyType.SVY_FORM, formComponent.getUUID());
 				json.put("propertyValue", propertyvalue);
+				json.put("isAbsoluteCSSPositionMix",
+					!form.isResponsiveLayout() && !formComponent.isResponsiveLayout() && (form.getUseCssPosition() != formComponent.getUseCssPosition()));
 				result.add(json);
 			}
 		}

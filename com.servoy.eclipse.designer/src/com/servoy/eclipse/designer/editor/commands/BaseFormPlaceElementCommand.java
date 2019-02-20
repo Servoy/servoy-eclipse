@@ -320,7 +320,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				ServoyLog.logWarning("paste/drop unsupported class:  " + o.getClass(), null);
 			}
 		}
-		if (location != null && origLocations.size() > 1)
+		if (location != null && origLocations.size() > 1 && (!(parent instanceof Form) || !((Form)parent).getUseCssPosition()))
 		{
 			// update the locations of the pasted persists to place them relative to each other same as in original position
 			Set<Entry<ISupportBounds, java.awt.Point>> entrySet = origLocations.entrySet();

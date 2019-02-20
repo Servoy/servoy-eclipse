@@ -32,9 +32,9 @@ import com.servoy.j2db.persistence.Media;
 
 /**
  * Composite to view a media image
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class MediaComposite extends ScrolledComposite
 {
@@ -80,7 +80,7 @@ public class MediaComposite extends ScrolledComposite
 
 	/**
 	 * Set the media to show
-	 * 
+	 *
 	 * @param media
 	 */
 	public void setMedia(Media media)
@@ -120,7 +120,7 @@ public class MediaComposite extends ScrolledComposite
 			}
 			catch (Exception ex)
 			{
-				mediaLabel.setText("Unsupported image format");
+				mediaLabel.setText("Unsupported image format. You can modify in Preferences -> Editors which editor should be used for this type of files.");
 				return;
 			}
 		}

@@ -625,7 +625,7 @@ public class MobileExporter
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--PHONEGAP_JS_PLACEHOLDER-->"),
-								exportAsZip ? "<script src=\"phonegap.js\"></script>" : "");
+								exportAsZip ? "<script src=\"cordova.js\"></script>" : "");
 							if (developmentWorkspaceExport)
 							{
 								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, htmlFile)), Charset.forName("UTF8"),

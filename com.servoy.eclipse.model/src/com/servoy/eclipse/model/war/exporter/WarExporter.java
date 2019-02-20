@@ -119,13 +119,12 @@ import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
+import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.Pair;
@@ -268,13 +267,13 @@ public class WarExporter
 			Media media = it.next();
 			if (media.getName().endsWith(".less"))
 			{
-				String content = ResourceProvider.compileSolutionLessFile(media, fs);
+				String content = LessCompiler.compileSolutionLessFile(media, fs);
 				if (content != null)
 				{
 					File folder = new File(tmpWarDir, MediaResourcesServlet.SERVOY_SOLUTION_CSS);
 					if (!folder.exists() && !folder.mkdir())
 					{
-						Debug.error("Could not create folder " + folder.getName());
+						ServoyLog.logError("Could not create folder " + folder.getName(), new RuntimeException());
 						break;
 					}
 					try
@@ -378,14 +377,14 @@ public class WarExporter
 			StringBuilder message = new StringBuilder();
 			while ((line = in.readLine()) != null)
 			{
-				message.append(line);
+				message.append(line).append("\n");
 			}
 			in.close();
 			if (proc.waitFor() != 0)
 			{
-				Debug.error(message);
+				ServoyLog.logError("Could not group and minify JS and CSS resources.", new RuntimeException(message.toString()));
 				throw new ExportException(
-					"Could not group and minify JS and CSS resources. See log for more details and servoy wiki on how to exclude libraries from grouping using group property in the spec.");
+					"Could not group and minify JS and CSS resources. See workspace log for more details and servoy wiki Specification (.spec) file page - on how to exclude web package js or css libraries from grouping using the group property - if needed.");
 			}
 
 			//delete unneeded files
@@ -416,7 +415,7 @@ public class WarExporter
 		}
 		catch (Exception e)
 		{
-			Debug.error(e);
+			ServoyLog.logError(e);
 			throw new ExportException(e.getMessage(), e);
 		}
 	}
@@ -828,7 +827,7 @@ public class WarExporter
 		}
 		catch (IOException e)
 		{
-			Debug.error("IO exception when extracting from file " + file.getAbsolutePath(), e);
+			ServoyLog.logError("IO exception when extracting from file " + file.getAbsolutePath(), e);
 		}
 	}
 
@@ -1434,7 +1433,7 @@ public class WarExporter
 				}
 				catch (Exception e)
 				{
-					Debug.error("Cannot load encrypted previous export passwords", e);
+					ServoyLog.logError("Cannot load encrypted previous export passwords", e);
 				}
 
 				Set<String> codes = new HashSet<String>();
@@ -1558,7 +1557,7 @@ public class WarExporter
 			}
 			catch (Exception e)
 			{
-				Debug.error("Could not encrypt password for sever " + sc.getName(), e);
+				ServoyLog.logError("Could not encrypt password for sever " + sc.getName(), e);
 			}
 			properties.put("server." + i + ".password", password);
 			properties.put("server." + i + ".URL", sc.getServerUrl());
@@ -1653,7 +1652,7 @@ public class WarExporter
 			}
 			catch (Exception e)
 			{
-				Debug.error("Could not encrypt license key.", e);
+				ServoyLog.logError("Could not encrypt license key.", e);
 			}
 			i++;
 		}
@@ -1754,7 +1753,7 @@ public class WarExporter
 			}
 			else
 			{
-				Debug.error("jnlp file " + pluginJarJnlpFile + " couldn't be parsed, nothing copied");
+				ServoyLog.logError("Plugin jnlp file " + pluginJarJnlpFile + " couldn't be parsed; nothing copied", new RuntimeException());
 			}
 		}
 	}
@@ -1797,7 +1796,7 @@ public class WarExporter
 		}
 		catch (Exception e)
 		{
-			Debug.error("Error creating parsing the jnlp file: " + jnlpFile, e);
+			ServoyLog.logError("Error creating parsing the jnlp file: " + jnlpFile, e);
 		}
 		return null;
 	}
@@ -1887,7 +1886,7 @@ public class WarExporter
 			try (FileInputStream fis = new FileInputStream(sourceFile))
 			{
 				String compileLessWithNashorn = null;
-				if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(fis)) != null)
+				if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = LessCompiler.compileLessWithNashorn(fis)) != null)
 				{
 					File compiledLessFile = destFile;
 					PrintWriter printWriter = new PrintWriter(compiledLessFile);

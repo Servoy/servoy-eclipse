@@ -70,7 +70,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -213,7 +213,7 @@ public class ModelUtils
 					{
 						if (styleNames == null)
 						{
-							String cssContent = media.getName().endsWith(".less") ? ResourceProvider.compileSolutionLessFile(media, flattenedSolution)
+							String cssContent = media.getName().endsWith(".less") ? LessCompiler.compileSolutionLessFile(media, flattenedSolution)
 								: new String(media.getMediaData(), "UTF-8");
 							// we only use the css3 styling (getStyleNames() so that we can give a boolean to ignore/don't create the rest
 							IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
@@ -397,45 +397,39 @@ public class ModelUtils
 		// This will normally now return any method now..
 		FlattenedSolution editingFlattenedSolution = getEditingFlattenedSolution(persist, context);
 		ScriptMethod sm = editingFlattenedSolution.getScriptMethod(methodId);
-		if (sm != null)
+		if (sm == null)
 		{
-			return sm;
-		}
-		// this code shouldn't be hit anymore
-		if (table != null)
-		{
-			try
+			// this code shouldn't be hit anymore
+			if (table != null)
 			{
-				Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(table);
-				while (tableNodes.hasNext())
+				try
 				{
-					TableNode tableNode = tableNodes.next();
-					IPersist method = AbstractBase.selectById(tableNode.getAllObjects(), methodId);
-					if (method instanceof IScriptProvider)
+					Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(table);
+					while (tableNodes.hasNext())
 					{
-						return (IScriptProvider)method;
+						TableNode tableNode = tableNodes.next();
+						IPersist method = AbstractBase.selectById(tableNode.getAllObjects(), methodId);
+						if (method instanceof IScriptProvider)
+						{
+							return (IScriptProvider)method;
+						}
 					}
 				}
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
-
 		// find the form method
 		Form formBase = (Form)(context == null ? persist : context).getAncestor(IRepository.FORMS); // search via context if provided
 		if (formBase == null)
 		{
 			// not a form method
-			return null;
+			return sm;
 		}
 
 		List<Form> formHierarchy = editingFlattenedSolution.getFormHierarchy(formBase);
-		for (int i = 0; sm == null && i < formHierarchy.size(); i++)
-		{
-			sm = formHierarchy.get(i).getScriptMethod(methodId);
-		}
 
 		if (sm != null && !sm.getParent().equals(formBase))
 		{

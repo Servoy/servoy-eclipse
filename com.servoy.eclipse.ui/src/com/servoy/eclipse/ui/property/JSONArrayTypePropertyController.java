@@ -144,7 +144,7 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 		{
 			try
 			{
-				final int idx = getIndexFromId((String)id);
+				final int idx = getIndexFromId((ArrayPropertyChildId)id);
 				return resetComplexElementValue(id, idx);
 			}
 			catch (NumberFormatException e)

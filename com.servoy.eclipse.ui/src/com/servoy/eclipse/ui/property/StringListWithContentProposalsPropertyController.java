@@ -72,7 +72,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 
 	private ILabelProvider labelProvider;
 
-	public StringListWithContentProposalsPropertyController(String id, String displayName, String[] proposals, String defaultValue, String tooltip,
+	public StringListWithContentProposalsPropertyController(Object id, String displayName, String[] proposals, String defaultValue, String tooltip,
 		IValueEditor<String> valueEditor)
 	{
 		super(id, displayName);
