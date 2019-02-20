@@ -631,7 +631,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	public void performHelp()
 	{
 		boolean focusNameField = solutionNameField.isFocusControl();
-		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.create_solution");
+		PlatformUI.getWorkbench().getHelpSystem().displayHelp(wizard.getHelpContextID());
 		if (focusNameField)
 		{
 			solutionNameField.setFocus();

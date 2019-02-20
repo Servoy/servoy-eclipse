@@ -523,4 +523,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return "sol_";
 	}
 
+	protected String getHelpContextID()
+	{
+		return "com.servoy.eclipse.ui.create_solution";
+	}
+
 }

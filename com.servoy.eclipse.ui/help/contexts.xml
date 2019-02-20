@@ -4,6 +4,9 @@
 	<context id="create_solution" title="New Solution Wizard">
     <topic href="https://servoy.github.io/servoy_documentation/201903/create_solution.html" label="Create Solution"/>
 	</context>
+	<context id="create_module" title="New Module Wizard">
+    <topic href="https://servoy.github.io/servoy_documentation/201903/create_module.html" label="Create Module"/>
+	</context>
  <context id="create_form" title="New Form Wizard">
     <topic href="https://servoy.github.io/servoy_documentation/201903/create_form.html" label="Create Form"/>
  </context>
