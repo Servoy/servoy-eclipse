@@ -377,7 +377,7 @@ public class WarExporter
 			StringBuilder message = new StringBuilder();
 			while ((line = in.readLine()) != null)
 			{
-				message.append(line);
+				message.append(line).append("\n");
 			}
 			in.close();
 			if (proc.waitFor() != 0)
