@@ -748,16 +748,13 @@ public class ValueListEditor extends PersistEditor
 				valueList.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES;
 			realType.setEnabled(isCustomOrGlobalValuelist);
 			displayType.setEnabled(isCustomOrGlobalValuelist);
-			realTypeLabel.setEnabled(isCustomOrGlobalValuelist);
-			displayTypeLabel.setEnabled(isCustomOrGlobalValuelist);
-			typeDefinitionGroup.setEnabled(isCustomOrGlobalValuelist);
 
-			Color disabledColor = isCustomOrGlobalValuelist ? Display.getDefault().getSystemColor(SWT.COLOR_BLACK)
-				: Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
-
-			realTypeLabel.setForeground(disabledColor);
-			displayTypeLabel.setForeground(disabledColor);
-			typeDefinitionGroup.setForeground(disabledColor);
+			Color enabledColor = customValuesButton.getForeground().getRed() == 0 ? Display.getDefault().getSystemColor(SWT.COLOR_BLACK)
+				: Display.getDefault().getSystemColor(SWT.COLOR_WHITE);
+			Color usedColor = isCustomOrGlobalValuelist ? enabledColor : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+			realTypeLabel.setForeground(usedColor);
+			displayTypeLabel.setForeground(usedColor);
+			typeDefinitionGroup.setForeground(usedColor);
 
 
 			currentTable = table;
