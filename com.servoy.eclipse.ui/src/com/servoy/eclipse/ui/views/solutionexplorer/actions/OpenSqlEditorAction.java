@@ -16,7 +16,8 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -122,8 +123,8 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 			IWorkbenchPage page = wWindow.getActivePage();
 			if (!page.getPerspective().getId().equals(perspectiveId))
 			{
-				Preferences store = Activator.getDefault().getPluginPreferences();
-				String option = store.getString(AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY);
+				IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
+				String option = store.get(AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.NEVER);
 				if (MessageDialogWithToggle.ALWAYS.equals(option))
 				{
 					Display.getCurrent().asyncExec(new Runnable()

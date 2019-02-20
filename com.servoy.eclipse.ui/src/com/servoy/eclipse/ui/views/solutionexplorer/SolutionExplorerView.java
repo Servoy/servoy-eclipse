@@ -3560,8 +3560,10 @@ public class SolutionExplorerView extends ViewPart
 				openActionInTree.selectionChanged(new SelectionChangedEvent(tree, new StructuredSelection(doubleClickedItem)));
 
 				IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
-				String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION, "");
-				String globalsDblClickOption = store.get(SolutionExplorerPreferences.GLOBALS_DOUBLE_CLICK_ACTION, "");
+				String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
+					SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
+				String globalsDblClickOption = store.get(SolutionExplorerPreferences.GLOBALS_DOUBLE_CLICK_ACTION,
+					SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT);
 				boolean formDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption)) ||
 					(SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_SCRIPT.equals(formDblClickOption));
 				boolean globalsDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(globalsDblClickOption));

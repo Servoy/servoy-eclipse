@@ -60,9 +60,9 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	public static final String GLOBALS_DOUBLE_CLICK_ACTION = "globalsDblClickAction";
 	public static final String SOLEX_ALIGNEMENT = "solexAlignement";
 	public static final String DOUBLE_CLICK_OPEN_FORM_EDITOR = "openFormEditor";
-	public static final String DOUBLE_CLICK_OPEN_FORM_SCRIPT = "openFormSciptEditor";
+	public static final String DOUBLE_CLICK_OPEN_FORM_SCRIPT = "openFormScriptEditor";
 	public static final String DOUBLE_CLICK_EXPAND_FORM_TREE = "expandFormTree";
-	public static final String DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT = "openGlobalSciptEditor";
+	public static final String DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT = "openGlobalScriptEditor";
 	public static final String DOUBLE_CLICK_EXPAND_GLOBAL_TREE = "expandGlobalTree";
 
 	private IDialogSettings solexDialogSettings;
@@ -115,10 +115,10 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 
 		IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
 
-		String option = store.get(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, "");
+		String option = store.get(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.NEVER);
 		chAutomaticPerspectiveSwitch.setSelection(MessageDialogWithToggle.ALWAYS.equals(option) ? true : false);
 
-		option = store.get(FORM_DOUBLE_CLICK_ACTION, "");
+		option = store.get(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_FORM_EDITOR);
 		if (DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(option))
 		{
 			rdOpenFormEditor.setSelection(true);
@@ -141,7 +141,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 			rdOpenFormScriptEditor.setSelection(false);
 		}
 
-		option = store.get(GLOBALS_DOUBLE_CLICK_ACTION, "");
+		option = store.get(GLOBALS_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT);
 		if (DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(option))
 		{
 			rdOpenGlobalScriptEditor.setSelection(true);
