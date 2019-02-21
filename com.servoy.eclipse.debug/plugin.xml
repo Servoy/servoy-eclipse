@@ -37,7 +37,7 @@
             targetID="org.eclipse.debug.ui.BreakpointView">
          <action
                class="com.servoy.eclipse.debug.actions.ToggleGlobalExitBreak"
-               icon="icons/exit_ovr.gif"
+               icon="icons/exit_ovr.png"
                id="com.servoy.eclipse.debug.toggle.global.exitbreak"
                label="Toggle Global ExitBreak"
                style="toggle"
@@ -46,7 +46,7 @@
          </action>
          <action
                class="com.servoy.eclipse.debug.actions.ToggleGlobalEntryBreak"
-               icon="icons/entry_ovr.gif"
+               icon="icons/entry_ovr.png"
                id="com.servoy.eclipse.debug.toggle.global.entrybreak"
                label="Toggle Global EntryBreak"
                style="toggle"
@@ -55,7 +55,7 @@
          </action>
          <action
                class="com.servoy.eclipse.debug.actions.ToggleGlobalExceptionBreak"
-               icon="icons/jexception_obj.gif"
+               icon="icons/jexception_obj.png"
                id="com.servoy.eclipse.debug.toggle.global.exceptionbreak"
                label="Toggle Global Exception Break"
                style="toggle"

@@ -249,7 +249,8 @@ public class ElementFactory
 			{
 				try
 				{
-					validator.checkName(newName, 0, new ValidatorSearchContext(parent, type), false);
+					Form form = (Form)(parent).getAncestor(IRepository.FORMS);
+					validator.checkName(newName, 0, new ValidatorSearchContext(form, type), false);
 					break;
 				}
 				catch (RepositoryException e)
@@ -297,7 +298,23 @@ public class ElementFactory
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 		AbstractBase copy = (AbstractBase)component.cloneObj(parent, true, validator, true, true,
 			true /* when component is an override we want a flattened one */);
-		if (copy instanceof ISupportBounds)
+		if (copy instanceof BaseComponent && parent instanceof Form && ((Form)parent).getUseCssPosition())
+		{
+			CSSPosition cssPosition = ((BaseComponent)copy).getCssPosition();
+
+			int left = CSSPosition.getPixelsValue(cssPosition.left);
+			if (left >= 0)
+			{
+				cssPosition.left = String.valueOf(x);
+			}
+			int top = CSSPosition.getPixelsValue(cssPosition.top);
+			if (top >= 0)
+			{
+				cssPosition.top = String.valueOf(y);
+			}
+			((BaseComponent)copy).setCssPosition(cssPosition);
+		}
+		else if (copy instanceof ISupportBounds)
 		{
 			CSSPosition.setLocation((ISupportBounds)copy, x, y);
 		}

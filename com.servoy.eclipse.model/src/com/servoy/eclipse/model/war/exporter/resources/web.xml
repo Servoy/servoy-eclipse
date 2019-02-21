@@ -6,7 +6,7 @@
                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
   version="3.0">
   <!--  this version below should be upped if servoy makes changes to this file! -->
-  <!--  servoy web.xml version:1 -->
+  <!--  servoy web.xml version:2 -->
   <!-- Servoy related servlets -->
   
   <absolute-ordering>

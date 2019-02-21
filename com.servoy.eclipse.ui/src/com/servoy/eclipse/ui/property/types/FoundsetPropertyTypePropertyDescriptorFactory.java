@@ -33,7 +33,7 @@ public class FoundsetPropertyTypePropertyDescriptorFactory implements ITypePrope
 {
 
 	@Override
-	public IPropertyDescriptor createPropertyDescriptor(String id, String displayName, FlattenedSolution flattenedEditingSolution,
+	public IPropertyDescriptor createPropertyDescriptor(Object id, String displayName, FlattenedSolution flattenedEditingSolution,
 		PersistContext persistContext, PropertyDescription propertyDescription)
 	{
 		return new FoundsetPropertyController(id, displayName, flattenedEditingSolution, persistContext,

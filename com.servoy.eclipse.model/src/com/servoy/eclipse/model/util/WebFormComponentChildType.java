@@ -191,7 +191,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	private WebCustomType createWebCustomType(Object propertyDescriptionArg, final String jsonKey, final int index, UUID uuidArg)
 	{
 		Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(this);
-		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index, false, idAndUUID.getLeft().intValue(),
+		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index, idAndUUID.getLeft().intValue(),
 			uuidArg != null ? uuidArg : idAndUUID.getRight());
 	}
 
@@ -501,10 +501,9 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		String jsonKey;
 		int index;
 
-		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, boolean isNew, int id,
-			UUID uuid)
+		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, int id, UUID uuid)
 		{
-			super(parentWebObject, propertyDescription, jsonKey, index, isNew, id, uuid);
+			super(parentWebObject, propertyDescription, jsonKey, index, false, id, uuid);
 			this.jsonKey = jsonKey;
 			this.index = index;
 		}
@@ -539,11 +538,6 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 			return WebCustomType.class.getSimpleName() + " -> " + webObjectImpl.toString(); //$NON-NLS-1$
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.util.ISupportOwnPropertyCheck#isOwnProperty(java.lang.String)
-		 */
 		@Override
 		public boolean isInheritedProperty(String propertyName)
 		{

@@ -56,7 +56,7 @@ public class EditableComboboxPropertyController extends PropertyController<Strin
 		}
 	};
 
-	public EditableComboboxPropertyController(String id, String displayName, String[] displayValues, IValueEditor valueEditor)
+	public EditableComboboxPropertyController(Object id, String displayName, String[] displayValues, IValueEditor valueEditor)
 	{
 		super(id, displayName);
 		this.displayValues = displayValues;

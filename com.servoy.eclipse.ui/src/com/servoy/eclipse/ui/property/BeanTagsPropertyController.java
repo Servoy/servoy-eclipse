@@ -25,16 +25,16 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * Property controller for bean property editor that supports getTags().
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class BeanTagsPropertyController extends PropertyController<Object, Integer>
 {
 	private final PropertyEditor propertyEditor;
 	private final ComboboxPropertyController<String> comboboxPropertyController;
 
-	public BeanTagsPropertyController(String id, String displayName, PropertyEditor propertyEditor, String unresolved)
+	public BeanTagsPropertyController(Object id, String displayName, PropertyEditor propertyEditor, String unresolved)
 	{
 		super(id, displayName);
 		this.propertyEditor = propertyEditor;
@@ -51,7 +51,8 @@ public class BeanTagsPropertyController extends PropertyController<Object, Integ
 	@Override
 	protected IPropertyConverter<Object, Integer> createConverter()
 	{
-		return new ChainedPropertyConverter<Object, String, Integer>(new BeanAsTextPropertyConverter(propertyEditor), comboboxPropertyController.getConverter());
+		return new ChainedPropertyConverter<Object, String, Integer>(new BeanAsTextPropertyConverter(propertyEditor),
+			comboboxPropertyController.getConverter());
 	}
 
 	@Override

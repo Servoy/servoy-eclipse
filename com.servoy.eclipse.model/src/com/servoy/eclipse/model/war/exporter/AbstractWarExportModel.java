@@ -386,6 +386,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	public String decryptPassword(Cipher desCipher, String password)
 	{
+		if (password == null) return "";
 		String result = "";
 		if (password.startsWith(IWarExportModel.enc_prefix))
 		{

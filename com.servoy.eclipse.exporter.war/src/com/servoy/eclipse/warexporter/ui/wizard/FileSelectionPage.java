@@ -19,6 +19,8 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.io.File;
 
+import javax.swing.filechooser.FileSystemView;
+
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -122,8 +124,8 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 
 		if (exportModel.getWarFileName() == null)
 		{
-			exportModel.setWarFileName(
-				System.getProperty("user.home") + "/" + ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getName() + ".war");
+			exportModel.setWarFileName(FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + File.separatorChar +
+				ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getName() + ".war");
 		}
 		fileNameText.setText(exportModel.getWarFileName());
 
@@ -269,12 +271,14 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
+				checkMetadataTablesButton.setEnabled(!exportMetadataTablesButton.getSelection());
 				exportModel.setExportMetaData(exportMetadataTablesButton.getSelection());
 			}
 		});
 
 		checkMetadataTablesButton = new Button(composite, SWT.CHECK);
 		checkMetadataTablesButton.setSelection(exportModel.isCheckMetadataTables());
+		checkMetadataTablesButton.setEnabled(exportModel.isCheckMetadataTables());
 		checkMetadataTablesButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -712,7 +716,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		overrideSequenceTypesButton.setEnabled(exportActiveSolution.getSelection());
 		overrideDefaultValuesButton.setEnabled(exportActiveSolution.getSelection());
 		exportMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
-		checkMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
+		checkMetadataTablesButton.setEnabled(exportActiveSolution.getSelection() && !exportMetadataTablesButton.getEnabled());
 		exportI18NDataButton.setEnabled(exportActiveSolution.getSelection());
 		insertNewI18NKeysOnlyButton.setEnabled(exportActiveSolution.getSelection() && exportI18NDataButton.getSelection());
 		overwriteGroupsButton.setEnabled(exportActiveSolution.getSelection());
@@ -734,6 +738,26 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		{
 			String potentialFileName = fileNameText.getText();
 			exportModel.setWarFileName(potentialFileName);
+			setErrorMessage(null);
+			setPageComplete(true);
+			if (!potentialFileName.endsWith(".war"))
+			{
+				setErrorMessage("Path must be a war file.");
+				setPageComplete(false);
+			}
+			else
+			{
+				File file = new File(potentialFileName);
+				try
+				{
+					file.getCanonicalPath();
+				}
+				catch (Exception ex)
+				{
+					setErrorMessage("Invalid path.");
+					setPageComplete(false);
+				}
+			}
 		}
 		else if (event.widget == browseButton)
 		{

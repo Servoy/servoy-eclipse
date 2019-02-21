@@ -74,7 +74,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		}
 	};
 
-	public MapEntriesPropertyController(String id, String displayName, Map<String, PropertyDescription> map)
+	public MapEntriesPropertyController(Object id, String displayName, Map<String, PropertyDescription> map)
 	{
 		super(id, displayName);
 		setLabelProvider(CLICK_TO_ADD);

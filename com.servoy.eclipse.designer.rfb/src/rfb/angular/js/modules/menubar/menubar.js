@@ -56,7 +56,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         e.stopPropagation();
                         $editorService.executeAction('copy');
                         $scope.actions[2].style.backgroundImage = 'url("images/copy_edit_disabled.png")';
-                        setTimeout(() => {
+                        setTimeout(function() {
                             $scope.actions[2].style.backgroundImage = 'url("images/copy_edit.png")';
 						}, 100);
                     }

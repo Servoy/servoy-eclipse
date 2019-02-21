@@ -148,19 +148,19 @@
 			<version>1.8.0.beta3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.servoy</groupId>
-			<artifactId>org.apache.logging.log4j.slf4j18-impl</artifactId>
-			<version>2.11.2.SNAPSHOT</version>
+		    <groupId>org.apache.logging.log4j</groupId>
+		    <artifactId>log4j-slf4j18-impl</artifactId>
+		    <version>2.11.2</version>
 		</dependency>
 		<dependency>
-			<groupId>com.servoy</groupId>
-			<artifactId>org.apache.logging.log4j.api</artifactId>
-			<version>2.11.2.SNAPSHOT</version>
+		    <groupId>org.apache.logging.log4j</groupId>
+		    <artifactId>log4j-api</artifactId>
+		    <version>2.11.2</version>
 		</dependency>
 		<dependency>
-			<groupId>com.servoy</groupId>
-			<artifactId>org.apache.logging.log4j.core</artifactId>
-			<version>2.11.2.SNAPSHOT</version>
+		    <groupId>org.apache.logging.log4j</groupId>
+		    <artifactId>log4j-core</artifactId>
+		    <version>2.11.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.servoy</groupId>

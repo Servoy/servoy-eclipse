@@ -50,7 +50,7 @@ public class DatasourceController extends PropertyController<String, IDataSource
 	private final Object input;
 	private final String title;
 
-	public DatasourceController(String id, String displayName, String title, boolean readOnly, Object input, ILabelProvider labelProvider)
+	public DatasourceController(Object id, String displayName, String title, boolean readOnly, Object input, ILabelProvider labelProvider)
 	{
 		super(id, displayName, null, labelProvider, null);
 		this.title = title;

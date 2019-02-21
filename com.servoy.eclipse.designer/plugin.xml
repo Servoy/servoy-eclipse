@@ -913,7 +913,17 @@
             defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.SaveAsTemplateCommand"
             id="com.servoy.eclipse.designer.rfb.saveastemplate"
             name="SaveAsTemplate">
-      </command>            
+      </command> 
+      <command
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.CopyCommand"
+            id="com.servoy.eclipse.designer.rfb.copyContainer"
+            name="CopyContainer">
+      </command>
+      <command
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.PasteCommand"
+            id="com.servoy.eclipse.designer.rfb.pasteContainer"
+            name="PasteContainer">
+      </command>           
       <command
             defaultHandler="com.servoy.eclipse.designer.editor.commands.DeleteCommand"
             id="com.servoy.eclipse.designer.rfb.delete"
@@ -1400,7 +1410,34 @@
                   commandId="com.servoy.eclipse.designer.rfb.saveastemplate"
                   label="Save as template ..."
                   style="push">
-            </command>               
+            </command> 
+            <command
+              	  commandId="com.servoy.eclipse.designer.rfb.copyContainer"
+                  label="Copy"
+                  style="push">
+            </command>   
+            <command
+              	  commandId="com.servoy.eclipse.designer.rfb.pasteContainer"
+                  label="Paste"
+                  style="push">
+               <visibleWhen
+                      checkEnabled="false">
+                   <with
+                         variable="activeMenuSelection">
+                      <and>
+                         <iterate
+                               operator="and">
+                            <test
+                                  property="com.servoy.eclipse.designer.editor.rfb.ispasteallowed">
+                            </test>
+                         </iterate>
+                         <count
+                               value="1">
+                         </count>
+                      </and>
+                   </with>
+                </visibleWhen>
+            </command>              
             <command
                   commandId="com.servoy.eclipse.designer.rfb.openscripteditor"
                   label="Open in Script Editor"
@@ -1566,6 +1603,16 @@
                id="com.servoy.eclipse.designer.rfb.hassuperform"
                namespace="com.servoy.eclipse.designer.editor.rfb"
                properties="hassuperform"
+               type="java.lang.Object">
+         </propertyTester>
+      </extension>
+    <extension
+            point="org.eclipse.core.expressions.propertyTesters">
+         <propertyTester
+               class="com.servoy.eclipse.designer.editor.rfb.menu.IsPasteAllowed"
+               id="com.servoy.eclipse.designer.rfb.ispasteallowed"
+               namespace="com.servoy.eclipse.designer.editor.rfb"
+               properties= "ispasteallowed"
                type="java.lang.Object">
          </propertyTester>
       </extension>

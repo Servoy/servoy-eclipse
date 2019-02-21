@@ -54,9 +54,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.javascript.ast.Script;
@@ -109,6 +110,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.search.internal.ui.SearchMessages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
@@ -210,6 +212,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.search.SearchAction;
+import com.servoy.eclipse.ui.util.AdaptableWrapper;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
@@ -347,6 +350,8 @@ public class SolutionExplorerView extends ViewPart
 	private ContextAction deleteActionInList;
 
 	private ContextAction openAction;
+
+	private ISelectionContributionItem openWithAction;
 
 	private ContextAction openActionInTree;
 
@@ -2651,6 +2656,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private void fillTreeContextMenu(IMenuManager manager)
 	{
+		refreshSelection();
 		SimpleUserNode selectedTreeNode = getSelectedTreeNode();
 
 		if (setActive.isEnabled()) manager.add(setActive);
@@ -2840,6 +2846,12 @@ public class SolutionExplorerView extends ViewPart
 		if (moveSample.isEnabled()) manager.add(moveSample);
 		manager.add(new Separator());
 		if (openAction.isEnabled()) manager.add(openAction);
+		if (openWithAction.isEnabled())
+		{
+			IMenuManager submenu = new MenuManager(SearchMessages.OpenWithMenu_label);
+			submenu.add(openWithAction);
+			manager.add(submenu);
+		}
 		if (editVariableAction.isEnabled()) manager.add(editVariableAction);
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
@@ -3260,6 +3272,8 @@ public class SolutionExplorerView extends ViewPart
 		OpenComponentResourceAction openComponentResource = new OpenComponentResourceAction();
 		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
 
+		openWithAction = new OpenWithMediaFile(new AdaptableWrapper(null));
+
 		addComponentIcon = new ContextAction(this, null, "Add Icon");
 		IAction addComponentIconAction = new AddComponentIconResourceAction(this);
 		addComponentIcon.registerAction(UserNodeType.COMPONENT, addComponentIconAction);
@@ -3407,6 +3421,7 @@ public class SolutionExplorerView extends ViewPart
 		addListSelectionChangedListener(createInMemFromSPAction);
 		addListSelectionChangedListener(deleteActionInList);
 		addListSelectionChangedListener(openAction);
+		addListSelectionChangedListener(openWithAction);
 		addListSelectionChangedListener(editVariableAction);
 		addListSelectionChangedListener(debugMethodAction);
 		addListSelectionChangedListener(newActionInListSecondary);
@@ -3547,9 +3562,12 @@ public class SolutionExplorerView extends ViewPart
 				// instead of the selection given by the tree
 				boolean isForm = (doubleClickedItem.getType() == UserNodeType.FORM); // form open action was moved to the designer plugin, so we must make a special case for it (it is no longer part of openActionInTree)
 				openActionInTree.selectionChanged(new SelectionChangedEvent(tree, new StructuredSelection(doubleClickedItem)));
-				Preferences store = Activator.getDefault().getPluginPreferences();
-				String formDblClickOption = store.getString(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION);
-				String globalsDblClickOption = store.getString(SolutionExplorerPreferences.GLOBALS_DOUBLE_CLICK_ACTION);
+
+				IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
+				String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
+					SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
+				String globalsDblClickOption = store.get(SolutionExplorerPreferences.GLOBALS_DOUBLE_CLICK_ACTION,
+					SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT);
 				boolean formDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption)) ||
 					(SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_SCRIPT.equals(formDblClickOption));
 				boolean globalsDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(globalsDblClickOption));

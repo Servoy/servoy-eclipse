@@ -55,12 +55,12 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 	private final String unresolved;
 	private final IValueEditor valueEditor;
 
-	public ComboboxPropertyController(String id, String displayName, IComboboxPropertyModel<T> model, String unresolved)
+	public ComboboxPropertyController(Object id, String displayName, IComboboxPropertyModel<T> model, String unresolved)
 	{
 		this(id, displayName, model, unresolved, null);
 	}
 
-	public ComboboxPropertyController(String id, String displayName, IComboboxPropertyModel<T> model, String unresolved, IValueEditor valueEditor)
+	public ComboboxPropertyController(Object id, String displayName, IComboboxPropertyModel<T> model, String unresolved, IValueEditor valueEditor)
 	{
 		super(id, displayName);
 		this.model = model;

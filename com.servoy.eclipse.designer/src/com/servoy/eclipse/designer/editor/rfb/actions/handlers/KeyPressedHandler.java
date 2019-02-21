@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.internal.WorkbenchPage;
@@ -101,6 +102,7 @@ public class KeyPressedHandler implements IServerService
 						if (selection.size() > 0 && !containsInheritedElements(selection))
 						{
 							editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[selection.size()])));
+							selectionProvider.setSelection(new StructuredSelection(editorPart.getForm()));
 						}
 					}
 				});
