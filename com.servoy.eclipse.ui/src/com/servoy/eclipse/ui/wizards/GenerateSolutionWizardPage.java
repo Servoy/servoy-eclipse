@@ -38,7 +38,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -82,17 +81,14 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private ExpandItem collapsableItem;
 	private Composite topLevel;
 	private SolutionAdvancedSettingsComposite expandComposite;
-	private Composite parentControl;
 	private ExpandBar expandBar;
-
-	private int parentHeight;
-	private Point dialogSize;
 
 	private Boolean addDefaultTheme;
 	private int[] solutionTypeComboValues;
 	private int solutionType;
 	private Label configLabel;
 	private NewSolutionWizard wizard;
+	private int expandedHeight;
 
 	protected static final String IS_ADVANCED_USER_SETTING = "is_advanced_user";
 	protected static final String SELECTED_SOLUTIONS_SETTING = "selected_solutions";
@@ -123,8 +119,6 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 		this.wizard = (NewSolutionWizard)getWizard();
 		boolean isModuleWizard = wizard.shouldAddAsModule(null);
-
-		this.parentControl = parent;
 
 		// top level group
 		topLevel = new Composite(parent, SWT.NONE);
@@ -158,10 +152,10 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			groupLayout.createParallelGroup().add(groupLayout.createSequentialGroup().add(solutionLabel).addPreferredGap(LayoutStyle.RELATED).add(
 				solutionNameField, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(configLabel,
 					!isModuleWizard ? GroupLayout.DEFAULT_SIZE : 0, !isModuleWizard ? GroupLayout.DEFAULT_SIZE : 0, Short.MAX_VALUE).add(tableContainer,
-						GroupLayout.PREFERRED_SIZE, 500, Short.MAX_VALUE).add(expandBar, GroupLayout.PREFERRED_SIZE, 500, Short.MAX_VALUE));
+						GroupLayout.PREFERRED_SIZE, 650, Short.MAX_VALUE).add(expandBar, GroupLayout.PREFERRED_SIZE, 650, Short.MAX_VALUE));
 		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup().add(solutionLabel).add(solutionNameField)).addPreferredGap(LayoutStyle.UNRELATED).add(configLabel).add(
-				tableContainer, !isModuleWizard ? 100 : 0, !isModuleWizard ? 100 : 0, !isModuleWizard ? 100 : 0).add(expandBar, 150, GroupLayout.PREFERRED_SIZE,
+				tableContainer, !isModuleWizard ? 100 : 0, !isModuleWizard ? 100 : 0, !isModuleWizard ? 100 : 0).add(expandBar, 0, GroupLayout.PREFERRED_SIZE,
 					Short.MAX_VALUE).addPreferredGap(LayoutStyle.UNRELATED).addContainerGap());
 	}
 
@@ -195,11 +189,19 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		collapsableItem.setExpanded(getWizard().getDialogSettings().getBoolean(wizard.getSettingsPrefix() + IS_ADVANCED_USER_SETTING));
 		if (collapsableItem.getExpanded())
 		{
-			centerDialog(getWizard().getContainer().getShell());
-			getWizard().getContainer().getShell().layout(true, true);
+			expandedHeight = expandComposite.getSize().y;
+			Shell shell = getWizard().getContainer().getShell();
+			shell.getDisplay().asyncExec(() -> {
+				//center dialog vertically
+				Rectangle parentSize = shell.getParent().getBounds();
+				Rectangle bounds = shell.getBounds();
+				bounds.y = (parentSize.height - bounds.height) / 2 + parentSize.y;
+				shell.setBounds(bounds);
+			});
 		}
 		collapsableItem.setText(collapsableItem.getExpanded() ? "Hide advanced solution settings" : "Show advanced solution settings");
 		collapsableItem.setImage(uiActivator.loadImageFromBundle(collapsableItem.getExpanded() ? "collapse_tree.png" : "expandall.png"));
+
 	}
 
 
@@ -385,38 +387,19 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		Shell shell = getWizard().getContainer().getShell();
 		if (expanded)
 		{
-			parentHeight = parentControl.getSize().y;
-			dialogSize = shell.getSize();
-
-			wizard.getDialogSettings().put(wizard.getSettingsPrefix() + "parentHeight", parentHeight);
-			wizard.getDialogSettings().put(wizard.getSettingsPrefix() + "dialogHeight", dialogSize.y);
-
-			parentControl.setSize(dialogSize.x, parentControl.getSize().y + expandComposite.getSize().y);
-			shell.setSize(dialogSize.x, parentControl.getSize().y + 25);//25 to make the border visible
-
-			centerDialog(shell);
+			Rectangle bounds = shell.getBounds();
+			expandedHeight = expandComposite.getSize().y;
+			bounds.height = bounds.height + expandedHeight;
+			Rectangle parentSize = shell.getParent().getBounds();
+			bounds.y = (parentSize.height - bounds.height) / 2 + parentSize.y;
+			shell.setBounds(bounds);
 		}
 		else
 		{
-			if (parentHeight == 0)//was expanded by default
-			{
-				parentHeight = wizard.getDialogSettings().getInt(wizard.getSettingsPrefix() + "parentHeight");
-				dialogSize = new Point(shell.getSize().x, wizard.getDialogSettings().getInt(wizard.getSettingsPrefix() + "dialogHeight"));
-			}
-			parentControl.setSize(parentControl.getSize().x, parentHeight);
-			shell.setSize(dialogSize);
+			Rectangle bounds = shell.getBounds();
+			bounds.height = bounds.height - expandedHeight;
+			shell.setBounds(bounds);
 		}
-	}
-
-
-	public void centerDialog(Shell shell)
-	{
-		//center dialog
-		Rectangle parentSize = shell.getParent().getBounds();
-		Rectangle shellSize = shell.getBounds();
-		int locationX = (parentSize.width - shellSize.width) / 2 + parentSize.x;
-		int locationY = (parentSize.height - shellSize.height) / 2 + parentSize.y;
-		shell.setLocation(new Point(locationX, locationY));
 	}
 
 	private final class SolutionAdvancedSettingsComposite extends Composite implements IValidator
