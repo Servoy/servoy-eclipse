@@ -194,6 +194,7 @@ public class CreateComponentHandler implements IServerService
 										}
 									}
 								}
+								((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshContent();
 							}
 						}
 						catch (Exception ex)
