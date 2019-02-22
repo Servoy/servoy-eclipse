@@ -24,6 +24,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController;
@@ -143,6 +144,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					ServoyLog.logError(e);
 				}
 			}
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, form, false);
 			elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 		}
 
