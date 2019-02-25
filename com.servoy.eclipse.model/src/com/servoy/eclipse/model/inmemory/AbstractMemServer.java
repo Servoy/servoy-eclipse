@@ -450,7 +450,10 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	public void removeTable(String tableName) throws SQLException, RepositoryException
 	{
 		ITable remove = tables.remove(tableName);
-		fireTablesRemoved(new ITable[] { remove }, true);
+		if (remove != null)
+		{
+			fireTablesRemoved(new ITable[] { remove }, true);
+		}
 	}
 
 	/*
@@ -1119,12 +1122,6 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	{
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	@Override
-	public String getTableDatasource(String tableName)
-	{
-		return DataSourceUtils.createInmemDataSource(tableName);
 	}
 
 	/*

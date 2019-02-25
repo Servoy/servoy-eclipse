@@ -3265,6 +3265,7 @@ public class SolutionExplorerView extends ViewPart
 		});
 		openAction.registerAction(UserNodeType.TABLE, openTable);
 		openAction.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTable);
+		openAction.registerAction(UserNodeType.VIEW_FOUNDSET, openTable);
 		openAction.registerAction(UserNodeType.VIEW, openTable);
 		openAction.registerAction(UserNodeType.RELATION, new OpenRelationAction());
 		openAction.registerAction(UserNodeType.MEDIA_IMAGE, new OpenMediaAction());
@@ -3283,7 +3284,8 @@ public class SolutionExplorerView extends ViewPart
 		IAction deleteMediaFolder = new DeleteMediaAction("Delete media", this);
 		IAction deleteValueList = new DeletePersistAction(UserNodeType.VALUELIST_ITEM, "Delete value list");
 		IAction deleteTable = new DeleteTableAction(shell);
-		IAction deleteInMemDataSource = new DeleteInMemTableAction(shell);
+		IAction deleteInMemDataSource = new DeleteInMemTableAction(shell, UserNodeType.INMEMORY_DATASOURCE);
+		IAction deleteViewFoundset = new DeleteInMemTableAction(shell, UserNodeType.VIEW_FOUNDSET);
 		IAction deleteStyle = new DeletePersistAction(UserNodeType.STYLE_ITEM, "Delete style");
 		IAction deleteTemplate = new DeletePersistAction(UserNodeType.TEMPLATE_ITEM, "Delete template");
 		IAction deleteRelation = new DeletePersistAction(UserNodeType.RELATION, "Delete relation");
@@ -3331,6 +3333,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInList.registerAction(UserNodeType.I18N_FILE_ITEM, deleteI18N);
 		deleteActionInList.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
 		deleteActionInList.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
+		deleteActionInList.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 
 		copyTable = new CopyTableAction(shell);
 		editVariableAction = new EditVariableAction(this);
@@ -3356,6 +3359,7 @@ public class SolutionExplorerView extends ViewPart
 		});
 		openActionInTree.registerAction(UserNodeType.TABLE, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTableInTree);
+		openActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.VIEW, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
 
@@ -3383,6 +3387,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
 		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
+		deleteActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
 		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebObjectFolder);
 		deleteActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
@@ -3390,7 +3395,6 @@ public class SolutionExplorerView extends ViewPart
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
 		RenameSolutionAction renameSolutionAction = new RenameSolutionAction(this);
-		RenameInMemTableAction renameInMemTableAction = new RenameInMemTableAction(shell, getSite().getPage());
 		renameActionInTree.registerAction(UserNodeType.SOLUTION, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, renameSolutionAction);
@@ -3400,7 +3404,9 @@ public class SolutionExplorerView extends ViewPart
 		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentOrService(this, shell, UserNodeType.COMPONENT));
 		renameActionInTree.registerAction(UserNodeType.LAYOUT, new RenameLayoutAction(this, shell, UserNodeType.LAYOUT));
 		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentOrService(this, shell, UserNodeType.SERVICE));
-		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, renameInMemTableAction);
+		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE,
+			new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.INMEMORY_DATASOURCE));
+		renameActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.VIEW_FOUNDSET));
 
 		addAsModuleAction = new AddAsModuleAction(shell);
 		addAsWebPackageAction = new AddAsWebPackageAction(shell);

@@ -42,4 +42,10 @@ public class ViewFoundsetsServer extends AbstractMemServer<ViewFoundsetTable>
 	{
 		return new ViewFoundsetTable(this, tableName);
 	}
+	
+	@Override
+	public String getTableDatasource(String tableName)
+	{
+		return DataSourceUtils.createViewDataSource(tableName);
+	}
 }

@@ -44,5 +44,11 @@ public class MemServer extends AbstractMemServer<MemTable>
 		return new MemTable(this, tableName);
 	}
 
+	@Override
+	public String getTableDatasource(String tableName)
+	{
+		return DataSourceUtils.createInmemDataSource(tableName);
+	}
+
 	//TODO rename, remove
 }

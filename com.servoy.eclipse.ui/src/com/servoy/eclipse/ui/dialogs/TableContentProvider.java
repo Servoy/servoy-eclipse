@@ -27,9 +27,11 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.AbstractMemServerWrapper;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions.TableListType;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -89,10 +91,15 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			if (options.serverName == null)
 			{
 				lst.add(new InMemServerWrapper());
+				lst.add(new ViewFoundsetServerWrapper());
 			}
 			else if (options.serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
 			{
 				lst.addAll(Arrays.asList(getChildren(new InMemServerWrapper())));
+			}
+			else if (options.serverName.equals(DataSourceUtils.VIEW_DATASOURCE))
+			{
+				lst.addAll(Arrays.asList(getChildren(new ViewFoundsetServerWrapper())));
 			}
 			return lst.toArray();
 		}
@@ -114,6 +121,10 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 		{
 			return new InMemServerWrapper();
 		}
+		else if (element instanceof ViewFoundsetServerWrapper && ((ViewFoundsetServerWrapper)element).getTableName() != null)
+		{
+			return new ViewFoundsetServerWrapper();
+		}
 		return null;
 	}
 
@@ -127,14 +138,14 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 				return getTables(tw.getServerName(), options);
 			}
 		}
-		else if (parentElement instanceof InMemServerWrapper && ((InMemServerWrapper)parentElement).getTableName() == null)
+		else if (parentElement instanceof AbstractMemServerWrapper && ((AbstractMemServerWrapper)parentElement).getTableName() == null)
 		{
-			Collection<String> tableNames = ((InMemServerWrapper)parentElement).getTableNames();
-			InMemServerWrapper[] wrappers = new InMemServerWrapper[tableNames.size()];
+			Collection<String> tableNames = ((AbstractMemServerWrapper)parentElement).getTableNames();
+			AbstractMemServerWrapper[] wrappers = new AbstractMemServerWrapper[tableNames.size()];
 			int i = 0;
 			for (String tableName : tableNames)
 			{
-				wrappers[i++] = new InMemServerWrapper(tableName);
+				wrappers[i++] = parentElement instanceof InMemServerWrapper ? new InMemServerWrapper(tableName) : new ViewFoundsetServerWrapper(tableName);
 			}
 			return wrappers;
 		}
@@ -180,7 +191,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 	public boolean hasChildren(Object element)
 	{
 		return !TABLE_NONE.equals(element) && ((element instanceof TableWrapper && ((TableWrapper)element).getTableName() == null) ||
-			(element instanceof InMemServerWrapper && ((InMemServerWrapper)element).getTableName() == null));
+			(element instanceof AbstractMemServerWrapper && ((AbstractMemServerWrapper)element).getTableName() == null));
 	}
 
 	public static class TableListOptions

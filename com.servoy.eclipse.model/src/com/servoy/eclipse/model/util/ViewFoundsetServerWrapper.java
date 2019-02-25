@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2015 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2019 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -22,46 +22,50 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
- * @author jcompagner
- * @since 8.1
+ * @author emera
  */
-public class InMemServerWrapper extends AbstractMemServerWrapper
+public class ViewFoundsetServerWrapper extends AbstractMemServerWrapper
 {
-	public InMemServerWrapper()
-	{
-		super(null);
-	}
-
-	public InMemServerWrapper(String tablename)
+	public ViewFoundsetServerWrapper(String tablename)
 	{
 		super(tablename);
+	}
+
+	public ViewFoundsetServerWrapper()
+	{
+		super(null);
 	}
 
 	@Override
 	public String getDataSource()
 	{
-		return DataSourceUtils.createInmemDataSource(tablename);
+		return DataSourceUtils.createViewDataSource(tablename);
 	}
 
 	public String getServerName()
 	{
-		return DataSourceUtils.INMEM_DATASOURCE;
+		return DataSourceUtils.VIEW_DATASOURCE;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see com.servoy.eclipse.model.util.AbstractMemServerWrapper#getServer()
+	 * @see com.servoy.eclipse.model.util.AbstractMemServerWrapper#getServer(com.servoy.eclipse.model.nature.ServoyProject)
 	 */
 	@Override
 	protected AbstractMemServer< ? > getServer(ServoyProject servoyProject)
 	{
-		return servoyProject.getMemServer();
+		return servoyProject.getViewFoundsetsServer();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.util.AbstractMemServerWrapper#getLabel()
+	 */
 	@Override
 	public String getLabel()
 	{
-		return "In Memory";
+		return "View Foundsets";
 	}
 }

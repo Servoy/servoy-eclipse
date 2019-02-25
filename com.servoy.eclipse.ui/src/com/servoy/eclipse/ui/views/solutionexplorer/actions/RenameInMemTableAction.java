@@ -36,13 +36,15 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.inmemory.AbstractMemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -62,13 +64,16 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 {
 	private HashMap<String, String> names;
 	private final IWorkbenchPage page;
+	private final UserNodeType type;
 
-	public RenameInMemTableAction(Shell shell, IWorkbenchPage page)
+	public RenameInMemTableAction(Shell shell, IWorkbenchPage page, UserNodeType type)
 	{
 		super(shell, "rename", "Renaming");
-		setText("Rename in memory datasource");
-		setToolTipText("Rename in memory datasource");
+		String text = type == UserNodeType.INMEMORY_DATASOURCE ? "Rename in memory datasource" : "Rename view foundset";
+		setText(text);
+		setToolTipText(text);
 		this.page = page;
+		this.type = type;
 	}
 
 	/*
@@ -80,7 +85,7 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 	@Override
 	protected void doAction(IServer server, ITable table) throws SQLException, RepositoryException
 	{
-		((MemServer)server).renameTable(table, names.get(table.getName()));
+		((AbstractMemServer< ? >)server).renameTable(table, names.get(table.getName()));
 	}
 
 	/*
@@ -94,7 +99,7 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 	{
 		try
 		{
-			((MemServer)server).renameTable(table, names.get(table.getName()), userSelection);
+			((AbstractMemServer< ? >)server).renameTable(table, names.get(table.getName()), userSelection);
 		}
 		catch (SQLException e)
 		{
@@ -118,15 +123,17 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 
 			if (!checkAndAskUnsaved(selectedTable)) continue;
 
-			InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), "Rename in memory datasource", "Supply a new datasource name",
+			InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), getText(), "Supply a new datasource name",
 				selectedTable.getTableName(), new IInputValidator()
 				{
 					public String isValid(String newText)
 					{
-						if (new InMemServerWrapper().getTableNames().contains(newText))
+						if (type == UserNodeType.INMEMORY_DATASOURCE && new InMemServerWrapper().getTableNames().contains(newText) ||
+							type == UserNodeType.VIEW_FOUNDSET && new ViewFoundsetServerWrapper().getTableNames().contains(newText))
 						{
 							return "Name already used";
 						}
+
 						boolean valid = (IdentDocumentValidator.isSQLIdentifier(newText) &&
 							(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
 							(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX)));
@@ -190,38 +197,38 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 			{
 				public Object visit(IPersist o)
 				{
+					String datasourceScheme = type == UserNodeType.INMEMORY_DATASOURCE ? DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON
+						: DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON;
 					if (o instanceof Form)
 					{
 						Form f = (Form)o;
 						String tableName = DataSourceUtils.getDataSourceTableName(f.getDataSource());
-						if (f.getDataSource() != null && f.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) &&
-							names.containsKey(tableName))
+						if (f.getDataSource() != null && f.getDataSource().startsWith(datasourceScheme) && names.containsKey(tableName))
 						{
-							f.setDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(tableName));
+							f.setDataSource(datasourceScheme + names.get(tableName));
 							persists.add(f);
 						}
 					}
 					else if (o instanceof Relation)
 					{
 						Relation r = (Relation)o;
-						if (r.getPrimaryDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) && names.containsKey(r.getPrimaryTableName()))
+						if (r.getPrimaryDataSource().startsWith(datasourceScheme) && names.containsKey(r.getPrimaryTableName()))
 						{
-							r.setPrimaryDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(r.getPrimaryTableName()));
+							r.setPrimaryDataSource(datasourceScheme + names.get(r.getPrimaryTableName()));
 							persists.add(r);
 						}
-						if (r.getForeignDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) && names.containsKey(r.getForeignTableName()))
+						if (r.getForeignDataSource().startsWith(datasourceScheme) && names.containsKey(r.getForeignTableName()))
 						{
-							r.setForeignDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(r.getForeignTableName()));
+							r.setForeignDataSource(datasourceScheme + names.get(r.getForeignTableName()));
 							persists.add(r);
 						}
 					}
 					else if (o instanceof ValueList)
 					{
 						ValueList vl = (ValueList)o;
-						if (vl.getDataSource() != null && vl.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) &&
-							names.containsKey(vl.getTableName()))
+						if (vl.getDataSource() != null && vl.getDataSource().startsWith(datasourceScheme) && names.containsKey(vl.getTableName()))
 						{
-							vl.setDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(vl.getTableName()));
+							vl.setDataSource(datasourceScheme + names.get(vl.getTableName()));
 							persists.add(vl);
 						}
 					}

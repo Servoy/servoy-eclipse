@@ -25,10 +25,12 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteInMemTableAction;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -54,7 +56,8 @@ public class DeleteMemTableQuickFix implements IMarkerResolution
 	@Override
 	public void run(IMarker marker)
 	{
-		DeleteInMemTableAction action = new DeleteInMemTableAction(UIUtils.getActiveShell());
+		DeleteInMemTableAction action = new DeleteInMemTableAction(UIUtils.getActiveShell(),
+			tableNode.getDataSource() == DataSourceUtils.INMEM_DATASOURCE ? UserNodeType.INMEMORY_DATASOURCE : UserNodeType.VIEW_FOUNDSET);
 		action.setSelection(new StructuredSelection(
 			new Pair<IDataSourceWrapper, IServer>(DataSourceWrapperFactory.getWrapper(tableNode.getDataSource()), project.getMemServer())));
 		action.run();
