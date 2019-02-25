@@ -207,8 +207,10 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/build_all.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/dtool16/build_exec.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/build_all.png"));
-			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/brkp_obj.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/brkp_obj.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png"));
+//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/brkp_obj.png"),
+//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/readwrite_obj.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/watchpoint.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/help_contents.png"),
@@ -542,7 +544,7 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.dltk.javascript.ui/icons/obj16/jsearch_obj.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/javascript_search.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/obj16/fldr_obj.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/project.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/folder.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/obj16/file_obj.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/file_obj.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.editors/icons/full/obj16/file_obj.png"),
@@ -610,9 +612,9 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/debugt_obj.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/debugt_obj.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/dlcl16/gotoobj_tsk.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/gotoobj_tsk-disabled.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/gotoobj_tsk-disabled.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/elcl16/gotoobj_tsk.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/gotoobj_tsk.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/gotoobj_tsk.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/file_obj.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/file_obj.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/prj_obj.png"),
