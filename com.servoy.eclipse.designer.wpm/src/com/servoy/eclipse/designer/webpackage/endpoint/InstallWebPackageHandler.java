@@ -171,7 +171,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 						if (allInstalledPackages == null)
 						{
-							allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages(null);
+							allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages();
 						}
 
 						for (Object pckObj : allInstalledPackages)

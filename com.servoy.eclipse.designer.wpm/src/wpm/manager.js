@@ -16,6 +16,7 @@ angular.module('app', ['ngMaterial'])
 	var ws = new WebSocket(uri);
 	$scope.websocket = ws;
 	$scope.isLoading = true;
+	$scope.needRefresh = false;
     
 	$window.addEventListener("beforeunload", function() {
     	ws.close();
@@ -49,7 +50,11 @@ angular.module('app', ['ngMaterial'])
 	$scope.servicePackages = []
 	$scope.layoutPackages = []
 	$scope.solutionPackages = []
-	  
+		
+	this.refreshRemotePackages = function(){
+		$scope.needRefresh = true;
+	}
+
 	this.requestAllInstalledPackages = function(packagesArray){
 		$scope.isLoading = false;
 		$scope.componentPackages.length = 0;

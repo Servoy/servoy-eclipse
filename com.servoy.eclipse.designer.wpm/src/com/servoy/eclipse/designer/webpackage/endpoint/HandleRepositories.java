@@ -41,8 +41,11 @@ public class HandleRepositories implements IDeveloperService
 
 	public static final String REMOVE_REPOSITORY = "removeRepository";
 
-	public HandleRepositories()
+	private final GetAllInstalledPackages getAllInstalledPackagesService;
+
+	public HandleRepositories(GetAllInstalledPackages getAllInstalledPackagesService)
 	{
+		this.getAllInstalledPackagesService = getAllInstalledPackagesService;
 	}
 
 	@Override
@@ -59,7 +62,7 @@ public class HandleRepositories implements IDeveloperService
 			String url = values.getString("url");
 			JSONObject result = new JSONObject();
 
-			List<JSONObject> allpackages = GetAllInstalledPackages.setSelectedWebPackageIndex(url);
+			List<JSONObject> allpackages = getAllInstalledPackagesService.setSelectedWebPackageIndex(url);
 			result.put("packages", allpackages);
 			JSONArray storedIndexes = null;
 			String indexes = Activator.getEclipsePreferences().node("wpm").get("indexes", null);
@@ -84,7 +87,7 @@ public class HandleRepositories implements IDeveloperService
 			String name = message.getString("name");
 			if (name.equals("Servoy Default"))
 			{
-				return GetAllInstalledPackages.setSelectedWebPackageIndex(GetAllInstalledPackages.MAIN_WEBPACKAGEINDEX);
+				return getAllInstalledPackagesService.setSelectedWebPackageIndex(GetAllInstalledPackages.MAIN_WEBPACKAGEINDEX);
 			}
 			else
 			{
@@ -96,7 +99,7 @@ public class HandleRepositories implements IDeveloperService
 					{
 						if (storedIndexes.getJSONObject(i).getString("name").equals(name))
 						{
-							return GetAllInstalledPackages.setSelectedWebPackageIndex(storedIndexes.getJSONObject(i).getString("url"));
+							return getAllInstalledPackagesService.setSelectedWebPackageIndex(storedIndexes.getJSONObject(i).getString("url"));
 						}
 					}
 				}
@@ -118,7 +121,7 @@ public class HandleRepositories implements IDeveloperService
 					storedIndexes.remove(i);
 					if (GetAllInstalledPackages.getSelectedWebPackageIndex().equals(repo.optString("url")))
 					{
-						GetAllInstalledPackages.setSelectedWebPackageIndex(GetAllInstalledPackages.MAIN_WEBPACKAGEINDEX);
+						getAllInstalledPackagesService.setSelectedWebPackageIndex(GetAllInstalledPackages.MAIN_WEBPACKAGEINDEX);
 					}
 					break;
 				}
