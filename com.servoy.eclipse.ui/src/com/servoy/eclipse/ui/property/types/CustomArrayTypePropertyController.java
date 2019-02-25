@@ -144,7 +144,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					ServoyLog.logError(e);
 				}
 			}
-			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, form, false);
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(), false);
 			elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 		}
 
