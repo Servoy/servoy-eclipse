@@ -207,10 +207,10 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/build_all.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/dtool16/build_exec.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/build_all.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/brkp_obj.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png"));
-//			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/brkp_obj.png"),
-//				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/brkp_obj.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/obj16/brkp_obj.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/readwrite_obj.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/watchpoint.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/etool16/help_contents.png"),
