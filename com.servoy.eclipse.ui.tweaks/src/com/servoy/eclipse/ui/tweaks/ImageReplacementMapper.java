@@ -644,7 +644,7 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/$nl$/icons/view16/help_view.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/help_contents.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/helpsearch_co.gif"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/help_search.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/help_search.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/obj16/bookmarks_view.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/bookmarks.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.help.ui/icons/etool16/print_topic.gif"),
