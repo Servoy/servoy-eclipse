@@ -1924,6 +1924,11 @@ public class SolutionExplorerView extends ViewPart
 								// for an in mem tablenode send just that tablenode so only that one is refreshed
 								parents.add(persist);
 							}
+							else if (persist instanceof TableNode && DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
+							{
+								// for an view fs tablenode send just that tablenode so only that one is refreshed
+								parents.add(persist);
+							}
 							else if (persist instanceof WebComponent)
 							{
 								parents.add(persist.getAncestor(IRepository.FORMS));

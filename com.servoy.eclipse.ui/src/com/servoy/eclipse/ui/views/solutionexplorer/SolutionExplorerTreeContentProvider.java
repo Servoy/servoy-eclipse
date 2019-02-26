@@ -1604,7 +1604,7 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else if (un.getType() == UserNodeType.INMEMORY_DATASOURCES || un.getType() == UserNodeType.VIEW_FOUNDSETS)
 				{
-					ServoyProject servoyProject = ((AbstractMemServer<?>)un.getRealObject()).getServoyProject();
+					ServoyProject servoyProject = ((AbstractMemServer< ? >)un.getRealObject()).getServoyProject();
 					try
 					{
 						List<IProject> allReferencedProjects;
@@ -3066,6 +3066,17 @@ public class SolutionExplorerTreeContentProvider
 								PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node,
 									Messages.TreeStrings_SolutionDataSources);
 								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_InMemory);
+								if (inMemNode != null)
+								{
+									inMemNode.children = null;
+									view.refreshTreeNodeFromModel(inMemNode);
+								}
+							}
+							else if (DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
+							{
+								PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node,
+									Messages.TreeStrings_SolutionDataSources);
+								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_ViewFoundsets);
 								if (inMemNode != null)
 								{
 									inMemNode.children = null;

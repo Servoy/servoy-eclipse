@@ -88,6 +88,7 @@ import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -2914,7 +2915,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										ServoyMarker mk = MarkerMessages.FormTableNotAccessible.fill(form.getName(), form.getTableName());
 										addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
 									}
-									else if (table != null && !(table instanceof MemTable) && table.getRowIdentColumnsCount() == 0)
+									else if (table != null && !(table instanceof AbstractMemTable) && table.getRowIdentColumnsCount() == 0)
 									{
 										ServoyMarker mk = MarkerMessages.FormTableNoPK.fill(form.getName(), form.getTableName());
 										addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
