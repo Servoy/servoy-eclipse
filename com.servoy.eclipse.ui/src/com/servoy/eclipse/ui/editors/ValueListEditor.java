@@ -767,7 +767,6 @@ public class ValueListEditor extends PersistEditor
 			usedColor = enabled ? enabledColor : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 			definitionGroup.setForeground(usedColor);
 
-			definitionGroup.setEnabled(enabled);
 			dp_select1.setEnabled(enabled);
 			dp_select2.setEnabled(enabled);
 			dp_select3.setEnabled(enabled);
