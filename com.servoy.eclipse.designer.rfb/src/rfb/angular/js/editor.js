@@ -406,7 +406,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					return {
 						marginTop: "-4px",
 						border: 0,
-						borderTop: "1px dashed #000",
+						borderTop: "2px dashed transparent",
 						width: (parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH - 15) + "px",
 						float: "right"
 					};
