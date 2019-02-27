@@ -17,18 +17,24 @@
 
 package com.servoy.eclipse.designer.editor.rfb.menu;
 
+import java.util.Set;
+
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.util.UUID;
 
 /**
  * @author costinchiulan
@@ -47,12 +53,34 @@ public class IsPasteAllowed extends PropertyTester
 			Object clipboardContent = getClipboardContents();
 			if (persist instanceof LayoutContainer)
 			{
+				UUID childUUID = null;
+				Set<String> allowed = DesignerUtil.getAllowedChildren().get(
+					((LayoutContainer)persist).getPackageName() + "." + ((LayoutContainer)persist).getSpecName());
+
 				if (clipboardContent instanceof Object[])
 				{
 					isAllowed = true;
 					for (Object tp : (Object[])clipboardContent)
 					{
-						if (tp instanceof PersistDragData) return isAllowed;
+						if (tp instanceof PersistDragData)
+						{
+							String childType = "";
+							childUUID = ((PersistDragData)tp).uuid;
+							IPersist childElement = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
+								persist).searchPersist(childUUID);
+							if (childElement instanceof LayoutContainer)
+							{
+								childType = ((LayoutContainer)childElement).getPackageName() + "." + ((LayoutContainer)childElement).getSpecName();
+							}
+							if (childElement instanceof WebComponent)
+							{
+								childType = "component";
+							}
+							if (allowed != null && allowed.size() > 0)
+							{
+								if (!allowed.contains(childType)) isAllowed = false;
+							}
+						}
 					}
 				}
 			}
