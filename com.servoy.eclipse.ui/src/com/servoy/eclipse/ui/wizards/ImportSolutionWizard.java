@@ -115,6 +115,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean allowSolutionFilePathSelection = true;
 	private boolean askForImportServerName;
 	private boolean activateSolution = true;
+	private boolean reportImportFail;
 
 	private static String getInitialImportPath()
 	{
@@ -156,6 +157,11 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	public void setActivateSolution(boolean activateSolution)
 	{
 		this.activateSolution = activateSolution;
+	}
+
+	public void setReportImportFail(boolean reportImportFail)
+	{
+		this.reportImportFail = reportImportFail;
 	}
 
 	/**
@@ -206,7 +212,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 					IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
 						(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
-						isCleanImport, projectLocation);
+						isCleanImport, projectLocation, reportImportFail);
 					if (rootObjects != null)
 					{
 						String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";
