@@ -43,6 +43,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -110,8 +112,11 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	private final List<IProject> createdProjects;
 
+	private final boolean reportImportFail;
+
 	public XMLEclipseWorkspaceImportHandlerVersions11AndHigher(IXMLImportHandlerVersions11AndHigher x11handler, EclipseRepository repository,
-		ServoyResourcesProject resourcesProject, WorkspaceUserManager userManager, IProgressMonitor monitor, List<IProject> createdProjects)
+		ServoyResourcesProject resourcesProject, WorkspaceUserManager userManager, IProgressMonitor monitor, List<IProject> createdProjects,
+		boolean reportImportFail)
 	{
 		this.x11handler = x11handler;
 		this.repository = repository;
@@ -119,6 +124,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		this.userManager = userManager;
 		m = monitor;
 		this.createdProjects = createdProjects;
+		this.reportImportFail = reportImportFail;
 	}
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
@@ -127,14 +133,14 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		throws RepositoryException
 	{
 		return importFromJarFile(importEngine, x11handler, userChannel, repository, newResourcesProjectName, resourcesProject, m, activateSolution, cleanImport,
-			null);
+			null, false);
 	}
 
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
-		final String projectLocation) throws RepositoryException
+		final String projectLocation, final boolean reportImportFail) throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -225,7 +231,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					try
 					{
 						XMLEclipseWorkspaceImportHandlerVersions11AndHigher eclipseWorkspaceImportHandler = new XMLEclipseWorkspaceImportHandlerVersions11AndHigher(
-							x11handler, repository, resourcesProject, userManager, m, createdProjects);
+							x11handler, repository, resourcesProject, userManager, m, createdProjects, reportImportFail);
 						// read jar file & import some stuff into resources project
 						rootObjects[0] = importEngine.importFromJarFile(eclipseWorkspaceImportHandler, cleanImport);
 						if (rootObjects[0] == null || rootObjects[0].length == 0) throw new RepositoryException("No solution was imported.");
@@ -1112,7 +1118,22 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	public void importingFailed(ImportInfo importInfo, ImportTransactable importTransactable, Exception e)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null, false);
+		if (reportImportFail)
+		{
+			// show error
+			Display.getDefault().syncExec(new Runnable()
+			{
+				public void run()
+				{
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Importing " + importInfo.main.name, e.getMessage());
+				}
+			});
+		}
+		else
+		{
+			// old behavior
+			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null, false);
+		}
 		rollback(importTransactable);
 		x11handler.importingFailed(importInfo, importTransactable, e);
 	}

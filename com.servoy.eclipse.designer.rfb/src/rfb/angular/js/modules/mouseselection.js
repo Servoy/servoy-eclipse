@@ -114,6 +114,14 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 
 		function onmousedownLasso(event) {
 			if (event.button == 0 && !lassoStarted) {
+				if(event.target && event.target.parentElement.hasAttribute('svy-id'))
+				{
+					var ghostObject = editorScope.getGhost(event.target.parentElement.getAttribute("svy-id"));
+					if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_PART)
+					{
+						return;
+					}	
+				}	
 				var node = utils.getNode(event);
 				var canStartLasso = !node;
 				if (node) {

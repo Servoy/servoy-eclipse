@@ -270,7 +270,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										{
 											IPersist next = it.next();
 											IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, activeEditor.getForm()));
-											if (child.getParent() instanceof Form)
+											if (child.getParent() instanceof Form && !child.equals(next))
 											{
 												child.getParent().removeChild(child);
 											}

@@ -81,5 +81,10 @@
             name="Import default responsive packages">
       </provider>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.servoy.eclipse.designer.webpackage.Startup">
+      </startup>
+   </extension>
 </plugin>

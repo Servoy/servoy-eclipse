@@ -75,4 +75,10 @@ public class NewModuleWizard extends NewSolutionWizard
 	{
 		return "mod_";
 	}
+
+	@Override
+	protected String getHelpContextID()
+	{
+		return "com.servoy.eclipse.ui.create_module";
+	}
 }

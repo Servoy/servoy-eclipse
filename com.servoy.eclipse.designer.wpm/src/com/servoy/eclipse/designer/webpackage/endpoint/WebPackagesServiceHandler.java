@@ -37,7 +37,7 @@ public class WebPackagesServiceHandler
 		configuredHandlers.put("showurl", new ShowUrllWebPackageHandler());
 		configuredHandlers.put("remove", new RemoveWebPackageHandler());
 		configuredHandlers.put(GetSolutionList.GET_SOLUTION_LIST_METHOD, new GetSolutionList(endpoint));
-		HandleRepositories handleRepositories = new HandleRepositories();
+		HandleRepositories handleRepositories = new HandleRepositories(getAllInstalledPackages);
 		configuredHandlers.put(HandleRepositories.GET_REPOSITORIES, handleRepositories);
 		configuredHandlers.put(HandleRepositories.SET_SELECTED_REPOSITORY, handleRepositories);
 		configuredHandlers.put(HandleRepositories.ADD_REPOSITORY, handleRepositories);

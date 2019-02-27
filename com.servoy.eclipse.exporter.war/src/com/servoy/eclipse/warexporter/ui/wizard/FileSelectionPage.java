@@ -271,7 +271,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				checkMetadataTablesButton.setEnabled(!exportMetadataTablesButton.getSelection());
+				checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getEnabled() && exportMetadataTablesButton.getSelection());
 				exportModel.setExportMetaData(exportMetadataTablesButton.getSelection());
 			}
 		});
@@ -690,7 +690,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		{
 			exportSampleDataButton.setText("Export solution sample data");
 		}
-		checkMetadataTablesButton.setEnabled(!dbiDown);
+		checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getEnabled() && exportSampleDataButton.getSelection());
 		checkMetadataTablesButton.setSelection(dbiDown ? false : exportModel.isExportMetaData());
 		if (dbiDown)
 		{
@@ -716,7 +716,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		overrideSequenceTypesButton.setEnabled(exportActiveSolution.getSelection());
 		overrideDefaultValuesButton.setEnabled(exportActiveSolution.getSelection());
 		exportMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
-		checkMetadataTablesButton.setEnabled(exportActiveSolution.getSelection() && !exportMetadataTablesButton.getEnabled());
+		checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getEnabled() && exportMetadataTablesButton.getSelection());
 		exportI18NDataButton.setEnabled(exportActiveSolution.getSelection());
 		insertNewI18NKeysOnlyButton.setEnabled(exportActiveSolution.getSelection() && exportI18NDataButton.getSelection());
 		overwriteGroupsButton.setEnabled(exportActiveSolution.getSelection());

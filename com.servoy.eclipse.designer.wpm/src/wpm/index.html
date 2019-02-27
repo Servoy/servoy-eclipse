@@ -51,7 +51,8 @@
 		          </md-tooltip>
 		        </md-button>
 		      </div>
-		      <h1 class="wpm-title">Servoy Package Manager</h1>
+					<h1 class="wpm-title">Servoy Package Manager</h1>
+					<p ng-if="needRefresh" class="warning">There are new packages available! Reopen the Web Package Manager to load them.</p>
 		      <p class="wpm-subtitle">Manage Web Packages of the active solution {{ !!getActiveSolution() ? "'" + getActiveSolution() + "'" : ""}} and it's modules...</p>
 		    </md-content>
 		  </div>
