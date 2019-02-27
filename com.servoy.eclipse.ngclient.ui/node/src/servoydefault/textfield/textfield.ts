@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
+import { Component, Renderer2} from '@angular/core';
 
 import {FormattingService, DecimalkeyconverterDirective, StartEditDirective} from '../../ngclient/servoy_public'
 
