@@ -68,6 +68,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.Utils;
 
 
 public class AddContainerCommand extends AbstractHandler implements IHandler
@@ -142,7 +143,11 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 							@Override
 							public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
 							{
-								return NameComparator.INSTANCE.compare(o1.getName(), o2.getName());
+								String displayName1 = o1.getDisplayName();
+								if (Utils.stringIsEmpty(displayName1)) displayName1 = o1.getName();
+								String displayName2 = o2.getDisplayName();
+								if (Utils.stringIsEmpty(displayName2)) displayName2 = o2.getName();
+								return NameComparator.INSTANCE.compare(displayName1, displayName2);
 							}
 						});
 						TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
@@ -151,6 +156,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								@Override
 								public String getText(Object element)
 								{
+									String displayName = ((WebObjectSpecification)element).getDisplayName();
+									if (!Utils.stringIsEmpty(displayName)) return displayName;
 									String componentName = ((WebObjectSpecification)element).getName();
 									int index = componentName.indexOf("-");
 									if (index != -1)
