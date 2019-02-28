@@ -771,8 +771,6 @@ public class ValueListEditor extends PersistEditor
 			dp_select2.setEnabled(enabled);
 			dp_select3.setEnabled(enabled);
 
-			updateTypeDefinitionWidgets();
-
 			sortingDefinitionSelect.setEnabled(enabled);
 			separator_char.setEnabled(enabled);
 			separatorCharacterLabel.setEnabled(enabled);
