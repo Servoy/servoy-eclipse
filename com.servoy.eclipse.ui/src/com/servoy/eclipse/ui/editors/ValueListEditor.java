@@ -749,9 +749,7 @@ public class ValueListEditor extends PersistEditor
 			realType.setEnabled(isCustomOrGlobalValuelist);
 			displayType.setEnabled(isCustomOrGlobalValuelist);
 
-			Color enabledColor = customValuesButton.getForeground().getRed() == 0 ? Display.getDefault().getSystemColor(SWT.COLOR_BLACK)
-				: Display.getDefault().getSystemColor(SWT.COLOR_WHITE);
-			Color usedColor = isCustomOrGlobalValuelist ? enabledColor : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+			Color usedColor = isCustomOrGlobalValuelist ? globalMethodValuesButton.getForeground() : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 			realTypeLabel.setForeground(usedColor);
 			displayTypeLabel.setForeground(usedColor);
 			typeDefinitionGroup.setForeground(usedColor);
@@ -764,7 +762,7 @@ public class ValueListEditor extends PersistEditor
 			dp_select3.initDataBindings(table);
 
 			boolean enabled = table != null;
-			usedColor = enabled ? enabledColor : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+			usedColor = enabled ? globalMethodValuesButton.getForeground() : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 			definitionGroup.setForeground(usedColor);
 
 			dp_select1.setEnabled(enabled);
