@@ -111,6 +111,12 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 
 			for (JSONObject pack : remotePackages)
 			{
+				// clear runtime settings
+				pack.remove("installed");
+				pack.remove("installedIsWPA");
+				pack.remove("installedResource");
+				pack.remove("activeSolution");
+
 				String name = pack.getString("name");
 				String type = pack.getString("packageType");
 
