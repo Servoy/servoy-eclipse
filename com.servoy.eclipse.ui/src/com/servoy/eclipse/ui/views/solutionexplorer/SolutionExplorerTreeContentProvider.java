@@ -3450,7 +3450,15 @@ public class SolutionExplorerTreeContentProvider
 			un = getSolutionNode(currentActiveEditorPersist.getRootObject().getName());
 			if (un != null)
 			{
-				un = findChildNode(un, Messages.TreeStrings_Forms);
+				if (!((Form)currentActiveEditorPersist).isFormComponent().booleanValue())
+				{
+					un = findChildNode(un, Messages.TreeStrings_Forms);
+				}
+				else
+				{
+					un = findChildNode(un, Messages.TreeStrings_FormComponents);	
+				}
+
 				if (un != null)
 				{
 					un = findChildNode(un, ((Form)currentActiveEditorPersist).getName());
