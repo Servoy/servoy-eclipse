@@ -1311,7 +1311,23 @@ public class SolutionExplorerTreeContentProvider
 		List<IProject> allReferencedProjects, IPackageReader[] packages)
 	{
 		IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
+		HashMap<String, IPackageReader> packageReadersMap = new HashMap<String, IPackageReader>();
+
 		for (IPackageReader reader : packages)
+		{
+			if (reader.getResource() != null && reader.getResource().isFile())
+			{
+				IPackageReader existingReader = packageReadersMap.get(reader.getPackageName());
+				if (existingReader != null && existingReader.getResource() != null && existingReader.getResource().isDirectory())
+				{
+					continue;
+				}
+			}
+			packageReadersMap.put(reader.getPackageName(), reader);
+		}
+
+
+		for (IPackageReader reader : packageReadersMap.values())
 		{
 			File resource = reader.getResource();
 			if (resource != null && resource.isFile())
@@ -3456,7 +3472,7 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else
 				{
-					un = findChildNode(un, Messages.TreeStrings_FormComponents);	
+					un = findChildNode(un, Messages.TreeStrings_FormComponents);
 				}
 
 				if (un != null)
