@@ -246,6 +246,9 @@ angular.module('editorContent',['servoyApp'])
 
   var formData = $editorContentService.formData(true);
   
+  if(!formData.components)
+	  formData.components = {};
+  
   if (formData.formProperties && formData.formProperties.absoluteLayout) {
 	  $scope.absoluteLayout = formData.formProperties.absoluteLayout['']
   }

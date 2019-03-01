@@ -56,6 +56,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
@@ -320,7 +321,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				ServoyLog.logWarning("paste/drop unsupported class:  " + o.getClass(), null);
 			}
 		}
-		if (location != null && origLocations.size() > 1 && (!(parent instanceof Form) || !((Form)parent).getUseCssPosition()))
+		if (location != null && origLocations.size() > 1)
 		{
 			// update the locations of the pasted persists to place them relative to each other same as in original position
 			Set<Entry<ISupportBounds, java.awt.Point>> entrySet = origLocations.entrySet();
@@ -336,7 +337,27 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			// relocate relative to the upper-left corner of the original selection
 			for (Entry<ISupportBounds, java.awt.Point> entry : entrySet)
 			{
-				CSSPosition.setLocation(entry.getKey(), location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny);
+				ISupportBounds element = entry.getKey();
+				if (element instanceof BaseComponent && parent instanceof Form && ((Form)parent).getUseCssPosition())
+				{
+					CSSPosition cssPosition = ((BaseComponent)element).getCssPosition();
+
+					int left = CSSPosition.getPixelsValue(cssPosition.left);
+					if (left >= 0)
+					{
+						cssPosition.left = String.valueOf(location.x + entry.getValue().x - minx);
+					}
+					int top = CSSPosition.getPixelsValue(cssPosition.top);
+					if (top >= 0)
+					{
+						cssPosition.top = String.valueOf(location.y + entry.getValue().y - miny);
+					}
+					((BaseComponent)element).setCssPosition(cssPosition);
+				}
+				else
+				{
+					CSSPosition.setLocation(entry.getKey(), location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny);
+				}
 			}
 		}
 		return res.toArray();

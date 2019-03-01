@@ -30,6 +30,7 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
@@ -45,24 +46,25 @@ public class IsPasteAllowed extends PropertyTester
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue)
 	{
+		boolean isAllowed = false;
 		if (receiver instanceof PersistContext)
 		{
 			IPersist persist = ((PersistContext)receiver).getPersist();
+			Object clipboardContent = getClipboardContents();
 			if (persist instanceof LayoutContainer)
 			{
 				UUID childUUID = null;
 				Set<String> allowed = DesignerUtil.getAllowedChildren().get(
 					((LayoutContainer)persist).getPackageName() + "." + ((LayoutContainer)persist).getSpecName());
-				Object clipboardContent = getClipboardContents();
 
 				if (clipboardContent instanceof Object[])
 				{
-					String childType = "";
-					boolean isAllowed = true;
+					isAllowed = true;
 					for (Object tp : (Object[])clipboardContent)
 					{
 						if (tp instanceof PersistDragData)
 						{
+							String childType = "";
 							childUUID = ((PersistDragData)tp).uuid;
 							IPersist childElement = ServoyModelManager.getServoyModelManager().getServoyModel().getEditingFlattenedSolution(
 								persist).searchPersist(childUUID);
@@ -80,11 +82,15 @@ public class IsPasteAllowed extends PropertyTester
 							}
 						}
 					}
-					return isAllowed;
 				}
 			}
+			else
+			{
+				isAllowed = (clipboardContent instanceof Object[] && ((Object[])clipboardContent).length > 0 &&
+					((PersistContext)receiver).getContext() instanceof Form && !((Form)((PersistContext)receiver).getContext()).isResponsiveLayout());
+			}
 		}
-		return false;
+		return isAllowed;
 	}
 
 	public static Object getClipboardContents()

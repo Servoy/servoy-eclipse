@@ -68,6 +68,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.Utils;
 
 
 public class AddContainerCommand extends AbstractHandler implements IHandler
@@ -136,30 +137,36 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								specs.add(webComponentSpec);
 							}
 						}
+						LabelProvider labelProvider = new LabelProvider()
+						{
+							@Override
+							public String getText(Object element)
+							{
+								String displayName = ((WebObjectSpecification)element).getDisplayName();
+								if (Utils.stringIsEmpty(displayName))
+								{
+									displayName = ((WebObjectSpecification)element).getName();
+									int index = displayName.indexOf("-");
+									if (index != -1)
+									{
+										displayName = displayName.substring(index + 1);
+									}
+								}
+								return displayName + " [" + ((WebObjectSpecification)element).getPackageName() + "]";
+							};
+						};
 						Collections.sort(specs, new Comparator<WebObjectSpecification>()
 						{
 
 							@Override
 							public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
 							{
-								return NameComparator.INSTANCE.compare(o1.getName(), o2.getName());
+								return NameComparator.INSTANCE.compare(labelProvider.getText(o1), labelProvider.getText(o2));
 							}
 						});
 						TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
-							FlatTreeContentProvider.INSTANCE, new LabelProvider()
-							{
-								@Override
-								public String getText(Object element)
-								{
-									String componentName = ((WebObjectSpecification)element).getName();
-									int index = componentName.indexOf("-");
-									if (index != -1)
-									{
-										componentName = componentName.substring(index + 1);
-									}
-									return componentName + " [" + ((WebObjectSpecification)element).getPackageName() + "]";
-								};
-							}, null, null, SWT.NONE, "Select spec", specs.toArray(new WebObjectSpecification[0]), null, false, "SpecDialog", null);
+							FlatTreeContentProvider.INSTANCE, labelProvider, null, null, SWT.NONE, "Select spec", specs.toArray(new WebObjectSpecification[0]),
+							null, false, "SpecDialog", null);
 						if (dialog.open() == Window.CANCEL)
 						{
 							return null;
@@ -270,7 +277,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										{
 											IPersist next = it.next();
 											IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, activeEditor.getForm()));
-											if (child.getParent() instanceof Form)
+											if (child.getParent() instanceof Form && !child.equals(next))
 											{
 												child.getParent().removeChild(child);
 											}

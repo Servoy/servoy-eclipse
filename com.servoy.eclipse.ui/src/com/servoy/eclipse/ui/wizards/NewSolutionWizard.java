@@ -317,7 +317,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						if (sm.getServoyProject(name) == null)
 						{
 							InputStream is = NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy");
-							importSolution(is, name, newSolutionName, monitor);
+							importSolution(is, name, newSolutionName, monitor, true);
 						}
 					}
 				}
@@ -414,7 +414,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
 	}
 
-	private void importSolution(InputStream is, final String name, final String targetSolution, IProgressMonitor monitor) throws IOException
+	private void importSolution(InputStream is, final String name, final String targetSolution, IProgressMonitor monitor, boolean reportImportFail)
+		throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -434,6 +435,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setAllowSolutionFilePathSelection(false);
 		importSolutionWizard.setActivateSolution(false);
 		importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+		importSolutionWizard.setReportImportFail(reportImportFail);
 
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);
