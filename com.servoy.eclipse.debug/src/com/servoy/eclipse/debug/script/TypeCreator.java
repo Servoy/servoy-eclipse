@@ -119,6 +119,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
@@ -143,6 +144,7 @@ import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSourceServer;
+import com.servoy.j2db.dataprocessing.datasource.ViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
@@ -448,6 +450,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
+		addScopeType(ViewDataSource.class.getSimpleName(), new ViewDataSourceCreator());
 		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class)
 		{
 			@Override
@@ -783,7 +786,7 @@ public class TypeCreator extends TypeCache
 					IReturnedTypesProvider datasourceReturns = ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class);
 					for (Class< ? > cls : datasourceReturns.getAllReturnedTypes())
 					{
-						if (cls != DBDataSource.class && cls != MemDataSource.class)
+						if (cls != DBDataSource.class && cls != MemDataSource.class && cls != ViewDataSource.class)
 						{
 							clsses.add(cls);
 						}
@@ -3407,6 +3410,45 @@ public class TypeCreator extends TypeCache
 		{
 		}
 	}
+	private class ViewDataSourceCreator implements IScopeTypeCreator
+	{
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setSuperType(createArrayLookupType(context, JSDataSource.class));
+			ViewFoundsetServerWrapper wrapper = new ViewFoundsetServerWrapper();
+			Collection<String> tableNames = wrapper.getTableNames();
+			EList<Member> members = type.getMembers();
+			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+			for (String name : tableNames)
+			{
+				ITable table = dsm.getDataSource(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON + name);
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(name);
+				property.setAttribute(RESOURCE, table);
+				property.setVisible(true);
+				property.setType(getTypeRef(context, JSDataSource.class.getSimpleName() + '<' + table.getDataSource() + '>'));
+				property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+				property.setDescription(Table.getTableTypeAsString(table.getTableType()));
+				members.add(property);
+			}
+
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
 
 	private class SPDataSourceServerCreator implements IScopeTypeCreator
 	{
