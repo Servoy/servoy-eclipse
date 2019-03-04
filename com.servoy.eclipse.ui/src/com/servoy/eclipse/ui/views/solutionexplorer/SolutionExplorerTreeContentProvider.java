@@ -1781,7 +1781,8 @@ public class SolutionExplorerTreeContentProvider
 			return false;
 		}
 		else if (parent instanceof UserNode &&
-			(((UserNode)parent).getType() == UserNodeType.TABLE || ((UserNode)parent).getType() == UserNodeType.INMEMORY_DATASOURCE)) return false;
+			(((UserNode)parent).getType() == UserNodeType.TABLE || ((UserNode)parent).getType() == UserNodeType.INMEMORY_DATASOURCE) ||
+			((UserNode)parent).getType() == UserNodeType.VIEW_FOUNDSET) return false;
 		return true;
 	}
 
