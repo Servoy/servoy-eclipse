@@ -141,6 +141,7 @@ import com.servoy.j2db.dataprocessing.datasource.DBDataSource;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSourceServer;
@@ -3417,7 +3418,7 @@ public class TypeCreator extends TypeCache
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
-			type.setSuperType(createArrayLookupType(context, JSDataSource.class));
+			type.setSuperType(createArrayLookupType(context, JSViewDataSource.class));
 			ViewFoundsetServerWrapper wrapper = new ViewFoundsetServerWrapper();
 			Collection<String> tableNames = wrapper.getTableNames();
 			EList<Member> members = type.getMembers();
@@ -3429,7 +3430,7 @@ public class TypeCreator extends TypeCache
 				property.setName(name);
 				property.setAttribute(RESOURCE, table);
 				property.setVisible(true);
-				property.setType(getTypeRef(context, JSDataSource.class.getSimpleName() + '<' + table.getDataSource() + '>'));
+				property.setType(getTypeRef(context, JSViewDataSource.class.getSimpleName() + '<' + table.getDataSource() + '>'));
 				property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
 				property.setDescription(Table.getTableTypeAsString(table.getTableType()));
 				members.add(property);
