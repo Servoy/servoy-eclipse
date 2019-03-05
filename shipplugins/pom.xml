@@ -1,9 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>servoy.com</groupId>
-  <artifactId>shiplibs</artifactId>
-  <version>2019.03</version>
-  <name>Servoy shiplibs</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>servoy.com</groupId>
+	<artifactId>shiplibs</artifactId>
+	<version>2019.03</version>
+	<name>Servoy shiplibs</name>
 
 	<packaging>eclipse-repository</packaging>
 
@@ -148,19 +150,19 @@
 			<version>1.8.0.beta3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-slf4j18-impl</artifactId>
-		    <version>2.11.2</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j18-impl</artifactId>
+			<version>2.11.2</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-api</artifactId>
-		    <version>2.11.2</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.11.2</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-core</artifactId>
-		    <version>2.11.2</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.11.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.servoy</groupId>
@@ -449,6 +451,11 @@
 			<groupId>org.apache.james</groupId>
 			<artifactId>apache-mime4j</artifactId>
 			<version>0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>de.inetsoftware</groupId>
+			<artifactId>jlessc</artifactId>
+			<version>1.8.0.201903051330</version>
 		</dependency>
 	</dependencies>
 </project>
