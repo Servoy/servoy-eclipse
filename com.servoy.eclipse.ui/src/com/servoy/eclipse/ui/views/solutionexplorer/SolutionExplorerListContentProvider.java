@@ -94,6 +94,7 @@ import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.node.IDeveloperFeedback;
@@ -457,6 +458,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
 				lm = createInMemTables(((MemServer)un.getRealObject()).getServoyProject(), includeModules);
+			}
+			else if (type == UserNodeType.VIEW_FOUNDSETS)
+			{
+				lm = createViewFoundsets(((ViewFoundsetsServer)un.getRealObject()).getServoyProject(), includeModules);
 			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{

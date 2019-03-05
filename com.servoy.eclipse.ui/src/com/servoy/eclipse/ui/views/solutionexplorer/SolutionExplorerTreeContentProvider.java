@@ -113,6 +113,7 @@ import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
@@ -2332,7 +2333,7 @@ public class SolutionExplorerTreeContentProvider
 			solutionMemoryDataSources.parent = solutionDataSources;
 
 			PlatformSimpleUserNode viewFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
-				servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSDataSources.class));//TODO icons
+				servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class));
 			viewFoundsets.parent = solutionDataSources;
 
 			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets };
