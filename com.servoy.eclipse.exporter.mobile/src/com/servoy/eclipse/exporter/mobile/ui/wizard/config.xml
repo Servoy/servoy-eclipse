@@ -3,7 +3,7 @@
 	<name>%%NAME%%</name>
 	<description>%%DESCRIPTION%%</description>
 
-	<preference name="phonegap-version" value="cli-6.0.0" />
+	<preference name="phonegap-version" value="cli-8.1.1" />
 	<gap:plugin name="cordova-plugin-whitelist" source="npm" />
 	<access origin="*"/>
 </widget>
