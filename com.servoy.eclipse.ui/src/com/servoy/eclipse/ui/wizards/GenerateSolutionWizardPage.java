@@ -337,15 +337,11 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 	public List<String> getWebPackagesToImport()
 	{
-		List<String> result = new ArrayList<>();
 		if (solutionType == SolutionMetaData.NG_CLIENT_ONLY)
 		{
-			result.add("12grid");
-			result.add("aggrid");
-			result.add("bootstrapcomponents");
-			result.add("servoy-extra-components");
+			return Arrays.asList(NewSolutionWizardDefaultPackages.PACKAGES);
 		}
-		return result;
+		return null;
 	}
 
 	@Override

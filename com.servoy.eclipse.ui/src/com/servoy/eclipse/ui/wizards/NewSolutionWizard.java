@@ -316,7 +316,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					{
 						if (sm.getServoyProject(name) == null)
 						{
-							InputStream is = NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy");
+							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 							importSolution(is, name, newSolutionName, monitor, true);
 						}
 					}
@@ -330,9 +330,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		};
 
 		IRunnableWithProgress importPackagesRunnable = null;
-		if (configPage.getSolutionType() != SolutionMetaData.MODULE && configPage.getSolutionType() != SolutionMetaData.NG_MODULE)
+		final List<String> packs = configPage.getWebPackagesToImport();
+		if (packs != null && configPage.getSolutionType() != SolutionMetaData.MODULE && configPage.getSolutionType() != SolutionMetaData.NG_MODULE)
 		{
-			final List<String> packs = configPage.getWebPackagesToImport();
 			importPackagesRunnable = new IRunnableWithProgress()
 			{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
@@ -357,9 +357,10 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					{
 						ServoyLog.logError(e);
 					}
+
 					for (String name : packs)
 					{
-						InputStream is = NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip");
+						InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 						IFile eclipseFile = folder.getFile(name + ".zip");
 						try
 						{
