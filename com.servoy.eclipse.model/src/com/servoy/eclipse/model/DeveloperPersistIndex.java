@@ -40,8 +40,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class DeveloperPersistIndex extends PersistIndex implements ISolutionModelPersistIndex
 {
-	private volatile Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
-	private volatile Map<Form, String> formToDataSource = new HashMap<>();
+	private final Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
+	private final Map<Form, String> formToDataSource = new HashMap<>();
 	private static final String ALL_FORMS = "";
 
 	public DeveloperPersistIndex(List<Solution> solutions)
