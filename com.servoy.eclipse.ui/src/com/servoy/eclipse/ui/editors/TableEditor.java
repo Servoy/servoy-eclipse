@@ -51,11 +51,13 @@ import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetTable;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.table.AggregationsComposite;
 import com.servoy.eclipse.ui.editors.table.CalculationsComposite;
@@ -158,7 +160,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	protected void createPages()
 	{
 		createColumnPage();
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
+		if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()) &&
+			ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 		{
 			createDynamicPages();
 
@@ -560,7 +563,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			throw new RuntimeException("Could not initialize table editor table could not be found");
 		}
-		isModified = isModified || !table.getExistInDB() || (table instanceof MemTable && ((MemTable)table).isChanged());
+		isModified = isModified || !table.getExistInDB() || (table instanceof AbstractMemTable && ((AbstractMemTable)table).isChanged());
 
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 
@@ -571,6 +574,11 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				MemTable memTable = (MemTable)table;
 				server = memTable.getParent();
+			}
+			else if (DataSourceUtils.VIEW_DATASOURCE.equals(table.getServerName()))
+			{
+				ViewFoundsetTable viewTable = (ViewFoundsetTable)table;
+				server = viewTable.getParent();
 			}
 			if (server == null)
 			{
@@ -732,7 +740,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				{
 					propertiesComposite.saveValues();
 				}
-				if (!(table instanceof MemTable))
+				if (!(table instanceof AbstractMemTable))
 				{
 					if (table.getRowIdentColumnsCount() == 0)
 					{

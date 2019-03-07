@@ -57,6 +57,7 @@ import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog;
@@ -569,6 +570,10 @@ public class ColumnDetailsComposite extends Composite
 			if (serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
 			{
 				return new InMemServerWrapper((String)fromObject);
+			}
+			else if (serverName.equals(DataSourceUtils.VIEW_DATASOURCE))
+			{
+				return new ViewFoundsetServerWrapper((String)fromObject);
 			}
 			return new TableWrapper(serverName, (String)fromObject, isView);
 		}

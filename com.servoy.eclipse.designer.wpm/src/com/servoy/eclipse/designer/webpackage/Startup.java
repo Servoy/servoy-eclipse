@@ -21,8 +21,11 @@ import org.eclipse.ui.IStartup;
 
 import com.servoy.eclipse.designer.webpackage.endpoint.GetAllInstalledPackages;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.wizards.NewSolutionWizardDefaultPackages;
 
 /**
+ * Used for caching wpm entries and download New Solution Wizard default packages
+ *
  * @author gboros
  *
  */
@@ -39,7 +42,7 @@ public class Startup implements IStartup
 	{
 		try
 		{
-			GetAllInstalledPackages.getRemotePackages();
+			NewSolutionWizardDefaultPackages.getInstance().setup(GetAllInstalledPackages.getRemotePackages());
 		}
 		catch (Exception ex)
 		{

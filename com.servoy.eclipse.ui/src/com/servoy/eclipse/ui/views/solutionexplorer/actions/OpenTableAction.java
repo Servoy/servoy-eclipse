@@ -56,7 +56,7 @@ public class OpenTableAction extends Action implements ISelectionChangedListener
 		if (state)
 		{
 			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			state = (type == UserNodeType.TABLE || type == UserNodeType.VIEW || type == UserNodeType.INMEMORY_DATASOURCE);
+			state = (type == UserNodeType.TABLE || type == UserNodeType.VIEW || type == UserNodeType.INMEMORY_DATASOURCE || type == UserNodeType.VIEW_FOUNDSET);
 		}
 		setEnabled(state);
 	}
@@ -65,7 +65,8 @@ public class OpenTableAction extends Action implements ISelectionChangedListener
 	public void run()
 	{
 		SimpleUserNode un = viewer.getSelectedNode();
-		if (un.getType() == UserNodeType.TABLE || un.getType() == UserNodeType.VIEW || un.getType() == UserNodeType.INMEMORY_DATASOURCE)
+		if (un.getType() == UserNodeType.TABLE || un.getType() == UserNodeType.VIEW || un.getType() == UserNodeType.INMEMORY_DATASOURCE ||
+			un.getType() == UserNodeType.VIEW_FOUNDSET)
 		{
 			EditorUtil.openTableEditor(((IDataSourceWrapper)un.getRealObject()).getDataSource());
 		}

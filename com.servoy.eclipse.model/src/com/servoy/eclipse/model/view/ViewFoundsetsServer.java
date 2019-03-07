@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2015 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2019 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -15,53 +15,37 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.model.util;
+package com.servoy.eclipse.model.view;
 
 import com.servoy.eclipse.model.inmemory.AbstractMemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
- * @author jcompagner
- * @since 8.1
+ * @author emera
  */
-public class InMemServerWrapper extends AbstractMemServerWrapper
+public class ViewFoundsetsServer extends AbstractMemServer<ViewFoundsetTable>
 {
-	public InMemServerWrapper()
-	{
-		super(null);
-	}
 
-	public InMemServerWrapper(String tablename)
+	public ViewFoundsetsServer(ServoyProject servoyProject)
 	{
-		super(tablename);
-	}
-
-	@Override
-	public String getDataSource()
-	{
-		return DataSourceUtils.createInmemDataSource(tablename);
-	}
-
-	public String getServerName()
-	{
-		return DataSourceUtils.INMEM_DATASOURCE;
+		super(servoyProject, DataSourceUtils.VIEW_DATASOURCE, DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see com.servoy.eclipse.model.util.AbstractMemServerWrapper#getServer()
+	 * @see com.servoy.eclipse.model.inmemory.AbstractMemServer#createTable(java.lang.String)
 	 */
 	@Override
-	protected AbstractMemServer< ? > getServer(ServoyProject servoyProject)
+	protected ViewFoundsetTable createTable(String tableName)
 	{
-		return servoyProject.getMemServer();
+		return new ViewFoundsetTable(this, tableName);
 	}
-
+	
 	@Override
-	public String getLabel()
+	public String getTableDatasource(String tableName)
 	{
-		return "In Memory";
+		return DataSourceUtils.createViewDataSource(tableName);
 	}
 }

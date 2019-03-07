@@ -94,6 +94,7 @@ import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.node.IDeveloperFeedback;
@@ -457,6 +458,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
 				lm = createInMemTables(((MemServer)un.getRealObject()).getServoyProject(), includeModules);
+			}
+			else if (type == UserNodeType.VIEW_FOUNDSETS)
+			{
+				lm = createViewFoundsets(((ViewFoundsetsServer)un.getRealObject()).getServoyProject(), includeModules);
 			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
@@ -1226,6 +1231,16 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	public static SimpleUserNode[] createInMemTables(ServoyProject servoyProject, boolean bIncludeModules)
 	{
+		return createTables(servoyProject, bIncludeModules, UserNodeType.INMEMORY_DATASOURCE);
+	}
+
+	public static SimpleUserNode[] createViewFoundsets(ServoyProject servoyProject, boolean bIncludeModules)
+	{
+		return createTables(servoyProject, bIncludeModules, UserNodeType.VIEW_FOUNDSET);
+	}
+
+	private static SimpleUserNode[] createTables(ServoyProject servoyProject, boolean bIncludeModules, UserNodeType nodeType)
+	{
 		ArrayList<SimpleUserNode> serverNodeChildren = new ArrayList<SimpleUserNode>();
 		try
 		{
@@ -1244,7 +1259,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
 				{
 					SimpleUserNode[] moduleTables = SolutionExplorerListContentProvider.createTables(
-						((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer(), UserNodeType.INMEMORY_DATASOURCE);
+						nodeType == UserNodeType.INMEMORY_DATASOURCE ? ((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer()
+							: ((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getViewFoundsetsServer(),
+						nodeType);
 
 					for (SimpleUserNode moduleTable : moduleTables)
 					{

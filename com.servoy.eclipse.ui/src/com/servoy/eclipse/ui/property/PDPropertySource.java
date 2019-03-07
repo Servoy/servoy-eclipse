@@ -93,7 +93,8 @@ public class PDPropertySource extends PersistPropertySource
 			IPropertyHandler propHandler = createPropertyHandlerFromSpec(desc, persistContext);
 			if (propHandler != null) props.add(propHandler);
 		}
-		if (persistContext.getPersist() instanceof LayoutContainer || persistContext.getPersist() instanceof WebComponent)
+		if (persistContext.getPersist() instanceof LayoutContainer || persistContext.getPersist() instanceof WebComponent ||
+			persistContext.getPersist() instanceof WebFormComponentChildType)
 		{
 			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(
 				new PropertyDescription(IContentSpecConstants.PROPERTY_ATTRIBUTES, null,

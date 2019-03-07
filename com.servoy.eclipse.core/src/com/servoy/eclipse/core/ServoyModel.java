@@ -2936,11 +2936,20 @@ public class ServoyModel extends AbstractServoyModel
 					}
 					if (child instanceof TableNode)
 					{
-						if (((TableNode)child).getColumns() != null)
+						TableNode tableNode = (TableNode)child;
+						if (tableNode.getColumns() != null)
 						{
 							try
 							{
-								servoyProject.getMemServer().removeTable(((TableNode)child).getTableName());
+								if (DataSourceUtils.INMEM_DATASOURCE.equals(tableNode.getServerName()))
+								{
+									servoyProject.getMemServer().removeTable(tableNode.getTableName());
+								}
+								else if (DataSourceUtils.VIEW_DATASOURCE.equals(tableNode.getServerName()))
+								{
+									servoyProject.getViewFoundsetsServer().removeTable(tableNode.getTableName());
+								}
+
 							}
 							catch (SQLException e)
 							{

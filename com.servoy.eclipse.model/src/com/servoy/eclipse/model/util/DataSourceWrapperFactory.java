@@ -49,6 +49,11 @@ public class DataSourceWrapperFactory
 		{
 			return new InMemServerWrapper(inmemDataSourceName);
 		}
+		String viewFoundsetDatasourceName = DataSourceUtils.getViewDataSourceName(dataSource);
+		if (viewFoundsetDatasourceName != null)
+		{
+			return new ViewFoundsetServerWrapper(viewFoundsetDatasourceName);
+		}
 
 		return null;
 	}
