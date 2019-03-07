@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -106,10 +107,39 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		JSONArray result = new JSONArray();
 		try
 		{
+			Comparator<JSONObject> packagesNameComparator = new Comparator<JSONObject>()
+			{
+				@Override
+				public int compare(JSONObject o1, JSONObject o2)
+				{
+					return o1.optString("displayName", "").compareTo(o2.optString("displayName", ""));
+				}
+			};
+
 			List<JSONObject> remotePackages = getAllInstalledPackagesService != null ? getAllInstalledPackagesService.getRemotePackagesAndCheckForChanges()
 				: getRemotePackages();
 
-			for (JSONObject pack : remotePackages)
+			List<JSONObject> firstPackages = remotePackages
+				.stream()
+				.filter(pkg -> 
+							pkg.optString("name").equals("bootstrapcomponents") ||
+							pkg.optString("name").equals("servoyextra") || 
+							pkg.optString("name").equals("aggrid"))
+			    .sorted(packagesNameComparator)
+			    .collect(Collectors.toList());
+
+			remotePackages = remotePackages
+				.stream()
+				.filter(pkg -> 
+							!pkg.optString("name").equals("bootstrapcomponents") &&
+							!pkg.optString("name").equals("servoyextra") && 
+							!pkg.optString("name").equals("aggrid"))
+				.sorted(packagesNameComparator)
+				.collect(Collectors.toList());
+
+			firstPackages.addAll(remotePackages);
+
+			for (JSONObject pack : firstPackages)
 			{
 				// clear runtime settings
 				pack.remove("installed");
