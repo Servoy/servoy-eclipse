@@ -47,6 +47,10 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	public DeveloperPersistIndex(List<Solution> solutions)
 	{
 		super(solutions);
+		for (Solution solution : solutions)
+		{
+			if (solution.getChangeHandler() != null) solution.getChangeHandler().addIPersistListener(this);
+		}
 		createDatasources();
 	}
 
