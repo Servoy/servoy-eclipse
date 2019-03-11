@@ -246,7 +246,14 @@ public final class DatabaseUtils
 					columnInfo.flagChanged();
 				}
 			}
-
+			try
+			{
+				table.updateDataproviderIDsIfNeeded(); // column info above could have set a dataproviderid/alias
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 			// createMissingDBSequences uses columninfo
 			try
 			{
