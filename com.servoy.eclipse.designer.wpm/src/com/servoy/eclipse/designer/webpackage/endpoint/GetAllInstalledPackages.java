@@ -357,6 +357,9 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 						String currentVersion = ClientVersion.getPureVersion();
 						JSONObject packageObject = new JSONObject(packageResponse);
 						JSONArray jsonArray = packageObject.getJSONArray("releases");
+
+						if (repoObject.has("top")) packageObject.put("top", repoObject.getBoolean("top"));
+						else packageObject.put("top", false);
 						List<JSONObject> toSort = new ArrayList<>();
 						for (int k = jsonArray.length(); k-- > 0;)
 						{
