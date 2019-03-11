@@ -38,6 +38,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -231,7 +232,7 @@ public class WarExporter
 			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
 			monitor.setWorkRemaining(6);
 			monitor.subTask("Copy exported components");
-			copyExportedComponentsAndServicesPropertyFile(tmpWarDir);
+			copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 			monitor.worked(2);
 			monitor.subTask("Grouping JS and CSS resources");
 			copyMinifiedAndGrouped(tmpWarDir);
@@ -557,20 +558,38 @@ public class WarExporter
 	 * This is needed to optimize the references included in the index.html file.
 	 * If no components and services are selected, then all references would be included in the index.
 	 */
-	private void copyExportedComponentsAndServicesPropertyFile(File tmpWarDir) throws ExportException
+	private void copyExportedComponentsAndServicesPropertyFile(File tmpWarDir, IProgressMonitor m) throws ExportException
 	{
-		if ((exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) ||
-			(exportModel.getExportedComponents().size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
-				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(
-					servicesSpecProviderState).length))
-			return;
+		Set<String> exportedComponents = exportModel.getExportedComponents();
+		Set<String> exportedServices = exportModel.getExportedServices();
+		if (exportModel.getExcludedComponentPackages() != null && exportModel.getExcludedComponentPackages().size() > 0)
+		{
+			m.subTask("Excluding component packages: " + Arrays.toString(exportModel.getExcludedComponentPackages().toArray(new String[0])));
+		}
+		if (exportedComponents != null)
+		{
+			m.subTask("Exporting components: " + Arrays.toString(exportedComponents.toArray(new String[0])));
+		}
 
+		if ((exportedComponents == null && exportedServices == null) ||
+			(exportedComponents.size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
+				exportedServices.size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
+			return;
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
 		Properties properties = new Properties();
 		StringBuilder webObjects = new StringBuilder();
-		for (String component : exportModel.getExportedComponents())
+		for (String component : exportedComponents)
 		{
 			webObjects.append(component + ",");
+		}
+
+		if (exportModel.getExcludedServicePackages() != null && exportModel.getExcludedServicePackages().size() > 0)
+		{
+			m.subTask("Excluding service packages: " + Arrays.toString(exportModel.getExcludedServicePackages().toArray(new String[0])));
+		}
+		if (exportedServices != null)
+		{
+			m.subTask("Exporting services: " + Arrays.toString(exportedServices.toArray(new String[0])));
 		}
 
 		TreeSet<String> allServices = new TreeSet<String>();
@@ -578,7 +597,7 @@ public class WarExporter
 		PackageSpecification<WebObjectSpecification> servoyservices = servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services
-		if (exportModel.getExportedServices() != null) allServices.addAll(exportModel.getExportedServices());
+		if (exportedServices != null) allServices.addAll(exportedServices);
 		for (String service : allServices)
 		{
 			webObjects.append(service + ",");
