@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -94,10 +95,12 @@ public class HandleDBIMarkersWizard extends Wizard
 
 	private final List<IServerInternal> servers;
 	private final List<IMarker> serverMarkers = new ArrayList<IMarker>();
+	private final String tableName;
 
-	public HandleDBIMarkersWizard(List<IServerInternal> servers)
+	public HandleDBIMarkersWizard(List<IServerInternal> servers, String tableName)
 	{
 		this.servers = servers;
+		this.tableName = tableName;
 	}
 
 	@Override
@@ -112,10 +115,10 @@ public class HandleDBIMarkersWizard extends Wizard
 			IMarkerResolution[] resolutions = generator.getResolutions(marker);
 			if (resolutions != null && resolutions.length > 0)
 			{
-				Map resolutionsMap = new HashMap();
+				Map<IMarkerResolution, List<IMarker>> resolutionsMap = new HashMap<>();
 				for (IMarkerResolution resolution : resolutions)
 				{
-					List relatedMarkers = new ArrayList();
+					List<IMarker> relatedMarkers = new ArrayList<>();
 					relatedMarkers.add(marker);
 					resolutionsMap.put(resolution, relatedMarkers);
 					if (resolution instanceof WorkbenchMarkerResolution)
@@ -167,6 +170,15 @@ public class HandleDBIMarkersWizard extends Wizard
 			try
 			{
 				IMarker[] markers = resourcesProject.getProject().findMarkers(ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+
+				if (tableName != null)
+				{
+					markers = Arrays.asList(markers)
+						.stream()
+						.filter(marker -> marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME, "").equals(tableName))
+						.toArray(IMarker[]::new);
+				}
+
 				if (markers != null && markers.length > 0)
 				{
 					IMarkerResolutionGenerator generator = new ServoyQuickFixGenerator();

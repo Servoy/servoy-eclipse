@@ -75,6 +75,10 @@ public class SynchronizeTablesAction extends OpenWizardAction implements ISelect
 						}
 					}
 				}
+				if (((SimpleUserNode)sel.getFirstElement()).getType() == UserNodeType.TABLE)
+				{
+					state = true;
+				}
 				if (state)
 				{
 					selection = sel;
