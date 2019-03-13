@@ -225,13 +225,16 @@ public abstract class AbstractNewDbAction extends Action
 
 	protected void displayError(final String message)
 	{
-		Display.getDefault().syncExec(new Runnable()
+		if (viewer != null)
 		{
-			public void run()
+			Display.getDefault().syncExec(new Runnable()
 			{
-				MessageDialog.openError(viewer.getSite().getShell(), "Error", message);
-			}
-		});
+				public void run()
+				{
+					MessageDialog.openError(viewer.getSite().getShell(), "Error", message);
+				}
+			});
+		}
 	}
 
 	/**

@@ -29,9 +29,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -172,5 +178,41 @@ public class NewSolutionWizardDefaultPackages
 
 		return null;
 	}
+
+	public Document getDatabaseInfo(String name)
+	{
+		try
+		{
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			if (downloadedPackages.containsKey(name))
+			{
+				File packagesFolder = new File(Activator.getDefault().getStateLocation().toFile(), "wizardpackages");
+				File packageFile = new File(packagesFolder, name + "_" + downloadedPackages.get(name));
+				if (packageFile.exists())
+				{
+					try (ZipFile zip = new ZipFile(packageFile))
+					{
+						ZipEntry entry = zip.getEntry("export/database_info.xml");
+						if (entry != null)
+						{
+							return builder.parse(zip.getInputStream(entry));
+						}
+					}
+				}
+			}
+//TODO			else if (Arrays.asList(SOLUTIONS).indexOf(name) != -1)
+//			{
+//				return NewSolutionWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy");
+//			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+
+		return null;
+	}
+
 
 }

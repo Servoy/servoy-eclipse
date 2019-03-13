@@ -23,7 +23,9 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -52,9 +54,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -64,11 +70,16 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptNameValidator;
+import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
@@ -83,8 +94,6 @@ import com.servoy.j2db.util.Utils;
 public class NewSolutionWizard extends Wizard implements INewWizard
 {
 	public static final String ID = "com.servoy.eclipse.ui.NewSolutionWizard";
-
-
 	protected GenerateSolutionWizardPage configPage;
 
 	/**
@@ -302,14 +311,16 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
-
+		Set<String> missingServerNames = searchMissingServers(solutions).keySet();
 		IRunnableWithProgress importSolutionsRunnable = new IRunnableWithProgress()
 		{
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				monitor.beginTask(jobName, 1);
+				monitor.beginTask(jobName, missingServerNames.size() + solutions.size());
 				try
 				{
+					createMissingDbServers(missingServerNames, monitor);
+
 					ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 					String newSolutionName = configPage.getNewSolutionName();
 					for (String name : solutions)
@@ -318,6 +329,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						{
 							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 							importSolution(is, name, newSolutionName, monitor, true);
+							monitor.worked(1);
 						}
 					}
 				}
@@ -327,6 +339,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				}
 				monitor.done();
 			}
+
+
 		};
 
 		IRunnableWithProgress importPackagesRunnable = null;
@@ -377,10 +391,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		try
 		{
-			PlatformUI.getWorkbench().getProgressService().run(true, false, newSolutionRunnable);
-			if (importPackagesRunnable != null) PlatformUI.getWorkbench().getProgressService().run(true, false, importPackagesRunnable);
-			PlatformUI.getWorkbench().getProgressService().run(true, false, solutionActivationRunnable);
-			PlatformUI.getWorkbench().getProgressService().run(true, false, importSolutionsRunnable);
+			IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+			progressService.run(true, false, newSolutionRunnable);
+			if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
+			progressService.run(true, false, solutionActivationRunnable);
+			progressService.run(true, false, importSolutionsRunnable);
 		}
 		catch (Exception e)
 		{
@@ -392,6 +407,100 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 //		dialog.open();
 //		dialog.close();
 		return true;
+	}
+
+	protected HashMap<String, List<String>> searchMissingServers(final List<String> solutions)
+	{
+		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IServerManagerInternal serverHandler = ServoyModel.getServerManager();
+		HashMap<String, List<String>> missingServerNames = new HashMap<>();
+		for (String name : solutions)
+		{
+			if (sm.getServoyProject(name) == null)
+			{
+				try
+				{
+					Document doc = NewSolutionWizardDefaultPackages.getInstance().getDatabaseInfo(name);
+					if (doc == null)
+					{
+						ServoyLog.logWarning("No database info found for solution " + name, new Exception("No database info found for solution " + name));
+						continue;
+					}
+
+					NodeList connections = doc.getElementsByTagName("connection");
+					for (int i = 0; i < connections.getLength(); i++)
+					{
+						NodeList n = connections.item(i).getChildNodes();
+						for (int j = 0; j < n.getLength(); j++)
+						{
+							if ("name".equals(n.item(j).getNodeName()))
+							{
+								String server_name = n.item(j).getTextContent();
+								IServerInternal serverObj = (IServerInternal)serverHandler.getServer(server_name, false, false);
+								if (serverObj == null)
+								{
+									if (!missingServerNames.containsKey(server_name))
+									{
+										missingServerNames.put(server_name, new ArrayList<>());
+									}
+									missingServerNames.get(server_name).add(name);
+								}
+								break;
+							}
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+		return missingServerNames;
+	}
+
+	protected boolean canCreateMissingServers()
+	{
+		return Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).anyMatch(s -> s.isPostgresDriver() && s.isEnabled());
+	}
+
+	protected void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
+	{
+		ServerConfig origConfig = Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).filter(
+			s -> s.isPostgresDriver() && s.isEnabled()).findAny().orElse(null);
+		if (origConfig == null) 
+		{
+			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find any Postgres server config"));
+			return;
+		}
+
+		IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(origConfig.getServerName());
+		if (server == null || !server.isValid())
+		{
+			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find a valid Postgres server."));
+			return;
+		}
+
+		NewPostgresDbAction action = new NewPostgresDbAction(null);
+		for (String server_name : missingServerNames)
+		{
+			action.createDatabase(server, server_name, monitor);
+			final ServerConfig serverConfig = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
+				DatabaseUtils.getPostgresServerUrl(origConfig, server_name), origConfig.getConnectionProperties(), origConfig.getDriver(),
+				origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(), origConfig.getMaxPreparedStatementsIdle(),
+				origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, origConfig.getPrefixTables(),
+				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass());
+			try
+			{
+				ServoyModel.getServerManager().testServerConfigConnection(serverConfig, 0);
+				ServoyModel.getServerManager().saveServerConfig(null, serverConfig);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError("Cannot create server '" + server_name + "'", ex);
+			}
+			monitor.worked(1);
+		}
 	}
 
 	protected void saveAllSettings()
@@ -529,6 +638,47 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	protected String getHelpContextID()
 	{
 		return "com.servoy.eclipse.ui.create_solution";
+	}
+
+
+	@Override
+	public boolean canFinish()
+	{
+		return super.canFinish() && (searchMissingServers(configPage.getSolutionsToImport()).isEmpty() || canCreateMissingServers());
+	}
+
+
+	@Override
+	public boolean performCancel()
+	{
+		Set<String> searchMissingServers = searchMissingServers(configPage.getSolutionsToImport()).keySet();
+		if (!canCreateMissingServers() && !searchMissingServers.isEmpty())
+		{
+			if (MessageDialog.openQuestion(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Cancel",
+				"Do you want to create missing database server(s) connections?"))
+			{
+				ServerConfig origConfig = getValidServerConfig();
+				for (String server_name : searchMissingServers)
+				{
+					ServerConfig config = new ServerConfig(server_name, origConfig.getUserName(), origConfig.getPassword(),
+						origConfig.getServerUrl().replace(origConfig.getServerName(), server_name), origConfig.getConnectionProperties(),
+						origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
+						origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
+						origConfig.getPrefixTables(), origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(),
+						origConfig.getDialectClass());
+
+					EditorUtil.openServerEditor(config, true);
+				}
+			}
+		}
+		return super.performCancel();
+	}
+
+	protected ServerConfig getValidServerConfig()
+	{
+		return Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).filter(
+			s -> s.isEnabled() && ServoyModel.getServerManager().getServer(s.getServerName()) != null &&
+				((IServerInternal)ServoyModel.getServerManager().getServer(s.getServerName())).isValid()).findAny().orElse(null);
 	}
 
 }
