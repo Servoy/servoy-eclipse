@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -201,10 +202,24 @@ public class NewSolutionWizardDefaultPackages
 					}
 				}
 			}
-//TODO			else if (Arrays.asList(SOLUTIONS).indexOf(name) != -1)
-//			{
-//				return NewSolutionWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy");
-//			}
+			else if (Arrays.asList(SOLUTIONS).indexOf(name) != -1)
+			{
+				try (ZipInputStream zis = new ZipInputStream(NewSolutionWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy")))
+				{
+					ZipEntry ze;
+					while ((ze = zis.getNextEntry()) != null)
+					{
+						if ("export/database_info.xml".equals(ze.getName()))
+						{
+							Document doc = builder.parse(zis);
+							zis.close();
+							return doc;
+						}
+					}
+					return null;
+
+				}
+			}
 		}
 		catch (Exception ex)
 		{
