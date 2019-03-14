@@ -1230,11 +1230,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Messages.LabelUnresolved);
 		}
 
-		if (propertyDescription != null && IContentSpecConstants.PROPERTY_AUTOCOMPLETE.equals(propertyDescription.getName()))
-		{
-			return createTypeaheadPropertyController(persistContext.getPersist(), id, displayName, form, ((ValuesConfig)propertyDescription.getConfig()));
-		}
-
 		IPropertyDescriptor otherPropertyDescriptor = createOtherPropertyDescriptorIfAppropriate(id, displayName, propertyDescription, form, persistContext,
 			readOnly, propertyDescriptor, propertySource, flattenedEditingSolution);
 		if (otherPropertyDescriptor != null) return otherPropertyDescriptor;
@@ -1750,25 +1745,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				return null;
 			}
 		};
-	}
-
-	/**
-	 * Create a property controller for selecting an autofill property in Properties view.
-	 *
-	 * @param id
-	 * @param displayName
-	 * @return
-	 */
-	public static PropertyController<String, ? > createTypeaheadPropertyController(IPersist persist, Object id, String displayName, Form form,
-		ValuesConfig values)
-	{
-		if (persist.getRootObject() instanceof Solution && form != null)
-		{
-			String tooltip = "Double click '{}' to add it to autofill.";
-			return new StringListWithContentProposalsPropertyController(id, displayName, values != null ? values.getDisplay() : new String[0],
-				values != null ? (String)values.getRealDefault() : null, tooltip, null);
-		}
-		else return null;
 	}
 
 	/**
