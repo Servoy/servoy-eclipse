@@ -120,6 +120,7 @@ import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
+import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
@@ -475,6 +476,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(SPDataSourceServer.class.getSimpleName(), new SPDataSourceServerCreator());
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
+		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
 	}
 
 	private void createSpecTypeDefinitions()
@@ -2684,7 +2686,8 @@ public class TypeCreator extends TypeCache
 				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>'));
 			}
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
-				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()))
+				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
+				memberType.getName().equals(ViewFoundSet.class.getSimpleName()))
 			{
 				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
 			}
@@ -4135,6 +4138,25 @@ public class TypeCreator extends TypeCache
 				}
 			}
 		}
+		else if (datasource.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON))
+		{
+			dbServernameTablename = DataSourceUtils.getViewServernameTablename(datasource);
+			if (dbServernameTablename != null)
+			{
+				for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
+				{
+					ViewFoundsetsServer server = sp.getViewFoundsetsServer();
+					if (server != null)
+					{
+						tbl = server.getTable(dbServernameTablename[1]);
+						if (tbl != null)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
 		else
 		{
 			dbServernameTablename = DataSourceUtilsBase.getDBServernameTablename(datasource);
@@ -4201,7 +4223,8 @@ public class TypeCreator extends TypeCache
 					if (servoyModel.getFlattenedSolution().getSolution() != null)
 					{
 						String[] dbServernameTablename = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
-							? DataSourceUtils.getMemServernameTablename(config) : DataSourceUtilsBase.getDBServernameTablename(config);
+							? DataSourceUtils.getMemServernameTablename(config) : config.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON)
+								? DataSourceUtils.getViewServernameTablename(config) : DataSourceUtilsBase.getDBServernameTablename(config);
 						if (dbServernameTablename != null)
 						{
 							try
@@ -4738,7 +4761,8 @@ public class TypeCreator extends TypeCache
 		String serverName = null;
 		String tableName = null;
 		String[] serverAndTableName = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) ? DataSourceUtils.getMemServernameTablename(config)
-			: DataSourceUtilsBase.getDBServernameTablename(config);
+			: config.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? DataSourceUtils.getViewServernameTablename(config)
+				: DataSourceUtilsBase.getDBServernameTablename(config);
 		if (serverAndTableName != null)
 		{
 			serverName = serverAndTableName[0];
