@@ -272,14 +272,15 @@ public class WarExporter
 				if (content != null)
 				{
 					File folder = new File(tmpWarDir, MediaResourcesServlet.SERVOY_SOLUTION_CSS);
-					if (!folder.exists() && !folder.mkdir())
-					{
-						ServoyLog.logError("Could not create folder " + folder.getName(), new RuntimeException());
-						break;
-					}
 					try
 					{
 						File f = new File(folder, media.getName().replace(".less", ".css"));
+						if (!f.getParentFile().exists() && !f.getParentFile().mkdirs())
+						{
+							ServoyLog.logError("Could not create folder " + f.getParentFile().getName() + " for less media: " + media.getName(),
+								new RuntimeException());
+							break;
+						}
 						f.createNewFile();
 						try (PrintWriter printWriter = new PrintWriter(f))
 						{
@@ -292,7 +293,7 @@ public class WarExporter
 					}
 					catch (IOException e)
 					{
-						ServoyLog.logError(e);
+						ServoyLog.logError("Error creating less file:  " + media.getName(), e);
 					}
 				}
 			}
