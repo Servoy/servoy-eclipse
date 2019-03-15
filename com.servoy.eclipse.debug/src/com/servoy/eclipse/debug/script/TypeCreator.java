@@ -139,6 +139,7 @@ import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
 import com.servoy.j2db.dataprocessing.ViewFoundSet;
+import com.servoy.j2db.dataprocessing.ViewRecord;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSource;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
@@ -419,6 +420,7 @@ public class TypeCreator extends TypeCache
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
+		addScopeType(ViewRecord.VIEW_RECORD, new ViewRecordCreator());
 		addScopeType(ViewFoundSet.VIEW_FOUNDSET, new ViewFoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
@@ -2687,7 +2689,7 @@ public class TypeCreator extends TypeCache
 			}
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
 				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
-				memberType.getName().equals(ViewFoundSet.class.getSimpleName()))
+				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()))
 			{
 				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
 			}
@@ -2912,6 +2914,50 @@ public class TypeCreator extends TypeCache
 			cachedSuperTypeTemplateTypeForFoundSet = null;
 			cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
 		}
+	}
+
+	private class ViewRecordCreator extends ViewFoundSetCreator
+	{
+		private Type cachedSuperTypeTemplateType;
+
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			if (fullTypeName.equals(ViewRecord.VIEW_RECORD))
+			{
+				Type type = TypeCreator.this.createType(context, fullTypeName, ViewRecord.class);
+				ImageDescriptor desc = IconProvider.instance().descriptor(ViewRecord.class);
+				type.setAttribute(IMAGE_DESCRIPTOR, desc);
+				// quickly add this one to the static types.
+				return addType(null, type);
+			}
+
+			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			if (cachedSuperTypeTemplateType == null)
+			{
+				cachedSuperTypeTemplateType = TypeCreator.this.createType(context, ViewRecord.VIEW_RECORD, ViewRecord.class);
+			}
+			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				Member overridden = createOverrideMember(member, context, config);
+				if (overridden != null)
+				{
+					overwrittenMembers.add(overridden);
+				}
+			}
+			return getCombinedTypeWithRelationsAndDataproviders(ElementResolver.getFlattenedSolution(context), context, fullTypeName, config,
+				overwrittenMembers, getType(context, ViewRecord.VIEW_RECORD), IconProvider.instance().descriptor(ViewRecord.class), true);
+		}
+
+		@Override
+		public void flush()
+		{
+			super.flush();
+			cachedSuperTypeTemplateType = null;
+		}
+
 	}
 
 
