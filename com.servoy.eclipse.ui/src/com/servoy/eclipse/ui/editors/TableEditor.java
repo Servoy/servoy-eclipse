@@ -887,9 +887,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			DataModelManager dmm = servoyModel.getDataModelManager();
 			if (dmm != null)
 			{
-				if (table instanceof MemTable)
+				if (table instanceof AbstractMemTable)
 				{
-					modified = ((MemTable)table).isChanged();
+					modified = ((AbstractMemTable)table).isChanged();
 				}
 				else
 				{
