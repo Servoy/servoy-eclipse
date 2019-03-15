@@ -43,6 +43,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Allows exporting client licenses into the war.
@@ -188,6 +189,7 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 				}
 			}
 			mainContainer.update();
+			setMessage("");
 		}
 
 		private void setEnabledButtons(final Button licenseButton, final Button deleteButton)
@@ -213,26 +215,39 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 		setMessage("");
 		try
 		{
+			License l = new License(companyText, licenseText, noOfLicensesText.trim());
 			if (ApplicationServerRegistry.get().checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
 			{
-				License l = new License(companyText, licenseText, noOfLicensesText.trim());
 				boolean isNew = !exportModel.containsLicense(l.getCode());
 				exportModel.addLicense(l);
 
 				if (isNew)
 				{
 					setMessage("License " + licenseText + " was saved.", IMessageProvider.INFORMATION);
-					Composite composite = new Composite(mainContainer, SWT.BORDER);
-					licenseFieldsComposite = new LicenseFieldsComposite(composite, SWT.NONE, "", "", "");
-					composite.moveAbove(mainContainer.getChildren()[0]);
-					mainContainer.layout(new Control[] { licenseFieldsComposite });
-					sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-					sc.update();
+					addLicense();
 				}
 			}
 			else
 			{
-				setMessage("License " + licenseText + " invalid.", IMessageProvider.ERROR);
+				Pair<Boolean, String> code = ApplicationServerRegistry.get().upgradeLicense(companyText, licenseText, noOfLicensesText.trim());
+				if (code != null)
+				{
+					if (code.getLeft().booleanValue() && !licenseText.equals(code.getRight()))
+					{
+						setMessage("License " + l.getCompanyKey() + " " + l.getCode() + " was auto upgraded to " + code.getRight(),
+							IMessageProvider.INFORMATION);
+						if (!exportModel.containsLicense(code.getRight()) && !exportModel.containsLicense(l.getCode()))
+						{
+							addLicense();
+						}
+						exportModel.replaceLicenseCode(l, code.getRight());
+						
+					}
+				}
+				else
+				{
+					setMessage("License " + licenseText + " invalid.", IMessageProvider.ERROR);
+				}
 			}
 		}
 		catch (Exception e)
@@ -240,6 +255,17 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 			setMessage("Please enter a number in the 'Number of licenses' field. " + noOfLicensesText + " is not a number.", IMessageProvider.ERROR);
 		}
 		container.layout();
+	}
+
+
+	protected void addLicense()
+	{
+		Composite composite = new Composite(mainContainer, SWT.BORDER);
+		licenseFieldsComposite = new LicenseFieldsComposite(composite, SWT.NONE, "", "", "");
+		composite.moveAbove(mainContainer.getChildren()[0]);
+		mainContainer.layout(new Control[] { licenseFieldsComposite });
+		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		sc.update();
 	}
 
 
