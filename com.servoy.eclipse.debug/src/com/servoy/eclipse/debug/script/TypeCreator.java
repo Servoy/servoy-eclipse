@@ -137,6 +137,7 @@ import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.dataprocessing.ViewFoundSet;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSource;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
@@ -417,6 +418,7 @@ public class TypeCreator extends TypeCache
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
+		addScopeType(ViewFoundSet.VIEW_FOUNDSET, new ViewFoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("RuntimeForm", new FormScopeCreator());
@@ -2799,6 +2801,116 @@ public class TypeCreator extends TypeCache
 			cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
 		}
 	}
+
+	private class ViewFoundSetCreator implements IScopeTypeCreator
+	{
+		private Type cachedSuperTypeTemplateTypeForFoundSet = null;
+		private Type cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
+
+		public Type createType(String context, String fullTypeName)
+		{
+			if (fullTypeName.equals(ViewFoundSet.VIEW_FOUNDSET))
+			{
+				// quickly add this one to the static types.
+				return addType(null, createBaseType(context, fullTypeName, ViewFoundSet.class));
+			}
+
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			EList<Member> members;
+			if (fs != null && fs.getRelation(config) != null)
+			{
+				// related foundset
+				if (cachedSuperTypeTemplateTypeForRelatedFoundSet == null)
+				{
+					cachedSuperTypeTemplateTypeForRelatedFoundSet = createBaseType(context, ViewFoundSet.VIEW_FOUNDSET, RelatedFoundSet.class);
+				}
+				members = cachedSuperTypeTemplateTypeForRelatedFoundSet.getMembers();
+			}
+			else
+			{
+				if (cachedSuperTypeTemplateTypeForFoundSet == null)
+				{
+					cachedSuperTypeTemplateTypeForFoundSet = createBaseType(context, ViewFoundSet.VIEW_FOUNDSET, ViewFoundSet.class);
+				}
+				members = cachedSuperTypeTemplateTypeForFoundSet.getMembers();
+			}
+
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				Member overridden = null;
+				if (member.getVisibility() == Visibility.INTERNAL)
+				{
+					if (fs != null && fs.getRelation(config) != null)
+					{
+						// the special internal once (like clear() of related) should be also added
+						// because they should override the normal super JSFoundSet clear
+						// leave the type check in the clone, dont give member.getType() because that removes the type from this member
+						overridden = TypeCreator.clone(member, null);
+						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
+					}
+				}
+				else
+				{
+					String memberConfig = config;
+					if (fs != null && member.getType() != null && member.getType().getName().equals(ViewFoundSet.VIEW_FOUNDSET) &&
+						member.getName().equals("unrelate"))
+					{
+						// its really a relation, unrelate it.
+						Relation relation = fs.getRelation(config);
+						if (relation != null)
+						{
+							memberConfig = relation.getForeignDataSource();
+						}
+					}
+
+					overridden = createOverrideMember(member, context, memberConfig);
+				}
+
+				if (overridden != null)
+				{
+					overwrittenMembers.add(overridden);
+				}
+			}
+			return getCombinedTypeWithRelationsAndDataproviders(fs, context, fullTypeName, config, overwrittenMembers,
+				getType(context, ViewFoundSet.VIEW_FOUNDSET), FOUNDSET_IMAGE, true);
+		}
+
+		/**
+		 * @param context
+		 * @param fullTypeName
+		 * @param foudsetClass
+		 * @return
+		 */
+		private Type createBaseType(String context, String fullTypeName, Class< ? > foundsetClass)
+		{
+			Type type = TypeCreator.this.createType(context, fullTypeName, foundsetClass);
+			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
+
+			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
+			maxRecordIndex.setName("maxRecordIndex");
+			type.getMembers().add(makeDeprecated(maxRecordIndex));
+
+			Property selectedIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
+			selectedIndex.setName("selectedIndex");
+			type.getMembers().add(makeDeprecated(selectedIndex));
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.All;
+		}
+
+		@Override
+		public void flush()
+		{
+			cachedSuperTypeTemplateTypeForFoundSet = null;
+			cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
+		}
+	}
+
 
 	private class JSDataSetCreator implements IScopeTypeCreator
 	{
