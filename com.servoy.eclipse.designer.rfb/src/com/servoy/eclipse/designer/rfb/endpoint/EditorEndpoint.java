@@ -38,7 +38,7 @@ import org.sablo.websocket.WebsocketEndpoint;
  *
  */
 
-@ServerEndpoint(value = "/rfb/angular/websocket/{editorid}")
+@ServerEndpoint(value = "/rfb/angular/websocket/{clientnr}")
 public class EditorEndpoint extends WebsocketEndpoint
 {
 	public static final String EDITOR_ENDPOINT = "editor";
@@ -49,9 +49,9 @@ public class EditorEndpoint extends WebsocketEndpoint
 	}
 
 	@OnOpen
-	public void start(Session newSession, @PathParam("editorid") String editorid) throws Exception
+	public void start(Session newSession, @PathParam("clientnr") String clientnr) throws Exception
 	{
-		super.start(newSession, editorid, null, null);
+		super.start(newSession, clientnr, null, null);
 	}
 
 	@Override

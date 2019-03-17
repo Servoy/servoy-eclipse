@@ -23,6 +23,7 @@ import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
+import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
 
 /**
@@ -39,9 +40,9 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	private static final WebObjectSpecification EDITOR_SERVICE_SPECIFICATION = new WebObjectSpecification(EDITOR_SERVICE, "", IPackageReader.WEB_SERVICE,
 		EDITOR_SERVICE, null, null, null, "", null);
 
-	public EditorWebsocketSession(String uuid)
+	public EditorWebsocketSession(WebsocketSessionKey sessionKey)
 	{
-		super(uuid);
+		super(sessionKey);
 	}
 
 	// session will be destroyed when editor is closed

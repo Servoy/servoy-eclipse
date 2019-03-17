@@ -41,6 +41,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
 import org.sablo.websocket.IServerService;
+import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -95,9 +96,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	/**
 	 * @param uuid
 	 */
-	public DesignerWebsocketSession(String uuid, BaseVisualFormEditor editor)
+	public DesignerWebsocketSession(WebsocketSessionKey sessionKey, BaseVisualFormEditor editor)
 	{
-		super(uuid);
+		super(sessionKey);
 		this.form = editor.getForm();
 		this.editor = editor;
 		registerServerService("$editor", this);
