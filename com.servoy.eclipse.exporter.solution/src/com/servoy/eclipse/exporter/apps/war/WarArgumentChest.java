@@ -318,7 +318,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 				if (parts.length != 3)
 				{
 					Pattern p = Pattern.compile("\"(.+)\" (.+) (.+)");
-					Matcher m = p.matcher(license);
+					Matcher m = p.matcher(license.trim());
 					if (m.matches())
 					{
 						company = m.group(1);

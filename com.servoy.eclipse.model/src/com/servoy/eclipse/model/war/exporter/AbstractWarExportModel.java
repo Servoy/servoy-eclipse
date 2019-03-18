@@ -384,6 +384,13 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		licenses.put(license.code, license);
 	}
 
+	public void replaceLicenseCode(License license, String code)
+	{
+		licenses.remove(license.code);
+		license.setCode(code);
+		licenses.put(code, license);
+	}
+
 	public String decryptPassword(Cipher desCipher, String password)
 	{
 		if (password == null) return "";
