@@ -343,6 +343,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			result.add("aggrid");
 			result.add("bootstrapcomponents");
 			result.add("servoy-extra-components");
+			result.add("fontawesome");
 		}
 		return result;
 	}
