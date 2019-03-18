@@ -3193,8 +3193,12 @@ public class TypeCreator extends TypeCache
 
 			if (ds != null || PersistEncapsulation.hideFoundset(formToUse))
 			{
-				String foundsetType = ds.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? ViewFoundSet.VIEW_FOUNDSET : FoundSet.JS_FOUNDSET;
-				if (ds != null) foundsetType += '<' + ds + '>';
+				String foundsetType = FoundSet.JS_FOUNDSET;
+				if (ds != null)
+				{
+					foundsetType = ds.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? ViewFoundSet.VIEW_FOUNDSET : FoundSet.JS_FOUNDSET;
+					foundsetType += '<' + ds + '>';
+				}
 				Member clone = TypeCreator.clone(getMember("foundset", baseType), getTypeRef(context, foundsetType));
 				overwrittenMembers.add(clone);
 				clone.setVisible(!PersistEncapsulation.hideFoundset(formToUse));
