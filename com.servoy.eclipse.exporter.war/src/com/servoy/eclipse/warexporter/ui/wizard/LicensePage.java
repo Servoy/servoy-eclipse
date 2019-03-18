@@ -43,6 +43,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -216,7 +217,8 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 		try
 		{
 			License l = new License(companyText, licenseText, noOfLicensesText.trim());
-			if (ApplicationServerRegistry.get().checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
+			IApplicationServerSingleton server = ApplicationServerRegistry.get();
+			if (server.checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
 			{
 				boolean isNew = !exportModel.containsLicense(l.getCode());
 				exportModel.addLicense(l);
@@ -224,24 +226,27 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 				if (isNew)
 				{
 					setMessage("License " + licenseText + " was saved.", IMessageProvider.INFORMATION);
-					addLicense();
+					addNewLicenseFields();
 				}
 			}
 			else
 			{
-				Pair<Boolean, String> code = ApplicationServerRegistry.get().upgradeLicense(companyText, licenseText, noOfLicensesText.trim());
+				Pair<Boolean, String> code = server.upgradeLicense(companyText, licenseText, noOfLicensesText.trim());
 				if (code != null)
 				{
-					if (code.getLeft().booleanValue() && !licenseText.equals(code.getRight()))
+					if (!licenseText.equals(code.getRight()) && server.checkClientLicense(l.getCompanyKey(), code.getRight(), l.getNumberOfLicenses()))
 					{
 						setMessage("License " + l.getCompanyKey() + " " + l.getCode() + " was auto upgraded to " + code.getRight(),
 							IMessageProvider.INFORMATION);
 						if (!exportModel.containsLicense(code.getRight()) && !exportModel.containsLicense(l.getCode()))
 						{
-							addLicense();
+							addNewLicenseFields();
 						}
 						exportModel.replaceLicenseCode(l, code.getRight());
-						
+					}
+					else
+					{
+						setMessage("License " + licenseText + " invalid.", IMessageProvider.ERROR);
 					}
 				}
 				else
@@ -258,7 +263,7 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 	}
 
 
-	protected void addLicense()
+	protected void addNewLicenseFields()
 	{
 		Composite composite = new Composite(mainContainer, SWT.BORDER);
 		licenseFieldsComposite = new LicenseFieldsComposite(composite, SWT.NONE, "", "", "");

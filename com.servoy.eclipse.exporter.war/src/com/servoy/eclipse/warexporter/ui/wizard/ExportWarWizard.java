@@ -267,7 +267,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			{
 				//try to auto upgrade
 				Pair<Boolean, String> code = server.upgradeLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses());
-				if (code == null || !code.getLeft().booleanValue())
+				if (code == null || !code.getLeft().booleanValue() || !server.checkClientLicense(l.getCompanyKey(), code.getRight(), l.getNumberOfLicenses()))
 				{
 					if (code != null)
 					{
@@ -275,7 +275,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 						{
 							public void run()
 							{
-								MessageDialog.openError(getShell(), "Error creating the WAR file", "License " + l.getCode() + " error: " + code.getRight());
+								MessageDialog.openError(getShell(), "Error creating the WAR file",
+									"License " + l.getCode() + (!code.getLeft().booleanValue() ? " error: " + code.getRight() : " is not valid."));
 							}
 						});
 					}
