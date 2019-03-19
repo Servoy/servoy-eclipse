@@ -112,10 +112,14 @@ public class ConvertToCSSPositionFormAction extends Action implements ISelection
 					{
 						try
 						{
-							ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-								toConvert.getSolution().getName());
-							CSSPosition.convertToCSSPosition(toConvert);
-							servoyProject.saveEditingSolutionNodes(new IPersist[] { toConvert }, true);
+							if (toConvert.getParts().hasNext() || toConvert == form)
+							{
+								// skip abstract forms
+								ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+									toConvert.getSolution().getName());
+								CSSPosition.convertToCSSPosition(toConvert);
+								servoyProject.saveEditingSolutionNodes(new IPersist[] { toConvert }, true);
+							}
 						}
 						catch (Exception ex)
 						{
