@@ -125,7 +125,7 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					checkLicense(container, companyText.getText(), licenseText.getText(), noOfLicensesText.getText());
+					checkLicense(container, companyText.getText(), licenseText, noOfLicensesText.getText());
 				}
 			});
 
@@ -211,53 +211,44 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 
 	}
 
-	private void checkLicense(Composite container, String companyText, String licenseText, String noOfLicensesText)
+	private void checkLicense(Composite container, String companyText, Text licenseTxt, String noOfLicensesText)
 	{
 		setMessage("");
-		try
-		{
-			License l = new License(companyText, licenseText, noOfLicensesText.trim());
-			IApplicationServerSingleton server = ApplicationServerRegistry.get();
-			if (server.checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
-			{
-				boolean isNew = !exportModel.containsLicense(l.getCode());
-				exportModel.addLicense(l);
 
-				if (isNew)
+		String licenseText = licenseTxt.getText();
+		License l = new License(companyText, licenseText, noOfLicensesText.trim());
+		IApplicationServerSingleton server = ApplicationServerRegistry.get();
+		if (server.checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
+		{
+			boolean isNew = !exportModel.containsLicense(l.getCode());
+			exportModel.addLicense(l);
+
+			if (isNew)
+			{
+				setMessage("License " + licenseText + " was saved.", IMessageProvider.INFORMATION);
+				addNewLicenseFields();
+			}
+		}
+		else
+		{
+			Pair<Boolean, String> code = server.upgradeLicense(companyText, licenseText, noOfLicensesText.trim());
+			if (code != null && code.getLeft().booleanValue())
+			{
+				if (!licenseText.equals(code.getRight()))
 				{
-					setMessage("License " + licenseText + " was saved.", IMessageProvider.INFORMATION);
-					addNewLicenseFields();
+					setMessage("License " + l.getCompanyKey() + " " + l.getCode() + " was auto upgraded to " + code.getRight(), IMessageProvider.INFORMATION);
+					if (!exportModel.containsLicense(code.getRight()) && !exportModel.containsLicense(l.getCode()))
+					{
+						addNewLicenseFields();
+					}
+					exportModel.replaceLicenseCode(l, code.getRight());
+					licenseTxt.setText(code.getRight());
 				}
 			}
 			else
 			{
-				Pair<Boolean, String> code = server.upgradeLicense(companyText, licenseText, noOfLicensesText.trim());
-				if (code != null)
-				{
-					if (!licenseText.equals(code.getRight()) && server.checkClientLicense(l.getCompanyKey(), code.getRight(), l.getNumberOfLicenses()))
-					{
-						setMessage("License " + l.getCompanyKey() + " " + l.getCode() + " was auto upgraded to " + code.getRight(),
-							IMessageProvider.INFORMATION);
-						if (!exportModel.containsLicense(code.getRight()) && !exportModel.containsLicense(l.getCode()))
-						{
-							addNewLicenseFields();
-						}
-						exportModel.replaceLicenseCode(l, code.getRight());
-					}
-					else
-					{
-						setMessage("License " + licenseText + " invalid.", IMessageProvider.ERROR);
-					}
-				}
-				else
-				{
-					setMessage("License " + licenseText + " invalid.", IMessageProvider.ERROR);
-				}
+				setMessage("License " + licenseText + " invalid." + (code != null ? code.getRight() : ""), IMessageProvider.ERROR);
 			}
-		}
-		catch (Exception e)
-		{
-			setMessage("Please enter a number in the 'Number of licenses' field. " + noOfLicensesText + " is not a number.", IMessageProvider.ERROR);
 		}
 		container.layout();
 	}

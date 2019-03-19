@@ -528,7 +528,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			{
 				//try to auto upgrade
 				Pair<Boolean, String> code = server.upgradeLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses());
-				if (code == null || !code.getLeft().booleanValue() || !server.checkClientLicense(l.getCompanyKey(), code.getRight(), l.getNumberOfLicenses()))
+				if (code == null || !code.getLeft().booleanValue())
 				{
 					throw new ExportException("Cannot export! License '" + l.getCompanyKey() + "' with code " + l.getCode() +
 						(code != null && !code.getLeft().booleanValue() ? " error: " + code.getRight() : " is not valid."));
