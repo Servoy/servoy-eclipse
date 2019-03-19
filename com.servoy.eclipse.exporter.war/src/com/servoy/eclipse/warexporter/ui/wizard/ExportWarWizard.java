@@ -275,7 +275,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 						{
 							public void run()
 							{
-								MessageDialog.openError(getShell(), "Error creating the WAR file", "License " + l.getCode() + " error: " + code.getRight());
+								MessageDialog.openError(getShell(), "Error creating the WAR file",
+									"License " + l.getCode() + (!code.getLeft().booleanValue() ? " error: " + code.getRight() : " is not valid."));
 							}
 						});
 					}
