@@ -52,7 +52,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class NewSolutionWizardDefaultPackages
 {
-	public static final String PACKAGES[] = { "12grid", "aggrid", "bootstrapcomponents", "servoyextra" };
+	public static final String PACKAGES[] = { "12grid", "aggrid", "bootstrapcomponents", "servoyextra", "fontawesome" };
 
 	public static final String SOLUTIONS[] = { "svySearch", "svySecurity", "svyUtils", "svyNavigation", "svyUtils$NGClient" };
 

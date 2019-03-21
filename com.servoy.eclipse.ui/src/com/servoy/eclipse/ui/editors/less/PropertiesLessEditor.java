@@ -148,6 +148,7 @@ public class PropertiesLessEditor extends MultiPageEditorPart
 		{
 			ServoyLog.logError("Error creating source editor for the Servoy theme properties less file.", e);
 		}
+		setTitleToolTip(getEditorInput().getToolTipText());
 	}
 
 

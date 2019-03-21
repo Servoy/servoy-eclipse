@@ -250,8 +250,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	@Override
 	public String getToolTipText()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return getFile() != null ? getFile().getFullPath().makeRelative().toString() : "";
 	}
 
 	public void propertyModified(LessPropertyEntry property)
@@ -310,4 +309,6 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		result.remove("@" + exclude);
 		return result.toArray(new String[result.size()]);
 	}
+
+
 }

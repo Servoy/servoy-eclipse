@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.TreeSet;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -43,13 +44,13 @@ public class AggregationContentProvider implements ITreeContentProvider
 		if (parentElement instanceof Solution)
 		{
 			Solution solution = (Solution)parentElement;
-			ArrayList aggregates = new ArrayList();
+			ArrayList<AggregateVariable> aggregates = new ArrayList<>();
 			try
 			{
-				Iterator it = solution.getAggregateVariables(table, true);
+				Iterator<AggregateVariable> it = solution.getAggregateVariables(table, true);
 				while (it.hasNext())
 				{
-					AggregateVariable element = (AggregateVariable)it.next();
+					AggregateVariable element = it.next();
 					aggregates.add(element);
 				}
 				return aggregates.toArray();
@@ -84,7 +85,11 @@ public class AggregationContentProvider implements ITreeContentProvider
 	{
 		if (inputElement instanceof ArrayList)
 		{
-			return ((ArrayList)inputElement).toArray();
+			return ((ArrayList< ? >)inputElement).toArray();
+		}
+		else if (inputElement instanceof TreeSet)
+		{
+			return ((TreeSet< ? >)inputElement).toArray();
 		}
 		return new Object[0];
 	}

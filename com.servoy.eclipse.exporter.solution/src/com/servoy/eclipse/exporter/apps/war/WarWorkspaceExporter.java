@@ -36,12 +36,15 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Eclipse application that can be used for exporting servoy solutions in .war format.
@@ -516,6 +519,30 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		return new WarArgumentChest((String[])context.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 	}
 
+	private void checkAndAutoUpgradeLicenses(CommandLineWarExportModel exportModel) throws ExportException
+	{
+		IApplicationServerSingleton server = ApplicationServerRegistry.get();
+		for (License l : exportModel.getLicenses())
+		{
+			if (!server.checkClientLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses()))
+			{
+				//try to auto upgrade
+				Pair<Boolean, String> code = server.upgradeLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses());
+				if (code == null || !code.getLeft().booleanValue())
+				{
+					throw new ExportException("Cannot export! License '" + l.getCompanyKey() + "' with code " + l.getCode() +
+						(code != null && !code.getLeft().booleanValue() ? " error: " + code.getRight() : " is not valid."));
+				}
+				else if (code.getLeft().booleanValue() && !l.getCode().equals(code.getRight()))
+				{
+					output("License '" + l.getCompanyKey() + "' with code " + l.getCode() + " was auto upgraded to " + code.getRight() +
+						". Please change it to the new code in future exports.");
+					exportModel.replaceLicenseCode(l, code.getRight());
+				}
+			}
+		}
+	}
+
 	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
@@ -526,9 +553,14 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			int solutionType = activeProject.getSolutionMetaData().getSolutionType();
 			isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
 		}
-		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration, isNGExport));
+
 		try
 		{
+			CommandLineWarExportModel exportModel = new CommandLineWarExportModel(configuration, isNGExport);
+			checkAndAutoUpgradeLicenses(exportModel);
+
+			WarExporter warExporter = new WarExporter(exportModel);
+
 			warExporter.doExport(new IProgressMonitor()
 			{
 				@Override

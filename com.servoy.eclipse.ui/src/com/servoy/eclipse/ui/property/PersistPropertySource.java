@@ -57,6 +57,8 @@ import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebObjectSpecification.TagAllowerdPropertyInputFieldType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.BytePropertyType;
@@ -1223,11 +1225,20 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 			}
 		}
-		if (propertyDescription != null && IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(propertyDescription.getName()))
+		if (propertyDescription != null)
 		{
-			return new ComboboxPropertyController<Boolean>(id, displayName,
-				new ComboboxPropertyModel<Boolean>(new Boolean[] { Boolean.TRUE, Boolean.FALSE }, new String[] { "true", "false" }).addDefaultValue(),
-				Messages.LabelUnresolved);
+			if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(propertyDescription.getName()))
+			{
+				return new ComboboxPropertyController<Boolean>(id, displayName,
+					new ComboboxPropertyModel<Boolean>(new Boolean[] { Boolean.TRUE, Boolean.FALSE }, new String[] { "true", "false" }).addDefaultValue(),
+					Messages.LabelUnresolved);
+			}
+			else if (propertyDescription.hasTag(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE) &&
+				TagAllowerdPropertyInputFieldType.stringValue((String)propertyDescription.getTag(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE)))
+			{
+				return createTypeaheadPropertyController(persistContext.getPersist(), id, displayName, form, ((ValuesConfig)propertyDescription.getConfig()));
+			}
+
 		}
 
 		IPropertyDescriptor otherPropertyDescriptor = createOtherPropertyDescriptorIfAppropriate(id, displayName, propertyDescription, form, persistContext,
@@ -1688,6 +1699,25 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 
 		return true;
+	}
+
+	/**
+	 * Create a property controller for selecting an autofill property in Properties view.
+	 *
+	 * @param id
+	 * @param displayName
+	 * @return
+	 */
+	public static PropertyController<String, ? > createTypeaheadPropertyController(IPersist persist, Object id, String displayName, Form form,
+		ValuesConfig values)
+	{
+		if (persist.getRootObject() instanceof Solution && form != null)
+		{
+			String tooltip = "Double click '{}' to add it to autofill.";
+			return new StringListWithContentProposalsPropertyController(id, displayName, values != null ? values.getDisplay() : new String[0],
+				values != null ? (String)values.getRealDefault() : null, tooltip, null);
+		}
+		else return null;
 	}
 
 	/**

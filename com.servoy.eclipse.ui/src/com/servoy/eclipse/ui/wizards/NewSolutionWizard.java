@@ -194,7 +194,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						// serialize Solution object to given project
 						repository.updateRootObject(solution);
 
-						solution.setMustAuthenticate(mustAuthenticate);
+						//disable must authenticate for now, until we include login form generation, users creation
+						//solution.setMustAuthenticate(mustAuthenticate);
 						addDefaultThemeIfNeeded(repository, solution);
 					}
 					monitor.worked(1);

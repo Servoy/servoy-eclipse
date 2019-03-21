@@ -43,6 +43,8 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Allows exporting client licenses into the war.
@@ -123,7 +125,7 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					checkLicense(container, companyText.getText(), licenseText.getText(), noOfLicensesText.getText());
+					checkLicense(container, companyText.getText(), licenseText, noOfLicensesText.getText());
 				}
 			});
 
@@ -188,6 +190,7 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 				}
 			}
 			mainContainer.update();
+			setMessage("");
 		}
 
 		private void setEnabledButtons(final Button licenseButton, final Button deleteButton)
@@ -208,38 +211,57 @@ public class LicensePage extends WizardPage implements IRestoreDefaultPage
 
 	}
 
-	private void checkLicense(Composite container, String companyText, String licenseText, String noOfLicensesText)
+	private void checkLicense(Composite container, String companyText, Text licenseTxt, String noOfLicensesText)
 	{
 		setMessage("");
-		try
-		{
-			if (ApplicationServerRegistry.get().checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
-			{
-				License l = new License(companyText, licenseText, noOfLicensesText.trim());
-				boolean isNew = !exportModel.containsLicense(l.getCode());
-				exportModel.addLicense(l);
 
-				if (isNew)
+		String licenseText = licenseTxt.getText();
+		License l = new License(companyText, licenseText, noOfLicensesText.trim());
+		IApplicationServerSingleton server = ApplicationServerRegistry.get();
+		if (server.checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
+		{
+			boolean isNew = !exportModel.containsLicense(l.getCode());
+			exportModel.addLicense(l);
+
+			if (isNew)
+			{
+				setMessage("License " + licenseText + " was saved.", IMessageProvider.INFORMATION);
+				addNewLicenseFields();
+			}
+		}
+		else
+		{
+			Pair<Boolean, String> code = server.upgradeLicense(companyText, licenseText, noOfLicensesText.trim());
+			if (code != null && code.getLeft().booleanValue())
+			{
+				if (!licenseText.equals(code.getRight()))
 				{
-					setMessage("License " + licenseText + " was saved.", IMessageProvider.INFORMATION);
-					Composite composite = new Composite(mainContainer, SWT.BORDER);
-					licenseFieldsComposite = new LicenseFieldsComposite(composite, SWT.NONE, "", "", "");
-					composite.moveAbove(mainContainer.getChildren()[0]);
-					mainContainer.layout(new Control[] { licenseFieldsComposite });
-					sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-					sc.update();
+					setMessage("License " + l.getCompanyKey() + " " + l.getCode() + " was auto upgraded to " + code.getRight(), IMessageProvider.INFORMATION);
+					if (!exportModel.containsLicense(code.getRight()) && !exportModel.containsLicense(l.getCode()))
+					{
+						addNewLicenseFields();
+					}
+					exportModel.replaceLicenseCode(l, code.getRight());
+					licenseTxt.setText(code.getRight());
 				}
 			}
 			else
 			{
-				setMessage("License " + licenseText + " invalid.", IMessageProvider.ERROR);
+				setMessage("License " + licenseText + " invalid." + (code != null ? code.getRight() : ""), IMessageProvider.ERROR);
 			}
 		}
-		catch (Exception e)
-		{
-			setMessage("Please enter a number in the 'Number of licenses' field. " + noOfLicensesText + " is not a number.", IMessageProvider.ERROR);
-		}
 		container.layout();
+	}
+
+
+	protected void addNewLicenseFields()
+	{
+		Composite composite = new Composite(mainContainer, SWT.BORDER);
+		licenseFieldsComposite = new LicenseFieldsComposite(composite, SWT.NONE, "", "", "");
+		composite.moveAbove(mainContainer.getChildren()[0]);
+		mainContainer.layout(new Control[] { licenseFieldsComposite });
+		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		sc.update();
 	}
 
 

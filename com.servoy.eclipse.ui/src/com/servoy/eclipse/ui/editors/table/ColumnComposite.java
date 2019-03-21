@@ -626,7 +626,7 @@ public class ColumnComposite extends Composite
 				tname = tname.substring(0, tname.length() - 1);
 			}
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 3)) + "_id";
+			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 3)) + "_uuid";
 			try
 			{
 				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType(t);

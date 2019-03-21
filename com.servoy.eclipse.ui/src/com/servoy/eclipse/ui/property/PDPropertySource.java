@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
@@ -246,8 +247,14 @@ public class PDPropertySource extends PersistPropertySource
 			{
 				config.addDefault(desc.getDefaultValue(), null);
 			}
+			JSONObject tags = null;
+			if (desc.hasTag(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE))
+			{
+				tags = new JSONObject();
+				tags.accumulate(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE, desc.getTag(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE));
+			}
 			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-				desc.getDefaultValue(), desc.getInitialValue(), desc.hasDefault(), null, null, null, false), persistContext);
+				desc.getDefaultValue(), desc.getInitialValue(), desc.hasDefault(), null, null, tags, false), persistContext);
 		}
 		else
 		{
