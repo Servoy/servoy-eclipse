@@ -181,6 +181,7 @@ public class SolutionExplorerTreeContentProvider
 	private static final String IMG_SOLUTION_MOBILE = "solution_mobile.png";
 	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png";
 	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png";
+	private static final String IMG_SOLUTION_SERVICE = "solution.png";
 	private static final String SERVER_IMAGE = "server.png";
 	private static final String SERVER_DUPLICATE_IMAGE = "duplicate_server.png";
 	private static final String SERVER_ERROR_IMAGE = "server.png_IMG_DEC_FIELD_ERROR";
@@ -573,6 +574,9 @@ public class SolutionExplorerTreeContentProvider
 				{
 					case SolutionMetaData.MODULE :
 						imgName = IMG_SOLUTION_MODULE;
+						break;
+					case SolutionMetaData.SERVICE :
+						imgName = IMG_SOLUTION_SERVICE;
 						break;
 					case SolutionMetaData.NG_MODULE :
 						imgName = IMG_SOLUTION_NG_MODULE;
