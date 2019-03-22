@@ -60,6 +60,12 @@ public class DBIQuickFixCreateInfoForColumn extends TableDifferenceQuickFix
 		return instance;
 	}
 
+	@Override
+	public String getShortLabel()
+	{
+		return "Update .dbi";
+	}
+
 	public String getLabel()
 	{
 		return "Add default information about this column to the database information file.";

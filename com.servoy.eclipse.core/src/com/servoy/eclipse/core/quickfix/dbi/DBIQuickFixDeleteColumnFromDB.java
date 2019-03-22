@@ -53,6 +53,12 @@ public class DBIQuickFixDeleteColumnFromDB extends TableDifferenceQuickFix
 	}
 
 	@Override
+	public String getShortLabel()
+	{
+		return "Delete column from DB.";
+	}
+
+	@Override
 	public boolean canHandleDifference(TableDifference difference)
 	{
 		return difference != null && difference.getType() == TableDifference.COLUMN_MISSING_FROM_DBI_FILE;

@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -37,17 +38,11 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.ListViewer;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.osgi.util.NLS;
@@ -60,8 +55,10 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -79,6 +76,7 @@ import org.eclipse.ui.views.markers.internal.Util;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator;
+import com.servoy.eclipse.core.quickfix.dbi.TableDifferenceQuickFix;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
@@ -173,10 +171,8 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				if (tableName != null)
 				{
-					markers = Arrays.asList(markers)
-						.stream()
-						.filter(marker -> marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME, "").equals(tableName))
-						.toArray(IMarker[]::new);
+					markers = Arrays.asList(markers).stream().filter(
+						marker -> marker.getAttribute(TableDifference.ATTRIBUTE_TABLENAME, "").equals(tableName)).toArray(IMarker[]::new);
 				}
 
 				if (markers != null && markers.length > 0)
@@ -216,8 +212,8 @@ public class HandleDBIMarkersWizard extends Wizard
 	public class ModifiedQuickFixPage extends WizardPage
 	{
 
-		private final Map resolutions;
-		private ListViewer resolutionsList;
+		private final Map<IMarkerResolution, List<IMarker>> resolutions;
+		private Group resolutionsList;
 		private CheckboxTableViewer markersTable;
 		private final IWorkbenchPartSite site;
 
@@ -232,7 +228,7 @@ public class HandleDBIMarkersWizard extends Wizard
 		 * @param site
 		 *            The IWorkbenchPartSite to show markers
 		 */
-		public ModifiedQuickFixPage(String problemDescription, Map resolutions, IWorkbenchPartSite site)
+		public ModifiedQuickFixPage(String problemDescription, Map<IMarkerResolution, List<IMarker>> resolutions, IWorkbenchPartSite site)
 		{
 			super(problemDescription);
 			this.resolutions = resolutions;
@@ -267,17 +263,10 @@ public class HandleDBIMarkersWizard extends Wizard
 
 			createResolutionsList(control);
 
-			FormData listData = new FormData();
-			listData.top = new FormAttachment(resolutionsLabel, 0);
-			listData.left = new FormAttachment(0);
-			listData.right = new FormAttachment(100, 0);
-			listData.height = convertHeightInCharsToPixels(10);
-			resolutionsList.getControl().setLayoutData(listData);
-
 			Label title = new Label(control, SWT.NONE);
 			title.setText(MarkerMessages.MarkerResolutionDialog_Problems_List_Title);
 			FormData labelData = new FormData();
-			labelData.top = new FormAttachment(resolutionsList.getControl(), 0);
+			labelData.top = new FormAttachment(resolutionsList, 0);
 			labelData.left = new FormAttachment(0);
 			title.setLayoutData(labelData);
 
@@ -299,8 +288,6 @@ public class HandleDBIMarkersWizard extends Wizard
 			markersTable.getControl().setLayoutData(tableData);
 
 			Dialog.applyDialogFont(control);
-
-			resolutionsList.setSelection(new StructuredSelection(resolutionsList.getElementAt(0)));
 
 			markersTable.setAllChecked(true);
 		}
@@ -337,7 +324,7 @@ public class HandleDBIMarkersWizard extends Wizard
 				public void widgetSelected(SelectionEvent arg0)
 				{
 					markersTable.setAllChecked(true);
-					setPageComplete(!resolutionsList.getSelection().isEmpty());
+					setPageComplete(getSelectedResolution() != null);
 				}
 			});
 
@@ -368,90 +355,35 @@ public class HandleDBIMarkersWizard extends Wizard
 		 */
 		private void createResolutionsList(Composite control)
 		{
-			resolutionsList = new ListViewer(control, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
-			resolutionsList.setContentProvider(new IStructuredContentProvider()
-			{
-				/*
-				 * (non-Javadoc)
-				 * 
-				 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-				 */
-				public Object[] getElements(Object inputElement)
+			RowLayout rowLayout = new RowLayout(SWT.VERTICAL);
+			resolutionsList = new Group(control, SWT.NATIVE);
+
+			rowLayout.spacing = 10;
+			rowLayout.marginTop = 20;
+			resolutionsList.setLayout(rowLayout);
+
+			resolutions.keySet().stream().collect(Collectors.toList()).forEach(mk -> {
+				Button b = new Button(resolutionsList, SWT.RADIO);
+
+				b.setData(mk);
+				if (mk instanceof TableDifferenceQuickFix) b.setText(((TableDifferenceQuickFix)mk).getShortLabel());
+				else b.setText(mk.getLabel());
+				b.setToolTipText(mk.getLabel());
+
+				b.addSelectionListener(new SelectionAdapter()
 				{
-					return resolutions.keySet().toArray();
-				}
-
-				/*
-				 * (non-Javadoc)
-				 * 
-				 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-				 */
-				public void dispose()
-				{
-
-				}
-
-				/*
-				 * (non-Javadoc)
-				 * 
-				 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-				 */
-				public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
-				{
-
-				}
+					@Override
+					public void widgetSelected(SelectionEvent event)
+					{
+						markersTable.refresh();
+						IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+						if (window == null) return;
+						IWorkbenchPage page = window.getActivePage();
+						if (page == null) return;
+					}
+				});
 			});
-
-			resolutionsList.setLabelProvider(new LabelProvider()
-			{
-				/*
-				 * (non-Javadoc)
-				 * 
-				 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
-				 */
-				@Override
-				public String getText(Object element)
-				{
-					return ((IMarkerResolution)element).getLabel();
-				}
-			});
-
-			resolutionsList.setInput(this);
-
-			resolutionsList.setComparator(new ViewerComparator()
-			{
-				/*
-				 * (non-Javadoc)
-				 * 
-				 * @see org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-				 */
-				@Override
-				public int compare(Viewer viewer, Object e1, Object e2)
-				{
-					return ((IMarkerResolution)e1).getLabel().compareTo(((IMarkerResolution)e1).getLabel());
-				}
-			});
-
-			resolutionsList.addSelectionChangedListener(new ISelectionChangedListener()
-			{
-				/*
-				 * (non-Javadoc)
-				 * 
-				 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-				 */
-				public void selectionChanged(SelectionChangedEvent event)
-				{
-
-					markersTable.refresh();
-
-					IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-					if (window == null) return;
-					IWorkbenchPage page = window.getActivePage();
-					if (page == null) return;
-
-				}
-
-			});
+			if (resolutions != null && resolutions.size() > 1) ((Button)(Arrays.asList(resolutionsList.getChildren()).get(1))).setSelection(true);
 		}
 
 		/**
@@ -764,16 +696,14 @@ public class HandleDBIMarkersWizard extends Wizard
 		 */
 		private IMarkerResolution getSelectedResolution()
 		{
-			ISelection selection = resolutionsList.getSelection();
-			if (!(selection instanceof IStructuredSelection))
+
+			List< ? > selected = Arrays.asList(resolutionsList.getChildren()).stream().filter(a -> a instanceof Button && ((Button)a).getSelection()).collect(
+				Collectors.toList());
+			if (selected != null && selected.size() > 0)
 			{
-				return null;
+				return ((IMarkerResolution)((Button)(selected.get(0))).getData());
 			}
-
-			Object first = ((IStructuredSelection)selection).getFirstElement();
-
-			return (IMarkerResolution)first;
-
+			else return null;
 		}
 
 	}
