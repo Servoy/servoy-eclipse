@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpSession;
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.EncodeException;
@@ -41,6 +42,7 @@ import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.RemoteEndpoint.Basic;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig.Configurator;
 
@@ -67,6 +69,60 @@ import com.servoy.j2db.util.Debug;
  */
 public class SwtWebsocket
 {
+	private static class SwtWebsocketHandshakeRequest implements HandshakeRequest
+	{ // RAGTEST kanweg
+		private final Map<String, List<String>> parameterMap;
+		private final HttpSession httpSession;
+
+		SwtWebsocketHandshakeRequest(Map<String, List<String>> parameterMap, HttpSession httpSession)
+		{
+			this.parameterMap = parameterMap;
+			this.httpSession = httpSession;
+		}
+
+		@Override
+		public Map<String, List<String>> getHeaders()
+		{
+			return null;
+		}
+
+		@Override
+		public Principal getUserPrincipal()
+		{
+			return null;
+		}
+
+		@Override
+		public URI getRequestURI()
+		{
+			return null;
+		}
+
+		@Override
+		public boolean isUserInRole(String var1)
+		{
+			return false;
+		}
+
+		@Override
+		public Object getHttpSession()
+		{
+			return httpSession;
+		}
+
+		@Override
+		public Map<String, List<String>> getParameterMap()
+		{
+			return parameterMap;
+		}
+
+		@Override
+		public String getQueryString()
+		{
+			return null;
+		}
+	}
+
 	private WebsocketEndpoint websocketEndpoint;
 
 	public SwtWebsocket(Browser browser, String uriString, int id, int editorClientnr, int contentClientnr) throws Exception
@@ -108,6 +164,14 @@ public class SwtWebsocket
 		}
 
 		websocketEndpoint = new EditorContentEndpoint();
+
+		Configurator configurator = getEndpointConfigurator(EditorContentEndpoint.class);
+		if (configurator != null)
+		{
+			// RAGTEST kanweg
+			configurator.modifyHandshake(null, new SwtWebsocketHandshakeRequest(null, null), null);
+		}
+
 		((EditorContentEndpoint)websocketEndpoint).start(newSession, String.valueOf(contentClientnr), args[1], args[2].split("\\?")[0]);
 		websocketEndpoint.getWindow().getSession().registerServerService(NGRuntimeWindowManager.WINDOW_SERVICE, new IServerService()
 		{
@@ -148,7 +212,7 @@ public class SwtWebsocket
 		return uriString.substring(uriString.indexOf(endpointPrefix) + endpointPrefix.length()).split("/");
 	}
 
-	private static Configurator getEndpointConfigurator(Class< ? > cls) RAGTEST roep configurator aan voor swtwebsocket
+	private static Configurator getEndpointConfigurator(Class< ? > cls)
 	{
 		ServerEndpoint annotation = cls.getAnnotation(ServerEndpoint.class);
 		if (annotation == null)

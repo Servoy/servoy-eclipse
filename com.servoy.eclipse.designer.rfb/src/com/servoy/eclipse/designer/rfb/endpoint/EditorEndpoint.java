@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.rfb.endpoint;
 
 import java.io.IOException;
 
+import javax.servlet.http.HttpSession;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -52,6 +53,12 @@ public class EditorEndpoint extends WebsocketEndpoint
 	public void start(Session newSession, @PathParam("clientnr") String clientnr) throws Exception
 	{
 		super.start(newSession, clientnr, null, null);
+	}
+
+	@Override
+	protected HttpSession getHttpSession(Session session)
+	{
+		return EditorHttpSession.getInstance();
 	}
 
 	@Override

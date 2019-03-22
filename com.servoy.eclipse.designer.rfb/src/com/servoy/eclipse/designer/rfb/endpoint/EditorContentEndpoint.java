@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.rfb.endpoint;
 
 
+import javax.servlet.http.HttpSession;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -54,21 +55,16 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 	}
 
 	@Override
+	protected HttpSession getHttpSession(Session session)
+	{
+		return EditorHttpSession.getInstance();
+	}
+
+	@Override
 	@OnMessage
 	public void incoming(String msg, boolean lastPart)
 	{
 		super.incoming(msg, lastPart);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint#onStart()
-	 */
-	@Override
-	public void onStart()
-	{
-		// ignore
 	}
 
 	@Override

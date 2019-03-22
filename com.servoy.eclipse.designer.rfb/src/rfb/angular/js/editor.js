@@ -1261,6 +1261,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return;
 			}
 		}
+		// RAGTEST rename naar editornr???
 		wsSession = $webSocket.connect('', [$webSocket.getURLParameter('editorid')])
 		wsSession.onopen(function() {
 			connected = true;

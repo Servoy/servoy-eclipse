@@ -17,13 +17,12 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
-import static java.util.UUID.randomUUID;
-
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -67,6 +66,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.designer.rfb.endpoint.EditorHttpSession;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -97,6 +97,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ISupportCheatSheetActions
 {
+	private static final AtomicInteger clientNrgenerator = new AtomicInteger();
+
 	// for setting selection when clicked in editor
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter()
 	{
@@ -173,10 +175,10 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 		// Serve requests for rfb editor
 
-		// RAGTEST start hgttp session !! meerdere tegelijk open ?? mischien  sessie starten en random nrs gebruiken
-		String httpSessionId = randomUUID().toString();
-		editorKey = new WebsocketSessionKey(httpSessionId, 1);
-		clientKey = new WebsocketSessionKey(httpSessionId, 2);
+		String httpSessionId = EditorHttpSession.getInstance().getId();
+		// RAGTEST clientnr hier nodig? mischien laten genereren door wsmanager
+		editorKey = new WebsocketSessionKey(httpSessionId, clientNrgenerator.incrementAndGet());
+		clientKey = new WebsocketSessionKey(httpSessionId, clientNrgenerator.incrementAndGet());
 
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorKey));
 		WebsocketSessionManager.addSession(designerWebsocketSession = new DesignerWebsocketSession(clientKey, editorPart));
