@@ -47,7 +47,7 @@
 		    <unit id="org.apache.commons.commons-text" version="1.6.0"/>
 		    <unit id="org.sweetlemonade.eclipse.json" version="1.0.4"/>
 		    <unit id="org.apache.james.apache-mime4j" version="0.6.0"/>
-		    <unit id="de.inetsoftware.jlessc" version="1.8.0.201903051330"/>
+		    <unit id="de.inetsoftware.jlessc" version="1.8.0.201903221450"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.201902041412"/>
