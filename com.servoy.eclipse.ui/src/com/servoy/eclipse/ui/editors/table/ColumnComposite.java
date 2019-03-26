@@ -71,6 +71,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetTable;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.editors.table.ColumnSeqTypeEditingSupport.ColumnSeqTypeEditingObservable;
 import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
@@ -96,9 +97,9 @@ public class ColumnComposite extends Composite
 //	private final DataBindingContext bindingContext;
 	private final TableViewer tableViewer;
 	private final ColumnDetailsComposite columnDetailsComposite;
-	private final ColumnAutoEnterComposite columnAutoEnterComposite;
-	private final ColumnValidationComposite columnValidationComposite;
-	private final ColumnConversionComposite columnConversionComposite;
+	private ColumnAutoEnterComposite columnAutoEnterComposite;
+	private ColumnValidationComposite columnValidationComposite;
+	private ColumnConversionComposite columnConversionComposite;
 	private final Composite tableContainer;
 	private final Button displayDataProviderID;
 
@@ -125,6 +126,7 @@ public class ColumnComposite extends Composite
 		myScrolledComposite.setContent(container);
 
 		final ITable t = te.getTable();
+		boolean isViewFoundsetTable = t instanceof ViewFoundsetTable;
 		tableContainer = new Composite(container, SWT.INHERIT_DEFAULT);
 		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLinesVisible(true);
@@ -242,26 +244,22 @@ public class ColumnComposite extends Composite
 		detailsTabItem.setText("Details");
 		tabFolder.setSelection(0);
 
-		final CTabItem autoEnterTabItem = new CTabItem(tabFolder, SWT.NONE, 1);
-		autoEnterTabItem.setText("Auto Enter");
-
-		final CTabItem validationTabItem = new CTabItem(tabFolder, SWT.NONE, 2);
-		validationTabItem.setText("Validation");
-
-		columnValidationComposite = new ColumnValidationComposite(te, tabFolder, SWT.NONE);
-		validationTabItem.setControl(columnValidationComposite);
-
-		columnAutoEnterComposite = new ColumnAutoEnterComposite(tabFolder, flattenedSolution, SWT.NONE);
-		autoEnterTabItem.setControl(columnAutoEnterComposite);
-		columnAutoEnterComposite.addChangeListener(new IChangeListener()
+		if (!isViewFoundsetTable)
 		{
-			public void handleChange(ChangeEvent event)
+			final CTabItem autoEnterTabItem = new CTabItem(tabFolder, SWT.NONE, 1);
+			autoEnterTabItem.setText("Auto Enter");
+			columnAutoEnterComposite = new ColumnAutoEnterComposite(tabFolder, flattenedSolution, SWT.NONE);
+			autoEnterTabItem.setControl(columnAutoEnterComposite);
+			columnAutoEnterComposite.addChangeListener(new IChangeListener()
 			{
-				tableViewer.refresh();
-			}
-		});
+				public void handleChange(ChangeEvent event)
+				{
+					tableViewer.refresh();
+				}
+			});
+		}
 
-		columnDetailsComposite = new ColumnDetailsComposite(tabFolder, SWT.NONE);
+		columnDetailsComposite = new ColumnDetailsComposite(tabFolder, SWT.NONE, isViewFoundsetTable);
 		detailsTabItem.setControl(columnDetailsComposite);
 
 		columnDetailsComposite.addValueChangeListener(new IValueChangeListener()
@@ -272,20 +270,35 @@ public class ColumnComposite extends Composite
 			}
 		});
 
-		final CTabItem conversionTabItem = new CTabItem(tabFolder, SWT.NONE, 3);
-		conversionTabItem.setText("Conversion");
+		//TODO conversion and validation support will be added later for view foundset tables SVY-13547
+		if (!isViewFoundsetTable)
+		{
+			final CTabItem validationTabItem = new CTabItem(tabFolder, SWT.NONE, 2);
+			validationTabItem.setText("Validation");
+			columnValidationComposite = new ColumnValidationComposite(te, tabFolder, SWT.NONE);
+			validationTabItem.setControl(columnValidationComposite);
 
-		columnConversionComposite = new ColumnConversionComposite(te, tabFolder, SWT.NONE);
-
-		conversionTabItem.setControl(columnConversionComposite);
+			final CTabItem conversionTabItem = new CTabItem(tabFolder, SWT.NONE, 3);
+			conversionTabItem.setText("Conversion");
+			columnConversionComposite = new ColumnConversionComposite(te, tabFolder, SWT.NONE);
+			conversionTabItem.setControl(columnConversionComposite);
+		}
 
 		if (IconPreferences.getInstance().getUseDarkThemeIcons())
 		{
 			Color backgroundColor = getServoyGrayBackground();
-			columnValidationComposite.setBackground(backgroundColor);
-			columnConversionComposite.setBackground(backgroundColor);
+			//TODO validation and conversion support will be added in the future for view foundset tables SVY-13547
+			if (!isViewFoundsetTable)
+			{
+				columnValidationComposite.setBackground(backgroundColor);
+				columnConversionComposite.setBackground(backgroundColor);
+			}
 			columnDetailsComposite.setBackground(backgroundColor);
-			columnAutoEnterComposite.setBackground(backgroundColor);
+
+			if (!isViewFoundsetTable)
+			{
+				columnAutoEnterComposite.setBackground(backgroundColor);
+			}
 		}
 
 		Button addButton;
@@ -328,6 +341,7 @@ public class ColumnComposite extends Composite
 
 		displayDataProviderID = new Button(container, SWT.CHECK);
 		displayDataProviderID.setText("Display DataProviderID");
+		displayDataProviderID.setVisible(!isViewFoundsetTable);
 		displayDataProviderID.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -451,9 +465,14 @@ public class ColumnComposite extends Composite
 	private void propagateSelection(Column c)
 	{
 		columnDetailsComposite.initDataBindings(c);
-		columnAutoEnterComposite.initDataBindings(c);
-		columnValidationComposite.initDataBindings(c);
-		columnConversionComposite.initDataBindings(c);
+		//TODO validation and conversion support will be added for view foundset tables SVY-13547
+		//auto-enter will not be supported!
+		if (!(c.getTable() instanceof ViewFoundsetTable))
+		{
+			columnAutoEnterComposite.initDataBindings(c);
+			columnValidationComposite.initDataBindings(c);
+			columnConversionComposite.initDataBindings(c);
+		}
 	}
 
 	static final int CI_NAME = 0;

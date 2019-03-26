@@ -51,9 +51,10 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
-import com.servoy.eclipse.model.inmemory.MemTable;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetTable;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.eclipse.ui.labelproviders.AccesCheckingContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
@@ -226,9 +227,9 @@ public class EventsComposite extends Composite
 		if (servoyProject != null)
 		{
 			Set<UUID> solutions = new HashSet<UUID>();
-			if (t instanceof MemTable)
+			if (t instanceof AbstractMemTable)
 			{
-				ServoyProject owner = ((MemTable)t).getParent().getServoyProject();
+				ServoyProject owner = ((AbstractMemTable)t).getServoyProject();
 				ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 				for (ServoyProject project : projects)
 				{
@@ -439,7 +440,8 @@ public class EventsComposite extends Composite
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 			for (EventNodeType tp : EventNodeType.values())
 			{
-				if (tp == EventNodeType.onLoad && !(table instanceof MemTable)) continue;
+				if (tp == EventNodeType.onLoad && !(table instanceof AbstractMemTable) || table instanceof ViewFoundsetTable && tp != EventNodeType.onLoad)
+					continue;
 				children.add(new EventNode(tp,
 					tableNode == null ? MethodWithArguments.METHOD_DEFAULT : new MethodWithArguments(
 						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), dsm.getDataSource(tableNode.getDataSource())),

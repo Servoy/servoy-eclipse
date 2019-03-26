@@ -160,12 +160,14 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	protected void createPages()
 	{
 		createColumnPage();
-		if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()) &&
-			ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 		{
 			createDynamicPages();
 
-			createPropertiesPage();
+			if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()))
+			{
+				createPropertiesPage();
+			}
 		}
 		updateTitle();
 	}
@@ -438,12 +440,18 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private void createDynamicPages()
 	{
-		createCalculationsPage();
-		createFoundsSetMethodsPage();
-		createAggregationsPage();
+		if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()))
+		{
+			createCalculationsPage();
+			createFoundsSetMethodsPage();
+			createAggregationsPage();
+		}
 		createEventsPage();
-		createSecurityPage();
-		createDataPage();
+		if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()))
+		{
+			createSecurityPage();
+			createDataPage();
+		}
 	}
 
 	@Override
