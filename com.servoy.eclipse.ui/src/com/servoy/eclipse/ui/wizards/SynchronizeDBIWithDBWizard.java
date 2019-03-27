@@ -231,7 +231,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			}
 
 			Object firstSelectedElement = selection.getFirstElement();
-			selectedTableName = firstSelectedElement instanceof UserNode ? ((TableWrapper)((UserNode)firstSelectedElement).getRealObject()).getTableName() : null;
+			selectedTableName = firstSelectedElement instanceof UserNode && ((UserNode)firstSelectedElement).getRealObject() instanceof TableWrapper
+				? ((TableWrapper)((UserNode)firstSelectedElement).getRealObject()).getTableName() : null;
 
 			// find differences between the DB table lists and the .dbi files
 			List<Pair<IServerInternal, String>> foundMissingTables = getMissingTables(servers, dmm);
