@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpSession;
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.EncodeException;
@@ -42,15 +41,11 @@ import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.RemoteEndpoint.Basic;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
-import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
-import javax.websocket.server.ServerEndpointConfig.Configurator;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
@@ -69,110 +64,40 @@ import com.servoy.j2db.util.Debug;
  */
 public class SwtWebsocket
 {
-	private static class SwtWebsocketHandshakeRequest implements HandshakeRequest
-	{ // RAGTEST kanweg
-		private final Map<String, List<String>> parameterMap;
-		private final HttpSession httpSession;
-
-		SwtWebsocketHandshakeRequest(Map<String, List<String>> parameterMap, HttpSession httpSession)
-		{
-			this.parameterMap = parameterMap;
-			this.httpSession = httpSession;
-		}
-
-		@Override
-		public Map<String, List<String>> getHeaders()
-		{
-			return null;
-		}
-
-		@Override
-		public Principal getUserPrincipal()
-		{
-			return null;
-		}
-
-		@Override
-		public URI getRequestURI()
-		{
-			return null;
-		}
-
-		@Override
-		public boolean isUserInRole(String var1)
-		{
-			return false;
-		}
-
-		@Override
-		public Object getHttpSession()
-		{
-			return httpSession;
-		}
-
-		@Override
-		public Map<String, List<String>> getParameterMap()
-		{
-			return parameterMap;
-		}
-
-		@Override
-		public String getQueryString()
-		{
-			return null;
-		}
-	}
-
-	private WebsocketEndpoint websocketEndpoint;
+	private final WebsocketEndpoint websocketEndpoint;
 
 	public SwtWebsocket(Browser browser, String uriString, int id, int editorClientnr, int contentClientnr) throws Exception
 	{
 		Session newSession = new SwtWebSocketSession(browser, uriString, id);
-		if (!createAndStartEditorEndpoint(uriString, newSession, editorClientnr) &&
-			!createAndStartEditorContentEndpoint(uriString, newSession, contentClientnr))
+		if (createAndStartEditorEndpoint(uriString, newSession, editorClientnr) == null ||
+			(websocketEndpoint = createAndStartEditorContentEndpoint(uriString, newSession, contentClientnr)) == null)
 		{
 			throw new IllegalArgumentException("Could not create websocket endpoint for uri '" + uriString + "'");
 		}
 
-		browser.addDisposeListener(new DisposeListener()
-		{
-
-			@Override
-			public void widgetDisposed(DisposeEvent e)
-			{
-				close();
-			}
-		});
+		browser.addDisposeListener(event -> close());
 	}
 
-	private boolean createAndStartEditorEndpoint(String uriString, Session newSession, int editorClientnr) throws Exception
+	private static EditorEndpoint createAndStartEditorEndpoint(String uriString, Session newSession, int editorClientnr) throws Exception
 	{
 		// expecting ws://localhost:8080/rfb/angular/websocket/{clientnr}
-		websocketEndpoint = new EditorEndpoint();
-		((EditorEndpoint)websocketEndpoint).start(newSession, String.valueOf(editorClientnr));
-		return true;
+		EditorEndpoint websocketEndpoint = new EditorEndpoint();
+		websocketEndpoint.start(newSession, String.valueOf(editorClientnr));
+		return websocketEndpoint;
 	}
 
-	private boolean createAndStartEditorContentEndpoint(String uriString, Session newSession, int contentClientnr) throws Exception
+	private static EditorContentEndpoint createAndStartEditorContentEndpoint(String uriString, Session newSession, int contentClientnr) throws Exception
 	{
 		// expecting ws://localhost:8080/rfb/angular/content/websocket/{clientnr}/{windowName}/{windowid}?solution=tst&id=%23editor&f=orders&s=tst&replacewebsocket=true
 		String[] args = getEndpointArgs(EditorContentEndpoint.class, uriString);
 
 		if (args == null || args.length != 3)
 		{
-			return false;
+			return null;
 		}
 
-		websocketEndpoint = new EditorContentEndpoint();
-
-		Configurator configurator = getEndpointConfigurator(EditorContentEndpoint.class);
-		if (configurator != null)
-		{
-			// RAGTEST kanweg
-			configurator.modifyHandshake(null, new SwtWebsocketHandshakeRequest(null, null), null);
-		}
-
-		((EditorContentEndpoint)websocketEndpoint).start(newSession, String.valueOf(contentClientnr), args[1], args[2].split("\\?")[0]);
+		EditorContentEndpoint websocketEndpoint = new EditorContentEndpoint();
+		websocketEndpoint.start(newSession, String.valueOf(contentClientnr), args[1], args[2].split("\\?")[0]);
 		websocketEndpoint.getWindow().getSession().registerServerService(NGRuntimeWindowManager.WINDOW_SERVICE, new IServerService()
 		{
 			@Override
@@ -190,7 +115,7 @@ public class SwtWebsocket
 				return null;
 			}
 		});
-		return true;
+		return websocketEndpoint;
 	}
 
 	private static String[] getEndpointArgs(Class< ? > cls, String uriString)
@@ -210,29 +135,6 @@ public class SwtWebsocket
 		}
 
 		return uriString.substring(uriString.indexOf(endpointPrefix) + endpointPrefix.length()).split("/");
-	}
-
-	private static Configurator getEndpointConfigurator(Class< ? > cls)
-	{
-		ServerEndpoint annotation = cls.getAnnotation(ServerEndpoint.class);
-		if (annotation == null)
-		{
-			return null;
-		}
-
-		Class< ? extends Configurator> configuratorClass = annotation.configurator();
-		if (configuratorClass != null)
-		{
-			try
-			{
-				return configuratorClass.newInstance();
-			}
-			catch (InstantiationException | IllegalAccessException e)
-			{
-				Debug.error("Cannot get endpoint configurator", e);
-			}
-		}
-		return null;
 	}
 
 	private void send(String string)
