@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ExpandEvent;
@@ -40,12 +41,13 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -90,7 +92,6 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private int solutionType;
 	private Label configLabel;
 	private NewSolutionWizard wizard;
-	private int expandedHeight;
 
 	protected static final String IS_ADVANCED_USER_SETTING = "is_advanced_user";
 	protected static final String SELECTED_SOLUTIONS_SETTING = "selected_solutions";
@@ -144,21 +145,24 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		addAdvancedSettings(isModuleWizard);
 
 		// layout of the page
-		GroupLayout groupLayout = new GroupLayout(topLevel);
-		topLevel.setLayout(groupLayout);
+		GridLayout gridLayout = new GridLayout(2, false);
+		gridLayout.marginWidth = gridLayout.marginHeight = 0;
+		gridLayout.marginTop = gridLayout.marginBottom = gridLayout.marginLeft = gridLayout.marginRight = 20;
+		gridLayout.verticalSpacing = 10;
+		topLevel.setLayout(gridLayout);
+		topLevel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		groupLayout.setAutocreateContainerGaps(true);
-		groupLayout.setAutocreateGaps(true);
+		solutionLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+		solutionNameField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
-		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup().add(groupLayout.createSequentialGroup().add(solutionLabel).addPreferredGap(LayoutStyle.RELATED).add(
-				solutionNameField, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(configLabel,
-					!isModuleWizard ? GroupLayout.DEFAULT_SIZE : 0, !isModuleWizard ? GroupLayout.DEFAULT_SIZE : 0, Short.MAX_VALUE).add(tableContainer,
-						GroupLayout.PREFERRED_SIZE, 650, Short.MAX_VALUE).add(expandBar, GroupLayout.PREFERRED_SIZE, 650, Short.MAX_VALUE));
-		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup().addContainerGap().add(
-			groupLayout.createParallelGroup().add(solutionLabel).add(solutionNameField)).addPreferredGap(LayoutStyle.UNRELATED).add(configLabel).add(
-				tableContainer, !isModuleWizard ? 100 : 0, !isModuleWizard ? 100 : 0, !isModuleWizard ? 100 : 0).add(expandBar, 0, GroupLayout.PREFERRED_SIZE,
-					Short.MAX_VALUE).addPreferredGap(LayoutStyle.UNRELATED).addContainerGap());
+		if (!isModuleWizard)
+		{
+			configLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 6));
+		}
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
+		gridData.minimumWidth = 650;//otherwise the resources project text is not visible
+		expandBar.setLayoutData(gridData);
 	}
 
 
@@ -177,21 +181,20 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			{
 				collapsableItem.setText("Hide advanced solution settings");
 				collapsableItem.setImage(uiActivator.loadImageFromBundle("collapse_tree.png"));
-				resizeDialog(true);
+				resizeDialog();
 			}
 
 			public void itemCollapsed(ExpandEvent e)
 			{
 				collapsableItem.setText("Show advanced solution settings");
 				collapsableItem.setImage(uiActivator.loadImageFromBundle("expandall.png"));
-				resizeDialog(false);
+				resizeDialog();
 			}
 		});
 
 		collapsableItem.setExpanded(getWizard().getDialogSettings().getBoolean(wizard.getSettingsPrefix() + IS_ADVANCED_USER_SETTING));
 		if (collapsableItem.getExpanded())
 		{
-			expandedHeight = expandComposite.getSize().y;
 			Shell shell = getWizard().getContainer().getShell();
 			shell.getDisplay().asyncExec(() -> {
 				//center dialog vertically
@@ -395,24 +398,29 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		return Arrays.stream(toImport).filter(sol -> isChecked(sol)).reduce("", (res, name) -> res + name + " ");
 	}
 
-	private void resizeDialog(boolean expanded)
+	private void resizeDialog()
 	{
 		Shell shell = getWizard().getContainer().getShell();
-		if (expanded)
-		{
+		shell.getDisplay().asyncExec(() -> {
+
+			Point preferredSize = shell.computeSize(shell.getSize().x, SWT.DEFAULT, true);
+			if (((WizardDialog)getWizard().getContainer()).getTray() != null && !collapsableItem.getExpanded())
+			{
+				//if the help page is visible, we don't shrink
+				return;
+			}
+
 			Rectangle bounds = shell.getBounds();
-			expandedHeight = expandComposite.getSize().y;
-			bounds.height = bounds.height + expandedHeight;
-			Rectangle parentSize = shell.getParent().getBounds();
-			bounds.y = (parentSize.height - bounds.height) / 2 + parentSize.y;
+			bounds.height = preferredSize.y;
+			if (collapsableItem.getExpanded())
+			{
+				//when it is expanded we center the dialog, because sometimes it shows right on top
+				Rectangle parentSize = shell.getParent().getBounds();
+				bounds.y = (parentSize.height - bounds.height) / 2 + parentSize.y;
+			}
 			shell.setBounds(bounds);
-		}
-		else
-		{
-			Rectangle bounds = shell.getBounds();
-			bounds.height = bounds.height - expandedHeight;
-			shell.setBounds(bounds);
-		}
+			shell.layout(true, true);
+		});
 	}
 
 	private final class SolutionAdvancedSettingsComposite extends Composite implements IValidator
