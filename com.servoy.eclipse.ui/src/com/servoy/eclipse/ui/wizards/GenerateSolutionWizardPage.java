@@ -432,7 +432,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 		public SolutionAdvancedSettingsComposite(Composite parent, boolean isModule)
 		{
-			super(parent, SWT.BORDER);
+			super(parent, SWT.NONE);
 			defaultThemeCheck = new Button(this, SWT.CHECK);
 			defaultThemeCheck.setVisible(!isModule);
 			if (!isModule)
