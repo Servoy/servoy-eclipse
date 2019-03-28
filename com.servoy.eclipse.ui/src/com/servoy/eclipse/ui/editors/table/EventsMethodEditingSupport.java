@@ -41,6 +41,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.DataSourceUtils;
 
 public class EventsMethodEditingSupport extends EditingSupport
 {
@@ -149,7 +150,7 @@ public class EventsMethodEditingSupport extends EditingSupport
 				new AccesCheckingContextDelegateLabelProvider(
 					new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, true), tableNode)),
 				new MethodValueEditor(persistContext), persistContext, node.getType().getProperty().getPropertyName(), false,
-				new MethodListOptions(false, true, false, true, true, table));
+				new MethodListOptions(false, true, false, true, DataSourceUtils.getViewDataSourceName(table.getDataSource()) == null, table));
 		}
 		return editor;
 	}

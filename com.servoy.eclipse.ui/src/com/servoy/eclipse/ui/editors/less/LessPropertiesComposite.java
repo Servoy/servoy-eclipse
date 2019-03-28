@@ -35,8 +35,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -265,8 +265,9 @@ public class LessPropertiesComposite extends Composite
 					editButton.addListener(SWT.Selection, e -> {
 						final Display display = editButton.getDisplay();
 						final Shell shell = new Shell(display);
-						Point cursorLocation = display.getCursorLocation();
-						shell.setLocation(cursorLocation.x - editButton.getBounds().width, cursorLocation.y - editButton.getBounds().height);
+						Rectangle bounds = editButton.getBounds();
+						shell.setLocation(bounds.x + bounds.width,
+							bounds.y - (sc.getVerticalBar() != null ? sc.getVerticalBar().getSelection() : 0) + bounds.height);
 						ColorDialog dialog = new ColorDialog(shell);
 						//TODO dialog.setRGB(rgb); ?
 						if (dialog.open() != null)

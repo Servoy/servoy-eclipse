@@ -156,6 +156,11 @@ public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution
 		return getLabel();
 	}
 
+	public String getShortLabel()
+	{
+		return getShortLabel();
+	}
+
 	public Image getImage()
 	{
 		return null;

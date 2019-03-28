@@ -57,6 +57,12 @@ public class DBIQuickFixDeleteInfoForColumn extends TableDifferenceQuickFix
 		return instance;
 	}
 
+	@Override
+	public String getShortLabel()
+	{
+		return "Delete information from .dbi";
+	}
+
 	public String getLabel()
 	{
 		return "Delete information from .dbi file about column that does not exist in DB.";

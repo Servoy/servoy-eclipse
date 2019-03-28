@@ -455,7 +455,7 @@
 		<dependency>
 			<groupId>de.inetsoftware</groupId>
 			<artifactId>jlessc</artifactId>
-			<version>1.8.0.201903051330</version>
+			<version>1.8.0.201903221450</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -56,6 +56,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.PersistHelper;
 
 /**
@@ -233,9 +234,10 @@ public class AddMethodButtonsComposite extends Composite
 		this.methodKey = methodKey;
 		Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
 		createFormMethodButton.setEnabled(form != null && !form.isFormComponent());
+		TableNode tableNode = (TableNode)persistContext.getContext().getAncestor(IRepository.TABLENODES);
 		createFoundsetMethodButton.setEnabled(
 			(form != null && form.getDataSource() != null && form.getSolution().getSolutionType() != SolutionMetaData.MOBILE) ||
-				persistContext.getContext().getAncestor(IRepository.TABLENODES) != null);
+				(tableNode != null && DataSourceUtils.getViewDataSourceName(tableNode.getDataSource()) == null));
 	}
 
 	public void setSelectedScope(ScopeWithContext scope)
