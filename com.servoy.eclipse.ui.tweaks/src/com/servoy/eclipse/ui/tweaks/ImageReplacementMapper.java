@@ -249,8 +249,20 @@ public class ImageReplacementMapper
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/problems.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/eview16/problems_view_warning.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/problems.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/obj16/warn_tsk.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/problems.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/obj16/quickfix_warning_obj.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/quickfix_warning.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/obj16/info_tsk.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/info.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/obj16/quickfix_info_obj.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/quickfix_info.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/eview16/problems_view_error.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/problems_view_error.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/obj16/error_tsk.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/problems_view_error.png"));
+			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/obj16/quickfix_error_obj.png"),
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/quickfix_error.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/elcl16/filter_ps.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/filter.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/dlcl16/filter_ps.png"),

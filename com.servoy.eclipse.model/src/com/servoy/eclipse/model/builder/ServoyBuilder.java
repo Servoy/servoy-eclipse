@@ -1014,7 +1014,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 			}
 		}
-		if (o instanceof LayoutContainer)
+		if (o instanceof LayoutContainer && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
 		{
 			WebLayoutSpecification spec = null;
 			PackageSpecification<WebLayoutSpecification> pkg = componentsSpecProviderState.getLayoutSpecifications().get(((LayoutContainer)o).getPackageName());
@@ -4035,7 +4035,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
 										if (dataProvider == null)
 										{
-											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(o);
+											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(context);
 											if (flattenedForm != null)
 											{
 												dataProvider = flattenedForm.getScriptVariable(id);

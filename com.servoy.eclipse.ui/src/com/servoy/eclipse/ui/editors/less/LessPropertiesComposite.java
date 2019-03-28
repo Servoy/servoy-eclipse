@@ -36,6 +36,7 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,6 +46,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -261,7 +263,12 @@ public class LessPropertiesComposite extends Composite
 					Button editButton = new Button(area, SWT.FLAT);
 					editButton.setText("Select Color");
 					editButton.addListener(SWT.Selection, e -> {
-						ColorDialog dialog = new ColorDialog(getShell());
+						final Display display = editButton.getDisplay();
+						final Shell shell = new Shell(display);
+						Rectangle bounds = editButton.getBounds();
+						shell.setLocation(bounds.x + bounds.width,
+							bounds.y - (sc.getVerticalBar() != null ? sc.getVerticalBar().getSelection() : 0) + bounds.height);
+						ColorDialog dialog = new ColorDialog(shell);
 						//TODO dialog.setRGB(rgb); ?
 						if (dialog.open() != null)
 						{
@@ -269,6 +276,7 @@ public class LessPropertiesComposite extends Composite
 							//TODO insert ?
 							txtName.setText(String.format("#%02x%02x%02x", rgb.red, rgb.green, rgb.blue).toUpperCase());
 						}
+						shell.dispose();
 					});
 				}
 				//TODO add other pickers

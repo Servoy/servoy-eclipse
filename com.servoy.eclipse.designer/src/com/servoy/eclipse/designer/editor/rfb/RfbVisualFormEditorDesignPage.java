@@ -274,6 +274,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		Form form = editorPart.getForm();
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
+		if (flattenedForm == null) return; // form is already deleted?
 
 		boolean isCSSPositionContainer = false;
 		if (showedContainer instanceof LayoutContainer)

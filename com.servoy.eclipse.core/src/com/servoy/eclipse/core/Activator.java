@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.SwingUtilities;
@@ -114,6 +115,7 @@ import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.J2DBGlobals;
+import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
@@ -124,11 +126,13 @@ import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepositoryFactory;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
@@ -931,8 +935,14 @@ public class Activator extends Plugin
 								Collection<IPersist> affectedFormElements = new ArrayList<IPersist>(changes);
 								if (changes != null)
 								{
+									Set<Solution> solutions = new HashSet<>();
 									for (IPersist persist : changes)
 									{
+										IRootObject rootObject = persist.getRootObject();
+										if (rootObject instanceof Solution)
+										{
+											solutions.add((Solution)rootObject);
+										}
 										if (persist instanceof IFormElement)
 										{
 											IPersist parent = persist.getParent();
@@ -957,6 +967,10 @@ public class Activator extends Plugin
 											}
 										}
 									}
+									solutions.stream(). //
+									map(solution -> PersistIndexCache.getCachedIndex(solution)). //
+									filter(Objects::nonNull). //
+									forEach(index -> index.reload());
 								}
 								FormElementHelper.INSTANCE.flush(affectedFormElements);
 								IDebugClientHandler dch = getDebugClientHandler();

@@ -169,9 +169,8 @@ public class StatusBarUpdater implements ISelectionChangedListener
 				if (selObj instanceof SimpleUserNode)
 				{
 					SimpleUserNode node = (SimpleUserNode)selObj;
-					StringBuffer standard = new StringBuffer("<form><p><b>");
+					StringBuffer standard = new StringBuffer("<form><p>");
 					standard.append(HtmlUtils.escapeMarkup(node.getName()));
-					standard.append("</b> ");
 					if (node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM)
 					{
 						// variable...

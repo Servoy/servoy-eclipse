@@ -53,6 +53,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
@@ -63,7 +64,9 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 
 
 /**
@@ -181,15 +184,23 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
+		String code = null;
+		if ((code = checkAndAutoUpgradeLicenses()) != null)
+		{
+			getContainer().showPage(licenseConfigurationPage);
+			licenseConfigurationPage.setErrorMessage("License " + code + " is not valid and cannot be auto upgraded.");
+			return false;
+		}
+
 		exportModel.saveSettings(getDialogSettings());
 		errorFlag = false;
 		IRunnableWithProgress job = new IRunnableWithProgress()
 		{
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				final WarExporter exporter = new WarExporter(exportModel);
 				try
 				{
+					final WarExporter exporter = new WarExporter(exportModel);
 					final boolean[] cancel = new boolean[] { false };
 					Display.getDefault().syncExec(new Runnable()
 					{
@@ -244,6 +255,40 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			return false;
 		}
 		return !errorFlag;
+	}
+
+
+	private String checkAndAutoUpgradeLicenses()
+	{
+		IApplicationServerSingleton server = ApplicationServerRegistry.get();
+		for (License l : exportModel.getLicenses())
+		{
+			if (!server.checkClientLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses()))
+			{
+				//try to auto upgrade
+				Pair<Boolean, String> code = server.upgradeLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses());
+				if (code == null || !code.getLeft().booleanValue())
+				{
+					if (code != null)
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								MessageDialog.openError(getShell(), "Error creating the WAR file",
+									"License " + l.getCode() + (!code.getLeft().booleanValue() ? " error: " + code.getRight() : " is not valid."));
+							}
+						});
+					}
+					return l.getCode();
+				}
+				else if (code.getLeft().booleanValue() && !l.getCode().equals(code.getRight()))
+				{
+					exportModel.replaceLicenseCode(l, code.getRight());
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override

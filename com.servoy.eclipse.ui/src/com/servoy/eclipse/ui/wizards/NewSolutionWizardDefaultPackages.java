@@ -29,9 +29,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -45,7 +52,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class NewSolutionWizardDefaultPackages
 {
-	public static final String PACKAGES[] = { "12grid", "aggrid", "bootstrapcomponents", "servoyextra" };
+	public static final String PACKAGES[] = { "12grid", "aggrid", "bootstrapcomponents", "servoyextra", "fontawesome" };
 
 	public static final String SOLUTIONS[] = { "svySearch", "svySecurity", "svyUtils", "svyNavigation", "svyUtils$NGClient" };
 
@@ -172,5 +179,55 @@ public class NewSolutionWizardDefaultPackages
 
 		return null;
 	}
+
+	public Document getDatabaseInfo(String name)
+	{
+		try
+		{
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			if (downloadedPackages.containsKey(name))
+			{
+				File packagesFolder = new File(Activator.getDefault().getStateLocation().toFile(), "wizardpackages");
+				File packageFile = new File(packagesFolder, name + "_" + downloadedPackages.get(name));
+				if (packageFile.exists())
+				{
+					try (ZipFile zip = new ZipFile(packageFile))
+					{
+						ZipEntry entry = zip.getEntry("export/database_info.xml");
+						if (entry != null)
+						{
+							return builder.parse(zip.getInputStream(entry));
+						}
+					}
+				}
+			}
+			else if (Arrays.asList(SOLUTIONS).indexOf(name) != -1)
+			{
+				try (ZipInputStream zis = new ZipInputStream(NewSolutionWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy")))
+				{
+					ZipEntry ze;
+					while ((ze = zis.getNextEntry()) != null)
+					{
+						if ("export/database_info.xml".equals(ze.getName()))
+						{
+							Document doc = builder.parse(zis);
+							zis.close();
+							return doc;
+						}
+					}
+					return null;
+
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+
+		return null;
+	}
+
 
 }

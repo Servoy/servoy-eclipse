@@ -51,6 +51,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
+import com.servoy.j2db.dataprocessing.ViewFoundSet;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
@@ -779,6 +780,10 @@ public class ElementResolver implements IElementResolver
 			Form form = getForm(context);
 			if (form != null && form.getDataSource() != null)
 			{
+				if (form.getDataSource().startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON))
+				{
+					return ViewFoundSet.VIEW_FOUNDSET + '<' + form.getDataSource() + '>';
+				}
 				return FoundSet.JS_FOUNDSET + '<' + form.getDataSource() + '>';
 			}
 			return FoundSet.JS_FOUNDSET;

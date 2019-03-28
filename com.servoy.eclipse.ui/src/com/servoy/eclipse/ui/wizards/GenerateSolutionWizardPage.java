@@ -19,7 +19,9 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.core.resources.IResource;
@@ -243,11 +245,13 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 				col.getColumn().setImage(uiActivator.loadImageFromBundle(allChecked ? "check_on.png" : "check_off.png"));
 				col.getColumn().setToolTipText(allChecked ? "Deselect all" : "Select all");
 				checkboxTableViewer.setAllChecked(allChecked);
+				validatePage();
 			});
 			final TableColumnLayout layout = new TableColumnLayout();
 			tableContainer.setLayout(layout);
 			layout.setColumnData(col.getColumn(), new ColumnWeightData(15, 50, true));
 			checkboxTableViewer.getTable().setHeaderVisible(true);
+			checkboxTableViewer.addCheckStateListener(e -> validatePage());
 		}
 		return tableContainer;
 	}
@@ -270,6 +274,20 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 	protected boolean validatePage()
 	{
+		HashMap<String, List<String>> servers = null;
+		if (!wizard.canCreateMissingServers() && !(servers = wizard.searchMissingServers(getSolutionsToImport())).isEmpty())
+		{
+			StringBuilder message = new StringBuilder();
+			for (String server : servers.keySet())
+			{
+				message.append("Database Server '" + server + "', required by the module(s) " + servers.get(server).stream().collect(Collectors.joining(",")) +
+					" is missing.\n");
+			}
+			message.append("Deselect not needed modules or press Cancel, create the databases and fill in the connection details.");
+			setMessage(message.toString(), WARNING);
+			return false;
+		}
+
 		String error = null;
 		if (solutionNameField.getText().trim().length() == 0)
 		{
@@ -329,7 +347,6 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			if (isChecked(SECURITY)) result.add("svySecurity");
 			if (isChecked(UTILS)) result.add("svyUtils");
 			if (isChecked(SEARCH)) result.add("svySearch");
-			result.add("svyNavigation");
 			result.add("svyUtils$NGClient");
 		}
 		return result;

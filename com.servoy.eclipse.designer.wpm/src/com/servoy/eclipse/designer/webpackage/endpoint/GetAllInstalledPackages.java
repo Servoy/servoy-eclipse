@@ -107,39 +107,29 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		JSONArray result = new JSONArray();
 		try
 		{
-			Comparator<JSONObject> packagesNameComparator = new Comparator<JSONObject>()
+			Comparator<JSONObject> comparator = new Comparator<JSONObject>()
 			{
 				@Override
 				public int compare(JSONObject o1, JSONObject o2)
 				{
-					return o1.optString("displayName", "").compareTo(o2.optString("displayName", ""));
+					boolean b1 = false;
+					boolean b2 = false;
+					if (o1.has("top")) b1 = o1.getBoolean("top");
+					if (o2.has("top")) b2 = o2.getBoolean("top");
+
+					int calc = (b1 ^ b2) ? ((b1 ^ true) ? 1 : -1) : 0;
+					if (calc != 0) return calc;
+					else return o1.getString("displayName").compareTo(o2.getString("displayName"));
 				}
 			};
+
 
 			List<JSONObject> remotePackages = getAllInstalledPackagesService != null ? getAllInstalledPackagesService.getRemotePackagesAndCheckForChanges()
 				: getRemotePackages();
 
-			List<JSONObject> firstPackages = remotePackages
-				.stream()
-				.filter(pkg -> 
-							pkg.optString("name").equals("bootstrapcomponents") ||
-							pkg.optString("name").equals("servoyextra") || 
-							pkg.optString("name").equals("aggrid"))
-			    .sorted(packagesNameComparator)
-			    .collect(Collectors.toList());
+			remotePackages = remotePackages.stream().sorted(comparator).collect(Collectors.toList());
 
-			remotePackages = remotePackages
-				.stream()
-				.filter(pkg -> 
-							!pkg.optString("name").equals("bootstrapcomponents") &&
-							!pkg.optString("name").equals("servoyextra") && 
-							!pkg.optString("name").equals("aggrid"))
-				.sorted(packagesNameComparator)
-				.collect(Collectors.toList());
-
-			firstPackages.addAll(remotePackages);
-
-			for (JSONObject pack : firstPackages)
+			for (JSONObject pack : remotePackages)
 			{
 				// clear runtime settings
 				pack.remove("installed");
@@ -367,6 +357,9 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 						String currentVersion = ClientVersion.getPureVersion();
 						JSONObject packageObject = new JSONObject(packageResponse);
 						JSONArray jsonArray = packageObject.getJSONArray("releases");
+
+						if (repoObject.has("top")) packageObject.put("top", repoObject.getBoolean("top"));
+						else packageObject.put("top", false);
 						List<JSONObject> toSort = new ArrayList<>();
 						for (int k = jsonArray.length(); k-- > 0;)
 						{

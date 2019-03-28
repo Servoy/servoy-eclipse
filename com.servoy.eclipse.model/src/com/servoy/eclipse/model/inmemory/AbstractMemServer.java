@@ -76,7 +76,6 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.query.ISQLQuery;
 import com.servoy.j2db.query.QueryColumn;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
@@ -136,7 +135,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 			try
 			{
 				ITable table = createNewTable(null, tableNode.getDataSource().substring(scheme.length()));
-				DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table, (ServoyJSONObject)property);
+				DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), table, (ServoyJSONObject)property);
 				table.setExistInDB(true);
 				table.setInitialized(true);
 				tableNode.setTable(table);

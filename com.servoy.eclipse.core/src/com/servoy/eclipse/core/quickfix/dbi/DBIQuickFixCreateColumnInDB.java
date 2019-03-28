@@ -57,6 +57,12 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 		return instance;
 	}
 
+	@Override
+	public String getShortLabel()
+	{
+		return "Create missing column.";
+	}
+
 	public String getLabel()
 	{
 		return "Create missing column in the DB table using the information from the DB information file.";

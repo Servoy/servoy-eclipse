@@ -45,6 +45,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -56,6 +57,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -90,7 +92,7 @@ public class SaveAsTemplateAction extends SelectionAction
 
 	private boolean groupTemplateElements = false;
 	private final BiPredicate<List<IPersist>, ISupportChilds> isNested = (List<IPersist> selected, ISupportChilds t) -> selected.contains(t) ? true
-		: t.getParent() instanceof LayoutContainer && this.isNested.test(selected, t.getParent());
+		: PersistHelper.getRealParent(t) instanceof LayoutContainer && this.isNested.test(selected, PersistHelper.getRealParent(t));
 
 	private static Pair<String, Boolean> askForTemplateName(Shell shell, boolean grouping)
 	{
@@ -229,7 +231,19 @@ public class SaveAsTemplateAction extends SelectionAction
 		}
 
 		List<IPersist> selected = completeContainment(form, persists);
-		List<IPersist> sel = selected.stream().filter(p -> !isNested.test(selected, p.getParent())).collect(Collectors.toList());
+		List<IPersist> unflattenedSelection = new ArrayList<IPersist>();
+		for (IPersist currentPersist : selected)
+		{
+			if (currentPersist instanceof IFlattenedPersistWrapper)
+			{
+				unflattenedSelection.add(((IFlattenedPersistWrapper)currentPersist).getWrappedPersist());
+			}
+			else
+			{
+				unflattenedSelection.add(currentPersist);
+			}
+		}
+		List<IPersist> sel = selected.stream().filter(p -> !isNested.test(unflattenedSelection, PersistHelper.getRealParent(p))).collect(Collectors.toList());
 
 		ServoyModelManager.getServoyModelManager().getServoyModel();
 		EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
