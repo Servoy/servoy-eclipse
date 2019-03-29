@@ -176,7 +176,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		// Serve requests for rfb editor
 
 		String httpSessionId = EditorHttpSession.getInstance().getId();
-		// RAGTEST clientnr hier nodig? mischien laten genereren door wsmanager
 		editorKey = new WebsocketSessionKey(httpSessionId, clientNrgenerator.incrementAndGet());
 		clientKey = new WebsocketSessionKey(httpSessionId, clientNrgenerator.incrementAndGet());
 
