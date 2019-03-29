@@ -37,7 +37,7 @@ import com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint;
  *
  */
 
-@ServerEndpoint(value = "/rfb/angular/content/websocket/{clientnr}/{windowName}/{windowid}")
+@ServerEndpoint(value = "/rfb/angular/content/websocket/{clientnr}/{windowName}/{windownr}")
 public class EditorContentEndpoint extends BaseNGClientEndpoint
 {
 	public EditorContentEndpoint()
@@ -48,10 +48,10 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 	@Override
 	@OnOpen
 	public void start(Session newSession, @PathParam("clientnr") String clientnr, @PathParam("windowName")
-	final String windowName, @PathParam("windowid")
-	final String windowid) throws Exception
+	final String windowName, @PathParam("windownr")
+	final String windownr) throws Exception
 	{
-		super.start(newSession, clientnr, windowName, windowid);
+		super.start(newSession, clientnr, windowName, windownr);
 	}
 
 	@Override
