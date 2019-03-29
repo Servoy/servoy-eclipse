@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
-
+import { Deferred } from '../sablo/util/deferred';
 import { FormComponent } from './form/form_component.component'
 
 import { ConverterService } from '../sablo/converter.service'
@@ -16,14 +16,15 @@ export class FormService {
 
     private formsCache: Map<String, FormCache>;
     private log: LoggerService;
-
+    private formComponentCache: Map<String, any>;
 //    private touchedForms:Map<String,boolean>;
 
     constructor( private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, private logFactory: LoggerFactory,
         private servoyService: ServoyService ) {
         this.log = logFactory.getLogger("FormService");
         this.formsCache = new Map();
-
+        this.formComponentCache = new Map();
+        
         websocketService.getSession().then(( session ) => {
             session.onMessageObject(( msg, conversionInfo ) => {
                 if ( msg.forms ) {
@@ -56,6 +57,26 @@ export class FormService {
                         }
                     }
                 }
+                if ( msg.call ) {
+                    // if form is loaded just call the api
+                    if (this.formComponentCache.has( msg.call.form) && ! (this.formComponentCache.get(msg.call.form) instanceof Deferred))
+                    {    
+                        return this.formComponentCache.get(msg.call.form).callApi(msg.call.bean,msg.call.api,msg.call.args);
+                    }
+                    if (!msg.call.delayUntilFormLoads)
+                    {
+                        // form is not loaded yet, api cannot wait; i think this should be an error
+                        this.log.error(this.log.buildMessage(() => ("calling api " + msg.call.api + " in form "+ msg.call.form + " on component " +  msg.call.bean + ". Form not loaded and api cannot be delayed. Api call was skipped.")));
+                        return;
+                    }    
+                    if (!this.formComponentCache.has( msg.call.form))
+                    {
+                        this.formComponentCache.set( msg.call.form,new Deferred<any>());
+                    }
+                    this.formComponentCache.get(msg.call.form).promise.then(function(){
+                        this.formComponentCache.get(msg.call.form).callApi(msg.call.bean,msg.call.api,msg.call.args);
+                    });
+                }
             } );
         } );
     }
@@ -65,7 +86,16 @@ export class FormService {
     }
 
     public getFormCache( form: FormComponent ): FormCache {
+        if (this.formComponentCache.get(form.name) instanceof Deferred)
+        {
+            this.formComponentCache.get(form.name).resolve();
+        } 
+        this.formComponentCache.set(form.name,form);
         return  this.formsCache.get( form.name );
+    }
+    
+    public destroy( form: FormComponent ) {
+        this.formComponentCache.delete(form.name) ;
     }
     
     public hasFormCacheEntry(name:string):boolean {
@@ -81,6 +111,7 @@ export class FormService {
     
     public destroyFormCache(formName:string){
         this.formsCache.delete(formName);
+        this.formComponentCache.delete(formName);
 //        delete this.touchedForms[formName];
     }
 

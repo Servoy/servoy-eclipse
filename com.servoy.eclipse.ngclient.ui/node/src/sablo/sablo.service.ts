@@ -56,40 +56,6 @@ export class SabloService {
                 // update the arguments on the reconnection websocket.
                 this.websocketService.setConnectionPathArguments( [this.getSessionId(), this.getWindowName(), this.getWindowId()] );
             }
-
-            if ( msg.call ) {
-                // {"call":{"form":"product","element":"datatextfield1","api":"requestFocus","args":[arg1, arg2]}, // optionally "viewIndex":1 
-                // "{ svy_types : {product: {datatextfield1: {0: "Date"}}} }
-                var call = msg.call;
-
-                this.log.debug(this.log.buildMessage(() => ("sbl * Received API call from server: '" + call.api + "' to form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) )));
-
-
-                var previousApiCallPromise = null;
-                if ( !call.delayUntilFormLoads ) {
-                    // make sure normal and async API calls are called in the same sequence that they were called in server side JS
-                    if ( this.apiCallDeferredQueue.length > 0 ) {
-                        previousApiCallPromise = this.apiCallDeferredQueue[this.apiCallDeferredQueue.length - 1].promise;
-                    }
-                    this.apiCallDeferredQueue.push( new Deferred() );
-                } // else it's a delayed call which means it shouldn't force load (in hidden div) the form if not resolved nor should it block other APIs from execution; it just waits for form to resolve
-
-
-
-                if ( previousApiCallPromise ) {
-                    return previousApiCallPromise.then(
-                        function() {
-                            return this.resolveFormIfNeededAndExecuteAPICall();
-                        },
-                        function( err ) {
-                            this.log.error(this.log.buildMessage(() => ("sbl * Error waiting for api call execute " + err )));
-                            return Promise.reject( err );
-                        } );
-                }
-                else {
-                    return this.resolveFormIfNeededAndExecuteAPICall( call );
-                }
-            }
         } );
 
         return this.wsSession
@@ -208,40 +174,6 @@ export class SabloService {
             funcThis = formState.api[call.bean];
         }
         return funcThis;
-    }
-
-    private executeAPICall( call, apiCallFunctions ) {
-        var func = apiCallFunctions ? apiCallFunctions[call.api] : null;
-        var returnValue;
-        if ( !func ) {
-            this.log.warn(this.log.buildMessage(() => ("sbl * Bean " + ( call.propertyPath ? call.propertyPath : call.bean ) + " on form " + call.form + " did not provide the called api: " + call.api )))
-            returnValue = null;
-        }
-        else {
-            this.log.debug(this.log.buildMessage(() => ("sbl * Api call '" + call.api + "' to form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) + " will be called now." )));
-            returnValue = func.apply( apiCallFunctions, call.args );
-        }
-        return returnValue;
-    }
-
-    private executeAPICallInTimeout( call, formState, count, timeout ) {
-        return of().pipe(delay( timeout )).toPromise().then(() => {
-            var apiFunctions = this.getAPICallFunctions( call, formState );
-            this.log.debug(this.log.buildMessage(() => ("sbl * Remaining wait cycles upon execution of API: '" + call.api + "' of form " + call.form + ", component " + ( call.propertyPath ? call.propertyPath : call.bean ) + ": " + count )));
-            if ( ( apiFunctions && apiFunctions[call.api] ) || count < 1 ) {
-                return this.executeAPICall( call, apiFunctions );
-            } else {
-                return this.executeAPICallInTimeout( call, formState, count - 1, timeout )
-            }
-        } ).then( function( result ) {
-            return result;
-        }, function( err ) {
-            return Promise.reject( err );
-        } );
-    }
-
-    private resolveFormIfNeededAndExecuteAPICall( call ) {
-        // TODO API CALLS
     }
     
     public sendServiceChanges (serviceName : string, propertyName : string, value : any)

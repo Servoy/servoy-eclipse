@@ -148,6 +148,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     ngOnDestroy() {
+        this.formservice.destroy(this);
     }
     
     public getAbsoluteFormStyle() {
@@ -200,10 +201,10 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         return api;
     }
 
-    public callApi( componentName: string, apiName: string, args: object ) {
+    public callApi( componentName: string, apiName: string, args: object ) : any{
         let comp = this.components.find( item => item['name'] == componentName );
         let proto = Object.getPrototypeOf( comp )
-        proto[apiName].apply( comp, args );
+        return proto[apiName].apply( comp, args );
     }
 }
 
