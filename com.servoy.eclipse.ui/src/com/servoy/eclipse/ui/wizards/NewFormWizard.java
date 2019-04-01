@@ -435,8 +435,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 				servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(form.getDataSource()));
 			}
 
-			// open newly created form in the editor (as new editor)
-			boolean returnValue = EditorUtil.openFormDesignEditor(form, true, true) != null;
+			// open newly created form in the form editor (as new editor) except abstract form
+			// which will be opened in script editor
+			boolean returnValue = 
+				!newFormWizardPage.bTypeAbstract.getSelection() ? 
+					EditorUtil.openFormDesignEditor(form, true, true) != null : 
+					EditorUtil.openScriptEditor(form, null, true) != null;
+
 
 			if (form.isResponsiveLayout() && WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().isEmpty())
 			{
