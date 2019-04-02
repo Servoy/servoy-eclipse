@@ -28,13 +28,13 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebLayoutSpecification;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.PseudoPropertyHandler.CustomPropertySetterDelegatePropertyController;
+import com.servoy.eclipse.ui.util.DeveloperUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -248,10 +248,10 @@ public class PDPropertySource extends PersistPropertySource
 				config.addDefault(desc.getDefaultValue(), null);
 			}
 			JSONObject tags = null;
-			if (desc.hasTag(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE))
+			if (desc.hasTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE))
 			{
 				tags = new JSONObject();
-				tags.accumulate(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE, desc.getTag(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE));
+				tags.accumulate(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE, desc.getTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE));
 			}
 			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
 				desc.getDefaultValue(), desc.getInitialValue(), desc.hasDefault(), null, null, tags, false), persistContext);
