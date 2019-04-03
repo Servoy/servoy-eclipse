@@ -662,8 +662,8 @@ var WpmService = /** @class */ (function () {
             this.needRefresh = true;
         };
         var loc = window.location;
-        //let uri = "ws://"+loc.host+"/wpm/angular2/websocket";
-        var uri = "ws://localhost:8080/wpm/angular2/websocket";
+        var uri = "ws://" + loc.host + "/wpm/angular2/websocket";
+        //let uri = "ws://localhost:8080/wpm/angular2/websocket";
         var webSocketConnection = wsService.connect(uri);
         webSocketConnection.open.subscribe(function () {
             _this.onConnectionOpen();
