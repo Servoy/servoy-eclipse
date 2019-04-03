@@ -116,6 +116,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean askForImportServerName;
 	private boolean activateSolution = true;
 	private boolean reportImportFail;
+	private boolean shouldSkipModulesImport = false;
+	private boolean allowDataModelChanges = false;
+	private boolean importSampleData = false;
 
 	private static String getInitialImportPath()
 	{
@@ -147,6 +150,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	public boolean shouldAskForImportServerName()
 	{
 		return askForImportServerName;
+	}
+
+	public void setSkipModulesImport(boolean skip)
+	{
+		this.shouldSkipModulesImport = skip;
+	}
+
+	public boolean shouldSkipModulesImport()
+	{
+		return shouldSkipModulesImport;
 	}
 
 	protected String getFirstPageTitle()
@@ -198,7 +211,38 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		{
 			public void run(IProgressMonitor monitor)
 			{
-				final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(doDisplayDataModelChanges, getShell());
+				final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(doDisplayDataModelChanges, getShell())
+				{
+					@Override
+					public int askImportSampleData()
+					{
+						if (ImportSolutionWizard.this.shouldImportSampleData())
+						{
+							return OK_ACTION;
+						}
+						return super.askImportSampleData();
+					}
+
+					@Override
+					public int getAllowDataModelChange(String serverName)
+					{
+						if (ImportSolutionWizard.this.shouldAllowDataModelChanges())
+						{
+							return OK_ACTION;
+						}
+						return super.getAllowDataModelChange(serverName);
+					}
+
+					@Override
+					public int askStyleAlreadyExistsAction(String name)
+					{
+						if (ImportSolutionWizard.this.shouldSkipModulesImport())
+						{
+							return SKIP_ACTION;
+						}
+						return super.askStyleAlreadyExistsAction(name);
+					}
+				};
 				IApplicationServerSingleton as = ApplicationServerRegistry.get();
 				try
 				{
@@ -291,6 +335,26 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		});
 	}
 
+
+	protected boolean shouldAllowDataModelChanges()
+	{
+		return allowDataModelChanges;
+	}
+
+	public void setAllowDataModelChanges(boolean allowDataModelChanges)
+	{
+		this.allowDataModelChanges = allowDataModelChanges;
+	}
+
+	public void setImportSampleData(boolean importSampleData)
+	{
+		this.importSampleData = importSampleData;
+	}
+
+	protected boolean shouldImportSampleData()
+	{
+		return importSampleData;
+	}
 
 	public class ImportSolutionWizardPage extends WizardPage implements IValidator
 	{

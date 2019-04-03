@@ -546,6 +546,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setActivateSolution(false);
 		importSolutionWizard.init(PlatformUI.getWorkbench(), null);
 		importSolutionWizard.setReportImportFail(reportImportFail);
+		importSolutionWizard.setSkipModulesImport(true);
+		importSolutionWizard.setAllowDataModelChanges(true);
+		importSolutionWizard.setImportSampleData(true);
 
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);
