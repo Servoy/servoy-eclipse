@@ -1,0 +1,24 @@
+.header-content {
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #000;
+    color: #fff;
+    font-size: medium;
+    text-transform: none;
+    display: block;
+    overflow: auto;
+}
+
+.wpm-title {
+    margin-bottom: 4px;
+  }
+  
+.wpm-subtitle {
+    margin-top: 0px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.warning {
+    color: red;
+}
