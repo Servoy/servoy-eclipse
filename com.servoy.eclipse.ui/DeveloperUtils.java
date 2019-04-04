@@ -18,8 +18,10 @@
 package com.servoy.eclipse.designer.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.IPropertyType;
@@ -53,6 +55,11 @@ public class DeveloperUtils
 	 * <p>When multiple sub-properties are marked as developer caption, they will be sorted by CAPTION_PRIORITY value (1 is highest prio/first, higher values have lower prio) and the first non-null caption property value will be used as caption.</p>
 	 */
 	public static final String TAG_CAPTION_PRIORITY = "captionPriority";
+
+	/**
+	 *  <p>Tag in .spec file for a sub-property of a tags object, specifying what field type should the object inherit  </p>
+	 */
+	public final static String TAG_PROPERTY_INPUT_FIELD_TYPE = "valuesFieldType";
 
 	/**
 	 * Looks in the custom type sub-prop values that are tagged using {@link #TAG_USE_AS_CAPTION_IN_DEVELOPER} or {@link #TAG_SHOW_IN_OUTLINE_VIEW} and gets the captio to use.
@@ -134,4 +141,17 @@ public class DeveloperUtils
 		return caption;
 	}
 
+	/**
+	 * Return the input field type that property should inherit.
+	 */
+	public enum TagAllowerdPropertyInputFieldType
+	{
+		typeahead, combobox, multipleTypeahead;
+
+		public static boolean stringValue(String s)
+		{
+			if (s == null) return false;
+			else return Arrays.stream(TagAllowerdPropertyInputFieldType.values()).map(i -> i.toString()).collect(Collectors.toList()).contains(s);
+		}
+	}
 }

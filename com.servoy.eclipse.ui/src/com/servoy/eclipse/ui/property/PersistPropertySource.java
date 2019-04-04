@@ -57,8 +57,6 @@ import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
-import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.WebObjectSpecification.TagAllowerdPropertyInputFieldType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.BytePropertyType;
@@ -128,6 +126,8 @@ import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithAr
 import com.servoy.eclipse.ui.property.types.ITypePropertyDescriptorFactory;
 import com.servoy.eclipse.ui.property.types.UITypesRegistry;
 import com.servoy.eclipse.ui.resource.FontResource;
+import com.servoy.eclipse.ui.util.DeveloperUtils;
+import com.servoy.eclipse.ui.util.DeveloperUtils.TagAllowerdPropertyInputFieldType;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -1233,8 +1233,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					new ComboboxPropertyModel<Boolean>(new Boolean[] { Boolean.TRUE, Boolean.FALSE }, new String[] { "true", "false" }).addDefaultValue(),
 					Messages.LabelUnresolved);
 			}
-			else if (propertyDescription.hasTag(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE) &&
-				TagAllowerdPropertyInputFieldType.stringValue((String)propertyDescription.getTag(WebObjectSpecification.TAG_PROPERTY_INPUT_FIELD_TYPE)))
+			else if (propertyDescription.hasTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE) &&
+				TagAllowerdPropertyInputFieldType.stringValue((String)propertyDescription.getTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE)))
 			{
 				return createTypeaheadPropertyController(persistContext.getPersist(), id, displayName, form, ((ValuesConfig)propertyDescription.getConfig()));
 			}

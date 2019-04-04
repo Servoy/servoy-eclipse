@@ -1,0 +1,109 @@
+th > div {
+    white-space: nowrap;
+	font-size: medium;
+    font-weight: bold;
+    background-color: rgb(248,248,248);
+    color: rgba(0,0,0,0.55);
+    padding: 16px;
+}
+
+tr.wpm-package-description > td {
+    padding-left: 60px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+  }
+  
+tr.wpm-package-description > td > mat-card-content {
+    display: block;
+    padding: 15px;
+    overflow: hidden;
+    background-color: rgb(240,240,240);
+}
+
+
+.table-package {
+    width: 100%;
+}
+  
+.table-package th,
+.table-package td {
+    padding-right: 2px;
+    padding-left: 2px;
+}
+
+
+.table-package .md-avatar {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-right: 16px;
+    border-radius: 50%;
+    box-sizing: content-box;
+    width: 40px;
+    height: 40px;
+}
+
+.table-package md-select {
+    display: inline-block;
+}
+
+.table-package td > div {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-justify-content: flex-start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    min-height: 48px;
+    margin-left: 5px;
+    margin-right: 5px;
+    height: auto;
+}
+
+.table-package td > div.align-center {
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+.table-package td > div.align-right {
+    -webkit-justify-content: flex-end;
+    -ms-flex-pack: flex-end;
+    justify-content: flex-end;
+}
+
+td.column-fitwidth {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.table-package .release-action {
+    font-size: 24px;
+    float: right;
+}
+
+.table-package {
+    border-spacing: 0px;
+    padding: 2px;
+}
+  
+.table-package th,
+.table-package td {
+    padding-right: 4px;
+    padding-left: 4px;
+}
+
+.wpm-package-selected {
+    background-color: rgb(210,210,210);
+}
+
+.wpm-clickable {
+    cursor: pointer;
+  }
+  
+.wpm-clickable:focus {
+    outline: none;
+}
