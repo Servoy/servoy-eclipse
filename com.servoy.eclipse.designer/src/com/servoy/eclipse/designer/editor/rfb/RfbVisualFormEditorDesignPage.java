@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -50,6 +50,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.json.JSONObject;
 import org.sablo.eventthread.WebsocketSessionWindows;
 import org.sablo.websocket.CurrentWindow;
+import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
@@ -65,6 +66,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.designer.rfb.endpoint.EditorHttpSession;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -95,6 +97,8 @@ import com.servoy.j2db.util.Utils;
  */
 public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ISupportCheatSheetActions
 {
+	private static final AtomicInteger clientNrgenerator = new AtomicInteger();
+
 	// for setting selection when clicked in editor
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter()
 	{
@@ -145,8 +149,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	private EditorServiceHandler editorServiceHandler;
 
 	private String layout = null;
-	private String editorId = null;
-	private String clientId = null;
+	private WebsocketSessionKey editorKey = null;
+	private WebsocketSessionKey clientKey = null;
 	private AbstractContainer showedContainer;
 
 	private final PartListener partListener = new PartListener();
@@ -170,11 +174,13 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 //		FormElementHelper.INSTANCE.reload(); // we can't reload just specs cause lately FormElement can add size/location/anchors to spec and we don't want to use old/cached/already initialized form elements while new specs were reloaded
 
 		// Serve requests for rfb editor
-		editorId = UUID.randomUUID().toString();
-		clientId = UUID.randomUUID().toString();
 
-		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
-		WebsocketSessionManager.addSession(designerWebsocketSession = new DesignerWebsocketSession(clientId, editorPart));
+		String httpSessionId = EditorHttpSession.getInstance().getId();
+		editorKey = new WebsocketSessionKey(httpSessionId, clientNrgenerator.incrementAndGet());
+		clientKey = new WebsocketSessionKey(httpSessionId, clientNrgenerator.incrementAndGet());
+
+		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorKey));
+		WebsocketSessionManager.addSession(designerWebsocketSession = new DesignerWebsocketSession(clientKey, editorPart));
 		selectionListener = new RfbSelectionListener(editorPart.getForm(), editorWebsocketSession);
 		getSite().setSelectionProvider(selectionProvider);
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
@@ -197,7 +203,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		try
 		{
 			// install fake WebSocket in case browser does not support it
-			SwtWebsocket.installFakeWebSocket(browser, editorId, clientId);
+			SwtWebsocket.installFakeWebSocket(browser, editorKey.getClientnr(), clientKey.getClientnr());
 			// install console
 			new BrowserFunction(browser, "consoleLog")
 			{
@@ -290,7 +296,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			if (isCSSPositionContainer) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
-				"&editorid=" + editorId + "&c_sessionid=" + clientId + (showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
+				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() +
+				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
 			final Runnable runnable = new Runnable()
 			{
 				public void run()
@@ -342,8 +349,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(selectionListener);
 		getSite().setSelectionProvider(null);
 		getSite().getPage().removePartListener(partListener);
-		WebsocketSessionManager.removeSession(editorWebsocketSession.getUuid());
-		WebsocketSessionManager.removeSession(designerWebsocketSession.getUuid());
+		WebsocketSessionManager.removeSession(editorWebsocketSession.getSessionKey());
+		WebsocketSessionManager.removeSession(designerWebsocketSession.getSessionKey());
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(partListener);
 		ServoyModelFinder.getServoyModel().removeFormComponentListener(partListener);
 	}
