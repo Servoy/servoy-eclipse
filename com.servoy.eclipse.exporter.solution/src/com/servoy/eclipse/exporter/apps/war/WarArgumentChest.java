@@ -315,7 +315,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 				String company = null;
 				String code = null;
 				String numLicenses = null;
-				if (parts.length != 3)
+				if (parts.length != 3 || parts[0].startsWith("\""))
 				{
 					Pattern p = Pattern.compile("\"(.+)\" (.+) (.+)");
 					Matcher m = p.matcher(license.trim());
