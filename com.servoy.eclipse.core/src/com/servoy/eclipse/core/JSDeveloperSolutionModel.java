@@ -144,7 +144,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 							{
 								memTable = memServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), table,
 									tableName);
-								memServer.syncTableObjWithDB(memTable, false, true, null);
+								memServer.syncTableObjWithDB(memTable, false, true);
 							}
 							else if (override && dataModelManager != null)
 							{
@@ -296,7 +296,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 							{
 								memTable = memServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), table,
 									tableName);
-								memServer.syncTableObjWithDB(memTable, false, true, null);
+								memServer.syncTableObjWithDB(memTable, false, true);
 							}
 							else if (override)
 							{
@@ -350,7 +350,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 											state.reportJSError("Can't update in memory table '" + memTable.getDataSource() +
 												"' as the number of column types does not match the number of columns of the dataset", null);
 										}
-										memServer.syncTableObjWithDB(memTable, false, false, null);
+										memServer.syncTableObjWithDB(memTable, false, false);
 									}
 									else
 									{

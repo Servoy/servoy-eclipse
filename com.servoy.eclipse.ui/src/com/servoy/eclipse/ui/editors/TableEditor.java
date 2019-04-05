@@ -793,7 +793,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				servoyModel.flushDataProvidersForTable(table);
 
 //				IColumnInfoManager cim = servoyModel.getDeveloperRepository().getColumnInfoManager();
-				server.syncTableObjWithDB(table, false, true, null);
+				server.syncTableObjWithDB(table, false, true);
 				if (securityComposite != null) securityComposite.saveValues();
 				ServoyProject servoyProject = servoyModel.getActiveProject();
 				if (servoyProject != null)

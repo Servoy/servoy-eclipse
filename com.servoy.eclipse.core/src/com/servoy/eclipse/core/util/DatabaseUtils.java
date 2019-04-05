@@ -180,7 +180,7 @@ public final class DatabaseUtils
 			dmm.setWritesEnabled(false);
 			try
 			{
-				server.syncTableObjWithDB(table, false, false, null);
+				server.syncTableObjWithDB(table, false, false);
 			}
 			catch (Exception e)
 			{
