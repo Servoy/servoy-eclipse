@@ -124,7 +124,7 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 					if (!doNotScrollIntoView && $scope.nodes.length > 0) {
 						var ghost = $scope.getGhost($scope.nodes[0].node.attr("svy-id"));
 
-						if (!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
+						if (!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM && ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART)) {
 							var target = $scope.nodes[0].node.get(0);
 							var targetRect = target.getBoundingClientRect();
 							var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;
