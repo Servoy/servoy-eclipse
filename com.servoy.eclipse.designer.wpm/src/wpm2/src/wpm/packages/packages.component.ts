@@ -11,12 +11,10 @@ export class PackagesComponent implements OnInit {
 
   @Input() packageList: PackageList;
   packages: Package[];
-  wpmService: WpmService;
   selectedPackage: Package;
   descriptionExpanded: boolean;
 
-  constructor(wpmService: WpmService) {
-    this.wpmService = wpmService;  
+  constructor(public wpmService: WpmService) {
   }
 
   ngOnInit() {
@@ -95,7 +93,7 @@ export class PackagesComponent implements OnInit {
   }
 
   getSolutions(): string[] {
-    return this.wpmService.getSolutions();
+    return this.wpmService.getAllSolutions();
   }
 
   getUpgradeCount(packages: Package[]): number {

@@ -15,6 +15,8 @@ interface Message {
   package?: Package;
   url?: string;
   solution?: string;
+  name?: string;
+  values?: Repository
 }
 
 export interface Release {
@@ -48,7 +50,13 @@ export interface PackagesInfo {
 
 export interface Repository {
   name: string;
-  selected: boolean;
+  selected?: boolean;
+  url?: string;
+}
+
+interface PackagesAndRepositories {
+  packages: Package[];
+  repositories: Repository[];
 }
 
 @Injectable()
@@ -61,14 +69,15 @@ export class WpmService {
 
   solutions: string[];
 
-  repositories: Repository[];
+  repositoriesObservable: Observable<Repository[]>;
+  repositoriesObserver: Observer<Repository[]>;
 
   needRefresh: boolean = false;
 
   constructor(wsService: WebsocketService) {
     let loc = window.location;
-    let uri = "ws://"+loc.host+"/wpm/angular2/websocket";
-    //let uri = "ws://localhost:8080/wpm/angular2/websocket";
+    //let uri = "ws://"+loc.host+"/wpm/angular2/websocket";
+    let uri = "ws://localhost:8080/wpm/angular2/websocket";
     let webSocketConnection = wsService.connect(uri);
     webSocketConnection.open.subscribe(() => {
       this.onConnectionOpen();
@@ -89,6 +98,10 @@ export class WpmService {
 
     this.packagesObservable = Rx.Observable.create((obs: Rx.Observer<PackagesInfo>) => {
       this.packagesObserver = obs;
+    }).pipe(share());
+
+    this.repositoriesObservable = Rx.Observable.create((obs: Rx.Observer<Repository[]>) => {
+      this.repositoriesObserver = obs;
     }).pipe(share());
   }
 
@@ -140,8 +153,8 @@ export class WpmService {
     this.messages.next(command);
   }
 
-  getSolutions(): string[] {
-    // TODO: this should be a promise
+  getAllSolutions(): string[] {
+    // TODO: should this return an observable?
     return this.solutions;
   }
 
@@ -152,8 +165,27 @@ export class WpmService {
     return "";
   }
 
+  getAllRepositories(): Observable<Repository[]> {
+    return this.repositoriesObservable;
+  }
+
   isNeedRefresh(): boolean {
     return this.needRefresh;
+  }
+
+  setNewSelectedRepository(repositoryName: string) {
+    let command: Message = { method: "setSelectedRepository", name: repositoryName };
+    this.messages.next(command);
+  }
+
+  addNewRepository(repository: Repository) {
+    let command: Message = { method: "addRepository", values: repository };
+    this.messages.next(command);
+  }
+
+  removeRepositoryWithName(repositoryName: string) {
+    let command: Message = { method: "removeRepository", name: repositoryName };
+    this.messages.next(command);
   }
 
   /**
@@ -181,10 +213,24 @@ export class WpmService {
   }
 
   getRepositories(repositoriesArray: Repository[]) {
-    this.repositories = repositoriesArray;
+    this.repositoriesObserver.next(repositoriesArray);
   }
 
   refreshRemotePackages = function(){
 		this.needRefresh = true;
-	}
+  }
+  
+  addRepository(newPackagesAndRepositories: PackagesAndRepositories) {
+    this.getRepositories(newPackagesAndRepositories.repositories)
+    this.requestAllInstalledPackages(newPackagesAndRepositories.packages);
+  }
+  
+  removeRepository(repositories: Repository[]) {
+    this.getRepositories(repositories);
+  }
+
+  setSelectedRepository(newPackages: Package[]) {
+    this.requestAllInstalledPackages(newPackages);
+  }
+  
 }

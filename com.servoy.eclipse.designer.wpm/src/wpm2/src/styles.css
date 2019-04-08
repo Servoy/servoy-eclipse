@@ -40,7 +40,16 @@ mat-tab-header, .mat-tab-label-content {
     background-color: #e4844a !important;
 }
 
+mat-select.repository {
+  width: unset;
+}
 
+mat-select.repository .mat-select-value {
+  color: #fff;
+  max-width: initial;
+}
 
-
+mat-select.repository .mat-select-arrow {
+  color: #fff;
+}
 
