@@ -403,13 +403,19 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$scope.getGhostHRStyle = function(ghost) {
 				if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // parts
-					return {
-						marginTop: "-4px",
-						border: 0,
-						borderTop: "1px dashed #000",
-						width: (parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH - 15) + "px",
-						float: "right"
-					};
+					var hrStyle = {
+							marginTop: "-4px",
+							border: 0,
+							borderTop: "1px dashed #000",
+							borderBottom: "5px dashed transparent",
+							width: (parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH - 15) + "px",
+							float: "right"
+						};
+					if (ghost == $scope.getLastPartGhost())
+					{
+						hrStyle.borderBottom = "3px dashed transparent";
+					}	
+					return hrStyle;
 				} else {
 					return {
 						display: "none"
