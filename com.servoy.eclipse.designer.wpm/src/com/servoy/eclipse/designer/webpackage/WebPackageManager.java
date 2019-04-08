@@ -55,8 +55,7 @@ public class WebPackageManager extends EditorPart
 
 		browser = new Browser(parent, SWT.NONE);
 
-		//String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
-		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm2/dist/wpm2/index.html";
+		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
 		if (getEditorInput() instanceof WebPackageManagerEditorInput)
 		{
 			String solutionName = ((WebPackageManagerEditorInput)getEditorInput()).getSolutionName();

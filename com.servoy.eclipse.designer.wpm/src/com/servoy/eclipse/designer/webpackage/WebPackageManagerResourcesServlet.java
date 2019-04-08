@@ -36,7 +36,7 @@ import com.servoy.j2db.util.Utils;
  * @author gganea
  *
  */
-@WebServlet(urlPatterns = { "/wpm/*", "/wpm2/*" })
+@WebServlet(urlPatterns = { "/wpm/*" })
 public class WebPackageManagerResourcesServlet extends HttpServlet
 {
 	private static final long serialVersionUID = 2361198278530167217L;
