@@ -3,21 +3,21 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<prerequisites>
-		<maven>3.3.3</maven>
+		<maven>3.6.0</maven>
 	</prerequisites>
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
 	<version>2019.6.0.3500_rc</version>
 	<properties>
-		<tycho.version>1.3.0</tycho.version>
-		<tycho.extra.version>1.3.0</tycho.extra.version>
+		<tycho.version>1.4.0</tycho.version>
+		<tycho.extra.version>1.4.0</tycho.extra.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.10/</servoy-repo.url>
-		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.03/</dltk.url>
-		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/2019.03/</servoy-shiplibs.url>
+		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.11/</eclipse.url>
+		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.06/</dltk.url>
+		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/2019.06/</servoy-shiplibs.url>
 		<sqlexplorer.url>http://developer.servoy.com/sqlexplorer/</sqlexplorer.url>
 		<gef.url>http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/</gef.url>
 		<emf.url>http://download.eclipse.org/modeling/emf/emf/builds/release/2.16/</emf.url>
@@ -26,7 +26,7 @@
 	<repositories>
 		<repository>
 			<id>servoy</id>
-			<url>${servoy-repo.url}</url>
+			<url>${eclipse.url}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>

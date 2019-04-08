@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target includeMode="feature" name="eclipse 2018-12 + egit" sequenceNumber="60">
     <locations>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://download.eclipse.org/eclipse/updates/4.10/"/>
-		    <unit id="org.eclipse.sdk.ide" version="4.10.0.I20181206-0815"/>
+		    <repository location="http://download.eclipse.org/eclipse/updates/4.11/"/>
+		    <unit id="org.eclipse.sdk.ide" version="4.11.0.I20190307-0500"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
@@ -28,7 +28,7 @@
 		    <unit id="org.apache.logging.log4j.slf4j18-impl" version="2.11.2"/>
 		    <unit id="org.jsoup" version="1.11.3"/>
 		    <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
-		    <repository location="http://developer.servoy.com/p2_repository/ship_plugins/2019.03/"/>
+		    <repository location="http://developer.servoy.com/p2_repository/ship_plugins/2019.06/"/>
 		    <unit id="javax.transaction" version="1.1.0"/>
 		    <unit id="javax.websocket" version="1.1.0"/>
 		    <unit id="org.apache.commons.commons-collections4" version="4.2.0"/>
@@ -52,8 +52,9 @@
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.201902041412"/>
 		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201902041415"/>
-		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.03/"/>
+		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.06/"/>
 	    </location>
+    </locations>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="org.eclipse.egit.feature.group" version="5.2.0.201812061821-r"/>
 		    <unit id="org.eclipse.egit.gitflow.feature.feature.group" version="5.2.0.201812061821-r"/>
