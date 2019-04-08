@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -24,7 +27,6 @@ import org.eclipse.help.ui.internal.IHelpUIConstants;
 import org.eclipse.help.ui.internal.Messages;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceNode;
-import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -214,9 +216,6 @@ public class HelpPreferencePage extends PreferencePage implements
 		return null;
 	}
 
-	/**
-	 * @see IWorkbenchPreferencePage
-	 */
 	@Override
 	public void init(IWorkbench workbench) {
 	}
@@ -257,9 +256,6 @@ public class HelpPreferencePage extends PreferencePage implements
 		super.performDefaults();
 	}
 
-	/**
-	 * @see IPreferencePage
-	 */
 	@Override
 	public boolean performOk() {
 		IEclipsePreferences pref = InstanceScope.INSTANCE.getNode(HelpBasePlugin.PLUGIN_ID);
