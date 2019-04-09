@@ -21,23 +21,23 @@ export class WebsocketService {
   }
 
   private create(url): WebSocketConnection {
-    let ws = new WebSocket(url);
+    const ws = new WebSocket(url);
 
-    let openObservable = Rx.Observable.create((obs: Rx.Observer<MessageEvent>) => {
+    const openObservable = Rx.Observable.create((obs: Rx.Observer<MessageEvent>) => {
       ws.onopen = obs.next.bind(obs);
       ws.onerror = obs.error.bind(obs);
       ws.onclose = obs.complete.bind(obs);
       return ws.close.bind(ws);
     });
 
-    let messageObservable = Rx.Observable.create((obs: Rx.Observer<MessageEvent>) => {
+    const messageObservable = Rx.Observable.create((obs: Rx.Observer<MessageEvent>) => {
       ws.onmessage = obs.next.bind(obs);
       ws.onerror = obs.error.bind(obs);
       ws.onclose = obs.complete.bind(obs);
       return ws.close.bind(ws);
     });
 
-    let messageObserver = {
+    const messageObserver = {
       next: (data: Object) => {
         if (ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify(data));
