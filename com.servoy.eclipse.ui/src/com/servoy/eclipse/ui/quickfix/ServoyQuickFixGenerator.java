@@ -106,7 +106,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					@Override
 					public String getLabel()
 					{
-						return "Automatic import of '" + packageName + "' from Web Package Manager";
+						return "Automatic import of '" + packageName + "' from Servoy Package Manager";
 					}
 				}, new IMarkerResolution()
 				{
@@ -120,7 +120,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					@Override
 					public String getLabel()
 					{
-						return "Open Web Package Manager";
+						return "Open Servoy Package Manager";
 					}
 				} };
 			}

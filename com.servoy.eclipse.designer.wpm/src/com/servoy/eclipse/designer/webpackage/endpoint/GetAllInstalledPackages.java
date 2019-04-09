@@ -298,7 +298,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		{
 			// check for new in a new thread
 			final String wpIndex = selectedWebPackageIndex;
-			Job checkForNewRemotePackagesJob = new Job("Check for new remote web packages")
+			Job checkForNewRemotePackagesJob = new Job("Check for new remote Servoy packages")
 			{
 				@Override
 				protected IStatus run(IProgressMonitor monitor)
@@ -503,7 +503,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			// sometimes for example 3 reloads were triggered in a short amount of time; keep the full reloads to a minimum;
 			// only keep 1 reload and if that is in progress and another one is needed remember to trigger it only once
 			// the first reload is over
-			if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Web Package Manager specs...")
+			if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Servoy Package Manager specs...")
 			{
 
 				@Override

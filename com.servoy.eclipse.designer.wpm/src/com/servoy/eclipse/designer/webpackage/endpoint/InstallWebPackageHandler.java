@@ -213,7 +213,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 														{
 															public void run()
 															{
-																response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Web Package Manager",
+																response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager",
 																	null,
 																	"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
 																		", but you already have version " + installedVersion +

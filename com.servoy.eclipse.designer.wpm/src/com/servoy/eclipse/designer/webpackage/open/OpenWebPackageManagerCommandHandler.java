@@ -67,8 +67,8 @@ public class OpenWebPackageManagerCommandHandler extends AbstractHandler impleme
 		}
 		else
 		{
-			new MessageDialog(Display.getDefault().getActiveShell(), "Web Package Manager", null,
-				"Web Package Manager does not work when there is no active solution set.", MessageDialog.INFORMATION,
+			new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager", null,
+				"Servoy Package Manager does not work when there is no active solution set.", MessageDialog.INFORMATION,
 				new String[] { IDialogConstants.OK_LABEL }, 0).open();
 		}
 	}

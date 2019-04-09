@@ -52,7 +52,7 @@ public class WebPackageManagerEditorInput implements IEditorInput
 	@Override
 	public String getToolTipText()
 	{
-		return "Web Package Manager";
+		return "Servoy Package Manager";
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class WebPackageManagerEditorInput implements IEditorInput
 	@Override
 	public String getName()
 	{
-		return "Web Package Manager";
+		return "Servoy Package Manager";
 	}
 
 	@Override
