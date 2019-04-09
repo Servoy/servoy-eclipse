@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.rfb.endpoint;
 
 
+import javax.servlet.http.HttpSession;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -36,7 +37,7 @@ import com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint;
  *
  */
 
-@ServerEndpoint(value = "/rfb/angular/content/websocket/{sessionid}/{windowName}/{windowid}")
+@ServerEndpoint(value = "/rfb/angular/content/websocket/{clientnr}/{windowName}/{windownr}")
 public class EditorContentEndpoint extends BaseNGClientEndpoint
 {
 	public EditorContentEndpoint()
@@ -46,11 +47,17 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 
 	@Override
 	@OnOpen
-	public void start(Session newSession, @PathParam("sessionid") String sessionid, @PathParam("windowName")
-	final String windowName, @PathParam("windowid")
-	final String windowid) throws Exception
+	public void start(Session newSession, @PathParam("clientnr") String clientnr, @PathParam("windowName")
+	final String windowName, @PathParam("windownr")
+	final String windownr) throws Exception
 	{
-		super.start(newSession, sessionid, windowName, windowid);
+		super.start(newSession, clientnr, windowName, windownr);
+	}
+
+	@Override
+	protected HttpSession getHttpSession(Session session)
+	{
+		return EditorHttpSession.getInstance();
 	}
 
 	@Override
@@ -58,17 +65,6 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 	public void incoming(String msg, boolean lastPart)
 	{
 		super.incoming(msg, lastPart);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint#onStart()
-	 */
-	@Override
-	public void onStart()
-	{
-		// ignore
 	}
 
 	@Override

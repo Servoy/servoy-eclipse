@@ -181,7 +181,7 @@ public class SolutionExplorerTreeContentProvider
 	private static final String IMG_SOLUTION_MOBILE = "solution_mobile.png";
 	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png";
 	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png";
-	private static final String IMG_SOLUTION_SERVICE = "solution.png";
+	private static final String IMG_SOLUTION_SERVICE = "servicesolution.png";
 	private static final String SERVER_IMAGE = "server.png";
 	private static final String SERVER_DUPLICATE_IMAGE = "duplicate_server.png";
 	private static final String SERVER_ERROR_IMAGE = "server.png_IMG_DEC_FIELD_ERROR";

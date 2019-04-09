@@ -132,7 +132,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		exportReferencedModulesButton.addListener(SWT.Selection, this);
 
 		exportReferencedWebPackagesButton = new Button(composite, SWT.CHECK);
-		exportReferencedWebPackagesButton.setText("Export referenced web packages ( for importing ONLY into developer)");
+		exportReferencedWebPackagesButton.setText("Export referenced Servoy packages ( for importing ONLY into developer)");
 		exportReferencedWebPackagesButton.setSelection(exportSolutionWizard.getModel().isExportReferencedWebPackages());
 		exportReferencedWebPackagesButton.addListener(SWT.Selection, this);
 

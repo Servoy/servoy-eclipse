@@ -183,7 +183,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					}
 					newProject.create(description, null);
 					newProject.open(null);
-					newProject.getFile(SolutionSerializer.GLOBALS_FILE).create(Utils.getUTF8EncodedStream(""), true, null);
 					monitor.worked(1);
 
 					if (solution != null)
@@ -474,7 +473,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	{
 		ServerConfig origConfig = Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).filter(
 			s -> s.isPostgresDriver() && s.isEnabled()).findAny().orElse(null);
-		if (origConfig == null) 
+		if (origConfig == null)
 		{
 			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find any Postgres server config"));
 			return;
@@ -552,6 +551,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setActivateSolution(false);
 		importSolutionWizard.init(PlatformUI.getWorkbench(), null);
 		importSolutionWizard.setReportImportFail(reportImportFail);
+		importSolutionWizard.setSkipModulesImport(true);
+		importSolutionWizard.setAllowDataModelChanges(true);
+		importSolutionWizard.setImportSampleData(true);
 
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);

@@ -403,12 +403,37 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$scope.getGhostHRStyle = function(ghost) {
 				if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // parts
+					var hrStyle = {
+							marginTop: "-4px",
+							border: 0,
+							borderTop: "1px dashed #000",
+							borderBottom: "5px dashed transparent",
+							width: (parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH - 15) + "px",
+							float: "right"
+						};
+					if (ghost == $scope.getLastPartGhost())
+					{
+						hrStyle.borderBottom = "3px dashed transparent";
+					}	
+					return hrStyle;
+				} else {
 					return {
-						marginTop: "-4px",
-						border: 0,
-						borderTop: "1px dashed #000",
-						width: (parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH - 15) + "px",
-						float: "right"
+						display: "none"
+					};
+				}
+			}
+			
+			$scope.getGhostVerticalHRStyle = function(ghost, cont){
+				if(ghost.type === EDITOR_CONSTANTS.GHOST_TYPE_PART){
+					return {
+						border: "none",
+					    borderLeft: "1px dashed #000",
+					    height: (ghost.location.y+15)+'px',
+					    marginLeft: "-5px",
+					    marginTop: -(ghost.location.y+15)+'px',
+						marginBottom: "0",
+						cursor: 'ew-resize',
+					    width: '1px',
 					};
 				} else {
 					return {
@@ -416,6 +441,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					};
 				}
 			}
+			
+
 
 			$scope.openContainedForm = function(ghost) {
 				if (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART) {
@@ -1158,8 +1185,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$editorService.connect().then(function() {
 				var replacews = $webSocket.getURLParameter("replacewebsocket") ? "&replacewebsocket=true" : "";
 				var containerID =  $webSocket.getURLParameter("cont") ? ("&cont="+$webSocket.getURLParameter("cont")) : "";
-				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&sessionid=" + $webSocket.getURLParameter(
-						"c_sessionid") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
+				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&clientnr=" + $webSocket.getURLParameter(
+						"c_clientnr") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
 					replacews + containerID;
 			})
 			
@@ -1261,7 +1288,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return;
 			}
 		}
-		wsSession = $webSocket.connect('', [$webSocket.getURLParameter('editorid')])
+		wsSession = $webSocket.connect('', [$webSocket.getURLParameter('clientnr')])
 		wsSession.onopen(function() {
 			connected = true;
 			if (deferred) deferred.resolve();

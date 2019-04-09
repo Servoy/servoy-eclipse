@@ -98,6 +98,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.query.ISQLJoin;
+import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -327,7 +328,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 							if (toTest instanceof MediaNode)
 							{
 								MediaNode node = ((MediaNode)toTest);
-								return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css") || node.getName().endsWith(".less");
+								return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css") || node.getName().endsWith(".less") && !ThemeResourceLoader.CUSTOM_PROPERTIES_LESS.equals(node.getName());
 							}
 							return false;
 						}

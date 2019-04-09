@@ -236,7 +236,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * com.servoy.j2db.persistence.Table)
 	 */
 	@Override
-	public String[] syncTableObjWithDB(ITable table, boolean createMissingServoySequences, boolean createMissingDBSequences, Table templateTable)
+	public String[] syncTableObjWithDB(ITable table, boolean createMissingServoySequences, boolean createMissingDBSequences)
 		throws RepositoryException, SQLException
 	{
 		DataModelManager dataModelManager = ServoyModelFinder.getServoyModel().getDataModelManager();
@@ -341,7 +341,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		if (t != null)
 		{
 			ITable newTable = createNewTable(null, t, newName);
-			syncTableObjWithDB(newTable, false, true, null);
+			syncTableObjWithDB(newTable, false, true);
 
 			// rename all tablenodes representing this table.
 			IServoyModel sm = ServoyModelFinder.getServoyModel();

@@ -295,7 +295,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 								{
 									for (Pair<String, byte[]> wp : webPackages)
 									{
-										m.setTaskName("Writing web package " + wp.getLeft());
+										m.setTaskName("Writing Servoy package " + wp.getLeft());
 										wsa.setContents(root.getName() + "/" + SolutionSerializer.NG_PACKAGES_DIR_NAME + "/" + wp.getLeft(), wp.getRight());
 									}
 								}

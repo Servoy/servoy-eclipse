@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -30,22 +33,25 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
  * <p>
  * This class is intended to be specified as a value of a class attribute of an
  * action element in plugin.xml for extensions of org.eclipse.ui.actionSets
- * extension point.  The URL to launch must be specified in the markup in one
- * of two ways.
+ * extension point. The URL to launch must be specified in the markup in one of
+ * two ways.
  * </p>
- * </p>
+ * <p>
  * The action element can have an attribute named url, in addition to markup
  * required by org.eclipse.ui.actionSets extension point specification. The
  * value of the url attribute should specify a URL to be opened in a browser.
  * </p>
- * </p>
+ * <p>
  * Alternatively, since 3.1, instead of a class attribute on the action element,
- * the extension can specify a nested class element with a class attribute
- * and URL specified in a parameter sub-element.  For example:
- * <pre>         &lt;class class="org.eclipse.help.ui.browser.LaunchURL"&gt;
- *              &lt;parameter name="url" value="http://eclipse.org/" /&gt;
- *          &lt;/class&gt;</pre>
+ * the extension can specify a nested class element with a class attribute and
+ * URL specified in a parameter sub-element. For example:
  * </p>
+ * 
+ * <pre>
+ *          &lt;class class="org.eclipse.help.ui.browser.LaunchURL"&gt;
+ *              &lt;parameter name="url" value="http://eclipse.org/" /&gt;
+ *          &lt;/class&gt;
+ * </pre>
  */
 public class LaunchURL implements IWorkbenchWindowActionDelegate,
 		IExecutableExtension {

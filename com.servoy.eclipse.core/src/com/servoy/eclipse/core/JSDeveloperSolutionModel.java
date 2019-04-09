@@ -69,6 +69,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.scripting.solutionmodel.IJSDeveloperSolutionModel;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
+import com.servoy.j2db.scripting.solutionmodel.JSMedia;
 import com.servoy.j2db.scripting.solutionmodel.JSRelation;
 import com.servoy.j2db.scripting.solutionmodel.JSValueList;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -143,7 +144,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 							{
 								memTable = memServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), table,
 									tableName);
-								memServer.syncTableObjWithDB(memTable, false, true, null);
+								memServer.syncTableObjWithDB(memTable, false, true);
 							}
 							else if (override && dataModelManager != null)
 							{
@@ -251,6 +252,10 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 		{
 			name = ((JSRelation)obj).getName();
 		}
+		else if (obj instanceof JSMedia)
+		{
+			name = ((JSMedia)obj).getName();
+		}
 		if (name != null)
 		{
 			final String objName = name;
@@ -291,7 +296,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 							{
 								memTable = memServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), table,
 									tableName);
-								memServer.syncTableObjWithDB(memTable, false, true, null);
+								memServer.syncTableObjWithDB(memTable, false, true);
 							}
 							else if (override)
 							{
@@ -345,7 +350,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 											state.reportJSError("Can't update in memory table '" + memTable.getDataSource() +
 												"' as the number of column types does not match the number of columns of the dataset", null);
 										}
-										memServer.syncTableObjWithDB(memTable, false, false, null);
+										memServer.syncTableObjWithDB(memTable, false, false);
 									}
 									else
 									{
@@ -376,6 +381,10 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 							else if (obj instanceof JSRelation)
 							{
 								saveObj = solutionCopy.getRelation(objName);
+							}
+							else if (obj instanceof JSMedia)
+							{
+								saveObj = solutionCopy.getMedia(objName);
 							}
 							if (saveObj == null) throw new IllegalArgumentException("The object " + objName + " is not solution model created/altered.");
 

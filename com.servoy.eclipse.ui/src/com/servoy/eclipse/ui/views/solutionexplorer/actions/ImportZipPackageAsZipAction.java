@@ -59,7 +59,7 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 
 	public ImportZipPackageAsZipAction(SolutionExplorerView viewer, String folder)
 	{
-		super(viewer, "Import zip web package", "Imports a zip web package (component/service/layout package) into the solution");
+		super(viewer, "Import zip Servoy package", "Imports a zip Servoy package (component/service/layout package) into the solution");
 		this.folderName = folder;
 	}
 

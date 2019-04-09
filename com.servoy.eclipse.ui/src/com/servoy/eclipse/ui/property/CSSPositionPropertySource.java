@@ -26,7 +26,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.servoy.eclipse.ui.editors.CSSPositionDialog;
@@ -73,7 +72,7 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 					@Override
 					public Object openDialogBox(Control cellEditorWindow)
 					{
-						CSSPositionDialog dialog = new CSSPositionDialog(new Shell(), getValue());
+						CSSPositionDialog dialog = new CSSPositionDialog(getControl().getShell() /* new Shell() */, getValue());
 						dialog.open();
 						if (dialog.getReturnCode() == Window.CANCEL)
 						{

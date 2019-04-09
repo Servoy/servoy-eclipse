@@ -153,7 +153,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 					}
 
 					// apply the changes (create column in database as well)
-					s.syncTableObjWithDB(difference.getTable(), false, true, null);
+					s.syncTableObjWithDB(difference.getTable(), false, true);
 
 					// reload the column information for this table just to make sure everything is in sync
 					dmm.loadAllColumnInfo(difference.getTable());

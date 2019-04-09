@@ -82,7 +82,7 @@ public class DBIQuickFixDeleteColumnFromDB extends TableDifferenceQuickFix
 					difference.getTable().removeColumn(difference.getColumnName());
 
 					// apply the changes (delete column from database as well)
-					s.syncTableObjWithDB(difference.getTable(), false, true, null);
+					s.syncTableObjWithDB(difference.getTable(), false, true);
 
 					// reload the column information for this table just to make sure everything is in sync
 					dmm.loadAllColumnInfo(difference.getTable());

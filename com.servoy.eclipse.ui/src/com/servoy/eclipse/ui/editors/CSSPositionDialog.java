@@ -84,10 +84,6 @@ public class CSSPositionDialog extends Dialog
 		Composite composite = (Composite)super.createDialogArea(parent);
 		composite.setLayout(new GridLayout(5, false));
 		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-		gridData.heightHint = 150;
-		gridData.widthHint = 300;
-		gridData.horizontalIndent = 15;
-		gridData.verticalIndent = 20;
 		composite.setLayoutData(gridData);
 
 		SelectionAdapter listener = new SelectionAdapter()
