@@ -76,8 +76,8 @@ export class WpmService {
 
   constructor(wsService: WebsocketService) {
     let loc = window.location;
-    //let uri = "ws://"+loc.host+"/wpm/angular2/websocket";
-    let uri = "ws://localhost:8080/wpm/angular2/websocket";
+    let uri = "ws://"+loc.host+"/wpm/angular2/websocket";
+    //let uri = "ws://localhost:8080/wpm/angular2/websocket";
     let webSocketConnection = wsService.connect(uri);
     webSocketConnection.open.subscribe(() => {
       this.onConnectionOpen();
