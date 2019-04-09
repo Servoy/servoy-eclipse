@@ -98,6 +98,26 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return getAllInstalledPackages(null, null);
 	}
 
+	private static List<JSONObject> sortPackages(List<JSONObject> remotePackages)
+	{
+		Comparator<JSONObject> comparator = new Comparator<JSONObject>()
+		{
+			@Override
+			public int compare(JSONObject o1, JSONObject o2)
+			{
+				boolean b1 = false;
+				boolean b2 = false;
+				if (o1.has("top")) b1 = o1.getBoolean("top");
+				if (o2.has("top")) b2 = o2.getBoolean("top");
+
+				int calc = (b1 ^ b2) ? ((b1 ^ true) ? 1 : -1) : 0;
+				if (calc != 0) return calc;
+				else return o1.getString("displayName").compareTo(o2.getString("displayName"));
+			}
+		};
+		return remotePackages.stream().sorted(comparator).collect(Collectors.toList());
+	}
+
 	private static JSONArray getAllInstalledPackages(JSONObject msg, GetAllInstalledPackages getAllInstalledPackagesService)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
@@ -107,27 +127,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		JSONArray result = new JSONArray();
 		try
 		{
-			Comparator<JSONObject> comparator = new Comparator<JSONObject>()
-			{
-				@Override
-				public int compare(JSONObject o1, JSONObject o2)
-				{
-					boolean b1 = false;
-					boolean b2 = false;
-					if (o1.has("top")) b1 = o1.getBoolean("top");
-					if (o2.has("top")) b2 = o2.getBoolean("top");
-
-					int calc = (b1 ^ b2) ? ((b1 ^ true) ? 1 : -1) : 0;
-					if (calc != 0) return calc;
-					else return o1.getString("displayName").compareTo(o2.getString("displayName"));
-				}
-			};
-
-
 			List<JSONObject> remotePackages = getAllInstalledPackagesService != null ? getAllInstalledPackagesService.getRemotePackagesAndCheckForChanges()
 				: getRemotePackages();
-
-			remotePackages = remotePackages.stream().sorted(comparator).collect(Collectors.toList());
 
 			for (JSONObject pack : remotePackages)
 			{
@@ -329,7 +330,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			checkForNewRemotePackagesJob.setPriority(Job.LONG);
 			checkForNewRemotePackagesJob.schedule();
 		}
-		return remotePackages;
+		return sortPackages(remotePackages);
 	}
 
 	private static synchronized List<JSONObject> getRemotePackages(String webPackageIndex, boolean useCache) throws Exception
