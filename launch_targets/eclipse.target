@@ -54,5 +54,6 @@
 		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201902041415"/>
 		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.06/"/>
 	    </location>
+	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
     </locations>
 </target>
