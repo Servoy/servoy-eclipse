@@ -224,7 +224,7 @@ public class PlaceDataprovidersComposite extends Composite
 		currentSelection = mainPref;
 		configurationSelection = "_";
 
-		final Object[] inputs = getComponentsAndTemplatesInput();
+		final Object[] inputs = getComponentsAndTemplatesInput(true);
 
 		this.setLayout(new FillLayout());
 		SashForm form = new SashForm(this, SWT.HORIZONTAL);
@@ -289,7 +289,7 @@ public class PlaceDataprovidersComposite extends Composite
 
 		placeWithLabelsButton = createLabelAndCheck(configurationComposite, "Place with labels", PLACE_WITH_LABELS_PROPERTY,
 			"Place a label component together with the field");
-		labelComponentCombo = generateTypeCombo(configurationComposite, "Label Component", inputs, LABEL_COMPONENT_PROPERTY,
+		labelComponentCombo = generateTypeCombo(configurationComposite, "Label Component", getComponentsAndTemplatesInput(false), LABEL_COMPONENT_PROPERTY,
 			"The component/template to use for the label component");
 		labelComponentCombo.getCCombo().setEnabled(placeWithLabelsButton.getSelection());
 		placeWithLabelsButton.addSelectionListener(new SelectionListener()
@@ -919,7 +919,7 @@ public class PlaceDataprovidersComposite extends Composite
 	/**
 	 * @return
 	 */
-	private Object[] getComponentsAndTemplatesInput()
+	private Object[] getComponentsAndTemplatesInput(boolean filterOnDataProviderProperty)
 	{
 		ArrayList<Object> specs = new ArrayList<>();
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
@@ -933,7 +933,7 @@ public class PlaceDataprovidersComposite extends Composite
 				{
 					JSONObject templateJSON = new ServoyJSONObject(content, false);
 					JSONArray elements = templateJSON.optJSONArray("elements");
-					if (elements != null && elements.length() == 1 && hasDataproviderProperty(elements.getJSONObject(0)))
+					if (elements != null && elements.length() == 1 && (!filterOnDataProviderProperty || hasDataproviderProperty(elements.getJSONObject(0))))
 					{
 						specs.add(template);
 					}
@@ -949,7 +949,7 @@ public class PlaceDataprovidersComposite extends Composite
 			if (pck.getPackageName().equals("servoycore")) continue;
 			for (WebObjectSpecification wos : pck.getSpecifications().values())
 			{
-				if (wos.getProperties(DataproviderPropertyType.INSTANCE).size() > 0)
+				if (!filterOnDataProviderProperty || wos.getProperties(DataproviderPropertyType.INSTANCE).size() > 0)
 				{
 					specs.add(wos);
 				}
@@ -1056,7 +1056,7 @@ public class PlaceDataprovidersComposite extends Composite
 			this.editor = new ComboBoxViewerCellEditor(viewer.getTable());
 			editor.setLabelProvider(new TemplateOrWebObjectLabelProvider());
 			editor.setContentProvider(ArrayContentProvider.getInstance());
-			editor.setInput(getComponentsAndTemplatesInput());
+			editor.setInput(getComponentsAndTemplatesInput(true));
 		}
 
 		@Override
