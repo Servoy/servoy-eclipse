@@ -423,27 +423,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 			}
 			
-			$scope.getGhostVerticalHRStyle = function(ghost, cont){
-				if(ghost.type === EDITOR_CONSTANTS.GHOST_TYPE_PART){
-					return {
-						border: "none",
-					    borderLeft: "1px dashed #000",
-					    height: (ghost.location.y+15)+'px',
-					    marginLeft: "-5px",
-					    marginTop: -(ghost.location.y+15)+'px',
-						marginBottom: "0",
-						cursor: 'ew-resize',
-					    width: '1px',
-					};
-				} else {
-					return {
-						display: "none"
-					};
-				}
-			}
-			
-
-
 			$scope.openContainedForm = function(ghost) {
 				if (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART) {
 					$editorService.openContainedForm(ghost);
