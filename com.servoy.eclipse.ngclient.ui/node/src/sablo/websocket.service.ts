@@ -50,7 +50,7 @@ export class WebsocketService {
             }
         }
 
-        new_uri += "?";
+        new_uri += "?connectNr="+Math.floor((Math.random() * 10000000000000))+"&";
 
         for ( var a in queryArgs ) {
             if ( queryArgs.hasOwnProperty( a ) ) {

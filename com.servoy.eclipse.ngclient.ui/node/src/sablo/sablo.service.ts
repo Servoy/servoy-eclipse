@@ -39,51 +39,60 @@ export class SabloService {
             queryArgs: queryArgs,
             websocketUri: websocketUri
         };
-        this.wsSession = this.websocketService.connect( wsSessionArgs.context, [this.getSessionId(), this.getWindowName(), this.getWindowId()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri );
+        // TODO clean support for opening another window
+//        if(this.websocketService.getURLParameter($websocketConstants.CLEAR_SESSION_PARAM) == 'true'){
+//            this.clearSabloInfo();
+//       }
+        this.wsSession = this.websocketService.connect( wsSessionArgs.context, [this.getClientnr(), this.getWindowName(), this.getWindownr()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri );
 
         this.wsSession.onMessageObject(( msg, conversionInfo ) => {
             // data got back from the server
 
             if ( conversionInfo && conversionInfo.call ) msg.call = this.converterService.convertFromServerToClient( msg.call, conversionInfo.call, undefined );
 
-            if ( msg.sessionid ) {
-                this.sessionStorage.set( "sessionid", msg.sessionid );
+            if ( msg.clientnr ) {
+                this.sessionStorage.set( "clientnr", msg.clientnr );
             }
-            if ( msg.windowid ) {
-                this.sessionStorage.set( "windowid", msg.windowid );
+            if ( msg.windownr ) {
+                this.sessionStorage.set( "windownr", msg.windownr );
             }
-            if ( msg.sessionid || msg.windowid ) {
+            if ( msg.clientnr || msg.windownr ) {
                 // update the arguments on the reconnection websocket.
-                this.websocketService.setConnectionPathArguments( [this.getSessionId(), this.getWindowName(), this.getWindowId()] );
+                this.websocketService.setConnectionPathArguments( [this.getClientnr(), this.getWindowName(), this.getWindownr()] );
             }
         } );
 
         return this.wsSession
     }
+    
+    private clearSabloInfo() {
+        this.sessionStorage.remove('windownr');
+        this.sessionStorage.remove('clientnr');
+    }
 
-    public getSessionId() {
-        var sessionId = this.sessionStorage.get( 'sessionid' )
-        if ( sessionId ) {
-            return sessionId;
+    public getClientnr() {
+        const sessionnr = this.sessionStorage.get( 'clientnr' )
+        if ( sessionnr ) {
+            return sessionnr;
         }
-        return this.websocketService.getURLParameter( 'sessionid' );
+        return this.websocketService.getURLParameter( 'clientnr' );
     }
 
     public getWindowName() {
         return this.websocketService.getURLParameter( 'windowname' );
     }
 
-    public getWindowId() {
-        return this.sessionStorage.get( 'windowid' );
+    public getWindownr() {
+        return this.sessionStorage.get( 'windownr' );
     }
 
     public getWindowUrl( windowname: string ) {
-        return "index.html?windowname=" + encodeURIComponent( windowname ) + "&sessionid=" + this.getSessionId();
+        return "index.html?windowname=" + encodeURIComponent( windowname ) + "&clientnr=" + this.getClientnr();
     }
 
     public getLanguageAndCountryFromBrowser() {
-        var langAndCountry;
-        var browserLanguages = this.windowRefService.nativeWindow.navigator['languages'];
+        let langAndCountry;
+        const browserLanguages = this.windowRefService.nativeWindow.navigator['languages'];
         // this returns first one of the languages array if the browser supports this (Chrome and FF) else it falls back to language or userLanguage (IE, and IE seems to return the right one from there)
         if ( browserLanguages && browserLanguages.length > 0 ) {
             langAndCountry = browserLanguages[0];
@@ -101,8 +110,8 @@ export class SabloService {
     }
     public getLocale() {
         if ( !this.locale ) {
-            var langAndCountry = this.getLanguageAndCountryFromBrowser();
-            var array = langAndCountry.split( "-" );
+            const langAndCountry = this.getLanguageAndCountryFromBrowser();
+            const array = langAndCountry.split( "-" );
             this.locale = { language: array[0], country: array[1], full: langAndCountry };
         }
         return this.locale;
@@ -113,7 +122,7 @@ export class SabloService {
     }
     
     public callService(serviceName:string, methodName:string, argsObject, async?:boolean) {
-        var promise = this.wsSession.callService(serviceName, methodName, argsObject, async)
+        const promise = this.wsSession.callService(serviceName, methodName, argsObject, async)
         return async ? promise : this.waitForServiceCallbacks(promise, [100, 200, 500, 1000, 3000, 5000])
     }
     
@@ -131,7 +140,7 @@ export class SabloService {
         if (this.currentServiceCallDone || --this.currentServiceCallWaiting == 0) {
             this.currentServiceCallWaiting = 0
             this.currentServiceCallTimeouts.map(function(id) { return clearTimeout(id) })
-            var tmp = this.currentServiceCallCallbacks
+            const tmp = this.currentServiceCallCallbacks
             this.currentServiceCallCallbacks = []
             tmp.map(function(func) { func.apply() })
         }
@@ -156,7 +165,7 @@ export class SabloService {
     }
 
     private getAPICallFunctions( call, formState ) {
-        var funcThis;
+        let funcThis;
         if ( call.viewIndex != undefined ) {
             // I think this viewIndex' is never used; it was probably intended for components with multiple rows targeted by the same component if it want to allow calling API on non-selected rows, but it is not used
             funcThis = formState.api[call.bean][call.viewIndex];
@@ -165,8 +174,8 @@ export class SabloService {
             // handle nested components; the property path is an array of string or int keys going
             // through the form's model starting with the root bean name, then it's properties (that could be nested)
             // then maybe nested child properties and so on 
-            var obj = formState.model;
-            var pn;
+            let obj = formState.model;
+            let pn;
             for ( pn in call.propertyPath ) obj = obj[call.propertyPath[pn]];
             funcThis = obj.api;
         }

@@ -145,7 +145,7 @@ export class ApplicationService {
     
     public showFileOpenDialog(title, multiselect, acceptFilter) {
         const modalRef = this.modalService.open(FileUploadWindowComponent, { backdrop: 'static' });
-        modalRef.componentInstance.url = "/resources/upload/" + this.sabloService.getSessionId();
+        modalRef.componentInstance.url = "/resources/upload/" + this.sabloService.getClientnr();
         modalRef.componentInstance.title = title;
         modalRef.componentInstance.multiselect = multiselect;
         modalRef.componentInstance.filter = acceptFilter;

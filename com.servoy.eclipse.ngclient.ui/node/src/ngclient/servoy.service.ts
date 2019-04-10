@@ -63,7 +63,7 @@ export class ServoyService {
         var solName = this.websocketService.getURLParameter( 's' );
         if ( !solName ) this.solutionSettings.solutionName = /.*\/([\$\w]+)\/.*/.exec( this.websocketService.getPathname() )[1];
         else this.solutionSettings.solutionName = solName;
-        this.solutionSettings.windowName = this.sabloService.getWindowId();
+        this.solutionSettings.windowName = this.sabloService.getWindownr();
         var recordingPrefix;
         if ( this.windowRefService.nativeWindow.location.search.indexOf( "svy_record=true" ) > -1 ) {
             recordingPrefix = "/recording/websocket";
@@ -73,9 +73,9 @@ export class ServoyService {
         // TODO find mode and anchors handling (anchors should be handles completely at the server side, css positioning should go over the line)
         wsSession.onMessageObject(( msg, conversionInfo ) => {
 
-            if ( msg.sessionid && recordingPrefix ) {
+            if ( msg.clientnr && recordingPrefix ) {
                 var btn = <HTMLAnchorElement>this.windowRefService.nativeWindow.document.createElement( "A" );        // Create a <button> element
-                btn.href = "solutions/" + msg.sessionid + ".recording";
+                btn.href = "solutions/" + msg.clientnr + ".recording";
                 btn.target = "_blank";
                 btn.style.position = "absolute";
                 btn.style.right = "0px";
@@ -84,8 +84,8 @@ export class ServoyService {
                 btn.appendChild( t );                                // Append the text to <button>
                 this.windowRefService.nativeWindow.document.body.appendChild( btn );
             }
-            if ( msg.windowid ) {
-                this.solutionSettings.windowName = msg.windowid;
+            if ( msg.windownr ) {
+                this.solutionSettings.windowName = msg.windownr;
             }
         } );
 
