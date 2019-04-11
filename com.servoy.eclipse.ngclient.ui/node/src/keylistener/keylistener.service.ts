@@ -28,8 +28,15 @@ export class KeyListener implements IComponentContributorListener {
                 let callback = this.getCallback(attribute);
                 if (callback) { 
                     let ev = this.utils.createJSEvent(event, "keyup");
+                    let capsLockEnabled = false;
+                    if(event instanceof KeyboardEvent) {
+                        capsLockEnabled = event.getModifierState("CapsLock")
+                    } 
+                    else if (event.originalEvent instanceof KeyboardEvent) {
+                        capsLockEnabled = event.originalEvent.getModifierState("CapsLock");
+                    }
                     this.servoyService.executeInlineScript(callback.formname, callback.script, 
-                            [element.value, ev, event.keyCode, event.altKey]);
+                            [element.value, ev, event.keyCode, event.altKey, event.ctrlKey, event.shiftKey, capsLockEnabled]);
                 }
               })
         }
@@ -41,7 +48,18 @@ export class KeyListener implements IComponentContributorListener {
         this.changeHandler.changed("keyListener","callbacks", this._callbacks);
     }
     
-    public getCallback(callbackKey: String): Function {
+    public removeKeyListener(callbackKey:string) : boolean {
+        let len = this._callbacks.length;
+        this._callbacks = this._callbacks.filter(c => c.callbackKey != callbackKey);
+        if (len > this._callbacks.length)
+        {
+            this.changeHandler.changed("keyListener","callbacks", this._callbacks);
+            return true;
+        }
+        return false;
+    }
+    
+    private getCallback(callbackKey: String): Function {
         let cb = this._callbacks.find( c => c.callbackKey === callbackKey);
         return cb ? cb.callback : undefined;
     }
