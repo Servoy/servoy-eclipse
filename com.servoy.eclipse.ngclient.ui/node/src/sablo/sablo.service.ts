@@ -7,7 +7,7 @@ import {delay} from 'rxjs/operators'
 import { Deferred } from './util/deferred'
 import { WindowRefService } from './util/windowref.service'
 
-import { WebsocketService, WebsocketSession } from '../sablo/websocket.service';
+import { WebsocketService, WebsocketSession, WebsocketConstants } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service'
 import { LoggerService, LoggerFactory } from './logger.service'
 
@@ -39,10 +39,10 @@ export class SabloService {
             queryArgs: queryArgs,
             websocketUri: websocketUri
         };
-        // TODO clean support for opening another window
-//        if(this.websocketService.getURLParameter($websocketConstants.CLEAR_SESSION_PARAM) == 'true'){
-//            this.clearSabloInfo();
-//       }
+
+        if(this.websocketService.getURLParameter(WebsocketConstants.CLEAR_SESSION_PARAM) == 'true'){
+            this.clearSabloInfo();
+        }
         this.wsSession = this.websocketService.connect( wsSessionArgs.context, [this.getClientnr(), this.getWindowName(), this.getWindownr()], wsSessionArgs.queryArgs, wsSessionArgs.websocketUri );
 
         this.wsSession.onMessageObject(( msg, conversionInfo ) => {

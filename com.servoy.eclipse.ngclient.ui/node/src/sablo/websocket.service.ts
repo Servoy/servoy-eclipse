@@ -64,6 +64,16 @@ export class WebsocketService {
 
         var queryString = this.getQueryString();
         if ( queryString ) {
+            var index = queryString.indexOf(WebsocketConstants.CLEAR_SESSION_PARAM);
+            if (index >= 0) {
+                var params_arr = queryString.split("&");
+                for (var i = params_arr.length - 1; i >= 0; i -= 1) {
+                    if (params_arr[i].indexOf(WebsocketConstants.CLEAR_SESSION_PARAM) == 0) {
+                        params_arr.splice(i, 1);
+                    }
+                }
+                queryString = params_arr.join("&");
+            }
             new_uri += queryString;
         }
         else {
@@ -557,4 +567,8 @@ class WsCloseCodes {
     static readonly TLS_HANDSHAKE_FAILURE: 1015; // is a reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint.
     static readonly TRY_AGAIN_LATER: 1013; // indicates that the service is experiencing overload
 }
+export class WebsocketConstants {
+    static readonly CLEAR_SESSION_PARAM = "sabloClearSession"
+}
+
 
