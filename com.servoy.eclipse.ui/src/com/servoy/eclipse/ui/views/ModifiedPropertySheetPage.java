@@ -29,6 +29,8 @@ import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -274,6 +276,70 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			tree.addListener(SWT.MouseMove, treeListener);
 			tree.addListener(SWT.MouseHover, treeListener);
 
+			tree.addTraverseListener(new TraverseListener()
+			{
+				@Override
+				public void keyTraversed(TraverseEvent e)
+				{
+					TreeItem currentSelectedItem = null;
+					TreeItem selectedItemParent = null;
+
+					switch (e.detail)
+					{
+						case SWT.TRAVERSE_TAB_NEXT :
+							Object selectionParent = (tree.getSelection() != null ? (tree.getSelection()[0].getParentItem() != null
+								? (TreeItem)tree.getSelection()[0].getParentItem() : (Tree)tree.getSelection()[0].getParent()) : "");
+							if (selectionParent instanceof TreeItem)
+							{
+								tree.setSelection(moveSelection((TreeItem)selectionParent, tree.getSelection()[0],
+									((TreeItem)selectionParent).indexOf(tree.getSelection()[0])));
+							}
+							else if (selectionParent instanceof Tree)
+							{
+								tree.setSelection(moveSelection(null, tree.getSelection()[0], ((Tree)selectionParent).indexOf(tree.getSelection()[0])));
+							}
+							break;
+
+						case SWT.TRAVERSE_TAB_PREVIOUS :
+							currentSelectedItem = tree.getSelection() != null ? tree.getSelection()[0] : null;
+							if (currentSelectedItem == null) tree.setSelection(tree.getItem(0));
+							else
+							{
+								int idx = 0;
+								selectedItemParent = currentSelectedItem.getParentItem();
+								if (selectedItemParent != null)
+								{
+									idx = selectedItemParent.indexOf(currentSelectedItem);
+									if (idx >= 1) tree.setSelection(selectedItemParent.getItem(idx - 1));
+									else if (idx == 0)
+									{
+										if (selectedItemParent.getParentItem() != null) tree.setSelection(
+											selectedItemParent.getParentItem().getItem(selectedItemParent.getParentItem().getItemCount() - 1));
+										else
+										{
+											idx = tree.indexOf(selectedItemParent);
+											if (idx > 0)
+											{
+												TreeItem parentElement = tree.getItem(idx - 1);
+												if (parentElement != null) tree.setSelection(parentElement.getItem(parentElement.getItemCount() - 1));
+												else tree.setSelection(tree.getItem(idx - 1));
+											}
+										}
+									}
+								}
+							}
+							break;
+					}
+
+					e.doit = false;
+					Event ev = new Event();
+					ev.detail = SWT.TRAVERSE_TAB_NEXT;
+					ev.item = tree.getSelection()[0];
+					tree.notifyListeners(SWT.Selection, ev);
+				}
+
+			});
+
 			composite.setLayout(new FormLayout());
 
 			FormData fd_propertiesLabel = new FormData();
@@ -301,6 +367,56 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 		}
 	}
 
+	private TreeItem moveSelection(TreeItem parentNode, TreeItem selection, int selectionIndex)
+	{
+		// find new newSelection in parentNode
+		TreeItem newSelection = null;
+		if (parentNode == null)
+		{
+			if (selection.getItemCount() > 0)
+			{
+				newSelection = selection.getItem(0);
+			}
+			else newSelection = selection.getParent().getItemCount() > selectionIndex + 1 ? selection.getParent().getItem(selectionIndex + 1)
+				: selection.getParent().getItem(0);
+		}
+		else
+		{
+			int sIndex = 0;
+			sIndex = parentNode.indexOf(selection);
+
+			if (selection.getItemCount() > 0)
+			{
+				selection.setExpanded(true);
+				if (selection.getExpanded()) newSelection = selection.getItems()[0];
+			}
+			else
+			{
+				if (parentNode.getItemCount() > (sIndex + 1))
+				{
+					return parentNode.getItem(sIndex + 1);
+				}
+				else
+				{
+					TreeItem newParent = parentNode;
+					if (parentNode.getParentItem() != null)
+					{
+						sIndex = parentNode.getParentItem().indexOf(parentNode);
+						return parentNode.getParentItem().getItem(sIndex + 1);
+					}
+					else
+					{
+						sIndex = parentNode.getParent().indexOf(parentNode);
+						if (parentNode.getParent().getItemCount() > sIndex + 1) newParent = parentNode.getParent().getItem(sIndex + 1);
+						else newParent = parentNode.getParent().getItem(0);
+
+					}
+					newSelection = moveSelection(newParent.getParentItem(), newParent, sIndex + 1);
+				}
+			}
+		}
+		return newSelection;
+	}
 
 	@Override
 	public Control getControl()
