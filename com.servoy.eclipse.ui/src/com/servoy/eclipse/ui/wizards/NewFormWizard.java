@@ -1322,6 +1322,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 						new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
 					updateExtendsFormViewer(flattenedSolution);
 					extendsFormViewer.setSelection(sel);
+
+					fillWorkingSets();//refresh working sets
 				}
 			}
 			setPageComplete(validatePage());
