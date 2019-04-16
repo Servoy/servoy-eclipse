@@ -328,7 +328,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 							if (toTest instanceof MediaNode)
 							{
 								MediaNode node = ((MediaNode)toTest);
-								return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css") || node.getName().endsWith(".less") && !ThemeResourceLoader.CUSTOM_PROPERTIES_LESS.equals(node.getName());
+								return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css") ||
+									node.getName().endsWith(".less") && !ThemeResourceLoader.CUSTOM_PROPERTIES_LESS.equals(node.getName());
 							}
 							return false;
 						}
@@ -894,12 +895,12 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 		if (name.equals(IContentSpecConstants.PROPERTY_NG_READONLY_MODE))
 		{
-			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, null, true, null, null, null, false);
+			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, null, null, true, null, null, null, false);
 		}
 
 		if (name.equals(IContentSpecConstants.PROPERTY_FORM_COMPONENT))
 		{
-			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, null, true, null, null, null, false);
+			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, null, null, true, null, null, null, false);
 		}
 
 		return super.getPropertyDescription(obj, propertySource, persistContext);
