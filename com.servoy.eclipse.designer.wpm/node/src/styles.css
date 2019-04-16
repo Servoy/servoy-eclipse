@@ -53,3 +53,8 @@ mat-select.repository .mat-select-value {
 mat-select.repository .mat-select-arrow {
   color: #fff;
 }
+
+/* workaround for IE, see: https://github.com/angular/material2/issues/11609 */
+.cdk-overlay-pane {
+  display: block;
+}

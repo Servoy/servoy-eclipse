@@ -29,7 +29,10 @@ export class HeaderComponent implements OnInit {
       }
       newRepositories.push(ADD_REMOVE_TEXT);
       this.repositories = newRepositories;
-      this.activeRepository = newActiveRepository;
+      if(this.activeRepository != newActiveRepository) {
+        this.activeRepository = newActiveRepository;
+        this.wpmService.setNewSelectedRepository(this.activeRepository);
+      }
     })
 
 

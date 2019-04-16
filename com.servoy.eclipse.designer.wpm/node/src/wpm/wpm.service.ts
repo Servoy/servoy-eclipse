@@ -9,6 +9,8 @@ export const PACKAGE_TYPE_WEB_SERVICE = "Web-Service";
 export const PACKAGE_TYPE_WEB_LAYOUT = "Web-Layout";
 export const PACKAGE_TYPE_SOLUTION = "Solution";
 
+const ALL_PACKAGE_TYPES = [ PACKAGE_TYPE_WEB_COMPONENT, PACKAGE_TYPE_WEB_SERVICE, PACKAGE_TYPE_WEB_LAYOUT, PACKAGE_TYPE_SOLUTION ];
+
 interface Message {
   method: string;
   data?: any;
@@ -175,6 +177,7 @@ export class WpmService {
 
   setNewSelectedRepository(repositoryName: string) {
     const command: Message = { method: "setSelectedRepository", name: repositoryName };
+    this.clearPackages();
     this.messages.next(command);
   }
 
@@ -186,6 +189,14 @@ export class WpmService {
   removeRepositoryWithName(repositoryName: string) {
     const command: Message = { method: "removeRepository", name: repositoryName };
     this.messages.next(command);
+  }
+
+  clearPackages() {
+    if(this.packagesObserver) {
+      for(let packageType of ALL_PACKAGE_TYPES) {
+        this.packagesObserver.next({ packageType: packageType, packages: [] });  
+      }
+    }
   }
 
   /**
@@ -204,6 +215,12 @@ export class WpmService {
     }
     
     if(this.packagesObserver) {
+      // fill missing package types so they are refreshed in the view
+      for(let packageType of ALL_PACKAGE_TYPES) {
+        if(!typeOfPackages.has(packageType)) {
+          typeOfPackages.set(packageType, []);
+        }
+      }
       typeOfPackages.forEach((pks, typ) => {
         this.packagesObserver.next({ packageType: typ, packages: pks });  
       });
