@@ -67,6 +67,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 
 /**
@@ -184,12 +185,57 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
-		String code = null;
-		if ((code = checkAndAutoUpgradeLicenses()) != null)
+		if (exportModel.getServoyPropertiesFileName() != null)
 		{
-			getContainer().showPage(licenseConfigurationPage);
-			licenseConfigurationPage.setErrorMessage("License " + code + " is not valid and cannot be auto upgraded.");
-			return false;
+			String checkFile = exportModel.checkServoyPropertiesFileExists();
+			if (checkFile == null)
+			{
+				final Object[] upgrade = exportModel.checkAndAutoUpgradeLicenses();
+				if (upgrade != null && upgrade.length >= 3)
+				{
+					if (!Utils.getAsBoolean(upgrade[0]))
+					{
+						getContainer().showPage(servoyPropertiesSelectionPage);
+						servoyPropertiesSelectionPage.setErrorMessage(
+							"License code '" + upgrade[1] + "' defined in the selected properties view is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+						return false;
+					}
+					else
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								String message = "License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
+									"'. The export contains the new license code, but the changes could not be written to the selected properties file. Please adjust the '" +
+									exportModel.getServoyPropertiesFileName() + "' file manually.";
+								ServoyLog.logInfo(message);
+								MessageDialog.openWarning(getShell(), "Could not save changes to the properties file", message);
+							}
+						});
+					}
+				}
+			}
+			else
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						MessageDialog.openError(getShell(), "Error creating the WAR file", checkFile);
+					}
+				});
+			}
+		}
+		else
+		{
+			String code = null;
+			if ((code = checkAndAutoUpgradeLicenses()) != null)
+			{
+				getContainer().showPage(licenseConfigurationPage);
+				licenseConfigurationPage.setErrorMessage("License " + code + " is not valid and cannot be auto upgraded.");
+				return false;
+			}
 		}
 
 		exportModel.saveSettings(getDialogSettings());

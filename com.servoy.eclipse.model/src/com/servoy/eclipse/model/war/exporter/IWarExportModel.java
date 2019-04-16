@@ -2,6 +2,7 @@ package com.servoy.eclipse.model.war.exporter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -132,4 +133,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	public List<String> getNoneActiveSolutions();
 
 	public boolean isExportNoneActiveSolutions();
+
+	public Map<String, String> getUpgradedLicenses();
 }
