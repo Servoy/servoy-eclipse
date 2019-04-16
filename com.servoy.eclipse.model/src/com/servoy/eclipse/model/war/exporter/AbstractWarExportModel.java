@@ -18,6 +18,8 @@
 package com.servoy.eclipse.model.war.exporter;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -26,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -51,6 +54,7 @@ import org.sablo.websocket.impl.ClientService;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
@@ -58,6 +62,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -79,6 +85,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	private String userHome;
 	private boolean isOverwriteDeployedDBServerProperties = true;
 	private boolean isOverwriteDeployedServoyProperties;
+	private Map<String, String> upgradedLicenses;
 
 	public AbstractWarExportModel(boolean isNGExport)
 	{
@@ -565,4 +572,94 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		}
 		return message;
 	}
+
+	/**
+	 * Check all the licenses from the selected properties file, auto-upgrade if it is the case
+	 * and save to the file.
+	 * @return Object[], on position 0 a boolean representing the result of auto upgrade,
+	 * 	                the old license code on position 1
+	 * 					the new license code or error message on position 2
+	 */
+	public Object[] checkAndAutoUpgradeLicenses()
+	{
+		upgradedLicenses = new HashMap<>();
+		Properties prop = new Properties();
+		File f = new File(getServoyPropertiesFileName());
+		try (FileInputStream fis = new FileInputStream(f))
+		{
+			prop.load(fis);
+
+			String numberOfLicenses = prop.getProperty("licenseManager.numberOfLicenses");
+			if (numberOfLicenses != null)
+			{
+				int nrOfLicenses = Utils.getAsInteger(numberOfLicenses.trim(), false);
+				IApplicationServerSingleton server = ApplicationServerRegistry.get();
+				for (int i = 0; i < nrOfLicenses; i++)
+				{
+					if (Utils.getAsInteger(prop.getProperty("license." + i + ".product")) == 0) //client
+					{
+						String companyName = prop.getProperty("license." + i + ".company_name");
+						String numLicenses = prop.getProperty("license." + i + ".licenses");
+						String licenseCode = prop.getProperty("license." + i + ".code");
+
+						if (!server.checkClientLicense(companyName, licenseCode, numLicenses))
+						{
+							//try to auto upgrade
+							Pair<Boolean, String> code = server.upgradeLicense(companyName, licenseCode, numLicenses);
+							if (code == null || !code.getLeft().booleanValue())
+							{
+								if (code != null)
+								{
+									return new Object[] { code.getLeft(), licenseCode, code.getRight() };
+								}
+							}
+							else if (code.getLeft().booleanValue() && !licenseCode.equals(code.getRight()))
+							{
+								prop.setProperty("license." + i + ".code", code.getRight());
+								try (FileOutputStream fos = new FileOutputStream(f))
+								{
+									prop.store(fos, "servoy"); //$NON-NLS-1$
+								}
+								catch (IOException e)
+								{
+									upgradedLicenses.put(licenseCode, code.getRight());
+									return new Object[] { code.getLeft(), licenseCode, code.getRight() };
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return null;
+	}
+
+	public String checkServoyPropertiesFileExists()
+	{
+		File f = new File(getServoyPropertiesFileName());
+		if (!f.exists())
+		{
+			return "Specified servoy properties file doesn't exist.";
+		}
+		else if (f.isDirectory())
+		{
+			return "Specified servoy properties file is a folder.";
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the upgraded licenses that could not be written to the original properties file.
+	 */
+	@Override
+	public Map<String, String> getUpgradedLicenses()
+	{
+		return upgradedLicenses;
+	}
+
+
 }
