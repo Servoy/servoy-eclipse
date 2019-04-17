@@ -46,7 +46,7 @@ export class PackagesComponent implements OnInit {
   }
 
   installAvailable(p: Package): boolean {
-    return !p.installed || (p.installedIsWPA && !this.isLatestRelease(p) && p.selected > p.installed);
+    return !p.installed || (p.installedIsWPA && p.selected != p.installed);
   }
 
   canBeRemoved(p: Package): boolean {
@@ -119,7 +119,9 @@ export class PackagesComponent implements OnInit {
 
   getInstallTooltip(p: Package): string {
     if (p.installed) { 
-      return p.installing ? "Upgrading the web package..." : "Upgrade the web package to the selected release version.";
+      return p.installing ?
+        (p.selected > p.installed ? "Upgrading the web package..." : "Downgrading the web package...") :
+        (p.selected > p.installed ? "Upgrade the web package to the selected release version." : "Downgrade the web package to the selected release version.");
     } else if(p.installing) {
       return "Adding the web package...";		      
     } else {

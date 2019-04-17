@@ -31,7 +31,9 @@
           <!-- Add/Upgrade button -->
           <div class="align-center btn-group">
             <button mat-icon-button *ngIf="installAvailable(package)" [disabled]="isInstallingOrRemoving(package)" (click)="install(package)">
-              <mat-icon matTooltip="{{ getInstallTooltip(package) }}">{{ package.installed ? "update" : "add_circle_outline" }}</mat-icon>
+              <mat-icon matTooltip="{{ getInstallTooltip(package) }}">
+                {{ package.installed ? (package.selected > package.installed ? "update" : "settings_backup_restore") : "add_circle_outline" }}
+              </mat-icon>
             </button>
           </div>
         </td>
