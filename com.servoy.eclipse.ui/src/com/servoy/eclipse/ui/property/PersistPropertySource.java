@@ -2547,6 +2547,13 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			retval.append(" - ").append(name);
 		}
+
+		if (persistContext.getPersist() instanceof Form)
+		{
+			Form myForm = (Form)persistContext.getPersist();
+			retval.append(" - " + myForm.getLayoutType());
+		}
+
 		if (persistContext.getPersist().getParent() instanceof Portal)
 		{
 			retval.append(" - (parent: portal)");
