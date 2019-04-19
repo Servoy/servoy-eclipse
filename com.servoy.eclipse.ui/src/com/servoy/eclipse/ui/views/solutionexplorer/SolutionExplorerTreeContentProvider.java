@@ -2126,6 +2126,7 @@ public class SolutionExplorerTreeContentProvider
 			});
 			for (WebObjectSpecification spec : serviceSpecifications)
 			{
+				if (spec.isDeprecated()) continue;
 				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 				{
 					Image icon = getIconFromSpec(spec, true);

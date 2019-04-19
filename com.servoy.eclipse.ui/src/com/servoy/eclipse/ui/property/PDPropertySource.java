@@ -254,7 +254,7 @@ public class PDPropertySource extends PersistPropertySource
 				tags.accumulate(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE, desc.getTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE));
 			}
 			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, null,
-				desc.getDefaultValue(), desc.getInitialValue(), desc.hasDefault(), null, null, tags, false), persistContext);
+				desc.getDefaultValue(), desc.getInitialValue(), desc.hasDefault(), null, null, tags, false, desc.isDeprecated()), persistContext);
 		}
 		else
 		{
