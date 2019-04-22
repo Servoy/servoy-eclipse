@@ -684,4 +684,6 @@ public class MarkerMessages
 
 	public static ServoyMarker MethodOverrideProblem = new ServoyMarker("The function \"{0}\" in form \"{1}\" must override a superform method.",
 		ServoyBuilder.METHOD_OVERRIDE);
+
+	public static ServoyMarker DeprecatedSpecification = new ServoyMarker("{0} specification \"{1}\" is deprecated", ServoyBuilder.DEPRECATED_SPEC);
 }

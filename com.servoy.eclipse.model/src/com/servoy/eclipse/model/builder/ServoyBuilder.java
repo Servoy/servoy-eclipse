@@ -351,6 +351,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
+	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -544,6 +545,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);//TODO should this be ERROR?
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -824,7 +826,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					// a project that this builder in interested in was deleted (so a module or the resources proj.)
 					// or something has changed in this builder's solution project
 					checkServoyProject(getProject(), componentsSpecProviderState);
-					checkMissingSpecs(getProject(), componentsSpecProviderState);
+					checkSpecs(getProject(), componentsSpecProviderState);
 					checkModules(getProject());
 					checkResourcesForServoyProject(getProject());
 					checkResourcesForModules(getProject());
@@ -906,7 +908,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void checkMissingSpecs(IProject buildProject, final SpecProviderState componentsSpecProviderState)
+	private void checkSpecs(IProject buildProject, final SpecProviderState componentsSpecProviderState)
 	{
 		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
 		if (modules != null)
@@ -916,23 +918,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (!Utils.equalObjects(module.getProject().getName(), buildProject.getName()))
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
+					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
 						@Override
 						public Object visit(IPersist o)
 						{
-							checkMissingSpecs(o, module.getProject(), componentsSpecProviderState);
+							checkSpecs(o, module.getProject(), componentsSpecProviderState);
 							return null;
 						}
 					});
 				}
 			}
 		}
-
 	}
 
-	private void checkMissingSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
+	private void checkSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -960,6 +962,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ServoyLog.logError("Type name not found for webcomponent " + ((WebComponent)o).getName(), null);
 				}
 			}
+			else if (spec.isDeprecated())
+			{
+				ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Web Component", typeName);
+				addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+			}
 		}
 		if (o instanceof LayoutContainer && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
 		{
@@ -972,10 +979,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (spec == null)
 			{
 				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout", ((LayoutContainer)o).getSpecName(), ((LayoutContainer)o).getPackageName());
-				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+			}
+			if (spec.isDeprecated())
+			{
+				ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Layout", ((LayoutContainer)o).getSpecName());
+				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
 				try
 				{
-					marker.setAttribute("packageName", ((LayoutContainer)o).getPackageName());
+					marker.setAttribute("replacement", spec.getReplacement());
 				}
 				catch (CoreException e)
 				{
@@ -2059,6 +2071,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, SUPERFORM_PROBLEM_TYPE);
 		deleteMarkers(project, MISSING_SPEC);
 		deleteMarkers(project, METHOD_OVERRIDE);
+		deleteMarkers(project, DEPRECATED_SPEC);
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -3667,7 +3680,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 						checkCancel();
-						checkMissingSpecs(o, project, componentsSpecProviderState);
+						checkSpecs(o, project, componentsSpecProviderState);
 						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)
 						{
