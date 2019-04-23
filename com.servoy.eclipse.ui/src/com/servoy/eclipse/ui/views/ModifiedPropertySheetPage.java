@@ -29,8 +29,6 @@ import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -276,68 +274,27 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			tree.addListener(SWT.MouseMove, treeListener);
 			tree.addListener(SWT.MouseHover, treeListener);
 
-			tree.addTraverseListener(new TraverseListener()
-			{
-				@Override
-				public void keyTraversed(TraverseEvent e)
+			tree.addTraverseListener(e -> {
+
+				TreeItem currentSelectedItem = tree.getSelection() != null && tree.getSelection().length > 0 ? tree.getSelection()[0] : null;
+
+				switch (e.detail)
 				{
-					TreeItem currentSelectedItem = null;
-					TreeItem selectedItemParent = null;
+					case SWT.TRAVERSE_TAB_NEXT :
+						tree.setSelection(getNextItemForward(tree, currentSelectedItem));
+						break;
 
-					switch (e.detail)
-					{
-						case SWT.TRAVERSE_TAB_NEXT :
-							Object selectionParent = (tree.getSelection() != null ? (tree.getSelection()[0].getParentItem() != null
-								? (TreeItem)tree.getSelection()[0].getParentItem() : (Tree)tree.getSelection()[0].getParent()) : "");
-							if (selectionParent instanceof TreeItem)
-							{
-								tree.setSelection(moveSelection((TreeItem)selectionParent, tree.getSelection()[0],
-									((TreeItem)selectionParent).indexOf(tree.getSelection()[0])));
-							}
-							else if (selectionParent instanceof Tree)
-							{
-								tree.setSelection(moveSelection(null, tree.getSelection()[0], ((Tree)selectionParent).indexOf(tree.getSelection()[0])));
-							}
-							break;
 
-						case SWT.TRAVERSE_TAB_PREVIOUS :
-							currentSelectedItem = tree.getSelection() != null ? tree.getSelection()[0] : null;
-							if (currentSelectedItem == null) tree.setSelection(tree.getItem(0));
-							else
-							{
-								int idx = 0;
-								selectedItemParent = currentSelectedItem.getParentItem();
-								if (selectedItemParent != null)
-								{
-									idx = selectedItemParent.indexOf(currentSelectedItem);
-									if (idx >= 1) tree.setSelection(selectedItemParent.getItem(idx - 1));
-									else if (idx == 0)
-									{
-										if (selectedItemParent.getParentItem() != null) tree.setSelection(
-											selectedItemParent.getParentItem().getItem(selectedItemParent.getParentItem().getItemCount() - 1));
-										else
-										{
-											idx = tree.indexOf(selectedItemParent);
-											if (idx > 0)
-											{
-												TreeItem parentElement = tree.getItem(idx - 1);
-												if (parentElement != null) tree.setSelection(parentElement.getItem(parentElement.getItemCount() - 1));
-												else tree.setSelection(tree.getItem(idx - 1));
-											}
-										}
-									}
-								}
-							}
-							break;
-					}
-
-					e.doit = false;
-					Event ev = new Event();
-					ev.detail = SWT.TRAVERSE_TAB_NEXT;
-					ev.item = tree.getSelection()[0];
-					tree.notifyListeners(SWT.Selection, ev);
+					case SWT.TRAVERSE_TAB_PREVIOUS :
+						tree.setSelection(getBackwardItem(tree, currentSelectedItem));
+						break;
 				}
 
+				e.doit = false;
+				Event ev = new Event();
+				ev.detail = SWT.TRAVERSE_TAB_NEXT;
+				ev.item = currentSelectedItem;
+				tree.notifyListeners(SWT.Selection, ev);
 			});
 
 			composite.setLayout(new FormLayout());
@@ -356,6 +313,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			fd_tree.left = new FormAttachment(0, 0);
 			tree.setLayoutData(fd_tree);
 		}
+
 		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
 		if (activeEditor != null)
 		{
@@ -367,54 +325,100 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 		}
 	}
 
-	private TreeItem moveSelection(TreeItem parentNode, TreeItem selection, int selectionIndex)
+	private TreeItem[] getSiblings(Tree tree, TreeItem currentItem)
 	{
-		// find new newSelection in parentNode
-		TreeItem newSelection = null;
-		if (parentNode == null)
+		TreeItem parentItem = currentItem.getParentItem();
+		if (parentItem != null) return parentItem.getItems();
+		return tree.getItems();
+	}
+
+	private TreeItem getNextSibling(Tree tree, TreeItem currentItem, boolean forward)
+	{
+		TreeItem[] siblings = getSiblings(tree, currentItem);
+		if (siblings.length < 2) return null;
+		int index = -1;
+		for (int i = 0; i < siblings.length; i++)
 		{
-			if (selection.getItemCount() > 0)
+			if (siblings[i] == currentItem)
 			{
-				newSelection = selection.getItem(0);
+				index = i;
+				break;
 			}
-			else newSelection = selection.getParent().getItemCount() > selectionIndex + 1 ? selection.getParent().getItem(selectionIndex + 1)
-				: selection.getParent().getItem(0);
 		}
+		if ((forward && index == siblings.length - 1) || (!forward && index == 0))
+		{
+			return null;
+		}
+
+		return forward ? siblings[index + 1] : siblings[index - 1];
+	}
+
+
+	private TreeItem getNextItem(TreeItem item)
+	{
+		TreeItem auxItem = item;
+
+		if (auxItem.getItemCount() == 0) return auxItem;
+		auxItem.getParent().showItem(auxItem.getItem(0));
+
+		while (auxItem.getItemCount() > 0)
+		{
+			auxItem.getParent().showItem(auxItem.getItem(0));
+			auxItem = auxItem.getItem(0);
+		}
+
+		return auxItem;
+	}
+
+	private TreeItem getNextItemForward(Tree tree, TreeItem currentItem)
+	{
+		TreeItem child = getNextItem(currentItem);
+		if (child != null && child != currentItem) return child;
+
+		TreeItem nextSibling = getNextSibling(tree, currentItem, true);
+		if (nextSibling != null) return getNextItem(nextSibling);
+
+		TreeItem parent = currentItem.getParentItem();
+
+		while (parent != null)
+		{
+			nextSibling = getNextSibling(tree, parent, true);
+			if (nextSibling != null) return getNextItem(nextSibling);
+			parent = parent.getParentItem();
+		}
+
+		return tree.getItem(0);
+	}
+
+
+	private TreeItem getBackwardItem(Tree tree, TreeItem currentSelectedItem)
+	{
+		TreeItem newSelection = null;
+		if (currentSelectedItem == null) newSelection = tree.getItem(tree.getItemCount() - 1);
 		else
 		{
-			int sIndex = 0;
-			sIndex = parentNode.indexOf(selection);
-
-			if (selection.getItemCount() > 0)
+			newSelection = getNextSibling(tree, currentSelectedItem, false);
+			if (newSelection == null)
 			{
-				selection.setExpanded(true);
-				if (selection.getExpanded()) newSelection = selection.getItems()[0];
-			}
-			else
-			{
-				if (parentNode.getItemCount() > (sIndex + 1))
+				TreeItem selectedItemParent = currentSelectedItem.getParentItem();
+				if (selectedItemParent != null)
 				{
-					return parentNode.getItem(sIndex + 1);
+					newSelection = getNextSibling(tree, selectedItemParent, false);
+					if (newSelection == null) newSelection = tree.getItem(tree.getItemCount() - 1);
 				}
 				else
 				{
-					TreeItem newParent = parentNode;
-					if (parentNode.getParentItem() != null)
-					{
-						sIndex = parentNode.getParentItem().indexOf(parentNode);
-						return parentNode.getParentItem().getItem(sIndex + 1);
-					}
-					else
-					{
-						sIndex = parentNode.getParent().indexOf(parentNode);
-						if (parentNode.getParent().getItemCount() > sIndex + 1) newParent = parentNode.getParent().getItem(sIndex + 1);
-						else newParent = parentNode.getParent().getItem(0);
-
-					}
-					newSelection = moveSelection(newParent.getParentItem(), newParent, sIndex + 1);
+					int currentIndex = tree.indexOf(currentSelectedItem) == 0 ? tree.getItemCount() - 1 : tree.indexOf(currentSelectedItem) - 1;
+					newSelection = tree.getItem(currentIndex);
 				}
 			}
+
+			if (newSelection.getItemCount() > 0)
+			{
+				newSelection = newSelection.getItem(newSelection.getItemCount() - 1);
+			}
 		}
+
 		return newSelection;
 	}
 
