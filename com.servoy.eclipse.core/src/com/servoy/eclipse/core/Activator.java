@@ -971,8 +971,8 @@ public class Activator extends Plugin
 									map(solution -> PersistIndexCache.getCachedIndex(solution)). //
 									filter(Objects::nonNull). //
 									forEach(index -> index.reload());
+									FormElementHelper.INSTANCE.reload();
 								}
-								FormElementHelper.INSTANCE.flush(affectedFormElements);
 								IDebugClientHandler dch = getDebugClientHandler();
 								dch.refreshDebugClients(changes);
 							}
