@@ -979,20 +979,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (spec == null)
 			{
 				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout", ((LayoutContainer)o).getSpecName(), ((LayoutContainer)o).getPackageName());
-				addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
-			}
-			if (spec.isDeprecated())
-			{
-				ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Layout", ((LayoutContainer)o).getSpecName());
-				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
 				try
 				{
-					marker.setAttribute("replacement", spec.getReplacement());
+					marker.setAttribute("packageName", ((LayoutContainer)o).getPackageName());
 				}
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
 				}
+			}
+			else if (spec.isDeprecated())
+			{
+				ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Layout", ((LayoutContainer)o).getSpecName());
+				addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
 			}
 		}
 	}
