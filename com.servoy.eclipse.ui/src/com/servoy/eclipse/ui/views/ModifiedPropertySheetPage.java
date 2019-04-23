@@ -279,18 +279,10 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 
 				TreeItem currentSelectedItem = tree.getSelection() != null && tree.getSelection().length > 0 ? tree.getSelection()[0] : null;
 
-				switch (e.detail)
+				if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS)
 				{
-					case SWT.TRAVERSE_TAB_NEXT :
-						if (currentSelectedItem.getItemCount() > 0) tree.setSelection(getNextItem(currentSelectedItem, true));
-						else tree.setSelection(getNextSibling(tree, currentSelectedItem, true));
-						break;
-
-
-					case SWT.TRAVERSE_TAB_PREVIOUS :
-						if (currentSelectedItem.getItemCount() > 0) tree.setSelection(getNextItem(currentSelectedItem, false));
-						else tree.setSelection(getNextSibling(tree, currentSelectedItem, false));
-						break;
+					if (currentSelectedItem.getItemCount() > 0) tree.setSelection(getNextItem(currentSelectedItem, e.detail == SWT.TRAVERSE_TAB_NEXT));
+					else tree.setSelection(getNextSibling(tree, currentSelectedItem, e.detail == SWT.TRAVERSE_TAB_NEXT));
 				}
 
 				e.doit = false;
