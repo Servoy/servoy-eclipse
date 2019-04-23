@@ -55,19 +55,19 @@
 		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.06/"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="org.eclipse.egit.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.egit.gitflow.feature.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.egit.source.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.egit.ui.smartimport" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.jgit.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.jgit.pgm.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.jgit.pgm.source.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.jgit.source.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.jgit.ssh.apache.feature.group" version="5.2.0.201812061821-r"/>
-		    <unit id="org.eclipse.jgit.ssh.apache.source.feature.group" version="5.2.0.201812061821-r"/>
 		    <repository location="http://download.eclipse.org/egit/updates"/>
+		    <unit id="org.eclipse.egit.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.egit.gitflow.feature.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.egit.source.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.egit.ui.smartimport" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.jgit.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.jgit.pgm.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.jgit.pgm.source.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.jgit.source.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.jgit.ssh.apache.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.jgit.ssh.apache.source.feature.group" version="5.3.0.201903130848-r"/>
 	    </location>
 	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
     </locations>

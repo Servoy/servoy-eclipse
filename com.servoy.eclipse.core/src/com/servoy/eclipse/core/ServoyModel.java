@@ -261,6 +261,9 @@ public class ServoyModel extends AbstractServoyModel
 	private String testBuildPathsPrjName;
 	private boolean testBuildPathsPrjShouldBuildPrj;
 
+	private final List<IResourceChangeListener> postChangeResourceChangeListeners = new ArrayList<>(); // post-change-listeners that will be triggered only after ServoyModel has had a chance to handle these changes
+	private final List<IResourceChangeEvent> outstandingPostChangeEvents = new ArrayList<>();
+
 	protected ServoyModel()
 	{
 		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
@@ -1148,6 +1151,7 @@ public class ServoyModel extends AbstractServoyModel
 
 					progressMonitor.worked(1);
 					progressMonitor.subTask("Announcing activation intent...");
+
 					ReturnValueRunnable uiRunnable = new ReturnValueRunnable()
 					{
 						public void run()
@@ -1374,6 +1378,7 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			Display.getDefault().syncExec(new Runnable()
 			{
+
 				public void run()
 				{
 					try
@@ -1391,13 +1396,15 @@ public class ServoyModel extends AbstractServoyModel
 						ServoyLog.logError(e);
 					}
 				}
+
 			});
 		}
 	}
 
-	private void setActiveProjectReferenceInternal(final ServoyProject project)
+	@Override
+	protected void setActiveProjectReferenceInternal(final ServoyProject project)
 	{
-		activeProject = project;
+		super.setActiveProjectReferenceInternal(project);
 		synchronized (this)
 		{
 			testBuildPathsPrjName = null; // TODO does this member even have to exist or could we always use activeProject instead of project argument in testBuildPathsAndBuild(...)?
@@ -1640,6 +1647,7 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				Display.getDefault().syncExec(new Runnable()
 				{
+
 					public void run()
 					{
 						try
@@ -1655,6 +1663,7 @@ public class ServoyModel extends AbstractServoyModel
 							ServoyLog.logError(e);
 						}
 					}
+
 				});
 			}
 		}
@@ -2187,23 +2196,11 @@ public class ServoyModel extends AbstractServoyModel
 						{
 							// a project that should be added to Servoy project list cache
 							refreshServoyProjects();
-							if (activeProject != null &&
-								activeProject.getProject() != getWorkspace().getRoot().getProject(activeProject.getProject().getName()))
-							{
-								// in case active project was replaced/overwritten we must update the reference as well (so we don't have trouble when comparing IProject instances)
-								setActiveProjectReferenceInternal(getServoyProject(activeProject.getProject().getName()));
-							}
 						}
 						else if ((element.getFlags() & IResourceDelta.REPLACED) != 0)
 						{
-							// it is an overwritten ServoyProject who must be updated as well (same name but other IProject instance)
+							// it is an overwritten ServoyProject which must be updated as well (same name but other IProject instance)
 							refreshServoyProjects();
-							if (activeProject != null &&
-								activeProject.getProject() != getWorkspace().getRoot().getProject(activeProject.getProject().getName()))
-							{
-								// in case active project was replaced/overwritten we must update the reference as well (so we don't have trouble when comparing IProject instances)
-								setActiveProjectReferenceInternal(getServoyProject(activeProject.getProject().getName()));
-							}
 						}
 
 						// check if there is a solution for it
@@ -2247,7 +2244,7 @@ public class ServoyModel extends AbstractServoyModel
 						else
 						{
 							// maybe this is a new ServoyProject (checked out right now, or imported into the workspace...);
-							// in this case we need enable it to have a solution - by updating the repository's root object meta data cache
+							// in this case we need to enable it to have a solution - by updating the repository's root object meta data cache
 							eclipseRepository.registerSolutionMetaData(resource.getName());
 
 							if (shouldBeModuleOfActiveSolution(resource.getName()))
@@ -3414,6 +3411,10 @@ public class ServoyModel extends AbstractServoyModel
 				try
 				{
 					resourcesPostChanged(event);
+					synchronized (outstandingPostChangeEvents)
+					{
+						outstandingPostChangeEvents.add(event);
+					}
 				}
 				finally
 				{
@@ -3423,8 +3424,7 @@ public class ServoyModel extends AbstractServoyModel
 		};
 		preChangeListener = new ModelPreChangeListener(this);
 		getWorkspace().addResourceChangeListener(postChangeListener, IResourceChangeEvent.POST_CHANGE);
-		getWorkspace().addResourceChangeListener(preChangeListener, IResourceChangeEvent.PRE_CLOSE);
-		getWorkspace().addResourceChangeListener(preChangeListener, IResourceChangeEvent.PRE_DELETE);
+		getWorkspace().addResourceChangeListener(preChangeListener, IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
 		getResourceChangesHandlerCounter().addValueListener(new AtomicIntegerWithListener.IValueListener()
 		{
@@ -3432,6 +3432,7 @@ public class ServoyModel extends AbstractServoyModel
 			public void valueSetToZero()
 			{
 				handleOutstandingChangedFiles(null);
+				triggerOutstandingPostChangeEvents();
 			}
 		});
 		if (dataModelManager != null)
@@ -3482,6 +3483,58 @@ public class ServoyModel extends AbstractServoyModel
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Equivalent to addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE).
+	 *
+	 * @see #addResourceChangeListener(IResourceChangeListener, int)
+	 */
+	public void addResourceChangeListener(IResourceChangeListener resourceChangeListener)
+	{
+		addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE);
+	}
+
+	/**
+	 * Adds a (proxy) listener to eclipse workspace resources changes (POST_CHANGE if requested will only get triggered once ServoyModel has had a chance to handle these changes; all other types of events will be registered normally to the workspace).<br/>
+	 * This is useful if these registered listeners that are POST_CHANGE depend on things being already updated in ServoyModel (for example that all ServoyProject instances are the new ones in case the .project files have changed).
+	 *
+	 * @param postChangeResourceChangeListener the listener that will get triggered only after ServoyModel has already had a chance to handle the POST_CHANGE resource changes if it is a POST_CHANGE; other types of events are registered directly to the workspace.
+	 * @param eventMask the bit-wise OR of all event types of interest to the listener; Use IResourceChangeEvent constants.
+	 *
+	 * @see IWorkspace#addResourceChangeListener(IResourceChangeListener, int) for more information on possible eventMasks and what they do.
+	 */
+	public void addResourceChangeListener(IResourceChangeListener resourceChangeListener, int eventMask)
+	{
+		if ((eventMask & IResourceChangeEvent.POST_CHANGE) != 0 && !postChangeResourceChangeListeners.contains(resourceChangeListener))
+			postChangeResourceChangeListeners.add(resourceChangeListener);
+
+		int remainingEventTypes = (eventMask & (~IResourceChangeEvent.POST_CHANGE));
+		if (remainingEventTypes != 0) ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, remainingEventTypes);
+	}
+
+	public void removeResourceChangeListener(IResourceChangeListener resourceChangeListener)
+	{
+		postChangeResourceChangeListeners.remove(resourceChangeListener);
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+	}
+
+	protected void triggerOutstandingPostChangeEvents()
+	{
+		synchronized (outstandingPostChangeEvents)
+		{
+			if (outstandingPostChangeEvents.size() > 0)
+			{
+				for (IResourceChangeEvent e : outstandingPostChangeEvents)
+				{
+					for (IResourceChangeListener l : postChangeResourceChangeListeners)
+					{
+						l.resourceChanged(e);
+					}
+				}
+			}
+			outstandingPostChangeEvents.clear();
 		}
 	}
 

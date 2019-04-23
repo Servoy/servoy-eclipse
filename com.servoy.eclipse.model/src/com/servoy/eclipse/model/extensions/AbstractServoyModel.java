@@ -370,6 +370,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 					if (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
 					{
 						ServoyProject sp = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
+						if (activeProject != null && activeProject.getProject().equals(project))
+						{
+							// in case active project was replaced/overwritten we must update the reference as well (so we don't have trouble when comparing IProject or ServoyProject instances...)
+							setActiveProjectReferenceInternal(sp);
+						}
 						servoyProjects.put(project.getName(), sp);
 					}
 				}
@@ -381,6 +386,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 			servoyProjectCache = servoyProjects;
 		}
 		return servoyProjects;
+	}
+
+	protected void setActiveProjectReferenceInternal(final ServoyProject project)
+	{
+		activeProject = project;
 	}
 
 	public DataModelManager getDataModelManager()

@@ -670,7 +670,7 @@ public class SolutionExplorerTreeContentProvider
 				// (still allows the user to activate them if necessary
 				for (ServoyProject module : modules)
 				{
-					if (module == servoyProject)
+					if (module.getProject().equals(servoyProject.getProject()))
 					{
 						isModule = true;
 						break;
@@ -3581,11 +3581,11 @@ public class SolutionExplorerTreeContentProvider
 			for (ServoyProject servoyProject : activeProjects)
 			{
 				SimpleUserNode moduleNode = findChildNode(modulesOfActiveSolution, servoyProject.getSolution().getName());
-				refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Web_Packages));
+				if (moduleNode != null) refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Web_Packages)); // null will be main active solution here which is already handled a few lines above
 			}
 		}
 
-		/* if (componentsChanged) */refreshTreeNode(componentsFromResourcesNode);
+		/* if (componentsChanged) */ refreshTreeNode(componentsFromResourcesNode);
 		/* if (servicesChanged) */ refreshTreeNode(servicesFromResourcesNode);
 
 		refreshTreeNode(plugins);

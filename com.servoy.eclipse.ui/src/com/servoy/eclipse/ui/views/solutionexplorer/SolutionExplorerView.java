@@ -2142,7 +2142,7 @@ public class SolutionExplorerView extends ViewPart
 				// update)
 				try
 				{
-					ServoyModel.getWorkspace().run(new IWorkspaceRunnable() // TODO this should be done nicer by controlling the sequence resource listeners execute; maybe add a proxy resource listener mechanism to ServoyModel that is able to do that
+					ServoyModel.getWorkspace().run(new IWorkspaceRunnable()
 					{
 
 						public void run(IProgressMonitor monitor) throws CoreException
@@ -2219,9 +2219,9 @@ public class SolutionExplorerView extends ViewPart
 						}
 						if (mustRefresh)
 						{
-							refreshAfterPendingChangesWereTreatedInModel(() -> {
-								refreshTreeCompletely();
-							});
+							UIUtils.runInUI(() -> {
+								refreshTreeCompletely(); // refreshAfterPendingChangesWereTreatedInModel should not be needed here as we are in a listener that is registered to run after post change event is handled by ServoyModel or even later, when after building finishes
+							}, false);
 						}
 					}
 					else if ((event.getType() & IResourceChangeEvent.POST_BUILD) != 0)
@@ -2260,8 +2260,11 @@ public class SolutionExplorerView extends ViewPart
 				}
 			};
 		}
-		if (wasNull || reregisterExistingListener) ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
-			IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+		if (wasNull || reregisterExistingListener)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().addResourceChangeListener(resourceChangeListener,
+				IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+		}
 	}
 
 	private void addServerAndTableListeners(boolean reregisterExistingListener)
@@ -3746,7 +3749,7 @@ public class SolutionExplorerView extends ViewPart
 
 		if (resourceChangeListener != null)
 		{
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+			ServoyModelManager.getServoyModelManager().getServoyModel().removeResourceChangeListener(resourceChangeListener);
 			if (discardListenerReferences) resourceChangeListener = null;
 		}
 

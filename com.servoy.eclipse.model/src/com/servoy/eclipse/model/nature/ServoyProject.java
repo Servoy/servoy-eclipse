@@ -89,8 +89,9 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 	private ViewFoundsetsServer viewServer = null;
 
 	public ServoyProject()
-
 	{
+		// constructor for when it is created via Project.getNature(natureID)
+		// setProject will be called later by NatureManager.createNature() that is called by Project.getNature(natureID)
 	}
 
 	ServoyProject(IProject project)
@@ -232,7 +233,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 	 */
 	public boolean isActive()
 	{
-		return this == ServoyModelFinder.getServoyModel().getActiveProject();
+		ServoyProject ap = ServoyModelFinder.getServoyModel().getActiveProject();
+		return project != null && ap != null && (ap == this || project.equals(ap.getProject())); // resource changes can end up creating different ServoyProject or even IProject instances for the same project; most of the time it does not matter as ServoyModel handles those POST_CHANGE events first, but still
 	}
 
 	public IProject getProject()

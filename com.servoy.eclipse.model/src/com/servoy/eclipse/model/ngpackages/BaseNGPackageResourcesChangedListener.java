@@ -19,7 +19,6 @@ package com.servoy.eclipse.model.ngpackages;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -107,7 +106,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				IProject project = (IProject)event.getResource(); // PRE_DELETE will give the project here in the event, not in the resource delta (which will be null)
 				recourceChangeHandler.handleProjectChanged(project);
 
-				// we did process the pre-delete or pre-close, but we don't fire it right now cause it will trigger things like refreshing the
+				// we did process the pre-delete or pre-close, but we don't fire it right now because it will trigger things like refreshing the
 				// solex tree - which then end up reading stale Resource states (workspace thinks they are still there but on disk they are already deleted);
 				// that can lead to exceptions for example meta-inf not existing on disk but the IResource.exists() for that says true => exception when trying to read contents
 
@@ -318,9 +317,9 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				else
 				{
 					// see if this is a change in the old locations (resources project components/services) - in expanded web packages subtrees (not zips)
-					if (resource.getProject().hasNature(ServoyResourcesProject.NATURE_ID) &&
-						resource.getProject().getNature(ServoyResourcesProject.NATURE_ID).equals(
-							ServoyModelFinder.getServoyModel().getActiveResourcesProject()))
+					ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+					if (resource.getProject().hasNature(ServoyResourcesProject.NATURE_ID) && activeResourcesProject != null &&
+						resource.getProject().equals(activeResourcesProject.getProject()))
 					{
 						// we need to determine the root dir package in "components" or in "services" that was affected if any
 						IProject resourcesProject = resource.getProject();
@@ -480,30 +479,28 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 					// a new one was found; deal with it
 					allAvailableNGPackageProjectNames.add(changedProject.getName());
 
-					List<String> referencedActiveSolutionons = new ArrayList<String>();
+					List<String> referencedActiveSolutions = new ArrayList<String>();
 					IProject[] referencingProjects = changedProject.getReferencingProjects();
 					if (referencingProjects.length > 0)
 					{
-						List<ServoyProject> allActiveSolutions = Arrays.asList(ServoyModelFinder.getServoyModel().getModulesOfActiveProject());
-
 						// see if this package project is referenced by any active solution/module
 						for (IProject iProject : referencingProjects)
 						{
-							if (iProject.hasNature(ServoyProject.NATURE_ID) && allActiveSolutions.contains(iProject.getNature(ServoyProject.NATURE_ID)))
+							if (iProject.hasNature(ServoyProject.NATURE_ID) && ServoyModelFinder.getServoyModel().isSolutionActive(iProject.getName()))
 							{
-								referencedActiveSolutionons.add(iProject.getName());
+								referencedActiveSolutions.add(iProject.getName());
 							}
 						}
 					}
 
-					setNGPackagesListChanged(referencedActiveSolutionons.size() > 0);
+					setNGPackagesListChanged(referencedActiveSolutions.size() > 0);
 
-					if (referencedActiveSolutionons.size() > 0)
+					if (referencedActiveSolutions.size() > 0)
 					{
 						baseNGPackageManager.clearReferencedNGPackageProjectsCache();
 
 						IPackageReader reader = baseNGPackageManager.readPackageResource(changedProject);
-						if (reader != null) for (String referencingSolutionName : referencedActiveSolutionons)
+						if (reader != null) for (String referencingSolutionName : referencedActiveSolutions)
 						{
 							getAddedPackageReaders(referencingSolutionName).add(reader);
 						}
