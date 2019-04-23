@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.views;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -281,12 +282,14 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				switch (e.detail)
 				{
 					case SWT.TRAVERSE_TAB_NEXT :
-						tree.setSelection(getNextItemForward(tree, currentSelectedItem));
+						if (currentSelectedItem.getItemCount() > 0) tree.setSelection(getNextItem(currentSelectedItem, true));
+						else tree.setSelection(getNextSibling(tree, currentSelectedItem, true));
 						break;
 
 
 					case SWT.TRAVERSE_TAB_PREVIOUS :
-						tree.setSelection(getBackwardItem(tree, currentSelectedItem));
+						if (currentSelectedItem.getItemCount() > 0) tree.setSelection(getNextItem(currentSelectedItem, false));
+						else tree.setSelection(getNextSibling(tree, currentSelectedItem, false));
 						break;
 				}
 
@@ -325,17 +328,10 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 		}
 	}
 
-	private TreeItem[] getSiblings(Tree tree, TreeItem currentItem)
-	{
-		TreeItem parentItem = currentItem.getParentItem();
-		if (parentItem != null) return parentItem.getItems();
-		return tree.getItems();
-	}
-
 	private TreeItem getNextSibling(Tree tree, TreeItem currentItem, boolean forward)
 	{
 		TreeItem[] siblings = getSiblings(tree, currentItem);
-		if (siblings.length < 2) return null;
+		if (siblings.length < 2) return getNextSibling(tree, currentItem.getParentItem(), forward);
 		int index = -1;
 		for (int i = 0; i < siblings.length; i++)
 		{
@@ -347,80 +343,39 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 		}
 		if ((forward && index == siblings.length - 1) || (!forward && index == 0))
 		{
-			return null;
+			TreeItem parent = currentItem.getParentItem() != null ? currentItem.getParentItem() : tree.getItem(tree.indexOf(currentItem));
+			siblings = getSiblings(tree, parent);
+			index = Arrays.asList(siblings).indexOf(parent);
+
+			if (forward && index == siblings.length - 1) return getNextItem(tree.getItem(0), forward);
+			else if (!forward && index == 0) return getNextItem(tree.getItem(siblings.length - 1), forward);
 		}
 
-		return forward ? siblings[index + 1] : siblings[index - 1];
+		return forward ? getNextItem(siblings[index + 1], forward) : getNextItem(siblings[index - 1], forward);
 	}
 
-
-	private TreeItem getNextItem(TreeItem item)
+	private TreeItem getNextItem(TreeItem item, boolean forward)
 	{
+		int idx = forward ? 0 : item.getItemCount() - 1;
 		TreeItem auxItem = item;
 
 		if (auxItem.getItemCount() == 0) return auxItem;
-		auxItem.getParent().showItem(auxItem.getItem(0));
-
 		while (auxItem.getItemCount() > 0)
 		{
-			auxItem.getParent().showItem(auxItem.getItem(0));
-			auxItem = auxItem.getItem(0);
+			auxItem.getParent().showItem(auxItem.getItem(idx));
+			auxItem = auxItem.getItem(idx);
 		}
 
 		return auxItem;
 	}
 
-	private TreeItem getNextItemForward(Tree tree, TreeItem currentItem)
+	private TreeItem[] getSiblings(Tree tree, TreeItem currentItem)
 	{
-		TreeItem child = getNextItem(currentItem);
-		if (child != null && child != currentItem) return child;
-
-		TreeItem nextSibling = getNextSibling(tree, currentItem, true);
-		if (nextSibling != null) return getNextItem(nextSibling);
-
-		TreeItem parent = currentItem.getParentItem();
-
-		while (parent != null)
-		{
-			nextSibling = getNextSibling(tree, parent, true);
-			if (nextSibling != null) return getNextItem(nextSibling);
-			parent = parent.getParentItem();
-		}
-
-		return tree.getItem(0);
+		TreeItem parentItem = currentItem.getParentItem();
+		if (parentItem != null) return parentItem.getItems();
+		return tree.getItems();
 	}
 
-
-	private TreeItem getBackwardItem(Tree tree, TreeItem currentSelectedItem)
-	{
-		TreeItem newSelection = null;
-		if (currentSelectedItem == null) newSelection = tree.getItem(tree.getItemCount() - 1);
-		else
-		{
-			newSelection = getNextSibling(tree, currentSelectedItem, false);
-			if (newSelection == null)
-			{
-				TreeItem selectedItemParent = currentSelectedItem.getParentItem();
-				if (selectedItemParent != null)
-				{
-					newSelection = getNextSibling(tree, selectedItemParent, false);
-					if (newSelection == null) newSelection = tree.getItem(tree.getItemCount() - 1);
-				}
-				else
-				{
-					int currentIndex = tree.indexOf(currentSelectedItem) == 0 ? tree.getItemCount() - 1 : tree.indexOf(currentSelectedItem) - 1;
-					newSelection = tree.getItem(currentIndex);
-				}
-			}
-
-			if (newSelection.getItemCount() > 0)
-			{
-				newSelection = newSelection.getItem(newSelection.getItemCount() - 1);
-			}
-		}
-
-		return newSelection;
-	}
 
 	@Override
 	public Control getControl()
