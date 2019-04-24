@@ -280,6 +280,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_methodNumberOfArgsMismatch;
 	public static String ErrorWarningPreferencePage_rolloverImageAndCursorNotWorking;
 	public static String ErrorWarningPreferencePage_methodOverrideProblem;
+	public static String ErrorWarningPreferencePage_deprecatedSpecUsageProblem;
 
 	static
 	{

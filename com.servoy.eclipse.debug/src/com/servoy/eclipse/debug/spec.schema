@@ -129,6 +129,10 @@
 		{
 			"type": "boolean"
 		},
+		"replacement": 
+		{
+			"type": "string"
+		},
 		"model":
 		{
 			"description": "The model this component has",

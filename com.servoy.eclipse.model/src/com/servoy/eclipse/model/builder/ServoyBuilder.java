@@ -545,7 +545,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);//TODO should this be ERROR?
+	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -964,8 +964,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else if (spec.isDeprecated())
 			{
-				ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Web Component", typeName);
-				addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
+				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+				{
+					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Web Component", typeName);
+					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
+					try
+					{
+						marker.setAttribute("replacement", spec.getReplacement());
+						marker.setAttribute("uuid", o.getUUID().toString());
+						marker.setAttribute("solutionName", project.getName());
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
 			}
 		}
 		if (o instanceof LayoutContainer && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
@@ -991,8 +1006,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			else if (spec.isDeprecated())
 			{
-				ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Layout", ((LayoutContainer)o).getSpecName());
-				addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
+				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+				{
+					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Layout", ((LayoutContainer)o).getSpecName());
+					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
+					try
+					{
+						marker.setAttribute("replacement", spec.getReplacement());
+						marker.setAttribute("uuid", o.getUUID().toString());
+						marker.setAttribute("solutionName", project.getName());
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
 			}
 		}
 	}
