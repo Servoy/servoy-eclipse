@@ -127,7 +127,7 @@
 		},
 		"deprecated": 
 		{
-			"type": "boolean"
+			"type": "string"
 		},
 		"replacement": 
 		{
@@ -246,7 +246,7 @@
 									"type": "boolean"
 								},
 								"deprecated": {
-									"type": "boolean"
+									"type": "string"
 								}
 							},
 				        	  "required":["type"],
@@ -357,7 +357,7 @@
 							"type": "string"
 						},
 						"deprecated": {
-							"type": "boolean"
+							"type": "string"
 						},
 						"parameters": {
 							"description": "the parameter types this api call accepts",

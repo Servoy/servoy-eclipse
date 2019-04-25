@@ -967,7 +967,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
 				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 				{
-					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Web Component", typeName);
+					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill(typeName,
+						"web component" + (((WebComponent)o).getName() != null ? " with name '" + ((WebComponent)o).getName() + "'" : "'"),
+						spec.getDeprecatedMessage());
 					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
 						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
 					try
@@ -1009,7 +1011,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
 				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 				{
-					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill("Layout", ((LayoutContainer)o).getSpecName());
+					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill(((LayoutContainer)o).getSpecName(), "layout", spec.getDeprecatedMessage());
 					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
 						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
 					try
