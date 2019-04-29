@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -57,7 +58,9 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -1204,6 +1207,66 @@ public class Activator extends Plugin
 		ss.startWebServer();
 
 		checkApplicationServerVersion(ApplicationServerRegistry.get());
+		checkDefaultPostgressInstall(ApplicationServerRegistry.get());
+	}
+
+	/**
+	 * @param iApplicationServerSingleton
+	 */
+	private void checkDefaultPostgressInstall(IApplicationServerSingleton appServer)
+	{
+		File file = new File(appServer.getServoyApplicationServerDirectory() + "/postgres_db/servoy_repository.dbdump");
+		if (file.exists())
+		{
+			// if the zip is there then always aks the question.
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(), "Default Postgress not installed.",
+						"Should a default Postgress database be installed?", SWT.NONE,
+						new String[] { "Yes (include sample)", "Yes (no sample)", "No", "Later" });
+					if (open == 0)
+					{
+						// create database with sample
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						try
+						{
+							dialog.run(true, false, new CreatedDatabaseJob(new File(file.getParentFile(), "install_postgres.bat"), // TODO batch file should be sh for none windows...
+								new String[] { "repository_server", "bug_db", "example", "log_data", "udm", "pdf_forms", "user_data" }, appServer));
+						}
+						catch (InvocationTargetException | InterruptedException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else if (open == 1)
+					{
+						// create database with just repo
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						try
+						{
+							dialog.run(true, false, new CreatedDatabaseJob(new File(file.getParentFile(), "install_postgres_no_samples.bat"),
+								new String[] { "repository_server" }, appServer)); // TODO batch file should be sh for none windows...
+						}
+						catch (InvocationTargetException | InterruptedException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else if (open == 2)
+					{
+						// delete dump files
+						File[] dumpFiles = file.getParentFile().listFiles(path -> path.isFile());
+						for (File dumpFile : dumpFiles)
+						{
+							dumpFile.delete();
+						}
+					}
+					// 3 ask the same again later.
+				}
+			});
+		}
 	}
 
 	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception
