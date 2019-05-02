@@ -1232,7 +1232,12 @@ public class Activator extends Plugin
 						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
 						try
 						{
-							dialog.run(true, false, new CreatedDatabaseJob(new File(file.getParentFile(), "install_postgres.bat"), // TODO batch file should be sh for none windows...
+							String installFile = "install_postgres.sh";
+							if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS)
+							{
+								installFile = "install_postgres.bat";
+							}
+							dialog.run(true, false, new CreatedDatabaseJob(new File(file.getParentFile(), installFile), // TODO batch file should be sh for none windows...
 								new String[] { "repository_server", "bug_db", "example", "log_data", "udm", "pdf_forms", "user_data" }, appServer));
 						}
 						catch (InvocationTargetException | InterruptedException e)
@@ -1246,8 +1251,13 @@ public class Activator extends Plugin
 						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
 						try
 						{
-							dialog.run(true, false, new CreatedDatabaseJob(new File(file.getParentFile(), "install_postgres_no_samples.bat"),
-								new String[] { "repository_server" }, appServer)); // TODO batch file should be sh for none windows...
+							String installFile = "install_postgres_no_samples.sh";
+							if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS)
+							{
+								installFile = "install_postgres_no_samples.bat";
+							}
+							dialog.run(true, false,
+								new CreatedDatabaseJob(new File(file.getParentFile(), installFile), new String[] { "repository_server" }, appServer)); // TODO batch file should be sh for none windows...
 						}
 						catch (InvocationTargetException | InterruptedException e)
 						{

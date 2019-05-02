@@ -18,17 +18,18 @@
 package com.servoy.eclipse.core;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.serverconfigtemplates.PostgresTemplate;
 import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -48,9 +49,43 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 	public CreatedDatabaseJob(File batchFile, String[] serverNames, IApplicationServerSingleton appServer)
 	{
 		super();
-		this.batchFile = batchFile;
+		File canonical = batchFile;
+		try
+		{
+			canonical = batchFile.getCanonicalFile();
+		}
+		catch (IOException e1)
+		{
+		}
+		this.batchFile = canonical;
 		this.serverNames = serverNames;
 		this.appServer = appServer;
+		try
+		{
+			this.batchFile.setExecutable(true);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Error setting executable bits on " + this.batchFile.getAbsolutePath(), e);
+		}
+
+		if (Utils.getPlatform() != Utils.PLATFORM_WINDOWS)
+		{
+			try
+			{
+				File postgresBin = new File(this.batchFile.getParentFile(), "bin");
+				new File(postgresBin, "initdb").setExecutable(true);
+				new File(postgresBin, "pg_ctl").setExecutable(true);
+				new File(postgresBin, "postgres").setExecutable(true);
+				new File(postgresBin, "createdb").setExecutable(true);
+				new File(postgresBin, "pg_restore").setExecutable(true);
+				new File(postgresBin, "pg_dump").setExecutable(true);
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Error setting executable bits on postgresql", e);
+			}
+		}
 	}
 
 
@@ -60,8 +95,8 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 		monitor.beginTask("Creating postgresql database", 3);
 		try
 		{
-			ProcessBuilder pb = new ProcessBuilder(batchFile.getCanonicalPath());
-			pb.directory(batchFile.getParentFile().getCanonicalFile());
+			ProcessBuilder pb = new ProcessBuilder(batchFile.getAbsolutePath());
+			pb.directory(batchFile.getParentFile());
 			Process process = pb.start();
 			process.waitFor();
 		}
@@ -74,8 +109,13 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 
 		try
 		{
-			File startPostgres = new File(batchFile.getParentFile().getParentFile().getCanonicalFile(), "startpostgres.bat");
-			ProcessBuilder pb = new ProcessBuilder(startPostgres.getCanonicalPath()); // TODO should be changed for OSX
+			ProcessBuilder pb = null;
+			File startPostgres = new File(batchFile.getParentFile().getParentFile(), "startpostgres.bat");
+			if (Utils.getPlatform() != Utils.PLATFORM_WINDOWS)
+			{
+				startPostgres = new File(batchFile.getParentFile().getParentFile(), "startpostgres.sh");
+			}
+			pb = new ProcessBuilder(startPostgres.getAbsolutePath());
 			pb.directory(startPostgres.getParentFile());
 			Process process = pb.start();
 			process.waitFor();
@@ -90,7 +130,14 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 
 		// add start postgres to the servoy properties file.
 		Settings settings = appServer.getService(Settings.class);
-		settings.setProperty("nativeStartupLauncher", "%%user.dir%%/startpostgres.bat"); // should be sh for none windows
+		if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS)
+		{
+			settings.setProperty("nativeStartupLauncher", "%%user.dir%%/startpostgres.bat");
+		}
+		else
+		{
+			settings.setProperty("nativeStartupLauncher", "%%user.dir%%/postgres_db/bin/pg_ctl|start|-D|database|-l|postgres_db/postgres_log.txt");
+		}
 		settings.setProperty("waitForNativeStartup", "false");
 		settings.setProperty("nativeShutdownLauncher", "%%user.dir%%/postgres_db/bin/pg_ctl|stop|-D|database|-l|postgres_db/postgres_log.txt");
 		IServerManagerInternal serverManager = appServer.getServerManager();
@@ -109,10 +156,18 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 			{
 				serverManager.saveServerConfig(null, newServerConfig);
 			}
-			catch (RepositoryException e)
+			catch (Exception e)
 			{
 				ServoyLog.logError(e);
 			}
+		}
+		try
+		{
+			settings.save();
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
 		}
 		monitor.worked(1);
 	}
