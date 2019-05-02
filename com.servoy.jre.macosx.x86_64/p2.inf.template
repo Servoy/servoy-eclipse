@@ -1,0 +1,8 @@
+# Those would better be placed on the feature.jar iu instead of feature.group, but didn't find a way to add touchpoint for feature.jar
+instructions.install = \
+org.eclipse.equinox.p2.touchpoint.eclipse.addProgramArg(programArg:-vm);\
+org.eclipse.equinox.p2.touchpoint.eclipse.addProgramArg(programArg:../Eclipse/features/project.artifactId_version/jre/Contents/Home/lib/libjli.dylib);\
+org.eclipse.equinox.p2.touchpoint.natives.chmod(targetDir:${installFolder}/features/project.artifactId_version/jre/Contents/Home/bin/,targetFile:java,permissions:755);
+instructions.uninstall = \
+org.eclipse.equinox.p2.touchpoint.eclipse.removeProgramArg(programArg:-vm);\
+org.eclipse.equinox.p2.touchpoint.eclipse.removeProgramArg(programArg:../Eclipse/features/project.artifactId_version/jre/Contents/Home/lib/libjli.dylib);

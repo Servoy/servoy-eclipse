@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.servoy.jre.macosx.x86_64.feature"
+      label="OpenJDK with OpenJ9 Runtime (macOS)"
+      version="12"
+      provider-name="Eclipse Packaging Project"
+      os="macosx"
+      arch="x86_64"
+      license-feature="org.eclipse.license"
+      license-feature-version="0.0.0">
+
+   <description url="http://eclipse.org/epp">
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+</feature>
