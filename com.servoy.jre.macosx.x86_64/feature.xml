@@ -5,9 +5,7 @@
       version="12"
       provider-name="Eclipse Packaging Project"
       os="macosx"
-      arch="x86_64"
-      license-feature="org.eclipse.license"
-      license-feature-version="0.0.0">
+      arch="x86_64">
 
    <description url="http://eclipse.org/epp">
       %description
