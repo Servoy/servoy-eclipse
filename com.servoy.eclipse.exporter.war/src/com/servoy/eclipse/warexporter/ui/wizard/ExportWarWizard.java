@@ -197,33 +197,25 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 					{
 						getContainer().showPage(servoyPropertiesSelectionPage);
 						servoyPropertiesSelectionPage.setErrorMessage(
-							"License code '" + upgrade[1] + "' defined in the selected properties view is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+							"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
 						return false;
 					}
 					else
 					{
-						Display.getDefault().asyncExec(new Runnable()
-						{
-							public void run()
-							{
-								String message = "License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
-									"'. The export contains the new license code, but the changes could not be written to the selected properties file. Please adjust the '" +
-									exportModel.getServoyPropertiesFileName() + "' file manually.";
-								ServoyLog.logInfo(message);
-								MessageDialog.openWarning(getShell(), "Could not save changes to the properties file", message);
-							}
+						Display.getDefault().asyncExec(() -> {
+							String message = "License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
+								"'. The export contains the new license code, but the changes could not be written to the selected properties file. Please adjust the '" +
+								exportModel.getServoyPropertiesFileName() + "' file manually.";
+							ServoyLog.logInfo(message);
+							MessageDialog.openWarning(getShell(), "Could not save changes to the properties file", message);
 						});
 					}
 				}
 			}
 			else
 			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						MessageDialog.openError(getShell(), "Error creating the WAR file", checkFile);
-					}
+				Display.getDefault().asyncExec(() -> {
+					MessageDialog.openError(getShell(), "Error creating the WAR file", checkFile);
 				});
 			}
 		}

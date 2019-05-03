@@ -533,7 +533,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 					if (!Utils.getAsBoolean(upgrade[0]))
 					{
 						throw new ExportException(
-							"License code '" + upgrade[1] + "' defined in the selected properties view is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+							"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
 					}
 					else
 					{

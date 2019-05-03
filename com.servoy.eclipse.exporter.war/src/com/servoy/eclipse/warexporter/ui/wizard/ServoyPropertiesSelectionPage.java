@@ -373,20 +373,16 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			if (!Utils.getAsBoolean(upgrade[0]))
 			{
 				setErrorMessage(
-					"License code '" + upgrade[1] + "' defined in the selected properties view is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+					"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
 			}
 			else
 			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						String message = "License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
-							"' but the changes could not be written to the selected properties file. Please adjust the '" +
-							exportModel.getServoyPropertiesFileName() + "' file manually.";
-						ServoyLog.logInfo(message);
-						MessageDialog.openWarning(getShell(), "Could not save changes to the properties file", message);
-					}
+				Display.getDefault().asyncExec(() -> {
+					String message = "License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
+						"' but the changes could not be written to the selected properties file. Please adjust the '" +
+						exportModel.getServoyPropertiesFileName() + "' file manually.";
+					ServoyLog.logInfo(message);
+					MessageDialog.openWarning(getShell(), "Could not save changes to the properties file", message);
 				});
 			}
 		}
