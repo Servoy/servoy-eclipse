@@ -81,6 +81,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	int importUserPolicy = IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G; // get from user.
 
 	private Button allowDataModelChangeButton;
+	private Button skipDatabaseViewsUpdate;
 	private Text allowDataModelServers;
 	private Button allowKeywordsButton;
 	private Button updateSequencesButton;
@@ -191,6 +192,18 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		allowDataModelServers.setToolTipText("Comma separated server names where changes are allowed");
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		allowDataModelServers.setLayoutData(gd);
+
+		skipDatabaseViewsUpdate = new Button(composite, SWT.CHECK);
+		skipDatabaseViewsUpdate.setText("Skip database views update");
+		skipDatabaseViewsUpdate.setSelection(exportModel.isSkipDatabaseViewsUpdate());
+		skipDatabaseViewsUpdate.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setSkipDatabaseViewsUpdate(skipDatabaseViewsUpdate.getSelection());
+			}
+		});
 
 		exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
 		exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only");
@@ -710,6 +723,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	{
 		exportNoneActiveSolutions.setEnabled(exportActiveSolution.getSelection());
 		allowDataModelChangeButton.setEnabled(exportActiveSolution.getSelection());
+		skipDatabaseViewsUpdate.setEnabled(exportActiveSolution.getSelection());
 		exportAllTablesFromReferencedServers.setEnabled(exportActiveSolution.getSelection());
 		allowKeywordsButton.setEnabled(exportActiveSolution.getSelection());
 		updateSequencesButton.setEnabled(exportActiveSolution.getSelection());

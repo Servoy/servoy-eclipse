@@ -135,4 +135,8 @@ public interface IWarExportModel extends IExportSolutionModel
 	public boolean isExportNoneActiveSolutions();
 
 	public Map<String, String> getUpgradedLicenses();
+
+	public boolean isSkipDatabaseViewsUpdate();
+
+	public void setSkipDatabaseViewsUpdate(boolean skip);
 }

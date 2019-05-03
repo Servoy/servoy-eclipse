@@ -978,6 +978,7 @@ public class WarExporter
 			prop.setProperty("allowDataModelChange", exportModel.getAllowDataModelChanges());
 			prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
 			prop.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
+			prop.setProperty("skipDatabaseViewsUpdate", Boolean.toString(exportModel.isSkipDatabaseViewsUpdate()));
 
 			try (FileWriter writer = new FileWriter(importProperties))
 			{

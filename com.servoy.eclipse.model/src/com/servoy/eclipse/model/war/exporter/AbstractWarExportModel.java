@@ -86,6 +86,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	private boolean isOverwriteDeployedDBServerProperties = true;
 	private boolean isOverwriteDeployedServoyProperties;
 	private Map<String, String> upgradedLicenses;
+	private boolean skipDatabaseViewsUpdate;
 
 	public AbstractWarExportModel(boolean isNGExport)
 	{
@@ -661,5 +662,15 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		return upgradedLicenses;
 	}
 
+	@Override
+	public boolean isSkipDatabaseViewsUpdate()
+	{
+		return skipDatabaseViewsUpdate;
+	}
 
+	@Override
+	public void setSkipDatabaseViewsUpdate(boolean skip)
+	{
+		skipDatabaseViewsUpdate = skip;
+	}
 }

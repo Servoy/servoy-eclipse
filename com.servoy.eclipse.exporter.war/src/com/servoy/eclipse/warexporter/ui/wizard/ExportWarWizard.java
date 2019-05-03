@@ -597,7 +597,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 
 		appendToBuilder(sb, " -overwriteGroups ", exportModel.isOverwriteGroups());
 		appendToBuilder(sb, " -allowSQLKeywords ", exportModel.isExportSampleData());
-		appendToBuilder(sb, " -stopOnDataModelChanges ", exportModel.getAllowDataModelChanges());
+		appendToBuilder(sb, " -allowDataModelChanges ", exportModel.getAllowDataModelChanges());
+		appendToBuilder(sb, " -skipDatabaseViewsUpdate ", exportModel.isSkipDatabaseViewsUpdate());
 		appendToBuilder(sb, " -overrideSequenceTypes ", exportModel.isOverrideSequenceTypes());
 		appendToBuilder(sb, " -overrideDefaultValues ", exportModel.isOverrideDefaultValues());
 		appendToBuilder(sb, " -insertNewI18NKeysOnly ", exportModel.isInsertNewI18NKeysOnly());

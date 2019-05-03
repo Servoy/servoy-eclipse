@@ -408,6 +408,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public String getAllowDataModelChanges()
 		{
+			if (configuration.getAllowDataModelChanges() != null)
+			{
+				return configuration.getAllowDataModelChanges();
+			}
 			return Boolean.toString(!configuration.isStopOnAllowDataModelChanges());
 		}
 
@@ -511,6 +515,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		public String getUserHome()
 		{
 			return configuration.getUserHome();
+		}
+
+		@Override
+		public boolean isSkipDatabaseViewsUpdate()
+		{
+			return configuration.skipDatabaseViewsUpdate();
 		}
 	}
 
