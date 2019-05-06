@@ -23,6 +23,7 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyEditor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -57,6 +58,8 @@ import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.BytePropertyType;
@@ -3030,8 +3033,42 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			else
 			{
 				if (form == null) return null;
-				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
-					flattenedEditingSolution.getFlattenedForm(form).getDataSource());
+
+				if (persistContext.getPersist() instanceof WebFormComponentChildType)
+				{
+					WebComponent parentComponent = (WebComponent)persistContext.getPersist().getAncestor(IRepository.WEBCOMPONENTS);
+					if (parentComponent != null)
+					{
+						WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+							parentComponent.getTypeName());
+						Collection<PropertyDescription> foundsetProperties = spec.getProperties(FoundsetPropertyType.INSTANCE);
+						if (!foundsetProperties.isEmpty())
+						{
+							PropertyDescription firstFoundsetProperty = foundsetProperties.iterator().next();
+							Object foundsetPropertyValue = parentComponent.getProperty(firstFoundsetProperty.getName());
+							if (foundsetPropertyValue instanceof JSONObject)
+							{
+								String foundsetSelector = (String)ServoyJSONObject.jsonNullToNull(
+									((JSONObject)foundsetPropertyValue).opt(FoundsetPropertyType.FOUNDSET_SELECTOR));
+								Relation[] relations = flattenedEditingSolution.getRelationSequence(foundsetSelector);
+								if (relations != null && relations.length > 0)
+								{
+									String foreignDS = relations[relations.length - 1].getForeignDataSource();
+									table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foreignDS);
+								}
+								else if (!"".equals(foundsetSelector))
+								{
+									table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foundsetSelector);
+								}
+							}
+						}
+					}
+				}
+				if (table == null)
+				{
+					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+						flattenedEditingSolution.getFlattenedForm(form).getDataSource());
+				}
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
 					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 
