@@ -17,8 +17,10 @@
 
 package com.servoy.eclipse.ui.property;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -27,14 +29,22 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
@@ -43,6 +53,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.MediaContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
@@ -140,66 +151,15 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 			addStyleSheetButton.setText("Create New Stylesheet");
 
 			Button addLessThemeButton = new Button(this, SWT.NONE);
-			addLessThemeButton.setText("Add Less Theme");
-			enableDisableLessButton(dialog, addLessThemeButton);
-			dialog.getTreeViewer().addSelectionChangedListener(e -> {
-				enableDisableLessButton(dialog, addLessThemeButton);
-			});
-			MediaContentProvider provider = (MediaContentProvider)dialog.getTreeViewer().getContentProvider();
+			addLessThemeButton.setText("Add Less Theme Support");
+			toggleLessButtonVisibility(dialog, addLessThemeButton);
 			addLessThemeButton.addListener(SWT.Selection, event -> {
-				try
+
+				AddLessThemeSupportDialog addLessThemeDialog = new AddLessThemeSupportDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+					dialog);
+				if (addLessThemeDialog.open() == Window.OK)
 				{
-					StructuredSelection ss = (StructuredSelection)dialog.getSelection();
-					Object sel = ss.getFirstElement();
-
-					MediaNode selected = null;
-					if (sel == MediaLabelProvider.MEDIA_NODE_NONE)
-					{
-						Media defaultTheme = addMediaFile(editingFlattenedSolution.getSolution(), ThemeResourceLoader.getDefaultSolutionLess(),
-							editingFlattenedSolution.getName() + ".less");
-						dialog.refreshTree();
-						selected = getSelectedMediaNode((MediaNode[])provider.getElements(new MediaContentProvider.MediaListOptions(false)),
-							defaultTheme.getName(), "", editingFlattenedSolution.getName());
-					}
-					else if (sel instanceof MediaNode)
-					{
-						selected = (MediaNode)sel;
-						boolean changed = false;
-						Media media = selected.getMedia();
-						if (selected.getName().endsWith(".css"))
-						{
-							String newName = selected.getName().replace(".css", ".less");
-							String oldName = selected.getName();
-							String path = selected.getPath().replace(oldName, "");
-							if (!path.equals("")) path += "/";
-
-							changed = renameCssToLess(media, newName, oldName, path);
-							if (!changed) return;
-
-							dialog.refreshTree();
-							selected = getSelectedMediaNode((MediaNode[])provider.getElements(new MediaContentProvider.MediaListOptions(false)), newName, path,
-								media.getRootObject().getName());
-							changed = true;
-						}
-
-						changed = addCustomPropertiesImport(media) || changed;
-						if (changed) EditorUtil.openMediaViewer(media);
-					}
-
-					if (selected != null)
-					{
-						dialog.setSelection(selected);
-						addLessThemeButton.setEnabled(false);
-						if (editingFlattenedSolution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS) == null)
-						{
-							addMediaFile((Solution)selected.getMedia().getRootObject(), ThemeResourceLoader.getCustomProperties(),
-								ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
-						}
-					}
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
+					addLessThemeButton.setVisible(false);
 				}
 			});
 
@@ -212,11 +172,11 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 			this.setLayout(groupLayout);
 		}
 
-		protected void enableDisableLessButton(final TreeSelectDialog dialog, Button addLessThemeButton)
+		protected void toggleLessButtonVisibility(final TreeSelectDialog dialog, Button addLessThemeButton)
 		{
 			if (editingFlattenedSolution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS) == null)
 			{
-				addLessThemeButton.setEnabled(true);
+				addLessThemeButton.setVisible(true);
 			}
 			else
 			{
@@ -224,64 +184,22 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 				Object sel = ss.getFirstElement();
 				if (sel == MediaLabelProvider.MEDIA_NODE_NONE)
 				{
-					addLessThemeButton.setEnabled(editingFlattenedSolution.getMedia(editingFlattenedSolution.getName() + ".less") == null);
+					addLessThemeButton.setVisible(editingFlattenedSolution.getMedia(editingFlattenedSolution.getName() + ".less") == null);
 				}
-				else if (sel instanceof MediaNode)
+				else if (sel instanceof MediaNode && ((MediaNode)sel).getMedia() != null)
 				{
 					MediaNode selected = (MediaNode)sel;
 					if (selected.getName().endsWith(".css"))
 					{
-						addLessThemeButton.setEnabled(true);
+						addLessThemeButton.setVisible(true);
 					}
 					else
 					{
 						String data = new String(selected.getMedia().getMediaData());
-						addLessThemeButton.setEnabled(!data.contains("@import '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'"));
+						addLessThemeButton.setVisible(!data.contains("@import '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'"));
 					}
 				}
 			}
-		}
-
-		protected boolean addCustomPropertiesImport(Media media)
-		{
-			String data = new String(media.getMediaData());
-			if (!data.contains("@import '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'"))
-			{
-				StringBuilder sb = new StringBuilder();
-				sb.append(new String(ThemeResourceLoader.getDefaultSolutionLess()) + "\n");
-				data = data.replace("@import \"standard_ngclient.css\";", "");
-				sb.append(data);
-				media.setPermMediaData(sb.toString().getBytes());
-				media.flagChanged();
-				saveMedia(media);
-				return true;
-			}
-			return false;
-		}
-
-		protected boolean renameCssToLess(Media media, String newName, String oldName, String path)
-		{
-			try
-			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(path + newName, -1,
-					new ValidatorSearchContext(IRepository.MEDIA), false);
-			}
-			catch (RepositoryException e)
-			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						MessageDialog.openError(getShell(), "Cannot add less theme to " + oldName, e.getMessage());
-					}
-				});
-				return false;
-			}
-
-			EditorUtil.closeEditor(media);
-			media.setName(newName);
-			saveMedia(media);
-			return true;
 		}
 	}
 
@@ -323,6 +241,211 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
+		}
+	}
+
+	private final class AddLessThemeSupportDialog extends Dialog
+	{
+
+		private Combo stylesCombo;
+		private final TreeSelectDialog dialog;
+		private CLabel description;
+		private MediaNode[] elements;
+		private MediaContentProvider provider;
+
+		protected AddLessThemeSupportDialog(Shell parentShell, TreeSelectDialog dialog)
+		{
+			super(parentShell);
+			this.dialog = dialog;
+			setBlockOnOpen(true);
+		}
+
+		@Override
+		protected void configureShell(Shell sh)
+		{
+			super.configureShell(sh);
+			sh.setText("Setup a Servoy Less Theme");
+			sh.setMinimumSize(500, 300);
+		}
+
+		@Override
+		protected Control createDialogArea(Composite parent)
+		{
+			GridLayout gridLayout = new GridLayout(1, false);
+			gridLayout.marginHeight = gridLayout.marginWidth = 20;
+			Composite composite = new Composite(parent, SWT.NONE);
+			composite.setLayout(gridLayout);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+			provider = (MediaContentProvider)dialog.getTreeViewer().getContentProvider();
+			boolean addCustom = editingFlattenedSolution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS) == null;
+			boolean includeNone = editingFlattenedSolution.getMedia(editingFlattenedSolution.getName() + ".less") == null;
+			elements = Arrays.stream(provider.getElements(new MediaContentProvider.MediaListOptions(includeNone))).filter(m -> {
+				Media media = ((MediaNode)m).getMedia();
+				if (media != null && media.getName().endsWith(".less"))
+				{
+					if (addCustom) return true;
+					String data = new String(media.getMediaData());
+					return !data.contains("@import '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'");
+				}
+				return m == MediaLabelProvider.MEDIA_NODE_NONE || media.getName().endsWith(".css") && !media.getName().equals("standard_ngclient.css") &&
+					editingFlattenedSolution.getMedia(media.getName().replace(".css", ".less")) == null;
+			}).toArray(MediaNode[]::new);
+			MediaLabelProvider labelProvider = new MediaLabelProvider();
+			String[] items = Arrays.stream(elements).map(e -> labelProvider.getText(e)).toArray(String[]::new);
+			Label l = new Label(composite, SWT.NONE);
+			l.setText("Select a stylesheet to configure the less theme");
+			stylesCombo = new Combo(composite, SWT.READ_ONLY | SWT.BORDER);
+			stylesCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+			stylesCombo.setItems(items);
+
+			StructuredSelection ss = (StructuredSelection)dialog.getSelection();
+			int index = Arrays.asList(elements).indexOf(ss.getFirstElement());
+			stylesCombo.select(index >= 0 ? index : 0);
+			stylesCombo.addModifyListener(new ModifyListener()
+			{
+				public void modifyText(ModifyEvent e)
+				{
+					setDescriptionText();
+				}
+			});
+
+			description = new CLabel(composite, SWT.WRAP);
+			description.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 4));
+			setDescriptionText();
+
+			return super.createDialogArea(parent);
+		}
+
+		private void setDescriptionText()
+		{
+			String msg = "";
+			MediaNode selected = elements[stylesCombo.getSelectionIndex()];
+			if (selected == MediaLabelProvider.MEDIA_NODE_NONE)
+			{
+				msg += "A new '" + editingFlattenedSolution.getName() + ".less' file will be created.";
+			}
+			else
+			{
+				Media media = selected.getMedia();
+				if (media.getName().endsWith(".css"))
+				{
+					msg += "The selected css file will be renamed to '" + media.getName().replaceAll(".css", ".less") + "'.";
+				}
+				if (media.getName().endsWith(".less"))
+				{
+					String data = new String(media.getMediaData());
+					if (!data.contains("@import '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'"))
+					{
+						msg += "The selected file will import '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'.";
+					}
+				}
+			}
+			if (editingFlattenedSolution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS) == null)
+			{
+				msg += "\nThe default properties file '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'\nwill be added to the solution.";
+			}
+			description.setImage(Activator.getDefault().loadImageFromBundle("info.png"));
+			description.setText(msg);
+		}
+
+		@Override
+		protected void okPressed()
+		{
+			try
+			{
+				MediaNode selected = null;
+				MediaNode sel = elements[stylesCombo.getSelectionIndex()];
+				if (sel == MediaLabelProvider.MEDIA_NODE_NONE)
+				{
+					Media defaultTheme = addMediaFile(editingFlattenedSolution.getSolution(), ThemeResourceLoader.getDefaultSolutionLess(),
+						editingFlattenedSolution.getName() + ".less");
+					dialog.refreshTree();
+					selected = getSelectedMediaNode((MediaNode[])provider.getElements(new MediaContentProvider.MediaListOptions(false)), defaultTheme.getName(),
+						"", editingFlattenedSolution.getName());
+				}
+				else
+				{
+					selected = sel;
+					boolean changed = false;
+					Media media = selected.getMedia();
+					if (selected.getName().endsWith(".css"))
+					{
+						String newName = selected.getName().replace(".css", ".less");
+						String oldName = selected.getName();
+						String path = selected.getPath().replace(oldName, "");
+						if (!path.equals("")) path += "/";
+
+						changed = renameCssToLess(media, newName, oldName, path);
+						if (!changed) return;
+
+						dialog.refreshTree();
+						selected = getSelectedMediaNode((MediaNode[])provider.getElements(new MediaContentProvider.MediaListOptions(false)), newName, path,
+							media.getRootObject().getName());
+						changed = true;
+					}
+
+					changed = addCustomPropertiesImport(media) || changed;
+					if (changed) EditorUtil.openMediaViewer(media);
+				}
+
+				if (selected != null)
+				{
+					dialog.setSelection(selected);
+					if (editingFlattenedSolution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS) == null)
+					{
+						addMediaFile((Solution)selected.getMedia().getRootObject(), ThemeResourceLoader.getCustomProperties(),
+							ThemeResourceLoader.CUSTOM_PROPERTIES_LESS);
+					}
+				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+			super.okPressed();
+		}
+
+		protected boolean renameCssToLess(Media media, String newName, String oldName, String path)
+		{
+			try
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(path + newName, -1,
+					new ValidatorSearchContext(IRepository.MEDIA), false);
+			}
+			catch (RepositoryException e)
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						MessageDialog.openError(getShell(), "Cannot add less theme to " + oldName, e.getMessage());
+					}
+				});
+				return false;
+			}
+
+			EditorUtil.closeEditor(media);
+			media.setName(newName);
+			saveMedia(media);
+			return true;
+		}
+
+		protected boolean addCustomPropertiesImport(Media media)
+		{
+			String data = new String(media.getMediaData());
+			if (!data.contains("@import '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'"))
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.append(new String(ThemeResourceLoader.getDefaultSolutionLess()) + "\n");
+				data = data.replace("@import \"standard_ngclient.css\";", "");
+				sb.append(data);
+				media.setPermMediaData(sb.toString().getBytes());
+				media.flagChanged();
+				saveMedia(media);
+				return true;
+			}
+			return false;
 		}
 	}
 }
