@@ -1223,8 +1223,8 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(), "Default Postgress not installed.",
-						"Should a default Postgress database be installed?", SWT.NONE,
+					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(),
+						"Default PostgreSQL not installed.", "Should a default PostgreSQL database be installed?", SWT.NONE,
 						new String[] { "Yes (include sample)", "Yes (no sample)", "No", "Later" });
 					if (open == 0)
 					{

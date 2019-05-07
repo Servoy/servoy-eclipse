@@ -92,7 +92,7 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 	@Override
 	public void run(IProgressMonitor monitor)
 	{
-		monitor.beginTask("Creating postgresql database", 3);
+		monitor.beginTask("Creating PostgreSQL database", 3);
 		try
 		{
 			ProcessBuilder pb = new ProcessBuilder(batchFile.getAbsolutePath());
@@ -105,7 +105,7 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 			ServoyLog.logError(e);
 		}
 		monitor.worked(1);
-		monitor.subTask("Starting postgresql");
+		monitor.subTask("Starting PostgreSQL");
 
 		try
 		{
