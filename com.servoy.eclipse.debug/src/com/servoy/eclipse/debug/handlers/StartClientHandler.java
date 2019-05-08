@@ -56,6 +56,8 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 	static final String START_SMART_CLIENT = "com.servoy.eclipse.ui.StartSmartClient";
 	static final String START_NG_CLIENT = "com.servoy.eclipse.ui.StartNGClient";
 	static final String START_MOBILE_CLIENT = "com.servoy.eclipse.ui.StartMobileClient";
+	static final String START_NG_DESKTOP_CLIENT = "com.servoy.eclipse.ui.StartNGDesktopClient";
+
 	final static IDialogSettings fDialogSettings = Activator.getDefault().getDialogSettings();
 
 	public StartClientHandler()

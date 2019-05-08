@@ -94,6 +94,11 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M3+M2+G">
       </key>
+      <key
+            commandId="com.servoy.eclipse.ui.StartNGDesktopClient"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M3+M2+A">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -124,6 +129,12 @@
                name="com.servoy.eclipse.debug.browser"
                optional="true">
          </commandParameter>
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.ui"
+            description="Launch NGDesktop"
+            id="com.servoy.eclipse.ui.StartNGDesktopClient"
+            name="Launch NGDesktopClient">
       </command>
    </extension>
    <extension
@@ -342,6 +353,25 @@
         
         <menuContribution
               allPopups="false"
+              locationURI="menu:com.servoy.eclipse.ui.StartClient">
+              <command
+                 commandId="com.servoy.eclipse.ui.StartNGDesktopClient"
+                 id="com.servoy.eclipse.ui.StartNGDesktopClient"
+                 icon="icons/launch.png"
+                 label="Launch NGDesktop Client"
+                 style="push">
+              <visibleWhen>
+              <with
+                    variable="com.servoy.eclipse.core.ngDesktopClientState">
+                 <equals
+                       value="ENABLED">
+                 </equals>
+              </with>
+           </visibleWhen>
+           </command>
+        </menuContribution>
+        <menuContribution
+              allPopups="false"
               locationURI="menu:org.eclipse.ui.run?after=breakpointGroup">
            <separator
                  name="com.servoy.eclipse.debug.separator"
@@ -363,6 +393,12 @@
                  commandId="com.servoy.eclipse.ui.StartNGClient"
                  icon="icons/launch_ng.png"
                  label="Launch NGClient"
+                 style="push">
+           </command>
+           <command
+                 commandId="com.servoy.eclipse.ui.StartNGDesktopClient"
+                 icon="icons/launch_ng.png"
+                 label="Launch NGDesktop Client"
                  style="push">
            </command>
         </menuContribution>
@@ -403,6 +439,18 @@
            <enabledWhen>
               <with
                     variable="com.servoy.eclipse.core.ngClientState">
+                 <equals
+                       value="ENABLED">
+                 </equals>
+              </with>
+           </enabledWhen>
+        </handler>
+                <handler
+              class="com.servoy.eclipse.debug.handlers.StartNGDesktopClientHandler"
+              commandId="com.servoy.eclipse.ui.StartNGDesktopClient">
+           <enabledWhen>
+              <with
+                    variable="com.servoy.eclipse.core.ngDesktopClientState">
                  <equals
                        value="ENABLED">
                  </equals>
