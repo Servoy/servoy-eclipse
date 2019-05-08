@@ -193,10 +193,12 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 			if (testAndStartDebugger())
 			{
+
 				String ngDesktopAppName = "ServoyNgDesktop";
 				String extension = Utils.isAppleMacOS() ? ".app" : (Utils.isWindowsOS() ? ".exe" : "");
-
-				File stateLocation = Activator.getDefault().getStateLocation().append(File.separator + "NGDesktop").toFile();
+				String folderName = "ServoyNgDesktop" + (Utils.isAppleMacOS() ? "" : (Utils.isWindowsOS()) ? "-1.0.0-win" : "-1.0.0-linux");
+				File stateLocation = Utils.isAppleMacOS() ? Activator.getDefault().getStateLocation().toFile()
+					: Activator.getDefault().getStateLocation().append(folderName).toFile();
 
 				File executable = new File((stateLocation.getAbsolutePath() + File.separator + ngDesktopAppName + extension));
 
@@ -276,7 +278,7 @@ class DownloadElectron implements IRunnableWithProgress
 		{
 			monitor.beginTask("Start downloading electron", 3);
 
-			File f = new File(Activator.getDefault().getStateLocation().toOSString() + File.separator + "NGDesktop");
+			File f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
 			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/servoyngdesktop-2019.06-" +
