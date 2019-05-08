@@ -17,12 +17,15 @@
 
 package com.servoy.eclipse.ui.property;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -280,27 +283,35 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 			provider = (MediaContentProvider)dialog.getTreeViewer().getContentProvider();
 			boolean addCustom = editingFlattenedSolution.getMedia(ThemeResourceLoader.CUSTOM_PROPERTIES_LESS) == null;
 			boolean includeNone = editingFlattenedSolution.getMedia(editingFlattenedSolution.getName() + ".less") == null;
-			elements = Arrays.stream(provider.getElements(new MediaContentProvider.MediaListOptions(includeNone))).filter(m -> {
-				Media media = ((MediaNode)m).getMedia();
+			elements = getAllStyleSheets(provider.getElements(new MediaContentProvider.MediaListOptions(includeNone))).stream().filter(m -> {
+				Media media = m.getMedia();
 				if (media != null && media.getName().endsWith(".less"))
 				{
 					if (addCustom) return true;
 					String data = new String(media.getMediaData());
 					return !data.contains("@import '" + ThemeResourceLoader.CUSTOM_PROPERTIES_LESS + "'");
 				}
-				return m == MediaLabelProvider.MEDIA_NODE_NONE || media.getName().endsWith(".css") && !media.getName().equals("standard_ngclient.css") &&
+				return m == MediaLabelProvider.MEDIA_NODE_NONE || media.getName().endsWith(".css") && !media.getName().endsWith("standard_ngclient.css") &&
 					editingFlattenedSolution.getMedia(media.getName().replace(".css", ".less")) == null;
 			}).toArray(MediaNode[]::new);
-			MediaLabelProvider labelProvider = new MediaLabelProvider();
-			String[] items = Arrays.stream(elements).map(e -> labelProvider.getText(e)).toArray(String[]::new);
+			ILabelProvider labelProvider = (ILabelProvider)dialog.getTreeViewer().getLabelProvider();
+			String[] items = Arrays.stream(elements).map(e -> e == MediaLabelProvider.MEDIA_NODE_NONE ? labelProvider.getText(e)
+				: e.getPath().replace(e.getName(), "") + labelProvider.getText(e)).toArray(String[]::new);
 			Label l = new Label(composite, SWT.NONE);
 			l.setText("Select a stylesheet to configure the less theme");
 			stylesCombo = new Combo(composite, SWT.READ_ONLY | SWT.BORDER);
 			stylesCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 			stylesCombo.setItems(items);
 
-			StructuredSelection ss = (StructuredSelection)dialog.getSelection();
-			int index = Arrays.asList(elements).indexOf(ss.getFirstElement());
+			int index = 0;
+			Media currentStyleSheet = null;
+			if (editingFlattenedSolution.getSolution().getStyleSheetID() > 0 &&
+				(currentStyleSheet = editingFlattenedSolution.getMedia(editingFlattenedSolution.getSolution().getStyleSheetID())) != null)
+			{
+				index = Arrays.asList(items).indexOf(
+					currentStyleSheet.toString() + (!editingFlattenedSolution.getName().equals(currentStyleSheet.getRootObject().getName())
+						? " [" + currentStyleSheet.getRootObject().getName() + "]" : ""));
+			}
 			stylesCombo.select(index >= 0 ? index : 0);
 			stylesCombo.addModifyListener(new ModifyListener()
 			{
@@ -315,6 +326,24 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 			setDescriptionText();
 
 			return super.createDialogArea(parent);
+		}
+
+		private Collection<MediaNode> getAllStyleSheets(Object[] nodes)
+		{
+			ArrayList<MediaNode> result = new ArrayList<>();
+			for (Object n : nodes)
+			{
+				MediaNode node = (MediaNode)n;
+				if (node.getType() == MediaNode.TYPE.FOLDER)
+				{
+					result.addAll(getAllStyleSheets(provider.getChildren(node)));
+				}
+				else
+				{
+					result.add(node);
+				}
+			}
+			return result;
 		}
 
 		private void setDescriptionText()
@@ -374,7 +403,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 						String newName = selected.getName().replace(".css", ".less");
 						String oldName = selected.getName();
 						String path = selected.getPath().replace(oldName, "");
-						if (!path.equals("")) path += "/";
+						if (!path.equals("") && !path.endsWith("/")) path += "/";
 
 						changed = renameCssToLess(media, newName, oldName, path);
 						if (!changed) return;
@@ -426,7 +455,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 			}
 
 			EditorUtil.closeEditor(media);
-			media.setName(newName);
+			media.setName(path + newName);
 			saveMedia(media);
 			return true;
 		}
