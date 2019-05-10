@@ -221,7 +221,7 @@ public class I18NServerTableDialog extends Dialog
 						column.setSequenceType(defaultFirstColumnSequenceType);
 					}
 					table.createNewColumn(validator, "message_key", Types.VARCHAR, 150, 0, false);
-					table.createNewColumn(validator, "message_language", Types.VARCHAR, 5, 0, true);
+					table.createNewColumn(validator, "message_language", Types.VARCHAR, 150, 0, true);
 					table.createNewColumn(validator, "message_value", Types.VARCHAR, 2000, 0, true);
 					server.syncTableObjWithDB(table, false, false);
 
