@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -76,6 +77,7 @@ import org.eclipse.ui.views.markers.internal.Util;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator;
+import com.servoy.eclipse.core.quickfix.dbi.IMarkerResolutionExceptionProvider;
 import com.servoy.eclipse.core.quickfix.dbi.TableDifferenceQuickFix;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -685,7 +687,15 @@ public class HandleDBIMarkersWizard extends Wizard
 				}
 
 			}
-
+			if (resolution instanceof IMarkerResolutionExceptionProvider)
+			{
+				Exception e = ((IMarkerResolutionExceptionProvider)resolution).retrieveException(true);
+				if (e != null)
+				{
+					MessageDialog.openError(this.getShell(), "Error", "Quick fix failed: " + e.getMessage());
+					return;
+				}
+			}
 		}
 
 		/**
