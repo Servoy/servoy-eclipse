@@ -118,6 +118,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -2807,7 +2808,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							form = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(form);
 							if (form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null)
 							{
-								Point location = ((BaseComponent)o).getLocation();
+								Point location = CSSPosition.getLocation((BaseComponent)o);
 								if (location != null)
 								{
 									boolean outsideForm = false;
@@ -2820,7 +2821,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (startPos <= location.y && endPos > location.y)
 										{
 											// found the part
-											int height = ((BaseComponent)o).getSize().height;
+											int height = CSSPosition.getSize((BaseComponent)o).height;
 											if (location.y + height > endPos)
 											{
 												String elementName = null;
@@ -2866,7 +2867,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (width < location.x + ((BaseComponent)o).getSize().width)
+											if (width < location.x + CSSPosition.getSize((BaseComponent)o).width)
 											{
 												outsideForm = true;
 											}
