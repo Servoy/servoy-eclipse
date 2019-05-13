@@ -27,12 +27,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
@@ -120,12 +118,13 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html";
 
-		String osxContent = File.separator + "Contents" + File.separator;
+		String osxContent = Utils.isAppleMacOS() ? File.separator + "Contents" : "";
 
-		String fileUrl = osxContent + (Utils.isAppleMacOS() ? "Resources" : "resources") + File.separator + "app" + File.separator + "config" + File.separator +
-			"servoy.json";
+		String fileUrl = osxContent + File.separator + (Utils.isAppleMacOS() ? "Resources" : "resources") + File.separator + "app" + File.separator + "config" +
+			File.separator + "servoy.json";
 
-		File f = new File(stateLocation.getAbsolutePath() + (Utils.isAppleMacOS() ? "/ServoyNGDesktop.app" : "") + fileUrl);
+
+		File f = new File(stateLocation.getAbsolutePath() + File.separator + fileUrl);
 
 		StringBuffer jsonFile = new StringBuffer();
 		String line = null;
@@ -152,8 +151,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		{
 			String cmd = Utils.isAppleMacOS() ? "/usr/bin/open" : Utils.isWindowsOS() ? "cmd /c start" : "./";
 
-			String[] command = new String[] { cmd, stateLocation.getAbsolutePath() + File.separator + "ServoyNGDesktop" + fileExtension };
-
+			String[] command = new String[] { cmd, stateLocation.getAbsolutePath() +
+				(Utils.isAppleMacOS() ? "" : File.separator + "servoyngdesktop" + fileExtension) };
 			monitor.beginTask("Open NGDesktop", 3);
 			Runtime.getRuntime().exec(command);
 			monitor.worked(2);
@@ -184,7 +183,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				{
 					public void run()
 					{
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem", "Cant open this solution type in this client");
+						org.eclipse.jface.dialogs.MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+							"Cant open this solution type in this client");
 					}
 				});
 				return;
@@ -193,14 +193,17 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 			if (testAndStartDebugger())
 			{
-
-				String ngDesktopAppName = "ServoyNgDesktop";
+				String ngDesktopAppName = "servoyngdesktop";
 				String extension = Utils.isAppleMacOS() ? ".app" : (Utils.isWindowsOS() ? ".exe" : "");
-				String folderName = "ServoyNgDesktop" + (Utils.isAppleMacOS() ? "" : (Utils.isWindowsOS()) ? "-1.0.0-win" : "-1.0.0-linux");
-				File stateLocation = Utils.isAppleMacOS() ? Activator.getDefault().getStateLocation().toFile()
-					: Activator.getDefault().getStateLocation().append(folderName).toFile();
 
-				File executable = new File((stateLocation.getAbsolutePath() + File.separator + ngDesktopAppName + extension));
+				String folderName = ngDesktopAppName +
+					((Utils.isAppleMacOS() ? "-2019.06-mac" + extension : (Utils.isWindowsOS()) ? "-2019.06-win" : "-2019.06-linux"));
+
+				File stateLocation = Activator.getDefault().getStateLocation().append(folderName).toFile();
+				String pathToExecutable = (Utils.isAppleMacOS() ? stateLocation.getAbsolutePath()
+					: stateLocation.getAbsolutePath() + File.separator + ngDesktopAppName + extension);
+
+				File executable = new File(pathToExecutable);
 
 				if (executable.exists())
 				{
