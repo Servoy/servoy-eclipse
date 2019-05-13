@@ -29,6 +29,7 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -507,7 +508,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						{
 							persist = webFormComponentChildType != null ? webFormComponentChildType : (IPersist)searchPersist;
 						}
-						selectionPath.add(PersistContext.create(persist, form));
+						PersistContext context = PersistContext.create(persist, form);
+						selectionPath.add(context);
+						getTreeViewer().expandToLevel(context, AbstractTreeViewer.ALL_LEVELS);
 					}
 				}
 				else
