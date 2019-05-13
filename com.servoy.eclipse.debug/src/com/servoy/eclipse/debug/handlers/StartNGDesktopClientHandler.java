@@ -79,7 +79,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException
+	public Object execute(ExecutionEvent event)
 	{
 
 		Job job = new Job("NGDesktop client launch")
@@ -149,10 +149,13 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		out.close();
 		try
 		{
-			String cmd = Utils.isAppleMacOS() ? "/usr/bin/open" : Utils.isWindowsOS() ? "cmd /c start" : "./";
+			String cmd = Utils.isAppleMacOS() ? "/usr/bin/open" : Utils.isWindowsOS() ? "cmd /c start" : "";
 
 			String[] command = new String[] { cmd, stateLocation.getAbsolutePath() +
 				(Utils.isAppleMacOS() ? "" : File.separator + "servoyngdesktop" + fileExtension) };
+
+			if (Utils.isLinuxOS()) command = new String[] { stateLocation.getAbsolutePath() + File.separator + "servoyngdesktop" + fileExtension };
+
 			monitor.beginTask("Open NGDesktop", 3);
 			Runtime.getRuntime().exec(command);
 			monitor.worked(2);
