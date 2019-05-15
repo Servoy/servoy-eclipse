@@ -36,8 +36,10 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -57,6 +59,7 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 import com.servoy.eclipse.warexporter.Activator;
@@ -659,6 +662,18 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		}
 		else if (argument.equals(" -b ") || argument.equals(" -pi ") || argument.equals(" -l ") || argument.equals(" -d "))
 			sb.append(argument).append("<none>");
+	}
+
+	@Override
+	public void setContainer(IWizardContainer wizardContainer)
+	{
+		super.setContainer(wizardContainer);
+		//when cancel is pressed on the wizard dialog - this method is called again setContainer(null) so
+		//avoid second call to saveDirtyEditors()
+		if (wizardContainer != null && EditorUtil.saveDirtyEditors(getShell(), true))
+		{
+			((WizardDialog)wizardContainer).close();
+		}
 	}
 
 }
