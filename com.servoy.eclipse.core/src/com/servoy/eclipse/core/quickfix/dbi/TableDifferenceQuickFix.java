@@ -167,7 +167,7 @@ public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution 
 		return null;
 	}
 
-	public void storeException(Exception e)
+	protected final void storeException(Exception e)
 	{
 		this.storedException = e;
 	}

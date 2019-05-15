@@ -25,13 +25,7 @@ public interface IMarkerResolutionExceptionProvider
 {
 
 	/**
-	 * Store an exception
-	 * @param e - exception to store.
-	 */
-	public void storeException(Exception e);
-
-	/**
-	 * Retrieve the stored exception;
+	 * Retrieve the exception;
 	 * @param - clearOnExit: if "true" - the stored exception is set to null.
 	 * @return - null if no exception is stored otherwise return the stored exception.
 	 */
