@@ -23,9 +23,8 @@ package com.servoy.eclipse.core.quickfix.dbi;
  */
 public interface IMarkerResolutionExceptionProvider
 {
-
 	/**
-	 * Retrieve the exception;
+	 * Retrieve the stored exception;
 	 * @param - clearOnExit: if "true" - the stored exception is set to null.
 	 * @return - null if no exception is stored otherwise return the stored exception.
 	 */
