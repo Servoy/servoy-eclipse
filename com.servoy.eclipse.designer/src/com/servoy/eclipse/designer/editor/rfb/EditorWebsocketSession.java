@@ -21,8 +21,10 @@ import java.util.Locale;
 
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebObjectSpecificationBuilder;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
+import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
 
 /**
@@ -36,12 +38,12 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	public static final String EDITOR_ENDPOINT = "editor";
 	public static final String EDITOR_SERVICE = "$editorService";
 
-	private static final WebObjectSpecification EDITOR_SERVICE_SPECIFICATION = new WebObjectSpecification(EDITOR_SERVICE, "", IPackageReader.WEB_SERVICE,
-		EDITOR_SERVICE, null, null, null, "", null);
+	private static final WebObjectSpecification EDITOR_SERVICE_SPECIFICATION = new WebObjectSpecificationBuilder().withName(EDITOR_SERVICE).withPackageType(
+		IPackageReader.WEB_SERVICE).build();
 
-	public EditorWebsocketSession(String uuid)
+	public EditorWebsocketSession(WebsocketSessionKey sessionKey)
 	{
-		super(uuid);
+		super(sessionKey);
 	}
 
 	// session will be destroyed when editor is closed

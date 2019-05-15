@@ -242,8 +242,7 @@ public class DesignerFilter implements Filter
 										try
 										{
 											JSONObject templateJSON = new ServoyJSONObject(content, false);
-											if ((layout.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) ||
-												(templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(Template.PROP_LAYOUT).equals(layout))))
+											if (templateJSON.optString(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE).equals(layout))
 											{
 												jsonWriter.object();
 												jsonWriter.key("name").value(iRootObject.getName());
@@ -275,6 +274,7 @@ public class DesignerFilter implements Filter
 							PackageSpecification<WebLayoutSpecification> entry = componentsSpecProviderState.getLayoutSpecifications().get(key);
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
+								if (spec.isDeprecated()) continue;
 								JSONObject layoutJson = new JSONObject();
 								layoutJson.put("name", spec.getName());
 								if (spec.getConfig() != null)
@@ -346,7 +346,7 @@ public class DesignerFilter implements Filter
 							}
 							for (WebObjectSpecification spec : webComponentSpecsCollection)
 							{
-								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()))
+								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()) && !spec.isDeprecated())
 								{
 									JSONObject componentJson = new JSONObject();
 									componentJson.put("name", spec.getName());
@@ -588,6 +588,8 @@ public class DesignerFilter implements Filter
 				JSONObject propertyvalue = new JSONObject();
 				propertyvalue.put(FormComponentPropertyType.SVY_FORM, formComponent.getUUID());
 				json.put("propertyValue", propertyvalue);
+				json.put("isAbsoluteCSSPositionMix",
+					!form.isResponsiveLayout() && !formComponent.isResponsiveLayout() && (form.getUseCssPosition() != formComponent.getUseCssPosition()));
 				result.add(json);
 			}
 		}
@@ -601,6 +603,11 @@ public class DesignerFilter implements Filter
 		Map<String, List<String>> droppableTypesToPropertyNames = new TreeMap<>();
 		for (PropertyDescription propertyDescription : properties.values())
 		{
+			if (propertyDescription.isDeprecated() ||
+				propertyDescription.getConfig() instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)propertyDescription.getConfig()).opt("deprecated")))
+			{
+				continue;
+			}
 			Object configObject = propertyDescription.getConfig();
 			if (RFBDesignerUtils.isDroppable(propertyDescription, configObject, true))
 			{

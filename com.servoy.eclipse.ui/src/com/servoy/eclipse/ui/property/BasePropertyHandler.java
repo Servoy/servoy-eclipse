@@ -25,6 +25,7 @@ import javax.swing.border.Border;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.BytePropertyType;
 import org.sablo.specification.property.types.ColorPropertyType;
@@ -65,7 +66,6 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.CSSPositionPropertyType;
-import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Base class for property handlers base on java beans/introspection.
@@ -76,8 +76,8 @@ import com.servoy.j2db.util.PersistHelper;
 public class BasePropertyHandler implements IPropertyHandler
 {
 	// null type: use property controller internally
-	public static final PropertyDescription ANCHORS_DESCRIPTION = new PropertyDescription("anchors", null,
-		new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class)));
+	public static final PropertyDescription ANCHORS_DESCRIPTION = new PropertyDescriptionBuilder().withName("anchors").withConfig(
+		new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class))).build();
 
 	protected final PropertyDescriptor propertyDescriptor;
 
@@ -117,78 +117,79 @@ public class BasePropertyHandler implements IPropertyHandler
 
 		if (clazz == java.awt.Dimension.class)
 		{
-			return new PropertyDescription(name, TypesRegistry.getType(DimensionPropertyType.TYPE_NAME));
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(DimensionPropertyType.TYPE_NAME)).build();
 		}
 
 		if (clazz == java.awt.Point.class)
 		{
-			return new PropertyDescription(name, TypesRegistry.getType(PointPropertyType.TYPE_NAME));
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(PointPropertyType.TYPE_NAME)).build();
 		}
 
 		if (clazz == java.awt.Insets.class)
 		{
-			return new PropertyDescription(name, TypesRegistry.getType(InsetsPropertyType.TYPE_NAME));
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(InsetsPropertyType.TYPE_NAME)).build();
 		}
 
 		if (clazz == java.awt.Color.class)
 		{
-			return new PropertyDescription(name, TypesRegistry.getType(ColorPropertyType.TYPE_NAME));
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(ColorPropertyType.TYPE_NAME)).build();
 		}
 
 		if (clazz == java.awt.Font.class)
 		{
-			return new PropertyDescription(name, TypesRegistry.getType(FontPropertyType.TYPE_NAME), Boolean.FALSE);
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(FontPropertyType.TYPE_NAME)).withConfig(
+				Boolean.FALSE).build();
 		}
 
 		if (clazz == Border.class)
 		{
-			return new PropertyDescription(name, BorderPropertyType.INSTANCE, Boolean.FALSE);
+			return new PropertyDescriptionBuilder().withName(name).withType(BorderPropertyType.INSTANCE).withConfig(Boolean.FALSE).build();
 		}
 
 		if (clazz == CSSPosition.class)
 		{
-			return new PropertyDescription(name, CSSPositionPropertyType.INSTANCE, Boolean.FALSE);
+			return new PropertyDescriptionBuilder().withName(name).withType(CSSPositionPropertyType.INSTANCE).withConfig(Boolean.FALSE).build();
 		}
 
 
 		if (clazz == boolean.class || clazz == Boolean.class)
 		{
-			return new PropertyDescription(name, BooleanPropertyType.INSTANCE);
+			return new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).build();
 		}
 
 		if (clazz == String.class)
 		{
-			return new PropertyDescription(name, StringPropertyType.INSTANCE);
+			return new PropertyDescriptionBuilder().withName(name).withType(StringPropertyType.INSTANCE).build();
 		}
 
 		if (clazz == byte.class || clazz == Byte.class)
 		{
-			return new PropertyDescription(name, BytePropertyType.INSTANCE);
+			return new PropertyDescriptionBuilder().withName(name).withType(BytePropertyType.INSTANCE).build();
 		}
 
 		if (clazz == double.class || clazz == Double.class)
 		{
-			return new PropertyDescription(name, DoublePropertyType.INSTANCE);
+			return new PropertyDescriptionBuilder().withName(name).withType(DoublePropertyType.INSTANCE).build();
 		}
 
 		if (clazz == float.class || clazz == Float.class)
 		{
-			return new PropertyDescription(name, FloatPropertyType.INSTANCE);
+			return new PropertyDescriptionBuilder().withName(name).withType(FloatPropertyType.INSTANCE).build();
 		}
 
 		if (clazz == int.class || clazz == Integer.class)
 		{
-			return new PropertyDescription(name, IntPropertyType.INSTANCE);
+			return new PropertyDescriptionBuilder().withName(name).withType(IntPropertyType.INSTANCE).build();
 		}
 
 		if (clazz == long.class || clazz == Long.class)
 		{
-			return new PropertyDescription(name, LongPropertyType.INSTANCE);
+			return new PropertyDescriptionBuilder().withName(name).withType(LongPropertyType.INSTANCE).build();
 		}
 
 		if (clazz == short.class || clazz == Short.class)
 		{
-			return new PropertyDescription(name, IntPropertyType.INSTANCE);
+			return new PropertyDescriptionBuilder().withName(name).withType(IntPropertyType.INSTANCE).build();
 		}
 
 		return null;
@@ -233,13 +234,13 @@ public class BasePropertyHandler implements IPropertyHandler
 		{
 			if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist())))
+					CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist())))
 			{
 				CSSPosition.setLocation((ISupportBounds)obj, ((Point)value).x, ((Point)value).y);
 			}
 			else if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(getName()) && value instanceof Dimension && persistContext != null &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist())))
+					CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist())))
 			{
 				CSSPosition.setSize((ISupportBounds)obj, ((Dimension)value).width, ((Dimension)value).height);
 			}
@@ -282,7 +283,7 @@ public class BasePropertyHandler implements IPropertyHandler
 				return false;
 			}
 			if (IContentSpecConstants.PROPERTY_CSS_POSITION.equals(name) && persistContext.getContext() instanceof Form &&
-				!((Form)persistContext.getContext()).getUseCssPosition() && !PersistHelper.isInAbsoluteLayoutMode(persistContext.getPersist()))
+				!((Form)persistContext.getContext()).getUseCssPosition() && !CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist()))
 			{
 				return false;
 			}

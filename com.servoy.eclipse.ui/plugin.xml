@@ -370,7 +370,7 @@
        <editor
              class="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              default="true"
-             filenames="servoy_theme_properties.less"
+             filenames="custom_servoy_theme_properties.less"
              icon="icons/theme_properties.png"
              id="com.servoy.eclipse.ui.editors.less.PropertiesLessEditor"
              matchingStrategy="com.servoy.eclipse.ui.editors.less.PropertiesLessMatchingStrategy"
@@ -699,7 +699,11 @@
      	<markerResolutionGenerator
             class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.methodOverride">
-      	</markerResolutionGenerator>        
+      	</markerResolutionGenerator>
+      	<markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.deprecatedSpec">
+      	</markerResolutionGenerator>      
      </extension>
      <extension
            point="org.eclipse.ui.commands">

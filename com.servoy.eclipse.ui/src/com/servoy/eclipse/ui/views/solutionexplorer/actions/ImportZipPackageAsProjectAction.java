@@ -75,8 +75,8 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 
 	public ImportZipPackageAsProjectAction(SolutionExplorerView viewer)
 	{
-		super(viewer, "Import zip web package as project",
-			"Imports a zip web package (component/service/layout package) into the workspace as a separate (expanded) project and references it from the solution. This is useful if you want to be able to change/extend the package.");
+		super(viewer, "Import zip Servoy package as project",
+			"Imports a zip Servoy package (component/service/layout package) into the workspace as a separate (expanded) project and references it from the solution. This is useful if you want to be able to change/extend the package.");
 	}
 
 	@Override

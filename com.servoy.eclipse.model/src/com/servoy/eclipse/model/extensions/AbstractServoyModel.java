@@ -47,6 +47,8 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetTable;
+import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.Messages;
@@ -120,6 +122,17 @@ public abstract class AbstractServoyModel implements IServoyModel
 					catch (Exception e)
 					{
 						ServoyLog.logError("couldn't find in mem table for datasource: " + dataSource, e);
+					}
+				}
+				else if (dataSource != null && dataSource.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON))
+				{
+					try
+					{
+						return findViewITable(DataSourceUtils.getViewDataSourceName(dataSource));
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("couldn't find view table for datasource: " + dataSource, e);
 					}
 				}
 				else
@@ -357,6 +370,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 					if (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
 					{
 						ServoyProject sp = (ServoyProject)project.getNature(ServoyProject.NATURE_ID);
+						if (activeProject != null && activeProject.getProject().equals(project))
+						{
+							// in case active project was replaced/overwritten we must update the reference as well (so we don't have trouble when comparing IProject or ServoyProject instances...)
+							setActiveProjectReferenceInternal(sp);
+						}
 						servoyProjects.put(project.getName(), sp);
 					}
 				}
@@ -368,6 +386,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 			servoyProjectCache = servoyProjects;
 		}
 		return servoyProjects;
+	}
+
+	protected void setActiveProjectReferenceInternal(final ServoyProject project)
+	{
+		activeProject = project;
 	}
 
 	public DataModelManager getDataModelManager()
@@ -628,6 +651,29 @@ public abstract class AbstractServoyModel implements IServoyModel
 		}
 		return null;
 	}
+
+	private ViewFoundsetTable findViewITable(String tablename)
+	{
+
+		ViewFoundsetsServer memServer = getActiveProject().getViewFoundsetsServer();
+		try
+		{
+			ViewFoundsetTable table = memServer.getTable(tablename);
+			if (table != null) return table;
+			ServoyProject[] modulesOfActiveProject = getModulesOfActiveProject();
+			for (ServoyProject servoyProject : modulesOfActiveProject)
+			{
+				table = servoyProject.getViewFoundsetsServer().getTable(tablename);
+				if (table != null) return table;
+			}
+		}
+		catch (RepositoryException e)
+		{
+			Debug.error(e);
+		}
+		return null;
+	}
+
 
 	public void dispose()
 	{

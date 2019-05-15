@@ -1,4 +1,4 @@
-angular.module("decorators",['editor','margin','resizeknobs','menubar']).directive("decorator", function($rootScope,EDITOR_EVENTS,EDITOR_CONSTANTS,$timeout){
+angular.module("decorators",['editor','margin','resizeknobs','menubar']).directive("decorator", function($rootScope,EDITOR_EVENTS,EDITOR_CONSTANTS,$timeout,$editorService){
 	return {
 	      restrict: 'E',
 	      transclude: true,
@@ -64,7 +64,12 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 								// TODO aren't height and width already set to these? can we remove these 2 lines?
 								height = node.outerHeight();
 								width = node.outerWidth();
-							} else {
+							}
+							else if ($editorService.isShowingContainer() && node.attr('svy-layoutname') != undefined)
+							{
+								currentNode.isResizable = {t:false, l:false, b:false, r:false};
+							}	
+							else {
 								currentNode.isResizable = {t:true, l:true, b:true, r:true};
 							}
 							currentNode.isContainer = false;
@@ -119,7 +124,7 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 					if (!doNotScrollIntoView && $scope.nodes.length > 0) {
 						var ghost = $scope.getGhost($scope.nodes[0].node.attr("svy-id"));
 
-						if (!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
+						if (!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM && ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART)) {
 							var target = $scope.nodes[0].node.get(0);
 							var targetRect = target.getBoundingClientRect();
 							var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;

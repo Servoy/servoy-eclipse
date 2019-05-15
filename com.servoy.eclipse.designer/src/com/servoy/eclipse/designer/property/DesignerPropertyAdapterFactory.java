@@ -65,6 +65,7 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
@@ -344,7 +345,9 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 										propertyDescriptor.propertyDescriptor.getName()))
 									return PropertyCategory.Events;
 								if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName()) ||
-									"designTimeProperties".equals(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
+									"designTimeProperties".equals(propertyDescriptor.propertyDescriptor.getName()) ||
+									IContentSpecConstants.PROPERTY_ATTRIBUTES.equals(propertyDescriptor.propertyDescriptor.getName()))
+									return PropertyCategory.Component;
 								return super.createPropertyCategory(propertyDescriptor);
 							}
 

@@ -56,6 +56,10 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
+import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Editor for a foundset typed property (NG).
@@ -133,7 +137,7 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 			contextPersist);
 		final SolutionContextDelegateLabelProvider withSolutionContextForCell = new SolutionContextDelegateLabelProvider(foundsetCellLabelProvider,
 			contextPersist);
-			// @formatter:on
+		// @formatter:on
 
 		// this is a bit confusing as this label provider is used both in tree dialog and in properties view cell; but we don't have
 		// the same kind of things in those two so we need some conversions here; we can't use 2 separate label providers because ListSelectCellEditor only uses 1
@@ -198,7 +202,31 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 
 		public void openEditor(Object value)
 		{
-			if (value instanceof RelationsWrapper) RelationValueEditor.INSTANCE.openEditor(value);
+			if (value instanceof JSONObject)
+			{
+				String foundsetSelector = (String)ServoyJSONObject.jsonNullToNull(((JSONObject)value).opt(FoundsetPropertyType.FOUNDSET_SELECTOR));
+				if (foundsetSelector != null)
+				{
+					if (DataSourceUtils.isDatasourceUri(foundsetSelector))
+					{
+						EditorUtil.openTableEditor(foundsetSelector);
+					}
+					else if (foundsetSelector.equals(""))
+					{
+						EditorUtil.openTableEditor(((Form)contextPersist.getAncestor(IRepository.FORMS)).getDataSource());
+					}
+					else
+					{
+						FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(contextPersist);
+						Relation[] relations = flattenedSolution.getRelationSequence(foundsetSelector);
+						if (relations != null && relations.length > 0)
+						{
+							EditorUtil.openRelationEditor(relations[relations.length - 1]);
+						}
+					}
+				}
+			}
+			else if (value instanceof RelationsWrapper) RelationValueEditor.INSTANCE.openEditor(value);
 			else if (value instanceof TableWrapper) TableValueEditor.INSTANCE.openEditor(value);
 			else if (value == FormFoundsetEntryContentProvider.FORM_FOUNDSET)
 			{
@@ -209,6 +237,30 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 
 		public boolean canEdit(Object value)
 		{
+			if (value instanceof JSONObject)
+			{
+				String foundsetSelector = (String)ServoyJSONObject.jsonNullToNull(((JSONObject)value).opt(FoundsetPropertyType.FOUNDSET_SELECTOR));
+				if (foundsetSelector != null)
+				{
+					if (DataSourceUtils.isDatasourceUri(foundsetSelector))
+					{
+						return true;
+					}
+					else if (foundsetSelector.equals(""))
+					{
+						return ((Form)contextPersist.getAncestor(IRepository.FORMS)).getDataSource() != null;
+					}
+					else
+					{
+						FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(contextPersist);
+						Relation[] relations = flattenedSolution.getRelationSequence(foundsetSelector);
+						if (relations != null && relations.length > 0)
+						{
+							return true;
+						}
+					}
+				}
+			}
 			return RelationValueEditor.INSTANCE.canEdit(value) || TableValueEditor.INSTANCE.canEdit(value) ||
 				(value == FormFoundsetEntryContentProvider.FORM_FOUNDSET && ((Form)contextPersist.getAncestor(IRepository.FORMS)).getDataSource() != null &&
 					((Form)contextPersist.getAncestor(IRepository.FORMS)).getDataSource().length() > 0);

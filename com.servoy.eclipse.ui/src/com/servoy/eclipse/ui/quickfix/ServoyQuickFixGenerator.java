@@ -106,7 +106,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					@Override
 					public String getLabel()
 					{
-						return "Automatic import of '" + packageName + "' from Web Package Manager";
+						return "Automatic import of '" + packageName + "' from Servoy Package Manager";
 					}
 				}, new IMarkerResolution()
 				{
@@ -120,9 +120,23 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					@Override
 					public String getLabel()
 					{
-						return "Open Web Package Manager";
+						return "Open Servoy Package Manager";
 					}
 				} };
+			}
+
+			if (type.equals(ServoyBuilder.DEPRECATED_SPEC))
+			{
+				final String replacement = (String)marker.getAttribute("replacement");
+				if (replacement != null)
+				{
+					String solName = (String)marker.getAttribute("solutionName");
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+					if (servoyProject.isSolutionLoaded())
+					{
+						return new IMarkerResolution[] { new DeprecatedSpecQuickFix(marker) };
+					}
+				}
 			}
 			// add dynamic resolutions below this line
 			List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
@@ -238,7 +252,19 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				final UUID id = UUID.fromString(uuid);
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
 				Form form = (Form)servoyProject.getEditingPersist(id);
+				Form extendsForm = form.getExtendsForm();
 				resolutions.add(new ChangeSuperFormQuickFix(form, servoyProject));
+				if (form != null && extendsForm != null)
+				{
+					if (form.getUseCssPosition() && !extendsForm.getUseCssPosition() && !extendsForm.isResponsiveLayout())
+					{
+						resolutions.add(new ConvertToCSSPositionLayout(extendsForm, servoyProject));
+					}
+					else if (extendsForm.getUseCssPosition() && !form.getUseCssPosition() && !form.isResponsiveLayout())
+					{
+						resolutions.add(new ConvertToCSSPositionLayout(form, servoyProject));
+					}
+				}
 			}
 			else if (type.equals(BaseNGPackageManager.SPEC_READ_MARKER))
 			{

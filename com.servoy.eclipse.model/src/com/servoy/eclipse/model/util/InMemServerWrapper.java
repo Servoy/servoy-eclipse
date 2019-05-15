@@ -17,31 +17,24 @@
 
 package com.servoy.eclipse.model.util;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-
-import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.inmemory.AbstractMemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
  * @author jcompagner
  * @since 8.1
  */
-public class InMemServerWrapper implements IDataSourceWrapper
+public class InMemServerWrapper extends AbstractMemServerWrapper
 {
-	private final String tablename;
-
 	public InMemServerWrapper()
 	{
-		this.tablename = null;
+		super(null);
 	}
 
 	public InMemServerWrapper(String tablename)
 	{
-		this.tablename = tablename;
+		super(tablename);
 	}
 
 	@Override
@@ -50,52 +43,25 @@ public class InMemServerWrapper implements IDataSourceWrapper
 		return DataSourceUtils.createInmemDataSource(tablename);
 	}
 
-	public String getTableName()
-	{
-		return tablename;
-	}
-
 	public String getServerName()
 	{
 		return DataSourceUtils.INMEM_DATASOURCE;
 	}
 
-	public Collection<String> getTableNames()
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.util.AbstractMemServerWrapper#getServer()
+	 */
+	@Override
+	protected AbstractMemServer< ? > getServer(ServoyProject servoyProject)
 	{
-		Set<String> names = new TreeSet<>();
-		try
-		{
-			ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-			for (ServoyProject servoyProject : modulesOfActiveProject)
-			{
-				names.addAll(servoyProject.getMemServer().getTableNames(false));
-			}
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-		}
-		return names;
+		return servoyProject.getMemServer();
 	}
 
 	@Override
-	public boolean equals(Object obj)
+	public String getLabel()
 	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		InMemServerWrapper other = (InMemServerWrapper)obj;
-		if (tablename == null)
-		{
-			if (other.tablename != null) return false;
-		}
-		else if (!tablename.equals(other.tablename)) return false;
-		return true;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return tablename == null ? 1 : tablename.hashCode();
+		return "In Memory";
 	}
 }

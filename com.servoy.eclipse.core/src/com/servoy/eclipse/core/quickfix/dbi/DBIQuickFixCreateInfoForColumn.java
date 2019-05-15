@@ -60,6 +60,12 @@ public class DBIQuickFixCreateInfoForColumn extends TableDifferenceQuickFix
 		return instance;
 	}
 
+	@Override
+	public String getShortLabel()
+	{
+		return "Update .dbi";
+	}
+
 	public String getLabel()
 	{
 		return "Add default information about this column to the database information file.";
@@ -153,18 +159,22 @@ public class DBIQuickFixCreateInfoForColumn extends TableDifferenceQuickFix
 			catch (JSONException e)
 			{
 				ServoyLog.logError(e);
+				storeException(e);
 			}
 			catch (CoreException e)
 			{
 				ServoyLog.logError(e);
+				storeException(e);
 			}
 			catch (UnsupportedEncodingException e)
 			{
 				ServoyLog.logError(e);
+				storeException(e);
 			}
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError(e);
+				storeException(e);
 			}
 		}
 		else

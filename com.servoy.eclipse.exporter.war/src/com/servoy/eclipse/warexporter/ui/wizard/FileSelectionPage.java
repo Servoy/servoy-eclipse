@@ -19,6 +19,8 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.io.File;
 
+import javax.swing.filechooser.FileSystemView;
+
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -79,6 +81,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	int importUserPolicy = IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G; // get from user.
 
 	private Button allowDataModelChangeButton;
+	private Button skipDatabaseViewsUpdate;
 	private Text allowDataModelServers;
 	private Button allowKeywordsButton;
 	private Button updateSequencesButton;
@@ -122,8 +125,8 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 
 		if (exportModel.getWarFileName() == null)
 		{
-			exportModel.setWarFileName(
-				System.getProperty("user.home") + "/" + ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getName() + ".war");
+			exportModel.setWarFileName(FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath() + File.separatorChar +
+				ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution().getName() + ".war");
 		}
 		fileNameText.setText(exportModel.getWarFileName());
 
@@ -189,6 +192,18 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		allowDataModelServers.setToolTipText("Comma separated server names where changes are allowed");
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		allowDataModelServers.setLayoutData(gd);
+
+		skipDatabaseViewsUpdate = new Button(composite, SWT.CHECK);
+		skipDatabaseViewsUpdate.setText("Skip database views update");
+		skipDatabaseViewsUpdate.setSelection(exportModel.isSkipDatabaseViewsUpdate());
+		skipDatabaseViewsUpdate.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setSkipDatabaseViewsUpdate(skipDatabaseViewsUpdate.getSelection());
+			}
+		});
 
 		exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
 		exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only");
@@ -269,12 +284,14 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
+				checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getEnabled() && exportMetadataTablesButton.getSelection());
 				exportModel.setExportMetaData(exportMetadataTablesButton.getSelection());
 			}
 		});
 
 		checkMetadataTablesButton = new Button(composite, SWT.CHECK);
 		checkMetadataTablesButton.setSelection(exportModel.isCheckMetadataTables());
+		checkMetadataTablesButton.setEnabled(exportModel.isCheckMetadataTables());
 		checkMetadataTablesButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -686,7 +703,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		{
 			exportSampleDataButton.setText("Export solution sample data");
 		}
-		checkMetadataTablesButton.setEnabled(!dbiDown);
+		checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getEnabled() && exportSampleDataButton.getSelection());
 		checkMetadataTablesButton.setSelection(dbiDown ? false : exportModel.isExportMetaData());
 		if (dbiDown)
 		{
@@ -706,13 +723,14 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	{
 		exportNoneActiveSolutions.setEnabled(exportActiveSolution.getSelection());
 		allowDataModelChangeButton.setEnabled(exportActiveSolution.getSelection());
+		skipDatabaseViewsUpdate.setEnabled(exportActiveSolution.getSelection());
 		exportAllTablesFromReferencedServers.setEnabled(exportActiveSolution.getSelection());
 		allowKeywordsButton.setEnabled(exportActiveSolution.getSelection());
 		updateSequencesButton.setEnabled(exportActiveSolution.getSelection());
 		overrideSequenceTypesButton.setEnabled(exportActiveSolution.getSelection());
 		overrideDefaultValuesButton.setEnabled(exportActiveSolution.getSelection());
 		exportMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
-		checkMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
+		checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getEnabled() && exportMetadataTablesButton.getSelection());
 		exportI18NDataButton.setEnabled(exportActiveSolution.getSelection());
 		insertNewI18NKeysOnlyButton.setEnabled(exportActiveSolution.getSelection() && exportI18NDataButton.getSelection());
 		overwriteGroupsButton.setEnabled(exportActiveSolution.getSelection());
@@ -734,6 +752,26 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		{
 			String potentialFileName = fileNameText.getText();
 			exportModel.setWarFileName(potentialFileName);
+			setErrorMessage(null);
+			setPageComplete(true);
+			if (!potentialFileName.endsWith(".war"))
+			{
+				setErrorMessage("Path must be a war file.");
+				setPageComplete(false);
+			}
+			else
+			{
+				File file = new File(potentialFileName);
+				try
+				{
+					file.getCanonicalPath();
+				}
+				catch (Exception ex)
+				{
+					setErrorMessage("Invalid path.");
+					setPageComplete(false);
+				}
+			}
 		}
 		else if (event.widget == browseButton)
 		{

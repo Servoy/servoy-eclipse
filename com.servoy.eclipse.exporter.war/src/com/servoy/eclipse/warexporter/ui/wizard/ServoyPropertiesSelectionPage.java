@@ -43,8 +43,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.util.Utils;
 
 /**
  *
@@ -161,6 +163,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			String potentialFileName = fileNameText.getText();
 			exportModel.setServoyPropertiesFileName(potentialFileName);
 			exportModel.setOverwriteSocketFactoryProperties(false);
+			checkLicenses();
 		}
 		else if (event.widget == log4jConfigurationFileText)
 		{
@@ -258,30 +261,23 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		boolean result = exportModel.getServoyPropertiesFileName() == null;
 		if (!result)
 		{
-			File f = new File(exportModel.getServoyPropertiesFileName());
-			if (!f.exists())
+			String checkFileMessage = exportModel.checkServoyPropertiesFileExists();
+			if (checkFileMessage != null)
 			{
-				setMessage("Specified servoy properties file doesn't exist.", IMessageProvider.WARNING);
-				messageSet = true;
-			}
-			else if (f.isDirectory())
-			{
-				setMessage("Specified servoy properties file is a folder.", IMessageProvider.WARNING);
+				setMessage(checkFileMessage, IMessageProvider.WARNING);
 				messageSet = true;
 			}
 			else
 			{
-				Properties prop = new Properties();
-				FileInputStream fis = null;
-				try
+				try (FileInputStream fis = new FileInputStream(new File(exportModel.getServoyPropertiesFileName())))
 				{
-					fis = new FileInputStream(f);
+					Properties prop = new Properties();
 					prop.load(fis);
 
 					String numberOfServers = prop.getProperty("ServerManager.numberOfServers");
 					if (numberOfServers != null)
 					{
-						int nrOfServers = Integer.parseInt(numberOfServers);
+						int nrOfServers = Utils.getAsInteger(numberOfServers.trim(), false);
 						boolean repositoryExists = false;
 						for (int i = 0; i < nrOfServers && !repositoryExists; i++)
 						{
@@ -335,17 +331,6 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						IMessageProvider.WARNING);
 					messageSet = true;
 				}
-				finally
-				{
-					try
-					{
-						if (fis != null) fis.close();
-					}
-					catch (IOException e)
-					{
-						// ignore
-					}
-				}
 
 			}
 		}
@@ -378,6 +363,29 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		}
 
 		return getMessageType() != IMessageProvider.WARNING;
+	}
+
+	protected void checkLicenses()
+	{
+		final Object[] upgrade = exportModel.checkAndAutoUpgradeLicenses();
+		if (upgrade != null && upgrade.length >= 3)
+		{
+			if (!Utils.getAsBoolean(upgrade[0]))
+			{
+				setErrorMessage(
+					"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+			}
+			else
+			{
+				Display.getDefault().asyncExec(() -> {
+					String message = "License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
+						"' but the changes could not be written to the selected properties file. Please adjust the '" +
+						exportModel.getServoyPropertiesFileName() + "' file manually.";
+					ServoyLog.logInfo(message);
+					MessageDialog.openWarning(getShell(), "Could not save changes to the properties file", message);
+				});
+			}
+		}
 	}
 
 	@Override

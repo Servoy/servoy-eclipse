@@ -91,8 +91,10 @@ import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -121,6 +123,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 	private final List<IServerInternal> servers = new ArrayList<IServerInternal>();
 	private DataModelManager dmm;
 	private IWorkbenchPage activePage;
+	private String selectedTableName;
 
 	public SynchronizeDBIWithDBWizard()
 	{
@@ -135,7 +138,6 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 		servers.clear();
 		dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		IServerManagerInternal sm = ServoyModel.getServerManager();
 		if (dmm == null)
 		{
@@ -203,6 +205,11 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 							servers.add(s);
 						}
 					}
+					else if (un.getType() == UserNodeType.TABLE || un.getType() == UserNodeType.VIEW)
+					{
+						IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName());
+						if (s.getConfig().isEnabled() || s.isValid()) servers.add(s);
+					}
 					else
 					{
 						serversIdentified = false;
@@ -222,6 +229,10 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					servers.add((IServerInternal)sm.getServer(serverNames[i], true, true));
 				}
 			}
+
+			Object firstSelectedElement = selection.getFirstElement();
+			selectedTableName = firstSelectedElement instanceof UserNode && ((UserNode)firstSelectedElement).getRealObject() instanceof TableWrapper
+				? ((TableWrapper)((UserNode)firstSelectedElement).getRealObject()).getTableName() : null;
 
 			// find differences between the DB table lists and the .dbi files
 			List<Pair<IServerInternal, String>> foundMissingTables = getMissingTables(servers, dmm);
@@ -451,14 +462,14 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 									{
 										public void run()
 										{
-											HandleDBIMarkersWizard wizard = new HandleDBIMarkersWizard(servers);
+											HandleDBIMarkersWizard wizard = new HandleDBIMarkersWizard(servers, selectedTableName);
 											int returnCode = Window.OK;
 											while (returnCode == Window.OK && wizard.hasMarkers(false))
 											{
 												WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);
 												dialog.create();
 												returnCode = dialog.open();
-												wizard = new HandleDBIMarkersWizard(servers);
+												wizard = new HandleDBIMarkersWizard(servers, selectedTableName);
 											}
 										}
 									}, false);

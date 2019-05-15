@@ -191,18 +191,22 @@ public class DBIQuickFixUpdateInfoFromColumn extends TableDifferenceQuickFix
 			catch (JSONException e)
 			{
 				ServoyLog.logError(e);
+				storeException(e);
 			}
 			catch (CoreException e)
 			{
 				ServoyLog.logError(e);
+				storeException(e);
 			}
 			catch (UnsupportedEncodingException e)
 			{
 				ServoyLog.logError(e);
+				storeException(e);
 			}
 			catch (RepositoryException e)
 			{
 				ServoyLog.logError(e);
+				storeException(e);
 			}
 		}
 		else

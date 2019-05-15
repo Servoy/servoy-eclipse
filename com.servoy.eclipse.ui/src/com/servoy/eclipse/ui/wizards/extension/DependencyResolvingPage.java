@@ -37,6 +37,7 @@ import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -44,6 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
@@ -124,6 +126,15 @@ public class DependencyResolvingPage extends ReviewOperationPage
 				{
 					public void run()
 					{
+						Shell shell = topLevel.getShell();
+						Point preferredSize = shell.computeSize(shell.getSize().x, SWT.DEFAULT, true);
+						if (preferredSize.y > shell.getSize().y)
+						{
+							shell.setSize(shell.getSize().x, preferredSize.y);
+							shell.layout(true, true);
+						}
+
+
 						topLevel.layout(true, true);
 					}
 				});

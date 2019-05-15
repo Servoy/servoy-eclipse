@@ -53,6 +53,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
@@ -63,7 +64,10 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 
 /**
@@ -181,15 +185,60 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
+		if (exportModel.getServoyPropertiesFileName() != null)
+		{
+			String checkFile = exportModel.checkServoyPropertiesFileExists();
+			if (checkFile == null)
+			{
+				final Object[] upgrade = exportModel.checkAndAutoUpgradeLicenses();
+				if (upgrade != null && upgrade.length >= 3)
+				{
+					if (!Utils.getAsBoolean(upgrade[0]))
+					{
+						getContainer().showPage(servoyPropertiesSelectionPage);
+						servoyPropertiesSelectionPage.setErrorMessage(
+							"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+						return false;
+					}
+					else
+					{
+						Display.getDefault().asyncExec(() -> {
+							String message = "License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
+								"'. The export contains the new license code, but the changes could not be written to the selected properties file. Please adjust the '" +
+								exportModel.getServoyPropertiesFileName() + "' file manually.";
+							ServoyLog.logInfo(message);
+							MessageDialog.openWarning(getShell(), "Could not save changes to the properties file", message);
+						});
+					}
+				}
+			}
+			else
+			{
+				Display.getDefault().asyncExec(() -> {
+					MessageDialog.openError(getShell(), "Error creating the WAR file", checkFile);
+				});
+			}
+		}
+		else
+		{
+			String code = null;
+			if ((code = checkAndAutoUpgradeLicenses()) != null)
+			{
+				getContainer().showPage(licenseConfigurationPage);
+				licenseConfigurationPage.setErrorMessage("License " + code + " is not valid and cannot be auto upgraded.");
+				return false;
+			}
+		}
+
 		exportModel.saveSettings(getDialogSettings());
 		errorFlag = false;
 		IRunnableWithProgress job = new IRunnableWithProgress()
 		{
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				final WarExporter exporter = new WarExporter(exportModel);
 				try
 				{
+					final WarExporter exporter = new WarExporter(exportModel);
 					final boolean[] cancel = new boolean[] { false };
 					Display.getDefault().syncExec(new Runnable()
 					{
@@ -244,6 +293,40 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			return false;
 		}
 		return !errorFlag;
+	}
+
+
+	private String checkAndAutoUpgradeLicenses()
+	{
+		IApplicationServerSingleton server = ApplicationServerRegistry.get();
+		for (License l : exportModel.getLicenses())
+		{
+			if (!server.checkClientLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses()))
+			{
+				//try to auto upgrade
+				Pair<Boolean, String> code = server.upgradeLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses());
+				if (code == null || !code.getLeft().booleanValue())
+				{
+					if (code != null)
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								MessageDialog.openError(getShell(), "Error creating the WAR file",
+									"License " + l.getCode() + (!code.getLeft().booleanValue() ? " error: " + code.getRight() : " is not valid."));
+							}
+						});
+					}
+					return l.getCode();
+				}
+				else if (code.getLeft().booleanValue() && !l.getCode().equals(code.getRight()))
+				{
+					exportModel.replaceLicenseCode(l, code.getRight());
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -506,7 +589,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 
 		appendToBuilder(sb, " -overwriteGroups ", exportModel.isOverwriteGroups());
 		appendToBuilder(sb, " -allowSQLKeywords ", exportModel.isExportSampleData());
-		appendToBuilder(sb, " -stopOnDataModelChanges ", exportModel.getAllowDataModelChanges());
+		appendToBuilder(sb, " -allowDataModelChanges ", exportModel.getAllowDataModelChanges());
+		appendToBuilder(sb, " -skipDatabaseViewsUpdate ", exportModel.isSkipDatabaseViewsUpdate());
 		appendToBuilder(sb, " -overrideSequenceTypes ", exportModel.isOverrideSequenceTypes());
 		appendToBuilder(sb, " -overrideDefaultValues ", exportModel.isOverrideDefaultValues());
 		appendToBuilder(sb, " -insertNewI18NKeysOnly ", exportModel.isInsertNewI18NKeysOnly());

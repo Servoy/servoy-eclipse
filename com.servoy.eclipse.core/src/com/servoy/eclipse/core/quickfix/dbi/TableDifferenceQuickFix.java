@@ -34,10 +34,11 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 
-public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution
+public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution implements IMarkerResolutionExceptionProvider
 {
 
 	private IMarker current = null;
+	private Exception storedException = null;
 
 	public static TableDifference getTableDifference(IMarker marker)
 	{
@@ -156,9 +157,27 @@ public abstract class TableDifferenceQuickFix extends WorkbenchMarkerResolution
 		return getLabel();
 	}
 
+	public String getShortLabel()
+	{
+		return getShortLabel();
+	}
+
 	public Image getImage()
 	{
 		return null;
+	}
+
+	public void storeException(Exception e)
+	{
+		this.storedException = e;
+	}
+
+	public Exception retrieveException(boolean clearOnExit)
+	{
+		//need this since new Exception(null) is not null
+		Exception retException = (storedException != null) ? new Exception(storedException) : null;
+		if ((storedException != null) && clearOnExit) storedException = null;
+		return retException;
 	}
 
 }

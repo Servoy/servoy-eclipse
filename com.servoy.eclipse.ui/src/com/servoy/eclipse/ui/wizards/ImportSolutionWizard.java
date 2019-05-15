@@ -20,6 +20,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -114,6 +115,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean allowSolutionFilePathSelection = true;
 	private boolean askForImportServerName;
 	private boolean activateSolution = true;
+	private boolean reportImportFail;
+	private boolean shouldSkipModulesImport = false;
+	private boolean allowDataModelChanges = false;
+	private boolean importSampleData = false;
 
 	private static String getInitialImportPath()
 	{
@@ -147,6 +152,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		return askForImportServerName;
 	}
 
+	public void setSkipModulesImport(boolean skip)
+	{
+		this.shouldSkipModulesImport = skip;
+	}
+
+	public boolean shouldSkipModulesImport()
+	{
+		return shouldSkipModulesImport;
+	}
+
 	protected String getFirstPageTitle()
 	{
 		return titleText;
@@ -157,6 +172,189 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		this.activateSolution = activateSolution;
 	}
 
+	public void setReportImportFail(boolean reportImportFail)
+	{
+		this.reportImportFail = reportImportFail;
+	}
+
+	/**
+	 * AES Decryption of the specified file and write the output in a temporary file.
+	 *
+	 * @return file
+	 *
+	 */
+	private File fileDecryption(File file)
+	{
+		String password = null;
+		if (CryptUtils.checkEncryption(file))
+		{
+			password = UIUtils.showPasswordDialog(getShell(), "This solution is password protected", "Please enter protection password:", "", null);
+		}
+		else return file;
+
+		return CryptUtils.fileDecryption(file, password);
+	}
+
+
+	/**
+	 * @param file
+	 * @param resourcesProjectName
+	 * @param existingProject
+	 * @param isCleanImport
+	 * @param doDisplayDataModelChanges
+	 * @param doActivateSolution
+	 */
+	public void doImport(final File file, final String resourcesProjectName, final ServoyResourcesProject existingProject, final boolean isCleanImport,
+		final boolean doDisplayDataModelChanges, final boolean doActivateSolution, String projectLocation, IRunnableContext context, IProgressMonitor mon)
+	{
+		IRunnableWithProgress runnable = new IRunnableWithProgress()
+		{
+			public void run(IProgressMonitor monitor)
+			{
+				final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(doDisplayDataModelChanges, getShell())
+				{
+					@Override
+					public int askImportSampleData()
+					{
+						if (ImportSolutionWizard.this.shouldImportSampleData())
+						{
+							return OK_ACTION;
+						}
+						return super.askImportSampleData();
+					}
+
+					@Override
+					public int getAllowDataModelChange(String serverName)
+					{
+						if (ImportSolutionWizard.this.shouldAllowDataModelChanges())
+						{
+							return OK_ACTION;
+						}
+						return super.getAllowDataModelChange(serverName);
+					}
+
+					@Override
+					public int askStyleAlreadyExistsAction(String name)
+					{
+						if (ImportSolutionWizard.this.shouldSkipModulesImport())
+						{
+							return SKIP_ACTION;
+						}
+						return super.askStyleAlreadyExistsAction(name);
+					}
+				};
+				IApplicationServerSingleton as = ApplicationServerRegistry.get();
+				try
+				{
+					IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file), (EclipseRepository)ServoyModel.getDeveloperRepository(),
+						as.getDataServer(), as.getClientId(), userChannel);
+
+					IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
+						as.getClientId(), userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository());
+
+					x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
+
+					IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
+						(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
+						isCleanImport, projectLocation, reportImportFail);
+					if (rootObjects != null)
+					{
+						String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";
+						if (doActivateSolution) detail += " and activated";
+						detail += ".";
+						importMessageDetails = detail;
+					}
+				}
+				catch (final RepositoryException ex)
+				{
+					finishPage.setTitle("Solution not imported");
+					if (ex.hasErrorCode(ServoyException.InternalCodes.OPERATION_CANCELLED))
+					{
+						// Don't show an error message if the import was canceled.
+						finishPage.setErrorMessage("Import cancelled");
+						importMessageDetails = "Import solution was cancelled";
+					}
+					else
+					{
+						// Don't show an stack trace for CRC related messages.
+						if (!ex.hasErrorCode(ServoyException.InternalCodes.CHECKSUM_FAILURE))
+						{
+							ServoyLog.logError(ex);
+						}
+						finishPage.setErrorMessage("Import failed");
+						importMessageDetails = "Could not import solution: " + ex.getMessage();
+					}
+				}
+				catch (final Exception ex)
+				{
+					ServoyLog.logError(ex);
+					String msg = "An unexpected error occured";
+					if (ex.getMessage() != null) msg += ex.getMessage();
+					else msg += ". Check the log for more details.";
+					final String mymsg = msg;
+					finishPage.setErrorMessage("Import failed");
+					finishPage.setTitle("Solution not imported");
+					importMessageDetails = "Could not import solution: " + mymsg;
+				}
+
+			}
+		};
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		try
+		{
+			servoyModel.setSolutionImportInProgressFlag(true); // suspended many of Solex's listeners to avoid unwanted flickers and unneded code running
+			if (context != null) context.run(true, false, runnable);
+			else runnable.run(mon);
+		}
+		catch (InvocationTargetException e)
+		{
+			ServoyLog.logError(e);
+		}
+		catch (InterruptedException e)
+		{
+			ServoyLog.logError(e);
+		}
+		finally
+		{
+			servoyModel.setSolutionImportInProgressFlag(false); // resumes Solex listeners that were suspended above and does a full refresh
+		}
+
+		// trigger start debug action delegate for refreshing enablement of debug client buttons by refreshing selection
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				IWorkbenchPage iwpage = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage();
+				if (iwpage != null && iwpage.getActivePart() instanceof SolutionExplorerView)
+				{
+					SolutionExplorerView view = (SolutionExplorerView)iwpage.getActivePart();
+					view.refreshSelection();
+				}
+			}
+		});
+	}
+
+
+	protected boolean shouldAllowDataModelChanges()
+	{
+		return allowDataModelChanges;
+	}
+
+	public void setAllowDataModelChanges(boolean allowDataModelChanges)
+	{
+		this.allowDataModelChanges = allowDataModelChanges;
+	}
+
+	public void setImportSampleData(boolean importSampleData)
+	{
+		this.importSampleData = importSampleData;
+	}
+
+	protected boolean shouldImportSampleData()
+	{
+		return importSampleData;
+	}
 
 	public class ImportSolutionWizardPage extends WizardPage implements IValidator
 	{
@@ -327,103 +525,12 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			final boolean isCleanImport = page.isCleanImport();
 			final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
 			final boolean doActivateSolution = page.getActivateSolution();
-			IRunnableWithProgress runnable = new IRunnableWithProgress()
-			{
-				public void run(IProgressMonitor monitor)
-				{
-					final EclipseImportUserChannel userChannel = new EclipseImportUserChannel(doDisplayDataModelChanges, getShell());
-					IApplicationServerSingleton as = ApplicationServerRegistry.get();
-					try
-					{
-						IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file), (EclipseRepository)ServoyModel.getDeveloperRepository(),
-							as.getDataServer(), as.getClientId(), userChannel);
-
-						IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
-							as.getClientId(), userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository());
-
-						x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
-
-						IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
-							(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
-							isCleanImport, projectLocationComposite.getProjectLocation());
-						if (rootObjects != null)
-						{
-							String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";
-							if (doActivateSolution) detail += " and activated";
-							detail += ".";
-							importMessageDetails = detail;
-						}
-					}
-					catch (final RepositoryException ex)
-					{
-						finishPage.setTitle("Solution not imported");
-						if (ex.hasErrorCode(ServoyException.InternalCodes.OPERATION_CANCELLED))
-						{
-							// Don't show an error message if the import was canceled.
-							finishPage.setErrorMessage("Import cancelled");
-							importMessageDetails = "Import solution was cancelled";
-						}
-						else
-						{
-							// Don't show an stack trace for CRC related messages.
-							if (!ex.hasErrorCode(ServoyException.InternalCodes.CHECKSUM_FAILURE))
-							{
-								ServoyLog.logError(ex);
-							}
-							finishPage.setErrorMessage("Import failed");
-							importMessageDetails = "Could not import solution: " + ex.getMessage();
-						}
-					}
-					catch (final Exception ex)
-					{
-						ServoyLog.logError(ex);
-						String msg = "An unexpected error occured";
-						if (ex.getMessage() != null) msg += ex.getMessage();
-						else msg += ". Check the log for more details.";
-						final String mymsg = msg;
-						finishPage.setErrorMessage("Import failed");
-						finishPage.setTitle("Solution not imported");
-						importMessageDetails = "Could not import solution: " + mymsg;
-					}
-
-				}
-			};
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			try
-			{
-				servoyModel.setSolutionImportInProgressFlag(true); // suspended many of Solex's listeners to avoid unwanted flickers and unneded code running
-				getContainer().run(true, false, runnable);
-			}
-			catch (InvocationTargetException e)
-			{
-				ServoyLog.logError(e);
-			}
-			catch (InterruptedException e)
-			{
-				ServoyLog.logError(e);
-			}
-			finally
-			{
-				servoyModel.setSolutionImportInProgressFlag(false); // resumes Solex listeners that were suspended above and does a full refresh
-			}
-
-			// trigger start debug action delegate for refreshing enablement of debug client buttons by refreshing selection
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					IWorkbenchPage iwpage = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage();
-					if (iwpage != null && iwpage.getActivePart() instanceof SolutionExplorerView)
-					{
-						SolutionExplorerView view = (SolutionExplorerView)iwpage.getActivePart();
-						view.refreshSelection();
-					}
-				}
-			});
+			doImport(file, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
+				projectLocationComposite.getProjectLocation(), getContainer(), null);
 
 			return true;
 		}
+
 
 		public String validate()
 		{
@@ -435,24 +542,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			else if (resourceProjectComposite != null) error = resourceProjectComposite.validate();
 			setErrorMessage(error);
 			return error;
-		}
-
-		/**
-		 * AES Decryption of the specified file and write the output in a temporary file.
-		 *
-		 * @return file
-		 *
-		 */
-		private File fileDecryption(File file)
-		{
-			String password = null;
-			if (CryptUtils.checkEncryption(file))
-			{
-				password = UIUtils.showPasswordDialog(getShell(), "This solution is password protected", "Please enter protection password:", "", null);
-			}
-			else return file;
-
-			return CryptUtils.fileDecryption(file, password);
 		}
 
 		public String getPath()

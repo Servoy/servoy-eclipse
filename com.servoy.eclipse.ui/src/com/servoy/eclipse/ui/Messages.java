@@ -169,6 +169,7 @@ public class Messages extends NLS
 	public static String TreeStrings_XMLMethods;
 	public static String TreeStrings_XMLListMethods;
 	public static String TreeStrings_RegExp;
+	public static String TreeStrings_ViewFoundsets;
 
 	public static String LabelTemplatesPalette;
 	public static String LabelElementsPalette;
@@ -279,6 +280,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_methodNumberOfArgsMismatch;
 	public static String ErrorWarningPreferencePage_rolloverImageAndCursorNotWorking;
 	public static String ErrorWarningPreferencePage_methodOverrideProblem;
+	public static String ErrorWarningPreferencePage_deprecatedSpecUsageProblem;
 
 	static
 	{

@@ -69,6 +69,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String overrideSequenceTypes = "overrideSequenceTypes";// overrides Sequence Types \n"
 	private static final String overrideDefaultValues = "overrideDefaultValues";// overrides Default Values \n"
 	private static final String insertNewI18NKeysOnly = "insertNewI18NKeysOnly";// inserts NewI18NKeysOnly \n"
+	private static final String allowDataModelChanges = "allowDataModelChanges";// allow data model changes \n"
+	private static final String skipDatabaseViewsUpdate = "skipDatabaseViewsUpdate";// skip database views update \n"
 
 	private static final String importUserPolicy = "importUserPolicy";// int \n"
 	private static final String addUsersToAdminGroup = "addUsersToAdminGroup";// adds Users To Admin Group \n"
@@ -214,7 +216,11 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Default: the (current if -s has more) solution name\n"
 			+ "        -" + overwriteGroups + " ...  overwrites Groups\n"
 			+ "        -" + allowSQLKeywords + " ... allows SQLKeywords\n"
-			+ "        -" + stopOnDataModelChanges + " ... stops import if data model changes\n"
+			+ "        -" + stopOnDataModelChanges + " ... stops import if data model changes.\n"
+			+ "             This option is ignored if "+allowDataModelChanges+" is present.\n"
+			+ "        -" + allowDataModelChanges +" ... (optionally) a space separated list of server names that allow data model changes\n"
+			+ "             If the list is missing, then data model changes are allowed on all servers\n"
+			+ "        -" + skipDatabaseViewsUpdate +"... skips database views update \n"
 			+ "        -" + overrideSequenceTypes + " ... overrides Sequence Types\n"
 			+ "        -" + overrideDefaultValues + " ... overrides Default Values\n"
 			+ "        -" + insertNewI18NKeysOnly + " ... inserts NewI18NKeysOnly\n"
@@ -315,10 +321,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 				String company = null;
 				String code = null;
 				String numLicenses = null;
-				if (parts.length != 3)
+				if (parts.length != 3 || parts[0].startsWith("\""))
 				{
 					Pattern p = Pattern.compile("\"(.+)\" (.+) (.+)");
-					Matcher m = p.matcher(license);
+					Matcher m = p.matcher(license.trim());
 					if (m.matches())
 					{
 						company = m.group(1);
@@ -637,5 +643,23 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String getNoneActiveSolutions()
 	{
 		return argumentsMap.get(noneActiveSolutions);
+	}
+
+	public String getAllowDataModelChanges()
+	{
+		if (argumentsMap.containsKey(allowDataModelChanges))
+		{
+			if (argumentsMap.get(allowDataModelChanges) != null)
+			{
+				return argumentsMap.get(allowDataModelChanges).replaceAll(" ", ",");
+			}
+			return Boolean.toString(true);
+		}
+		return null;
+	}
+
+	public boolean skipDatabaseViewsUpdate()
+	{
+		return argumentsMap.containsKey(skipDatabaseViewsUpdate);
 	}
 }

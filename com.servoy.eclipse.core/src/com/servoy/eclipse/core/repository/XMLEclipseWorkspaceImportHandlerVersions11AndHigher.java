@@ -43,6 +43,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -110,8 +112,11 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	private final List<IProject> createdProjects;
 
+	private final boolean reportImportFail;
+
 	public XMLEclipseWorkspaceImportHandlerVersions11AndHigher(IXMLImportHandlerVersions11AndHigher x11handler, EclipseRepository repository,
-		ServoyResourcesProject resourcesProject, WorkspaceUserManager userManager, IProgressMonitor monitor, List<IProject> createdProjects)
+		ServoyResourcesProject resourcesProject, WorkspaceUserManager userManager, IProgressMonitor monitor, List<IProject> createdProjects,
+		boolean reportImportFail)
 	{
 		this.x11handler = x11handler;
 		this.repository = repository;
@@ -119,6 +124,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		this.userManager = userManager;
 		m = monitor;
 		this.createdProjects = createdProjects;
+		this.reportImportFail = reportImportFail;
 	}
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
@@ -127,14 +133,14 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		throws RepositoryException
 	{
 		return importFromJarFile(importEngine, x11handler, userChannel, repository, newResourcesProjectName, resourcesProject, m, activateSolution, cleanImport,
-			null);
+			null, false);
 	}
 
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
-		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateImportedSolutionAfterwards, final boolean cleanImport,
-		final String projectLocation) throws RepositoryException
+		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
+		final String projectLocation, final boolean reportImportFail) throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -177,15 +183,15 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					{
 						if (resourcesProject == null) userManager.setResourcesProject(rProject[0]);
 						userManager.writeAllSecurityInformation(true);
-						if (!activateImportedSolutionAfterwards)
-						{
-							// job 6
-							Job job = new WorkspaceImporterActivateSolutionJob("Re-activating previously active solution", previouslyActiveProject.getProject(),
-								null, null, null, null);
-							job.setUser(false);
-							job.setSystem(true);
-							job.schedule();
-						}
+//						if (!activateSolution)
+//						{
+//							// job 6
+//							Job job = new WorkspaceImporterActivateSolutionJob("Re-activating previously active solution", previouslyActiveProject.getProject(),
+//								null, null, null, null);
+//							job.setUser(false);
+//							job.setSystem(true);
+//							job.schedule();
+//						}
 					}
 					catch (Exception e)
 					{
@@ -225,7 +231,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					try
 					{
 						XMLEclipseWorkspaceImportHandlerVersions11AndHigher eclipseWorkspaceImportHandler = new XMLEclipseWorkspaceImportHandlerVersions11AndHigher(
-							x11handler, repository, resourcesProject, userManager, m, createdProjects);
+							x11handler, repository, resourcesProject, userManager, m, createdProjects, reportImportFail);
 						// read jar file & import some stuff into resources project
 						rootObjects[0] = importEngine.importFromJarFile(eclipseWorkspaceImportHandler, cleanImport);
 						if (rootObjects[0] == null || rootObjects[0].length == 0) throw new RepositoryException("No solution was imported.");
@@ -289,7 +295,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 								{
 									for (Pair<String, byte[]> wp : webPackages)
 									{
-										m.setTaskName("Writing web package " + wp.getLeft());
+										m.setTaskName("Writing Servoy package " + wp.getLeft());
 										wsa.setContents(root.getName() + "/" + SolutionSerializer.NG_PACKAGES_DIR_NAME + "/" + wp.getLeft(), wp.getRight());
 									}
 								}
@@ -311,10 +317,17 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						m.setTaskName("Updating workbench state");
 
 						// job 4
-						job = new WorkspaceImporterActivateSolutionJob("Activating imported solution project", mainProject[0], importJob5, exception,
-							finishedFlag, dummySolProject[0]);
-						job.setUser(false);
-						job.setSystem(true);
+						if (activateSolution)
+						{
+							job = new WorkspaceImporterActivateSolutionJob("Activating imported solution project", mainProject[0], importJob5, exception,
+								finishedFlag, dummySolProject[0]);
+							job.setUser(false);
+							job.setSystem(true);
+						}
+						else
+						{
+							importJob5.schedule();
+						}
 					}
 					catch (Exception e)
 					{
@@ -343,110 +356,116 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			importJob3.setUser(false);
 			importJob3.setSystem(true);
 
-			// need to call following code in a set of jobs through an IWorkspaceRunnable because some operations need the resource listeners to update stuff before running other stuff;
-			// by doing it through IWorkspaceRunnable we really make sure that there are no concurrent threads/jobs running in the workspace (Eclipse Notification Manager)
-			final Job importJob1 = new RunInWorkspaceJob(new IWorkspaceRunnable()
+			if (!activateSolution)
 			{
-				public void run(IProgressMonitor monitor) throws CoreException
+				importJob3.schedule();
+			}
+			else
+			{
+				// need to call following code in a set of jobs through an IWorkspaceRunnable because some operations need the resource listeners to update stuff before running other stuff;
+				// by doing it through IWorkspaceRunnable we really make sure that there are no concurrent threads/jobs running in the workspace (Eclipse Notification Manager)
+				final Job importJob1 = new RunInWorkspaceJob(new IWorkspaceRunnable()
 				{
-					m.setTaskName("Preparing for import (activating needed resources project)");
-					m.worked(1);
-					Job job = null;
-					try
+					public void run(IProgressMonitor monitor) throws CoreException
 					{
-						// create/use resources project - and make sure it is active before super.importFromJarFile(...) is called because that changes .dbi files - and those changes
-						// should be applied to the proper resources project (maybe other stuff as well from resources project, such as i18n)
-						if (resourcesProject == null)
-						{
-							if (newResourcesProjectName != null)
-							{
-								// create the resources project
-								// create a new resource project
-								rProject[0] = ServoyModel.getWorkspace().getRoot().getProject(newResourcesProjectName);
-								rProject[0].create(null);
-								rProject[0].open(null);
-								IProjectDescription resourceProjectDescription = rProject[0].getDescription();
-								resourceProjectDescription.setNatureIds(new String[] { ServoyResourcesProject.NATURE_ID });
-								rProject[0].setDescription(resourceProjectDescription, null);
-								createdProjects.add(rProject[0]);
-							}
-						}
-						else
-						{
-							rProject[0] = resourcesProject.getProject();
-						}
-
-						// create a dummy solution so that the active resources project can become the right one
-						dummySolProject[0] = null;
-						for (int i = 0; (dummySolProject[0] == null || dummySolProject[0].exists()); i++)
-						{
-							if (i == 100)
-							{
-								// can't go on forever....
-								throw new RuntimeException("Could not create a new dummy solution project to use during import");
-							}
-							dummySolProject[0] = ServoyModel.getWorkspace().getRoot().getProject("import_placeholder" + (i == 0 ? "" : ("_" + i)));
-						}
-						dummySolProject[0].create(null);
-						dummySolProject[0].open(null);
-						createdProjects.add(dummySolProject[0]);
-						IProjectDescription description = dummySolProject[0].getDescription();
-						description.setNatureIds(new String[] { ServoyProject.NATURE_ID, JavaScriptNature.NATURE_ID });
-						if (rProject[0] != null) description.setReferencedProjects(new IProject[] { rProject[0] });
-						dummySolProject[0].setDescription(description, null);
-						Solution dummySolution = (Solution)repository.createNewRootObject(dummySolProject[0].getName(), IRepository.SOLUTIONS);
-						SolutionSerializer.writePersist(dummySolution, wsa, repository, true, false, true);
-
-						ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
-
-						m.setTaskName("Updating workbench state");
-
-						// job 2
-						job = new WorkspaceImporterActivateSolutionJob("Activating resources project", dummySolProject[0], importJob3, exception, finishedFlag,
-							dummySolProject[0])
-						{
-							@Override
-							protected void runCodeAfterActivation() throws RepositoryException
-							{
-								// verify that correct resources project is active
-								if (rProject[0] != null &&
-									ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject() != rProject[0])
-								{
-									throw new RepositoryException("Cannot activate resources project " + rProject[0].getName() + ".");
-								}
-							}
-						};
-						job.setUser(false);
-						job.setSystem(true);
-					}
-					catch (Exception e)
-					{
-						exception[0] = e;
-					}
-					finally
-					{
+						m.setTaskName("Preparing for import (activating needed resources project)");
+						m.worked(1);
+						Job job = null;
 						try
 						{
-							if (job == null && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
+							// create/use resources project - and make sure it is active before super.importFromJarFile(...) is called because that changes .dbi files - and those changes
+							// should be applied to the proper resources project (maybe other stuff as well from resources project, such as i18n)
+							if (resourcesProject == null)
+							{
+								if (newResourcesProjectName != null)
+								{
+									// create the resources project
+									// create a new resource project
+									rProject[0] = ServoyModel.getWorkspace().getRoot().getProject(newResourcesProjectName);
+									rProject[0].create(null);
+									rProject[0].open(null);
+									IProjectDescription resourceProjectDescription = rProject[0].getDescription();
+									resourceProjectDescription.setNatureIds(new String[] { ServoyResourcesProject.NATURE_ID });
+									rProject[0].setDescription(resourceProjectDescription, null);
+									createdProjects.add(rProject[0]);
+								}
+							}
+							else
+							{
+								rProject[0] = resourcesProject.getProject();
+							}
+
+							// create a dummy solution so that the active resources project can become the right one
+							dummySolProject[0] = null;
+							for (int i = 0; (dummySolProject[0] == null || dummySolProject[0].exists()); i++)
+							{
+								if (i == 100)
+								{
+									// can't go on forever....
+									throw new RuntimeException("Could not create a new dummy solution project to use during import");
+								}
+								dummySolProject[0] = ServoyModel.getWorkspace().getRoot().getProject("import_placeholder" + (i == 0 ? "" : ("_" + i)));
+							}
+							dummySolProject[0].create(null);
+							dummySolProject[0].open(null);
+							createdProjects.add(dummySolProject[0]);
+							IProjectDescription description = dummySolProject[0].getDescription();
+							description.setNatureIds(new String[] { ServoyProject.NATURE_ID, JavaScriptNature.NATURE_ID });
+							if (rProject[0] != null) description.setReferencedProjects(new IProject[] { rProject[0] });
+							dummySolProject[0].setDescription(description, null);
+							Solution dummySolution = (Solution)repository.createNewRootObject(dummySolProject[0].getName(), IRepository.SOLUTIONS);
+							SolutionSerializer.writePersist(dummySolution, wsa, repository, true, false, true);
+
+							ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
+
+							m.setTaskName("Updating workbench state");
+
+							// job 2
+							job = new WorkspaceImporterActivateSolutionJob("Activating resources project", dummySolProject[0], importJob3, exception,
+								finishedFlag, dummySolProject[0])
+							{
+								@Override
+								protected void runCodeAfterActivation() throws RepositoryException
+								{
+									// verify that correct resources project is active
+									if (rProject[0] != null &&
+										ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject() != rProject[0])
+									{
+										throw new RepositoryException("Cannot activate resources project " + rProject[0].getName() + ".");
+									}
+								}
+							};
+							job.setUser(false);
+							job.setSystem(true);
+						}
+						catch (Exception e)
+						{
+							exception[0] = e;
 						}
 						finally
 						{
-							synchronized (finishedFlag)
+							try
 							{
-								finishedFlag[0] = job == null;
-								if (finishedFlag[0] == true) finishedFlag.notify();
+								if (job == null && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
+							}
+							finally
+							{
+								synchronized (finishedFlag)
+								{
+									finishedFlag[0] = job == null;
+									if (finishedFlag[0] == true) finishedFlag.notify();
+								}
 							}
 						}
+						if (job != null) job.schedule();
 					}
-					if (job != null) job.schedule();
-				}
+				});
 
-			});
-
-			importJob1.setRule(ServoyModel.getWorkspace().getRoot());
-			importJob1.setUser(false);
-			importJob1.setSystem(true);
-			importJob1.schedule();
+				importJob1.setRule(ServoyModel.getWorkspace().getRoot());
+				importJob1.setUser(false);
+				importJob1.setSystem(true);
+				importJob1.schedule();
+			}
 
 			synchronized (finishedFlag)
 			{
@@ -1099,7 +1118,22 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	public void importingFailed(ImportInfo importInfo, ImportTransactable importTransactable, Exception e)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null, false);
+		if (reportImportFail)
+		{
+			// show error
+			Display.getDefault().syncExec(new Runnable()
+			{
+				public void run()
+				{
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Importing " + importInfo.main.name, e.getMessage());
+				}
+			});
+		}
+		else
+		{
+			// old behavior
+			ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(null, false);
+		}
 		rollback(importTransactable);
 		x11handler.importingFailed(importInfo, importTransactable, e);
 	}

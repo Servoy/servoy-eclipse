@@ -24,15 +24,15 @@
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.logging.log4j.slf4j18-impl"
-		version="2.11.2.SNAPSHOT">
+		version="2.11.2">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.logging.log4j.api"
-		version="2.11.2.SNAPSHOT">
+		version="2.11.2">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.logging.log4j.core"
-		version="2.11.2.SNAPSHOT">
+		version="2.11.2">
 		<category name="bundles" />
 	</bundle>
 	<bundle id="org.apache.commons.io" version="2.6.0">
@@ -107,5 +107,7 @@
 	<bundle id='org.apache.james.apache-mime4j' version='0.6'>
 		<category name="bundles" />
 	</bundle>
-
+	<bundle id='de.inetsoftware.jlessc' version='1.8.0.201903221450'>
+		<category name="bundles" />
+	</bundle>
 </site>

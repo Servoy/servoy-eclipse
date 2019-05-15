@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.InMemServerWrapper;
+import com.servoy.eclipse.model.util.AbstractMemServerWrapper;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -165,10 +165,10 @@ public abstract class AbstractPersistSelectionAction extends Action implements I
 					{
 						persistList.add((IPersist)persist);
 					}
-					else if (persist instanceof InMemServerWrapper && projectNode.getRealObject() instanceof ServoyProject)
+					else if (persist instanceof AbstractMemServerWrapper && projectNode.getRealObject() instanceof ServoyProject)
 					{
 						Iterator<TableNode> nodes = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getTableNodes(
-							((InMemServerWrapper)persist).getDataSource());
+							((AbstractMemServerWrapper)persist).getDataSource());
 						while (nodes.hasNext())
 						{
 							TableNode tableNode = nodes.next();

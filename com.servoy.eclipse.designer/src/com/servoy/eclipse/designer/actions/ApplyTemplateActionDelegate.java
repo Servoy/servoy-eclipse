@@ -80,8 +80,8 @@ public class ApplyTemplateActionDelegate extends AbstractEditpartActionDelegate
 						{
 							Template template = (Template)templates.get(i);
 							JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
-							if (!templateJSON.has(Template.PROP_LAYOUT) && Template.LAYOUT_TYPE_ABSOLUTE.equals(layout) ||
-								templateJSON.get(Template.PROP_LAYOUT).equals(layout))
+							String templateLayout = templateJSON.optString(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE);
+							if (templateLayout.equals(layout))
 							{
 								elements.add(new TemplateElementHolder(template));
 							}

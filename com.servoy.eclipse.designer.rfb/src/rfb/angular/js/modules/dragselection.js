@@ -21,6 +21,12 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				return;
 			}
 			dragNode = utils.getNode(event);
+			
+			if (!dragNode && event.target && event.target.parentElement.hasAttribute('svy-id'))
+			{
+				// fix for bottom line of body part ghost
+				dragNode = event.target.parentElement;
+			}	
 			// do not allow moving elements inside css position container in responsive layout
 			if (dragNode && !editorScope.isAbsoluteFormLayout() && $(dragNode).parents('.svy-csspositioncontainer').length)
 				return;
@@ -605,6 +611,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 				if (!editorScope.selectionToDrag) {
 					editorScope.selectionToDrag = editorScope.getSelection();
+					if (!editorScope.selectionToDrag || editorScope.selectionToDrag.length == 0)
+					{
+						editorScope.selectionToDrag = [dragNode];
+					}	
 					editorScope.selectionToDrag = utils.addGhostsToSelection(editorScope.selectionToDrag);
 				}
 

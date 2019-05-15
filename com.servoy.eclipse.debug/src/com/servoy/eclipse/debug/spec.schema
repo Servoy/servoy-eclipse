@@ -125,6 +125,14 @@
 			"description": "Specifies if this component can be grouped (for web resource optimization), default true",
 			"type": "boolean"
 		},
+		"deprecated": 
+		{
+			"type": "string"
+		},
+		"replacement": 
+		{
+			"type": "string"
+		},
 		"model":
 		{
 			"description": "The model this component has",
@@ -236,6 +244,9 @@
 								},
 								"lazyLoading": {
 									"type": "boolean"
+								},
+								"deprecated": {
+									"type": "string"
 								}
 							},
 				        	  "required":["type"],
@@ -343,6 +354,9 @@
 					"properties": {
 						"returns": {
 							"description": "the datatype this api call returns",
+							"type": "string"
+						},
+						"deprecated": {
 							"type": "string"
 						},
 						"parameters": {

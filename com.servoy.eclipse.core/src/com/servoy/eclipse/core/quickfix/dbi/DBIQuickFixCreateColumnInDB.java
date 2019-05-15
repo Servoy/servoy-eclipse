@@ -57,6 +57,12 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 		return instance;
 	}
 
+	@Override
+	public String getShortLabel()
+	{
+		return "Create missing column.";
+	}
+
 	public String getLabel()
 	{
 		return "Create missing column in the DB table using the information from the DB information file.";
@@ -101,6 +107,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 							catch (RepositoryException e)
 							{
 								ServoyLog.logWarning("Fix create column from column info - " + e.getMessage(), null);
+								storeException(e);
 							}
 						}
 					};
@@ -143,11 +150,12 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 						catch (Exception e)
 						{
 							ServoyLog.logError(e);
+							storeException(e);
 						}
 					}
 
 					// apply the changes (create column in database as well)
-					s.syncTableObjWithDB(difference.getTable(), false, true, null);
+					s.syncTableObjWithDB(difference.getTable(), false, true);
 
 					// reload the column information for this table just to make sure everything is in sync
 					dmm.loadAllColumnInfo(difference.getTable());
@@ -169,10 +177,12 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 	}
 }

@@ -28,6 +28,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -49,18 +50,19 @@ public class NewInMemoryDataSourceAction extends Action implements ISelectionCha
 {
 
 	private final SolutionExplorerView viewer;
+	private final UserNodeType nodeType;
 
 	/**
 	 * Creates a new action for the given solution view.
 	 *
 	 * @param sev the solution view to use.
 	 */
-	public NewInMemoryDataSourceAction(SolutionExplorerView sev)
+	public NewInMemoryDataSourceAction(SolutionExplorerView sev, String text, UserNodeType nodeType)
 	{
 		viewer = sev;
-
-		setText("Create in memory datasource");
-		setToolTipText("Create in memory datasource");
+		this.nodeType = nodeType;
+		setText(text);
+		setToolTipText(text);
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -73,8 +75,7 @@ public class NewInMemoryDataSourceAction extends Action implements ISelectionCha
 			if (node.getRealObject() instanceof IServerInternal)
 			{
 				IServerInternal s = (IServerInternal)node.getRealObject();
-				state = (node.getType() == UserNodeType.INMEMORY_DATASOURCES) &&
-					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
+				state = (node.getType() == nodeType) && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 			}
 		}
 		setEnabled(state);
@@ -84,25 +85,25 @@ public class NewInMemoryDataSourceAction extends Action implements ISelectionCha
 	public void run()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
-		if (node.getType().equals(UserNodeType.INMEMORY_DATASOURCES))
+		if (node.getType().equals(nodeType))
 		{
 
 			final IServerInternal s = (IServerInternal)node.getRealObject();
-			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Create in mem datasource", "Supply datasource name", "",
-				new IInputValidator()
+			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), getText(), "Supply datasource name", "", new IInputValidator()
+			{
+				public String isValid(String newText)
 				{
-					public String isValid(String newText)
+					if (nodeType == UserNodeType.INMEMORY_DATASOURCES && new InMemServerWrapper().getTableNames().contains(newText) ||
+						nodeType == UserNodeType.VIEW_FOUNDSETS && new ViewFoundsetServerWrapper().getTableNames().contains(newText))
 					{
-						if (new InMemServerWrapper().getTableNames().contains(newText))
-						{
-							return "Name already used";
-						}
-						boolean valid = (IdentDocumentValidator.isSQLIdentifier(newText) &&
-							(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
-							(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX)));
-						return valid ? null : (newText.length() == 0 ? "" : "Invalid datasource name");
+						return "Name already used";
 					}
-				});
+					boolean valid = (IdentDocumentValidator.isSQLIdentifier(newText) &&
+						(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
+						(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX)));
+					return valid ? null : (newText.length() == 0 ? "" : "Invalid datasource name");
+				}
+			});
 
 			int res = nameDialog.open();
 			if (res == Window.OK)

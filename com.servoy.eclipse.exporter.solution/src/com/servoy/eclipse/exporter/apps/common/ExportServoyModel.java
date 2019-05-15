@@ -18,6 +18,7 @@
 package com.servoy.eclipse.exporter.apps.common;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.CoreException;
 
 import com.servoy.eclipse.model.IFormComponentListener;
@@ -47,7 +48,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 	{
 		if (getNGPackageManager() == null) super.initialize(); // if super is not already initialized by a previous call do it now
 
-		activeProject = getServoyProject(solutionName);
+		setActiveProjectReferenceInternal(getServoyProject(solutionName));
 		setActiveResourcesProject(activeProject != null ? activeProject.getResourcesProject() : null);
 		updateFlattenedSolution();
 
@@ -115,6 +116,24 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 	@Override
 	public void removeFormComponentListener(IFormComponentListener listener)
 	{
+	}
+
+	@Override
+	public void addResourceChangeListener(IResourceChangeListener resourceChangeListener)
+	{
+		// changes are not relevant for command line exports as after a solution is activated everything is refreshed anyway and no-one changes the workspace
+	}
+
+	@Override
+	public void addResourceChangeListener(IResourceChangeListener postChangeResourceChangeListener, int eventMask)
+	{
+		// changes are not relevant for command line exports as after a solution is activated everything is refreshed anyway and no-one changes the workspace
+	}
+
+	@Override
+	public void removeResourceChangeListener(IResourceChangeListener postChangeResourceChangeListener)
+	{
+		// changes are not relevant for command line exports as after a solution is activated everything is refreshed anyway and no-one changes the workspace
 	}
 
 }

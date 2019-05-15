@@ -223,6 +223,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 	public boolean shouldShow(PersistContext persistContext)
 	{
+		if (propertyDescription.isDeprecated()) return false;
 		if (propertyDescription.getType() instanceof ComponentPropertyType)
 		{
 			return false;

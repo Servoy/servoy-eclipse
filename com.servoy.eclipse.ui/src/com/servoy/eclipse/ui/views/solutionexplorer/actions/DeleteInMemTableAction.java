@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -43,11 +44,12 @@ public class DeleteInMemTableAction extends AbstractInMemTableAction implements 
 	/**
 	 * Creates a new delete table action.
 	 */
-	public DeleteInMemTableAction(Shell shell)
+	public DeleteInMemTableAction(Shell shell, UserNodeType type)
 	{
 		super(shell, "delete", "Deleting");
-		setText("Delete in memory datasource");
-		setToolTipText("Delete in memory datasource");
+		String text = type == UserNodeType.INMEMORY_DATASOURCE ? "Delete in memory datasource" : "Delete view foundset";
+		setText(text);
+		setToolTipText(text);
 	}
 
 	@Override

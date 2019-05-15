@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2019.3.0.3410_rc" useFeatures="true" includeLaunchers="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="2019.6.0.3500_rc" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
       <text>
          Servoy
 
-Version:8.4.0.3400_b1
+Version: 2019.3.0.3411_rc2
 
-Copyright © 1997-2018 Servoy BV. All rights reserved.
+Copyright © 1997-2019 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 
 This computer program is protected by copyright law and international treaties.
@@ -25,12 +25,8 @@ and will be prosecuted to the maximum extent possible under law.
    </configIni>
 
    <launcherArgs>
-      <programArgs>--launcher.XXMaxPermSize
-256m
-      </programArgs>
       <vmArgs>-Xms40m
 -Xmx1G
--XX:MaxPermSize=256M
 --add-modules=ALL-SYSTEM
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
@@ -102,7 +98,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="2019.3.0.3410_rc"/>
+      <feature id="com.servoy.eclipse.feature" version="2019.6.0.3500_rc"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -135,6 +131,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
       <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="4" />
       <plugin id="slf4j.api" autoStart="true" startLevel="0" />
+      <property name="osgi.instance.area.default" value="@user.home/workspace" />
    </configurations>
 
    <preferencesInfo>

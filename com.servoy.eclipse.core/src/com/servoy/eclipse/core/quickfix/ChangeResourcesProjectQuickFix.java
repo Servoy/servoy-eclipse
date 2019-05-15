@@ -19,6 +19,7 @@ package com.servoy.eclipse.core.quickfix;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -359,6 +360,12 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 		public ResourcesProjectChooserComposite(Composite parent, int style, IValidator validator, String text, ServoyResourcesProject initialResourcesProject,
 			boolean noResourcesProject)
 		{
+			this(parent, style, validator, text, initialResourcesProject, noResourcesProject, true);
+		}
+
+		public ResourcesProjectChooserComposite(Composite parent, int style, IValidator validator, String text, ServoyResourcesProject initialResourcesProject,
+			boolean noResourcesProject, boolean canCreate)
+		{
 			super(parent, style);
 			setLayout(new FillLayout());
 			Group radioGroupComposite = new Group(this, SWT.NONE);
@@ -373,6 +380,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			radio1 = new Button(radioGroupComposite, SWT.RADIO | SWT.LEFT);
 			radio1.setText("Create new resource project");
 			radio1.setData(NEW_RESOURCE_PROJECT);
+			radio1.setVisible(canCreate);
 			radio1.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
@@ -392,6 +400,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			});
 			resourceProjectNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			resourceProjectNameField.setText("resources");
+			resourceProjectNameField.setVisible(canCreate);
 
 			radio2 = new Button(radioGroupComposite, SWT.RADIO | SWT.LEFT);
 			radio2.setText("Use existing resource project");
@@ -410,6 +419,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			resourceProjectList.setContentProvider(new ArrayContentProvider());
 			ServoyResourcesProject[] resourcesProjects = ServoyModelManager.getServoyModelManager().getServoyModel().getResourceProjects();
 			resourceProjectList.setInput(resourcesProjects);
+			resourceProjectList.getControl().setVisible(canCreate);
 			resourceProjectList.addSelectionChangedListener(new ISelectionChangedListener()
 			{
 				public void selectionChanged(SelectionChangedEvent event)
@@ -431,7 +441,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			});
 
 			GridData data = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-			data.heightHint = 60;
+			data.heightHint = canCreate ? 60 : 0;
 			data.widthHint = 150;
 			resourceProjectList.getList().setLayoutData(data);
 
@@ -555,6 +565,26 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			return error;
 		}
 
+
+		public void setResourceProjectName(String name)
+		{
+			Optional<ServoyResourcesProject> resProject = Arrays.stream(
+				ServoyModelManager.getServoyModelManager().getServoyModel().getResourceProjects()).filter(p -> name.equals(p.getProject().getName())).findAny();
+			if (resProject.isPresent())
+			{
+				resourceProjectList.setSelection(new StructuredSelection(resProject.get()));
+				handleResourceProjectRadioSelected(EXISTING_RESOURCE_PROJECT);
+			}
+		}
+
+
+		public void selectNoResourceProject()
+		{
+			radio1.setSelection(false);
+			radio2.setSelection(false);
+			radio3.setSelection(true);
+			handleResourceProjectRadioSelected(NO_RESOURCE_PROJECT);
+		}
 	}
 
 	/**

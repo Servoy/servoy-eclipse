@@ -41,6 +41,7 @@
 		<Logger name="org.sablo" level="WARN" />
 		<Logger name="org.sablo.specification.property" level="WARN" />
 		<Logger name="org.sablo.websocket" level="WARN" />
+		<Logger name="org.sablo.IndexPageEnhancer" level="ERROR" />
 		<Logger name="com.servoy.j2db.server.ngclient.property.types"
 			level="WARN" />
 		<Logger name="org.apache.wicket" level="WARN" />

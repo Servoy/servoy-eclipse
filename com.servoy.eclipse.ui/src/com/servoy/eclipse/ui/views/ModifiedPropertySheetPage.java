@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.views;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -274,6 +275,23 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			tree.addListener(SWT.MouseMove, treeListener);
 			tree.addListener(SWT.MouseHover, treeListener);
 
+			tree.addTraverseListener(e -> {
+
+				TreeItem currentSelectedItem = tree.getSelection() != null && tree.getSelection().length > 0 ? tree.getSelection()[0] : null;
+
+				if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS)
+				{
+					if (currentSelectedItem.getItemCount() > 0) tree.setSelection(getNextItem(currentSelectedItem, e.detail == SWT.TRAVERSE_TAB_NEXT));
+					else tree.setSelection(getNextSibling(tree, currentSelectedItem, e.detail == SWT.TRAVERSE_TAB_NEXT));
+				}
+
+				e.doit = false;
+				Event ev = new Event();
+				ev.detail = SWT.TRAVERSE_TAB_NEXT;
+				ev.item = currentSelectedItem;
+				tree.notifyListeners(SWT.Selection, ev);
+			});
+
 			composite.setLayout(new FormLayout());
 
 			FormData fd_propertiesLabel = new FormData();
@@ -290,6 +308,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			fd_tree.left = new FormAttachment(0, 0);
 			tree.setLayoutData(fd_tree);
 		}
+
 		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
 		if (activeEditor != null)
 		{
@@ -299,6 +318,54 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				selectionChanged(activeEditor, selectionProvider.getSelection());
 			}
 		}
+	}
+
+	private TreeItem getNextSibling(Tree tree, TreeItem currentItem, boolean forward)
+	{
+		TreeItem[] siblings = getSiblings(tree, currentItem);
+		if (siblings.length < 2) return getNextSibling(tree, currentItem.getParentItem(), forward);
+		int index = -1;
+		for (int i = 0; i < siblings.length; i++)
+		{
+			if (siblings[i] == currentItem)
+			{
+				index = i;
+				break;
+			}
+		}
+		if ((forward && index == siblings.length - 1) || (!forward && index == 0))
+		{
+			TreeItem parent = currentItem.getParentItem() != null ? currentItem.getParentItem() : tree.getItem(tree.indexOf(currentItem));
+			siblings = getSiblings(tree, parent);
+			index = Arrays.asList(siblings).indexOf(parent);
+
+			if (forward && index == siblings.length - 1) return getNextItem(tree.getItem(0), forward);
+			else if (!forward && index == 0) return getNextItem(tree.getItem(siblings.length - 1), forward);
+		}
+
+		return forward ? getNextItem(siblings[index + 1], forward) : getNextItem(siblings[index - 1], forward);
+	}
+
+	private TreeItem getNextItem(TreeItem item, boolean forward)
+	{
+		int idx = forward ? 0 : item.getItemCount() - 1;
+		TreeItem auxItem = item;
+
+		if (auxItem.getItemCount() == 0) return auxItem;
+		while (auxItem.getItemCount() > 0)
+		{
+			auxItem.getParent().showItem(auxItem.getItem(idx));
+			auxItem = auxItem.getItem(idx);
+		}
+
+		return auxItem;
+	}
+
+	private TreeItem[] getSiblings(Tree tree, TreeItem currentItem)
+	{
+		TreeItem parentItem = currentItem.getParentItem();
+		if (parentItem != null) return parentItem.getItems();
+		return tree.getItems();
 	}
 
 

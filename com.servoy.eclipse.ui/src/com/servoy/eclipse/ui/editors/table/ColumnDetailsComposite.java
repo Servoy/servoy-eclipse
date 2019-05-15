@@ -40,6 +40,8 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
+import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -57,6 +59,7 @@ import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog;
@@ -104,15 +107,19 @@ public class ColumnDetailsComposite extends Composite
 
 	private Column column;
 
+	private final boolean isViewFoundsetTable;
+
 	/**
 	 * Create the composite
 	 *
 	 * @param parent
 	 * @param style
+	 * @param isViewFoundsetTable
 	 */
-	public ColumnDetailsComposite(Composite parent, int style)
+	public ColumnDetailsComposite(Composite parent, int style, boolean isViewFoundsetTable)
 	{
 		super(parent, style);
+		this.isViewFoundsetTable = isViewFoundsetTable;
 
 		Label titleLabel;
 		titleLabel = new Label(this, SWT.NONE);
@@ -190,27 +197,36 @@ public class ColumnDetailsComposite extends Composite
 		});
 
 		foreignTypeTreeSelect = new TreeSelectViewer(this, SWT.NONE, TableValueEditor.INSTANCE);
-		foreignTypeTreeSelect.setTitleText("Select foreign table");
-		foreignTypeTreeSelect.setName("foreignDialog");
-		foreignTypeTreeSelect.setContentProvider(new TableContentProvider());
-		foreignTypeTreeSelect.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
-		foreignTypeTreeSelect.setEditable(true);
-
 		Control foreignTypeControl = foreignTypeTreeSelect.getControl();
-
 		suggestForeignTypeButton = new Button(this, SWT.PUSH);
-		suggestForeignTypeButton.setText("Suggest...");
-		suggestForeignTypeButton.addListener(SWT.Selection, new Listener()
+		if (!isViewFoundsetTable)
 		{
-			public void handleEvent(Event event)
+			foreignTypeTreeSelect.setTitleText("Select foreign table");
+			foreignTypeTreeSelect.setName("foreignDialog");
+			foreignTypeTreeSelect.setContentProvider(new TableContentProvider());
+			foreignTypeTreeSelect.setLabelProvider(DatasourceLabelProvider.INSTANCE_IMAGE_NAMEONLY);
+			foreignTypeTreeSelect.setEditable(true);
+
+
+			suggestForeignTypeButton.setText("Suggest...");
+			suggestForeignTypeButton.addListener(SWT.Selection, new Listener()
 			{
-				IStructuredSelection selection = StructuredSelection.EMPTY;
-				suggestForeignTypesWizard.init(PlatformUI.getWorkbench(), selection);
-				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), suggestForeignTypesWizard);
-				dialog.create();
-				dialog.open();
-			}
-		});
+				public void handleEvent(Event event)
+				{
+					IStructuredSelection selection = StructuredSelection.EMPTY;
+					suggestForeignTypesWizard.init(PlatformUI.getWorkbench(), selection);
+					WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), suggestForeignTypesWizard);
+					dialog.create();
+					dialog.open();
+				}
+			});
+		}
+		else
+		{
+			foreignTypeControl.setVisible(false);
+			foreignTypeLabel.setVisible(false);
+			suggestForeignTypeButton.setVisible(false);
+		}
 
 		Label flagsLabel;
 		flagsLabel = new Label(this, SWT.NONE);
@@ -220,31 +236,39 @@ public class ColumnDetailsComposite extends Composite
 		uuidCheckBox = new Button(this, SWT.CHECK);
 		tenantCheckBox = new Button(this, SWT.CHECK);
 
-		tenantCheckBox.addSelectionListener(new SelectionListener()
+		if (!isViewFoundsetTable)
 		{
-
-			@Override
-			public void widgetSelected(SelectionEvent e)
+			tenantCheckBox.addSelectionListener(new SelectionListener()
 			{
-				if (tenantCheckBox.getSelection())
+
+				@Override
+				public void widgetSelected(SelectionEvent e)
 				{
-					for (Column col : column.getTable().getColumns())
+					if (tenantCheckBox.getSelection())
 					{
-						if (col.getColumnInfo().hasFlag(IBaseColumn.TENANT_COLUMN) && col != column)
+						for (Column col : column.getTable().getColumns())
 						{
-							UIUtils.reportWarning("Warning", "There is already another column marked as tenant: " + col.getName());
-							break;
+							if (col.getColumnInfo().hasFlag(IBaseColumn.TENANT_COLUMN) && col != column)
+							{
+								UIUtils.reportWarning("Warning", "There is already another column marked as tenant: " + col.getName());
+								break;
+							}
 						}
 					}
 				}
-			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e)
+				{
 
-			}
-		});
+				}
+			});
+		}
+		else
+		{
+			excludedCheckBox.setVisible(false);
+			tenantCheckBox.setVisible(false);
+		}
 
 		uuidCheckBox.addListener(SWT.Selection, new Listener()
 		{
@@ -299,6 +323,36 @@ public class ColumnDetailsComposite extends Composite
 
 		final GroupLayout groupLayout = new GroupLayout(this);
 
+		SequentialGroup flagsHorizontalGroup = groupLayout.createSequentialGroup();
+		if (!isViewFoundsetTable)
+		{
+			flagsHorizontalGroup.add(excludedCheckBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+				LayoutStyle.RELATED);
+		}
+		flagsHorizontalGroup.add(uuidCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+			LayoutStyle.RELATED);
+		if (!isViewFoundsetTable)
+		{
+			flagsHorizontalGroup.add(tenantCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE);
+		}
+
+		SequentialGroup foreignTypeHorizontalGroup = isViewFoundsetTable ? groupLayout.createSequentialGroup().addContainerGap()
+			: groupLayout.createSequentialGroup().add(foreignTypeControl, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).addPreferredGap(
+				LayoutStyle.RELATED).add(suggestForeignTypeButton);
+
+		ParallelGroup labelsHorizontalGroup = groupLayout.createParallelGroup(GroupLayout.LEADING).
+		//add default format label;
+			add(titleLabel).
+			//add title label;
+			add(defaultFormatLabel);
+		if (!isViewFoundsetTable)
+		{
+			//add foreign type label;
+			labelsHorizontalGroup.add(foreignTypeLabel);
+		}
+		//add flags label
+		labelsHorizontalGroup.add(flagsLabel);
+
 		groupLayout.setHorizontalGroup(
 			//here we create a parallel group
 			groupLayout.createSequentialGroup().
@@ -313,15 +367,7 @@ public class ColumnDetailsComposite extends Composite
 						//start group
 						GroupLayout.TRAILING, groupLayout.createSequentialGroup().
 						//add group with default format label, title label, foreign type label, flags label
-							add(groupLayout.createParallelGroup(GroupLayout.LEADING).
-							//add default format label;
-								add(titleLabel).
-								//add title label;
-								add(defaultFormatLabel).
-								//add foreign type label;
-								add(foreignTypeLabel).
-								//add flags label
-								add(flagsLabel)).add(10, 10, 10).
+							add(labelsHorizontalGroup).add(10, 10, 10).
 							//add the group
 							add(
 								//start parallel group
@@ -331,25 +377,11 @@ public class ColumnDetailsComposite extends Composite
 									//add the default format combo-box;
 									add(formatComposite, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
 									//add the foreign-type combo-box
-									add(groupLayout.createSequentialGroup().add(foreignTypeControl, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE).
-									//
-										addPreferredGap(LayoutStyle.RELATED).
-										//add the suggest button for foreign type
-										add(suggestForeignTypeButton)).
+									add(foreignTypeHorizontalGroup).
 									//add other flags combo-box
 									add(
 										//add the flags
-										groupLayout.createSequentialGroup().
-										//
-											add(excludedCheckBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).
-											//
-											addPreferredGap(LayoutStyle.RELATED).
-											//
-											add(uuidCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).
-											//
-											addPreferredGap(LayoutStyle.RELATED).
-											//
-											add(tenantCheckBox, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+										flagsHorizontalGroup
 
 								//end adding the flags
 								)
@@ -368,21 +400,27 @@ public class ColumnDetailsComposite extends Composite
 				//add a container gap
 				addContainerGap());
 
+		//other flags combo
+		ParallelGroup flagsVerticalGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(flagsLabel);
+		if (!isViewFoundsetTable) flagsVerticalGroup.add(excludedCheckBox);
+		flagsVerticalGroup.add(uuidCheckBox);
+		if (!isViewFoundsetTable) flagsVerticalGroup.add(tenantCheckBox);
+
+		ParallelGroup foreignTypeVerticalGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false);
+		if (!isViewFoundsetTable)
+		{
+			foreignTypeVerticalGroup.add(foreignTypeLabel).
+			//foreign type treeselect;
+				add(foreignTypeControl, 0, isViewFoundsetTable ? 0 : GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE).
+				//suggest button for foreign type
+				add(suggestForeignTypeButton, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE);
+		}
 		groupLayout.setVerticalGroup(groupLayout.createSequentialGroup().addContainerGap().add(
 			groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(titleLabel).add(titleComposite)).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(defaultFormatLabel).add(formatComposite)).addPreferredGap(
-					LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER, false).
-		// foreign type label;
-						add(foreignTypeLabel).
-						//foreign type treeselect;
-						add(foreignTypeControl, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE).
-						//suggest button for foreign type
-						add(suggestForeignTypeButton, 0, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-							groupLayout.createParallelGroup(GroupLayout.CENTER, false).add(flagsLabel).
-							//other flags combo
-								add(excludedCheckBox).add(uuidCheckBox).add(tenantCheckBox)).addPreferredGap(LayoutStyle.UNRELATED).add(
-									descriptionLabel).addPreferredGap(LayoutStyle.RELATED).add(descriptionText, GroupLayout.PREFERRED_SIZE,
-										GroupLayout.PREFERRED_SIZE, Integer.MAX_VALUE).addContainerGap());
+					LayoutStyle.RELATED).add(foreignTypeVerticalGroup).addPreferredGap(LayoutStyle.RELATED).add(flagsVerticalGroup).addPreferredGap(
+						LayoutStyle.UNRELATED).add(descriptionLabel).addPreferredGap(LayoutStyle.RELATED).add(descriptionText, 100, GroupLayout.PREFERRED_SIZE,
+							Integer.MAX_VALUE).addContainerGap());
 
 		setLayout(groupLayout);
 	}
@@ -422,7 +460,11 @@ public class ColumnDetailsComposite extends Composite
 		try
 		{
 			// Fill foreign type treeselect
-			foreignTypeTreeSelect.setInput(new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true, c.getTable().getServerName()));
+			if (!isViewFoundsetTable)
+			{
+				foreignTypeTreeSelect.setInput(
+					new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, true, c.getTable().getServerName()));
+			}
 
 			excludedCheckBox.setSelection(c.getColumnInfo().hasFlag(IBaseColumn.EXCLUDED_COLUMN));
 			uuidCheckBox.setSelection(c.getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN));
@@ -569,6 +611,10 @@ public class ColumnDetailsComposite extends Composite
 			if (serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
 			{
 				return new InMemServerWrapper((String)fromObject);
+			}
+			else if (serverName.equals(DataSourceUtils.VIEW_DATASOURCE))
+			{
+				return new ViewFoundsetServerWrapper((String)fromObject);
 			}
 			return new TableWrapper(serverName, (String)fromObject, isView);
 		}

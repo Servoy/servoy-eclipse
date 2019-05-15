@@ -119,6 +119,8 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.ViewFoundsetServerWrapper;
+import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
@@ -136,13 +138,17 @@ import com.servoy.j2db.dataprocessing.JSDataSet;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.Record;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.dataprocessing.ViewFoundSet;
+import com.servoy.j2db.dataprocessing.ViewRecord;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSource;
 import com.servoy.j2db.dataprocessing.datasource.DBDataSourceServer;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.dataprocessing.datasource.MemDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSource;
 import com.servoy.j2db.dataprocessing.datasource.SPDataSourceServer;
+import com.servoy.j2db.dataprocessing.datasource.ViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
 import com.servoy.j2db.documentation.IParameter;
@@ -414,6 +420,8 @@ public class TypeCreator extends TypeCache
 
 		addScopeType(Record.JS_RECORD, new RecordCreator());
 		addScopeType(FoundSet.JS_FOUNDSET, new FoundSetCreator());
+		addScopeType(ViewRecord.VIEW_RECORD, new ViewRecordCreator());
+		addScopeType(ViewFoundSet.VIEW_FOUNDSET, new ViewFoundSetCreator());
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("RuntimeForm", new FormScopeCreator());
@@ -448,6 +456,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBColumns.class.getSimpleName(), new QueryBuilderColumnsCreator());
 		addScopeType(QBFunctions.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
+		addScopeType(ViewDataSource.class.getSimpleName(), new ViewDataSourceCreator());
 		addScopeType(SPDataSource.class.getSimpleName(), new DBDataSourceCreator(SPDataSourceServer.class)
 		{
 			@Override
@@ -469,6 +478,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(SPDataSourceServer.class.getSimpleName(), new SPDataSourceServerCreator());
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
+		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
 	}
 
 	private void createSpecTypeDefinitions()
@@ -516,7 +526,9 @@ public class TypeCreator extends TypeCache
 							{
 								memberType = TypeUtil.arrayOf(memberType);
 							}
-							members.add(createProperty(name, false, memberType, "", null));
+							Property property = createProperty(name, false, memberType, "", null);
+							property.setDeprecated(pd.isDeprecated());
+							members.add(property);
 						}
 					}
 				}
@@ -783,7 +795,7 @@ public class TypeCreator extends TypeCache
 					IReturnedTypesProvider datasourceReturns = ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class);
 					for (Class< ? > cls : datasourceReturns.getAllReturnedTypes())
 					{
-						if (cls != DBDataSource.class && cls != MemDataSource.class)
+						if (cls != DBDataSource.class && cls != MemDataSource.class && cls != ViewDataSource.class)
 						{
 							clsses.add(cls);
 						}
@@ -1176,7 +1188,9 @@ public class TypeCreator extends TypeCache
 				{
 					memberType = TypeUtil.arrayOf(memberType);
 				}
-				members.add(createProperty(name, false, memberType, "", null));
+				Property property = createProperty(name, false, memberType, "", null);
+				property.setDeprecated(pd.isDeprecated());
+				members.add(property);
 			}
 		}
 		SolutionExplorerListContentProvider.extractApiDocs(spec);
@@ -1188,7 +1202,11 @@ public class TypeCreator extends TypeCache
 			if (api.getDocumentation() != null)
 			{
 				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(api.getDocumentation(), STANDARD_ELEMENT_NAME, true));
-				method.setDeprecated(api.getDocumentation().contains("@deprecated"));
+				method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
+			}
+			else
+			{
+				method.setDeprecated(api.isDeprecated());
 			}
 			JSType returnType = getType(context, api.getReturnType());
 			if (returnType == null && api.getReturnType() != null)
@@ -2678,7 +2696,8 @@ public class TypeCreator extends TypeCache
 				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>'));
 			}
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
-				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()))
+				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
+				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()))
 			{
 				return TypeCreator.clone(member, getTypeRef(context, memberType.getName() + '<' + config + '>'));
 			}
@@ -2795,6 +2814,160 @@ public class TypeCreator extends TypeCache
 			cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
 		}
 	}
+
+	private class ViewFoundSetCreator implements IScopeTypeCreator
+	{
+		private Type cachedSuperTypeTemplateTypeForFoundSet = null;
+		private Type cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
+
+		public Type createType(String context, String fullTypeName)
+		{
+			if (fullTypeName.equals(ViewFoundSet.VIEW_FOUNDSET))
+			{
+				// quickly add this one to the static types.
+				return addType(null, createBaseType(context, fullTypeName, ViewFoundSet.class));
+			}
+
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			EList<Member> members;
+			if (fs != null && fs.getRelation(config) != null)
+			{
+				// related foundset
+				if (cachedSuperTypeTemplateTypeForRelatedFoundSet == null)
+				{
+					cachedSuperTypeTemplateTypeForRelatedFoundSet = createBaseType(context, ViewFoundSet.VIEW_FOUNDSET, RelatedFoundSet.class);
+				}
+				members = cachedSuperTypeTemplateTypeForRelatedFoundSet.getMembers();
+			}
+			else
+			{
+				if (cachedSuperTypeTemplateTypeForFoundSet == null)
+				{
+					cachedSuperTypeTemplateTypeForFoundSet = createBaseType(context, ViewFoundSet.VIEW_FOUNDSET, ViewFoundSet.class);
+				}
+				members = cachedSuperTypeTemplateTypeForFoundSet.getMembers();
+			}
+
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				Member overridden = null;
+				if (member.getVisibility() == Visibility.INTERNAL)
+				{
+					if (fs != null && fs.getRelation(config) != null)
+					{
+						// the special internal once (like clear() of related) should be also added
+						// because they should override the normal super JSFoundSet clear
+						// leave the type check in the clone, dont give member.getType() because that removes the type from this member
+						overridden = TypeCreator.clone(member, null);
+						overridden.setAttribute(HIDDEN_IN_RELATED, Boolean.TRUE);
+					}
+				}
+				else
+				{
+					String memberConfig = config;
+					if (fs != null && member.getType() != null && member.getType().getName().equals(ViewFoundSet.VIEW_FOUNDSET) &&
+						member.getName().equals("unrelate"))
+					{
+						// its really a relation, unrelate it.
+						Relation relation = fs.getRelation(config);
+						if (relation != null)
+						{
+							memberConfig = relation.getForeignDataSource();
+						}
+					}
+
+					overridden = createOverrideMember(member, context, memberConfig);
+				}
+
+				if (overridden != null)
+				{
+					overwrittenMembers.add(overridden);
+				}
+			}
+			return getCombinedTypeWithRelationsAndDataproviders(fs, context, fullTypeName, config, overwrittenMembers,
+				getType(context, ViewFoundSet.VIEW_FOUNDSET), FOUNDSET_IMAGE, true);
+		}
+
+		/**
+		 * @param context
+		 * @param fullTypeName
+		 * @param foudsetClass
+		 * @return
+		 */
+		private Type createBaseType(String context, String fullTypeName, Class< ? > foundsetClass)
+		{
+			Type type = TypeCreator.this.createType(context, fullTypeName, foundsetClass);
+			//type.setAttribute(IMAGE_DESCRIPTOR, FOUNDSET_IMAGE);
+
+			Property maxRecordIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
+			maxRecordIndex.setName("maxRecordIndex");
+			type.getMembers().add(makeDeprecated(maxRecordIndex));
+
+			Property selectedIndex = TypeInfoModelFactory.eINSTANCE.createProperty();
+			selectedIndex.setName("selectedIndex");
+			type.getMembers().add(makeDeprecated(selectedIndex));
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.All;
+		}
+
+		@Override
+		public void flush()
+		{
+			cachedSuperTypeTemplateTypeForFoundSet = null;
+			cachedSuperTypeTemplateTypeForRelatedFoundSet = null;
+		}
+	}
+
+	private class ViewRecordCreator extends ViewFoundSetCreator
+	{
+		private Type cachedSuperTypeTemplateType;
+
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			if (fullTypeName.equals(ViewRecord.VIEW_RECORD))
+			{
+				Type type = TypeCreator.this.createType(context, fullTypeName, ViewRecord.class);
+				ImageDescriptor desc = IconProvider.instance().descriptor(ViewRecord.class);
+				type.setAttribute(IMAGE_DESCRIPTOR, desc);
+				// quickly add this one to the static types.
+				return addType(null, type);
+			}
+
+			String config = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			if (cachedSuperTypeTemplateType == null)
+			{
+				cachedSuperTypeTemplateType = TypeCreator.this.createType(context, ViewRecord.VIEW_RECORD, ViewRecord.class);
+			}
+			EList<Member> members = cachedSuperTypeTemplateType.getMembers();
+			List<Member> overwrittenMembers = new ArrayList<Member>();
+			for (Member member : members)
+			{
+				Member overridden = createOverrideMember(member, context, config);
+				if (overridden != null)
+				{
+					overwrittenMembers.add(overridden);
+				}
+			}
+			return getCombinedTypeWithRelationsAndDataproviders(ElementResolver.getFlattenedSolution(context), context, fullTypeName, config,
+				overwrittenMembers, getType(context, ViewRecord.VIEW_RECORD), IconProvider.instance().descriptor(ViewRecord.class), true);
+		}
+
+		@Override
+		public void flush()
+		{
+			super.flush();
+			cachedSuperTypeTemplateType = null;
+		}
+
+	}
+
 
 	private class JSDataSetCreator implements IScopeTypeCreator
 	{
@@ -3029,7 +3202,11 @@ public class TypeCreator extends TypeCache
 			if (ds != null || PersistEncapsulation.hideFoundset(formToUse))
 			{
 				String foundsetType = FoundSet.JS_FOUNDSET;
-				if (ds != null) foundsetType += '<' + ds + '>';
+				if (ds != null)
+				{
+					foundsetType = ds.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? ViewFoundSet.VIEW_FOUNDSET : FoundSet.JS_FOUNDSET;
+					foundsetType += '<' + ds + '>';
+				}
 				Member clone = TypeCreator.clone(getMember("foundset", baseType), getTypeRef(context, foundsetType));
 				overwrittenMembers.add(clone);
 				clone.setVisible(!PersistEncapsulation.hideFoundset(formToUse));
@@ -3407,6 +3584,45 @@ public class TypeCreator extends TypeCache
 		{
 		}
 	}
+	private class ViewDataSourceCreator implements IScopeTypeCreator
+	{
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setSuperType(createArrayLookupType(context, JSViewDataSource.class));
+			ViewFoundsetServerWrapper wrapper = new ViewFoundsetServerWrapper();
+			Collection<String> tableNames = wrapper.getTableNames();
+			EList<Member> members = type.getMembers();
+			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+			for (String name : tableNames)
+			{
+				ITable table = dsm.getDataSource(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON + name);
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(name);
+				property.setAttribute(RESOURCE, table);
+				property.setVisible(true);
+				property.setType(getTypeRef(context, JSViewDataSource.class.getSimpleName() + '<' + table.getDataSource() + '>'));
+				property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+				property.setDescription(Table.getTableTypeAsString(table.getTableType()));
+				members.add(property);
+			}
+
+			return type;
+		}
+
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng_wc_sc;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
 
 	private class SPDataSourceServerCreator implements IScopeTypeCreator
 	{
@@ -3934,6 +4150,7 @@ public class TypeCreator extends TypeCache
 			Form form = fs.getForm(formName);
 			if (form != null)
 			{
+				form = fs.getFlattenedForm(form);
 				List<IFormElement> formelements = form.getFlattenedObjects(PositionComparator.XY_PERSIST_COMPARATOR);
 				ElementsScopeCreator elementScopeCreator = (ElementsScopeCreator)scopeTypes.get("Elements");
 				IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
@@ -3968,6 +4185,25 @@ public class TypeCreator extends TypeCache
 				for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 				{
 					MemServer server = sp.getMemServer();
+					if (server != null)
+					{
+						tbl = server.getTable(dbServernameTablename[1]);
+						if (tbl != null)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+		else if (datasource.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON))
+		{
+			dbServernameTablename = DataSourceUtils.getViewServernameTablename(datasource);
+			if (dbServernameTablename != null)
+			{
+				for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
+				{
+					ViewFoundsetsServer server = sp.getViewFoundsetsServer();
 					if (server != null)
 					{
 						tbl = server.getTable(dbServernameTablename[1]);
@@ -4045,7 +4281,8 @@ public class TypeCreator extends TypeCache
 					if (servoyModel.getFlattenedSolution().getSolution() != null)
 					{
 						String[] dbServernameTablename = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
-							? DataSourceUtils.getMemServernameTablename(config) : DataSourceUtilsBase.getDBServernameTablename(config);
+							? DataSourceUtils.getMemServernameTablename(config) : config.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON)
+								? DataSourceUtils.getViewServernameTablename(config) : DataSourceUtilsBase.getDBServernameTablename(config);
 						if (dbServernameTablename != null)
 						{
 							try
@@ -4582,7 +4819,8 @@ public class TypeCreator extends TypeCache
 		String serverName = null;
 		String tableName = null;
 		String[] serverAndTableName = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) ? DataSourceUtils.getMemServernameTablename(config)
-			: DataSourceUtilsBase.getDBServernameTablename(config);
+			: config.startsWith(DataSourceUtils.VIEW_DATASOURCE_SCHEME_COLON) ? DataSourceUtils.getViewServernameTablename(config)
+				: DataSourceUtilsBase.getDBServernameTablename(config);
 		if (serverAndTableName != null)
 		{
 			serverName = serverAndTableName[0];

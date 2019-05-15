@@ -51,11 +51,13 @@ import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetTable;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
 import com.servoy.eclipse.ui.editors.table.AggregationsComposite;
 import com.servoy.eclipse.ui.editors.table.CalculationsComposite;
@@ -162,7 +164,10 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			createDynamicPages();
 
-			createPropertiesPage();
+			if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()))
+			{
+				createPropertiesPage();
+			}
 		}
 		updateTitle();
 	}
@@ -435,12 +440,18 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private void createDynamicPages()
 	{
-		createCalculationsPage();
-		createFoundsSetMethodsPage();
-		createAggregationsPage();
+		if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()))
+		{
+			createCalculationsPage();
+			createFoundsSetMethodsPage();
+			createAggregationsPage();
+		}
 		createEventsPage();
-		createSecurityPage();
-		createDataPage();
+		if (!DataSourceUtils.VIEW_DATASOURCE.equals(server.getName()))
+		{
+			createSecurityPage();
+			createDataPage();
+		}
 	}
 
 	@Override
@@ -560,7 +571,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			throw new RuntimeException("Could not initialize table editor table could not be found");
 		}
-		isModified = isModified || !table.getExistInDB() || (table instanceof MemTable && ((MemTable)table).isChanged());
+		isModified = isModified || !table.getExistInDB() || (table instanceof AbstractMemTable && ((AbstractMemTable)table).isChanged());
 
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 
@@ -571,6 +582,11 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				MemTable memTable = (MemTable)table;
 				server = memTable.getParent();
+			}
+			else if (DataSourceUtils.VIEW_DATASOURCE.equals(table.getServerName()))
+			{
+				ViewFoundsetTable viewTable = (ViewFoundsetTable)table;
+				server = viewTable.getParent();
 			}
 			if (server == null)
 			{
@@ -732,7 +748,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				{
 					propertiesComposite.saveValues();
 				}
-				if (!(table instanceof MemTable))
+				if (!(table instanceof AbstractMemTable))
 				{
 					if (table.getRowIdentColumnsCount() == 0)
 					{
@@ -777,7 +793,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				servoyModel.flushDataProvidersForTable(table);
 
 //				IColumnInfoManager cim = servoyModel.getDeveloperRepository().getColumnInfoManager();
-				server.syncTableObjWithDB(table, false, true, null);
+				server.syncTableObjWithDB(table, false, true);
 				if (securityComposite != null) securityComposite.saveValues();
 				ServoyProject servoyProject = servoyModel.getActiveProject();
 				if (servoyProject != null)
@@ -879,9 +895,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			DataModelManager dmm = servoyModel.getDataModelManager();
 			if (dmm != null)
 			{
-				if (table instanceof MemTable)
+				if (table instanceof AbstractMemTable)
 				{
-					modified = ((MemTable)table).isChanged();
+					modified = ((AbstractMemTable)table).isChanged();
 				}
 				else
 				{

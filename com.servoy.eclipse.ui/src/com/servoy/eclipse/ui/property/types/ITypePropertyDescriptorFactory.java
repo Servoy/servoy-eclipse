@@ -35,7 +35,7 @@ public interface ITypePropertyDescriptorFactory
 	/**
 	 * Creates a property descriptor for the property described by the arguments
 	 */
-	IPropertyDescriptor createPropertyDescriptor(String id, String displayName, FlattenedSolution flattenedEditingSolution, PersistContext persistContext,
+	IPropertyDescriptor createPropertyDescriptor(Object id, String displayName, FlattenedSolution flattenedEditingSolution, PersistContext persistContext,
 		PropertyDescription propertyDescription);
 
 }

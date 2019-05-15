@@ -50,7 +50,9 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -66,6 +68,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.Utils;
 
 
 public class AddContainerCommand extends AbstractHandler implements IHandler
@@ -80,32 +83,108 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			final BaseVisualFormEditor activeEditor = DesignerUtil.getActiveEditor();
 			if (activeEditor != null)
 			{
-				activeEditor.getCommandStack().execute(new BaseRestorableCommand("createLayoutContainer")
+				final ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
+				PersistContext persistCtxt = null;
+				if (DesignerUtil.getContentOutlineSelection() != null)
 				{
-					private IPersist persist;
-
-					@Override
-					public void execute()
+					persistCtxt = DesignerUtil.getContentOutlineSelection();
+				}
+				else
+				{
+					IStructuredSelection sel = (IStructuredSelection)selectionProvider.getSelection();
+					if (!sel.isEmpty())
 					{
-						try
+						Object[] selection = sel.toArray();
+						persistCtxt = selection[0] instanceof PersistContext ? (PersistContext)selection[0] : PersistContext.create((IPersist)selection[0]);
+					}
+				}
+
+				if (persistCtxt != null)
+				{
+					PersistContext persistContext = persistCtxt;
+
+					Object dlgSelection = null;
+					if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.template") != null)
+					{
+						if (persistContext.getPersist() instanceof AbstractContainer)
 						{
-							final ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
-							PersistContext persistContext = null;
-							if (DesignerUtil.getContentOutlineSelection() != null)
-							{
-								persistContext = DesignerUtil.getContentOutlineSelection();
-							}
-							else
-							{
-								IStructuredSelection sel = (IStructuredSelection)selectionProvider.getSelection();
-								if (!sel.isEmpty())
+							TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
+								FlatTreeContentProvider.INSTANCE, new LabelProvider()
 								{
-									Object[] selection = sel.toArray();
-									persistContext = selection[0] instanceof PersistContext ? (PersistContext)selection[0]
-										: PersistContext.create((IPersist)selection[0]);
-								}
+									@Override
+									public String getText(Object element)
+									{
+										return ((TemplateElementHolder)element).template.getName();
+									};
+								}, null, null, SWT.NONE, "Select template",
+								DesignerUtil.getResponsiveLayoutTemplates((AbstractContainer)persistContext.getPersist()), null, false, "TemplateDialog", null);
+							if (dialog.open() == Window.CANCEL)
+							{
+								return null;
 							}
-							if (persistContext != null)
+							dlgSelection = ((StructuredSelection)dialog.getSelection()).getFirstElement();
+						}
+					}
+					else if (event.getParameters().isEmpty())
+					{
+						//we need to ask for component spec
+						List<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
+						WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+						for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
+						{
+							if (webComponentSpec.isDeprecated()) continue;
+							if (!webComponentSpec.getPackageName().equals("servoydefault"))
+							{
+								specs.add(webComponentSpec);
+							}
+						}
+						LabelProvider labelProvider = new LabelProvider()
+						{
+							@Override
+							public String getText(Object element)
+							{
+								String displayName = ((WebObjectSpecification)element).getDisplayName();
+								if (Utils.stringIsEmpty(displayName))
+								{
+									displayName = ((WebObjectSpecification)element).getName();
+									int index = displayName.indexOf("-");
+									if (index != -1)
+									{
+										displayName = displayName.substring(index + 1);
+									}
+								}
+								return displayName + " [" + ((WebObjectSpecification)element).getPackageName() + "]";
+							};
+						};
+						Collections.sort(specs, new Comparator<WebObjectSpecification>()
+						{
+
+							@Override
+							public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
+							{
+								return NameComparator.INSTANCE.compare(labelProvider.getText(o1), labelProvider.getText(o2));
+							}
+						});
+						TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
+							FlatTreeContentProvider.INSTANCE, labelProvider, null, null, SWT.NONE, "Select spec", specs.toArray(new WebObjectSpecification[0]),
+							null, false, "SpecDialog", null);
+						if (dialog.open() == Window.CANCEL)
+						{
+							return null;
+						}
+						dlgSelection = ((StructuredSelection)dialog.getSelection()).getFirstElement();
+					}
+
+
+					Object dialogSelection = dlgSelection;
+					activeEditor.getCommandStack().execute(new BaseRestorableCommand("createLayoutContainer")
+					{
+						private IPersist persist;
+
+						@Override
+						public void execute()
+						{
+							try
 							{
 								if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property") != null)
 								{
@@ -127,100 +206,60 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								}
 								else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.template") != null)
 								{
-									if (persistContext.getPersist() instanceof AbstractContainer)
+									AbstractContainer parentPersist = (AbstractContainer)ElementUtil.getOverridePersist(persistContext);
+									int x = parentPersist.getAllObjectsAsList().size();
+									TemplateElementHolder template = (TemplateElementHolder)dialogSelection;
+									Object[] applyTemplate = ElementFactory.applyTemplate(parentPersist, template,
+										new org.eclipse.swt.graphics.Point(x + 1, x + 1), false);
+									if (applyTemplate.length > 0)
 									{
-										TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
-											FlatTreeContentProvider.INSTANCE, new LabelProvider()
-											{
-												@Override
-												public String getText(Object element)
-												{
-													return ((TemplateElementHolder)element).template.getName();
-												};
-											}, null, null, SWT.NONE, "Select template", DesignerUtil.getResponsiveLayoutTemplates(), null, false, "TemplateDialog", null);
-										dialog.open();
-										if (dialog.getReturnCode() == Window.OK)
+										List<IPersist> persists = new ArrayList<>();
+										for (Object o : applyTemplate)
 										{
-											AbstractContainer parentPersist = (AbstractContainer)ElementUtil.getOverridePersist(persistContext);
-											int x = parentPersist.getAllObjectsAsList().size();
-											TemplateElementHolder template = (TemplateElementHolder)((StructuredSelection)dialog.getSelection()).getFirstElement();
-											Object[] applyTemplate = ElementFactory.applyTemplate(parentPersist, template,
-												new org.eclipse.swt.graphics.Point(x + 1, x + 1), false);
-											if (applyTemplate.length > 0)
+											if (o instanceof FormElementGroup)
 											{
-												persist = parentPersist;
+												FormElementGroup group = (FormElementGroup)o;
+												group.getElements().forEachRemaining(persists::add);
+											}
+											else if (o instanceof IPersist)
+											{
+												persists.add((IPersist)o);
 											}
 										}
+										ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, persists);
+										IStructuredSelection structuredSelection = new StructuredSelection(persists.size() > 0 ? persists.get(0) : persists);
+										selectionProvider.setSelection(structuredSelection);
+										persist = parentPersist;
 									}
 								}
 								else
 								{
-									List<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
-									WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
-									for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
+									AbstractContainer parentPersist = (AbstractContainer)ElementUtil.getOverridePersist(persistContext);
+									WebObjectSpecification spec = (WebObjectSpecification)dialogSelection;
+									String componentName = spec.getName();
+									int index = componentName.indexOf("-");
+									if (index != -1)
 									{
-										if (!webComponentSpec.getPackageName().equals("servoydefault"))
-										{
-											specs.add(webComponentSpec);
-										}
+										componentName = componentName.substring(index + 1);
 									}
-									Collections.sort(specs, new Comparator<WebObjectSpecification>()
+									componentName = componentName.replaceAll("-", "_");
+									String baseName = componentName;
+									int i = 1;
+									while (!PersistFinder.INSTANCE.checkName(activeEditor, componentName))
 									{
+										componentName = baseName + "_" + i;
+										i++;
+									}
+									persist = parentPersist.createNewWebComponent(componentName, spec.getName());
 
-										@Override
-										public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
-										{
-											return NameComparator.INSTANCE.compare(o1.getName(), o2.getName());
-										}
-									});
-									TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
-										FlatTreeContentProvider.INSTANCE, new LabelProvider()
-										{
-											@Override
-											public String getText(Object element)
-											{
-												String componentName = ((WebObjectSpecification)element).getName();
-												int index = componentName.indexOf("-");
-												if (index != -1)
-												{
-													componentName = componentName.substring(index + 1);
-												}
-												return componentName + " [" + ((WebObjectSpecification)element).getPackageName() + "]";
-											};
-										}, null, null, SWT.NONE, "Select spec", specs.toArray(new WebObjectSpecification[0]), null, false, "SpecDialog", null);
-									dialog.open();
-									if (dialog.getReturnCode() == Window.OK)
+									Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
+									for (String string : allPropertiesNames)
 									{
-										if (persistContext.getPersist() instanceof AbstractContainer)
+										PropertyDescription property = spec.getProperty(string);
+										if (property != null && property.getInitialValue() != null)
 										{
-											AbstractContainer parentPersist = (AbstractContainer)ElementUtil.getOverridePersist(persistContext);
-											WebObjectSpecification spec = (WebObjectSpecification)((StructuredSelection)dialog.getSelection()).getFirstElement();
-											String componentName = spec.getName();
-											int index = componentName.indexOf("-");
-											if (index != -1)
-											{
-												componentName = componentName.substring(index + 1);
-											}
-											componentName = componentName.replaceAll("-", "_");
-											String baseName = componentName;
-											int i = 1;
-											while (!PersistFinder.INSTANCE.checkName(activeEditor, componentName))
-											{
-												componentName = baseName + "_" + i;
-												i++;
-											}
-											persist = parentPersist.createNewWebComponent(componentName, spec.getName());
-
-											Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
-											for (String string : allPropertiesNames)
-											{
-												PropertyDescription property = spec.getProperty(string);
-												if (property != null && property.getInitialValue() != null)
-												{
-													Object initialValue = property.getInitialValue();
-													if (initialValue != null) ((WebComponent)persist).setProperty(string, initialValue);
-												}
-											}
+											Object initialValue = property.getInitialValue();
+											if (initialValue != null) ((WebComponent)persist).setProperty(string, initialValue);
 										}
 									}
 								}
@@ -239,7 +278,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										{
 											IPersist next = it.next();
 											IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, activeEditor.getForm()));
-											if (child.getParent() instanceof Form)
+											if (child.getParent() instanceof Form && !child.equals(next))
 											{
 												child.getParent().removeChild(child);
 											}
@@ -282,31 +321,31 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									});
 								}
 							}
-						}
-						catch (Exception ex)
-						{
-							Debug.error(ex);
-						}
-					}
-
-					@Override
-					public void undo()
-					{
-						try
-						{
-							if (persist != null)
+							catch (Exception ex)
 							{
-								((IDeveloperRepository)persist.getRootObject().getRepository()).deleteObject(persist);
-								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-									Arrays.asList(new IPersist[] { persist }));
+								Debug.error(ex);
 							}
 						}
-						catch (RepositoryException e)
+
+						@Override
+						public void undo()
 						{
-							ServoyLog.logError("Could not undo create layout container", e);
+							try
+							{
+								if (persist != null)
+								{
+									((IDeveloperRepository)persist.getRootObject().getRepository()).deleteObject(persist);
+									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
+										Arrays.asList(new IPersist[] { persist }));
+								}
+							}
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError("Could not undo create layout container", e);
+							}
 						}
-					}
-				});
+					});
+				}
 			}
 		}
 		catch (NullPointerException npe)
@@ -331,7 +370,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				container.setPackageName(packageName);
 				parent.addChild(container);
 				container.setLocation(new Point(index, index));
-				if (PersistHelper.isCSSPositionContainer(container)) container.setSize(new Dimension(200, 200));
+				if (CSSPosition.isCSSPositionContainer(container)) container.setSize(new Dimension(200, 200));
 				if (configJson != null)
 				{
 					Iterator keys = configJson.keys();
@@ -425,9 +464,10 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		}
 		if (parentBean instanceof WebComponent)
 		{
-			WebCustomType bean = WebCustomType.createNewInstance(parentBean, targetPD, propertyName, index, true);
-			bean.setName(compName);
-			bean.setTypeName(typeName);
+			WebComponent parentWebComponent = (WebComponent)parentBean;
+			WebCustomType customType = WebCustomType.createNewInstance(parentWebComponent, targetPD, propertyName, index, true);
+			customType.setName(compName);
+			customType.setTypeName(typeName);
 
 			if (targetPD.getType() instanceof NGCustomJSONObjectType)
 			{
@@ -438,44 +478,14 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					if (property != null && property.getInitialValue() != null)
 					{
 						Object initialValue = property.getInitialValue();
-						if (initialValue != null) bean.setProperty(string, initialValue);
+						if (initialValue != null) customType.setProperty(string, initialValue);
 					}
 				}
 			}
 
-			if (isArray)
-			{
-				if (arrayValue == null)
-				{
-					arrayValue = new IChildWebObject[] { bean };
-				}
-				else
-				{
-					if (index > -1)
-					{
-						ArrayList<IChildWebObject> arrayList = new ArrayList<IChildWebObject>();
-						arrayList.addAll(Arrays.asList(arrayValue));
-						arrayList.add(index, bean);
-						// update index for all elements that are after the inserted one
-						for (int i = index + 1; i < arrayList.size(); i++)
-						{
-							arrayList.get(i).setIndex(i);
-						}
-						arrayValue = arrayList.toArray(new IChildWebObject[arrayList.size()]);
-					}
-					else
-					{
-						IChildWebObject[] newArrayValue = new IChildWebObject[arrayValue.length + 1];
-						System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
-						newArrayValue[arrayValue.length] = bean;
-						arrayValue = newArrayValue;
-					}
-				}
-				((WebComponent)parentBean).setProperty(propertyName, arrayValue);
-			}
-			else((WebComponent)parentBean).setProperty(propertyName, bean);
+			parentWebComponent.insertChild(customType); // if it is array it will make use of index given above in WebCustomType.createNewInstance(...) when inserting; otherwise it's a simple set to some property name anyway
 
-			return bean;
+			return customType;
 		}
 		return null;
 	}

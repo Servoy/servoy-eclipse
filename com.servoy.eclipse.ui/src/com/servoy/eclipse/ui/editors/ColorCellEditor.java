@@ -19,9 +19,12 @@ package com.servoy.eclipse.ui.editors;
 import java.awt.Color;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
@@ -57,10 +60,15 @@ public class ColorCellEditor extends TextDialogCellEditor
 		{
 			color = Color.black;
 		}
-		ColorDialog dialog = new ColorDialog(cellEditorWindow.getShell());
+		final Display display = cellEditorWindow.getDisplay();
+		final Shell shell = new Shell(display);
+		Point cursorLocation = display.getCursorLocation();
+		shell.setLocation(cursorLocation.x - cellEditorWindow.getBounds().width, cursorLocation.y - cellEditorWindow.getBounds().height);
+		ColorDialog dialog = new ColorDialog(shell);
 		dialog.setRGB(ColorResource.ColorAwt2Rgb(color));
 
 		if (dialog.open() == null) return CANCELVALUE;
+		shell.dispose();
 
 		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(null, ColorResource.ColoRgb2Awt(dialog.getRGB()));
 	}

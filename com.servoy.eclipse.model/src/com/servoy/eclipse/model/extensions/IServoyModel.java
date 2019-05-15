@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.model.extensions;
 
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
+
 import com.servoy.eclipse.model.IFormComponentListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -115,5 +118,25 @@ public interface IServoyModel
 	void addFormComponentListener(IFormComponentListener listener);
 
 	void removeFormComponentListener(IFormComponentListener listener);
+
+	/**
+	 * Equivalent to addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE).
+	 *
+	 * @see #addResourceChangeListener(IResourceChangeListener, int)
+	 */
+	public void addResourceChangeListener(IResourceChangeListener resourceChangeListener);
+
+	/**
+	 * Adds a (proxy) listener to eclipse workspace resources changes (POST_CHANGE if requested will only get triggered once ServoyModel has had a chance to handle these changes; all other types of events will be registered normally to the workspace).<br/>
+	 * This is useful if these registered listeners that are POST_CHANGE depend on things being already updated in ServoyModel (for example that all ServoyProject instances are the new ones in case the .project files have changed).
+	 *
+	 * @param resourceChangeListener the listener that will get triggered only after ServoyModel has already had a chance to handle the POST_CHANGE resource changes if it is a POST_CHANGE; other types of events are registered directly to the workspace.
+	 * @param eventMask the bit-wise OR of all event types of interest to the listener; Use IResourceChangeEvent constants.
+	 *
+	 * @see IWorkspace#addResourceChangeListener(IResourceChangeListener, int) for more information on possible eventMasks and what they do.
+	 */
+	void addResourceChangeListener(IResourceChangeListener resourceChangeListener, int eventMask);
+
+	void removeResourceChangeListener(IResourceChangeListener resourceChangeListener);
 
 }

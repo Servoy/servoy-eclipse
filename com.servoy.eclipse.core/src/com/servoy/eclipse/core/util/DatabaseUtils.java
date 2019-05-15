@@ -180,7 +180,7 @@ public final class DatabaseUtils
 			dmm.setWritesEnabled(false);
 			try
 			{
-				server.syncTableObjWithDB(table, false, false, null);
+				server.syncTableObjWithDB(table, false, false);
 			}
 			catch (Exception e)
 			{
@@ -246,7 +246,14 @@ public final class DatabaseUtils
 					columnInfo.flagChanged();
 				}
 			}
-
+			try
+			{
+				table.updateDataproviderIDsIfNeeded(); // column info above could have set a dataproviderid/alias
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 			// createMissingDBSequences uses columninfo
 			try
 			{

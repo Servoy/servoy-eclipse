@@ -58,7 +58,7 @@ public class NewRelationAction extends Action implements ISelectionChangedListen
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("relation.png"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("new_relation_wizard.png"));
 		setText("Create relation");
 		setToolTipText("Create relation");
 	}

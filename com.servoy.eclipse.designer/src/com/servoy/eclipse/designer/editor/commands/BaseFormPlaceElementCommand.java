@@ -44,6 +44,7 @@ import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.property.FormElementGroupPropertySource;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.dnd.FormElementDragData.DataProviderDragData;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -56,6 +57,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
@@ -81,6 +83,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -336,7 +339,27 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			// relocate relative to the upper-left corner of the original selection
 			for (Entry<ISupportBounds, java.awt.Point> entry : entrySet)
 			{
-				CSSPosition.setLocation(entry.getKey(), location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny);
+				ISupportBounds element = entry.getKey();
+				if (element instanceof BaseComponent && parent instanceof Form && ((Form)parent).getUseCssPosition())
+				{
+					CSSPosition cssPosition = ((BaseComponent)element).getCssPosition();
+
+					int left = CSSPosition.getPixelsValue(cssPosition.left);
+					if (left >= 0)
+					{
+						cssPosition.left = String.valueOf(location.x + entry.getValue().x - minx);
+					}
+					int top = CSSPosition.getPixelsValue(cssPosition.top);
+					if (top >= 0)
+					{
+						cssPosition.top = String.valueOf(location.y + entry.getValue().y - miny);
+					}
+					((BaseComponent)element).setCssPosition(cssPosition);
+				}
+				else
+				{
+					CSSPosition.setLocation(entry.getKey(), location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny);
+				}
 			}
 		}
 		return res.toArray();
@@ -475,10 +498,20 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			{
 				persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (AbstractBase)draggedPersist, x, y, IRepository.ELEMENTS, groupMap);
 			}
-			else if (parent instanceof LayoutContainer && draggedPersist instanceof LayoutContainer)
+			else if (parent instanceof LayoutContainer)
 			{
-				if (parent == draggedPersist) parent = draggedPersist.getParent();
-				persist = ElementFactory.copyComponent(parent, (LayoutContainer)draggedPersist, x, y, IRepository.LAYOUTCONTAINERS, groupMap);
+				if (draggedPersist instanceof LayoutContainer) persist = isComponentAllowedForPaste(parent, draggedPersist)
+					? ElementFactory.copyComponent(parent, (LayoutContainer)draggedPersist, x, y, IRepository.LAYOUTCONTAINERS, groupMap) : null;
+
+				else persist = isComponentAllowedForPaste(parent, draggedPersist)
+					? ElementFactory.copyComponent(parent, (AbstractBase)draggedPersist, x, y, IRepository.ELEMENTS, groupMap) : null;
+
+				if (persist == null)
+				{
+					String draggedPersistSpecName = draggedPersist instanceof LayoutContainer ? ((LayoutContainer)draggedPersist).getSpecName() : "component";
+					ServoyLog.logWarning("paste object: cannot paste " + draggedPersistSpecName + " into " + ((LayoutContainer)parent).getSpecName(), null);
+					return null;
+				}
 			}
 			else
 			{
@@ -493,6 +526,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 		}
 
 		if (draggedPersist instanceof Form && parent instanceof Form)
+
 		{
 			return ElementFactory.createTabs(application, parent, new Object[] { new ElementFactory.RelatedForm(null, (Form)draggedPersist) }, location,
 				TabPanel.DEFAULT_ORIENTATION, "tab_" + ((Form)draggedPersist).getName());
@@ -500,6 +534,22 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 
 		ServoyLog.logWarning("place object: dropped object not supported: " + draggedPersist.getClass().getName(), null);
 		return null;
+	}
+
+
+	public static boolean isComponentAllowedForPaste(Object parent, Object component)
+	{
+		if (parent instanceof LayoutContainer)
+		{
+			Set<String> allowed = DesignerUtil.getAllowedChildren().get(
+				((LayoutContainer)parent).getPackageName() + "." + ((LayoutContainer)parent).getSpecName());
+			if (component instanceof LayoutContainer)
+				return allowed.contains(((LayoutContainer)component).getPackageName() + "." + ((LayoutContainer)component).getSpecName());
+			if (component instanceof WebComponent) return allowed.contains("component");
+
+			return true;
+		}
+		return true;
 	}
 
 	/**

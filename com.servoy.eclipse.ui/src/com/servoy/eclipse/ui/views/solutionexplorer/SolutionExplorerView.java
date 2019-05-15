@@ -54,9 +54,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.javascript.ast.Script;
@@ -109,6 +110,7 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.search.internal.ui.SearchMessages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
@@ -210,6 +212,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.search.SearchAction;
+import com.servoy.eclipse.ui.util.AdaptableWrapper;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
@@ -347,6 +350,8 @@ public class SolutionExplorerView extends ViewPart
 	private ContextAction deleteActionInList;
 
 	private ContextAction openAction;
+
+	private ISelectionContributionItem openWithAction;
 
 	private ContextAction openActionInTree;
 
@@ -1919,6 +1924,11 @@ public class SolutionExplorerView extends ViewPart
 								// for an in mem tablenode send just that tablenode so only that one is refreshed
 								parents.add(persist);
 							}
+							else if (persist instanceof TableNode && DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
+							{
+								// for an view fs tablenode send just that tablenode so only that one is refreshed
+								parents.add(persist);
+							}
 							else if (persist instanceof WebComponent)
 							{
 								parents.add(persist.getAncestor(IRepository.FORMS));
@@ -2132,7 +2142,7 @@ public class SolutionExplorerView extends ViewPart
 				// update)
 				try
 				{
-					ServoyModel.getWorkspace().run(new IWorkspaceRunnable() // TODO this should be done nicer by controlling the sequence resource listeners execute; maybe add a proxy resource listener mechanism to ServoyModel that is able to do that
+					ServoyModel.getWorkspace().run(new IWorkspaceRunnable()
 					{
 
 						public void run(IProgressMonitor monitor) throws CoreException
@@ -2209,9 +2219,9 @@ public class SolutionExplorerView extends ViewPart
 						}
 						if (mustRefresh)
 						{
-							refreshAfterPendingChangesWereTreatedInModel(() -> {
-								refreshTreeCompletely();
-							});
+							UIUtils.runInUI(() -> {
+								refreshTreeCompletely(); // refreshAfterPendingChangesWereTreatedInModel should not be needed here as we are in a listener that is registered to run after post change event is handled by ServoyModel or even later, when after building finishes
+							}, false);
 						}
 					}
 					else if ((event.getType() & IResourceChangeEvent.POST_BUILD) != 0)
@@ -2250,8 +2260,11 @@ public class SolutionExplorerView extends ViewPart
 				}
 			};
 		}
-		if (wasNull || reregisterExistingListener) ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
-			IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+		if (wasNull || reregisterExistingListener)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().addResourceChangeListener(resourceChangeListener,
+				IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+		}
 	}
 
 	private void addServerAndTableListeners(boolean reregisterExistingListener)
@@ -2653,6 +2666,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private void fillTreeContextMenu(IMenuManager manager)
 	{
+		refreshSelection();
 		SimpleUserNode selectedTreeNode = getSelectedTreeNode();
 
 		if (setActive.isEnabled()) manager.add(setActive);
@@ -2845,6 +2859,12 @@ public class SolutionExplorerView extends ViewPart
 		if (moveSample.isEnabled()) manager.add(moveSample);
 		manager.add(new Separator());
 		if (openAction.isEnabled()) manager.add(openAction);
+		if (openWithAction.isEnabled())
+		{
+			IMenuManager submenu = new MenuManager(SearchMessages.OpenWithMenu_label);
+			submenu.add(openWithAction);
+			manager.add(submenu);
+		}
 		if (editVariableAction.isEnabled()) manager.add(editVariableAction);
 		if (debugMethodAction.isMethodSelected()) manager.add(debugMethodAction);
 		if (openSqlEditorAction.isEnabled()) manager.add(openSqlEditorAction);
@@ -3146,7 +3166,10 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVER, new NewTableAction(this));
-		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, new NewInMemoryDataSourceAction(this));
+		NewInMemoryDataSourceAction newMem = new NewInMemoryDataSourceAction(this, "Create in memory datasource", UserNodeType.INMEMORY_DATASOURCES);
+		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, newMem);
+		NewInMemoryDataSourceAction newViewFS = new NewInMemoryDataSourceAction(this, "Create view foundset", UserNodeType.VIEW_FOUNDSETS);
+		newActionInTreePrimary.registerAction(UserNodeType.VIEW_FOUNDSETS, newViewFS);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
@@ -3228,7 +3251,8 @@ public class SolutionExplorerView extends ViewPart
 		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
 		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM_CALCULATION_MODE, newScope);
 		newActionInListPrimary.registerAction(UserNodeType.MODULES, newModule);
-		newActionInListPrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, new NewInMemoryDataSourceAction(this));
+		newActionInListPrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, newMem);
+		newActionInListPrimary.registerAction(UserNodeType.VIEW_FOUNDSETS, newViewFS);
 
 		newActionInListSecondary.registerAction(UserNodeType.TABLE, newForm);
 		newActionInListSecondary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newForm);
@@ -3254,12 +3278,15 @@ public class SolutionExplorerView extends ViewPart
 		});
 		openAction.registerAction(UserNodeType.TABLE, openTable);
 		openAction.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTable);
+		openAction.registerAction(UserNodeType.VIEW_FOUNDSET, openTable);
 		openAction.registerAction(UserNodeType.VIEW, openTable);
 		openAction.registerAction(UserNodeType.RELATION, new OpenRelationAction());
 		openAction.registerAction(UserNodeType.MEDIA_IMAGE, new OpenMediaAction());
 		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, new OpenI18NAction(this));
 		OpenComponentResourceAction openComponentResource = new OpenComponentResourceAction();
 		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
+
+		openWithAction = new OpenWithMediaFile(new AdaptableWrapper(null));
 
 		addComponentIcon = new ContextAction(this, null, "Add Icon");
 		IAction addComponentIconAction = new AddComponentIconResourceAction(this);
@@ -3270,7 +3297,8 @@ public class SolutionExplorerView extends ViewPart
 		IAction deleteMediaFolder = new DeleteMediaAction("Delete media", this);
 		IAction deleteValueList = new DeletePersistAction(UserNodeType.VALUELIST_ITEM, "Delete value list");
 		IAction deleteTable = new DeleteTableAction(shell);
-		IAction deleteInMemDataSource = new DeleteInMemTableAction(shell);
+		IAction deleteInMemDataSource = new DeleteInMemTableAction(shell, UserNodeType.INMEMORY_DATASOURCE);
+		IAction deleteViewFoundset = new DeleteInMemTableAction(shell, UserNodeType.VIEW_FOUNDSET);
 		IAction deleteStyle = new DeletePersistAction(UserNodeType.STYLE_ITEM, "Delete style");
 		IAction deleteTemplate = new DeletePersistAction(UserNodeType.TEMPLATE_ITEM, "Delete template");
 		IAction deleteRelation = new DeletePersistAction(UserNodeType.RELATION, "Delete relation");
@@ -3318,6 +3346,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInList.registerAction(UserNodeType.I18N_FILE_ITEM, deleteI18N);
 		deleteActionInList.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
 		deleteActionInList.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
+		deleteActionInList.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 
 		copyTable = new CopyTableAction(shell);
 		editVariableAction = new EditVariableAction(this);
@@ -3343,6 +3372,7 @@ public class SolutionExplorerView extends ViewPart
 		});
 		openActionInTree.registerAction(UserNodeType.TABLE, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTableInTree);
+		openActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.VIEW, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, openComponentResource);
 
@@ -3370,6 +3400,7 @@ public class SolutionExplorerView extends ViewPart
 		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
 		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
+		deleteActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, deleteViewFoundset);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
 		deleteActionInTree.registerAction(UserNodeType.WEB_OBJECT_FOLDER, deleteWebObjectFolder);
 		deleteActionInTree.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
@@ -3377,7 +3408,6 @@ public class SolutionExplorerView extends ViewPart
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
 		RenameSolutionAction renameSolutionAction = new RenameSolutionAction(this);
-		RenameInMemTableAction renameInMemTableAction = new RenameInMemTableAction(shell, getSite().getPage());
 		renameActionInTree.registerAction(UserNodeType.SOLUTION, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, renameSolutionAction);
@@ -3387,7 +3417,9 @@ public class SolutionExplorerView extends ViewPart
 		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentOrService(this, shell, UserNodeType.COMPONENT));
 		renameActionInTree.registerAction(UserNodeType.LAYOUT, new RenameLayoutAction(this, shell, UserNodeType.LAYOUT));
 		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentOrService(this, shell, UserNodeType.SERVICE));
-		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, renameInMemTableAction);
+		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE,
+			new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.INMEMORY_DATASOURCE));
+		renameActionInTree.registerAction(UserNodeType.VIEW_FOUNDSET, new RenameInMemTableAction(shell, getSite().getPage(), UserNodeType.VIEW_FOUNDSET));
 
 		addAsModuleAction = new AddAsModuleAction(shell);
 		addAsWebPackageAction = new AddAsWebPackageAction(shell);
@@ -3408,6 +3440,7 @@ public class SolutionExplorerView extends ViewPart
 		addListSelectionChangedListener(createInMemFromSPAction);
 		addListSelectionChangedListener(deleteActionInList);
 		addListSelectionChangedListener(openAction);
+		addListSelectionChangedListener(openWithAction);
 		addListSelectionChangedListener(editVariableAction);
 		addListSelectionChangedListener(debugMethodAction);
 		addListSelectionChangedListener(newActionInListSecondary);
@@ -3548,9 +3581,12 @@ public class SolutionExplorerView extends ViewPart
 				// instead of the selection given by the tree
 				boolean isForm = (doubleClickedItem.getType() == UserNodeType.FORM); // form open action was moved to the designer plugin, so we must make a special case for it (it is no longer part of openActionInTree)
 				openActionInTree.selectionChanged(new SelectionChangedEvent(tree, new StructuredSelection(doubleClickedItem)));
-				Preferences store = Activator.getDefault().getPluginPreferences();
-				String formDblClickOption = store.getString(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION);
-				String globalsDblClickOption = store.getString(SolutionExplorerPreferences.GLOBALS_DOUBLE_CLICK_ACTION);
+
+				IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
+				String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
+					SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
+				String globalsDblClickOption = store.get(SolutionExplorerPreferences.GLOBALS_DOUBLE_CLICK_ACTION,
+					SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT);
 				boolean formDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption)) ||
 					(SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_SCRIPT.equals(formDblClickOption));
 				boolean globalsDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(globalsDblClickOption));
@@ -3718,7 +3754,7 @@ public class SolutionExplorerView extends ViewPart
 
 		if (resourceChangeListener != null)
 		{
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+			ServoyModelManager.getServoyModelManager().getServoyModel().removeResourceChangeListener(resourceChangeListener);
 			if (discardListenerReferences) resourceChangeListener = null;
 		}
 

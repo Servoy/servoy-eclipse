@@ -184,14 +184,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		serverNameField = new Text(mainComposite, SWT.BORDER);
 		serverNameField.setToolTipText(toolTip);
-
+		ModifyListener ml = null;
 		if (serverTemplateDefinition != null)
 		{
 			String[] urlKeys = serverTemplateDefinition.getUrlKeys();
 			String[] urlKeyDescriptions = serverTemplateDefinition.getUrlKeyDescriptions();
 			if (urlKeys != null)
 			{
-				ModifyListener ml = new ModifyListener()
+				ml = new ModifyListener()
 				{
 					@Override
 					public void modifyText(ModifyEvent e)
@@ -390,6 +390,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		urlField = new Text(advancedSettingsComposite, SWT.BORDER);
 		urlField.setToolTipText(ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
+		final ModifyListener finalML = ml;
 		urlField.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -399,7 +400,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				{
 					if (!urlPropertiesFields.get(i).getText().equals(urlValues[i]))
 					{
+						if (finalML != null) urlPropertiesFields.get(i).removeModifyListener(finalML);
 						urlPropertiesFields.get(i).setText(urlValues[i]);
+						if (finalML != null) urlPropertiesFields.get(i).addModifyListener(finalML);
 					}
 
 				}

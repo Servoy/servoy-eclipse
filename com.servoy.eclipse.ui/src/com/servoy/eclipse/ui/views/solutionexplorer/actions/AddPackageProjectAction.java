@@ -71,8 +71,8 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 	public AddPackageProjectAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Add web package project reference");
-		setToolTipText("Add a Web Package Project reference to the solution");
+		setText("Add Servoy package project reference");
+		setToolTipText("Add a Servoy Package Project reference to the solution");
 	}
 
 	@Override
@@ -128,7 +128,7 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 				int treeStyle = SWT.MULTI | SWT.CHECK;
 
 				TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS, contentProvider, labelProvider, null,
-					selectionFilter, treeStyle, "Select Web Packages", selectablePackages.toArray(), theSelection, true, "Select Web Packages", null);
+					selectionFilter, treeStyle, "Select Servoy Packages", selectablePackages.toArray(), theSelection, true, "Select Servoy Packages", null);
 
 				dialog.open();
 

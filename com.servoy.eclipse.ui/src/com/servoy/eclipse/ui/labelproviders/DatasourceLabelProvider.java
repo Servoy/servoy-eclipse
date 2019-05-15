@@ -19,7 +19,7 @@ package com.servoy.eclipse.ui.labelproviders;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import com.servoy.eclipse.model.util.InMemServerWrapper;
+import com.servoy.eclipse.model.util.AbstractMemServerWrapper;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
@@ -75,14 +75,15 @@ public class DatasourceLabelProvider extends LabelProvider implements IDefaultIm
 			}
 			return tw.getTableName();
 		}
-		else if (value instanceof InMemServerWrapper)
+		else if (value instanceof AbstractMemServerWrapper)
 		{
-			if (((InMemServerWrapper)value).getTableName() != null)
+			AbstractMemServerWrapper serverWrapper = (AbstractMemServerWrapper)value;
+			if (serverWrapper.getTableName() != null)
 			{
-				if (fullyQualifiedName) return "In Memory/" + ((InMemServerWrapper)value).getTableName();
-				return ((InMemServerWrapper)value).getTableName();
+				if (fullyQualifiedName) return serverWrapper.getLabel() + "/" + serverWrapper.getTableName();
+				return serverWrapper.getTableName();
 			}
-			return "In Memory";
+			return serverWrapper.getLabel();
 		}
 
 		return Messages.LabelUnresolved;
@@ -104,9 +105,9 @@ public class DatasourceLabelProvider extends LabelProvider implements IDefaultIm
 				if (tw.isView()) return VIEW_IMAGE;
 				return TABLE_IMAGE;
 			}
-			else if (element instanceof InMemServerWrapper)
+			else if (element instanceof AbstractMemServerWrapper)
 			{
-				if (((InMemServerWrapper)element).getTableName() == null)
+				if (((AbstractMemServerWrapper)element).getTableName() == null)
 				{
 					// server
 					return SERVER_IMAGE;

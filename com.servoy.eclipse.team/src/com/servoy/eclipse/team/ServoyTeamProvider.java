@@ -293,11 +293,6 @@ public class ServoyTeamProvider extends RepositoryProvider
 		SolutionSubscriber.getInstance().getSynchronizer().flush(getProject(), IResource.DEPTH_INFINITE);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.team.core.RepositoryProvider#getRuleFactory()
-	 */
 	@Override
 	public IResourceRuleFactory getRuleFactory()
 	{
@@ -599,7 +594,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 
 	public static void cleanup()
 	{
-		ResourcesPlugin.getWorkspace().removeResourceChangeListener(ServoyTeamProvider.PROJECT_DELETE_LISTENER);
+		ServoyModelManager.getServoyModelManager().getServoyModel().removeResourceChangeListener(ServoyTeamProvider.PROJECT_DELETE_LISTENER);
 		ServoyTeamProvider.forceDelete(ServoyTeamProvider.getTemporaryDirectory());
 		RepositoryAccessPoint.clear();
 	}
@@ -646,7 +641,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 			new int[] { Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, Team.TEXT, });
 
 
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(ServoyTeamProvider.PROJECT_DELETE_LISTENER);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addResourceChangeListener(ServoyTeamProvider.PROJECT_DELETE_LISTENER);
 
 		// Have to run as a separate job because this plugin holds a lock in RepositoryProvider.mappingLock and ServoyModel-create may
 		// block on requesting the main swt thread (causes deadlock when Project Explorer is shown at startup)
@@ -693,9 +688,9 @@ public class ServoyTeamProvider extends RepositoryProvider
 						public void run()
 						{
 							Shell shell = dd.getActiveShell();
-							boolean ok = MessageDialog.openConfirm(shell, "Confirm repository upgrade", "Old or no repository version found in '" +
-								IServer.REPOSITORY_SERVER +
-								"' connection, do you want to upgrade the repository?\nYou might want to backup your database first before continuing.");
+							boolean ok = MessageDialog.openConfirm(shell, "Confirm repository upgrade",
+								"Old or no repository version found in '" + IServer.REPOSITORY_SERVER +
+									"' connection, do you want to upgrade the repository?\nYou might want to backup your database first before continuing.");
 							if (ok)
 							{
 								IServerInternal repository_server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(
@@ -750,7 +745,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 
 	/**
 	 * Delete file/dir even if dir is not empty
-	 * 
+	 *
 	 * @param file/dir to delete
 	 */
 	private static void forceDelete(File file)
@@ -780,7 +775,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 
 	/**
 	 * Return the resource variant for the local resource.
-	 * 
+	 *
 	 * @param resource the resource
 	 * @return the resource variant
 	 */
@@ -818,7 +813,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 
 	/**
 	 * Return the resource variant for the local resource using the bytes to identify the variant.
-	 * 
+	 *
 	 * @param resource the resource
 	 * @param bytes the bytes that identify the resource variant
 	 * @return the resource variant handle
@@ -856,7 +851,7 @@ public class ServoyTeamProvider extends RepositoryProvider
 	/**
 	 * Return the <code>java.io.File</code> that the given resource maps to. Return <code>null</code> if the resource is not a child of this provider's
 	 * project.
-	 * 
+	 *
 	 * @param resource the resource
 	 * @return the file that the resource maps to.
 	 */

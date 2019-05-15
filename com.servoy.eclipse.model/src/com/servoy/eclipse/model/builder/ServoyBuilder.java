@@ -88,6 +88,7 @@ import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -107,6 +108,7 @@ import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.DBValueList;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
+import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptor;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
@@ -116,6 +118,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -176,6 +179,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
+import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -348,6 +352,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
+	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -541,6 +546,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -821,7 +827,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					// a project that this builder in interested in was deleted (so a module or the resources proj.)
 					// or something has changed in this builder's solution project
 					checkServoyProject(getProject(), componentsSpecProviderState);
-					checkMissingSpecs(getProject(), componentsSpecProviderState);
+					checkSpecs(getProject(), componentsSpecProviderState);
 					checkModules(getProject());
 					checkResourcesForServoyProject(getProject());
 					checkResourcesForModules(getProject());
@@ -903,7 +909,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void checkMissingSpecs(IProject buildProject, final SpecProviderState componentsSpecProviderState)
+	private void checkSpecs(IProject buildProject, final SpecProviderState componentsSpecProviderState)
 	{
 		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
 		if (modules != null)
@@ -913,23 +919,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (!Utils.equalObjects(module.getProject().getName(), buildProject.getName()))
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
+					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
 						@Override
 						public Object visit(IPersist o)
 						{
-							checkMissingSpecs(o, module.getProject(), componentsSpecProviderState);
+							checkSpecs(o, module.getProject(), componentsSpecProviderState);
 							return null;
 						}
 					});
 				}
 			}
 		}
-
 	}
 
-	private void checkMissingSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
+	private void checkSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -957,8 +963,30 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ServoyLog.logError("Type name not found for webcomponent " + ((WebComponent)o).getName(), null);
 				}
 			}
+			else if (spec.isDeprecated())
+			{
+				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
+				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+				{
+					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill(typeName,
+						"web component" + (((WebComponent)o).getName() != null ? " with name '" + ((WebComponent)o).getName() + "'" : "'"),
+						spec.getDeprecatedMessage());
+					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
+					try
+					{
+						marker.setAttribute("replacement", spec.getReplacement());
+						marker.setAttribute("uuid", o.getUUID().toString());
+						marker.setAttribute("solutionName", project.getName());
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
 		}
-		if (o instanceof LayoutContainer)
+		if (o instanceof LayoutContainer && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
 		{
 			WebLayoutSpecification spec = null;
 			PackageSpecification<WebLayoutSpecification> pkg = componentsSpecProviderState.getLayoutSpecifications().get(((LayoutContainer)o).getPackageName());
@@ -977,6 +1005,26 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
+				}
+			}
+			else if (spec.isDeprecated())
+			{
+				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
+				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+				{
+					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill(((LayoutContainer)o).getSpecName(), "layout", spec.getDeprecatedMessage());
+					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
+					try
+					{
+						marker.setAttribute("replacement", spec.getReplacement());
+						marker.setAttribute("uuid", o.getUUID().toString());
+						marker.setAttribute("solutionName", project.getName());
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 			}
 		}
@@ -1677,23 +1725,33 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 			if (extendsForm != null)
 			{
-				if (form.isResponsiveLayout() != extendsForm.isResponsiveLayout())
+				if ((form.isResponsiveLayout() != extendsForm.isResponsiveLayout()) || (form.getUseCssPosition() != extendsForm.getUseCssPosition()))
 				{
 					Iterator<IFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
 					// do now show if no ui is present
 					if (uiElements.hasNext())
 					{
-						String message = null;
+						String formLayoutType = "absolute layout";
 						if (form.isResponsiveLayout())
 						{
-							message = "The responsive layout form '" + form.getName() + "' should not extend the absolute layout form '" +
-								extendsForm.getName() + "'.";
+							formLayoutType = "responsive layout";
 						}
-						else
+						else if (form.getUseCssPosition())
 						{
-							message = "The absolute layout form  '" + form.getName() + "' should not extend the responsive layout form '" +
-								extendsForm.getName() + "'.";
+							formLayoutType = "css position layout";
 						}
+						String message = "The " + formLayoutType + " form '" + form.getName() + "' should not extend the ";
+						String extendsFormLayoutType = "absolute layout";
+						if (extendsForm.isResponsiveLayout())
+						{
+							extendsFormLayoutType = "responsive layout";
+						}
+						else if (extendsForm.getUseCssPosition())
+						{
+							extendsFormLayoutType = "css position layout";
+						}
+						message += extendsFormLayoutType + " form '" + extendsForm.getName() + "'.";
+
 						IMarker marker = addMarker(project, SUPERFORM_PROBLEM_TYPE, message, -1, SUPERFORM_PROBLEM, IMarker.PRIORITY_NORMAL, null, persist);
 						try
 						{
@@ -1934,7 +1992,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 		}
 		if (serverName != null && !missingServers.containsKey(serverName) && !goodServers.contains(serverName) &&
-			!serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
+			!serverName.equals(DataSourceUtils.INMEM_DATASOURCE) && !serverName.equals(DataSourceUtils.VIEW_DATASOURCE))
 		{
 			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 			IServer server = sm.getServer(serverName);
@@ -2046,6 +2104,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, SUPERFORM_PROBLEM_TYPE);
 		deleteMarkers(project, MISSING_SPEC);
 		deleteMarkers(project, METHOD_OVERRIDE);
+		deleteMarkers(project, DEPRECATED_SPEC);
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -2643,13 +2702,71 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 										Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
 										if (frm == null) continue;
-										if (!Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
+										if (pd.getConfig() instanceof ComponentTypeConfig)
+										{
+											String forFoundsetName = ((ComponentTypeConfig)pd.getConfig()).forFoundset;
+											String datasource = null;
+											String foundsetValue = null;
+											if (((WebComponent)o).hasProperty(forFoundsetName))
+											{
+												Object foundsetJson = ((WebComponent)o).getProperty(forFoundsetName);
+												if (foundsetJson instanceof JSONObject)
+												{
+													foundsetValue = (String)((JSONObject)foundsetJson).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
+												}
+											}
+											if (foundsetValue != null)
+											{
+												if (DataSourceUtils.isDatasourceUri(foundsetValue))
+												{
+													datasource = foundsetValue;
+												}
+												else if (foundsetValue.equals(""))
+												{
+													datasource = form.getDataSource();
+												}
+												else
+												{
+													Relation[] relations = flattenedSolution.getRelationSequence(foundsetValue);
+													if (relations != null && relations.length > 0)
+													{
+														datasource = relations[relations.length - 1].getForeignDataSource();
+													}
+													else
+													{
+														IFoundSet foundset;
+														try
+														{
+															foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(
+																foundsetValue);
+															if (foundset != null)
+															{
+																datasource = foundset.getDataSource();
+															}
+														}
+														catch (ServoyException e)
+														{
+															ServoyLog.logError(e);
+														}
+													}
+												}
+												if (frm.getDataSource() != null && !Utils.equalObjects(datasource, frm.getDataSource()))
+												{
+													ServoyMarker mk = MarkerMessages.FormComponentForFoundsetInvalidDataSource.fill(((WebComponent)o).getName(),
+														pd.getName(), frm.getName(), forFoundsetName);
+													addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE,
+														IMarker.PRIORITY_NORMAL, null, o);
+												}
+											}
+										}
+										else if (frm.getDataSource() != null && !Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
 										{
 											ServoyMarker mk = MarkerMessages.FormComponentInvalidDataSource.fill(((WebComponent)o).getName(), pd.getName(),
 												frm.getName(), form.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE, IMarker.PRIORITY_NORMAL, null,
 												o);
 										}
+
 										FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd,
 											(JSONObject)propertyValue, frm, flattenedSolution);
 										for (FormElement element : cache.getFormComponentElements())
@@ -2691,7 +2808,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							form = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(form);
 							if (form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null)
 							{
-								Point location = ((BaseComponent)o).getLocation();
+								Point location = CSSPosition.getLocation((BaseComponent)o);
 								if (location != null)
 								{
 									boolean outsideForm = false;
@@ -2704,7 +2821,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (startPos <= location.y && endPos > location.y)
 										{
 											// found the part
-											int height = ((BaseComponent)o).getSize().height;
+											int height = CSSPosition.getSize((BaseComponent)o).height;
 											if (location.y + height > endPos)
 											{
 												String elementName = null;
@@ -2750,7 +2867,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (width < location.x + ((BaseComponent)o).getSize().width)
+											if (width < location.x + CSSPosition.getSize((BaseComponent)o).width)
 											{
 												outsideForm = true;
 											}
@@ -2844,7 +2961,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										ServoyMarker mk = MarkerMessages.FormTableNotAccessible.fill(form.getName(), form.getTableName());
 										addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
 									}
-									else if (table != null && !(table instanceof MemTable) && table.getRowIdentColumnsCount() == 0)
+									else if (table != null && !(table instanceof AbstractMemTable) && table.getRowIdentColumnsCount() == 0)
 									{
 										ServoyMarker mk = MarkerMessages.FormTableNoPK.fill(form.getName(), form.getTableName());
 										addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
@@ -3596,7 +3713,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 						checkCancel();
-						checkMissingSpecs(o, project, componentsSpecProviderState);
+						checkSpecs(o, project, componentsSpecProviderState);
 						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)
 						{
@@ -3911,7 +4028,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
 										if (dataProvider == null)
 										{
-											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(o);
+											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(context);
 											if (flattenedForm != null)
 											{
 												dataProvider = flattenedForm.getScriptVariable(id);
@@ -5831,6 +5948,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						primaryServerName = DataSourceUtils.INMEM_DATASOURCE;
 					}
+					else if ((primaryServerName = DataSourceUtils.getViewDataSourceName(element.getForeignDataSource())) != null)
+					{
+						primaryServerName = DataSourceUtils.VIEW_DATASOURCE;
+					}
 					else continue; // just skip this relation, unknown datasource
 				}
 
@@ -5846,6 +5967,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (foreignTableName != null)
 					{
 						foreignServerName = DataSourceUtils.INMEM_DATASOURCE;
+					}
+					else if ((foreignTableName = DataSourceUtils.getViewDataSourceName(element.getForeignDataSource())) != null)
+					{
+						foreignServerName = DataSourceUtils.VIEW_DATASOURCE;
 					}
 					else continue; // just skip this relation, unknown datasource
 				}

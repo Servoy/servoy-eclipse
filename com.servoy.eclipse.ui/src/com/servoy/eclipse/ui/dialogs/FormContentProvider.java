@@ -180,6 +180,13 @@ public class FormContentProvider implements ITreeContentProvider
 									(options.showTemplates == Utils.getAsBoolean(obj.isFormComponent())) && childForm != obj &&
 									!PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
 								{
+									// skip if form component list and isAbsoluteCSSPositionMix
+									if ((options.showTemplates == Utils.getAsBoolean(obj.isFormComponent())) && childForm != null &&
+										!childForm.isResponsiveLayout() && !obj.isResponsiveLayout() &&
+										(childForm.getUseCssPosition() != obj.getUseCssPosition()))
+									{
+										continue;
+									}
 									addFormInList(activeProject, obj, solutionNames, list);
 								}
 							}
@@ -191,7 +198,9 @@ public class FormContentProvider implements ITreeContentProvider
 							while (forms.hasNext())
 							{
 								Form possibleParentForm = forms.next();
-								if ((childForm.isResponsiveLayout() == possibleParentForm.isResponsiveLayout() || !possibleParentForm.getParts().hasNext()) &&
+								if (((childForm.getUseCssPosition() == possibleParentForm.getUseCssPosition() &&
+									childForm.isResponsiveLayout() == possibleParentForm.isResponsiveLayout()) ||
+									(!possibleParentForm.getParts().hasNext()) && !possibleParentForm.isResponsiveLayout()) &&
 									!PersistEncapsulation.isModuleScope(possibleParentForm, flattenedSolution.getSolution()))
 								{
 									// do not add the form if it is already a sub-form, to prevent cycles

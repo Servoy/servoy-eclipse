@@ -54,7 +54,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
-import com.servoy.eclipse.model.inmemory.MemTable;
+import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
@@ -461,15 +461,15 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				// create file contents as string
 				t.acquireReadLock();
-				out = serializeTable(t, !(t instanceof MemTable));
+				out = serializeTable(t, !(t instanceof AbstractMemTable));
 			}
 			finally
 			{
 				t.releaseReadLock();
 			}
-			if (t instanceof MemTable)
+			if (t instanceof AbstractMemTable)
 			{
-				MemTable mem = (MemTable)t;
+				AbstractMemTable mem = (AbstractMemTable)t;
 				mem.setColumns(out);
 			}
 			else try

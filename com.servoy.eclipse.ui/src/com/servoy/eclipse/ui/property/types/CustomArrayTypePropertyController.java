@@ -24,6 +24,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ArrayTypePropertyController;
@@ -39,6 +40,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Utils;
@@ -74,9 +76,10 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		{
 			String typeName = propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
 				: propertyDescription.getType().getName();
-			IBasicWebObject parent = (IBasicWebObject)persistContext.getPersist();
-			WebCustomType customType = WebCustomType.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true);
+			ISupportsIndexedChildren parent = (ISupportsIndexedChildren)persistContext.getPersist();
+			WebCustomType customType = WebCustomType.createNewInstance((IBasicWebObject)parent, arrayElementPD, propertyDescription.getName(), index, true);
 			customType.setTypeName(typeName);
+			parent.insertChild(customType);
 			return customType;
 		}
 		return null;
@@ -103,15 +106,9 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		}
 
 		@Override
-		protected int getIndexFromId(String id)
+		protected ArrayPropertyChildId getIdFromIndex(int idx)
 		{
-			return Integer.valueOf(id).intValue();
-		}
-
-		@Override
-		protected String getIdFromIndex(int idx)
-		{
-			return String.valueOf(idx);
+			return new ArrayPropertyChildId(getId(), idx);
 		}
 
 		@Override
@@ -140,13 +137,14 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					PropertyDescriptorWrapper propertyDescriptorWrapper = new PersistPropertySource.PropertyDescriptorWrapper(
 						PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD(), persistContext), arrayValue[i]);
 					createdPDs.add(addButtonsToPD(PersistPropertySource.createPropertyDescriptor(this, getIdFromIndex(i), persistContextForElement, readOnly,
-						propertyDescriptorWrapper, '[' + getIdFromIndex(i) + ']', flattenedEditingSolution, form), i));
+						propertyDescriptorWrapper, "[" + i + "]", flattenedEditingSolution, form), i));
 				}
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError(e);
 				}
 			}
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(), false);
 			elementPropertyDescriptors = createdPDs.toArray(new IPropertyDescriptor[createdPDs.size()]);
 		}
 
@@ -211,7 +209,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		{
 			try
 			{
-				final int idx = getIndexFromId((String)id);
+				final int idx = getIndexFromId((ArrayPropertyChildId)id);
 
 				PersistPropertySource.adjustPropertyValueAndReset(id, getPropertyDescriptors()[idx], this);
 			}

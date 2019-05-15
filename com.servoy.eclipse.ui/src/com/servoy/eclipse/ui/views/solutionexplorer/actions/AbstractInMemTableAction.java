@@ -104,7 +104,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 			{
 				SimpleUserNode node = (SimpleUserNode)selected;
 				selection.put((IDataSourceWrapper)node.getRealObject(), (IServer)node.parent.getRealObject());
-				state = (node.getType() == UserNodeType.INMEMORY_DATASOURCE);
+				state = (node.getType() == UserNodeType.INMEMORY_DATASOURCE || node.getType() == UserNodeType.VIEW_FOUNDSET);
 			}
 			else if (selected instanceof Pair< ? , ? >)
 			{

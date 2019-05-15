@@ -57,6 +57,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.PersistHelper;
@@ -255,7 +256,17 @@ public class FormElementDeleteCommand extends Command
 		ArrayList<IPersist> confirmedChildren = new ArrayList<IPersist>();
 		for (IPersist child : children)
 		{
-			List<IPersist> overriding = getOverridingPersists(child);
+			List<IPersist> childStructure = new ArrayList<IPersist>();
+			childStructure.add(child);
+			if (child instanceof LayoutContainer)
+			{
+				childStructure.addAll(((LayoutContainer)child).getFlattenedFormElementsAndLayoutContainers());
+			}
+			List<IPersist> overriding = new ArrayList<IPersist>();
+			for (IPersist currentPersist : childStructure)
+			{
+				overriding.addAll(getOverridingPersists(currentPersist));
+			}
 			if (!overriding.isEmpty())
 			{
 				String name = child instanceof ISupportName ? ((ISupportName)child).getName() : "";
@@ -379,7 +390,7 @@ public class FormElementDeleteCommand extends Command
 	{
 		if (p instanceof ISupportExtendsID && (((ISupportExtendsID)p).getExtendsID() == superPersist.getID()))
 		{
-			overriding.add(p);
+			if (!overriding.contains(p)) overriding.add(p);
 			if (p instanceof ISupportChilds)
 			{
 				ISupportChilds parent = (ISupportChilds)p;
@@ -387,21 +398,12 @@ public class FormElementDeleteCommand extends Command
 				{
 					if (child instanceof ISupportExtendsID && !PersistHelper.isOverrideElement((ISupportExtendsID)child))
 					{ // is is an extra child element compared to its super child elements
-						overriding.add(child);
+						if (!overriding.contains(child)) overriding.add(child);
 					}
 					else if (((AbstractBase)child).hasOverrideProperties())
 					{
-						overriding.add(child);
+						if (!overriding.contains(child)) overriding.add(child);
 					}
-				}
-			}
-			else if (p instanceof ISupportChilds)
-			{
-				ISupportChilds parent = (ISupportChilds)p;
-				Iterator<IPersist> childrenIt = parent.getAllObjects();
-				while (childrenIt.hasNext())
-				{
-					addOverriding(overriding, superPersist, childrenIt.next());
 				}
 			}
 		}

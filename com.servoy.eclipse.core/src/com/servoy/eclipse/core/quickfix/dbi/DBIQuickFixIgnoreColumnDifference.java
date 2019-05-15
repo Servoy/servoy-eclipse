@@ -77,6 +77,7 @@ public class DBIQuickFixIgnoreColumnDifference extends TableDifferenceQuickFix
 			catch (RepositoryException e)
 			{
 				Debug.error(e);
+				storeException(e);
 			}
 		}
 	}

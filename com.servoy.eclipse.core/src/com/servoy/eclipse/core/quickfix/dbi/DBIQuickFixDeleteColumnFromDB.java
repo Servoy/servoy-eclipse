@@ -53,6 +53,12 @@ public class DBIQuickFixDeleteColumnFromDB extends TableDifferenceQuickFix
 	}
 
 	@Override
+	public String getShortLabel()
+	{
+		return "Delete column from DB.";
+	}
+
+	@Override
 	public boolean canHandleDifference(TableDifference difference)
 	{
 		return difference != null && difference.getType() == TableDifference.COLUMN_MISSING_FROM_DBI_FILE;
@@ -76,7 +82,7 @@ public class DBIQuickFixDeleteColumnFromDB extends TableDifferenceQuickFix
 					difference.getTable().removeColumn(difference.getColumnName());
 
 					// apply the changes (delete column from database as well)
-					s.syncTableObjWithDB(difference.getTable(), false, true, null);
+					s.syncTableObjWithDB(difference.getTable(), false, true);
 
 					// reload the column information for this table just to make sure everything is in sync
 					dmm.loadAllColumnInfo(difference.getTable());
@@ -94,10 +100,12 @@ public class DBIQuickFixDeleteColumnFromDB extends TableDifferenceQuickFix
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 	}
 

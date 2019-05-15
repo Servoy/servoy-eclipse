@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+<parent>
+		<groupId>com.servoy</groupId>
+		<artifactId>servoy-eclipse</artifactId>
+		<version>2019.6.0.3500_rc</version>
+	</parent>
+
+	<artifactId>com.servoy.jre.macosx.x86_64.feature</artifactId>
+	<packaging>eclipse-feature</packaging>
+	<version>12</version>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}/jre</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>replacer</artifactId>
+				<version>1.5.3</version>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<configuration>
+							<file>${basedir}/p2.inf.template</file>
+							<outputFile>${basedir}/p2.inf</outputFile>
+							<regex>false</regex>
+							<replacements>
+								<replacement>
+									<token>project.artifactId</token>
+									<value>${project.artifactId}</value>
+								</replacement>
+								<replacement>
+									<token>version</token>
+									<value>${qualifiedVersion}</value>
+								</replacement>
+							</replacements>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>1.4.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<url>https://api.adoptopenjdk.net/v2/binary/releases/openjdk12?openjdk_impl=openj9&amp;os=mac&amp;arch=x64&amp;release=latest&amp;type=jre&amp;heap_size=normal</url>
+							<outputFileName>jre12.tar.gz</outputFileName>
+							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>  
+    <artifactId>maven-antrun-plugin</artifactId>  
+    <version>1.8</version>  
+    <executions>  
+        <execution>  
+            <id>prepare</id>  
+            <phase>generate-resources</phase>  
+            <configuration>  
+                <tasks>  
+		    <untar src="${project.build.directory}/jre12.tar.gz" compression="gzip" dest="${project.build.directory}"/>
+                </tasks>  
+            </configuration>  
+            <goals>  
+                <goal>run</goal>  
+            </goals>  
+        </execution>  
+    </executions>  
+</plugin> 
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>copy-jre</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/jre</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/jdk-12.0.1+12-jre/</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

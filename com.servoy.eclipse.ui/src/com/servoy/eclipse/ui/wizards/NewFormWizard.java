@@ -435,8 +435,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 				servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(form.getDataSource()));
 			}
 
-			// open newly created form in the editor (as new editor)
-			boolean returnValue = EditorUtil.openFormDesignEditor(form, true, true) != null;
+			// open newly created form in the form editor (as new editor) except abstract form
+			// which will be opened in script editor
+			boolean returnValue = newFormWizardPage.bTypeAbstract != null && newFormWizardPage.bTypeAbstract.getSelection()
+				? EditorUtil.openScriptEditor(form, null, true) != null : EditorUtil.openFormDesignEditor(form, true, true) != null;
+
 
 			if (form.isResponsiveLayout() && WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().isEmpty())
 			{
@@ -1083,7 +1086,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			List<Object> workingSets = new ArrayList<Object>();
 			workingSets.add(SELECTION_NONE);
-			if (servoyProject != null)
+			if (servoyProject != null && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 			{
 				List<String> existingWorkingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
 					new String[] { servoyProject.getProject().getName() });
@@ -1317,6 +1320,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 						new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
 					updateExtendsFormViewer(flattenedSolution);
 					extendsFormViewer.setSelection(sel);
+
+					fillWorkingSets();//refresh working sets
 				}
 			}
 			setPageComplete(validatePage());

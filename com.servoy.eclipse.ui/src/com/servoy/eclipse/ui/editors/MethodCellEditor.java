@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.IControlFactory;
+import com.servoy.j2db.persistence.IScriptProvider;
 
 /**
  * A cell editor that manages a method field.
@@ -50,7 +51,7 @@ public class MethodCellEditor extends DialogCellEditor
 
 	/**
 	 * Creates a new method cell editor parented under the given control.
-	 * 
+	 *
 	 * @param parent the parent control
 	 */
 	public MethodCellEditor(Composite parent, ILabelProvider labelProvider, IValueEditor<MethodWithArguments> valueEditor, PersistContext persistContext,
@@ -74,7 +75,9 @@ public class MethodCellEditor extends DialogCellEditor
 			public Control createControl(Composite composite)
 			{
 				final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
-				buttons.setContext(persistContext, id.toString());
+				IScriptProvider scriptProvider = !getSelection().isEmpty() && getSelection().getFirstElement() instanceof MethodWithArguments
+					? MethodLabelProvider.getScriptProvider((MethodWithArguments)getSelection().getFirstElement(), persistContext) : null;
+				buttons.setContext(persistContext, scriptProvider != null ? scriptProvider.getName() : id.toString());
 				buttons.setDialog(dialog);
 				buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
 				dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()

@@ -66,7 +66,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 		colorsMap.put("aqua", "#00ffff");
 	}
 
-	public ColorPropertyController(String id, String displayName)
+	public ColorPropertyController(Object id, String displayName)
 	{
 		super(id, displayName);
 		setLabelProvider(COLOR_LABEL_PROVIDER);
@@ -152,8 +152,8 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 			if (hex.startsWith("#") && hex.length() == 4)
 			{
 				// #rgb -> #rrggbb
-				hex = new StringBuilder("#").append(hex.charAt(1)).append(hex.charAt(1)).append(hex.charAt(2)).append(hex.charAt(2)).append(hex.charAt(3)).append(
-					hex.charAt(3)).toString();
+				hex = new StringBuilder("#").append(hex.charAt(1)).append(hex.charAt(1)).append(hex.charAt(2)).append(hex.charAt(2)).append(
+					hex.charAt(3)).append(hex.charAt(3)).toString();
 			}
 			return java.awt.Color.decode(hex);
 		}
@@ -190,7 +190,8 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 		{
 			if (element instanceof String)
 			{
-				return ColorResource.INSTANCE.getColorImage(12, 12, 1, ColorResource.ColorAwt2Rgb(PROPERTY_COLOR_CONVERTER.convertValue(null, (String)element)));
+				return ColorResource.INSTANCE.getColorImage(12, 12, 1,
+					ColorResource.ColorAwt2Rgb(PROPERTY_COLOR_CONVERTER.convertValue(null, (String)element)));
 			}
 
 			return super.getImage(element);

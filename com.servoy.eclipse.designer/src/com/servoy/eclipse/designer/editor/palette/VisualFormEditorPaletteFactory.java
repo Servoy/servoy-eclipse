@@ -78,6 +78,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 
@@ -197,9 +198,20 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		return new PaletteCustomization(drawers, drawerEntries, entryProperties);
 	}
 
-	private static void addTemplates(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+	private void addTemplates(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
 	{
-		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+		List<IRootObject> alltemplates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+		String layout = form.getUseCssPosition().booleanValue() ? Template.LAYOUT_TYPE_CSS_POSITION : Template.LAYOUT_TYPE_ABSOLUTE;
+		List<Template> templates = new ArrayList<>();
+		for (int i = 0; i < alltemplates.size(); i++)
+		{
+			Template template = (Template)alltemplates.get(i);
+			JSONObject templateJSON = new ServoyJSONObject(template.getContent(), false);
+			if (templateJSON.optString(Template.PROP_LAYOUT, Template.LAYOUT_TYPE_ABSOLUTE).equals(layout))
+			{
+				templates.add(template);
+			}
+		}
 		if (templates.size() > 0)
 		{
 			String id = TEMPLATES_ID;

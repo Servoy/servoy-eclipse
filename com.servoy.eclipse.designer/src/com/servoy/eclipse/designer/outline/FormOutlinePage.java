@@ -29,6 +29,7 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -70,6 +71,7 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -146,7 +148,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							IPersist real = ((PersistContext)element).getPersist();
 							if (real != null)
 							{
-								if (PersistHelper.isInAbsoluteLayoutMode(real))
+								if (CSSPosition.isInAbsoluteLayoutMode(real))
 								{
 									// do not allow d&d from absolute layout div
 									event.doit = false;
@@ -506,7 +508,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						{
 							persist = webFormComponentChildType != null ? webFormComponentChildType : (IPersist)searchPersist;
 						}
-						selectionPath.add(PersistContext.create(persist, form));
+						PersistContext context = PersistContext.create(persist, form);
+						selectionPath.add(context);
+						getTreeViewer().expandToLevel(context, AbstractTreeViewer.ALL_LEVELS);
 					}
 				}
 				else

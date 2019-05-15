@@ -22,6 +22,7 @@ import java.awt.Dimension;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyDescriptionBuilder;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.component.ComponentFactory;
@@ -85,7 +86,7 @@ public class BeanPropertyHandler extends BasePropertyHandler
 		String name = propertyDescriptor.getName();
 		if (name.equals("innerHTML"))
 		{
-			return new PropertyDescription(name, TagStringPropertyType.INSTANCE, true);
+			return new PropertyDescriptionBuilder().withName(name).withType(TagStringPropertyType.INSTANCE).withConfig(Boolean.TRUE).build();
 		}
 		return super.getPropertyDescription(obj, propertySource, persistContext);
 	}

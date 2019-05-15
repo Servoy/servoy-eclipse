@@ -122,7 +122,7 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 	@Override
 	protected String solutionChooseDialogMessage()
 	{
-		return "You may add Web Package Projects to the active solution or to any of it's modules.\nPlease choose one of these solutions.";
+		return "You may add Servoy Package Projects to the active solution or to any of it's modules.\nPlease choose one of these solutions.";
 	}
 
 	public static void addReferencedProjectToDescription(IProject newProject, IProjectDescription solutionProjectDescription)

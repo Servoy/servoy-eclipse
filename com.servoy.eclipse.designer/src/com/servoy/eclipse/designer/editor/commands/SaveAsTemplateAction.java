@@ -19,6 +19,8 @@ package com.servoy.eclipse.designer.editor.commands;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
@@ -27,6 +29,7 @@ import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 import org.json.JSONException;
@@ -42,16 +45,19 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -85,6 +91,8 @@ public class SaveAsTemplateAction extends SelectionAction
 	}
 
 	private boolean groupTemplateElements = false;
+	private final BiPredicate<List<IPersist>, ISupportChilds> isNested = (List<IPersist> selected, ISupportChilds t) -> selected.contains(t) ? true
+		: PersistHelper.getRealParent(t) instanceof LayoutContainer && this.isNested.test(selected, PersistHelper.getRealParent(t));
 
 	private static Pair<String, Boolean> askForTemplateName(Shell shell, boolean grouping)
 	{
@@ -140,7 +148,7 @@ public class SaveAsTemplateAction extends SelectionAction
 	@Override
 	public void run()
 	{
-		Pair<String, Boolean> result = askForTemplateName(getWorkbenchPart().getSite().getShell(), groupTemplateElements);
+		Pair<String, Boolean> result = askForTemplateName(Display.getDefault().getActiveShell(), groupTemplateElements);
 		String templateName = result.getLeft();
 		groupTemplateElements = result.getRight().booleanValue();
 
@@ -222,7 +230,20 @@ public class SaveAsTemplateAction extends SelectionAction
 			return;
 		}
 
-		persists = completeContainment(form, persists);
+		List<IPersist> selected = completeContainment(form, persists);
+		List<IPersist> unflattenedSelection = new ArrayList<IPersist>();
+		for (IPersist currentPersist : selected)
+		{
+			if (currentPersist instanceof IFlattenedPersistWrapper)
+			{
+				unflattenedSelection.add(((IFlattenedPersistWrapper)currentPersist).getWrappedPersist());
+			}
+			else
+			{
+				unflattenedSelection.add(currentPersist);
+			}
+		}
+		List<IPersist> sel = selected.stream().filter(p -> !isNested.test(unflattenedSelection, PersistHelper.getRealParent(p))).collect(Collectors.toList());
 
 		ServoyModelManager.getServoyModelManager().getServoyModel();
 		EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
@@ -240,7 +261,7 @@ public class SaveAsTemplateAction extends SelectionAction
 				template = existingTemplate;
 			}
 			template.setResourceType(resourceType);
-			template.setContent(ElementFactory.createTemplateContent(repository, form, persists, resourceType, groupTemplateElements));
+			template.setContent(ElementFactory.createTemplateContent(repository, form, sel, resourceType, groupTemplateElements));
 			repository.updateRootObject(template);
 		}
 		catch (JSONException e)

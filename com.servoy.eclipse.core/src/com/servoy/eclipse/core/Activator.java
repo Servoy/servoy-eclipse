@@ -19,6 +19,8 @@ package com.servoy.eclipse.core;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -36,6 +38,7 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -55,7 +58,9 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -112,6 +117,7 @@ import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.J2DBGlobals;
+import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.dataprocessing.ClientInfo;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
@@ -955,8 +961,9 @@ public class Activator extends Plugin
 											}
 										}
 									}
+									PersistIndexCache.reload();
+									FormElementHelper.INSTANCE.reload();
 								}
-								FormElementHelper.INSTANCE.flush(affectedFormElements);
 								IDebugClientHandler dch = getDebugClientHandler();
 								dch.refreshDebugClients(changes);
 							}
@@ -1200,12 +1207,86 @@ public class Activator extends Plugin
 		ss.startWebServer();
 
 		checkApplicationServerVersion(ApplicationServerRegistry.get());
+		checkDefaultPostgressInstall(ApplicationServerRegistry.get());
+	}
+
+	/**
+	 * @param iApplicationServerSingleton
+	 */
+	private void checkDefaultPostgressInstall(IApplicationServerSingleton appServer)
+	{
+		File file = new File(appServer.getServoyApplicationServerDirectory() + "/postgres_db/servoy_repository.dbdump");
+		if (file.exists())
+		{
+			// if the zip is there then always aks the question.
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(),
+						"Default PostgreSQL not installed.", "Should a default PostgreSQL database be installed?", SWT.NONE,
+						new String[] { "Yes (include sample)", "Yes (no sample)", "No", "Later" });
+					if (open == 0)
+					{
+						// create database with sample
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						try
+						{
+							String installFile = "install_postgres.sh";
+							if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS)
+							{
+								installFile = "install_postgres.bat";
+							}
+							dialog.run(true, false, new CreatedDatabaseJob(new File(file.getParentFile(), installFile), // TODO batch file should be sh for none windows...
+								new String[] { "repository_server", "bug_db", "example", "log_data", "udm", "pdf_forms", "user_data" }, appServer));
+						}
+						catch (InvocationTargetException | InterruptedException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else if (open == 1)
+					{
+						// create database with just repo
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						try
+						{
+							String installFile = "install_postgres_no_samples.sh";
+							if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS)
+							{
+								installFile = "install_postgres_no_samples.bat";
+							}
+							dialog.run(true, false,
+								new CreatedDatabaseJob(new File(file.getParentFile(), installFile), new String[] { "repository_server" }, appServer)); // TODO batch file should be sh for none windows...
+						}
+						catch (InvocationTargetException | InterruptedException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else if (open == 2)
+					{
+						// delete dump files
+						File[] dumpFiles = file.getParentFile().listFiles(path -> path.isFile());
+						for (File dumpFile : dumpFiles)
+						{
+							dumpFile.delete();
+						}
+					}
+					// 3 ask the same again later.
+				}
+			});
+		}
 	}
 
 	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception
 	{
-		URLClassLoader loader = URLClassLoader.newInstance(
-			new URL[] { new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/../servoy_updater.jar").toURI().toURL() });
+		File file = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/../servoy_updater.jar");
+		try (InputStream is = Activator.class.getResourceAsStream("updater/servoy_updater.jar"))
+		{
+			FileUtils.copyInputStreamToFile(is, file);
+		}
+		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() });
 		Class< ? > versionCheckClass = loader.loadClass("com.servoy.updater.VersionCheck");
 		Method updateAppServerFromSerclipse = versionCheckClass.getMethod("updateAppServerFromSerclipse",
 			new Class[] { java.io.File.class, int.class, int.class, ActionListener.class });

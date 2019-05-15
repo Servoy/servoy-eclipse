@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +37,12 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportAttributes;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
@@ -57,7 +60,7 @@ import com.servoy.j2db.util.UUID;
  *
  * @author jcompagner
  */
-public class WebFormComponentChildType extends AbstractBase implements IBasicWebObject, IParentOverridable
+public class WebFormComponentChildType extends AbstractBase implements IBasicWebObject, IParentOverridable, ISupportAttributes
 {
 	private final PropertyDescription propertyDescription;
 	private final String key;
@@ -191,7 +194,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	private WebCustomType createWebCustomType(Object propertyDescriptionArg, final String jsonKey, final int index, UUID uuidArg)
 	{
 		Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(this);
-		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index, false, idAndUUID.getLeft().intValue(),
+		return new WebFormComponentCustomType(this, propertyDescriptionArg, jsonKey, index, idAndUUID.getLeft().intValue(),
 			uuidArg != null ? uuidArg : idAndUUID.getRight());
 	}
 
@@ -496,15 +499,44 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		return allObjectsAsList;
 	}
 
+	@Override
+	public void putAttributes(Map<String, String> value)
+	{
+		putCustomProperty(new String[] { IContentSpecConstants.PROPERTY_ATTRIBUTES }, value);
+	}
+
+	@Override
+	public Map<String, String> getAttributes()
+	{
+		Object customProperty = getCustomProperty(new String[] { IContentSpecConstants.PROPERTY_ATTRIBUTES });
+		if (customProperty instanceof Map)
+		{
+			return Collections.unmodifiableMap((Map<String, String>)customProperty);
+		}
+		return Collections.emptyMap();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, String> getMergedAttributes()
+	{
+		return (Map<String, String>)getMergedCustomPropertiesInternal(IContentSpecConstants.PROPERTY_ATTRIBUTES, new HashMap<String, String>());
+	}
+
+	@Override
+	public void putUnmergedAttributes(Map<String, String> value)
+	{
+		setUnmergedCustomPropertiesInternal(IContentSpecConstants.PROPERTY_ATTRIBUTES, value);
+	}
+
 	class WebFormComponentCustomType extends WebCustomType implements ISupportInheritedPropertyCheck
 	{
 		String jsonKey;
 		int index;
 
-		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, boolean isNew, int id,
-			UUID uuid)
+		public WebFormComponentCustomType(IBasicWebObject parentWebObject, Object propertyDescription, String jsonKey, int index, int id, UUID uuid)
 		{
-			super(parentWebObject, propertyDescription, jsonKey, index, isNew, id, uuid);
+			super(parentWebObject, propertyDescription, jsonKey, index, false, id, uuid);
 			this.jsonKey = jsonKey;
 			this.index = index;
 		}
@@ -539,11 +571,6 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 			return WebCustomType.class.getSimpleName() + " -> " + webObjectImpl.toString(); //$NON-NLS-1$
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.util.ISupportOwnPropertyCheck#isOwnProperty(java.lang.String)
-		 */
 		@Override
 		public boolean isInheritedProperty(String propertyName)
 		{

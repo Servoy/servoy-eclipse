@@ -27,14 +27,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -55,9 +59,11 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.AvoidMultipleExecutionsJob;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -67,10 +73,13 @@ import com.servoy.j2db.util.Utils;
 public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadListener, IActiveProjectListener, IWPMController
 {
 	public static final String CLIENT_SERVER_METHOD = "requestAllInstalledPackages";
+	public static final String REFRESH_REMOTE_PACKAGES_METHOD = "refreshRemotePackages";
 	public static final String MAIN_WEBPACKAGEINDEX = "https://servoy.github.io/webpackageindex/";
 	private final WebPackageManagerEndpoint endpoint;
 	private static String selectedWebPackageIndex = MAIN_WEBPACKAGEINDEX;
 	private AvoidMultipleExecutionsJob reloadWPMSpecsJob;
+
+	private static HashMap<String, Pair<Long, List<JSONObject>>> remotePackagesCache = new HashMap<String, Pair<Long, List<JSONObject>>>();
 
 	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
 	{
@@ -80,10 +89,25 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 
 	public JSONArray executeMethod(JSONObject msg)
 	{
-		return getAllInstalledPackages(msg);
+		return getAllInstalledPackages(msg, this);
 	}
 
-	public static JSONArray getAllInstalledPackages(JSONObject msg)
+	public static JSONArray getAllInstalledPackages()
+	{
+		return getAllInstalledPackages(null, null);
+	}
+
+	private static List<JSONObject> sortPackages(List<JSONObject> remotePackages)
+	{
+		remotePackages.sort((JSONObject o1, JSONObject o2) -> {
+			boolean b1 = o1.has("top") ? o1.getBoolean("top") : false;
+			boolean b2 = o2.has("top") ? o2.getBoolean("top") : false;
+			return (b1 ^ b2) ? ((b1 ^ true) ? 1 : -1) : o1.getString("displayName").compareTo(o2.getString("displayName"));
+		});
+		return remotePackages;
+	}
+
+	private static JSONArray getAllInstalledPackages(JSONObject msg, GetAllInstalledPackages getAllInstalledPackagesService)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 		ServoyProject[] activeProjecWithModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
@@ -92,10 +116,17 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		JSONArray result = new JSONArray();
 		try
 		{
-			List<JSONObject> remotePackages = getRemotePackages();
+			List<JSONObject> remotePackages = getAllInstalledPackagesService != null ? getAllInstalledPackagesService.getRemotePackagesAndCheckForChanges()
+				: getRemotePackages();
 
 			for (JSONObject pack : remotePackages)
 			{
+				// clear runtime settings
+				pack.remove("installed");
+				pack.remove("installedIsWPA");
+				pack.remove("installedResource");
+				pack.remove("activeSolution");
+
 				String name = pack.getString("name");
 				String type = pack.getString("packageType");
 
@@ -225,12 +256,12 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
-	public static List<JSONObject> setSelectedWebPackageIndex(String index)
+	public List<JSONObject> setSelectedWebPackageIndex(String index)
 	{
 		selectedWebPackageIndex = index;
 		try
 		{
-			return getRemotePackages();
+			return getRemotePackagesAndCheckForChanges();
 		}
 		catch (Exception e)
 		{
@@ -239,84 +270,159 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
+
+	public List<JSONObject> getRemotePackagesAndCheckForChanges() throws Exception
+	{
+		return getRemotePackages(endpoint);
+	}
+
 	public static List<JSONObject> getRemotePackages() throws Exception
 	{
-		List<JSONObject> result = new ArrayList<>();
-		String repositoriesIndex = getUrlContents(selectedWebPackageIndex);
+		return getRemotePackages(null);
+	}
 
-		JSONArray repoArray = new JSONArray(repositoriesIndex);
-		for (int i = repoArray.length(); i-- > 0;)
+	private static List<JSONObject> getRemotePackages(WebPackageManagerEndpoint endpoint) throws Exception
+	{
+		final List<JSONObject> remotePackages = getRemotePackages(selectedWebPackageIndex, true);
+		if (endpoint != null)
 		{
-			Object repo = repoArray.get(i);
-			if (repo instanceof JSONObject)
+			// check for new in a new thread
+			final String wpIndex = selectedWebPackageIndex;
+			Job checkForNewRemotePackagesJob = new Job("Check for new remote Servoy packages")
 			{
-				JSONObject repoObject = (JSONObject)repo;
-				String packageResponse = getUrlContents(repoObject.getString("url"));
-				if (packageResponse == null)
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					Debug.log("Couldn't get the package contents of: " + repoObject);
-					continue;
-				}
-				try
-				{
-					String currentVersion = ClientVersion.getPureVersion();
-					JSONObject packageObject = new JSONObject(packageResponse);
-					JSONArray jsonArray = packageObject.getJSONArray("releases");
-					List<JSONObject> toSort = new ArrayList<>();
-					for (int k = jsonArray.length(); k-- > 0;)
+					try
 					{
-						JSONObject jsonObject = jsonArray.getJSONObject(k);
-						if (jsonObject.has("servoy-version"))
+						Pair<Long, List<JSONObject>> currentPackages = remotePackagesCache.get(wpIndex);
+						if (currentPackages != null)
 						{
-							String servoyVersion = jsonObject.getString("servoy-version");
-							String[] minAndMax = servoyVersion.split(" - ");
-							if (versionCompare(minAndMax[0], currentVersion) <= 0)
+							List<JSONObject> newRemotePackages = getRemotePackages(wpIndex, false);
+							if (getChecksum(newRemotePackages) != currentPackages.getLeft().longValue())
 							{
-								toSort.add(jsonObject);
+								remotePackagesCache.remove(wpIndex);
+								JSONObject jsonResult = new JSONObject();
+								jsonResult.put("method", REFRESH_REMOTE_PACKAGES_METHOD);
+								endpoint.send(jsonResult.toString());
 							}
 						}
-						else toSort.add(jsonObject);
 					}
-					if (toSort.size() > 0)
+					catch (Exception ex)
 					{
-						Collections.sort(toSort, new Comparator<JSONObject>()
-						{
-							@Override
-							public int compare(JSONObject o1, JSONObject o2)
-							{
-								return o2.optString("version", "").compareTo(o1.optString("version", ""));
-							}
-						});
+						ServoyLog.logError(ex);
+					}
 
-						List<JSONObject> currentVersionReleases = new ArrayList<>();
-						for (JSONObject jsonObject : toSort)
+					return Status.OK_STATUS;
+				}
+			};
+			checkForNewRemotePackagesJob.setPriority(Job.LONG);
+			checkForNewRemotePackagesJob.schedule();
+		}
+		return sortPackages(remotePackages);
+	}
+
+	private static synchronized List<JSONObject> getRemotePackages(String webPackageIndex, boolean useCache) throws Exception
+	{
+		if (!useCache || !remotePackagesCache.containsKey(webPackageIndex))
+		{
+			List<JSONObject> result = new ArrayList<>();
+			String repositoriesIndex = getUrlContents(webPackageIndex);
+
+			JSONArray repoArray = new JSONArray(repositoriesIndex);
+			for (int i = repoArray.length(); i-- > 0;)
+			{
+				Object repo = repoArray.get(i);
+				if (repo instanceof JSONObject)
+				{
+					JSONObject repoObject = (JSONObject)repo;
+					String packageResponse = getUrlContents(repoObject.getString("url"));
+					if (packageResponse == null)
+					{
+						Debug.log("Couldn't get the package contents of: " + repoObject);
+						continue;
+					}
+					try
+					{
+						String currentVersion = ClientVersion.getPureVersion();
+						JSONObject packageObject = new JSONObject(packageResponse);
+						JSONArray jsonArray = packageObject.getJSONArray("releases");
+
+						if (repoObject.has("top")) packageObject.put("top", repoObject.getBoolean("top"));
+						else packageObject.put("top", false);
+						List<JSONObject> toSort = new ArrayList<>();
+						for (int k = jsonArray.length(); k-- > 0;)
 						{
+							JSONObject jsonObject = jsonArray.getJSONObject(k);
 							if (jsonObject.has("servoy-version"))
 							{
 								String servoyVersion = jsonObject.getString("servoy-version");
 								String[] minAndMax = servoyVersion.split(" - ");
-								if (minAndMax.length > 1 && versionCompare(minAndMax[1], currentVersion) <= 0)
+								if (versionCompare(minAndMax[0], currentVersion) <= 0)
 								{
-									break;
+									toSort.add(jsonObject);
 								}
 							}
-							currentVersionReleases.add(jsonObject);
+							else toSort.add(jsonObject);
 						}
-						if (currentVersionReleases.size() > 0)
+						if (toSort.size() > 0)
 						{
-							packageObject.put("releases", currentVersionReleases);
-							result.add(packageObject);
+							Collections.sort(toSort, new Comparator<JSONObject>()
+							{
+								@Override
+								public int compare(JSONObject o1, JSONObject o2)
+								{
+									return o2.optString("version", "").compareTo(o1.optString("version", ""));
+								}
+							});
+
+							List<JSONObject> currentVersionReleases = new ArrayList<>();
+							for (JSONObject jsonObject : toSort)
+							{
+								if (jsonObject.has("servoy-version"))
+								{
+									String servoyVersion = jsonObject.getString("servoy-version");
+									String[] minAndMax = servoyVersion.split(" - ");
+									if (minAndMax.length > 1 && versionCompare(minAndMax[1], currentVersion) <= 0)
+									{
+										break;
+									}
+								}
+								currentVersionReleases.add(jsonObject);
+							}
+							if (currentVersionReleases.size() > 0)
+							{
+								packageObject.put("releases", currentVersionReleases);
+								result.add(packageObject);
+							}
 						}
 					}
-				}
-				catch (Exception e)
-				{
-					Debug.log("Couldn't get the package contents of: " + repoObject + " error parsing: " + packageResponse, e);
-					continue;
+					catch (Exception e)
+					{
+						Debug.log("Couldn't get the package contents of: " + repoObject + " error parsing: " + packageResponse, e);
+						continue;
+					}
 				}
 			}
+			if (useCache)
+			{
+				remotePackagesCache.put(webPackageIndex, new Pair<Long, List<JSONObject>>(Long.valueOf(getChecksum(result)), result));
+			}
+			else
+			{
+				return result;
+			}
 		}
-		return result;
+		return remotePackagesCache.get(webPackageIndex).getRight();
+	}
+
+	private static long getChecksum(List<JSONObject> list)
+	{
+		byte[] listAsBytes = list.toString().getBytes();
+		Checksum checksum = new CRC32();
+		checksum.update(listAsBytes, 0, listAsBytes.length);
+
+		return checksum.getValue();
 	}
 
 	private static int versionCompare(String v1, String v2)
@@ -387,7 +493,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			// sometimes for example 3 reloads were triggered in a short amount of time; keep the full reloads to a minimum;
 			// only keep 1 reload and if that is in progress and another one is needed remember to trigger it only once
 			// the first reload is over
-			if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Web Package Manager specs...")
+			if (reloadWPMSpecsJob == null) reloadWPMSpecsJob = new AvoidMultipleExecutionsJob("Reloading Servoy Package Manager specs...")
 			{
 
 				@Override

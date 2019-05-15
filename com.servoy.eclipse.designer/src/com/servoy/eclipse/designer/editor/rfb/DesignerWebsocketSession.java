@@ -38,9 +38,11 @@ import org.json.JSONWriter;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebObjectSpecificationBuilder;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
 import org.sablo.websocket.IServerService;
+import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -50,6 +52,7 @@ import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -84,8 +87,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 {
 	public static final String EDITOR_CONTENT_SERVICE = "$editorContentService";
 
-	private static final WebObjectSpecification EDITOR_CONTENT_SERVICE_SPECIFICATION = new WebObjectSpecification(EDITOR_CONTENT_SERVICE, "",
-		IPackageReader.WEB_SERVICE, EDITOR_CONTENT_SERVICE, null, null, null, "", null);
+	private static final WebObjectSpecification EDITOR_CONTENT_SERVICE_SPECIFICATION = new WebObjectSpecificationBuilder().withName(
+		EDITOR_CONTENT_SERVICE).withPackageType(IPackageReader.WEB_SERVICE).build();
 
 	private final Form form;
 
@@ -94,9 +97,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	/**
 	 * @param uuid
 	 */
-	public DesignerWebsocketSession(String uuid, BaseVisualFormEditor editor)
+	public DesignerWebsocketSession(WebsocketSessionKey sessionKey, BaseVisualFormEditor editor)
 	{
-		super(uuid);
+		super(sessionKey);
 		this.form = editor.getForm();
 		this.editor = editor;
 		registerServerService("$editor", this);
@@ -206,7 +209,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
 							{
 								AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
-								if (container instanceof LayoutContainer && PersistHelper.isCSSPositionContainer((LayoutContainer)container))
+								if (container instanceof LayoutContainer && CSSPosition.isCSSPositionContainer((LayoutContainer)container))
 								{
 									responsive = false;
 								}

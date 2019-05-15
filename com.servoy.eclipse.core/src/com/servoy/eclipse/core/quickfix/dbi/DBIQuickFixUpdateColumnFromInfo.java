@@ -102,6 +102,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 							catch (RepositoryException e)
 							{
 								ServoyLog.logWarning("Fix update column from column info - " + e.getMessage(), null);
+								storeException(e);
 							}
 						}
 					};
@@ -145,11 +146,12 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 						catch (Exception e)
 						{
 							ServoyLog.logError(e);
+							storeException(e);
 						}
 					}
 
 					// apply the changes (delete column from database as well)
-					s.syncTableObjWithDB(difference.getTable(), false, true, null);
+					s.syncTableObjWithDB(difference.getTable(), false, true);
 
 					// reload the column information for this table just to make sure everything is in sync
 					dmm.loadAllColumnInfo(difference.getTable());
@@ -167,10 +169,12 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 	}
 

@@ -49,7 +49,7 @@ public class NewPostgresDbAction extends AbstractNewDbAction
 	 * @param monitor
 	 */
 	@Override
-	protected boolean createDatabase(final IServerInternal serverPrototype, final String name, IProgressMonitor monitor)
+	public boolean createDatabase(final IServerInternal serverPrototype, final String name, IProgressMonitor monitor)
 	{
 		ITransactionConnection connection = null;
 		PreparedStatement ps = null;
@@ -61,13 +61,16 @@ public class NewPostgresDbAction extends AbstractNewDbAction
 			ps.execute();
 			ps.close();
 			ps = null;
-			Display.getDefault().syncExec(new Runnable()
+			if (viewer != null)
 			{
-				public void run()
+				Display.getDefault().syncExec(new Runnable()
 				{
-					MessageDialog.openInformation(viewer.getSite().getShell(), "Info", "PostgreSQL database created.");
-				}
-			});
+					public void run()
+					{
+						MessageDialog.openInformation(viewer.getSite().getShell(), "Info", "PostgreSQL database created.");
+					}
+				});
+			}
 		}
 		catch (Exception e)
 		{

@@ -16,7 +16,8 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.PreferencePage;
@@ -31,10 +32,12 @@ import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenSqlEditorAction;
+import com.servoy.j2db.util.Debug;
 
 public class SolutionExplorerPreferences extends PreferencePage implements IWorkbenchPreferencePage
 {
@@ -57,14 +60,13 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	public static final String GLOBALS_DOUBLE_CLICK_ACTION = "globalsDblClickAction";
 	public static final String SOLEX_ALIGNEMENT = "solexAlignement";
 	public static final String DOUBLE_CLICK_OPEN_FORM_EDITOR = "openFormEditor";
-	public static final String DOUBLE_CLICK_OPEN_FORM_SCRIPT = "openFormSciptEditor";
+	public static final String DOUBLE_CLICK_OPEN_FORM_SCRIPT = "openFormScriptEditor";
 	public static final String DOUBLE_CLICK_EXPAND_FORM_TREE = "expandFormTree";
-	public static final String DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT = "openGlobalSciptEditor";
+	public static final String DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT = "openGlobalScriptEditor";
 	public static final String DOUBLE_CLICK_EXPAND_GLOBAL_TREE = "expandGlobalTree";
 
 	private IDialogSettings solexDialogSettings;
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected Control createContents(Composite parent)
 	{
@@ -102,7 +104,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		rdExpandFormTree.setText("Expand tree");
 
 		Group solexGlobalsGroup = new Group(cp, SWT.NONE);
-		solexGlobalsGroup.setText("Globals node double click operation");
+		solexGlobalsGroup.setText("Scopes node double click operation");
 		solexGlobalsGroup.setLayout(new GridLayout(1, true));
 
 		rdOpenGlobalScriptEditor = new Button(solexGlobalsGroup, SWT.RADIO);
@@ -111,11 +113,12 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 		rdExpandGlobalsTree = new Button(solexGlobalsGroup, SWT.RADIO);
 		rdExpandGlobalsTree.setText("Expand tree");
 
-		Preferences store = Activator.getDefault().getPluginPreferences();
-		String option = store.getString(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY);
+		IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
+
+		String option = store.get(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.NEVER);
 		chAutomaticPerspectiveSwitch.setSelection(MessageDialogWithToggle.ALWAYS.equals(option) ? true : false);
 
-		option = store.getString(FORM_DOUBLE_CLICK_ACTION);
+		option = store.get(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_FORM_EDITOR);
 		if (DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(option))
 		{
 			rdOpenFormEditor.setSelection(true);
@@ -138,7 +141,7 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 			rdOpenFormScriptEditor.setSelection(false);
 		}
 
-		option = store.getString(GLOBALS_DOUBLE_CLICK_ACTION);
+		option = store.get(GLOBALS_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT);
 		if (DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(option))
 		{
 			rdOpenGlobalScriptEditor.setSelection(true);
@@ -218,36 +221,36 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	@Override
 	public boolean performOk()
 	{
-		Preferences store = Activator.getDefault().getPluginPreferences();
+		IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
 		if (chAutomaticPerspectiveSwitch.getSelection())
 		{
-			store.setValue(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.ALWAYS);
+			store.put(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.ALWAYS);
 		}
 		else
 		{
-			store.setValue(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.NEVER);
+			store.put(OpenSqlEditorAction.AUTOMATIC_SWITCH_PERSPECTIVE_PROPERTY, MessageDialogWithToggle.NEVER);
 		}
 
 		if (rdOpenFormEditor.getSelection())
 		{
-			store.setValue(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_FORM_EDITOR);
+			store.put(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_FORM_EDITOR);
 		}
 		else if (rdOpenFormScriptEditor.getSelection())
 		{
-			store.setValue(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_FORM_SCRIPT);
+			store.put(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_FORM_SCRIPT);
 		}
 		else
 		{
-			store.setValue(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_EXPAND_FORM_TREE);
+			store.put(FORM_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_EXPAND_FORM_TREE);
 		}
 
 		if (rdOpenGlobalScriptEditor.getSelection())
 		{
-			store.setValue(GLOBALS_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT);
+			store.put(GLOBALS_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT);
 		}
 		else
 		{
-			store.setValue(GLOBALS_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_EXPAND_GLOBAL_TREE);
+			store.put(GLOBALS_DOUBLE_CLICK_ACTION, DOUBLE_CLICK_EXPAND_GLOBAL_TREE);
 		}
 
 		IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
@@ -336,8 +339,14 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 			solexDialogSettings.put(SolutionExplorerView.INCLUDE_ENTRIES_FROM_MODULES, chIncludeModules.getSelection());
 		}
 
-		Activator.getDefault().savePluginPreferences();
-
+		try
+		{
+			store.flush();
+		}
+		catch (BackingStoreException e)
+		{
+			Debug.log(e);
+		}
 		return super.performOk();
 	}
 
@@ -346,11 +355,11 @@ public class SolutionExplorerPreferences extends PreferencePage implements IWork
 	{
 		super.performDefaults();
 		chAutomaticPerspectiveSwitch.setSelection(false);
-		rdOpenFormEditor.setSelection(false);
+		rdOpenFormEditor.setSelection(true);
 		rdOpenFormScriptEditor.setSelection(false);
-		rdExpandFormTree.setSelection(true);
-		rdOpenGlobalScriptEditor.setSelection(false);
-		rdExpandGlobalsTree.setSelection(true);
+		rdExpandFormTree.setSelection(false);
+		rdOpenGlobalScriptEditor.setSelection(true);
+		rdExpandGlobalsTree.setSelection(false);
 		rdAutomaticAlignement.setSelection(true);
 		rdVerticalAlignement.setSelection(false);
 		rdHorizontalAlignement.setSelection(false);

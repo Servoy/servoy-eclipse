@@ -44,12 +44,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -166,6 +168,8 @@ public class ValueListEditor extends PersistEditor
 
 	// type definition widgets
 	private Combo displayType, realType;
+	private Label displayTypeLabel, realTypeLabel;
+	private Group typeDefinitionGroup;
 
 	@Override
 	protected boolean validatePersist(IPersist persist)
@@ -457,15 +461,15 @@ public class ValueListEditor extends PersistEditor
 		encapsulation = new Combo(valueListEditorComposite, SWT.READ_ONLY);
 		encapsulation.setItems(new String[] { Messages.Public, Messages.ModuleScope });
 
-		Group typeDefinitionGroup = new Group(valueListEditorComposite, SWT.NONE);
+		typeDefinitionGroup = new Group(valueListEditorComposite, SWT.NONE);
 		typeDefinitionGroup.setText("Type definition");
 
-		Label displayTypeLabel = new Label(typeDefinitionGroup, SWT.NONE);
+		displayTypeLabel = new Label(typeDefinitionGroup, SWT.NONE);
 		displayTypeLabel.setText("Display value type");
 		displayType = new Combo(typeDefinitionGroup, SWT.READ_ONLY);
 		displayType.setItems(Type2StringConverter.INSTANCE.getAllTypes());
 
-		Label realTypeLabel = new Label(typeDefinitionGroup, SWT.NONE);
+		realTypeLabel = new Label(typeDefinitionGroup, SWT.NONE);
 		realTypeLabel.setText("Real value type");
 		realType = new Combo(typeDefinitionGroup, SWT.READ_ONLY);
 		realType.setItems(Type2StringConverter.INSTANCE.getAllTypes());
@@ -745,6 +749,12 @@ public class ValueListEditor extends PersistEditor
 			realType.setEnabled(isCustomOrGlobalValuelist);
 			displayType.setEnabled(isCustomOrGlobalValuelist);
 
+			Color usedColor = isCustomOrGlobalValuelist ? globalMethodValuesButton.getForeground() : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+			realTypeLabel.setForeground(usedColor);
+			displayTypeLabel.setForeground(usedColor);
+			typeDefinitionGroup.setForeground(usedColor);
+
+
 			currentTable = table;
 
 			dp_select1.initDataBindings(table);
@@ -752,12 +762,12 @@ public class ValueListEditor extends PersistEditor
 			dp_select3.initDataBindings(table);
 
 			boolean enabled = table != null;
-			definitionGroup.setEnabled(enabled);
+			usedColor = enabled ? globalMethodValuesButton.getForeground() : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+			definitionGroup.setForeground(usedColor);
+
 			dp_select1.setEnabled(enabled);
 			dp_select2.setEnabled(enabled);
 			dp_select3.setEnabled(enabled);
-
-			updateTypeDefinitionWidgets();
 
 			sortingDefinitionSelect.setEnabled(enabled);
 			separator_char.setEnabled(enabled);

@@ -38,6 +38,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -117,15 +118,14 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
+import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
-import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
+import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.Pair;
@@ -150,7 +150,7 @@ public class WarExporter
 	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "org.apache.commons.lang3_*.jar" };
+		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "org.apache.commons.lang3_*.jar", "de.inetsoftware.jlessc_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
 
@@ -232,11 +232,12 @@ public class WarExporter
 			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
 			monitor.setWorkRemaining(6);
 			monitor.subTask("Copy exported components");
-			copyExportedComponentsAndServicesPropertyFile(tmpWarDir);
+			copyExportedComponentsAndServicesPropertyFile(tmpWarDir, m);
 			monitor.worked(2);
 			monitor.subTask("Grouping JS and CSS resources");
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.subTask("Compile less resources");
+			// TODO this only compiles the less resources of the active project (and its modules) not for the none active solutions that could also be exported
 			compileLessResources(tmpWarDir);
 			monitor.worked(1);
 		}
@@ -257,6 +258,8 @@ public class WarExporter
 	 */
 	private void compileLessResources(File tmpWarDir)
 	{
+		// this only compiles the active solution and modules less stuff in a dir
+		// not from the none active solutions, problem could be that the none active solutions can have duplicate names..
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		FlattenedSolution fs = servoyModel.getFlattenedSolution();
 		Iterator<Media> it = fs.getMedias(false);
@@ -265,18 +268,19 @@ public class WarExporter
 			Media media = it.next();
 			if (media.getName().endsWith(".less"))
 			{
-				String content = ResourceProvider.compileSolutionLessFile(media, fs);
+				String content = LessCompiler.compileSolutionLessFile(media, fs);
 				if (content != null)
 				{
-					File folder = new File(tmpWarDir, NGClientWebsocketSession.SERVOY_SOLUTION_CSS);
-					if (!folder.exists() && !folder.mkdir())
-					{
-						Debug.error("Could not create folder " + folder.getName());
-						break;
-					}
+					File folder = new File(tmpWarDir, MediaResourcesServlet.SERVOY_SOLUTION_CSS);
 					try
 					{
 						File f = new File(folder, media.getName().replace(".less", ".css"));
+						if (!f.getParentFile().exists() && !f.getParentFile().mkdirs())
+						{
+							ServoyLog.logError("Could not create folder " + f.getParentFile().getName() + " for less media: " + media.getName(),
+								new RuntimeException());
+							break;
+						}
 						f.createNewFile();
 						try (PrintWriter printWriter = new PrintWriter(f))
 						{
@@ -289,7 +293,7 @@ public class WarExporter
 					}
 					catch (IOException e)
 					{
-						ServoyLog.logError(e);
+						ServoyLog.logError("Error creating less file:  " + media.getName(), e);
 					}
 				}
 			}
@@ -375,14 +379,15 @@ public class WarExporter
 			StringBuilder message = new StringBuilder();
 			while ((line = in.readLine()) != null)
 			{
-				message.append(line);
+				message.append(line).append("\n");
 			}
 			in.close();
 			if (proc.waitFor() != 0)
 			{
-				Debug.error(message);
+				ServoyLog.logError("Could not group and minify JS and CSS resources.", new RuntimeException(message.toString()));
 				throw new ExportException(
-					"Could not group and minify JS and CSS resources. See log for more details and servoy wiki on how to exclude libraries from grouping using group property in the spec.");
+					"Could not group and minify JS and CSS resources. See workspace log for more details and servoy wiki Specification (.spec) file page - on how to exclude Servoy package js or css libraries from grouping using the group property - if needed: " +
+						message.toString());
 			}
 
 			//delete unneeded files
@@ -413,7 +418,7 @@ public class WarExporter
 		}
 		catch (Exception e)
 		{
-			Debug.error(e);
+			ServoyLog.logError(e);
 			throw new ExportException(e.getMessage(), e);
 		}
 	}
@@ -555,20 +560,38 @@ public class WarExporter
 	 * This is needed to optimize the references included in the index.html file.
 	 * If no components and services are selected, then all references would be included in the index.
 	 */
-	private void copyExportedComponentsAndServicesPropertyFile(File tmpWarDir) throws ExportException
+	private void copyExportedComponentsAndServicesPropertyFile(File tmpWarDir, IProgressMonitor m) throws ExportException
 	{
-		if ((exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) ||
-			(exportModel.getExportedComponents().size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
-				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(
-					servicesSpecProviderState).length))
-			return;
+		Set<String> exportedComponents = exportModel.getExportedComponents();
+		Set<String> exportedServices = exportModel.getExportedServices();
+		if (exportModel.getExcludedComponentPackages() != null && exportModel.getExcludedComponentPackages().size() > 0)
+		{
+			m.subTask("Excluding component packages: " + Arrays.toString(exportModel.getExcludedComponentPackages().toArray(new String[0])));
+		}
+		if (exportedComponents != null)
+		{
+			m.subTask("Exporting components: " + Arrays.toString(exportedComponents.toArray(new String[0])));
+		}
 
+		if ((exportedComponents == null && exportedServices == null) ||
+			(exportedComponents.size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
+				exportedServices.size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
+			return;
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
 		Properties properties = new Properties();
 		StringBuilder webObjects = new StringBuilder();
-		for (String component : exportModel.getExportedComponents())
+		for (String component : exportedComponents)
 		{
 			webObjects.append(component + ",");
+		}
+
+		if (exportModel.getExcludedServicePackages() != null && exportModel.getExcludedServicePackages().size() > 0)
+		{
+			m.subTask("Excluding service packages: " + Arrays.toString(exportModel.getExcludedServicePackages().toArray(new String[0])));
+		}
+		if (exportedServices != null)
+		{
+			m.subTask("Exporting services: " + Arrays.toString(exportedServices.toArray(new String[0])));
 		}
 
 		TreeSet<String> allServices = new TreeSet<String>();
@@ -576,7 +599,7 @@ public class WarExporter
 		PackageSpecification<WebObjectSpecification> servoyservices = servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services
-		if (exportModel.getExportedServices() != null) allServices.addAll(exportModel.getExportedServices());
+		if (exportedServices != null) allServices.addAll(exportedServices);
 		for (String service : allServices)
 		{
 			webObjects.append(service + ",");
@@ -825,7 +848,7 @@ public class WarExporter
 		}
 		catch (IOException e)
 		{
-			Debug.error("IO exception when extracting from file " + file.getAbsolutePath(), e);
+			ServoyLog.logError("IO exception when extracting from file " + file.getAbsolutePath(), e);
 		}
 	}
 
@@ -955,6 +978,7 @@ public class WarExporter
 			prop.setProperty("allowDataModelChange", exportModel.getAllowDataModelChanges());
 			prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
 			prop.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
+			prop.setProperty("skipDatabaseViewsUpdate", Boolean.toString(exportModel.isSkipDatabaseViewsUpdate()));
 
 			try (FileWriter writer = new FileWriter(importProperties))
 			{
@@ -1087,7 +1111,7 @@ public class WarExporter
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() ||
+			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() || !exportModel.getUpgradedLicenses().isEmpty() ||
 				(exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0))
 			{
 				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
@@ -1419,7 +1443,8 @@ public class WarExporter
 				if (properties.containsKey("SocketFactory.useTwoWaySocket")) properties.remove("SocketFactory.useTwoWaySocket");
 			}
 
-			if (!exportModel.getLicenses().isEmpty())
+			Map<String, String> upgradedLicenses = exportModel.getUpgradedLicenses();
+			if (!exportModel.getLicenses().isEmpty() || !upgradedLicenses.isEmpty())
 			{
 				List<License> licenses = new ArrayList<>();
 				Cipher desCipher = null;
@@ -1431,7 +1456,7 @@ public class WarExporter
 				}
 				catch (Exception e)
 				{
-					Debug.error("Cannot load encrypted previous export passwords", e);
+					ServoyLog.logError("Cannot load encrypted previous export passwords", e);
 				}
 
 				Set<String> codes = new HashSet<String>();
@@ -1464,6 +1489,14 @@ public class WarExporter
 					{
 						ServoyLog.logError(new Exception("The license \"" + license.getCompanyKey() + ", " + license.getCode().substring(0, 4) +
 							"**-******-******," + license.getNumberOfLicenses() + "\" is not valid"));
+					}
+				}
+
+				for (License license : licenses)
+				{
+					if (upgradedLicenses.containsKey(license.getCode()))
+					{
+						license.setCode(upgradedLicenses.get(license.getCode()));
 					}
 				}
 
@@ -1555,7 +1588,7 @@ public class WarExporter
 			}
 			catch (Exception e)
 			{
-				Debug.error("Could not encrypt password for sever " + sc.getName(), e);
+				ServoyLog.logError("Could not encrypt password for sever " + sc.getName(), e);
 			}
 			properties.put("server." + i + ".password", password);
 			properties.put("server." + i + ".URL", sc.getServerUrl());
@@ -1650,7 +1683,7 @@ public class WarExporter
 			}
 			catch (Exception e)
 			{
-				Debug.error("Could not encrypt license key.", e);
+				ServoyLog.logError("Could not encrypt license key.", e);
 			}
 			i++;
 		}
@@ -1751,7 +1784,7 @@ public class WarExporter
 			}
 			else
 			{
-				Debug.error("jnlp file " + pluginJarJnlpFile + " couldn't be parsed, nothing copied");
+				ServoyLog.logError("Plugin jnlp file " + pluginJarJnlpFile + " couldn't be parsed; nothing copied", new RuntimeException());
 			}
 		}
 	}
@@ -1794,7 +1827,7 @@ public class WarExporter
 		}
 		catch (Exception e)
 		{
-			Debug.error("Error creating parsing the jnlp file: " + jnlpFile, e);
+			ServoyLog.logError("Error creating parsing the jnlp file: " + jnlpFile, e);
 		}
 		return null;
 	}
@@ -1884,7 +1917,7 @@ public class WarExporter
 			try (FileInputStream fis = new FileInputStream(sourceFile))
 			{
 				String compileLessWithNashorn = null;
-				if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(fis)) != null)
+				if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = LessCompiler.compileLess(fis)) != null)
 				{
 					File compiledLessFile = destFile;
 					PrintWriter printWriter = new PrintWriter(compiledLessFile);

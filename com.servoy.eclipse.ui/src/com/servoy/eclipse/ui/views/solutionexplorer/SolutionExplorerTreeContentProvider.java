@@ -54,8 +54,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -85,6 +85,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
+import com.servoy.eclipse.model.inmemory.AbstractMemServer;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -94,6 +95,7 @@ import com.servoy.eclipse.model.ngpackages.IAvailableNGPackageProjectsListener;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetsServer;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
@@ -111,6 +113,7 @@ import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
+import com.servoy.j2db.dataprocessing.datasource.JSViewDataSource;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.JSLib;
@@ -178,6 +181,7 @@ public class SolutionExplorerTreeContentProvider
 	private static final String IMG_SOLUTION_MOBILE = "solution_mobile.png";
 	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png";
 	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png";
+	private static final String IMG_SOLUTION_SERVICE = "servicesolution.png";
 	private static final String SERVER_IMAGE = "server.png";
 	private static final String SERVER_DUPLICATE_IMAGE = "duplicate_server.png";
 	private static final String SERVER_ERROR_IMAGE = "server.png_IMG_DEC_FIELD_ERROR";
@@ -571,6 +575,9 @@ public class SolutionExplorerTreeContentProvider
 					case SolutionMetaData.MODULE :
 						imgName = IMG_SOLUTION_MODULE;
 						break;
+					case SolutionMetaData.SERVICE :
+						imgName = IMG_SOLUTION_SERVICE;
+						break;
 					case SolutionMetaData.NG_MODULE :
 						imgName = IMG_SOLUTION_NG_MODULE;
 						break;
@@ -663,7 +670,7 @@ public class SolutionExplorerTreeContentProvider
 				// (still allows the user to activate them if necessary
 				for (ServoyProject module : modules)
 				{
-					if (module == servoyProject)
+					if (module.getProject().equals(servoyProject.getProject()))
 					{
 						isModule = true;
 						break;
@@ -856,9 +863,18 @@ public class SolutionExplorerTreeContentProvider
 					{
 						addServersNodeChildren(un);
 					}
-					else if (type == UserNodeType.SERVER || un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+					else if (type == UserNodeType.SERVER || un.getType() == UserNodeType.INMEMORY_DATASOURCES || un.getType() == UserNodeType.VIEW_FOUNDSETS)
 					{
-						addServerNodeChildren(un, type == UserNodeType.SERVER ? UserNodeType.TABLE : UserNodeType.INMEMORY_DATASOURCE);
+						UserNodeType t = UserNodeType.TABLE;
+						if (un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+						{
+							t = UserNodeType.INMEMORY_DATASOURCE;
+						}
+						else if (un.getType() == UserNodeType.VIEW_FOUNDSETS)
+						{
+							t = UserNodeType.VIEW_FOUNDSET;
+						}
+						addServerNodeChildren(un, t);
 					}
 					else if (type == UserNodeType.PLUGINS)
 					{
@@ -1311,7 +1327,23 @@ public class SolutionExplorerTreeContentProvider
 		List<IProject> allReferencedProjects, IPackageReader[] packages)
 	{
 		IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
+		HashMap<String, IPackageReader> packageReadersMap = new HashMap<String, IPackageReader>();
+
 		for (IPackageReader reader : packages)
+		{
+			if (reader.getResource() != null && reader.getResource().isFile())
+			{
+				IPackageReader existingReader = packageReadersMap.get(reader.getPackageName());
+				if (existingReader != null && existingReader.getResource() != null && existingReader.getResource().isDirectory())
+				{
+					continue;
+				}
+			}
+			packageReadersMap.put(reader.getPackageName(), reader);
+		}
+
+
+		for (IPackageReader reader : packageReadersMap.values())
 		{
 			File resource = reader.getResource();
 			if (resource != null && resource.isFile())
@@ -1504,7 +1536,7 @@ public class SolutionExplorerTreeContentProvider
 		Image img = imageCache.get(path);
 		if (img == null)
 		{
-			Display display = Display.getCurrent();
+			Display display = Display.getDefault();
 			try
 			{
 				int px = Math.round(16 * display.getDPI().y / 96f);
@@ -1591,9 +1623,9 @@ public class SolutionExplorerTreeContentProvider
 						return false;
 					}
 				}
-				else if (un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+				else if (un.getType() == UserNodeType.INMEMORY_DATASOURCES || un.getType() == UserNodeType.VIEW_FOUNDSETS)
 				{
-					ServoyProject servoyProject = ((MemServer)un.getRealObject()).getServoyProject();
+					ServoyProject servoyProject = ((AbstractMemServer< ? >)un.getRealObject()).getServoyProject();
 					try
 					{
 						List<IProject> allReferencedProjects;
@@ -1610,7 +1642,10 @@ public class SolutionExplorerTreeContentProvider
 						{
 							if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
 							{
-								if (((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer().getTableNames(true).size() > 0)
+								ServoyProject project = (ServoyProject)module.getNature(ServoyProject.NATURE_ID);
+								AbstractMemServer< ? > server = un.getType() == UserNodeType.INMEMORY_DATASOURCES ? project.getMemServer()
+									: project.getViewFoundsetsServer();
+								if (server.getTableNames(true).size() > 0)
 								{
 									return true;
 								}
@@ -1751,7 +1786,8 @@ public class SolutionExplorerTreeContentProvider
 			return false;
 		}
 		else if (parent instanceof UserNode &&
-			(((UserNode)parent).getType() == UserNodeType.TABLE || ((UserNode)parent).getType() == UserNodeType.INMEMORY_DATASOURCE)) return false;
+			(((UserNode)parent).getType() == UserNodeType.TABLE || ((UserNode)parent).getType() == UserNodeType.INMEMORY_DATASOURCE) ||
+			((UserNode)parent).getType() == UserNodeType.VIEW_FOUNDSET) return false;
 		return true;
 	}
 
@@ -1853,27 +1889,30 @@ public class SolutionExplorerTreeContentProvider
 		{
 			Solution servoySolution = (Solution)realObject;
 			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(servoySolution.getName());
-			IProject eclipseProject = servoyProject.getProject();
-			try
+			if (servoyProject != null)
 			{
-				List<IProject> allReferencedProjects;
-				if (includeModules)
+				IProject eclipseProject = servoyProject.getProject();
+				try
 				{
-					allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
-				}
-				else
-				{
-					allReferencedProjects = Arrays.asList(eclipseProject.getReferencedProjects());
-				}
+					List<IProject> allReferencedProjects;
+					if (includeModules)
+					{
+						allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
+					}
+					else
+					{
+						allReferencedProjects = Arrays.asList(eclipseProject.getReferencedProjects());
+					}
 
-				for (IProject iProject : allReferencedProjects)
-				{
-					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID)) return true;
+					for (IProject iProject : allReferencedProjects)
+					{
+						if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID)) return true;
+					}
 				}
-			}
-			catch (CoreException e)
-			{
-				Debug.log(e);
+				catch (CoreException e)
+				{
+					Debug.log(e);
+				}
 			}
 		}
 		return false;
@@ -1909,6 +1948,11 @@ public class SolutionExplorerTreeContentProvider
 		if (serverNode.getType() == UserNodeType.INMEMORY_DATASOURCES)
 		{
 			serverNode.children = SolutionExplorerListContentProvider.createInMemTables(((MemServer)serverNode.getRealObject()).getServoyProject(),
+				includeModules);
+		}
+		if (serverNode.getType() == UserNodeType.VIEW_FOUNDSETS)
+		{
+			serverNode.children = SolutionExplorerListContentProvider.createViewFoundsets(((ViewFoundsetsServer)serverNode.getRealObject()).getServoyProject(),
 				includeModules);
 		}
 		else
@@ -1949,9 +1993,18 @@ public class SolutionExplorerTreeContentProvider
 					result[0] = uiActivator.loadImageFromCache(SERVER_ERROR_IMAGE);
 					if (result[0] == null)
 					{
-						ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
-						result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
-						uiActivator.putImageInCache(SERVER_ERROR_IMAGE, result[0]);
+						Image IMG_ERROR = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+						if (IMG_ERROR != null)
+						{
+							result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), ImageDescriptor.createFromImage(IMG_ERROR),
+								IDecoration.BOTTOM_LEFT).createImage();
+							uiActivator.putImageInCache(SERVER_ERROR_IMAGE, result[0]);
+						}
+						else
+						{
+							ServoyLog.logWarning("Could not load the problem decorator for the database server " + serverName,
+								new Exception("Cannot load server error image!"));
+						}
 					}
 					return;
 				}
@@ -2073,6 +2126,7 @@ public class SolutionExplorerTreeContentProvider
 			});
 			for (WebObjectSpecification spec : serviceSpecifications)
 			{
+				if (spec.isDeprecated()) continue;
 				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 				{
 					Image icon = getIconFromSpec(spec, true);
@@ -2283,7 +2337,12 @@ public class SolutionExplorerTreeContentProvider
 				servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));
 			solutionMemoryDataSources.parent = solutionDataSources;
 
-			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources };
+			PlatformSimpleUserNode viewFoundsets = new PlatformSimpleUserNode(Messages.TreeStrings_ViewFoundsets, UserNodeType.VIEW_FOUNDSETS,
+				servoyProject.getViewFoundsetsServer(), IconProvider.instance().image(JSViewDataSource.class));
+			viewFoundsets.parent = solutionDataSources;
+
+			solutionDataSources.children = new PlatformSimpleUserNode[] { solutionMemoryDataSources, viewFoundsets };
+
 
 			PlatformSimpleUserNode solutionWebPackages = new PlatformSimpleUserNode(Messages.TreeStrings_Web_Packages,
 				UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, solution, uiActivator.loadImageFromBundle("all_packages.png"));
@@ -3036,6 +3095,17 @@ public class SolutionExplorerTreeContentProvider
 									view.refreshTreeNodeFromModel(inMemNode);
 								}
 							}
+							else if (DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
+							{
+								PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node,
+									Messages.TreeStrings_SolutionDataSources);
+								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_ViewFoundsets);
+								if (inMemNode != null)
+								{
+									inMemNode.children = null;
+									view.refreshTreeNodeFromModel(inMemNode);
+								}
+							}
 
 						}
 						else if (persist instanceof Solution)
@@ -3438,7 +3508,15 @@ public class SolutionExplorerTreeContentProvider
 			un = getSolutionNode(currentActiveEditorPersist.getRootObject().getName());
 			if (un != null)
 			{
-				un = findChildNode(un, Messages.TreeStrings_Forms);
+				if (!((Form)currentActiveEditorPersist).isFormComponent().booleanValue())
+				{
+					un = findChildNode(un, Messages.TreeStrings_Forms);
+				}
+				else
+				{
+					un = findChildNode(un, Messages.TreeStrings_FormComponents);
+				}
+
 				if (un != null)
 				{
 					un = findChildNode(un, ((Form)currentActiveEditorPersist).getName());
@@ -3503,11 +3581,11 @@ public class SolutionExplorerTreeContentProvider
 			for (ServoyProject servoyProject : activeProjects)
 			{
 				SimpleUserNode moduleNode = findChildNode(modulesOfActiveSolution, servoyProject.getSolution().getName());
-				refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Web_Packages));
+				if (moduleNode != null) refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Web_Packages)); // null will be main active solution here which is already handled a few lines above
 			}
 		}
 
-		/* if (componentsChanged) */refreshTreeNode(componentsFromResourcesNode);
+		/* if (componentsChanged) */ refreshTreeNode(componentsFromResourcesNode);
 		/* if (servicesChanged) */ refreshTreeNode(servicesFromResourcesNode);
 
 		refreshTreeNode(plugins);

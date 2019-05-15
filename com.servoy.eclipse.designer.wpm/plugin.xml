@@ -15,7 +15,7 @@
             default="false"
             icon="icons/webpackagemanager.png"
             id="com.servoy.eclipse.ui.webpackagemanager"
-            name="Web Package Manager">
+            name="Servoy Package Manager">
       </editor>
    </extension>
    <extension
@@ -23,9 +23,9 @@
       <command
             categoryId="com.servoy.eclipse.designer.category"
             defaultHandler="com.servoy.eclipse.designer.webpackage.open.OpenWebPackageManagerCommandHandler"
-            description="Opens the Web Package Manager to download/install components/services or layouts"
+            description="Opens the Servoy Package Manager to download/install components/services or layouts"
             id="com.servoy.eclipse.designer.wpm.open"
-            name="Download/Install with Web Package Manager">
+            name="Download/Install with Servoy Package Manager">
       </command>
    </extension>
    <extension
@@ -36,7 +36,7 @@
          <command
                commandId="com.servoy.eclipse.designer.wpm.open"
                icon="icons/webpackagemanager.png"
-               label="Download/Install with Web Package Manager"
+               label="Download/Install with Servoy Package Manager"
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -81,5 +81,10 @@
             name="Import default responsive packages">
       </provider>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.servoy.eclipse.designer.webpackage.Startup">
+      </startup>
+   </extension>
 </plugin>

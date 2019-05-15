@@ -396,6 +396,8 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_deprecatedScriptElementUsageProblem, true));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.DEPRECATED_ELEMENT_USAGE_PROBLEM,
 				Messages.ErrorWarningPreferencePage_deprecatedElementUsageProblem, true));
+			associatedProblemMarkers.add(
+				new ErrorWarningPreferenceItem(ServoyBuilder.DEPRECATED_SPECIFICATION, Messages.ErrorWarningPreferencePage_deprecatedSpecUsageProblem, true));
 		}
 		else if (ERROR_WARNING_COLUMNS_PROBLEMS.equals(problemSection))
 		{
