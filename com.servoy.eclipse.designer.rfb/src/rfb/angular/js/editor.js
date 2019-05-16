@@ -1546,6 +1546,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		getSuperForms: function() {
 			return wsSession.callService('formeditor', 'getSuperForms');
 		},
+		
+		setCssAnchoring: function(selection, anchors) {
+			wsSession.callService('formeditor', 'setCssAnchoring', {"selection":selection, "anchors":anchors}, true);
+		},
 
 		// add more service methods here
 	}

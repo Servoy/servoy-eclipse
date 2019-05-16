@@ -83,6 +83,15 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			}
 		}
 		
+		var setCssAnchoring = function(top, right, bottom, left){
+			var selection = editorScope.getSelection();
+			if (selection && selection.length > 0) 
+			{
+				var selected = selection.map(function(node){ return node.getAttribute("svy-id")});
+				$editorService.setCssAnchoring(selected, {"top":top, "right":right, "bottom":bottom, "left":left});
+			}
+		}
+		
 		var promise = $editorService.getShortcuts();
 		var pr = $editorService.getSuperForms();
 		$q.all([promise, pr]).then(function (result){
@@ -137,9 +146,10 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         					}
         				);
         			
-        			if (!editorScope.isCSSPositionFormLayout()){
+        			
         			// anchoring
         			var anchoringActions = [];
+        			if (!editorScope.isCSSPositionFormLayout()){
         			anchoringActions.push(
         					{
         						text: "Top",
@@ -197,6 +207,70 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						}
         					}
         				);
+        			}
+        			else
+        			{
+        				anchoringActions.push(
+            					{
+            						text: "Top/Left",
+            						execute:function()
+            						{
+            							setCssAnchoring('0', '-1', '-1', '0');
+            						}
+            					}
+            				);
+        				anchoringActions.push(
+            					{
+            						text: "Top/Right",
+            						execute:function()
+            						{
+            							setCssAnchoring('0', '0', '-1', '-1');
+            						}
+            					}
+            				);
+        				anchoringActions.push(
+            					{
+            						text: "Top/Left/Right",
+            						execute:function()
+            						{
+            							setCssAnchoring('0', '0', '-1', '0');
+            						}
+            					}
+            				);
+        				anchoringActions.push(
+            					{
+            						text: "Bottom/Left",
+            						execute:function()
+            						{
+            							setCssAnchoring('-1', '-1', '0', '0');
+            						}
+            					}
+            				);
+        				
+        				anchoringActions.push(
+            					{
+            						text: "Bottom/Right",
+            						execute:function()
+            						{
+            							setCssAnchoring('-1', '0', '0', '-1');
+            						}
+            					}
+            				);
+        				anchoringActions.push(
+            					{
+            						text: "Other...",
+            						execute:function()
+            						{
+            							var selection = editorScope.getSelection();
+            							if (selection && selection.length > 0) 
+            							{
+            								var selected = selection.map(function(node){ return node.getAttribute("svy-id")});
+            								$editorService.setCssAnchoring(selected);
+            							}
+            						}
+            					}
+            				);
+        			}
         			
         			$contextmenu.add(
         					{
@@ -205,7 +279,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() { return "dropdown-submenu";}
         					}
         				);
-        			}
+        			
         			//arrange
         			var arrangeActions = [];
         			arrangeActions.push(
