@@ -522,54 +522,48 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	private void checkAndAutoUpgradeLicenses(CommandLineWarExportModel exportModel) throws ExportException
 	{
-		if (exportModel.getServoyPropertiesFileName() != null)
+		IApplicationServerSingleton server = ApplicationServerRegistry.get();
+		for (License l : exportModel.getLicenses())
 		{
-			String checkFile = exportModel.checkServoyPropertiesFileExists();
-			if (checkFile == null)
+			if (!server.checkClientLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses()))
 			{
-				final Object[] upgrade = exportModel.checkAndAutoUpgradeLicenses();
-				if (upgrade != null && upgrade.length >= 3)
+				//try to auto upgrade
+				Pair<Boolean, String> code = server.upgradeLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses());
+				if (code == null || !code.getLeft().booleanValue())
 				{
-					if (!Utils.getAsBoolean(upgrade[0]))
-					{
-						throw new ExportException(
-							"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
-					}
-					else
-					{
-						output("Could not save changes to the properties file. License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
-							"'. The export contains the new license code, but the changes could not be written to the selected properties file. Please adjust the '" +
-							exportModel.getServoyPropertiesFileName() + "' file manually.");
-					}
+					throw new ExportException("Cannot export! License '" + l.getCompanyKey() + "' with code " + l.getCode() +
+						(code != null && !code.getLeft().booleanValue() ? " error: " + code.getRight() : " is not valid."));
+				}
+				else if (code.getLeft().booleanValue() && !l.getCode().equals(code.getRight()))
+				{
+					output("License '" + l.getCompanyKey() + "' with code " + l.getCode() + " was auto upgraded to " + code.getRight() +
+						". Please change it to the new code in future exports.");
+					exportModel.replaceLicenseCode(l, code.getRight());
 				}
 			}
-			else
+		}
+		String checkFile = exportModel.checkServoyPropertiesFileExists();
+		if (checkFile == null)
+		{
+			final Object[] upgrade = exportModel.checkAndAutoUpgradeLicenses();
+			if (upgrade != null && upgrade.length >= 3)
 			{
-				throw new ExportException("Error creating the WAR file. " + checkFile);
+				if (!Utils.getAsBoolean(upgrade[0]))
+				{
+					throw new ExportException(
+						"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+				}
+				else
+				{
+					output("Could not save changes to the properties file. License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
+						"'. The export contains the new license code, but the changes could not be written to the selected properties file. Please adjust the '" +
+						exportModel.getServoyPropertiesFileName() + "' file manually.");
+				}
 			}
 		}
 		else
 		{
-			IApplicationServerSingleton server = ApplicationServerRegistry.get();
-			for (License l : exportModel.getLicenses())
-			{
-				if (!server.checkClientLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses()))
-				{
-					//try to auto upgrade
-					Pair<Boolean, String> code = server.upgradeLicense(l.getCompanyKey(), l.getCode(), l.getNumberOfLicenses());
-					if (code == null || !code.getLeft().booleanValue())
-					{
-						throw new ExportException("Cannot export! License '" + l.getCompanyKey() + "' with code " + l.getCode() +
-							(code != null && !code.getLeft().booleanValue() ? " error: " + code.getRight() : " is not valid."));
-					}
-					else if (code.getLeft().booleanValue() && !l.getCode().equals(code.getRight()))
-					{
-						output("License '" + l.getCompanyKey() + "' with code " + l.getCode() + " was auto upgraded to " + code.getRight() +
-							". Please change it to the new code in future exports.");
-						exportModel.replaceLicenseCode(l, code.getRight());
-					}
-				}
-			}
+			throw new ExportException("Error creating the WAR file. " + checkFile);
 		}
 	}
 
