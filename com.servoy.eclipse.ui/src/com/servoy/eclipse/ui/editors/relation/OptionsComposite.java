@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.base.query.IJoinConstants;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Messages;
@@ -87,7 +88,7 @@ public class OptionsComposite extends Group
 		joinTypeLabel.setText("Join type");
 
 		joinCombo = new CCombo(this, SWT.READ_ONLY | SWT.BORDER);
-		joinCombo.setItems(new String[] { ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.LEFT_OUTER_JOIN] });
+		joinCombo.setItems(new String[] { ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.LEFT_OUTER_JOIN] });
 
 		Label initialSortLabel;
 		initialSortLabel = new Label(this, SWT.NONE);

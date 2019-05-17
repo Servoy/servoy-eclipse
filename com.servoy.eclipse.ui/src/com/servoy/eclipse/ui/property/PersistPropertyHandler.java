@@ -50,6 +50,7 @@ import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
+import com.servoy.base.query.IJoinConstants;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -184,8 +185,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 	public static final PropertyDescription JOIN_TYPE_VALUES = new PropertyDescriptionBuilder().withName("joinType").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
-			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(ISQLJoin.INNER_JOIN), Integer.valueOf(ISQLJoin.LEFT_OUTER_JOIN) },
-				new String[] { ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.LEFT_OUTER_JOIN] })).build();
+			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(IJoinConstants.INNER_JOIN), Integer.valueOf(IJoinConstants.LEFT_OUTER_JOIN) },
+				new String[] { ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.LEFT_OUTER_JOIN] })).build();
 
 	public static final PropertyDescription DISPLAY_TYPE_VALUES = new PropertyDescriptionBuilder().withName(
 		"displayType").withType(ValuesPropertyType.INSTANCE).withConfig(new ValuesConfig().setValues(
@@ -426,45 +427,45 @@ public class PersistPropertyHandler extends BasePropertyHandler
 								}
 							}
 							else if (type == IColumnTypes.INTEGER)
+						{
+							if (isQuoted(defaultValue))
 							{
-								if (isQuoted(defaultValue))
-								{
-									newDefault = defaultValue.substring(1, defaultValue.length() - 1);
-								}
-								else
-								{
-									newDefault = defaultValue;
-								}
-								try
-								{
-									Integer.parseInt(newDefault);
-									newDefault = (defaultValue == newDefault) ? null : newDefault;
-								}
-								catch (NumberFormatException e)
-								{
-									newDefault = "";
-								}
+								newDefault = defaultValue.substring(1, defaultValue.length() - 1);
 							}
+							else
+							{
+								newDefault = defaultValue;
+							}
+							try
+							{
+								Integer.parseInt(newDefault);
+								newDefault = (defaultValue == newDefault) ? null : newDefault;
+							}
+							catch (NumberFormatException e)
+							{
+								newDefault = "";
+							}
+						}
 							else if (type == IColumnTypes.NUMBER)
+						{
+							if (isQuoted(defaultValue))
 							{
-								if (isQuoted(defaultValue))
-								{
-									newDefault = defaultValue.substring(1, defaultValue.length() - 1);
-								}
-								else
-								{
-									newDefault = defaultValue;
-								}
-								try
-								{
-									Double.parseDouble(newDefault);
-									newDefault = (defaultValue == newDefault) ? null : newDefault;
-								}
-								catch (NumberFormatException e)
-								{
-									newDefault = "";
-								}
+								newDefault = defaultValue.substring(1, defaultValue.length() - 1);
 							}
+							else
+							{
+								newDefault = defaultValue;
+							}
+							try
+							{
+								Double.parseDouble(newDefault);
+								newDefault = (defaultValue == newDefault) ? null : newDefault;
+							}
+							catch (NumberFormatException e)
+							{
+								newDefault = "";
+							}
+						}
 
 							if (newDefault != null)
 							{
