@@ -88,6 +88,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String useAsRealAdminUser = "useAsRealAdminUser";
 	private static final String minimizeJsCss = "minimize";
 	private static final String licenses = "licenses";
+	private static final String license = "license";
+	private static final String license_name_suffix = ".company_name";
+	private static final String license_code_suffix = ".code";
+	private static final String license_nr_suffix = ".licenses";
 
 	private static final String userHomeDirectory = "userHomeDirectory";
 	private static final String overwriteDBServerProperties = "overwriteDBServerProperties";
@@ -245,9 +249,15 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + useAsRealAdminUser + " ... the  default admin user login  given via   -" + defaultAdminUser + "\n"
 			+ "             above will be available as a normal admin user in solutions as well.\n"
 			+ "        -" + minimizeJsCss + " ... minimize JS and CSS files \n"
-			+ "        -" + licenses + " <company_name> <numberOf_licenses> <license_code> ... export Servoy Client\n"
-			+ "             licenses;  to add more licenses use  ','  as delimiter. If the company name has\n"
-			+ "             spaces, then it must be enclosed in double quotes.\n"
+			+ "        -" + license+license_name_suffix +" OR "+license+".<i>"+license_name_suffix+",\n"
+			+ "             The name of the company that has the license, where <i> is used when there are multiple licenses:\n"
+			+ "             -"+license+".1"+license_name_suffix +" name1" + " -"+license+".2"+license_name_suffix +" name2\n"
+			+ "        -" + license+license_code_suffix +" OR "+license+".<i>"+license_code_suffix+",\n"
+			+ "             The license code, where <i> is used when there are multiple licenses:\n"
+			+ "             -"+license+".1"+license_code_suffix +" XXXX-XXXX-XXXX" + " -"+license+".2"+license_code_suffix +"  XXXX-XXXX-XXXX\n"
+			+ "        -" + license+license_nr_suffix +" OR "+license+".<i>"+license_nr_suffix+",\n"
+			+ "             The number of licenses, where <i> is used when there are multiple licenses:\n"
+			+ "             -"+license+".1"+license_nr_suffix +" SERVER" + " -"+license+".2"+license_nr_suffix +" 1000\n"
 			+ "        -" + userHomeDirectory + " <user_home_directory> ... this must be a writable directory where\n"
 			+ "             Servoy application  related files  will be stored;  if not set, then the system\n"
 			+ "             user home directory will be used.\n"
@@ -302,8 +312,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 		parseArg("defaultAdminUser", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
 		parseArg("defaultAdminPassword", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
 
-		if (argsMap.containsKey(licenses)) licenseMap = parseLicensesArg(argsMap);
-
+		if (argsMap.containsKey(licenses) || argsMap.containsKey(license + license_name_suffix) || argsMap.containsKey(license + ".1" + license_name_suffix))
+		{
+			licenseMap = parseLicensesArg(argsMap);
+		}
 
 		argumentsMap = argsMap;
 	}
@@ -311,20 +323,48 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private Map<String, License> parseLicensesArg(HashMap<String, String> argsMap)
 	{
 		Map<String, License> result = new HashMap<>();
+		if (argsMap.containsKey(license + license_name_suffix))
+		{
+			String name = argsMap.get(license + license_name_suffix);
+			String code = argsMap.get(license + license_code_suffix);
+			String nrLicenses = argsMap.get(license + license_nr_suffix);
+			if (checkLicensePart(name, license + license_name_suffix) && checkLicensePart(code, license + license_code_suffix) &&
+				checkLicensePart(nrLicenses, license + license_nr_suffix))
+			{
+				result.put(code, new License(name, code, nrLicenses));
+			}
+		}
+		else if (argsMap.containsKey(license + ".1" + license_name_suffix))
+		{
+			int i = 1;
+			while (argsMap.containsKey(license + "." + i + license_name_suffix))
+			{
+				String name = argsMap.get(license + "." + i + license_name_suffix);
+				String code = argsMap.get(license + "." + i + license_code_suffix);
+				String nrLicenses = argsMap.get(license + "." + i + license_nr_suffix);
+				if (!checkLicensePart(name, license + "." + i + license_name_suffix) || !checkLicensePart(code, license + "." + i + license_code_suffix) ||
+					!checkLicensePart(nrLicenses, license + "." + i + license_nr_suffix))
+				{
+					break;
+				}
+				result.put(code, new License(name, code, nrLicenses));
+				i++;
+			}
+		}
 		if (argsMap.containsKey(licenses))
 		{
 			String l = argsMap.get(licenses);
 			String[] l_array = l.split(",");
-			for (String license : l_array)
+			for (String license1 : l_array)
 			{
-				String[] parts = license.trim().split(" ");
+				String[] parts = license1.trim().split(" ");
 				String company = null;
 				String code = null;
 				String numLicenses = null;
 				if (parts.length != 3 || parts[0].startsWith("\""))
 				{
 					Pattern p = Pattern.compile("\"(.+)\" (.+) (.+)");
-					Matcher m = p.matcher(license.trim());
+					Matcher m = p.matcher(license1.trim());
 					if (m.matches())
 					{
 						company = m.group(1);
@@ -335,7 +375,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 					{
 						ServoyLog.logError(new Exception(
 							"Please specify license as <company_name> <number_of_licenses> <code> or \\\"<company_name>\\\" <number_of_licenses> <code>. \"" +
-								license + "\" is not valid"));
+								license1 + "\" is not valid"));
 						continue;
 					}
 				}
@@ -349,6 +389,17 @@ public class WarArgumentChest extends AbstractArgumentChest
 			}
 		}
 		return result;
+	}
+
+	protected boolean checkLicensePart(String value, String key)
+	{
+		if (value == null || "".equals(value.trim()))
+		{
+			ServoyLog.logError(new Exception("Please specify license as -license.company_name <name> -license.code <code> -license.licenses <licenses number> " +
+				" or -license.<i>.company_name <name> -license.<i>.code <code> -license.<i>.licenses <licenses number>. The key '" + key + "' is not specified."));
+			return false;
+		}
+		return true;
 	}
 
 	/**

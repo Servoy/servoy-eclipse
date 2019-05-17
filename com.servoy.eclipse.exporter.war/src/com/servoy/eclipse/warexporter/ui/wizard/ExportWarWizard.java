@@ -617,11 +617,14 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 
 		if (exportModel.getLicenses() != null && exportModel.getLicenses().size() > 0)
 		{
-			sb.append(" -licenses ");
-			exportModel.getLicenses().forEach((license) -> {
-				sb.append(license.getCompanyKey() + " " + license.getNumberOfLicenses() + " " + license.getCode() + ", ");
-			});
-			sb.replace(sb.length() - 2, sb.length() - 1, "");
+			int i = 1;
+			for (License license : exportModel.getLicenses())
+			{
+				sb.append(" -license." + i + ".company_name " + license.getCompanyKey());
+				sb.append(" -license." + i + ".code " + license.getCode());
+				sb.append(" -license." + i + ".licenses " + license.getNumberOfLicenses());
+				i++;
+			}
 		}
 
 		if (exportModel.getUserHome() != null && !exportModel.getUserHome().equals("") && !exportModel.getUserHome().equals(System.getProperty("user.home")))
