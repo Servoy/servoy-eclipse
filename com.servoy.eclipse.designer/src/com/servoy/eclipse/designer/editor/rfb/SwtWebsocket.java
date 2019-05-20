@@ -44,8 +44,8 @@ import javax.websocket.WebSocketContainer;
 import javax.websocket.server.ServerEndpoint;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.BrowserFunction;
+import org.eclipse.swt.chromium.Browser;
+import org.eclipse.swt.chromium.BrowserFunction;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
