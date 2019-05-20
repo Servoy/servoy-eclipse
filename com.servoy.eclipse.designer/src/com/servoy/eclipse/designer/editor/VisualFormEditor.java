@@ -38,7 +38,9 @@ import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
+import com.servoy.eclipse.designer.editor.rfb.ChromiumVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.rfb.SystemVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
@@ -172,7 +174,8 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 			case Mobile :
 				return new MobileVisualFormEditorHtmlDesignPage(this);
 			case Rfb :
-				return new RfbVisualFormEditorDesignPage(this);
+				if (Utils.isLinuxOS() || Boolean.valueOf(System.getProperty("use.system.browser", "false"))) return new SystemVisualFormEditorDesignPage(this);
+				return new ChromiumVisualFormEditorDesignPage(this);
 			case Classic :
 				return new VisualFormEditorDesignPage(this);
 		}
