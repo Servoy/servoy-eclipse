@@ -174,8 +174,8 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 			case Mobile :
 				return new MobileVisualFormEditorHtmlDesignPage(this);
 			case Rfb :
-				if (Utils.isLinuxOS() || Boolean.valueOf(System.getProperty("use.system.browser", "false"))) return new SystemVisualFormEditorDesignPage(this);
-				return new ChromiumVisualFormEditorDesignPage(this);
+				if (new DesignerPreferences().useChromiumBrowser()) return new ChromiumVisualFormEditorDesignPage(this);
+				return new SystemVisualFormEditorDesignPage(this);
 			case Classic :
 				return new VisualFormEditorDesignPage(this);
 		}

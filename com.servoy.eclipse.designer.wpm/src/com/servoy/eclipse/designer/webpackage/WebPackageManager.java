@@ -11,8 +11,8 @@ import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.Utils;
 
 public class WebPackageManager extends EditorPart
 {
@@ -54,13 +54,13 @@ public class WebPackageManager extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 
-		if (Utils.isLinuxOS() || Boolean.valueOf(System.getProperty("use.system.browser", "false")))
+		if (new DesignerPreferences().useChromiumBrowser())
 		{
-			internalBrowser = new org.eclipse.swt.browser.Browser(parent, SWT.NONE);
+			browser = new Browser(parent, SWT.NONE);
 		}
 		else
 		{
-			browser = new Browser(parent, SWT.NONE);
+			internalBrowser = new org.eclipse.swt.browser.Browser(parent, SWT.NONE);
 		}
 
 		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";

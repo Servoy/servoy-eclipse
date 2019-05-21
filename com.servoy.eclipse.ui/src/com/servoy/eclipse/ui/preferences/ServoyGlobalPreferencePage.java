@@ -66,6 +66,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Spinner waitForSolutionToBeLoadedInTestClientSpinner;
 	private Button useDarkIconsButton;
 	private Button jsValidationButton;
+	private Button chromiumButton;
 
 	public void init(IWorkbench workbench)
 	{
@@ -192,6 +193,16 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			"This is because the return value of a function is not inferenced from the parsing of the body.\n" +
 			"All related javascript files (scopes/forms) are not fully parsed, only the function declarations and @constructor functions bodies");
 
+		// use chromium
+		Group chromiumContainer = new Group(rootContainer, SWT.NONE);
+		chromiumContainer.setText("Chromium browser (Form Editor/Servoy Package Mananager)");
+		chromiumContainer.setLayout(new GridLayout(1, false));
+		chromiumContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		chromiumButton = new Button(chromiumContainer, SWT.CHECK);
+		chromiumButton.setText("Use the chromium browser instead of the system one");
+		chromiumButton.setToolTipText("Use the shipped chromium browser instead of the system installed browser, for windows IE");
+
 
 		Group launcherSettings = new Group(rootContainer, SWT.NONE); // TODO it would really be nicer to have these in a real launch configuration page (similar to what mobile client lauchers do)
 		launcherSettings.setText("Launcher settings");
@@ -233,6 +244,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
 		jsValidationButton.setSelection(prefs.skipFunctionBodyWhenParsingJS());
+		chromiumButton.setSelection(prefs.useChromiumBrowser());
 		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
 	}
 
@@ -251,6 +263,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
 		useDarkIconsButton.setSelection(IconPreferences.USE_DARK_THEME_ICONS_DEFAULT);
 		jsValidationButton.setSelection(DesignerPreferences.SKIP_FUNCTION_BODY_PARSING_DEFAULT);
+		chromiumButton.setSelection(DesignerPreferences.USE_CHROMIUM_BROWSER_DEFAULT);
 		super.performDefaults();
 	}
 
@@ -271,6 +284,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			((Integer)((ObjectWrapper)((IStructuredSelection)encapsulationTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
 		prefs.setSkipFunctionBodyWhenParsingJS(jsValidationButton.getSelection());
+		prefs.setUseChromiumBrowser(chromiumButton.getSelection());
 		prefs.save();
 
 		IconPreferences iconPreferences = IconPreferences.getInstance();
