@@ -1027,19 +1027,20 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						return true;
 					});
 					$(document).keydown(function(objEvent) {
-						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
-
-						if (fixedKeyEvent.isCtrl) {
-							var k = String.fromCharCode(fixedKeyEvent.keyCode).toLowerCase();
-							if ('a' == k || 's' == k || (fixedKeyEvent.isShift && 'z' == k)) {
-								if (fixedKeyEvent.isShift && ('s' == k || 'z' == k)) {
-									// send the CTRL+SHIFT+S (save all) and CTRL+SHIFT+Z (open editor) key code to the server
-									$editorService.keyPressed(objEvent);
-								}
-								return false;
-							}
-						}
-						return true;
+//						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
+//
+//						if (fixedKeyEvent.isCtrl) {
+//							var k = String.fromCharCode(fixedKeyEvent.keyCode).toLowerCase();
+//							if ('a' == k || 's' == k || (fixedKeyEvent.isShift && 'z' == k)) {
+//								if (fixedKeyEvent.isShift && ('s' == k || 'z' == k)) {
+//									// send the CTRL+SHIFT+S (save all) and CTRL+SHIFT+Z (open editor) key code to the server
+//									$editorService.keyPressed(objEvent);
+//								}
+//								return false;
+//							}
+//						}
+						$editorService.keyPressed(objEvent);
+						return false;
 					});
 
 					$(document).mousedown(function(objEvent) {
