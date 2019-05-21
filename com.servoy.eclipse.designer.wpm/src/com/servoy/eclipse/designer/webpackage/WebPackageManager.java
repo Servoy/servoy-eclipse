@@ -12,10 +12,12 @@ import org.eclipse.ui.part.EditorPart;
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Utils;
 
 public class WebPackageManager extends EditorPart
 {
 	private Browser browser;
+	private org.eclipse.swt.browser.Browser internalBrowser;
 
 	@Override
 	public void doSave(IProgressMonitor monitor)
@@ -52,8 +54,14 @@ public class WebPackageManager extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 
-
-		browser = new Browser(parent, SWT.NONE);
+		if (Utils.isLinuxOS() || Boolean.valueOf(System.getProperty("use.system.browser", "false")))
+		{
+			internalBrowser = new org.eclipse.swt.browser.Browser(parent, SWT.NONE);
+		}
+		else
+		{
+			browser = new Browser(parent, SWT.NONE);
+		}
 
 		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
 		if (getEditorInput() instanceof WebPackageManagerEditorInput)
@@ -66,7 +74,14 @@ public class WebPackageManager extends EditorPart
 		}
 		try
 		{
-			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
+			if (browser != null)
+			{
+				browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
+			}
+			else
+			{
+				internalBrowser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
+			}
 		}
 		catch (Exception ex)
 		{
@@ -79,6 +94,7 @@ public class WebPackageManager extends EditorPart
 	public void setFocus()
 	{
 		if (browser != null) browser.setFocus();
+		if (internalBrowser != null) internalBrowser.setFocus();
 	}
 
 }
