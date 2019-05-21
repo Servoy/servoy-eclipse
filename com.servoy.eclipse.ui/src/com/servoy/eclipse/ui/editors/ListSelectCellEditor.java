@@ -52,6 +52,7 @@ public class ListSelectCellEditor extends DialogCellEditor
 	private boolean showFilterMenu = false;
 	private int defaultFilterMode = TreePatternFilter.FILTER_LEAFS;
 	private final String optionalMessage;
+	private final ILabelProvider dialogLabelProvider;
 
 	/**
 	 * Creates a new list cell editor parented under the given control. Use this constructor for selecting from a list of values
@@ -61,7 +62,7 @@ public class ListSelectCellEditor extends DialogCellEditor
 	public ListSelectCellEditor(Composite parent, String title, ILabelProvider labelProvider, IValueEditor< ? > valueEditor, boolean readOnly, Object[] values,
 		int treeStyle, ListSelectControlFactory controlFactory, String name)
 	{
-		this(parent, title, FlatTreeContentProvider.INSTANCE, labelProvider, valueEditor, readOnly, values, treeStyle, controlFactory, name, null);
+		this(parent, title, FlatTreeContentProvider.INSTANCE, labelProvider, null, valueEditor, readOnly, values, treeStyle, controlFactory, name, null);
 	}
 
 	/**
@@ -73,9 +74,21 @@ public class ListSelectCellEditor extends DialogCellEditor
 	public ListSelectCellEditor(Composite parent, String title, ITreeContentProvider contentProvider, ILabelProvider labelProvider,
 		IValueEditor< ? > valueEditor, boolean readOnly, Object input, int treeStyle, ListSelectControlFactory controlFactory, String name)
 	{
-		this(parent, title, contentProvider, labelProvider, valueEditor, readOnly, input, treeStyle, controlFactory, name, null);
+		this(parent, title, contentProvider, labelProvider, null, valueEditor, readOnly, input, treeStyle, controlFactory, name, null);
 	}
 
+	/**
+	 * Creates a new list cell editor parented under the given control. Use this constructor when the content provider builds the list from the input (in
+	 * getElements) and need a second label provider dialogs
+	 *
+	 * @param parent the parent control
+	 */
+	public ListSelectCellEditor(Composite parent, String title, ITreeContentProvider contentProvider, ILabelProvider labelProvider,
+		ILabelProvider dialogLabelProvider, IValueEditor< ? > valueEditor, boolean readOnly, Object input, int treeStyle,
+		ListSelectControlFactory controlFactory, String name)
+	{
+		this(parent, title, contentProvider, labelProvider, dialogLabelProvider, valueEditor, readOnly, input, treeStyle, controlFactory, name, null);
+	}
 
 	/**
 	 * Creates a new list cell editor parented under the given control. Use this constructor when the content provider builds the list from the input (in
@@ -87,6 +100,19 @@ public class ListSelectCellEditor extends DialogCellEditor
 		IValueEditor< ? > valueEditor, boolean readOnly, Object input, int treeStyle, ListSelectControlFactory controlFactory, String name,
 		String optionalMessage)
 	{
+		this(parent, title, contentProvider, labelProvider, null, valueEditor, readOnly, input, treeStyle, controlFactory, name, null);
+	}
+
+	/**
+	 * Creates a new list cell editor parented under the given control. Use this constructor when the content provider builds the list from the input (in
+	 * getElements)
+	 *
+	 * @param parent the parent control
+	 */
+	public ListSelectCellEditor(Composite parent, String title, ITreeContentProvider contentProvider, ILabelProvider labelProvider,
+		ILabelProvider dialogLabelProvider, IValueEditor< ? > valueEditor, boolean readOnly, Object input, int treeStyle,
+		ListSelectControlFactory controlFactory, String name, String optionalMessage)
+	{
 		super(parent, labelProvider, valueEditor, readOnly, SWT.NONE);
 		this.title = title;
 		this.name = name;
@@ -95,6 +121,7 @@ public class ListSelectCellEditor extends DialogCellEditor
 		this.treeStyle = treeStyle;
 		this.controlFactory = controlFactory;
 		this.optionalMessage = optionalMessage;
+		this.dialogLabelProvider = dialogLabelProvider;
 	}
 	
 	public void setInput(Object input)
@@ -134,8 +161,12 @@ public class ListSelectCellEditor extends DialogCellEditor
 		boolean allowEmptySelection = false;
 		if ((treeStyle & SWT.MULTI) != 0) allowEmptySelection = true;
 
+		ILabelProvider labelProvider = dialogLabelProvider != null ? dialogLabelProvider : getLabelProvider();
+
 		TreeSelectDialog dialog = new TreeSelectDialog(cellEditorWindow.getShell(), showFilter, showFilterMenu, defaultFilterMode, contentProvider,
-			getLabelProvider(), null, getSelectionFilter(), treeStyle, title, input, getSelection(), allowEmptySelection, name, null);
+			labelProvider, null, getSelectionFilter(), treeStyle, title, input, getSelection(), allowEmptySelection, name, null);
+
+
 		dialog.setOptionalMessage(optionalMessage);
 		if (controlFactory != null)
 		{

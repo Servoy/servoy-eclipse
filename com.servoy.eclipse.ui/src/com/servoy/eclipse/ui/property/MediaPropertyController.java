@@ -69,7 +69,7 @@ public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 		this.persistContext = persistContext;
 		this.includeNone = includeNone;
 		this.config = config;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(), persistContext.getContext()));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(new MediaLabelProvider(true), persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
@@ -79,8 +79,9 @@ public class MediaPropertyController<P> extends PropertyController<P, MediaNode>
 		String dialogTitle = (config != null && config.title != null) ? config.title : "Please select media / resource";
 		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 		ListSelectCellEditor listSelectCellEditor = new ListSelectCellEditor(parent, dialogTitle,
-			new MediaContentProvider(flattenedEditingSolution, persistContext.getContext(), config != null ? config.leafFilter : null), getLabelProvider(),
-			new IValueEditor<MediaNode>()
+			new MediaContentProvider(flattenedEditingSolution, persistContext.getContext(), config != null ? config.leafFilter : null),
+			new SolutionContextDelegateLabelProvider(new MediaLabelProvider(true), persistContext.getContext()),
+			new SolutionContextDelegateLabelProvider(new MediaLabelProvider(false), persistContext.getContext()), new IValueEditor<MediaNode>()
 			{
 				public void openEditor(MediaNode value)
 				{
