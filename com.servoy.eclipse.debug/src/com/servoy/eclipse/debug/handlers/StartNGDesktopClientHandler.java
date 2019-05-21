@@ -284,14 +284,13 @@ class DownloadElectron implements IRunnableWithProgress
 	{
 		try
 		{
-			monitor.beginTask("Start downloading electron", 3);
+			monitor.beginTask("Downloading NGDesktop executable", 3);
 
 			File f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
 			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/servoyngdesktop-2019.06-" +
 				(Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
-
 			ZipUtils.extractTarGZ(fileUrl, f);
 			monitor.worked(2);
 		}
