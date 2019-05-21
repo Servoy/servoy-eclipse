@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -56,7 +57,9 @@ public abstract class AbstractFormSelectionActionDelegate implements IWorkbenchW
 				Iterator iterator = ((IStructuredSelection)selection).iterator();
 				while (iterator.hasNext())
 				{
-					Openable openable = Platform.getAdapterManager().getAdapter(iterator.next(), Openable.class);
+					Object sel = iterator.next();
+					if (sel instanceof PersistContext) sel = ((PersistContext)sel).getContext();
+					Openable openable = Platform.getAdapterManager().getAdapter(sel, Openable.class);
 					if (openable != null)
 					{
 						openables.add(openable);
