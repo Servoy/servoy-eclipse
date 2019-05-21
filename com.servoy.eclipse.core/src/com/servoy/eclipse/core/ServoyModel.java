@@ -2965,6 +2965,8 @@ public class ServoyModel extends AbstractServoyModel
 			}
 		}
 
+		// TODO maybe here update used DB severs/tables here instead of sooner? or maybe both now and before... (there is another todo added in the same commit in SolutionDeserializer where it currently does that)
+
 		// update the last modified time for the web client.
 		solution.updateLastModifiedTime();
 

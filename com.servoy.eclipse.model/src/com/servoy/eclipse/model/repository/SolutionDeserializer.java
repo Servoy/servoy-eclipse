@@ -276,6 +276,7 @@ public class SolutionDeserializer
 
 			});
 
+			// TODO isn't this done too soon? I mean a deleted form from disk for example would not yet be removed from the solution at this point right? (see the other TODO that was added in ServoyModel in the same commit)
 			ModelUtils.updateSolutionServerProxies(solution, repository);
 
 			return changedFilesCopy; // what remains of the day
@@ -1572,46 +1573,94 @@ public class SolutionDeserializer
 			}
 			existingNode = AbstractRepository.searchPersist(parent, uuid);
 
-			if (existingNode == null && file != null && !file.getPath().endsWith(SolutionSerializer.JS_FILE_EXTENSION) &&
-				!SolutionSerializer.isCompositeWithItems(parent))
+			if (existingNode == null)
 			{
-				// check if another persists exists linked to the same file, this can happen when the uuid has been updated
-				// Note that this is only applicable if the persist has its own file
-				final String fileName = file.getName();
-				final String parentDirName = file.getParentFile().getName();
-				final String parentRelativePath = SolutionSerializer.getRelativePath(parent, false);
-				IPersist persistInSameFile = (IPersist)parent.acceptVisitor(new IPersistVisitor()
+				if (file != null && !file.getPath().endsWith(SolutionSerializer.JS_FILE_EXTENSION) && !SolutionSerializer.isCompositeWithItems(parent))
 				{
-					public Object visit(IPersist o)
+					// check if another persists exists linked to the same file, this can happen when the uuid has been updated
+					// Note that this is only applicable if the persist has its own file
+					final String fileName = file.getName();
+					final String parentDirName = file.getParentFile().getName();
+					final String parentRelativePath = SolutionSerializer.getRelativePath(parent, false);
+					IPersist persistInSameFile = (IPersist)parent.acceptVisitor(new IPersistVisitor()
 					{
-						if (o == parent)
+						public Object visit(IPersist o)
 						{
-							return IPersistVisitor.CONTINUE_TRAVERSAL;
-						}
-						if (fileName.equals(getFileName(o)))
-						{
-							String relativePath = SolutionSerializer.getRelativePath(o, false);
-							if (relativePath.replace(parentRelativePath, "").startsWith(parentDirName))
+							if (o == parent)
 							{
-								// must make sure also the same parent dir
-								// updated persist in same file
-								return o;
+								return IPersistVisitor.CONTINUE_TRAVERSAL;
 							}
+
+							// if this persist is going to be updated by these same changes already, do use the new name (it might change right now);
+							// for example f1 renamed into f2 in the same commit where f2 was renamed into f1
+							JSONObject oIsGoingToBeUpdatedWithThisJSON = persist_json_map.get(o);
+							String fileNameOfO;
+							if (oIsGoingToBeUpdatedWithThisJSON != null && oIsGoingToBeUpdatedWithThisJSON.has(SolutionSerializer.PROP_NAME))
+								fileNameOfO = SolutionSerializer.appendExtensionToFileName(o.getTypeID(),
+									oIsGoingToBeUpdatedWithThisJSON.getString(SolutionSerializer.PROP_NAME));
+							else fileNameOfO = getFileName(o);
+
+							if (fileName.equals(fileNameOfO))
+							{
+								String relativePath = SolutionSerializer.getRelativePath(o, false);
+								if (relativePath.replace(parentRelativePath, "").startsWith(parentDirName))
+								{
+									// must make sure also the same parent dir
+									// updated persist in same file
+									return o;
+								}
+							}
+							// just check the immediate children only
+							return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 						}
-						// just check the immediate children only
-						return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+					});
+					if (persistInSameFile != null)
+					{
+						// updated persist in same file (uuid changed), add to strayCats and remove
+						persistInSameFile.getParent().removeChild(persistInSameFile);
+						if (strayCats != null) strayCats.add(persistInSameFile);
 					}
-				});
-				if (persistInSameFile != null)
+				}
+				else
 				{
-					// updated persist in same file (uuid changed), add to strayCats and remove
-					persistInSameFile.getParent().removeChild(persistInSameFile);
-					if (strayCats != null) strayCats.add(persistInSameFile);
+					persistUUIDNotFound = true;
 				}
 			}
-			else if (existingNode == null)
+			else
 			{
-				persistUUIDNotFound = true;
+				// ok so there is a persist with the same UUID is already present for this file that was changed; new JSON will be parsed later (via what is set in 'persist_json_map') and updated in this persist but
+				// check if the persist with the UUID was actually renamed and overwrites now another existing persist with a different UUID but with the same name as this persist's new name;
+				// if that happened then the other persist that was overridden needs to be removed from the solution and we should put it in 'strayCats';
+				// FOR EXAMPLE you have formA and formB in the same solution under git or whatever; then someone else deletes formA and renames formB to formA and pushes to git; then you pull
+				// formA will be the changed file but it's UUID will match existing persist formB; we must make sure that formA and it's child persists do get removed in this situation
+				String newNameOfExistingPersistInSameParent = obj.optString(SolutionSerializer.PROP_NAME, null);
+				if (newNameOfExistingPersistInSameParent != null)
+				{
+					String oldNameOfExistingPersistInSameParent = existingNode instanceof ISupportName ? ((ISupportName)existingNode).getName() : null;
+					if (!newNameOfExistingPersistInSameParent.equals(oldNameOfExistingPersistInSameParent))
+					{
+						// so the persist with this UUID was renamed; check if it did overwrite something else (check if we have a old different (uuid) persist with the same name as new name)
+						// we are checking agains the same type of children (so that the files can overwrite each other...)
+						int objectTypeId = obj.getInt(SolutionSerializer.PROP_TYPEID);
+						Iterator<IPersist> allObjects = parent.getObjects(objectTypeId);
+						while (allObjects.hasNext())
+						{
+							IPersist someOtherPersistOfSameTypeInSameParent = allObjects.next();
+							if (someOtherPersistOfSameTypeInSameParent instanceof ISupportName &&
+								newNameOfExistingPersistInSameParent.equals(((ISupportName)someOtherPersistOfSameTypeInSameParent).getName()) &&
+								SolutionSerializer.isPersistWorkspaceFile(someOtherPersistOfSameTypeInSameParent, false, file))
+							{
+								// bingo, it did replace some other persist when it was renamed; make sure to delete that...
+								someOtherPersistOfSameTypeInSameParent.getParent().removeChild(someOtherPersistOfSameTypeInSameParent);
+								if (strayCats != null)
+								{
+									strayCats.add(someOtherPersistOfSameTypeInSameParent); // remember that it is removed so that it can be removed later from editing solution as well
+								}
+								break; // no need to iterate further; we found it - also we removed it so it would lead to a ConcurrentModifEx
+							}
+						}
+					}
+				}
 			}
 		}
 		else
