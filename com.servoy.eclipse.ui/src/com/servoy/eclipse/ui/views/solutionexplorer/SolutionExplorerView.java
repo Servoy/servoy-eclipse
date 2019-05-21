@@ -2348,14 +2348,18 @@ public class SolutionExplorerView extends ViewPart
 
 				public void serverAdded(IServerInternal s)
 				{
-					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
-					s.addTableListener(tableListener);
+					Display.getDefault().asyncExec(() -> {
+						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
+						s.addTableListener(tableListener);
+					});
 				}
 
 				public void serverRemoved(IServerInternal s)
 				{
-					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
-					s.removeTableListener(tableListener);
+					Display.getDefault().asyncExec(() -> {
+						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
+						s.removeTableListener(tableListener);
+					});
 				}
 			};
 		}
