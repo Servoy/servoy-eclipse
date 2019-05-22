@@ -51,10 +51,12 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * @author costinchiulan
- *
+ * @since 2019.06
  */
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
+	static final String NGDESKTOP_VERSION = "2019.06";
+
 	public static ITagResolver noReplacementResolver = new ITagResolver()
 	{
 		public String getStringValue(String name)
@@ -73,11 +75,6 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		}
 	};
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
 	@Override
 	public Object execute(ExecutionEvent event)
 	{
@@ -201,8 +198,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				String ngDesktopAppName = "servoyngdesktop";
 				String extension = Utils.isAppleMacOS() ? ".app" : (Utils.isWindowsOS() ? ".exe" : "");
 
-				String folderName = ngDesktopAppName +
-					((Utils.isAppleMacOS() ? "-2019.06-mac" + extension : (Utils.isWindowsOS()) ? "-2019.06-win" : "-2019.06-linux"));
+				String folderName = ngDesktopAppName + "-" + NGDESKTOP_VERSION +
+					((Utils.isAppleMacOS() ? "-mac" + extension : (Utils.isWindowsOS()) ? "-win" : "-linux"));
 
 				File stateLocation = Activator.getDefault().getStateLocation().append(folderName).toFile();
 				String pathToExecutable = (Utils.isAppleMacOS() ? stateLocation.getAbsolutePath()
@@ -247,11 +244,6 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		monitor.done();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.debug.actions.StartDebugAction#getDebuggerAboutToStartListener()
-	 */
 	@Override
 	protected IDebuggerStartListener getDebuggerAboutToStartListener()
 	{
@@ -268,17 +260,6 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 class DownloadElectron implements IRunnableWithProgress
 {
-
-
-	/**
-	 * @param appServer
-	 * @param name
-	 */
-	public DownloadElectron()
-	{
-	}
-
-
 	@Override
 	public void run(IProgressMonitor monitor)
 	{
@@ -289,7 +270,7 @@ class DownloadElectron implements IRunnableWithProgress
 			File f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
-			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/servoyngdesktop-2019.06-" +
+			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
 				(Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
 			ZipUtils.extractTarGZ(fileUrl, f);
 			monitor.worked(2);
