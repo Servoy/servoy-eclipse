@@ -116,6 +116,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 
 	private ListSelectionPage noneActiveSolutionPage;
 
+	private DatabaseImportPropertiesPage databaseImportProperties;
+
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
@@ -391,9 +393,12 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 				"Select the solutions that you want to include in this WAR. Be aware that these solutions are not checked for builder markers!", tmp,
 				exportModel.getNoneActiveSolutions(), false, "export_war_none_active_solutions");
 			fileSelectionPage = new FileSelectionPage(exportModel);
+			databaseImportProperties = new DatabaseImportPropertiesPage(exportModel);
 
 			addPage(fileSelectionPage);
+			addPage(databaseImportProperties);
 			addPage(noneActiveSolutionPage);
+			addPage(userHomeSelectionPage);
 			addPage(pluginSelectionPage);
 			addPage(beanSelectionPage);
 			addPage(lafSelectionPage);
@@ -408,7 +413,6 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 			addPage(servoyPropertiesConfigurationPage);
 			addPage(licenseConfigurationPage);
 			addPage(serversSelectionPage);
-			addPage(userHomeSelectionPage);
 
 			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
@@ -433,7 +437,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		IWizardPage[] allPages = getPages();
 		for (IWizardPage page : allPages)
 		{
-			if (page instanceof DeployConfigurationPage) continue;
+			if (page instanceof ServerConfigurationPage && page.getNextPage() == null) continue;
 			if (!page.canFlipToNextPage())
 			{
 				return false;
@@ -445,7 +449,11 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 	@Override
 	public IWizardPage getNextPage(IWizardPage page)
 	{
-		if (page.equals(fileSelectionPage) && !exportModel.isExportNoneActiveSolutions())
+		if (page.equals(fileSelectionPage) && !exportModel.isExportActiveSolution())
+		{
+			return !exportModel.isExportNoneActiveSolutions() ? super.getNextPage(noneActiveSolutionPage) : super.getNextPage(databaseImportProperties);
+		}
+		if (page.equals(databaseImportProperties) && !exportModel.isExportNoneActiveSolutions())
 		{
 			return super.getNextPage(noneActiveSolutionPage);
 		}
@@ -503,11 +511,6 @@ public class ExportWarWizard extends Wizard implements IExportWizard, IRestoreDe
 		}
 		componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
 		servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
-	}
-
-	public IWizardPage getLastPage()
-	{
-		return userHomeSelectionPage;
 	}
 
 	@Override

@@ -391,8 +391,11 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 	@Override
 	public IWizardPage getNextPage()
 	{
-		if (exportModel.getServoyPropertiesFileName() == null) return super.getNextPage();
-		else return wizard.getLastPage();
+		if (exportModel.getServoyPropertiesFileName() == null)
+		{
+			return super.getNextPage();
+		}
+		return null;
 	}
 
 	@Override
