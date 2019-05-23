@@ -39,8 +39,13 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -55,7 +60,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Tab in form editor for managing form security.
- * 
+ *
  * @author lvostinar
  */
 
@@ -69,18 +74,53 @@ public class VisualFormEditorSecurityPage extends Composite
 	private final Composite treeContainer;
 	final ElementSettingsModel model;
 	private boolean doRefresh;
+	private Button btnNORights;
 
 	public VisualFormEditorSecurityPage(BaseVisualFormEditor formEditor, Composite parent, int style)
 	{
 		super(parent, style);
-		setLayout(new FillLayout());
+		setLayout(new FormLayout());
 		this.editor = formEditor;
 		model = new ElementSettingsModel(formEditor.getForm());
 
 		TableColumnLayout elementslayout = new TableColumnLayout();
 		TableColumnLayout layout = new TableColumnLayout();
 
+		btnNORights = new Button(this, SWT.CHECK);
+		btnNORights.setText("No rights unless explicitly specified");
+		btnNORights.setToolTipText(
+			"When this is checked, all groups will have by default no right to view/access the data of any element, unless it is specified by editor. If unchecked, by default all rights are available.");
+		btnNORights.setSelection(formEditor.getForm().getImplicitSecurityNoRights());
+		btnNORights.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				formEditor.getForm().setImplicitSecurityNoRights(btnNORights.getSelection());
+				editor.flagModified();
+				doRefresh();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+
+			}
+		});
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(0, 10);
+		formData.left = new FormAttachment(0, 10);
+		btnNORights.setLayoutData(formData);
+
 		final SashForm sashForm = new SashForm(this, SWT.NONE);
+		formData = new FormData();
+		formData.top = new FormAttachment(btnNORights, 6);
+		formData.left = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(100, -5);
+		formData.bottom = new FormAttachment(100, -5);
+		sashForm.setLayoutData(formData);
+
 		tableContainer = new Composite(sashForm, SWT.NONE);
 		groupViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		groupViewer.getTable().setHeaderVisible(true);
