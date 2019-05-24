@@ -215,3 +215,26 @@ body {
   border-width: 0 5px 5px;
   border-bottom-color: #000;
 }
+
+
+.modal-backdrop {
+  height: 100%;
+  opacity: .5;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  background-color: #000;
+}
+.modal-backdrop.fade {
+  filter: alpha(opacity=0);
+  opacity: 0;
+}
+.modal-backdrop.in {
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+
+.window .window-title .close {
+  display: none;
+}

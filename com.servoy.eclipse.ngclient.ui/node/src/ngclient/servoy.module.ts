@@ -16,11 +16,12 @@ import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
 import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
+import { DialogWindowComponent } from './services/dialog-window/dialog-window.component'
 import { HttpClientModule } from '@angular/common/http';
 import { FormatFilterPipe} from './servoy_public'
 import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
-import {I18NProvider} from './services/i18n_provider.service'
+import { I18NProvider } from './services/i18n_provider.service'
 import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
 
 import { ComponentContributor } from './component_contributor.service';
@@ -32,7 +33,8 @@ import { ComponentContributor } from './component_contributor.service';
         AddAttributeDirective,
         DefaultLoginWindowComponent,
         FileUploadWindowComponent,
-        DefaultNavigator
+        DefaultNavigator,
+        DialogWindowComponent
     ],
     imports: [
         BrowserModule,
@@ -45,6 +47,6 @@ import { ComponentContributor } from './component_contributor.service';
     ],
     providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe, ComponentContributor],
     bootstrap: [MainComponent],
-    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent]
+    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent]
 } )
 export class ServoyModule { }

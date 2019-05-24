@@ -29,31 +29,19 @@ export class FormService {
             session.onMessageObject(( msg, conversionInfo ) => {
                 if ( msg.forms ) {
                     for ( var formname in msg.forms ) {
-                        const formCache = this.formsCache.get( formname );
-                        if ( formCache != null ) {
-                            const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
-                            var formData = msg.forms[formname];
-                            for ( var beanname in formData ) {
-                                const comp = formCache.getComponent( beanname );
-                                if (!comp) {
-                                    this.log.debug(this.log.buildMessage(() => ("got message for " + beanname + " of form " + formname + " but that component is not in the cache")));
-                                    continue;
-                                }
-                                const beanConversion = formConversion ? formConversion[beanname] : null;
-                                for ( var property in formData[beanname] ) {
-                                    let value = formData[beanname][property];
-                                    if ( beanConversion && beanConversion[property] ) {
-                                        value = this.converterService.convertFromServerToClient( value, beanConversion[property], comp.model[property]);
-                                    }
-                                    comp.model[property] = value;
-                                }
-                                if(beanname === "") {
-                                    servoyService.setFindMode(formname, formData[beanname]["findmode"]);
-                                }
-                            }
+                        // if form is loaded
+                        if (this.formComponentCache.has(formname) && ! (this.formComponentCache.get(formname) instanceof Deferred))
+                        {   
+                            this.formMessageHandler(this.formsCache.get( formname ), formname, msg, conversionInfo, servoyService);
                         }
                         else {
-                            // wait for the form cache to arrive??
+                            if (!this.formComponentCache.has(formname))
+                            {
+                                this.formComponentCache.set(formname,new Deferred<any>());
+                            }
+                            this.formComponentCache.get(formname).promise.then(() =>
+                                this.formMessageHandler(this.formsCache.get( formname ), formname, msg, conversionInfo, servoyService)
+                            );
                         }
                     }
                 }
@@ -81,6 +69,29 @@ export class FormService {
         } );
     }
     
+    private formMessageHandler(formCache: FormCache, formname: string, msg: any, conversionInfo: any, servoyService: ServoyService) {
+        const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
+        var formData = msg.forms[formname];
+        for ( var beanname in formData ) {
+            const comp = formCache.getComponent( beanname );
+            if (!comp) {
+                this.log.debug(this.log.buildMessage(() => ("got message for " + beanname + " of form " + formname + " but that component is not in the cache")));
+                continue;
+            }
+            const beanConversion = formConversion ? formConversion[beanname] : null;
+            for ( var property in formData[beanname] ) {
+                let value = formData[beanname][property];
+                if ( beanConversion && beanConversion[property] ) {
+                    value = this.converterService.convertFromServerToClient( value, beanConversion[property], comp.model[property]);
+                }
+                comp.model[property] = value;
+            }
+            if(beanname === "") {
+                servoyService.setFindMode(formname, formData[beanname]["findmode"]);
+            }
+        }
+    }
+
     public getFormCacheByName( formName: string ): FormCache {
         return  this.formsCache.get( formName );
     }

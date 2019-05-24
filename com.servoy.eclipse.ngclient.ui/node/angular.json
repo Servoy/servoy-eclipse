@@ -27,7 +27,8 @@
               "src/servoydefault/htmlarea/tinymce/tinymce.min.js",
               "src/servoydefault/htmlarea/tinymce/themes/modern/theme.js",
               "src/servoydefault/htmlarea/tinymce/plugins/tabindex/plugin.js",
-              "src/servoydefault/htmlarea/tinymce/plugins/resizetocontainer/plugin.js"
+              "src/servoydefault/htmlarea/tinymce/plugins/resizetocontainer/plugin.js",
+              "node_modules/jquery/dist/jquery.min.js" 
             ]
           },
           "configurations": {

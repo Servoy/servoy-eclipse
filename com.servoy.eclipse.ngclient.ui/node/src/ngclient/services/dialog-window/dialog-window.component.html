@@ -1,0 +1,14 @@
+ <div class="svy-dialog" [class.window]="!isUndecorated()" [ngClass]="getCSSClassName()" [style.background-color]="getBackgroundColor()">
+    <div [style.opacity]="getOpacity()">
+        <div  class='window-header' tabindex="-1"  style="outline:0;" [style.display]="isUndecorated() ? 'none' : 'block'">
+            <button type="button" class="svy-dialog-close"
+                aria-hidden="true" tabindex="-1" (click)="cancel()">x</button>
+            <h4 class="window-title"></h4>
+        </div>	
+        <div class="window-body">
+            <svy-default-navigator [name]="getFormName()" *ngIf="getNavigatorFormName()"></svy-default-navigator>
+            <svy-form [name]="getFormName()"></svy-form>
+        </div>    
+        <div class="window-footer" [style.display]="isUndecorated() ? 'none' : 'block'"></div>
+    </div>
+</div>

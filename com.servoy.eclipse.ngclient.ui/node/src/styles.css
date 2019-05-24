@@ -5,4 +5,5 @@
 @import "~@fortawesome/fontawesome-free-webfonts/css/fa-regular.css";
 @import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
 @import "~ng-pick-datetime/assets/style/picker.min.css";
-@import "assets/styles/servoy.css";
+@import "assets/bootstrap-window/bootstrap-window.css";
+@import "assets/styles/servoy.css"
