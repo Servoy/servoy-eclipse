@@ -105,6 +105,8 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 				return "Web client launch";
 			case START_MOBILE_CLIENT :
 				return "Mobile client launch";
+			case START_NG_DESKTOP_CLIENT :
+				return "NGDesktop client launch";
 			default :
 				return "NG client launch";
 		}
@@ -153,7 +155,7 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 					return START_WEB_CLIENT;
 				case SolutionMetaData.NG_CLIENT_ONLY :
 				case SolutionMetaData.NG_MODULE :
-					return START_NG_CLIENT;
+					return fDialogSettings.get("lastDebugCommandId") != null ? fDialogSettings.get("lastDebugCommandId") : START_NG_CLIENT;
 				case SolutionMetaData.MOBILE :
 					return START_MOBILE_CLIENT;
 				default :
