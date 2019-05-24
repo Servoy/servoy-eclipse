@@ -9,6 +9,8 @@ export const PACKAGE_TYPE_WEB_SERVICE = "Web-Service";
 export const PACKAGE_TYPE_WEB_LAYOUT = "Web-Layout";
 export const PACKAGE_TYPE_SOLUTION = "Solution";
 
+const ALL_PACKAGE_TYPES = [ PACKAGE_TYPE_WEB_COMPONENT, PACKAGE_TYPE_WEB_SERVICE, PACKAGE_TYPE_WEB_LAYOUT, PACKAGE_TYPE_SOLUTION ];
+
 interface Message {
   method: string;
   data?: any;
@@ -75,16 +77,16 @@ export class WpmService {
   needRefresh: boolean = false;
 
   constructor(wsService: WebsocketService) {
-    let loc = window.location;
-    //let uri = "ws://"+loc.host+"/wpm/angular2/websocket";
-    let uri = "ws://localhost:8080/wpm/angular2/websocket";
-    let webSocketConnection = wsService.connect(uri);
+    const loc = window.location;
+    const uri = "ws://"+loc.host+"/wpm/angular2/websocket";
+    //const uri = "ws://localhost:8080/wpm/angular2/websocket";
+    const webSocketConnection = wsService.connect(uri);
     webSocketConnection.open.subscribe(() => {
       this.onConnectionOpen();
     });
     this.messages = <Subject<Message>>webSocketConnection.messages.pipe(map(
       (response: MessageEvent): Message => {
-        let data = JSON.parse(response.data);
+        const data = JSON.parse(response.data);
         return {
           method: data.method,
           data: data.result
@@ -110,9 +112,9 @@ export class WpmService {
    */
   onConnectionOpen() {
 
-    let requestAllInstalledPackagesCommand: Message = { method: "requestAllInstalledPackages" };
+    const requestAllInstalledPackagesCommand: Message = { method: "requestAllInstalledPackages" };
     // get solution name
-    let solutionName = decodeURIComponent((new RegExp('[?|&]solution=' + '([^&;]+?)(&|#|;|$)').exec(window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+    const solutionName = decodeURIComponent((new RegExp('[?|&]solution=' + '([^&;]+?)(&|#|;|$)').exec(window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
     if(solutionName) {
       requestAllInstalledPackagesCommand.solution = solutionName;
     }
@@ -128,7 +130,7 @@ export class WpmService {
    * @param method name of the method
    */
   callRemoteMethod(method: string) {
-    let command: Message = { method: method };
+    const command: Message = { method: method };
     this.messages.next(command);
   }
 
@@ -138,18 +140,18 @@ export class WpmService {
 
   install(p: Package) {
     p.installing = true;
-    let command: Message = { method: "install", package: p };
+    const command: Message = { method: "install", package: p };
     this.messages.next(command);
   }
 
   uninstall(p: Package) {
     p.removing = true;
-    let command: Message = { method: "remove", package: p };
+    const command: Message = { method: "remove", package: p };
     this.messages.next(command);
   }
 
   showUrl(url: string) {
-    let command: Message = { method: "showurl", url: url };
+    const command: Message = { method: "showurl", url: url };
     this.messages.next(command);
   }
 
@@ -174,18 +176,27 @@ export class WpmService {
   }
 
   setNewSelectedRepository(repositoryName: string) {
-    let command: Message = { method: "setSelectedRepository", name: repositoryName };
+    const command: Message = { method: "setSelectedRepository", name: repositoryName };
+    this.clearPackages();
     this.messages.next(command);
   }
 
   addNewRepository(repository: Repository) {
-    let command: Message = { method: "addRepository", values: repository };
+    const command: Message = { method: "addRepository", values: repository };
     this.messages.next(command);
   }
 
   removeRepositoryWithName(repositoryName: string) {
-    let command: Message = { method: "removeRepository", name: repositoryName };
+    const command: Message = { method: "removeRepository", name: repositoryName };
     this.messages.next(command);
+  }
+
+  clearPackages() {
+    if(this.packagesObserver) {
+      for(let packageType of ALL_PACKAGE_TYPES) {
+        this.packagesObserver.next({ packageType: packageType, packages: [] });  
+      }
+    }
   }
 
   /**
@@ -193,19 +204,27 @@ export class WpmService {
    */
 
   requestAllInstalledPackages(packagesArray: Package[]) {
-    let typeOfPackages: Map<string, Package[]> = new Map();
+    const typeOfPackages: Map<string, Package[]> = new Map();
 
 		for(let i = 0; i < packagesArray.length; i++) {
       if(!typeOfPackages.has(packagesArray[i].packageType)) {
         typeOfPackages.set(packagesArray[i].packageType, []);
       }
-      let packages: Package[] = typeOfPackages.get(packagesArray[i].packageType);
+      const packages: Package[] = typeOfPackages.get(packagesArray[i].packageType);
       packages.push(packagesArray[i]);
     }
     
-    typeOfPackages.forEach((pks, typ) => {
-      this.packagesObserver.next({ packageType: typ, packages: pks });  
-    });
+    if(this.packagesObserver) {
+      // fill missing package types so they are refreshed in the view
+      for(let packageType of ALL_PACKAGE_TYPES) {
+        if(!typeOfPackages.has(packageType)) {
+          typeOfPackages.set(packageType, []);
+        }
+      }
+      typeOfPackages.forEach((pks, typ) => {
+        this.packagesObserver.next({ packageType: typ, packages: pks });  
+      });
+    }
   }
 
   getSolutionList(solutionsArray: string[]) {

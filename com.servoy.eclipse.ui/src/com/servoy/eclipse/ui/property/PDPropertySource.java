@@ -26,6 +26,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.property.types.StyleClassPropertyType;
@@ -98,7 +99,7 @@ public class PDPropertySource extends PersistPropertySource
 			persistContext.getPersist() instanceof WebFormComponentChildType)
 		{
 			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(
-				new PropertyDescription(IContentSpecConstants.PROPERTY_ATTRIBUTES, null,
+				new PropertyDescriptionBuilder().withName(IContentSpecConstants.PROPERTY_ATTRIBUTES).withConfig(
 					new CustomPropertySetterDelegatePropertyController<Map<String, ? >, PersistPropertySource>(new MapEntriesPropertyController(
 						IContentSpecConstants.PROPERTY_ATTRIBUTES, RepositoryHelper.getDisplayName(IContentSpecConstants.PROPERTY_ATTRIBUTES, Form.class),
 						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null)
@@ -198,7 +199,7 @@ public class PDPropertySource extends PersistPropertySource
 								((ISupportAttributes)p).putUnmergedAttributes((Map<String, String>)value);
 							}
 						}
-					}));
+					}).build());
 			props.add(attributesPropertyHandler);
 		}
 		if (persistContext.getPersist() instanceof WebComponent || persistContext.getPersist() instanceof WebFormComponentChildType)
@@ -253,8 +254,11 @@ public class PDPropertySource extends PersistPropertySource
 				tags = new JSONObject();
 				tags.accumulate(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE, desc.getTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE));
 			}
-			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-				desc.getDefaultValue(), desc.getInitialValue(), desc.hasDefault(), null, null, tags, false), persistContext);
+			createdPropertyHandler = createWebComponentPropertyHandler(
+				new PropertyDescriptionBuilder().withName(desc.getName()).withType(ValuesPropertyType.INSTANCE).withConfig(config).withDefaultValue(
+					desc.getDefaultValue()).withInitialValue(desc.getInitialValue()).withHasDefault(desc.hasDefault()).withTags(tags).withDeprecated(
+						desc.getDeprecated()).build(),
+				persistContext);
 		}
 		else
 		{

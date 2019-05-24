@@ -124,6 +124,20 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					}
 				} };
 			}
+
+			if (type.equals(ServoyBuilder.DEPRECATED_SPEC))
+			{
+				final String replacement = (String)marker.getAttribute("replacement");
+				if (replacement != null)
+				{
+					String solName = (String)marker.getAttribute("solutionName");
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+					if (servoyProject.isSolutionLoaded())
+					{
+						return new IMarkerResolution[] { new DeprecatedSpecQuickFix(marker) };
+					}
+				}
+			}
 			// add dynamic resolutions below this line
 			List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
 

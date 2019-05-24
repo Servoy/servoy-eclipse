@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -33,7 +34,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.SwingUtilities;
@@ -58,7 +58,9 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -126,13 +128,11 @@ import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepositoryFactory;
-import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
@@ -935,14 +935,8 @@ public class Activator extends Plugin
 								Collection<IPersist> affectedFormElements = new ArrayList<IPersist>(changes);
 								if (changes != null)
 								{
-									Set<Solution> solutions = new HashSet<>();
 									for (IPersist persist : changes)
 									{
-										IRootObject rootObject = persist.getRootObject();
-										if (rootObject instanceof Solution)
-										{
-											solutions.add((Solution)rootObject);
-										}
 										if (persist instanceof IFormElement)
 										{
 											IPersist parent = persist.getParent();
@@ -967,12 +961,9 @@ public class Activator extends Plugin
 											}
 										}
 									}
-									solutions.stream(). //
-									map(solution -> PersistIndexCache.getCachedIndex(solution)). //
-									filter(Objects::nonNull). //
-									forEach(index -> index.reload());
+									PersistIndexCache.reload();
+									FormElementHelper.INSTANCE.reload();
 								}
-								FormElementHelper.INSTANCE.flush(affectedFormElements);
 								IDebugClientHandler dch = getDebugClientHandler();
 								dch.refreshDebugClients(changes);
 							}
@@ -1216,6 +1207,76 @@ public class Activator extends Plugin
 		ss.startWebServer();
 
 		checkApplicationServerVersion(ApplicationServerRegistry.get());
+		checkDefaultPostgressInstall(ApplicationServerRegistry.get());
+	}
+
+	/**
+	 * @param iApplicationServerSingleton
+	 */
+	private void checkDefaultPostgressInstall(IApplicationServerSingleton appServer)
+	{
+		File file = new File(appServer.getServoyApplicationServerDirectory() + "/postgres_db/servoy_repository.dbdump");
+		if (file.exists())
+		{
+			// if the zip is there then always aks the question.
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(),
+						"Default PostgreSQL not installed.", "Should a default PostgreSQL database be installed?", SWT.NONE,
+						new String[] { "Yes (include sample)", "Yes (no sample)", "No", "Later" });
+					if (open == 0)
+					{
+						// create database with sample
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						try
+						{
+							String installFile = "install_postgres.sh";
+							if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS)
+							{
+								installFile = "install_postgres.bat";
+							}
+							dialog.run(true, false, new CreatedDatabaseJob(new File(file.getParentFile(), installFile), // TODO batch file should be sh for none windows...
+								new String[] { "repository_server", "bug_db", "example", "log_data", "udm", "pdf_forms", "user_data" }, appServer));
+						}
+						catch (InvocationTargetException | InterruptedException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else if (open == 1)
+					{
+						// create database with just repo
+						ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+						try
+						{
+							String installFile = "install_postgres_no_samples.sh";
+							if (Utils.getPlatform() == Utils.PLATFORM_WINDOWS)
+							{
+								installFile = "install_postgres_no_samples.bat";
+							}
+							dialog.run(true, false,
+								new CreatedDatabaseJob(new File(file.getParentFile(), installFile), new String[] { "repository_server" }, appServer)); // TODO batch file should be sh for none windows...
+						}
+						catch (InvocationTargetException | InterruptedException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					else if (open == 2)
+					{
+						// delete dump files
+						File[] dumpFiles = file.getParentFile().listFiles(path -> path.isFile());
+						for (File dumpFile : dumpFiles)
+						{
+							dumpFile.delete();
+						}
+					}
+					// 3 ask the same again later.
+				}
+			});
+		}
 	}
 
 	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception

@@ -27,7 +27,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.search.ui.IQueryListener;
 import org.eclipse.search.ui.ISearchQuery;
@@ -36,11 +35,12 @@ import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.Match;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Class that handles resource changes to update the search results.
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -54,7 +54,7 @@ public class SearchResultUpdater implements IResourceChangeListener, IQueryListe
 		fResult = result;
 		searchText = null;
 		NewSearchUI.addQueryListener(this);
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addResourceChangeListener(this);
 	}
 
 	public SearchResultUpdater(AbstractTextSearchResult result, String searchText)
@@ -62,7 +62,7 @@ public class SearchResultUpdater implements IResourceChangeListener, IQueryListe
 		fResult = result;
 		this.searchText = searchText;
 		NewSearchUI.addQueryListener(this);
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addResourceChangeListener(this);
 	}
 
 	public void resourceChanged(IResourceChangeEvent event)
@@ -169,7 +169,7 @@ public class SearchResultUpdater implements IResourceChangeListener, IQueryListe
 	{
 		if (fResult.equals(query.getSearchResult()))
 		{
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
+			ServoyModelManager.getServoyModelManager().getServoyModel().removeResourceChangeListener(this);
 			NewSearchUI.removeQueryListener(this);
 		}
 	}

@@ -100,10 +100,12 @@ public class DBIQuickFixDeleteColumnFromDB extends TableDifferenceQuickFix
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 	}
 

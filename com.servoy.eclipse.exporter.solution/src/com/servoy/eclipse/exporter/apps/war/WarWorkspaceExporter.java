@@ -45,6 +45,7 @@ import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Eclipse application that can be used for exporting servoy solutions in .war format.
@@ -407,6 +408,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public String getAllowDataModelChanges()
 		{
+			if (configuration.getAllowDataModelChanges() != null)
+			{
+				return configuration.getAllowDataModelChanges();
+			}
 			return Boolean.toString(!configuration.isStopOnAllowDataModelChanges());
 		}
 
@@ -511,6 +516,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			return configuration.getUserHome();
 		}
+
+		@Override
+		public boolean isSkipDatabaseViewsUpdate()
+		{
+			return configuration.skipDatabaseViewsUpdate();
+		}
 	}
 
 	@Override
@@ -540,6 +551,29 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 					exportModel.replaceLicenseCode(l, code.getRight());
 				}
 			}
+		}
+		String checkFile = exportModel.checkServoyPropertiesFileExists();
+		if (checkFile == null)
+		{
+			final Object[] upgrade = exportModel.checkAndAutoUpgradeLicenses();
+			if (upgrade != null && upgrade.length >= 3)
+			{
+				if (!Utils.getAsBoolean(upgrade[0]))
+				{
+					throw new ExportException(
+						"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+				}
+				else
+				{
+					output("Could not save changes to the properties file. License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
+						"'. The export contains the new license code, but the changes could not be written to the selected properties file. Please adjust the '" +
+						exportModel.getServoyPropertiesFileName() + "' file manually.");
+				}
+			}
+		}
+		else
+		{
+			throw new ExportException("Error creating the WAR file. " + checkFile);
 		}
 	}
 

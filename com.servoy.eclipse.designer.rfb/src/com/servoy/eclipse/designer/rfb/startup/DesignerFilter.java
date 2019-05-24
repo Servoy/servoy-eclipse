@@ -274,6 +274,7 @@ public class DesignerFilter implements Filter
 							PackageSpecification<WebLayoutSpecification> entry = componentsSpecProviderState.getLayoutSpecifications().get(key);
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
+								if (spec.isDeprecated()) continue;
 								JSONObject layoutJson = new JSONObject();
 								layoutJson.put("name", spec.getName());
 								if (spec.getConfig() != null)
@@ -345,7 +346,7 @@ public class DesignerFilter implements Filter
 							}
 							for (WebObjectSpecification spec : webComponentSpecsCollection)
 							{
-								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()))
+								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()) && !spec.isDeprecated())
 								{
 									JSONObject componentJson = new JSONObject();
 									componentJson.put("name", spec.getName());
@@ -602,6 +603,11 @@ public class DesignerFilter implements Filter
 		Map<String, List<String>> droppableTypesToPropertyNames = new TreeMap<>();
 		for (PropertyDescription propertyDescription : properties.values())
 		{
+			if (propertyDescription.isDeprecated() ||
+				propertyDescription.getConfig() instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)propertyDescription.getConfig()).opt("deprecated")))
+			{
+				continue;
+			}
 			Object configObject = propertyDescription.getConfig();
 			if (RFBDesignerUtils.isDroppable(propertyDescription, configObject, true))
 			{

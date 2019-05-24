@@ -122,6 +122,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPosition;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -404,6 +405,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
+	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -597,6 +599,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -877,7 +880,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					// a project that this builder in interested in was deleted (so a module or the resources proj.)
 					// or something has changed in this builder's solution project
 					checkServoyProject(getProject(), componentsSpecProviderState);
-					checkMissingSpecs(getProject(), componentsSpecProviderState);
+					checkSpecs(getProject(), componentsSpecProviderState);
 					checkModules(getProject());
 					checkResourcesForServoyProject(getProject());
 					checkResourcesForModules(getProject());
@@ -959,7 +962,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void checkMissingSpecs(IProject buildProject, final SpecProviderState componentsSpecProviderState)
+	private void checkSpecs(IProject buildProject, final SpecProviderState componentsSpecProviderState)
 	{
 		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
 		if (modules != null)
@@ -969,23 +972,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (!Utils.equalObjects(module.getProject().getName(), buildProject.getName()))
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
+					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
 						@Override
 						public Object visit(IPersist o)
 						{
-							checkMissingSpecs(o, module.getProject(), componentsSpecProviderState);
+							checkSpecs(o, module.getProject(), componentsSpecProviderState);
 							return null;
 						}
 					});
 				}
 			}
 		}
-
 	}
 
-	private void checkMissingSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
+	private void checkSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -1013,6 +1016,28 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ServoyLog.logError("Type name not found for webcomponent " + ((WebComponent)o).getName(), null);
 				}
 			}
+			else if (spec.isDeprecated())
+			{
+				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
+				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+				{
+					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill(typeName,
+						"web component" + (((WebComponent)o).getName() != null ? " with name '" + ((WebComponent)o).getName() + "'" : "'"),
+						spec.getDeprecatedMessage());
+					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
+					try
+					{
+						marker.setAttribute("replacement", spec.getReplacement());
+						marker.setAttribute("uuid", o.getUUID().toString());
+						marker.setAttribute("solutionName", project.getName());
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
 		}
 		if (o instanceof LayoutContainer && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
 		{
@@ -1033,6 +1058,26 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				catch (CoreException e)
 				{
 					ServoyLog.logError(e);
+				}
+			}
+			else if (spec.isDeprecated())
+			{
+				String customSeverity = getSeverity(DEPRECATED_SPECIFICATION.getLeft(), DEPRECATED_SPECIFICATION.getRight().name(), o);
+				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+				{
+					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill(((LayoutContainer)o).getSpecName(), "layout", spec.getDeprecatedMessage());
+					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
+					try
+					{
+						marker.setAttribute("replacement", spec.getReplacement());
+						marker.setAttribute("uuid", o.getUUID().toString());
+						marker.setAttribute("solutionName", project.getName());
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 			}
 		}
@@ -2112,6 +2157,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, SUPERFORM_PROBLEM_TYPE);
 		deleteMarkers(project, MISSING_SPEC);
 		deleteMarkers(project, METHOD_OVERRIDE);
+		deleteMarkers(project, DEPRECATED_SPEC);
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -2815,7 +2861,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							form = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(form);
 							if (form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null)
 							{
-								Point location = ((BaseComponent)o).getLocation();
+								Point location = CSSPosition.getLocation((BaseComponent)o);
 								if (location != null)
 								{
 									boolean outsideForm = false;
@@ -2828,7 +2874,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (startPos <= location.y && endPos > location.y)
 										{
 											// found the part
-											int height = ((BaseComponent)o).getSize().height;
+											int height = CSSPosition.getSize((BaseComponent)o).height;
 											if (location.y + height > endPos)
 											{
 												String elementName = null;
@@ -2874,7 +2920,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (width < location.x + ((BaseComponent)o).getSize().width)
+											if (width < location.x + CSSPosition.getSize((BaseComponent)o).width)
 											{
 												outsideForm = true;
 											}
@@ -3720,7 +3766,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 						checkCancel();
-						checkMissingSpecs(o, project, componentsSpecProviderState);
+						checkSpecs(o, project, componentsSpecProviderState);
 						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)
 						{

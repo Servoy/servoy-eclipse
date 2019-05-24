@@ -86,6 +86,24 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.gef"
          version="0.0.0"/>
 
+   <includes
+         id="com.servoy.jre.linux.x86_64.feature"
+         version="0.0.0"
+         os="linux"
+         arch="x86_64"/>
+
+   <includes
+         id="com.servoy.jre.macosx.x86_64.feature"
+         version="0.0.0"
+         os="macosx"
+         arch="x86_64"/>
+
+   <includes
+         id="com.servoy.jre.win32.x86_64.feature"
+         version="0.0.0"
+         os="win32"
+         arch="x86_64"/>
+
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
@@ -97,6 +115,8 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <import feature="org.eclipse.emf.common" version="2.9.0.v20130528-0742"/>
       <import feature="org.eclipse.emf.common.ui" version="2.8.0.v20130610-0406"/>
       <import feature="org.eclipse.emf.ecore" version="2.9.0.v20130528-0742"/>
+      <import feature="com.make.chromium.cef.feature" version="0.4.0.201904250337"/>
+      <import feature="org.eclipse.swt.chromium.feature" version="0.9.1.201905200749" match="greaterOrEqual"/>
    </requires>
 
    <plugin

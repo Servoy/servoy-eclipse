@@ -102,6 +102,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 							catch (RepositoryException e)
 							{
 								ServoyLog.logWarning("Fix update column from column info - " + e.getMessage(), null);
+								storeException(e);
 							}
 						}
 					};
@@ -145,6 +146,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 						catch (Exception e)
 						{
 							ServoyLog.logError(e);
+							storeException(e);
 						}
 					}
 
@@ -167,10 +169,12 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
+			storeException(e);
 		}
 	}
 

@@ -36,11 +36,36 @@ public class MediaLabelProvider extends LabelProvider implements IPersistLabelPr
 	public static final MediaNode MEDIA_NODE_NONE = new MediaNode(Messages.LabelNone, null, MediaNode.TYPE.IMAGE, null);
 	public static final MediaNode MEDIA_NODE_UNRESOLVED = new MediaNode(Messages.LabelUnresolved, null, MediaNode.TYPE.IMAGE, null);
 
+	private boolean getPath = false;
+
+	/**
+	 * @param getPath
+	 */
+	public MediaLabelProvider()
+	{
+		super();
+		this.getPath = false;
+	}
+
+	/**
+	 * @param getPath
+	 */
+	public MediaLabelProvider(boolean getPath)
+	{
+		super();
+		this.getPath = getPath;
+	}
+
 	@Override
 	public String getText(Object value)
 	{
 		if (value instanceof MediaNode)
 		{
+			if (getPath)
+			{
+				String path = ((MediaNode)value).getPath();
+				return path == null ? ((MediaNode)value).getName() : path;
+			}
 			return ((MediaNode)value).getName();
 		}
 

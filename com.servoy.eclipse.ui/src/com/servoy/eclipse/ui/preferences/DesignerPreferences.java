@@ -108,6 +108,7 @@ public class DesignerPreferences
 	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
 	public static final String ENCAPSULATION_TYPE = "encapsulationType";
 	public static final String SKIP_FUNCTION_BODY_PARSING = "skipFunctionBodyParsing";
+	public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final String WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME = "servoy.test.solution-load.timeout"; // in seconds; if you modify this, modify it in ServoyGlobalPreferencePage
@@ -165,6 +166,8 @@ public class DesignerPreferences
 	public static final int WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT = 300; // 5 min (in hundreds of milliseconds); can be overridden via 'servoy.test.solution-load.timeout' system property
 
 	public static final boolean SKIP_FUNCTION_BODY_PARSING_DEFAULT = true;
+
+	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = true;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
@@ -834,6 +837,16 @@ public class DesignerPreferences
 		if (timeout == WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT)
 			removeProperty(WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME);
 		else setProperty(WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME, timeout);
+	}
+
+	public boolean useChromiumBrowser()
+	{
+		return getProperty(USE_CHROMIUM_BROWSER, USE_CHROMIUM_BROWSER_DEFAULT);
+	}
+
+	public void setUseChromiumBrowser(boolean chromium)
+	{
+		setProperty(USE_CHROMIUM_BROWSER, chromium);
 	}
 
 	/**

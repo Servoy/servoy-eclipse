@@ -450,6 +450,7 @@ public class DesignerUtil
 						{
 							for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
 							{
+								if (layoutSpec.isDeprecated()) continue;
 								try
 								{
 									String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);
@@ -478,6 +479,7 @@ public class DesignerUtil
 			{
 				// this can't be a filter. because also row can be a top level container and needs to be able to get into a column.
 //						if (layoutSpec.isTopContainer()) continue;
+				if (layoutSpec.isDeprecated()) continue;
 				try
 				{
 					String layoutName = new JSONObject((String)layoutSpec.getConfig()).optString("layoutName", null);

@@ -197,7 +197,6 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
-		EditorUtil.saveDirtyEditors(getShell(), true);
 		IDialogSettings dialogSettings = getDialogSettings();
 		dialogSettings.put(INITIAL_FILE_NAME, exportModel.getFileName());
 		dialogSettings.put(PROTECT_WITH_PASSWORD, exportModel.isProtectWithPassword());
@@ -348,22 +347,28 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		// needed for setting modules to export in case of File -> Export
 		if (wizardContainer instanceof WizardDialog)
 		{
-			((WizardDialog)wizardContainer).addPageChangedListener(new IPageChangedListener()
+			if (EditorUtil.saveDirtyEditors(getShell(), true))
 			{
-				public void pageChanged(PageChangedEvent event)
+				((WizardDialog)wizardContainer).close();
+			}
+			else
+			{
+				((WizardDialog)wizardContainer).addPageChangedListener(new IPageChangedListener()
 				{
-					if (event.getSelectedPage() == modulesSelectionPage)
+					public void pageChanged(PageChangedEvent event)
 					{
-						modulesSelectionPage.checkStateChanged(null);
+						if (event.getSelectedPage() == modulesSelectionPage)
+						{
+							modulesSelectionPage.checkStateChanged(null);
+						}
+						if (event.getSelectedPage() == passwordPage)
+						{
+							passwordPage.requestPasswordFieldFocus();
+						}
 					}
-					if (event.getSelectedPage() == passwordPage)
-					{
-						passwordPage.requestPasswordFieldFocus();
-					}
-				}
-			});
+				});
+			}
 		}
-
 	}
 
 	private ExportConfirmationPage exportConfirmationPage;

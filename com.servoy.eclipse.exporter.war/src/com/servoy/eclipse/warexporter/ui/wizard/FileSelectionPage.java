@@ -80,25 +80,12 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 
 	int importUserPolicy = IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G; // get from user.
 
-	private Button allowDataModelChangeButton;
-	private Text allowDataModelServers;
-	private Button allowKeywordsButton;
-	private Button updateSequencesButton;
-	private Button overrideSequenceTypesButton;
-	private Button overrideDefaultValuesButton;
 	private Button insertNewI18NKeysOnlyButton;
-	private Button overwriteGroupsButton;
+
 	private Button addUsersToAdminGroupButton;
 	private Button createNoneExistingUsersButton;
 	private Button overwriteExistingUsersButton;
-	private Button automaticallyUpgradeRepository;
-
-	private Button createTomcatContextXML;
-	private Button antiResourceLocking;
-	private Button clearReferencesStatic;
-	private Button clearReferencesStopThreads;
-	private Button clearReferencesStopTimerThreads;
-	private Button minimizeJSAndCSS;
+//	private Button minimizeJSAndCSS;
 
 	public FileSelectionPage(ExportWarModel exportModel)
 	{
@@ -159,38 +146,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			}
 		});
 
-		allowDataModelChangeButton = new Button(composite, SWT.CHECK);
-		allowDataModelChangeButton.setText("Allowed data model changes");
-		allowDataModelChangeButton.setSelection(true);
-		if ("false".equals(exportModel.getAllowDataModelChanges()))
-		{
-			allowDataModelChangeButton.setSelection(false);
-		}
-		allowDataModelChangeButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setAllowDataModelChanges(Boolean.toString(allowDataModelChangeButton.getSelection()));
-			}
-		});
-		allowDataModelChangeButton.setToolTipText("Enable/Disable changes for all servers");
-
-		allowDataModelServers = new Text(composite, SWT.BORDER);
-		allowDataModelServers.setText(!"true".equals(exportModel.getAllowDataModelChanges()) && !"false".equals(exportModel.getAllowDataModelChanges())
-			? exportModel.getAllowDataModelChanges() : "");
-		allowDataModelServers.addModifyListener(new ModifyListener()
-		{
-			@Override
-			public void modifyText(ModifyEvent e)
-			{
-				allowDataModelChangeButton.setSelection(true);
-				exportModel.setAllowDataModelChanges(allowDataModelServers.getText());
-			}
-		});
-		allowDataModelServers.setToolTipText("Comma separated server names where changes are allowed");
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		allowDataModelServers.setLayoutData(gd);
 
 		exportUsingDbiFileInfoOnlyButton = new Button(composite, SWT.CHECK);
 		exportUsingDbiFileInfoOnlyButton.setText("Export based on DBI files only");
@@ -215,53 +170,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 				exportModel.setExportAllTablesFromReferencedServers(exportAllTablesFromReferencedServers.getSelection());
 			}
 		});
-		allowKeywordsButton = new Button(composite, SWT.CHECK);
-		allowKeywordsButton.setText("Allow sql keywords");
-		allowKeywordsButton.setSelection(exportModel.isAllowSQLKeywords());
-		allowKeywordsButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setAllowSQLKeywords(allowKeywordsButton.getSelection());
-			}
-		});
 
-		updateSequencesButton = new Button(composite, SWT.CHECK);
-		updateSequencesButton.setText("Update sequences");
-		updateSequencesButton.setSelection(exportModel.isUpdateSequences());
-		updateSequencesButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setUpdateSequences(updateSequencesButton.getSelection());
-			}
-		});
-
-		overrideSequenceTypesButton = new Button(composite, SWT.CHECK);
-		overrideSequenceTypesButton.setText("Override sequence types");
-		overrideSequenceTypesButton.setSelection(exportModel.isOverrideSequenceTypes());
-		overrideSequenceTypesButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setOverrideSequenceTypes(overrideSequenceTypesButton.getSelection());
-			}
-		});
-
-		overrideDefaultValuesButton = new Button(composite, SWT.CHECK);
-		overrideDefaultValuesButton.setText("Override default values");
-		overrideDefaultValuesButton.setSelection(exportModel.isOverrideDefaultValues());
-		overrideDefaultValuesButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setOverrideDefaultValues(overrideDefaultValuesButton.getSelection());
-			}
-		});
 
 		exportMetadataTablesButton = new Button(composite, SWT.CHECK);
 		exportMetadataTablesButton.setText("Export metadata from metadata tables (based on workspace files)");
@@ -419,18 +328,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			}
 		});
 
-		overwriteGroupsButton = new Button(composite, SWT.CHECK);
-		overwriteGroupsButton.setText("Overwrite repository group security settings with import version");
-		overwriteGroupsButton.setSelection(exportModel.isOverwriteGroups());
-		overwriteGroupsButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setOverwriteGroups(overwriteGroupsButton.getSelection());
-			}
-		});
-
 		exportUsersButton = new Button(composite, SWT.CHECK);
 		exportUsersButton.setText("Export users");
 		exportUsersButton.setSelection(exportModel.getImportUserPolicy() > IXMLImportUserChannel.IMPORT_USER_POLICY_DONT);
@@ -526,133 +423,20 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		}
 		enableSolutionExportData();
 
-		automaticallyUpgradeRepository = new Button(composite, SWT.CHECK);
-		automaticallyUpgradeRepository.setSelection(exportModel.isAutomaticallyUpgradeRepository());
-		automaticallyUpgradeRepository.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setAutomaticallyUpgradeRepository(automaticallyUpgradeRepository.getSelection());
-			}
-		});
-		automaticallyUpgradeRepository.setText("Automatically upgrade repository if needed.");
 
-		createTomcatContextXML = new Button(composite, SWT.CHECK);
-		createTomcatContextXML.setText("Create Tomcat META-INF/context.xml");
-		createTomcatContextXML.setSelection(exportModel.isCreateTomcatContextXML());
-		createTomcatContextXML.setToolTipText("Adds a Tomcat specific META-INF/context.xml file in the war file which allows enabling the options below.\n" +
-			"Please note that the file is copied (and renamed) to $CATALINA_BASE/conf/[enginename]/[hostname]/ only the first time the war is deployed.\n" +
-			"Subsequent updates of META-INF/context.xml in the war file will be ignored by tomcat.");
-		createTomcatContextXML.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
-				clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
-				clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
-				antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
-				exportModel.setCreateTomcatContextXML(createTomcatContextXML.getSelection());
-			}
-		});
-		horizontalComposite = new Composite(composite, SWT.None);
-		hcGridLayout = new GridLayout();
-		hcGridLayout.numColumns = 4;
-		hcGridLayout.marginHeight = 0;
-		hcGridLayout.marginWidth = 0;
-		horizontalComposite.setLayout(hcGridLayout);
-
-
-		new Label(horizontalComposite, SWT.NONE);
-		new Label(horizontalComposite, SWT.NONE);
-		new Label(horizontalComposite, SWT.NONE);
-		antiResourceLocking = new Button(horizontalComposite, SWT.CHECK);
-		antiResourceLocking.setText("Set antiResourceLocking to true");
-		antiResourceLocking.setSelection(exportModel.isAntiResourceLocking());
-		antiResourceLocking.setToolTipText(
-			"Recomended for Tomcat instalations running on Windows. It avoids a file locking issue when undeploying the war. \n" +
-				"This will impact the startup time of the application.");
-		antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
-		antiResourceLocking.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setAntiResourceLocking(antiResourceLocking.getSelection());
-			}
-		});
-
-		new Label(horizontalComposite, SWT.NONE);
-		new Label(horizontalComposite, SWT.NONE);
-		new Label(horizontalComposite, SWT.NONE);
-		clearReferencesStatic = new Button(horizontalComposite, SWT.CHECK);
-		clearReferencesStatic.setText("Set clearReferencesStatic to true");
-		clearReferencesStatic.setSelection(exportModel.isClearReferencesStatic());
-		clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
-		clearReferencesStatic.setToolTipText(
-			"In order to avoid memory leaks, Tomcat will null out static fields from loaded classes after the application has been stopped.");
-		clearReferencesStatic.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setClearReferencesStatic(clearReferencesStatic.getSelection());
-			}
-		});
-
-		new Label(horizontalComposite, SWT.NONE);
-		new Label(horizontalComposite, SWT.NONE);
-		new Label(horizontalComposite, SWT.NONE);
-		clearReferencesStopThreads = new Button(horizontalComposite, SWT.CHECK);
-		clearReferencesStopThreads.setText("Set clearReferencesStopThreads to true (USE WITH CARE)");
-		clearReferencesStopThreads.setSelection(exportModel.isClearReferencesStopThreads());
-		clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
-		clearReferencesStopThreads.setToolTipText(
-			"In order to avoid memory leaks, Tomcat will attempt to terminate threads that have been started by the web application.\n" +
-				"Still running threads are stopped via the deprecated Thread.stop() method.");
-		clearReferencesStopThreads.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setClearReferencesStopThreads(clearReferencesStopThreads.getSelection());
-			}
-		});
-
-		new Label(horizontalComposite, SWT.NONE);
-		new Label(horizontalComposite, SWT.NONE);
-		new Label(horizontalComposite, SWT.NONE);
-		clearReferencesStopTimerThreads = new Button(horizontalComposite, SWT.CHECK);
-		clearReferencesStopTimerThreads.setText("Set clearReferencesStopTimerThreads to true");
-		clearReferencesStopTimerThreads.setSelection(exportModel.isClearReferencesStopTimerThreads());
-		clearReferencesStopTimerThreads.setToolTipText(
-			"In order to avoid memory leaks, Tomcat attempts to terminate java.util.Timer threads that have been started by the web application.\n" +
-				"Unlike standard threads, timer threads can be stopped safely although there may still be side-effects for the application.");
-
-		clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
-
-		clearReferencesStopTimerThreads.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setClearReferencesStopTimerThreads(clearReferencesStopTimerThreads.getSelection());
-			}
-		});
-
-		minimizeJSAndCSS = new Button(horizontalComposite, SWT.CHECK);
-		minimizeJSAndCSS.setEnabled(exportModel.isNGExport());
-		minimizeJSAndCSS.setText("Minimize JS and CSS");
-		minimizeJSAndCSS.setSelection(exportModel.isMinimizeJsCssResources());
-		minimizeJSAndCSS.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setMinimizeJsCssResources(minimizeJSAndCSS.getSelection());
-			}
-		});
+//   leave out for now
+//		minimizeJSAndCSS = new Button(horizontalComposite, SWT.CHECK);
+//		minimizeJSAndCSS.setEnabled(exportModel.isNGExport());
+//		minimizeJSAndCSS.setText("Minimize JS and CSS");
+//		minimizeJSAndCSS.setSelection(exportModel.isMinimizeJsCssResources());
+//		minimizeJSAndCSS.addSelectionListener(new SelectionAdapter()
+//		{
+//			@Override
+//			public void widgetSelected(SelectionEvent e)
+//			{
+//				exportModel.setMinimizeJsCssResources(minimizeJSAndCSS.getSelection());
+//			}
+//		});
 
 		setControl(composite);
 	}
@@ -709,17 +493,11 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	private void enableSolutionExportData()
 	{
 		exportNoneActiveSolutions.setEnabled(exportActiveSolution.getSelection());
-		allowDataModelChangeButton.setEnabled(exportActiveSolution.getSelection());
 		exportAllTablesFromReferencedServers.setEnabled(exportActiveSolution.getSelection());
-		allowKeywordsButton.setEnabled(exportActiveSolution.getSelection());
-		updateSequencesButton.setEnabled(exportActiveSolution.getSelection());
-		overrideSequenceTypesButton.setEnabled(exportActiveSolution.getSelection());
-		overrideDefaultValuesButton.setEnabled(exportActiveSolution.getSelection());
 		exportMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
 		checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getEnabled() && exportMetadataTablesButton.getSelection());
 		exportI18NDataButton.setEnabled(exportActiveSolution.getSelection());
 		insertNewI18NKeysOnlyButton.setEnabled(exportActiveSolution.getSelection() && exportI18NDataButton.getSelection());
-		overwriteGroupsButton.setEnabled(exportActiveSolution.getSelection());
 		exportUsersButton.setEnabled(exportActiveSolution.getSelection());
 		addUsersToAdminGroupButton.setEnabled(exportActiveSolution.getSelection() && exportUsersButton.getSelection());
 		createNoneExistingUsersButton.setEnabled(exportActiveSolution.getSelection() && exportUsersButton.getSelection());
@@ -867,17 +645,8 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		exportModel.setFileName(null);
 		exportActiveSolution.setSelection(false);
 		exportModel.setExportActiveSolution(false);
-		allowDataModelChangeButton.setSelection(true);
-		exportModel.setAllowDataModelChanges("true");
 		exportSampleDataButton.setSelection(false);
 		exportModel.setExportSampleData(false);
-		allowKeywordsButton.setSelection(false);
-		exportModel.setAllowSQLKeywords(false);
-		updateSequencesButton.setSelection(false);
-		exportModel.setUpdateSequences(false);
-		overrideSequenceTypesButton.setSelection(false);
-		exportModel.setOverrideSequenceTypes(false);
-		overrideDefaultValuesButton.setSelection(false);
 		exportModel.setOverrideDefaultValues(false);
 		exportMetadataTablesButton.setSelection(false);
 		exportModel.setExportMetaData(false);
@@ -894,31 +663,13 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		insertNewI18NKeysOnlyButton.setSelection(true);
 		insertNewI18NKeysOnlyButton.setEnabled(false);
 		exportModel.setInsertNewI18NKeysOnly(false);
-		overwriteGroupsButton.setSelection(false);
-		exportModel.setOverwriteGroups(false);
 		exportUsersButton.setSelection(false);
 		createNoneExistingUsersButton.setSelection(false);
 		overwriteExistingUsersButton.setSelection(false);
 		addUsersToAdminGroupButton.setSelection(false);
 		exportModel.setImportUserPolicy(0);
 		enableSolutionExportData();
-		automaticallyUpgradeRepository.setSelection(false);
-		exportModel.setAutomaticallyUpgradeRepository(false);
-		createTomcatContextXML.setSelection(false);
-		exportModel.setCreateTomcatContextXML(false);
-		antiResourceLocking.setSelection(false);
-		antiResourceLocking.setEnabled(false);
-		exportModel.setAntiResourceLocking(false);
-		clearReferencesStatic.setSelection(false);
-		clearReferencesStatic.setEnabled(false);
-		exportModel.setClearReferencesStatic(false);
-		clearReferencesStopThreads.setEnabled(false);
-		clearReferencesStopThreads.setSelection(false);
-		exportModel.setClearReferencesStopThreads(false);
-		clearReferencesStopTimerThreads.setSelection(false);
-		clearReferencesStopTimerThreads.setEnabled(false);
-		exportModel.setClearReferencesStopTimerThreads(false);
-		minimizeJSAndCSS.setSelection(false);
+//		minimizeJSAndCSS.setSelection(false);
 		exportModel.setMinimizeJsCssResources(false);
 
 		getWizard().getContainer().updateButtons();

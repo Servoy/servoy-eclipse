@@ -292,7 +292,7 @@ public class ServerConfigurationPage extends WizardPage implements IRestoreDefau
 				next = true;
 			}
 		}
-		return wizard.getLastPage();
+		return null;
 	}
 
 

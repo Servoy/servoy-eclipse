@@ -699,7 +699,11 @@
      	<markerResolutionGenerator
             class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.methodOverride">
-      	</markerResolutionGenerator>        
+      	</markerResolutionGenerator>
+      	<markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.deprecatedSpec">
+      	</markerResolutionGenerator>      
      </extension>
      <extension
            point="org.eclipse.ui.commands">

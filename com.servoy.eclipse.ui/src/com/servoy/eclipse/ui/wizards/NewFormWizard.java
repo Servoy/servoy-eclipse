@@ -437,10 +437,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			// open newly created form in the form editor (as new editor) except abstract form
 			// which will be opened in script editor
-			boolean returnValue = 
-				!newFormWizardPage.bTypeAbstract.getSelection() ? 
-					EditorUtil.openFormDesignEditor(form, true, true) != null : 
-					EditorUtil.openScriptEditor(form, null, true) != null;
+			boolean returnValue = newFormWizardPage.bTypeAbstract != null && newFormWizardPage.bTypeAbstract.getSelection()
+				? EditorUtil.openScriptEditor(form, null, true) != null : EditorUtil.openFormDesignEditor(form, true, true) != null;
 
 
 			if (form.isResponsiveLayout() && WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().isEmpty())
@@ -1322,6 +1320,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 						new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
 					updateExtendsFormViewer(flattenedSolution);
 					extendsFormViewer.setSelection(sel);
+
+					fillWorkingSets();//refresh working sets
 				}
 			}
 			setPageComplete(validatePage());

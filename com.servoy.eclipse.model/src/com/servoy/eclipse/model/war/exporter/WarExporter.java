@@ -978,6 +978,7 @@ public class WarExporter
 			prop.setProperty("allowDataModelChange", exportModel.getAllowDataModelChanges());
 			prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
 			prop.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
+			prop.setProperty("skipDatabaseViewsUpdate", Boolean.toString(exportModel.isSkipDatabaseViewsUpdate()));
 
 			try (FileWriter writer = new FileWriter(importProperties))
 			{
@@ -1110,7 +1111,7 @@ public class WarExporter
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() ||
+			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() || !exportModel.getUpgradedLicenses().isEmpty() ||
 				(exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0))
 			{
 				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
@@ -1442,7 +1443,8 @@ public class WarExporter
 				if (properties.containsKey("SocketFactory.useTwoWaySocket")) properties.remove("SocketFactory.useTwoWaySocket");
 			}
 
-			if (!exportModel.getLicenses().isEmpty())
+			Map<String, String> upgradedLicenses = exportModel.getUpgradedLicenses();
+			if (!exportModel.getLicenses().isEmpty() || !upgradedLicenses.isEmpty())
 			{
 				List<License> licenses = new ArrayList<>();
 				Cipher desCipher = null;
@@ -1487,6 +1489,14 @@ public class WarExporter
 					{
 						ServoyLog.logError(new Exception("The license \"" + license.getCompanyKey() + ", " + license.getCode().substring(0, 4) +
 							"**-******-******," + license.getNumberOfLicenses() + "\" is not valid"));
+					}
+				}
+
+				for (License license : licenses)
+				{
+					if (upgradedLicenses.containsKey(license.getCode()))
+					{
+						license.setCode(upgradedLicenses.get(license.getCode()));
 					}
 				}
 

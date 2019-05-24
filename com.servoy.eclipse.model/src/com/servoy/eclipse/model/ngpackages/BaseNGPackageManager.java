@@ -97,8 +97,8 @@ public abstract class BaseNGPackageManager
 		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(CHANGE_REASON.RELOAD, null); // initial load
 
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
-			IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
+		ServoyModelFinder.getServoyModel().addResourceChangeListener(resourceChangeListener,
+			IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE); // give a chance to ServoyModel to process post-change resource events before we start working so that any changes in ServoyProject references is already handled by ServoyModel
 		setRemovedPackages();
 	}
 
@@ -832,7 +832,7 @@ public abstract class BaseNGPackageManager
 
 	public void dispose()
 	{
-		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+		ServoyModelFinder.getServoyModel().removeResourceChangeListener(resourceChangeListener);
 		ResourceProvider.setPackages(new ArrayList<List<IPackageReader>>());
 	}
 

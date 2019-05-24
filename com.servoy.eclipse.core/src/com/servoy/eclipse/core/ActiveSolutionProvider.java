@@ -14,6 +14,7 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 	public static final String MOBILE_STATE = "com.servoy.eclipse.core.mobileState";
 	public static final String WEB_STATE = "com.servoy.eclipse.core.webClientState";
 	public static final String SMART_STATE = "com.servoy.eclipse.core.smartClientState";
+	public static final String NGDESKTOP_STATE = "com.servoy.eclipse.core.ngDesktopClientState";
 
 	private ServoyModel sm;
 	private IActiveProjectListener listener;
@@ -36,6 +37,7 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 				fireSourceChanged(ISources.WORKBENCH, MOBILE_STATE, getMobileVariableState());
 				fireSourceChanged(ISources.WORKBENCH, WEB_STATE, getWebVariableState());
 				fireSourceChanged(ISources.WORKBENCH, SMART_STATE, getSmartClientVariableState());
+				fireSourceChanged(ISources.WORKBENCH, NGDESKTOP_STATE, getNGDesktopVariableState());
 			}
 
 			@Override
@@ -68,6 +70,8 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 		map.put(WEB_STATE, getWebVariableState());
 		map.put(SMART_STATE, getSmartClientVariableState());
 		map.put(NG_STATE, getNGVariableState());
+		map.put(NGDESKTOP_STATE, getNGDesktopVariableState());
+
 		return map;
 	}
 
@@ -99,10 +103,15 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 		return translateEnablement(sm.isActiveSolutionNGClient());
 	}
 
+	private String getNGDesktopVariableState()
+	{
+		return translateEnablement(sm.isActiveSolutionNGClient());
+	}
+
 	@Override
 	public String[] getProvidedSourceNames()
 	{
-		return new String[] { NG_STATE, MOBILE_STATE, WEB_STATE, SMART_STATE };
+		return new String[] { NG_STATE, MOBILE_STATE, WEB_STATE, SMART_STATE, NGDESKTOP_STATE };
 	}
 
 }

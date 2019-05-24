@@ -142,18 +142,6 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 		setSelectTextOnEnter(true); // may have to override this setting in places we don't want autoselection of text
 
-		if (valueEditor != null)
-		{
-			openButton = createOpenButton(composite);
-			openButton.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(final SelectionEvent e)
-				{
-					openValue();
-				}
-			});
-		}
 
 		button = createButton(composite);
 		button.addSelectionListener(new SelectionAdapter()
@@ -167,6 +155,20 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 
 		// layout
 		button.setText(DEFAULT_BUTTON_TEXT);
+
+
+		if (valueEditor != null)
+		{
+			openButton = createOpenButton(composite);
+			openButton.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(final SelectionEvent e)
+				{
+					openValue();
+				}
+			});
+		}
 
 		if (text == null)
 		{

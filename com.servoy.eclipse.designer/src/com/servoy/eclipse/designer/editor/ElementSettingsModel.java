@@ -68,7 +68,7 @@ public class ElementSettingsModel
 	private int getAccess(IPersist element)
 	{
 		UUID uuid = element.getUUID();
-		int access = IRepository.IMPLICIT_FORM_ACCESS;// default value
+		int access = form.getImplicitSecurityNoRights() ? IRepository.IMPLICIT_FORM_NO_ACCESS : IRepository.IMPLICIT_FORM_ACCESS;// default value
 		Map<UUID, Integer> currentGroupSecurityInfo = securityInfo.get(currentGroup);
 		if (currentGroupSecurityInfo != null && currentGroupSecurityInfo.containsKey(uuid))
 		{

@@ -42,14 +42,19 @@ mat-tab-header, .mat-tab-label-content {
 
 mat-select.repository {
   width: unset;
+  padding-top: 10px;
 }
 
 mat-select.repository .mat-select-value {
   color: #fff;
-  max-width: initial;
+  max-width: none;
 }
 
 mat-select.repository .mat-select-arrow {
   color: #fff;
 }
 
+/* workaround for IE, see: https://github.com/angular/material2/issues/11609 */
+.cdk-overlay-pane {
+  display: block;
+}

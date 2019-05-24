@@ -1835,9 +1835,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			List<String> ids = new ArrayList<String>();
 			for (PropertyDescription pd : properties.values())
 			{
-				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
+				if (pd.isDeprecated() || WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
 				{
-					// skip design and private properties
+					// skip deprecated, design and private properties
 					continue;
 				}
 				ids.add(pd.getName());
@@ -1854,6 +1854,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (spec.getApiFunction((String)element) != null)
 					{
 						final WebObjectFunctionDefinition api = spec.getApiFunction((String)element);
+						if (api.isDeprecated()) continue;
 						icon = functionIcon;
 						final List<String> parNames = new ArrayList<String>();
 						List<String> parTypes = new ArrayList<String>();

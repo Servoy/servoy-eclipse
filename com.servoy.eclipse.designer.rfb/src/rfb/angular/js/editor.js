@@ -423,27 +423,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 			}
 			
-			$scope.getGhostVerticalHRStyle = function(ghost, cont){
-				if(ghost.type === EDITOR_CONSTANTS.GHOST_TYPE_PART){
-					return {
-						border: "none",
-					    borderLeft: "1px dashed #000",
-					    height: (ghost.location.y+15)+'px',
-					    marginLeft: "-5px",
-					    marginTop: -(ghost.location.y+15)+'px',
-						marginBottom: "0",
-						cursor: 'ew-resize',
-					    width: '1px',
-					};
-				} else {
-					return {
-						display: "none"
-					};
-				}
-			}
-			
-
-
 			$scope.openContainedForm = function(ghost) {
 				if (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART) {
 					$editorService.openContainedForm(ghost);
@@ -568,25 +547,28 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.getFixedKeyEvent = function(event) {
-				var keyCode, isCtrl, isShift, isAlt;
+				var keyCode, isCtrl, isShift, isAlt, isMeta;
 
 				if (window.event) { //IE
 					keyCode = window.event.keyCode;
 					isCtrl = window.event.ctrlKey ? true : false;
 					isShift = window.event.shiftKey ? true : false;
 					isAlt = window.event.altKey ? true : false;
+					isMeta = window.event.metaKey ? true : false;
 				} else { // firefox
 					keyCode = event.which;
 					isCtrl = event.ctrlKey ? true : false;
 					isShift = event.shiftKey ? true : false;
 					isAlt = event.altKey ? true : false;
+					isMeta = event.metaKey ? true : false;
 				}
 
 				return {
 					keyCode: keyCode,
 					isCtrl: isCtrl,
 					isShift: isShift,
-					isAlt: isAlt
+					isAlt: isAlt,
+					isMeta: isMeta
 				};
 			}
 
@@ -1050,15 +1032,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					$(document).keydown(function(objEvent) {
 						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
 
-						if (fixedKeyEvent.isCtrl) {
-							var k = String.fromCharCode(fixedKeyEvent.keyCode).toLowerCase();
-							if ('a' == k || 's' == k || (fixedKeyEvent.isShift && 'z' == k)) {
-								if (fixedKeyEvent.isShift && ('s' == k || 'z' == k)) {
-									// send the CTRL+SHIFT+S (save all) and CTRL+SHIFT+Z (open editor) key code to the server
-									$editorService.keyPressed(objEvent);
-								}
-								return false;
-							}
+						if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta) {
+							$editorService.keyPressed(objEvent);
+							return false;
 						}
 						return true;
 					});
@@ -1566,6 +1542,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		
 		getSuperForms: function() {
 			return wsSession.callService('formeditor', 'getSuperForms');
+		},
+		
+		setCssAnchoring: function(selection, anchors) {
+			wsSession.callService('formeditor', 'setCssAnchoring', {"selection":selection, "anchors":anchors}, true);
 		},
 
 		// add more service methods here

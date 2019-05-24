@@ -468,20 +468,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			}
 		}
 
-		// see if the accessMask is implicit; if it is, then no use in keeping track of it...
-		boolean implicit;
-		if (formElement)
-		{
-			implicit = (accessMask == IRepository.IMPLICIT_FORM_ACCESS);
-		}
-		else
-		{
-			implicit = (accessMask == IRepository.IMPLICIT_TABLE_ACCESS);
-		}
-		if (!implicit)
-		{
-			securityInfo.add(new SecurityInfo(element_uid, accessMask));
-		}
+		securityInfo.add(new SecurityInfo(element_uid, accessMask));
 		return replaced;
 	}
 
@@ -1190,33 +1177,29 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				}
 
 				SecurityInfo element = groupPermissions.get(0);
-				if (element.access == IRepository.IMPLICIT_TABLE_ACCESS) mustWriteBackTableInfo = true;
-				else
+				IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
+				ITable table = null;
+				if (server != null)
 				{
-					IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
-					ITable table = null;
-					if (server != null)
+					try
 					{
-						try
-						{
-							table = server.getTable(tableName);
-						}
-						catch (RemoteException e)
-						{
-						}
+						table = server.getTable(tableName);
 					}
-					if (table != null)
+					catch (RemoteException e)
 					{
-						for (String columnName : table.getColumnNames())
-						{
-							setSecurityInfo(tableInfoForGroup, columnName, element.access, false);
-						}
-						if (table.getColumnNames().length == 0) setSecurityInfo(tableInfoForGroup, TABLE_PERMISSION_KEY, element.access, false); // if a new table is created and a sec file already exists for it, remember permission even if no columns are available for it yet...
-					} // else it is ok not to load it in memory - because it will not be written...
-					if (groupPermissions.size() > 1 || (!TABLE_PERMISSION_KEY.equals(element.element_uid)))
-					{
-						mustWriteBackTableInfo = true;
 					}
+				}
+				if (table != null)
+				{
+					for (String columnName : table.getColumnNames())
+					{
+						setSecurityInfo(tableInfoForGroup, columnName, element.access, false);
+					}
+					if (table.getColumnNames().length == 0) setSecurityInfo(tableInfoForGroup, TABLE_PERMISSION_KEY, element.access, false); // if a new table is created and a sec file already exists for it, remember permission even if no columns are available for it yet...
+				} // else it is ok not to load it in memory - because it will not be written...
+				if (groupPermissions.size() > 1 || (!TABLE_PERMISSION_KEY.equals(element.element_uid)))
+				{
+					mustWriteBackTableInfo = true;
 				}
 			}
 			else
@@ -1295,8 +1278,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		Map<String, List<SecurityInfo>> formAccess = new HashMap<String, List<SecurityInfo>>();
 		deserializeSecurityPermissionInfo(info, formAccess);
 
-		boolean mustWriteBackFormInfo = false;
-
 		Iterator<String> keys = formAccess.keySet().iterator();
 		while (keys.hasNext())
 		{
@@ -1324,7 +1305,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				{
 					if (isElementChildOfForm(element.element_uid, form))
 					{
-						if (element.access == IRepository.IMPLICIT_FORM_ACCESS) mustWriteBackFormInfo = true;
 						boolean replaced = setSecurityInfo(formInfoForGroup, element.element_uid, element.access, true);
 						if (replaced)
 						{
@@ -1347,18 +1327,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			{
 				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED,
 					"Group '" + groupName + "' not defined, but referenced in form '" + form.getName() + "' security file.", groupName);
-			}
-		}
-
-		if (writeMode == WRITE_MODE_AUTOMATIC && mustWriteBackFormInfo)
-		{
-			try
-			{
-				writeSecurityInfo(form, true);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
 			}
 		}
 	}
@@ -1557,28 +1525,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						old.setLeft(Integer.valueOf(old.getLeft().intValue() + 1));
 					}
 					retval.put(cid, (Integer)value); //server.table.column -> int
-				}
-			}
-		}
-		Iterator<Entry<Object, Integer>> entries = retval.entrySet().iterator();
-		while (entries.hasNext())
-		{
-			Entry<Object, Integer> entry = entries.next();
-			Pair<Integer, Boolean> gwnda = groupsWithNonDefaultAccess.get(entry.getKey());
-			if (gwnda.getLeft().intValue() < groups.length)
-			{
-				// this means the user is part of more groups, some of which have default access values
-				// for this form element or table column; merge these defaults with other group access value
-				if (gwnda.getRight().equals(Boolean.TRUE))
-				{
-					// form element
-					entry.setValue(Integer.valueOf(entry.getValue().intValue() | (IRepository.VIEWABLE + IRepository.ACCESSIBLE)));
-				}
-				else
-				{
-					// table column
-					entry.setValue(
-						Integer.valueOf(entry.getValue().intValue() | (IRepository.READ + IRepository.INSERT + IRepository.UPDATE + IRepository.DELETE))); // default no TRACKING!
 				}
 			}
 		}

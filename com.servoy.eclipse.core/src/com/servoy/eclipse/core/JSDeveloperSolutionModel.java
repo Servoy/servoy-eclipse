@@ -62,6 +62,7 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -408,7 +409,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 						checkParent(saveObj);
 
 						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(saveObj));
-						SolutionSerializer.writePersist(saveObj, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+						SolutionSerializer.writePersist(saveObj, wfa, ServoyModel.getDeveloperRepository(), !(saveObj instanceof Media), false, true);
 					}
 					catch (RepositoryException | SQLException e)
 					{

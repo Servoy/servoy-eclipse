@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 
 import org.eclipse.core.resources.IFile;
 
+import com.servoy.eclipse.model.util.ServoyLog;
+
 import sj.jsonschemavalidation.ISchemaProvider;
 
 public class SpecSchemaProvider implements ISchemaProvider
@@ -14,11 +16,14 @@ public class SpecSchemaProvider implements ISchemaProvider
 
 	public SpecSchemaProvider()
 	{
-		InputStream is = getClass().getResourceAsStream("spec.schema");
-		InputStreamReader reader = new InputStreamReader(is);
+		specSchema = readSpecSchema();
+	}
+
+	protected String readSpecSchema()
+	{
 		StringBuilder sb = new StringBuilder();
 		char[] chars = new char[2048];
-		try
+		try (InputStream is = getClass().getResourceAsStream("spec.schema"); InputStreamReader reader = new InputStreamReader(is))
 		{
 			int read = reader.read(chars);
 			while (read != -1)
@@ -29,9 +34,10 @@ public class SpecSchemaProvider implements ISchemaProvider
 		}
 		catch (IOException e)
 		{
+			ServoyLog.logError(e);
 			e.printStackTrace();
 		}
-		specSchema = sb.toString();
+		return sb.toString();
 	}
 
 	@Override
@@ -39,25 +45,9 @@ public class SpecSchemaProvider implements ISchemaProvider
 	{
 		if (file.getName().toLowerCase().endsWith(".spec"))
 		{
-			InputStream is = getClass().getResourceAsStream("spec.schema");
-			InputStreamReader reader = new InputStreamReader(is);
-			StringBuilder sb = new StringBuilder();
-			char[] chars = new char[2048];
-			try
-			{
-				int read = reader.read(chars);
-				while (read != -1)
-				{
-					sb.append(chars, 0, read);
-					read = reader.read(chars);
-				}
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-			return sb.toString();
-//			return specSchema;
+//			FOR DEBUG uncomment the following line
+//			return readSpecSchema();
+			return specSchema;
 		}
 		return null;
 	}

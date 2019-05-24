@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.mobile.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
@@ -51,26 +52,30 @@ public class MobileCustomPropertyHandler implements IPropertyHandler
 		//			"custom",
 		"delete", "edit", "forward", "gear", "grid", "home", "info", "minus", "plus", "refresh", "search", "star" };
 
-	public static final PropertyDescription DATA_ICONS_VALUES = new PropertyDescription(IMobileProperties.DATA_ICON.propertyName, ValuesPropertyType.INSTANCE,
-		new ValuesConfig().setValues(DATA_ICONS).addDefault(null, null));
+	public static final PropertyDescription DATA_ICONS_VALUES = new PropertyDescriptionBuilder().withName(IMobileProperties.DATA_ICON.propertyName).withType(
+		ValuesPropertyType.INSTANCE).withConfig(new ValuesConfig().setValues(DATA_ICONS).addDefault(null, null)).build();
 
 
-	public static final PropertyDescription HEADERSIZE_VALUES = new PropertyDescription(IMobileProperties.HEADER_SIZE.propertyName, ValuesPropertyType.INSTANCE,
-		new ValuesConfig().setValues(
-			new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) },
-			new String[] { "h1", "h2", "h3", "h4", "h5", "h6" }).addDefault(null, null));
+	public static final PropertyDescription HEADERSIZE_VALUES = new PropertyDescriptionBuilder().withName(IMobileProperties.HEADER_SIZE.propertyName).withType(
+		ValuesPropertyType.INSTANCE).withConfig(
+			new ValuesConfig().setValues(
+				new Integer[] { Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), Integer.valueOf(4), Integer.valueOf(5), Integer.valueOf(6) },
+				new String[] { "h1", "h2", "h3", "h4", "h5", "h6" }).addDefault(null, null)).build();
 
 
 	public static final String ALIGN_RIGHT_NAME = "alignRight";
-	public static final PropertyDescription ALIGN_RIGHT_DESCRIPTION = new PropertyDescription(ALIGN_RIGHT_NAME, BooleanPropertyType.INSTANCE);
+	public static final PropertyDescription ALIGN_RIGHT_DESCRIPTION = new PropertyDescriptionBuilder().withName(ALIGN_RIGHT_NAME).withType(
+		BooleanPropertyType.INSTANCE).build();
 
 
 	public static final String RADIO_STYLE_NAME = "horizontal";
-	public static final PropertyDescription RADIO_STYLE_DESCRIPTION = new PropertyDescription(RADIO_STYLE_NAME, BooleanPropertyType.INSTANCE);
+	public static final PropertyDescription RADIO_STYLE_DESCRIPTION = new PropertyDescriptionBuilder().withName(RADIO_STYLE_NAME).withType(
+		BooleanPropertyType.INSTANCE).build();
 
 
 	public static final String STICKY_PART_NAME = "sticky";
-	public static final PropertyDescription STICKY_PART_DESCRIPTION = new PropertyDescription(STICKY_PART_NAME, BooleanPropertyType.INSTANCE);
+	public static final PropertyDescription STICKY_PART_DESCRIPTION = new PropertyDescriptionBuilder().withName(STICKY_PART_NAME).withType(
+		BooleanPropertyType.INSTANCE).build();
 
 
 	private final String name;

@@ -292,11 +292,13 @@ public class PersistEditPolicy extends ComponentEditPolicy
 			if (persist instanceof Media && child instanceof ISupportMedia && child instanceof IPersist)
 			{
 				Media mediaPersist = (Media)persist;
-				String mediaPersistName = mediaPersist.getName();
+				String mediaPersistFullPath = mediaPersist.getName(); //this may include the path
+				String mediaName = mediaPersistFullPath != null && mediaPersistFullPath.indexOf("/") > 0
+					? mediaPersistFullPath.substring(mediaPersistFullPath.lastIndexOf("/") + 1) : mediaPersistFullPath;
 				return SetValueCommand.createSetvalueCommand("Drag-n-drop image",
 					PersistPropertySource.createPersistPropertySource((IPersist)child, (IPersist)(formEditPart == null ? null : formEditPart.getModel()),
 						false),
-					StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName(), new MediaNode(mediaPersistName, mediaPersistName, MediaNode.TYPE.IMAGE,
+					StaticContentSpecLoader.PROPERTY_IMAGEMEDIAID.getPropertyName(), new MediaNode(mediaName, mediaPersistFullPath, MediaNode.TYPE.IMAGE,
 						servoyProject.getEditingFlattenedSolution().getSolution(), null, mediaPersist));
 			}
 			if (persist instanceof ValueList && child instanceof Field)

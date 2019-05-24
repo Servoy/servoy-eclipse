@@ -526,7 +526,9 @@ public class TypeCreator extends TypeCache
 							{
 								memberType = TypeUtil.arrayOf(memberType);
 							}
-							members.add(createProperty(name, false, memberType, "", null));
+							Property property = createProperty(name, false, memberType, "", null);
+							property.setDeprecated(pd.isDeprecated());
+							members.add(property);
 						}
 					}
 				}
@@ -1186,7 +1188,9 @@ public class TypeCreator extends TypeCache
 				{
 					memberType = TypeUtil.arrayOf(memberType);
 				}
-				members.add(createProperty(name, false, memberType, "", null));
+				Property property = createProperty(name, false, memberType, "", null);
+				property.setDeprecated(pd.isDeprecated());
+				members.add(property);
 			}
 		}
 		SolutionExplorerListContentProvider.extractApiDocs(spec);
@@ -1198,7 +1202,11 @@ public class TypeCreator extends TypeCache
 			if (api.getDocumentation() != null)
 			{
 				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(api.getDocumentation(), STANDARD_ELEMENT_NAME, true));
-				method.setDeprecated(api.getDocumentation().contains("@deprecated"));
+				method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
+			}
+			else
+			{
+				method.setDeprecated(api.isDeprecated());
 			}
 			JSType returnType = getType(context, api.getReturnType());
 			if (returnType == null && api.getReturnType() != null)

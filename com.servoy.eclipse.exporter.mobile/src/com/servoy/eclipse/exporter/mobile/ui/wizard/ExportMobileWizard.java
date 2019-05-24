@@ -28,8 +28,10 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -50,6 +52,7 @@ import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.wizards.FinishPage;
 
 public class ExportMobileWizard extends Wizard implements IExportWizard
@@ -376,5 +379,17 @@ public class ExportMobileWizard extends Wizard implements IExportWizard
 	interface IMobileExportPropertiesPage
 	{
 		public boolean saveProperties();
+	}
+
+	@Override
+	public void setContainer(IWizardContainer wizardContainer)
+	{
+		super.setContainer(wizardContainer);
+		//when cancel is pressed on the wizard dialog - this method is called again setContainer(null) so
+		//avoid second call to saveDirtyEditors()
+		if (wizardContainer != null && EditorUtil.saveDirtyEditors(getShell(), true))
+		{
+			((WizardDialog)wizardContainer).close();
+		}
 	}
 }

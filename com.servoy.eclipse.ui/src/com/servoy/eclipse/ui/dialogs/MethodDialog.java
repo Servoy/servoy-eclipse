@@ -329,7 +329,7 @@ public class MethodDialog extends TreeSelectDialog
 			Form form = (Form)parentElement;
 			if (form.getScriptMethods(false).hasNext())
 			{
-				Iterator<ScriptMethod> it = currentFlattenedForm.getScriptMethods(false);
+				Iterator<ScriptMethod> it = currentFlattenedForm.getScriptMethods(true);
 				while (it.hasNext())
 				{
 					ScriptMethod sm = it.next();

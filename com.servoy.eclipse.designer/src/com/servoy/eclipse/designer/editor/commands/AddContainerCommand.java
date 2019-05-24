@@ -132,6 +132,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 						WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
 						for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
 						{
+							if (webComponentSpec.isDeprecated()) continue;
 							if (!webComponentSpec.getPackageName().equals("servoydefault"))
 							{
 								specs.add(webComponentSpec);

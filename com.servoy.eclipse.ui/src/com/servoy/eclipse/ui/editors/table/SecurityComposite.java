@@ -31,17 +31,25 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class SecurityComposite extends Composite implements EclipseUserManager.IUserGroupChangeListener
@@ -52,14 +60,73 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 
 	private final TableSettingsComposite settingsComposite;
 
-	public SecurityComposite(Composite parent, int style, final TableEditor te)
+	public SecurityComposite(Composite parent, int style, final TableEditor te, Solution solution)
 	{
 		super(parent, style);
 
-		this.setLayout(new FillLayout());
+		this.setLayout(new FormLayout());
 
-		SashForm sashForm;
-		sashForm = new SashForm(this, SWT.HORIZONTAL);
+		Button btnNORights = new Button(this, SWT.CHECK);
+		btnNORights.setText("No rights unless explicitly specified");
+		btnNORights.setToolTipText(
+			"When this is checked, all groups will have by default no right for this table, unless it is specified by editor. If unchecked, by default read/insert/update/delete are available.");
+		try
+		{
+			btnNORights.setSelection(solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
+		}
+		catch (RepositoryException e2)
+		{
+			ServoyLog.logError(e2);
+		}
+		btnNORights.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				try
+				{
+					solution.getOrCreateTableNode(te.getTable().getDataSource()).setImplicitSecurityNoRights(btnNORights.getSelection());
+				}
+				catch (RepositoryException e1)
+				{
+					ServoyLog.logError(e1);
+				}
+				te.flagModified();
+				ISelection sel = tableViewer.getSelection();
+				if (sel instanceof IStructuredSelection)
+				{
+					Object first = ((IStructuredSelection)sel).getFirstElement();
+					try
+					{
+						settingsComposite.setValues(first != null ? first.toString() : null,
+							solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
+					}
+					catch (RepositoryException e1)
+					{
+						ServoyLog.logError(e1);
+					}
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+
+			}
+		});
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(0, 10);
+		formData.left = new FormAttachment(0, 10);
+		btnNORights.setLayoutData(formData);
+
+		SashForm sashForm = new SashForm(this, SWT.HORIZONTAL);
+		formData = new FormData();
+		formData.top = new FormAttachment(btnNORights, 6);
+		formData.left = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(100, -5);
+		formData.bottom = new FormAttachment(100, -5);
+		sashForm.setLayoutData(formData);
 
 		tableContainer = new Composite(sashForm, SWT.NONE);
 		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
@@ -75,7 +142,15 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 				if (sel instanceof IStructuredSelection)
 				{
 					Object first = ((IStructuredSelection)sel).getFirstElement();
-					settingsComposite.setValues(first != null ? first.toString() : null);
+					try
+					{
+						settingsComposite.setValues(first != null ? first.toString() : null,
+							solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 
 			}
@@ -181,8 +256,8 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 		{
 			public void run()
 			{
-				tableViewer.setInput(ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(
-					ApplicationServerRegistry.get().getClientId()));
+				tableViewer.setInput(
+					ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager().getGroups(ApplicationServerRegistry.get().getClientId()));
 
 			}
 		}, true);

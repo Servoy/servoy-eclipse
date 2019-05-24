@@ -17,7 +17,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -1336,7 +1335,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			}
 		};
 
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addResourceChangeListener(resourceChangeListener,
+			IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
 	}
 
 
@@ -1371,7 +1371,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		if (resourceChangeListener != null)
 		{
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+			ServoyModelManager.getServoyModelManager().getServoyModel().removeResourceChangeListener(resourceChangeListener);
 			resourceChangeListener = null;
 		}
 

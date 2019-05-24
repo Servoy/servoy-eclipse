@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit {
   ngOnInit() {
 
     this.wpmService.getAllRepositories().subscribe(repositories => {
-      let newRepositories = [];
+      const newRepositories = [];
       let newActiveRepository = this.activeRepository;
       for(let repository of repositories) {
         if(repository.selected) newActiveRepository = repository.name;
@@ -29,7 +29,10 @@ export class HeaderComponent implements OnInit {
       }
       newRepositories.push(ADD_REMOVE_TEXT);
       this.repositories = newRepositories;
-      this.activeRepository = newActiveRepository;
+      if(this.activeRepository != newActiveRepository) {
+        this.activeRepository = newActiveRepository;
+        this.wpmService.setNewSelectedRepository(this.activeRepository);
+      }
     })
 
 
@@ -66,7 +69,7 @@ export class HeaderComponent implements OnInit {
     });
   
     dialogRef.afterClosed().subscribe(result => {
-      let newRepo = <Repository>result;
+      const newRepo = <Repository>result;
 
       if(newRepo) {
         if(newRepo.name == ADD_REMOVE_TEXT) {

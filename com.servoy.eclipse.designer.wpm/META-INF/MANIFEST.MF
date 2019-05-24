@@ -19,5 +19,6 @@ Require-Bundle: javax.servlet,
  org.eclipse.ui,
  org.eclipse.core.expressions,
  com.servoy.eclipse.ui,
- org.eclipse.ui.intro
+ org.eclipse.ui.intro,
+ org.eclipse.swt.chromium
 Automatic-Module-Name: com.servoy.eclipse.designer.wpm
