@@ -25,7 +25,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,6 +32,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
@@ -51,7 +51,6 @@ public class OpenWizardAction extends Action
 {
 
 	private final Class< ? extends IWorkbenchWizard> wizardClass;
-	final boolean[] closedBeforeOpen = new boolean[1]; //used to check if closed was called before create / open
 
 	/**
 	 * Creates a new "open wizard" action.
@@ -77,6 +76,7 @@ public class OpenWizardAction extends Action
 	{
 		try
 		{
+			if (EditorUtil.saveDirtyEditors(Display.getCurrent().getActiveShell(), true)) return;
 			final IWorkbenchWizard wizard = wizardClass.newInstance();
 
 			IStructuredSelection selection = StructuredSelection.EMPTY;
@@ -86,7 +86,6 @@ public class OpenWizardAction extends Action
 				selection = (IStructuredSelection)windowSelection;
 			}
 			wizard.init(PlatformUI.getWorkbench(), selection);
-			closedBeforeOpen[0] = false;
 
 			// Instantiates the wizard container with the wizard and opens it
 			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
@@ -110,8 +109,7 @@ public class OpenWizardAction extends Action
 					}
 					getDialogBoundsSettings().put("tray_open", trayOpen);
 					wizard.dispose();
-					closedBeforeOpen[0] = super.close();
-					return closedBeforeOpen[0];
+					return super.close();
 				}
 
 				@Override
@@ -234,12 +232,9 @@ public class OpenWizardAction extends Action
 			{
 				dialog.addPageChangedListener((IPageChangedListener)wizard);
 			}
-			if (!closedBeforeOpen[0])
-			{
-				dialog.create();
-				dialog.open();
-				wizard.dispose();
-			}
+			dialog.create();
+			dialog.open();
+			wizard.dispose();
 
 		}
 		catch (InstantiationException e)
