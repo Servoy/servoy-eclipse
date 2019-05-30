@@ -17,8 +17,13 @@
 
 package com.servoy.eclipse.exporter.electron.ui.wizard;
 
+import java.util.Arrays;
+
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -38,6 +43,11 @@ public class ExportPage extends WizardPage
 {
 	private Text applicationURLText;
 	private Text saveDir;
+	private Group platformGroup;
+	private Group packageGroup;
+	private Button permanent;
+	private String selectedPlatform = "linux";
+	private String selectedArchive = "zip";
 
 	public ExportPage(ExportElectronWizard exportElectronWizard)
 	{
@@ -63,31 +73,123 @@ public class ExportPage extends WizardPage
 		Label platformLabel = new Label(composite, SWT.NONE);
 		platformLabel.setText("Platform");
 		
-		Group platformGroup = new Group(composite, SWT.NONE);
+		platformGroup = new Group(composite, SWT.NONE);
 		platformGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 		
+		
 		Button winBtn = new Button(platformGroup, SWT.RADIO);
+		winBtn.setData("win");
 		winBtn.setText("Windows");
 		winBtn.setSelection(true);
+		
+		winBtn.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				platformSelectionChangeListener((String)event.widget.getData());
+			}
+		});
 		 
+		
 		Button macBtn = new Button(platformGroup, SWT.RADIO);
 		macBtn.setText("MacOS");
+		macBtn.setData("mac");
+		
+		macBtn.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				platformSelectionChangeListener((String)event.widget.getData());
+			}
+		});
 
 		Button linuxBtn = new Button(platformGroup, SWT.RADIO);
 		linuxBtn.setText("Linux");
+		linuxBtn.setData("linux");
+		
+		linuxBtn.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				platformSelectionChangeListener((String)event.widget.getData());
+			}
+		});
+		 
+
 		
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		platformGroup.setLayoutData(gd);
-
+		
+		
+		Label packageLabel = new Label(composite, SWT.NONE);
+		packageLabel.setText("Target application package");
+		
+		packageGroup = new Group(composite, SWT.NONE);
+		packageGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
+		
+		Button tarballBtn = new Button(packageGroup, SWT.RADIO);
+		tarballBtn.setText("Tarball");
+		tarballBtn.setData("tarball");
+		tarballBtn.setSelection(true);
+		
+		tarballBtn.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				packageSelectionChangeListener((String)event.widget.getData());
+			}
+		});
+		 
+		Button installerBtn = new Button(packageGroup, SWT.RADIO);
+		installerBtn.setText("Installer");
+		installerBtn.setData("installer");
+		
+		installerBtn.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				packageSelectionChangeListener((String)event.widget.getData());
+			}
+		});
+		
+		Button zipBtn = new Button(packageGroup, SWT.RADIO);
+		zipBtn.setText("Zip");
+		zipBtn.setData("zip");
+		
+		zipBtn.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				packageSelectionChangeListener((String)event.widget.getData());
+			}
+		});
+		
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		packageGroup.setLayoutData(gd);
+		
+		
+		permanent = new Button(composite, SWT.CHECK);
+		permanent.setText("Keep download permanent");
+		permanent.setLayoutData(gd);
+		
+		
 		Label outputDirLabel = new Label(composite, SWT.NONE);
-		outputDirLabel.setText("Save directory");		
+		outputDirLabel.setText("Save directory");	
+		
 		saveDir = new Text(composite, SWT.BORDER);
 		saveDir.setText(getInitialSaveDir());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		saveDir.setLayoutData(gd);
-		
+//		
 		setControl(composite);
 	}
 	
@@ -112,5 +214,25 @@ public class ExportPage extends WizardPage
 	public String getSaveDir()
 	{
 		return saveDir.getText();
+	}
+	
+	public void platformSelectionChangeListener(String selectedPlatform) {
+		this.selectedPlatform = selectedPlatform;
+	}
+	
+	public void packageSelectionChangeListener(String selectedArchive) {
+		this.selectedArchive = selectedArchive;
+	}
+	
+	public String getSelectedPlatform() {
+		return selectedPlatform;
+	}
+	
+	public String getSelectedPackageType() {
+		return selectedArchive;
+	}
+	
+	public boolean getIsPermanent() {
+		return permanent.getSelection();
 	}
 }

@@ -3,8 +3,10 @@ package com.servoy.eclipse.exporter.electron.ui.wizard;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +20,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -55,40 +58,39 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 	public boolean performFinish()
 	{
 		String solutionName = "NGDesktop_Installer"; //ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
-		final File outputFile = new File(exportPage.getSaveDir(), solutionName + ".exe");
-		final String applicationURL = exportPage.getApplicationURL();
+		final File outputFile = new File(exportPage.getSaveDir(), solutionName);
+		final String packageType = exportPage.getSelectedPackageType();
+
+		final String platformType = exportPage.getSelectedPlatform();
+		final boolean isPermanent = exportPage.getIsPermanent();
 		final StringBuilder errorMsg = new StringBuilder();
 		IRunnableWithProgress job = new IRunnableWithProgress()
 		{
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
+				
+				String buildOptionsParams = platformType.charAt(0) + "/" +  packageType + "/" + String.valueOf(isPermanent);
 				monitor.beginTask("Generating and downloading electron application ...", 3);
-//				HttpClient httpclient = HttpClients.createDefault();
+				HttpClient httpclient = HttpClients.createDefault();
+				HttpPost httpPost = new HttpPost("http://localhost:8091/NGDesktopWS/build/" + buildOptionsParams);
+
 //				HttpGet httpget = new HttpGet("https://s3.eu-central-1.amazonaws.com/s3-artifactory-jenkins-team3/windows/NGDesktop_Installer.exe");
 
 				// execute the request
 				try
 				{
-//					HttpResponse response = httpclient.execute(httpget);
+					HttpResponse response = httpclient.execute(httpPost);
 					monitor.worked(1);
 	
-//					HttpEntity responseEntity = response.getEntity();
-//					if (response.getStatusLine().getStatusCode() == 200)
-//					{
-//						
-//						FileOutputStream fos = new FileOutputStream(outputFile);
-//						Utils.streamCopy(responseEntity.getContent(), fos);
-//						fos.flush();
-//						Utils.close(responseEntity.getContent());
-						monitor.worked(1);
-						ExportElectronWizard.insertApplicationURL(outputFile, applicationURL);
-						monitor.worked(1);
-						
-//					}
-//					else
-//					{
-//						errorMsg.append("HTTP error code : " + response.getStatusLine().getStatusCode());
-//					}
+					HttpEntity responseEntity = response.getEntity();
+					if (response.getStatusLine().getStatusCode() == 200)
+					{	
+						waitForEndpointsAndDownload(getStringFromInputStream(responseEntity.getContent(), errorMsg), errorMsg, outputFile);
+					}
+					else
+					{
+						errorMsg.append("HTTP error code : " + response.getStatusLine().getStatusCode());
+					}
 				}
 				catch(Exception ex)
 				{
@@ -122,6 +124,67 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 	{
 		exportPage = new ExportPage(this);
 		addPage(exportPage);
+	}
+	
+	private String getStringFromInputStream(InputStream is, StringBuilder sb){
+		StringBuilder stringBuilder = new StringBuilder();
+		String line = null;
+		
+		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is))) {	
+			try {
+				while ((line = bufferedReader.readLine()) != null) {
+					stringBuilder.append(line);
+				}
+			}
+			catch (IOException e) {
+				sb.append(e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		catch (IOException e1) {
+			sb.append(e1.getMessage());
+			e1.printStackTrace();
+		}
+		return stringBuilder.toString();
+	}
+	
+	private void waitForEndpointsAndDownload(String token, StringBuilder errorMsg, File outputFile ) {
+		
+		HttpClient httpclient = HttpClients.createDefault();
+		HttpGet httpget = new HttpGet("http://localhost:8091/NGDesktopWS/status/" + token);
+
+		try
+		{
+			HttpResponse response = httpclient.execute(httpget);
+			HttpEntity responseEntity = response.getEntity();
+
+			if (response.getStatusLine().getStatusCode() == 200)
+			{
+				String resp = getStringFromInputStream(responseEntity.getContent(), errorMsg);
+				if(resp.equals("Build not finished yet"))
+				{
+					System.out.println("Wait 5 sec then check again...");
+					wait(5000);
+					System.out.println("Checking again...");
+					waitForEndpointsAndDownload(token, errorMsg, outputFile);
+					return;
+				}
+				else {
+					//resp == endpoint, we have to download it.
+					FileOutputStream fos = new FileOutputStream(outputFile);
+					
+					Utils.streamCopy(responseEntity.getContent(), fos);
+					fos.flush();
+					Utils.close(responseEntity.getContent());
+					ExportElectronWizard.insertApplicationURL(outputFile, exportPage.getApplicationURL());
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			errorMsg.append(ex.toString());
+		}
+
 	}
 	
 	
