@@ -18,7 +18,6 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,10 +32,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTError;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -95,7 +90,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ISupportCheatSheetActions
+public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ISupportCheatSheetActions
 {
 	private static final AtomicInteger clientNrgenerator = new AtomicInteger();
 
@@ -140,8 +135,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	// for updating selection in editor when selection changes in IDE
 	private RfbSelectionListener selectionListener;
-
-	private Browser browser;
 
 	private EditorWebsocketSession editorWebsocketSession;
 	private DesignerWebsocketSession designerWebsocketSession;
@@ -190,53 +183,13 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		editorWebsocketSession.registerServerService("formeditor", editorServiceHandler);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(partListener);
 		ServoyModelFinder.getServoyModel().addFormComponentListener(partListener);
-		try
-		{
-			browser = new Browser(parent, SWT.NONE);
-		}
-		catch (SWTError e)
-		{
-			ServoyLog.logError(e);
-			return;
-		}
-
-		try
-		{
-			// install fake WebSocket in case browser does not support it
-			SwtWebsocket.installFakeWebSocket(browser, editorKey.getClientnr(), clientKey.getClientnr());
-			// install console
-			new BrowserFunction(browser, "consoleLog")
-			{
-				@Override
-				public Object function(Object[] arguments)
-				{
-					if (arguments.length > 1)
-					{
-						if ("log".equals(arguments[0]))
-						{
-							ServoyLog.logInfo(arguments[1] != null ? arguments[1].toString() : null);
-						}
-						else if ("error".equals(arguments[0]))
-						{
-							ServoyLog.logError(arguments[1] != null ? arguments[1].toString() : null, null);
-						}
-						else if ("onerror".equals(arguments[0]))
-						{
-							ServoyLog.logError(Arrays.toString(arguments), null);
-						}
-					}
-					return null;
-				}
-			};
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("couldn't load the editor: ", e);
-		}
+		createBrowser(parent);
 
 		refreshBrowserUrl(false);
 		openViewers();
 	}
+
+	protected abstract void createBrowser(Composite parent);
 
 	@Override
 	public Object getAdapter(Class type)
@@ -305,7 +258,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 					try
 					{
 						ServoyLog.logInfo("Browser url for editor: " + url);
-						if (!browser.isDisposed()) browser.setUrl(url + "&replacewebsocket=true");
+						showUrl(url);
 					}
 					catch (Exception ex)
 					{
@@ -530,10 +483,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	}
 
 	@Override
-	public void setFocus()
-	{
-		browser.setFocus();
-	}
+	public abstract void setFocus();
 
 	@Override
 	protected DeleteAction createDeleteAction()
@@ -611,6 +561,11 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		return showedContainer;
 	}
+
+	/**
+	 * @param url
+	 */
+	protected abstract void showUrl(final String url);
 
 	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener, IFormComponentListener
 	{

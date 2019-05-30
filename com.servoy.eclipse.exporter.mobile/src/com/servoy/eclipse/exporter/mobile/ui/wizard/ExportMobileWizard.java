@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -51,8 +50,9 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.FinishPage;
+import com.servoy.eclipse.ui.wizards.DirtySaveExportWizard;
 
-public class ExportMobileWizard extends Wizard implements IExportWizard
+public class ExportMobileWizard extends DirtySaveExportWizard implements IExportWizard
 {
 	private static final String PROPERTY_IS_OPEN_URL = "isOpenURL";
 

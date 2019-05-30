@@ -52,8 +52,10 @@ public class MediaNamePropertyController extends MediaPropertyController<String>
 					Media media = editingFlattenedSolution.getMedia(value);
 					if (media != null)
 					{
-						String mediaName = media.getName();
-						return new MediaNode(mediaName, mediaName, MediaNode.TYPE.IMAGE, editingFlattenedSolution.getSolution(), null, media);
+						String mediaFullPath = media.getName();//this may include the path
+						String mediaName = mediaFullPath != null && mediaFullPath.indexOf("/") > 0 ? mediaFullPath.substring(mediaFullPath.lastIndexOf("/") + 1)
+							: mediaFullPath;
+						return new MediaNode(mediaName, mediaFullPath, MediaNode.TYPE.IMAGE, editingFlattenedSolution.getSolution(), null, media);
 					}
 					return MediaLabelProvider.MEDIA_NODE_UNRESOLVED;
 				}

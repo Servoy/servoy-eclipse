@@ -383,6 +383,8 @@ public class EditorServiceHandler implements IServerService
 
 		});
 
+		configuredHandlers.put("setCssAnchoring", new SetCssAnchoringHandler(editorPart));
+
 	}
 
 	@Override

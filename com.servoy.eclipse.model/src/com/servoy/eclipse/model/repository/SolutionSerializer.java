@@ -644,6 +644,9 @@ public class SolutionSerializer
 		}
 	}
 
+	/**
+	 * I think this actually means "is a composite persist with child persists that get stored in the same file as the composite".
+	 */
 	public static boolean isCompositeWithItems(IPersist p)
 	{
 		if (p != null)
@@ -680,6 +683,9 @@ public class SolutionSerializer
 			p instanceof LayoutContainer;
 	}
 
+	/**
+	 * I think this is intended to mean "is an item, not a composite". (don't read it as 'composite that is also an item...')
+	 */
 	public static boolean isCompositeItem(IPersist p)
 	{
 		return !(p instanceof Media || p instanceof IRootObject || p instanceof Relation || p instanceof ValueList || p instanceof Form ||
@@ -1262,22 +1268,31 @@ public class SolutionSerializer
 			return name;
 		}
 
-		if (persist.getTypeID() == IRepository.FORMS)
+		return appendExtensionToFileName(persist.getTypeID(), name);
+	}
+
+	/**
+	 * Call this only for persist types on which {@link #isCompositeWithItems(IPersist)} called with the parent of that persist would return false. (so only for persist
+	 * types that have their own files...).
+	 */
+	public static String appendExtensionToFileName(int persistTypeID, String name)
+	{
+		if (persistTypeID == IRepository.FORMS)
 		{
 			return name + FORM_FILE_EXTENSION;
 		}
 
-		if (persist.getTypeID() == IRepository.RELATIONS)
+		if (persistTypeID == IRepository.RELATIONS)
 		{
 			return name + RELATION_FILE_EXTENSION;
 		}
 
-		if (persist.getTypeID() == IRepository.VALUELISTS)
+		if (persistTypeID == IRepository.VALUELISTS)
 		{
 			return name + VALUELIST_FILE_EXTENSION;
 		}
 
-		if (persist.getTypeID() == IRepository.TABLENODES)
+		if (persistTypeID == IRepository.TABLENODES)
 		{
 			return name + TABLENODE_FILE_EXTENSION;
 		}

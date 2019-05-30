@@ -32,6 +32,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
@@ -75,6 +76,7 @@ public class OpenWizardAction extends Action
 	{
 		try
 		{
+			if (EditorUtil.saveDirtyEditors(Display.getCurrent().getActiveShell(), true)) return;
 			final IWorkbenchWizard wizard = wizardClass.newInstance();
 
 			IStructuredSelection selection = StructuredSelection.EMPTY;
@@ -106,6 +108,7 @@ public class OpenWizardAction extends Action
 						closeTray();
 					}
 					getDialogBoundsSettings().put("tray_open", trayOpen);
+					wizard.dispose();
 					return super.close();
 				}
 

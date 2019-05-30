@@ -15,18 +15,28 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.core.quickfix.dbi;
+package com.servoy.eclipse.ui.wizards;
 
-/**Extension used to pass core exception to the ui level
- * @author vidma
+import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
+
+import com.servoy.eclipse.ui.util.EditorUtil;
+
+/**
+ * @author Marian
  *
  */
-public interface IMarkerResolutionExceptionProvider
+public abstract class DirtySaveExportWizard extends Wizard
 {
-	/**
-	 * Retrieve the stored exception;
-	 * @param - clearOnExit: if "true" - the stored exception is set to null.
-	 * @return - null if no exception is stored otherwise return the stored exception.
-	 */
-	public Exception retrieveException(boolean clearOnExit);
+	@Override
+	public void setContainer(IWizardContainer wizardContainer)
+	{
+		super.setContainer(wizardContainer);
+		//on cancel wizardContainer is null
+		if (wizardContainer != null && wizardContainer.getShell() != null) wizardContainer.getShell().getDisplay().asyncExec(() -> {
+			if (EditorUtil.saveDirtyEditors(getShell(), true)) ((WizardDialog)wizardContainer).close();
+		});
+
+	}
 }

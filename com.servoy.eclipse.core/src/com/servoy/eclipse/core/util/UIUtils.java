@@ -43,12 +43,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -75,6 +77,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -491,6 +494,67 @@ public class UIUtils
 				yes = true;
 			}
 			return yes;
+		}
+	}
+
+	public static class CheckGroupDialog extends Dialog
+	{
+
+		private final String title;
+		private final String[] options;
+		private final String[] values;
+		private Object[] selected;
+		private CheckboxTableViewer checkboxTableViewer;
+		private final String message;
+
+		public CheckGroupDialog(Shell parentShell, String title, String message, String[] options, String[] values)
+		{
+			super(parentShell);
+			setBlockOnOpen(true);
+			this.title = title;
+			this.options = options;
+			this.values = values;
+			this.message = message;
+		}
+
+		@Override
+		protected void configureShell(Shell sh)
+		{
+			super.configureShell(sh);
+			sh.setText(title);
+		}
+
+		@Override
+		protected Control createDialogArea(Composite parent)
+		{
+			GridLayout gridLayout = new GridLayout(1, false);
+			gridLayout.marginHeight = gridLayout.marginWidth = 20;
+			Composite composite = new Composite(parent, SWT.NONE);
+			composite.setLayout(gridLayout);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+			Label label = new Label(composite, SWT.NONE);
+			label.setText(message);
+
+			Table table = new Table(composite, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+			checkboxTableViewer = new CheckboxTableViewer(table);
+			checkboxTableViewer.setContentProvider(ArrayContentProvider.getInstance());
+			checkboxTableViewer.setInput(options);
+			checkboxTableViewer.setCheckedElements(values);
+			table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 4));
+			return super.createDialogArea(parent);
+		}
+
+		@Override
+		protected void okPressed()
+		{
+			selected = checkboxTableViewer.getCheckedElements();
+			super.okPressed();
+		}
+
+		public Object[] getSelected()
+		{
+			return selected;
 		}
 	}
 

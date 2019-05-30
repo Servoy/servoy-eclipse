@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.PlatformUI;
 
@@ -41,20 +42,22 @@ public class SolutionExplorerServerConfigSync implements IServerConfigListener
 	 */
 	public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 	{
-		try
-		{
-			IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
-			SolutionExplorerView solexView = null;
-			if (solexRef != null)
+		Display.getDefault().asyncExec(() -> {
+			try
 			{
-				solexView = (SolutionExplorerView)solexRef.getView(false);
-				solexView.enablePostgresDBCreation();
-				solexView.enableSybaseDBCreation();
+				IViewReference solexRef = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findViewReference(SolutionExplorerView.PART_ID);
+				SolutionExplorerView solexView = null;
+				if (solexRef != null)
+				{
+					solexView = (SolutionExplorerView)solexRef.getView(false);
+					solexView.enablePostgresDBCreation();
+					solexView.enableSybaseDBCreation();
+				}
 			}
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logInfo("Server configuration is changes but the solex couldn't be updated: " + e.getMessage());
-		}
+			catch (Exception e)
+			{
+				ServoyLog.logInfo("Server configuration is changes but the solex couldn't be updated: " + e.getMessage());
+			}
+		});
 	}
 }

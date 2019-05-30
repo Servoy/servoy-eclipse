@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -80,6 +81,7 @@ public class MediaNode
 
 	public MediaNode(String name, String path, TYPE type, IMediaProvider mediaProvider, String info, Media media)
 	{
+		if (name.contains(String.valueOf(IPath.SEPARATOR))) throw new IllegalArgumentException(name);
 		this.name = name;
 		this.path = path;
 		this.type = type;
@@ -164,11 +166,12 @@ public class MediaNode
 			{
 				continue;
 			}
-			String mediaName = mediaItem.getName();
-
-			if (mediaName != null && (mediaFolder == null || mediaName.startsWith(mediaFolder)))
+			String mediaFullPath = mediaItem.getName();//this may include the path
+			String mediaName = mediaFullPath != null && mediaFullPath.indexOf("/") > 0 ? mediaFullPath.substring(mediaFullPath.lastIndexOf("/") + 1)
+				: mediaFullPath;
+			if (mediaFullPath != null && (mediaFolder == null || mediaFullPath.startsWith(mediaFolder)))
 			{
-				String mediaPath = mediaFolder == null ? mediaName : mediaName.substring(mediaFolder.length());
+				String mediaPath = mediaFolder == null ? mediaFullPath : mediaFullPath.substring(mediaFolder.length());
 				int pathSepIdx = mediaPath.indexOf('/');
 				if (pathSepIdx != -1) // it is a directory
 				{
@@ -182,7 +185,7 @@ public class MediaNode
 				{
 					if (mediaNodeFilter.contains(TYPE.IMAGE))
 					{
-						node = new MediaNode(mediaPath, mediaName, TYPE.IMAGE, mediaProvider, "\"media:///" + mediaName + "\"", mediaItem);
+						node = new MediaNode(mediaName, mediaFullPath, TYPE.IMAGE, mediaProvider, "\"media:///" + mediaFullPath + "\"", mediaItem);
 					}
 				}
 

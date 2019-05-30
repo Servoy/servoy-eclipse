@@ -16,16 +16,19 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.11/</eclipse.url>
+		<orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository</orbit.url>
 		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.06/</dltk.url>
 		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/2019.06/</servoy-shiplibs.url>
 		<sqlexplorer.url>http://developer.servoy.com/sqlexplorer/</sqlexplorer.url>
 		<gef.url>http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/</gef.url>
 		<emf.url>http://download.eclipse.org/modeling/emf/emf/builds/release/2.16/</emf.url>
+		<chromium.url>http://developer.servoy.com/p2_repository/chromium/</chromium.url>
+		<cef.url>http://dl.maketechnology.io/chromium-cef/rls/repository</cef.url>
 	</properties>
 
 	<repositories>
 		<repository>
-			<id>servoy</id>
+			<id>eclipse</id>
 			<url>${eclipse.url}</url>
 			<layout>p2</layout>
 		</repository>
@@ -49,9 +52,24 @@
 			<url>${gef.url}</url>
 			<layout>p2</layout>
 		</repository>
-			<repository>
+		<repository>
 			<id>emf</id>
 			<url>${emf.url}</url>
+			<layout>p2</layout>
+		</repository>
+		<repository>
+			<id>chromium</id>
+			<url>${chromium.url}</url>
+			<layout>p2</layout>
+		</repository>
+		<repository>
+			<id>cef</id>
+			<url>${cef.url}</url>
+			<layout>p2</layout>
+		</repository>
+		<repository>
+			<id>orbit</id>
+			<url>${orbit.url}</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>

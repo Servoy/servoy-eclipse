@@ -50,9 +50,24 @@
 		    <unit id="de.inetsoftware.jlessc" version="1.8.0.201903221450"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.201902041412"/>
-		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201902041415"/>
+		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.201905081119"/>
+		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201905081121"/>
 		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.06/"/>
+	    </location>
+	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.201904250337"/>
+		    <repository location="http://dl.maketechnology.io/chromium-cef/rls/repository"/>
+	    </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <unit id="org.eclipse.swt.chromium.feature.feature.group" version="0.9.1.201905200749"/>
+		    <repository location="http://developer.servoy.com/p2_repository/chromium/"/>
+	    </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <unit id="com.github.jnr.ffi" version="2.1.4.v20180207-1730"/>
+		    <unit id="com.github.jnr.ffi.source" version="2.1.4.v20180207-1730"/>
+		    <unit id="jnr.x86asm" version="1.0.2.v201505052040"/>
+		    <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/egit/updates"/>
@@ -69,6 +84,5 @@
 		    <unit id="org.eclipse.jgit.ssh.apache.feature.group" version="5.3.0.201903130848-r"/>
 		    <unit id="org.eclipse.jgit.ssh.apache.source.feature.group" version="5.3.0.201903130848-r"/>
 	    </location>
-	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
     </locations>
 </target>

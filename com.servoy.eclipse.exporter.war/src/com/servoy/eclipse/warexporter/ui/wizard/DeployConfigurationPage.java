@@ -22,9 +22,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -52,6 +52,12 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 	private Button overwriteDBServerPropertiesBtn;
 	private Button overwriteAllPropertiesBtn;
 	private Text userHomeText;
+	private Button automaticallyUpgradeRepository;
+	private Button createTomcatContextXML;
+	private Button antiResourceLocking;
+	private Button clearReferencesStatic;
+	private Button clearReferencesStopThreads;
+	private Button clearReferencesStopTimerThreads;
 
 	public DeployConfigurationPage(String title, ExportWarModel exportModel)
 	{
@@ -67,27 +73,130 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 
-		Label lblDBProp = new Label(composite, SWT.NONE);
-		lblDBProp.setText("Overwrite DB servers properties");
-		lblDBProp.setToolTipText("Overwrite all DB servers related changes that were made on the previous deploy of the war");
+		createTomcatContextXML = new Button(composite, SWT.CHECK);
+		createTomcatContextXML.setText("Create Tomcat META-INF/context.xml");
+		createTomcatContextXML.setSelection(exportModel.isCreateTomcatContextXML());
+		createTomcatContextXML.setToolTipText("Adds a Tomcat specific META-INF/context.xml file in the war file which allows enabling the options below.\n" +
+			"Please note that the file is copied (and renamed) to $CATALINA_BASE/conf/[enginename]/[hostname]/ only the first time the war is deployed.\n" +
+			"Subsequent updates of META-INF/context.xml in the war file will be ignored by tomcat.");
+		createTomcatContextXML.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
+				clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
+				clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
+				antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
+				exportModel.setCreateTomcatContextXML(createTomcatContextXML.getSelection());
+			}
+		});
+		createTomcatContextXML.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
+
+		new Label(composite, SWT.NONE);
+		new Label(composite, SWT.NONE);
+		antiResourceLocking = new Button(composite, SWT.CHECK);
+		antiResourceLocking.setText("Set antiResourceLocking to true");
+		antiResourceLocking.setSelection(exportModel.isAntiResourceLocking());
+		antiResourceLocking.setToolTipText(
+			"Recomended for Tomcat instalations running on Windows. It avoids a file locking issue when undeploying the war. \n" +
+				"This will impact the startup time of the application.");
+		antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
+		antiResourceLocking.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setAntiResourceLocking(antiResourceLocking.getSelection());
+			}
+		});
+		antiResourceLocking.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+
+		new Label(composite, SWT.NONE);
+		new Label(composite, SWT.NONE);
+		clearReferencesStatic = new Button(composite, SWT.CHECK);
+		clearReferencesStatic.setText("Set clearReferencesStatic to true");
+		clearReferencesStatic.setSelection(exportModel.isClearReferencesStatic());
+		clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
+		clearReferencesStatic.setToolTipText(
+			"In order to avoid memory leaks, Tomcat will null out static fields from loaded classes after the application has been stopped.");
+		clearReferencesStatic.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setClearReferencesStatic(clearReferencesStatic.getSelection());
+			}
+		});
+		clearReferencesStatic.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+
+
+		new Label(composite, SWT.NONE);
+		new Label(composite, SWT.NONE);
+		clearReferencesStopThreads = new Button(composite, SWT.CHECK);
+		clearReferencesStopThreads.setText("Set clearReferencesStopThreads to true (USE WITH CARE)");
+		clearReferencesStopThreads.setSelection(exportModel.isClearReferencesStopThreads());
+		clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
+		clearReferencesStopThreads.setToolTipText(
+			"In order to avoid memory leaks, Tomcat will attempt to terminate threads that have been started by the web application.\n" +
+				"Still running threads are stopped via the deprecated Thread.stop() method.");
+		clearReferencesStopThreads.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setClearReferencesStopThreads(clearReferencesStopThreads.getSelection());
+			}
+		});
+		clearReferencesStopThreads.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+
+		new Label(composite, SWT.NONE);
+		new Label(composite, SWT.NONE);
+		clearReferencesStopTimerThreads = new Button(composite, SWT.CHECK);
+		clearReferencesStopTimerThreads.setText("Set clearReferencesStopTimerThreads to true");
+		clearReferencesStopTimerThreads.setSelection(exportModel.isClearReferencesStopTimerThreads());
+		clearReferencesStopTimerThreads.setToolTipText(
+			"In order to avoid memory leaks, Tomcat attempts to terminate java.util.Timer threads that have been started by the web application.\n" +
+				"Unlike standard threads, timer threads can be stopped safely although there may still be side-effects for the application.");
+
+		clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
+
+		clearReferencesStopTimerThreads.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setClearReferencesStopTimerThreads(clearReferencesStopTimerThreads.getSelection());
+			}
+		});
+		clearReferencesStopTimerThreads.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+
+		automaticallyUpgradeRepository = new Button(composite, SWT.CHECK);
+		automaticallyUpgradeRepository.setSelection(exportModel.isAutomaticallyUpgradeRepository());
+		automaticallyUpgradeRepository.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setAutomaticallyUpgradeRepository(automaticallyUpgradeRepository.getSelection());
+			}
+		});
+		automaticallyUpgradeRepository.setText("Automatically upgrade repository if needed.");
+		automaticallyUpgradeRepository.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
+
 		overwriteDBServerPropertiesBtn = new Button(composite, SWT.CHECK);
-		overwriteDBServerPropertiesBtn.setToolTipText(lblDBProp.getToolTipText());
 		overwriteDBServerPropertiesBtn.setSelection(exportModel.isOverwriteDeployedDBServerProperties());
 		overwriteDBServerPropertiesBtn.addSelectionListener(this);
-		GridData gdDBProp = new GridData(GridData.FILL_HORIZONTAL);
-		gdDBProp.horizontalSpan = 3;
-		overwriteDBServerPropertiesBtn.setLayoutData(gdDBProp);
+		overwriteDBServerPropertiesBtn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
+		overwriteDBServerPropertiesBtn.setText("Overwrite DB servers properties");
+		overwriteDBServerPropertiesBtn.setToolTipText("Overwrite all DB servers related changes that were made on the previous deploy of the war");
 
-		Label lblAllProp = new Label(composite, SWT.NONE);
-		lblAllProp.setText("Overwrite all Servoy properties");
-		lblAllProp.setToolTipText("Overwrite all servoy.properties changes that were made on the previous deploy of the war");
 		overwriteAllPropertiesBtn = new Button(composite, SWT.CHECK);
-		overwriteAllPropertiesBtn.setToolTipText(lblAllProp.getToolTipText());
 		overwriteAllPropertiesBtn.setSelection(exportModel.isOverwriteDeployedServoyProperties());
 		overwriteAllPropertiesBtn.addSelectionListener(this);
-		GridData gdAllProp = new GridData(GridData.FILL_HORIZONTAL);
-		gdAllProp.horizontalSpan = 3;
-		overwriteAllPropertiesBtn.setLayoutData(gdAllProp);
+		overwriteAllPropertiesBtn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
+		overwriteAllPropertiesBtn.setText("Overwrite all Servoy properties");
+		overwriteAllPropertiesBtn.setToolTipText("Overwrite all servoy.properties changes that were made on the previous deploy of the war");
 
 		Label label = new Label(composite, SWT.NONE);
 		label.setText("User home directory ");
@@ -105,12 +214,6 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 			"\nNOTE: This must be a writable directory where Servoy application related files will be stored.\nIf you leave it empty, the system user home directory will be used.");
 
 		setControl(composite);
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		return null;
 	}
 
 	@Override
@@ -190,6 +293,23 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		exportModel.setOverwriteDeployedServoyProperties(false);
 		exportModel.setUserHome(null);
 
+		automaticallyUpgradeRepository.setSelection(false);
+		exportModel.setAutomaticallyUpgradeRepository(false);
+
+		createTomcatContextXML.setSelection(false);
+		exportModel.setCreateTomcatContextXML(false);
+		antiResourceLocking.setSelection(false);
+		antiResourceLocking.setEnabled(false);
+		exportModel.setAntiResourceLocking(false);
+		clearReferencesStatic.setSelection(false);
+		clearReferencesStatic.setEnabled(false);
+		exportModel.setClearReferencesStatic(false);
+		clearReferencesStopThreads.setEnabled(false);
+		clearReferencesStopThreads.setSelection(false);
+		exportModel.setClearReferencesStopThreads(false);
+		clearReferencesStopTimerThreads.setSelection(false);
+		clearReferencesStopTimerThreads.setEnabled(false);
+		exportModel.setClearReferencesStopTimerThreads(false);
 	}
 
 	@Override

@@ -30,28 +30,19 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.SecurityInfo;
 
 public class TableSettingsComposite extends Group
 {
-
-	private final Button implicitButton;
-
-	private final Button explicitButton;
-
-	private final Label implicitLabel;
 
 	private final Button readButton;
 
@@ -79,40 +70,10 @@ public class TableSettingsComposite extends Group
 		tableEditor = te;
 		securityInfo = new HashMap<String, Integer>();
 
-		implicitButton = new Button(this, SWT.RADIO);
-		FormData fd_implicitButton;
-		fd_implicitButton = new FormData();
-		implicitButton.setLayoutData(fd_implicitButton);
-		implicitButton.setText("Implicit:");
-
-		explicitButton = new Button(this, SWT.RADIO);
-		final FormData fd_explicitButton = new FormData();
-		fd_explicitButton.right = new FormAttachment(100, 0);
-		fd_explicitButton.left = new FormAttachment(0, 9);
-		fd_explicitButton.top = new FormAttachment(0, 84);
-		fd_explicitButton.bottom = new FormAttachment(0, 104);
-		explicitButton.setLayoutData(fd_explicitButton);
-		explicitButton.setText("Explicit:");
-
-		implicitLabel = new Label(this, SWT.WRAP);
-		fd_implicitButton.top = new FormAttachment(implicitLabel, -20, SWT.TOP);
-		fd_implicitButton.bottom = new FormAttachment(implicitLabel, 0, SWT.TOP);
-		fd_implicitButton.left = new FormAttachment(0, 9);
-		final FormData fd_implicitLabel = new FormData();
-		fd_implicitLabel.bottom = new FormAttachment(explicitButton, -5, SWT.TOP);
-		fd_implicitLabel.right = new FormAttachment(100, 0);
-		fd_implicitLabel.left = new FormAttachment(0, 24);
-		fd_implicitLabel.top = new FormAttachment(0, 21);
-		implicitLabel.setLayoutData(fd_implicitLabel);
-		implicitLabel.setText("Default security (read, insert, update, and delete) unless overridden by another module.");
-
 		readButton = new Button(this, SWT.CHECK);
-		//fd_implicitButton.right = new FormAttachment(readButton, 0, SWT.RIGHT);
-		fd_implicitButton.right = new FormAttachment(100, 0);
 		final FormData fd_readButton = new FormData();
 		fd_readButton.left = new FormAttachment(0, 20);
-		fd_readButton.top = new FormAttachment(0, 109);
-		fd_readButton.bottom = new FormAttachment(0, 129);
+		fd_readButton.top = new FormAttachment(0, 9);
 		fd_readButton.right = new FormAttachment(100, 0);
 		readButton.setLayoutData(fd_readButton);
 		readButton.setText("Read");
@@ -121,8 +82,7 @@ public class TableSettingsComposite extends Group
 		final FormData fd_insertButton = new FormData();
 		fd_insertButton.right = new FormAttachment(100, 0);
 		fd_insertButton.left = new FormAttachment(0, 20);
-		fd_insertButton.top = new FormAttachment(0, 134);
-		fd_insertButton.bottom = new FormAttachment(0, 154);
+		fd_insertButton.top = new FormAttachment(0, 34);
 		insertButton.setLayoutData(fd_insertButton);
 		insertButton.setText("Insert");
 
@@ -130,8 +90,7 @@ public class TableSettingsComposite extends Group
 		final FormData fd_updateButton = new FormData();
 		fd_updateButton.left = new FormAttachment(0, 20);
 		fd_updateButton.right = new FormAttachment(100, 0);
-		fd_updateButton.bottom = new FormAttachment(0, 179);
-		fd_updateButton.top = new FormAttachment(0, 159);
+		fd_updateButton.top = new FormAttachment(0, 59);
 		updateButton.setLayoutData(fd_updateButton);
 		updateButton.setText("Update");
 
@@ -139,8 +98,7 @@ public class TableSettingsComposite extends Group
 		final FormData fd_deleteButton = new FormData();
 		fd_deleteButton.left = new FormAttachment(0, 20);
 		fd_deleteButton.right = new FormAttachment(100, 0);
-		fd_deleteButton.bottom = new FormAttachment(0, 204);
-		fd_deleteButton.top = new FormAttachment(0, 184);
+		fd_deleteButton.top = new FormAttachment(0, 84);
 		deleteButton.setLayoutData(fd_deleteButton);
 		deleteButton.setText("Delete");
 
@@ -148,8 +106,7 @@ public class TableSettingsComposite extends Group
 		final FormData fd_trackingButton = new FormData();
 		fd_trackingButton.left = new FormAttachment(0, 20);
 		fd_trackingButton.right = new FormAttachment(100, 0);
-		fd_trackingButton.bottom = new FormAttachment(0, 229);
-		fd_trackingButton.top = new FormAttachment(0, 209);
+		fd_trackingButton.top = new FormAttachment(0, 109);
 		trackingButton.setLayoutData(fd_trackingButton);
 		trackingButton.setText("Tracking(Insert/Update/Delete)");
 
@@ -157,15 +114,9 @@ public class TableSettingsComposite extends Group
 		final FormData fd_trackingSelectButton = new FormData();
 		fd_trackingSelectButton.left = new FormAttachment(0, 20);
 		fd_trackingSelectButton.right = new FormAttachment(100, 0);
-		fd_trackingSelectButton.bottom = new FormAttachment(0, 254);
-		fd_trackingSelectButton.top = new FormAttachment(0, 234);
+		fd_trackingSelectButton.top = new FormAttachment(0, 134);
 		trackingSelectButton.setLayoutData(fd_trackingSelectButton);
 		trackingSelectButton.setText("Tracking(Select)");
-
-		setDefaultValues();
-		implicitButton.setEnabled(false);
-		explicitButton.setEnabled(false);
-		implicitLabel.setEnabled(false);
 
 		SelectionAdapter selectionListener = new SelectionAdapter()
 		{
@@ -176,8 +127,6 @@ public class TableSettingsComposite extends Group
 				addGroupAccess();
 			}
 		};
-		implicitButton.addSelectionListener(selectionListener);
-		explicitButton.addSelectionListener(selectionListener);
 		readButton.addSelectionListener(selectionListener);
 		updateButton.addSelectionListener(selectionListener);
 		insertButton.addSelectionListener(selectionListener);
@@ -187,49 +136,15 @@ public class TableSettingsComposite extends Group
 
 	}
 
-	private void setDefaultValues()
-	{
-		explicitButton.setSelection(false);
-		implicitButton.setSelection(true);
-		readButton.setSelection(true);
-		insertButton.setSelection(true);
-		updateButton.setSelection(true);
-		deleteButton.setSelection(true);
-		trackingButton.setSelection(false);
-		trackingSelectButton.setSelection(false);
-		enableControls(false);
-	}
 
-	public void enableControls(boolean enable)
+	public void setValues(String group, boolean implicitSecurityNoRights)
 	{
-		readButton.setEnabled(enable);
-		insertButton.setEnabled(enable);
-		updateButton.setEnabled(enable);
-		deleteButton.setEnabled(enable);
-		trackingButton.setEnabled(enable);
-		trackingSelectButton.setEnabled(enable);
-		if (enable) enableTracking();
-	}
-
-	public void setValues(String group)
-	{
-		implicitButton.setEnabled(true);
-		explicitButton.setEnabled(true);
-		implicitLabel.setEnabled(true);
 		currentGroup = group;
 		if (currentGroup != null)
 		{
 			if (this.securityInfo.containsKey(currentGroup))
 			{
-				int i_access = securityInfo.get(currentGroup);
-				if (i_access == IRepository.IMPLICIT_TABLE_ACCESS)
-				{
-					setDefaultValues();
-				}
-				else
-				{
-					setRights(i_access);
-				}
+				setRights(securityInfo.get(currentGroup));
 			}
 			else
 			{
@@ -237,7 +152,7 @@ public class TableSettingsComposite extends Group
 					tableEditor.getTable());
 				if (securityInfo == null || securityInfo.size() == 0)
 				{
-					setDefaultValues();
+					setRights(implicitSecurityNoRights ? IRepository.IMPLICIT_TABLE_NO_ACCESS : IRepository.IMPLICIT_TABLE_ACCESS);
 				}
 				else
 				{
@@ -246,17 +161,10 @@ public class TableSettingsComposite extends Group
 				}
 			}
 		}
-		else
-		{
-			setDefaultValues();
-		}
 	}
 
 	private void setRights(int i_access)
 	{
-		enableControls(true);
-		implicitButton.setSelection(false);
-		explicitButton.setSelection(true);
 		readButton.setSelection(((i_access & IRepository.READ) != 0));
 		insertButton.setSelection(((i_access & IRepository.INSERT) != 0));
 		updateButton.setSelection(((i_access & IRepository.UPDATE) != 0));
@@ -265,31 +173,6 @@ public class TableSettingsComposite extends Group
 		trackingSelectButton.setSelection(((i_access & IRepository.TRACKING_VIEWS) != 0));
 	}
 
-	private void enableTracking()
-	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
-		IServer s = ServoyModel.getServerManager().getLogServer();
-		if (s != null)
-		{
-			try
-			{
-				ITable log = s.getTable("log");
-				if (log != null)
-				{
-					trackingButton.setEnabled(true);
-					trackingSelectButton.setEnabled(true);
-					return;
-				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
-
-		}
-		trackingButton.setEnabled(false);
-		trackingSelectButton.setEnabled(false);
-	}
 
 	@Override
 	protected void checkSubclass()
@@ -300,38 +183,29 @@ public class TableSettingsComposite extends Group
 	private void addGroupAccess()
 	{
 		int access = 0;
-		if (implicitButton.getSelection())
+		if (readButton.getSelection())
 		{
-			access = IRepository.READ + IRepository.INSERT + IRepository.UPDATE + IRepository.DELETE;
-			enableControls(false);
+			access += IRepository.READ;
 		}
-		else
+		if (insertButton.getSelection())
 		{
-			enableControls(true);
-			if (readButton.getSelection())
-			{
-				access += IRepository.READ;
-			}
-			if (insertButton.getSelection())
-			{
-				access += IRepository.INSERT;
-			}
-			if (updateButton.getSelection())
-			{
-				access += IRepository.UPDATE;
-			}
-			if (deleteButton.getSelection())
-			{
-				access += IRepository.DELETE;
-			}
-			if (trackingButton.getSelection())
-			{
-				access += IRepository.TRACKING;
-			}
-			if (trackingSelectButton.getSelection())
-			{
-				access += IRepository.TRACKING_VIEWS;
-			}
+			access += IRepository.INSERT;
+		}
+		if (updateButton.getSelection())
+		{
+			access += IRepository.UPDATE;
+		}
+		if (deleteButton.getSelection())
+		{
+			access += IRepository.DELETE;
+		}
+		if (trackingButton.getSelection())
+		{
+			access += IRepository.TRACKING;
+		}
+		if (trackingSelectButton.getSelection())
+		{
+			access += IRepository.TRACKING_VIEWS;
 		}
 		if (currentGroup != null)
 		{
