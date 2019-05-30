@@ -4123,7 +4123,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 																	IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
 																		VALUELIST_DATAPROVIDER_TYPE_MISMATCH, IMarker.PRIORITY_NORMAL, null, o);
 																	marker.setAttribute("Uuid", valuelistUUID.toString());
-																	marker.setAttribute("SolutionName", project.getName());
+																	marker.setAttribute("SolutionName", valuelist.getRootObject().getName());
 																}
 															}
 														}
