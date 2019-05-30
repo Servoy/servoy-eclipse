@@ -4023,7 +4023,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									Form parentForm = (Form)context;
 									if (!missingServers.containsKey(parentForm.getServerName()))
 									{
-										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
+										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(context, flattenedSolution);
 										IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
 											servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
 										if (dataProvider == null)
@@ -6395,21 +6395,30 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
 				Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-				if (persist instanceof IFormElement && persist.getParent() instanceof Form && ((Form)persist.getParent()).isFormComponent())
+				if (persist instanceof IFormElement)
 				{
-					String name = ((IFormElement)persist).getName();
-					if (name != null)
+					IPersist parent = persist;
+					while (parent != null)
 					{
-						String[] nameParts = name.split("\\$");
-						if (nameParts.length == 3)
+						parent = parent.getParent();
+						if (parent instanceof Form) break;
+					}
+					if (parent instanceof Form && ((Form)parent).isFormComponent())
+					{
+						String name = ((IFormElement)persist).getName();
+						if (name != null)
 						{
-							// look for real form to add marker on it
-							IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
-							if (form != null)
+							String[] nameParts = name.split("\\$");
+							if (nameParts.length == 3)
 							{
-								pathPair = SolutionSerializer.getFilePath(form, true);
-								path = new Path(pathPair.getLeft() + pathPair.getRight());
-								file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+								// look for real form to add marker on it
+								IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
+								if (form != null)
+								{
+									pathPair = SolutionSerializer.getFilePath(form, true);
+									path = new Path(pathPair.getLeft() + pathPair.getRight());
+									file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+								}
 							}
 						}
 					}
