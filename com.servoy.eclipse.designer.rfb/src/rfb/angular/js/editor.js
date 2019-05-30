@@ -737,7 +737,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			    $scope.$apply();
 			}
 
-			function redrawDecorators()
+			$scope.redrawDecorators = function()
 			{
 				var selection = $editorService.getEditor().getSelection();
 				if (selection && selection.length > 0) 
@@ -769,7 +769,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				adjustGlassPaneSize(width, height);
 				if (fixedSize)
 				{
-					redrawDecorators()
+					$scope.redrawDecorators()
 				}	
 			}
 			$scope.setContentSizeFull = function(redraw) {
@@ -789,7 +789,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				adjustGlassPaneSize();
 				if (redraw)
 				{
-					redrawDecorators()
+					$scope.redrawDecorators()
 				}	
 			}
 			$scope.getContentSize = function() {
@@ -1359,9 +1359,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		},
 
 		toggleShowWireframe: function() {
-			return wsSession.callService('formeditor', 'toggleShow', {
+			var res = wsSession.callService('formeditor', 'toggleShow', {
 				"show" : "showWireframeInDesigner"
-			}, false)
+			}, false);
+			this.getEditor().redrawDecorators();
+			return res;
 		},
 
 		createComponents: function(components) {
