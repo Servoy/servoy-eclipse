@@ -75,9 +75,7 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 							currentNode.isContainer = false;
 						} else {
 							currentNode.isContainer = node.attr('svy-layoutname') != undefined;
-						}	
-
-						currentNode.is
+						}
 
 						var offset = node.offset();
 						var display = 'block';
@@ -115,6 +113,14 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 							left: offset.left,
 							display: display
 						};
+						
+						currentNode.cls = "";
+						if (currentNode.isContainer && $editorService.getEditor().getEditorContentRootScope().showWireframe)
+						{
+							currentNode.svytitle = node.attr('svy-title');
+							currentNode.cls = "showWireframe";
+							currentNode.style['--svyBackgroundColor'] = node.css('backgroundColor');							
+						}
 					}); // end of foreach
 
 					for (var i = selection.length; i<$scope.nodes.length; i++) {

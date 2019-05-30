@@ -1,5 +1,4 @@
-<div class="menubar" ng-mousedown="onmousedown($event)">
-    <span class="containerType" ng-bind="getContainerType()"></span>
-    <span class="containerName" ng-bind="getContainerName()"></span>
-    <div class="containerAction" ng-repeat="action in actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></div>
+<div class="menubar" style="display:inline;float:right;" ng-mousedown="onmousedown($event)">
+	<span class="containerAction" ng-repeat="action in menu.actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></span>
+	<span class="containerAction" ng-repeat="action in deleteMenu.actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></span>
 </div>

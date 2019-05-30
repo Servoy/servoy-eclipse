@@ -334,7 +334,7 @@ public class CreateComponentHandler implements IServerService
 
 						for (IPersist element : childArray)
 						{
-							if (element == rightSibling)
+							if (element.getUUID().equals(rightSibling.getUUID()))
 							{
 								x = counter;
 								y = counter;
