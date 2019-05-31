@@ -3,7 +3,6 @@ package com.servoy.eclipse.exporter.electron.ui.wizard;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +14,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -30,6 +30,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
@@ -39,6 +40,9 @@ import com.servoy.j2db.util.Utils;
  */
 public class ExportElectronWizard extends Wizard implements IExportWizard
 {
+	
+	private static String REMOTE_URL = "http://localhost:8091/NGDesktopWS/";
+	
 	private ExportPage exportPage;
 	
 	public ExportElectronWizard()
@@ -57,10 +61,8 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean performFinish()
 	{
-		String solutionName = "NGDesktop_Installer"; //ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
-		final File outputFile = new File(exportPage.getSaveDir(), solutionName);
 		final String packageType = exportPage.getSelectedPackageType();
-
+		final String appDir = exportPage.getSaveDir();
 		final String platformType = exportPage.getSelectedPlatform();
 		final boolean isPermanent = exportPage.getIsPermanent();
 		final StringBuilder errorMsg = new StringBuilder();
@@ -68,11 +70,11 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		{
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				
 				String buildOptionsParams = platformType.charAt(0) + "/" +  packageType + "/" + String.valueOf(isPermanent);
 				monitor.beginTask("Generating and downloading electron application ...", 3);
+
 				HttpClient httpclient = HttpClients.createDefault();
-				HttpPost httpPost = new HttpPost("http://localhost:8091/NGDesktopWS/build/" + buildOptionsParams);
+				HttpPost httpPost = new HttpPost( REMOTE_URL + "build/" + buildOptionsParams );
 
 //				HttpGet httpget = new HttpGet("https://s3.eu-central-1.amazonaws.com/s3-artifactory-jenkins-team3/windows/NGDesktop_Installer.exe");
 
@@ -85,7 +87,7 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 					HttpEntity responseEntity = response.getEntity();
 					if (response.getStatusLine().getStatusCode() == 200)
 					{	
-						waitForEndpointsAndDownload(getStringFromInputStream(responseEntity.getContent(), errorMsg), errorMsg, outputFile);
+						waitForEndpointsAndDownload(getStringFromInputStream(responseEntity.getContent(), errorMsg), errorMsg, monitor, appDir);
 					}
 					else
 					{
@@ -148,10 +150,11 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		return stringBuilder.toString();
 	}
 	
-	private void waitForEndpointsAndDownload(String token, StringBuilder errorMsg, File outputFile ) {
+	private void waitForEndpointsAndDownload(String token, StringBuilder errorMsg, IProgressMonitor monitor, String saveDir) {
 		
 		HttpClient httpclient = HttpClients.createDefault();
-		HttpGet httpget = new HttpGet("http://localhost:8091/NGDesktopWS/status/" + token);
+		HttpGet httpget = new HttpGet(REMOTE_URL + "status/" + token);
+		monitor.worked(1);
 
 		try
 		{
@@ -163,20 +166,12 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 				String resp = getStringFromInputStream(responseEntity.getContent(), errorMsg);
 				if(resp.equals("Build not finished yet"))
 				{
-					System.out.println("Wait 5 sec then check again...");
-					wait(5000);
-					System.out.println("Checking again...");
-					waitForEndpointsAndDownload(token, errorMsg, outputFile);
+					TimeUnit.SECONDS.sleep(5);
+					waitForEndpointsAndDownload(token, errorMsg, monitor, saveDir);
 					return;
 				}
 				else {
-					//resp == endpoint, we have to download it.
-					FileOutputStream fos = new FileOutputStream(outputFile);
-					
-					Utils.streamCopy(responseEntity.getContent(), fos);
-					fos.flush();
-					Utils.close(responseEntity.getContent());
-					ExportElectronWizard.insertApplicationURL(outputFile, exportPage.getApplicationURL());
+					downloadElectron(token, errorMsg, monitor, saveDir);
 				}
 			}
 		}
@@ -184,6 +179,31 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		{
 			errorMsg.append(ex.toString());
 		}
+	}
+	
+	private void downloadElectron(String token, StringBuilder errorMsg, IProgressMonitor monitor, String saveDir) throws UnsupportedOperationException, IOException{
+		HttpClient httpclient = HttpClients.createDefault();
+		HttpGet httpget = new HttpGet(REMOTE_URL + "endpoints/" + token);
+
+		HttpResponse response = httpclient.execute(httpget);
+		HttpEntity responseEntity = response.getEntity();
+		
+		if(response.getStatusLine().getStatusCode() == 200) {
+			monitor.worked(1);
+			
+			String ext = exportPage.getSelectedPackageType().equals("tarball") ? ".tar.gz" : (exportPage.getSelectedPackageType().equals("zip") ? ".zip" : ".exe");
+			String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
+
+			Path p = Paths.get(saveDir, solutionName+ext);
+			final File outputFile = p.toFile();
+			
+			FileOutputStream fos = new FileOutputStream(outputFile);
+			Utils.streamCopy(responseEntity.getContent(), fos);
+			fos.flush();
+			Utils.close(responseEntity.getContent());
+			ExportElectronWizard.insertApplicationURL(outputFile, exportPage.getApplicationURL());
+		}
+
 
 	}
 	
