@@ -213,6 +213,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         				anchoringActions.push(
             					{
             						text: "Top/Left",
+            						getIconStyle: function(){ return {'background-image':"url(images/anchor-top-left.png)"}},
             						execute:function()
             						{
             							setCssAnchoring('0', '-1', '-1', '0');
@@ -222,6 +223,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         				anchoringActions.push(
             					{
             						text: "Top/Right",
+            						getIconStyle: function(){ return {'background-image':"url(images/anchor-top-right.png)"}},
             						execute:function()
             						{
             							setCssAnchoring('0', '0', '-1', '-1');
@@ -231,6 +233,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         				anchoringActions.push(
             					{
             						text: "Top/Left/Right",
+            						getIconStyle: function(){ return {'background-image':"url(images/anchor-top-left-right.png)"}},
             						execute:function()
             						{
             							setCssAnchoring('0', '0', '-1', '0');
@@ -240,6 +243,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         				anchoringActions.push(
             					{
             						text: "Bottom/Left",
+            						getIconStyle: function(){ return {'background-image':"url(images/anchor-bottom-left.png)"}},
             						execute:function()
             						{
             							setCssAnchoring('-1', '-1', '0', '0');
@@ -250,6 +254,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         				anchoringActions.push(
             					{
             						text: "Bottom/Right",
+            						getIconStyle: function(){ return {'background-image':"url(images/anchor-bottom-right.png)"}},
             						execute:function()
             						{
             							setCssAnchoring('-1', '0', '0', '-1');
