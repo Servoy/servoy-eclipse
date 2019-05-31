@@ -14,6 +14,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "center",
                         backgroundImage: 'url("images/insert_before.png")',
+                        cursor: "pointer",
                         width: "20px",
                         height: "18px"
                     },
@@ -37,6 +38,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "center",
                         backgroundImage: 'url("images/insert_after.png")',
+                        cursor: "pointer",
                         width: "20px",
                         height: "18px"
                     },
@@ -63,6 +65,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         backgroundColor: "#606060",
                         backgroundPosition: "center",
                         backgroundImage: 'url("images/copy_edit.png")',
+                        cursor: "pointer",
                         width: "20px",
                         height: "18px"
                     },
@@ -84,6 +87,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "center",
                         backgroundImage: 'url("images/zoom_in_menu.png")',
+                        cursor: "pointer",
                         width: "20px",
                         height: "18px"
                     },
@@ -105,6 +109,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "center",
                         backgroundImage: 'url("images/delete_in_menu.png")',
+                        cursor: "pointer",
                         width: "20px",
                         height: "18px"
                     },
