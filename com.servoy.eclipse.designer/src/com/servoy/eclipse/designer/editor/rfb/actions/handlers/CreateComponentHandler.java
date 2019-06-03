@@ -22,6 +22,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -699,6 +700,14 @@ public class CreateComponentHandler implements IServerService
 								if (dropTarget != null && !dropTarget.equals(initialDropTarget))
 								{
 									res.add(dropTarget);
+								}
+								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
+								{
+									LayoutContainer layoutContainer = (LayoutContainer)res.get(0);
+									List<IPersist> children = new ArrayList<>(((AbstractContainer)layoutContainer.getParent()).getAllObjectsAsList());
+									Collections.sort(children, PositionComparator.XY_PERSIST_COMPARATOR);
+									//only refresh if it's not the last element
+									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
 								}
 								IPersist[] result = res.toArray(new IPersist[0]);
 								if (fullRefreshNeeded)
