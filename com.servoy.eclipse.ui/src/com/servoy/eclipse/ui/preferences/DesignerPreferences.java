@@ -167,7 +167,7 @@ public class DesignerPreferences
 
 	public static final boolean SKIP_FUNCTION_BODY_PARSING_DEFAULT = true;
 
-	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = true;
+	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = false;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
