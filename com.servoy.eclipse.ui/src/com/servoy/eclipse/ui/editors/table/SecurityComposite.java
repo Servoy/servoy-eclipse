@@ -117,7 +117,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 		});
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(0, 10);
-		formData.left = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(100, -5);
 		btnNORights.setLayoutData(formData);
 
 		SashForm sashForm = new SashForm(this, SWT.HORIZONTAL);
