@@ -46,7 +46,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_INVISIBLE: "invisible",
 	GHOST_TYPE_GROUP: "group"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
-	$editorService, $webSocket, $q, $interval,$allowedChildren,$document) {
+	$editorService, $webSocket, $q, $interval,$allowedChildren,$document,$websocketConstants) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -1163,7 +1163,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var containerID =  $webSocket.getURLParameter("cont") ? ("&cont="+$webSocket.getURLParameter("cont")) : "";
 				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&clientnr=" + $webSocket.getURLParameter(
 						"c_clientnr") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
-					replacews + containerID;
+					 "&" + $websocketConstants.CLEAR_SESSION_PARAM + "=true" + replacews + containerID;
 			})
 			
 			function areAllGhostContainersVisible() {
