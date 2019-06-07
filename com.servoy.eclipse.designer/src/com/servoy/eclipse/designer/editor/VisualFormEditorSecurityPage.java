@@ -110,7 +110,7 @@ public class VisualFormEditorSecurityPage extends Composite
 		});
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(0, 10);
-		formData.left = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(100, -5);
 		btnNORights.setLayoutData(formData);
 
 		final SashForm sashForm = new SashForm(this, SWT.NONE);

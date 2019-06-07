@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -117,7 +118,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 		});
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(0, 10);
-		formData.left = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(100, -5);
 		btnNORights.setLayoutData(formData);
 
 		SashForm sashForm = new SashForm(this, SWT.HORIZONTAL);
@@ -234,9 +235,11 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 			}
 		});
 		EclipseUserManager eum = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
-		tableViewer.setInput(eum.getGroups(ApplicationServerRegistry.get().getClientId()));
+		IDataSet groups = eum.getGroups(ApplicationServerRegistry.get().getClientId());
+		tableViewer.setInput(groups);
 		tableViewer.setSorter(new ColumnsSorter(tableViewer, new TableColumn[] { nameColumn }, new Comparator[] { NameComparator.INSTANCE }));
 		eum.addUserGroupChangeListener(this);
+		if (groups.getRowCount() > 0) tableViewer.setSelection(new StructuredSelection(groups.getRow(0)[1]), true);
 	}
 
 	@Override
