@@ -46,8 +46,8 @@ public class ExportPage extends WizardPage
 	private Group platformGroup;
 	private Group packageGroup;
 	private Button permanent;
-	private String selectedPlatform = "linux";
-	private String selectedArchive = "zip";
+	private String selectedPlatform = "win";
+	private String selectedArchive = "tarball";
 
 	public ExportPage(ExportElectronWizard exportElectronWizard)
 	{
@@ -75,7 +75,7 @@ public class ExportPage extends WizardPage
 		
 		platformGroup = new Group(composite, SWT.NONE);
 		platformGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
-		
+
 		
 		Button winBtn = new Button(platformGroup, SWT.RADIO);
 		winBtn.setData("win");
@@ -117,9 +117,20 @@ public class ExportPage extends WizardPage
 				platformSelectionChangeListener((String)event.widget.getData());
 			}
 		});
-		 
-
 		
+		Button linuxMacBtn = new Button(platformGroup, SWT.RADIO);
+		linuxBtn.setText("Linux & Mac");
+		linuxBtn.setData("l_w");
+		
+		linuxBtn.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				platformSelectionChangeListener((String)event.widget.getData());
+			}
+		});
+		 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		platformGroup.setLayoutData(gd);
@@ -189,7 +200,7 @@ public class ExportPage extends WizardPage
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		saveDir.setLayoutData(gd);
-//		
+		
 		setControl(composite);
 	}
 	

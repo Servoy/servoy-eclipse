@@ -56,6 +56,14 @@ import com.servoy.j2db.util.Utils;
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
 	static final String NGDESKTOP_VERSION = "2019.06";
+	static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
+	static final String MAC_EXTENSION = ".app";
+	static final String WINDOWS_EXTENSION = ".exe";
+	//Linux doesn't have any extension
+
+	static final String ELECTRON_WINDOWS_BUILD_PLATFORM = "win";
+	static final String ELECTRON_MAC_BUILD_PLATFORM = "mac";
+	static final String ELECTRON_LINUX_BUILD_PLATFORM = "linux";
 
 	public static ITagResolver noReplacementResolver = new ITagResolver()
 	{
@@ -110,6 +118,11 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	}
 
 
+	/**
+	 * Method for writing into servoy.json details about electron app.
+	 * Here can be also changed icon, url, or used modules.
+	 */
+
 	private void writeElectronJsonFile(Solution solution, File stateLocation, String fileExtension, IProgressMonitor monitor) throws IOException
 	{
 
@@ -117,12 +130,14 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 		String osxContent = Utils.isAppleMacOS() ? File.separator + "Contents" : "";
 
+		//Mac folder structure is different, we should adapt url to that.
 		String fileUrl = osxContent + File.separator + (Utils.isAppleMacOS() ? "Resources" : "resources") + File.separator + "app" + File.separator + "config" +
 			File.separator + "servoy.json";
 
 
 		File f = new File(stateLocation.getAbsolutePath() + File.separator + fileUrl);
 
+		//Store servoy.json file as a JSONObject
 		StringBuffer jsonFile = new StringBuffer();
 		String line = null;
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
@@ -135,6 +150,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 		JSONObject options = (JSONObject)configFile.get("options");
 
+		//put url and other options in servoy.json(we can put image also here, check servoy.json to see available options.
 		options.put("url", solutionUrl);
 		configFile.put("options", options);
 
@@ -144,16 +160,17 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		BufferedWriter out = new BufferedWriter(file);
 		out.write(configFile.toString());
 		out.close();
+
+		//Now try opening servoyNGDesktop app.
 		try
 		{
-
 			String[] command;
 			if (Utils.isWindowsOS() || Utils.isLinuxOS())
-				command = new String[] { stateLocation.getAbsolutePath() + File.separator + "servoyngdesktop" + fileExtension };
+				command = new String[] { stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
 			else
 			{
 				command = new String[] { "/usr/bin/open", stateLocation.getAbsolutePath() +
-					(Utils.isAppleMacOS() ? "" : File.separator + "servoyngdesktop" + fileExtension) };
+					(Utils.isAppleMacOS() ? "" : File.separator + NG_DESKTOP_APP_NAME + fileExtension) };
 			}
 			monitor.beginTask("Open NGDesktop", 3);
 			Runtime.getRuntime().exec(command);
@@ -195,15 +212,15 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 			if (testAndStartDebugger())
 			{
-				String ngDesktopAppName = "servoyngdesktop";
-				String extension = Utils.isAppleMacOS() ? ".app" : (Utils.isWindowsOS() ? ".exe" : "");
 
-				String folderName = ngDesktopAppName + "-" + NGDESKTOP_VERSION +
-					((Utils.isAppleMacOS() ? "-mac" + extension : (Utils.isWindowsOS()) ? "-win" : "-linux"));
+				String extension = Utils.isAppleMacOS() ? MAC_EXTENSION : (Utils.isWindowsOS() ? WINDOWS_EXTENSION : "");
+
+				String folderName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION + "-" + ((Utils.isAppleMacOS() ? ELECTRON_MAC_BUILD_PLATFORM + extension
+					: (Utils.isWindowsOS()) ? ELECTRON_WINDOWS_BUILD_PLATFORM : ELECTRON_LINUX_BUILD_PLATFORM));
 
 				File stateLocation = Activator.getDefault().getStateLocation().append(folderName).toFile();
 				String pathToExecutable = (Utils.isAppleMacOS() ? stateLocation.getAbsolutePath()
-					: stateLocation.getAbsolutePath() + File.separator + ngDesktopAppName + extension);
+					: stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + extension);
 
 				File executable = new File(pathToExecutable);
 
@@ -270,8 +287,12 @@ class DownloadElectron implements IRunnableWithProgress
 			File f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
-			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-				(Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
+			URL fileUrl = new URL(
+				"http://download.servoy.com/ngdesktop/" + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
+					StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+					(Utils.isAppleMacOS() ? StartNGDesktopClientHandler.ELECTRON_MAC_BUILD_PLATFORM : (Utils.isWindowsOS()
+						? StartNGDesktopClientHandler.ELECTRON_WINDOWS_BUILD_PLATFORM : StartNGDesktopClientHandler.ELECTRON_LINUX_BUILD_PLATFORM)) +
+					".tar.gz");
 			ZipUtils.extractTarGZ(fileUrl, f);
 			monitor.worked(2);
 		}

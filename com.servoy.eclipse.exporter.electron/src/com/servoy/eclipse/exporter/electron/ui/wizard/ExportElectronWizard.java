@@ -73,10 +73,11 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 				String buildOptionsParams = platformType.charAt(0) + "/" +  packageType + "/" + String.valueOf(isPermanent);
 				monitor.beginTask("Generating and downloading electron application ...", 3);
 
+				//Prepare request for generating build.
 				HttpClient httpclient = HttpClients.createDefault();
 				HttpPost httpPost = new HttpPost( REMOTE_URL + "build/" + buildOptionsParams );
 
-//				HttpGet httpget = new HttpGet("https://s3.eu-central-1.amazonaws.com/s3-artifactory-jenkins-team3/windows/NGDesktop_Installer.exe");
+				//HttpGet httpget = new HttpGet("https://s3.eu-central-1.amazonaws.com/s3-artifactory-jenkins-team3/windows/NGDesktop_Installer.exe");
 
 				// execute the request
 				try
@@ -87,6 +88,7 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 					HttpEntity responseEntity = response.getEntity();
 					if (response.getStatusLine().getStatusCode() == 200)
 					{	
+						//If response is 200(the build started), we'll wait for build to be done
 						waitForEndpointsAndDownload(getStringFromInputStream(responseEntity.getContent(), errorMsg), errorMsg, monitor, appDir);
 					}
 					else
@@ -119,6 +121,7 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 			MessageDialog.openInformation(UIUtils.getActiveShell(), "Electron Export", "Export done successfully!");
 			return true;
 		}
+				
 	}
 	
 	@Override
@@ -154,8 +157,9 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		
 		HttpClient httpclient = HttpClients.createDefault();
 		HttpGet httpget = new HttpGet(REMOTE_URL + "status/" + token);
-		monitor.worked(1);
-
+		monitor.worked(2);
+		//We will do a request to server to check build status at each 5 seconds
+		//When server said build is ready, we'll start downloading it.
 		try
 		{
 			HttpResponse response = httpclient.execute(httpget);
@@ -166,12 +170,16 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 				String resp = getStringFromInputStream(responseEntity.getContent(), errorMsg);
 				if(resp.equals("Build not finished yet"))
 				{
+					//Build not finished, wait 5 seconds then try again...
 					TimeUnit.SECONDS.sleep(5);
 					waitForEndpointsAndDownload(token, errorMsg, monitor, saveDir);
 					return;
 				}
 				else {
+					//Build finished, we'll start downloading
 					downloadElectron(token, errorMsg, monitor, saveDir);
+					System.out.println("Finished download, now insert url");
+					//Now we'll insert desired applicationURL into app.
 				}
 			}
 		}
@@ -188,20 +196,24 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		HttpResponse response = httpclient.execute(httpget);
 		HttpEntity responseEntity = response.getEntity();
 		
+		//We'll send a request to server with extension we want to download
 		if(response.getStatusLine().getStatusCode() == 200) {
-			monitor.worked(1);
+			
 			
 			String ext = exportPage.getSelectedPackageType().equals("tarball") ? ".tar.gz" : (exportPage.getSelectedPackageType().equals("zip") ? ".zip" : ".exe");
 			String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
 
+			
 			Path p = Paths.get(saveDir, solutionName+ext);
 			final File outputFile = p.toFile();
-			
+			//Copying electron build into outputFile
 			FileOutputStream fos = new FileOutputStream(outputFile);
 			Utils.streamCopy(responseEntity.getContent(), fos);
 			fos.flush();
 			Utils.close(responseEntity.getContent());
 			ExportElectronWizard.insertApplicationURL(outputFile, exportPage.getApplicationURL());
+
+			monitor.worked(1);
 		}
 
 
@@ -210,11 +222,16 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 	
 	private static void insertApplicationURL(File outputFile, String applicationURL) throws IOException
 	{
+		
 	    Path zipFilePath = Paths.get(outputFile.getAbsolutePath());
+	    
+	    /** Mac electron build folder has a different structure...we have to adapt resources path..  */
+		Path pathToResourcesFolder = Paths.get(Utils.isAppleMacOS() ? "/Contents/Resources/" : "resources");
+
 	    try (FileSystem fs = FileSystems.newFileSystem(zipFilePath, null))
 	    {
-	        Path source = fs.getPath("/resources/app/config/servoy.json");
-	        Path temp = fs.getPath("/resources/app/config/servoy.json.temp");
+	        Path source = fs.getPath(pathToResourcesFolder.toString(), "app/config/servoy.json");
+	        Path temp = fs.getPath(pathToResourcesFolder.toString(), "app/config/servoy.json.temp");
 	        if (Files.exists(temp))
 	        {
 	            throw new IOException("temp file exists, generate another name");
@@ -235,7 +252,7 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		        String line;
 		        while ((line = br.readLine()) != null)
 		        {
-		            line = line.replace("https://demo.servoy.com/solutions/sampleGallery/index.html", applicationURL);
+		            line = line.replace("http://demo.servoy.com", applicationURL);
 		            bw.write(line);
 		            bw.newLine();
 		        }

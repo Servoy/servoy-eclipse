@@ -664,7 +664,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 		}
 		else if (argument.equals(" -b ") || argument.equals(" -pi ") || argument.equals(" -l ") || argument.equals(" -d "))
-			sb.append(argument).append("<none>");
+			sb.append(argument).append('"').append("<none>").append('"');
 	}
 
 }
