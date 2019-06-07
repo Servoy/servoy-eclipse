@@ -19,10 +19,12 @@ package com.servoy.eclipse.core.repository;
 
 import java.rmi.RemoteException;
 import java.util.Map;
+import java.util.Set;
 
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerInternal;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
 
@@ -30,7 +32,7 @@ import com.servoy.j2db.util.UUID;
  * Because unit tests isolate the workspace users from the tests, but depend on the app. server
  * user manager for many operations (which would normally reflect workspace users and not the possibly
  * altered test run users), we need to be able to temporarily switch the app. server user manager behaviour to that of the test client user manager.
- * 
+ *
  * This class can be used as a user manager that is able to switch between a "main" EclipseUserManager and some other (IUserManagerInternal && IUserManager).
  * @author acostescu
  */
@@ -80,14 +82,14 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 
 	public String checkPasswordForUserName(String clientId, String username, String password) throws RemoteException, ServoyException
 	{
-		return switchedTo == null ? eclipseUserManger.checkPasswordForUserName(clientId, username, password) : switchedTo.checkPasswordForUserName(clientId,
-			username, password);
+		return switchedTo == null ? eclipseUserManger.checkPasswordForUserName(clientId, username, password)
+			: switchedTo.checkPasswordForUserName(clientId, username, password);
 	}
 
 	public boolean checkPasswordForUserUID(String clientId, String userUID, String password) throws RemoteException, ServoyException
 	{
-		return switchedTo == null ? eclipseUserManger.checkPasswordForUserUID(clientId, userUID, password) : switchedTo.checkPasswordForUserUID(clientId,
-			userUID, password);
+		return switchedTo == null ? eclipseUserManger.checkPasswordForUserUID(clientId, userUID, password)
+			: switchedTo.checkPasswordForUserUID(clientId, userUID, password);
 	}
 
 	public String[] getUserGroups(String clientId, String userUID) throws RemoteException, ServoyException
@@ -95,11 +97,11 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 		return switchedTo == null ? eclipseUserManger.getUserGroups(clientId, userUID) : switchedTo.getUserGroups(clientId, userUID);
 	}
 
-	public Map<Object, Integer> getSecurityAccess(String clientId, int[] solution_id, int[] releaseNumber, String[] groups) throws RemoteException,
-		ServoyException
+	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, int[] solution_id, int[] releaseNumber, String[] groups)
+		throws RemoteException, ServoyException
 	{
-		return switchedTo == null ? eclipseUserManger.getSecurityAccess(clientId, solution_id, releaseNumber, groups) : switchedTo.getSecurityAccess(clientId,
-			solution_id, releaseNumber, groups);
+		return switchedTo == null ? eclipseUserManger.getSecurityAccess(clientId, solution_id, releaseNumber, groups)
+			: switchedTo.getSecurityAccess(clientId, solution_id, releaseNumber, groups);
 	}
 
 	public String getUserUID(String clientId, String username) throws ServoyException, RemoteException
@@ -179,14 +181,14 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 
 	public int createUser(String clientId, String userName, String password, String userUID, boolean alreadyHashed) throws ServoyException, RemoteException
 	{
-		return switchedTo == null ? eclipseUserManger.createUser(clientId, userName, password, userUID, alreadyHashed) : switchedTo.createUser(clientId,
-			userName, password, userUID, alreadyHashed);
+		return switchedTo == null ? eclipseUserManger.createUser(clientId, userName, password, userUID, alreadyHashed)
+			: switchedTo.createUser(clientId, userName, password, userUID, alreadyHashed);
 	}
 
 	public boolean setPassword(String clientId, String userUID, String password, boolean hashPassword) throws ServoyException, RemoteException
 	{
-		return switchedTo == null ? eclipseUserManger.setPassword(clientId, userUID, password, hashPassword) : switchedTo.setPassword(clientId, userUID,
-			password, hashPassword);
+		return switchedTo == null ? eclipseUserManger.setPassword(clientId, userUID, password, hashPassword)
+			: switchedTo.setPassword(clientId, userUID, password, hashPassword);
 	}
 
 	public boolean setUserUID(String clientId, String oldUserUID, String newUserUID) throws ServoyException, RemoteException
@@ -226,8 +228,8 @@ public class SwitchableEclipseUserManager implements IUserManagerInternal, IUser
 			: switchedTo.changeUserName(clientId, userUID, newUserName);
 	}
 
-	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID elementUUID, String solutionName) throws ServoyException,
-		RemoteException
+	public void setFormSecurityAccess(String clientId, String groupName, Integer accessMask, UUID elementUUID, String solutionName)
+		throws ServoyException, RemoteException
 	{
 		if (switchedTo == null) eclipseUserManger.setFormSecurityAccess(clientId, groupName, accessMask, elementUUID, solutionName);
 		else switchedTo.setFormSecurityAccess(clientId, groupName, accessMask, elementUUID, solutionName);

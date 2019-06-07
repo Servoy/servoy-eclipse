@@ -331,18 +331,27 @@ public class CreateComponentHandler implements IServerService
 					if (args.has("rightSibling"))
 					{
 						IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("rightSibling", null));
-						int counter = 1;
-
-						for (IPersist element : childArray)
+						if (rightSibling != null)
 						{
-							if (element.getUUID().equals(rightSibling.getUUID()))
+							int counter = 1;
+							for (IPersist element : childArray)
 							{
-								x = counter;
-								y = counter;
+								if (element.getUUID().equals(rightSibling.getUUID()))
+								{
+									x = counter;
+									y = counter;
+									counter++;
+								}
+								((ISupportBounds)element).setLocation(new Point(counter, counter));
 								counter++;
 							}
-							((ISupportBounds)element).setLocation(new Point(counter, counter));
-							counter++;
+						}
+						else
+						{
+							Debug.log("Could not find rightsibling with uuid '" + args.optString("rightSibling", null) + "', inserting on last position.");
+							Point location = ((ISupportBounds)childArray[childArray.length - 1]).getLocation();
+							x = location.x + 1;
+							y = location.y + 1;
 						}
 					}
 					else

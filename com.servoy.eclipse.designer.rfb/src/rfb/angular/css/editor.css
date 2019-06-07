@@ -332,7 +332,12 @@ html, body
 	width: auto;
 	float:right;
 	pointer-events: auto;
-	cursor: default;
+	cursor: pointer;
+	display:inline;
+	float:right;
+	overflow:hidden;
+	white-space:nowrap;
+	z-index: 10000;
 }
 
 .menubar .containerType {

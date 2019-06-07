@@ -146,8 +146,8 @@ public class RepositoryOperations
 				public void run()
 				{
 					final PasswordInputDialog repoPasswdDlg = new PasswordInputDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-						"Servoy Team Provider", "Please enter password for '" + projectTeamProperties.getUser() + "@" +
-							projectTeamProperties.getServerAddress() + "'", "", null);
+						"Servoy Team Provider",
+						"Please enter password for '" + projectTeamProperties.getUser() + "@" + projectTeamProperties.getServerAddress() + "'", "", null);
 					repoPasswdDlg.setBlockOnOpen(true);
 					if (repoPasswdDlg.open() == Window.OK)
 					{
@@ -181,8 +181,8 @@ public class RepositoryOperations
 	public void checkoutProject() throws Exception
 	{
 		IProject project = servoyTeamProvider.getProject();
-		TeamProviderProperties teamProviderProperties = new TeamProviderProperties(new File(project.getWorkspace().getRoot().getLocation().toFile(),
-			project.getName()));
+		TeamProviderProperties teamProviderProperties = new TeamProviderProperties(
+			new File(project.getWorkspace().getRoot().getLocation().toFile(), project.getName()));
 		teamProviderProperties.load();
 
 		boolean isResourceProject = false;
@@ -191,8 +191,8 @@ public class RepositoryOperations
 		{
 			String projectName = project.getName();
 			isResourceProject = projectName.equals(ServoyTeamProvider.generateResourceProjectName(teamProviderProperties.getServerAddress(), null)) ||
-				projectName.equals(ServoyTeamProvider.generateResourceProjectName(teamProviderProperties.getServerAddress(),
-					teamProviderProperties.getRepositoryUUID()));
+				projectName.equals(
+					ServoyTeamProvider.generateResourceProjectName(teamProviderProperties.getServerAddress(), teamProviderProperties.getRepositoryUUID()));
 			needToSetNature = true;
 		}
 		else
@@ -406,7 +406,8 @@ public class RepositoryOperations
 			}
 			else
 			{
-				Solution solution = (Solution)repo.getRootObject(pTeamProperties.getSolutionName(), IRepository.SOLUTIONS, pTeamProperties.getSolutionVersion());
+				Solution solution = (Solution)repo.getRootObject(pTeamProperties.getSolutionName(), IRepository.SOLUTIONS,
+					pTeamProperties.getSolutionVersion());
 				if (solution != null)
 				{
 					//					solution.setRevisionNumber(projectTeamProperties.getSolutionVersion());
@@ -678,7 +679,7 @@ public class RepositoryOperations
 		for (String groupName : groupsNames)
 		{
 			Map<Object, Integer> securityAccess = userManager.getSecurityAccess(rap.getClientID(), new int[] { solution.getID() },
-				new int[] { solution.getReleaseNumber() }, new String[] { groupName });
+				new int[] { solution.getReleaseNumber() }, new String[] { groupName }).getLeft();
 			Iterator<Map.Entry<Object, Integer>> securityAccessIte = securityAccess.entrySet().iterator();
 			Map.Entry<Object, Integer> securityEntry;
 
@@ -745,7 +746,8 @@ public class RepositoryOperations
 		// serialize table security entries
 		for (String groupName : groupsNames)
 		{
-			Map<Object, Integer> securityAccess = userManager.getSecurityAccess(rap.getClientID(), new int[0], new int[0], new String[] { groupName });
+			Map<Object, Integer> securityAccess = userManager.getSecurityAccess(rap.getClientID(), new int[0], new int[0],
+				new String[] { groupName }).getLeft();
 			Iterator<Map.Entry<Object, Integer>> securityAccessIte = securityAccess.entrySet().iterator();
 			Map.Entry<Object, Integer> securityEntry;
 
@@ -934,9 +936,9 @@ public class RepositoryOperations
 		for (String groupName : groupsNames)
 		{
 			Map<Object, Integer> securityAccess = eclipseUserManager.getSecurityAccess(ApplicationServerRegistry.get().getClientId(), new int[0], new int[0],
-				new String[] { groupName });
+				new String[] { groupName }).getLeft();
 			Map<Object, Integer> remoteSecurityAccess = remoteUserManager.getSecurityAccess(repositoryAP.getClientID(), new int[0], new int[0],
-				new String[] { groupName });
+				new String[] { groupName }).getLeft();
 			Iterator<Map.Entry<Object, Integer>> securityAccessIte;
 			Map.Entry<Object, Integer> securityEntry;
 
@@ -1011,10 +1013,10 @@ public class RepositoryOperations
 		for (String groupName : groupsNames)
 		{
 			Map<Object, Integer> securityAccess = eclipseUserManager.getSecurityAccess(ApplicationServerRegistry.get().getClientId(),
-				new int[] { localSolution.getID() }, new int[] { localSolution.getReleaseNumber() }, new String[] { groupName });
+				new int[] { localSolution.getID() }, new int[] { localSolution.getReleaseNumber() }, new String[] { groupName }).getLeft();
 			Map<Object, Integer> remoteSecurityAccess = null;
 			if (remoteSolution != null) remoteSecurityAccess = remoteUserManager.getSecurityAccess(rap.getClientID(), new int[] { remoteSolution.getID() },
-				new int[] { remoteSolution.getReleaseNumber() }, new String[] { groupName });
+				new int[] { remoteSolution.getReleaseNumber() }, new String[] { groupName }).getLeft();
 			Iterator<Map.Entry<Object, Integer>> securityAccessIte;
 			Map.Entry<Object, Integer> securityEntry;
 
@@ -1108,7 +1110,7 @@ public class RepositoryOperations
 
 	/**
 	 * Commit the given resources to the given depth by replacing the remote contents with the local workspace contents.
-	 * 
+	 *
 	 * @param traversals the traversals that cover the resources to check in
 	 * @param overrideIncoming indicate whether incoming remote changes should be replaced
 	 * @param progress a progress monitor
@@ -1136,7 +1138,7 @@ public class RepositoryOperations
 
 	/**
 	 * Commit the given resources to the given depth by replacing the remote contents with the local workspace contents.
-	 * 
+	 *
 	 * @param resources the resources
 	 * @param depth the depth of the operation
 	 * @param overrideIncoming indicate whether incoming remote changes should be replaced
@@ -1228,7 +1230,7 @@ public class RepositoryOperations
 
 	/**
 	 * Put the file if the sync state allows it.
-	 * 
+	 *
 	 * @param localFile the local file
 	 * @param overrideIncoming whether incoming changes should be overwritten
 	 * @param progress a progress monitor
@@ -1408,7 +1410,7 @@ public class RepositoryOperations
 	/**
 	 * Make the local state of the traversals match the remote state by getting any out-of-sync resources. The overrideOutgoing flag is used to indicate whether
 	 * locally modified files should also be replaced or left alone.
-	 * 
+	 *
 	 * @param traversals the traversals that cover the resources to get
 	 * @param overrideOutgoing whether locally modified resources should be replaced
 	 * @param progress a progress monitor
@@ -1435,7 +1437,7 @@ public class RepositoryOperations
 	/**
 	 * Make the local state of the project match the remote state by getting any out-of-sync resources. The overrideOutgoing flag is used to indicate whether
 	 * locally modified files should also be replaced or left alone.
-	 * 
+	 *
 	 * @param resources the resources to get
 	 * @param depth the depth of the operation
 	 * @param overrideOutgoing whether locally modified resources should be replaced
@@ -1537,7 +1539,7 @@ public class RepositoryOperations
 				if (!folder.exists() && remote != null)
 				{
 					// Create the local folder
-					ResourcesUtils.createParentContainers(folder, false); //folder.create(false, true, progress);					
+					ResourcesUtils.createParentContainers(folder, false); //folder.create(false, true, progress);
 					synchronizer.setBaseBytes(folder, remote.asBytes());
 				}
 				else if (folder.exists() && remote == null)
