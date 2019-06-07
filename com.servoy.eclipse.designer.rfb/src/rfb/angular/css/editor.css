@@ -337,6 +337,7 @@ html, body
 	float:right;
 	overflow:hidden;
 	white-space:nowrap;
+	z-index: 10000;
 }
 
 .menubar .containerType {
