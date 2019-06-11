@@ -1365,6 +1365,32 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			this.getEditor().redrawDecorators();
 			return res;
 		},
+		
+		isShowSolutionLayoutsCss: function() {
+			return wsSession.callService('formeditor', 'getBooleanState', {
+				"showSolutionLayoutsCss": true
+			}, false)
+		},
+		
+		toggleShowSolutionLayoutsCss: function() {
+			var res =  wsSession.callService('formeditor', 'toggleShow', {
+				"show" : "showSolutionLayoutsCssInDesigner"
+			}, false);
+			this.getEditor().redrawDecorators();
+			return res;
+		},
+		
+		isShowSolutionCss: function() {
+			return wsSession.callService('formeditor', 'getBooleanState', {
+				"showSolutionCss": true
+			}, false)
+		},
+		
+		toggleShowSolutionCss: function() {
+			return wsSession.callService('formeditor', 'toggleShow', {
+				"show" : "showSolutionCssInDesigner"
+			}, false);
+		},
 
 		createComponents: function(components) {
 			wsSession.callService('formeditor', 'createComponents', components, true)

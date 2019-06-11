@@ -263,6 +263,18 @@ public class EditorServiceHandler implements IServerService
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER))
 							: Boolean.FALSE;
 					}
+					if (args.has("showSolutionLayoutsCss"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_SOLUTION_LAYOUTS_CSS_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_SOLUTION_LAYOUTS_CSS_IN_ANGULAR_DESIGNER))
+							: Boolean.TRUE;
+					}
+					if (args.has("showSolutionCss"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_SOLUTION_CSS_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_SOLUTION_CSS_IN_ANGULAR_DESIGNER))
+							: Boolean.TRUE;
+					}
 					if (args.has("showHighlight"))
 					{
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER)

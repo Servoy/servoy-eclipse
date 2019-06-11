@@ -109,6 +109,8 @@ angular.module('editorContent',['servoyApp'])
     return dragCloneDiv;
   }
   $rootScope.showWireframe = false;
+  $rootScope.showSolutionLayoutsCss = true;
+  $rootScope.showSolutionCss = true;
   $solutionSettings.enableAnchoring = false;
   $scope.solutionSettings = $solutionSettings;
   var realConsole = $window.console;
