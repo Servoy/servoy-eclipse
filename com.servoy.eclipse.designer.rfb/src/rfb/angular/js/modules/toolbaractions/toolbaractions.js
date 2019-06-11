@@ -45,6 +45,18 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			btnHideInheritedElements.state = result;
 			$editorService.hideInheritedElements(result);
 		});		
+		var solutionLayoutsCssPromise = $editorService.isShowSolutionLayoutsCss();
+		solutionLayoutsCssPromise.then(function(result) {
+			if (!result) btnSolutionCss.text = "Components CSS";
+			editorScope.getEditorContentRootScope().showSolutionLayoutsCss = result;
+			editorScope.getEditorContentRootScope().$digest();
+		});
+		var solutionCssPromise = $editorService.isShowSolutionCss();
+		solutionCssPromise.then(function(result) {
+			if (!result) btnSolutionCss.text = "No CSS";
+			editorScope.getEditorContentRootScope().showSolutionCss = result;
+			editorScope.getEditorContentRootScope().$digest();
+		});
 	});
 	var btnPlaceField = {
 		text: "Place Field Wizard",
@@ -149,9 +161,75 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 		}
 	};
 
+	function toggleShowSolutionLayoutsCss()
+	{
+		var promise = $editorService.toggleShowSolutionLayoutsCss();
+		promise.then(function(result) {
+			editorScope.getEditorContentRootScope().showSolutionLayoutsCss = result;
+			editorScope.getEditorContentRootScope().$apply();
+			$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
+		});
+	};
+	
+	function toggleShowSolutionCss()
+	{
+		var promise = $editorService.toggleShowSolutionCss();
+		promise.then(function(result) {
+			editorScope.getEditorContentRootScope().showSolutionCss = result;
+			editorScope.getEditorContentRootScope().$apply();
+			$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
+		});
+	};
+	
+	var btnSolutionCss = {
+			text: "Layouts & Components CSS",
+			tooltip: "Enable/disable solution css",
+			enabled: true,
+			onclick: function(selection) {
+				if (selection == "Layouts & Components CSS")
+				{	
+					if (!editorScope.getEditorContentRootScope().showSolutionCss)
+					{
+						toggleShowSolutionCss();
+					}
+					if (!editorScope.getEditorContentRootScope().showSolutionLayoutsCss)
+					{
+						toggleShowSolutionLayoutsCss();
+					}
+				}
+				if (selection == "Components CSS")
+				{
+					if (!editorScope.getEditorContentRootScope().showSolutionCss)
+					{
+						toggleShowSolutionCss();
+					}
+					if (editorScope.getEditorContentRootScope().showSolutionLayoutsCss)
+					{
+						toggleShowSolutionLayoutsCss();
+					}
+				}
+				if (selection == "No CSS")
+				{
+					if (editorScope.getEditorContentRootScope().showSolutionCss)
+					{
+						toggleShowSolutionCss();
+					}
+					/*if (editorScope.getEditorContentRootScope().showSolutionLayoutsCss)
+					{
+						toggleShowSolutionLayoutsCss();
+					}*/
+				}
+			},
+			list: ["Layouts & Components CSS", "Components CSS", "No CSS"],
+			onselection: function(selection) {
+				this.onclick(selection);
+				return selection;
+			}
+		};
 
 	$toolbar.add(btnToggleShowData, TOOLBAR_CATEGORIES.SHOW_DATA);
 	$toolbar.add(btnToggleDesignMode, TOOLBAR_CATEGORIES.DESIGN_MODE);
+	$toolbar.add(btnSolutionCss, TOOLBAR_CATEGORIES.DESIGN_MODE);
 
 	var btnTabSequence = {
 		text: "Set tab sequence",
