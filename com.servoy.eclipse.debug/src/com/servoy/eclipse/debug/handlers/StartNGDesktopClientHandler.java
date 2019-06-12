@@ -26,6 +26,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -176,31 +177,18 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	}
 
-	private byte[] getBytes(InputStream in, File writeFile) throws IOException
+	private byte[] getBytes(InputStream in) throws IOException
 	{
-		FileOutputStream fileOutputStream = null;
 		try
 		{
-			byte versionBuffer[] = new byte[BUFFER_SIZE];
+			byte versionBuffer[] = new byte[BUFFER_SIZE]; //default initialize to '0'
 			int bytesRead = in.read(versionBuffer, 0, BUFFER_SIZE);
-			if (bytesRead != -1)
-			{
-				if (writeFile != null)
-				{
-					File parentFile = writeFile.getParentFile();
-					parentFile.mkdirs(); //create path to file it not previously exists;
-					fileOutputStream = new FileOutputStream(writeFile);
-					fileOutputStream.write(versionBuffer, 0, bytesRead);
-				}
-				return versionBuffer;
-			}
+			return bytesRead != -1 ? Arrays.copyOf(versionBuffer, bytesRead) : null;
 		}
 		finally
 		{
-			if (fileOutputStream != null) fileOutputStream.close();
 			in.close();
 		}
-		return null;
 	}
 
 	/*
@@ -216,20 +204,18 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
 			File currentVersionFile = new File(parentFile.getAbsolutePath() + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
 				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
-			File remoteVersionFile = new File(parentFile.getAbsolutePath() + File.separator + "remoteversion" +
-				StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION + StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
 
-			byte[] remoteBuf = getBytes(fileUrl.openStream(), remoteVersionFile);
-			byte[] currentBuf = currentVersionFile.exists() ? getBytes(new FileInputStream(currentVersionFile), null) : null;
+			byte[] remoteBuf = getBytes(fileUrl.openStream());
+			byte[] currentBuf = currentVersionFile.exists() ? getBytes(new FileInputStream(currentVersionFile)) : null;
 			if (!Arrays.equals(remoteBuf, currentBuf))
 			{
 				//TODO: notify user. if (user decide to download higher version) {
 				Files.walk(location.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile).peek(System.out::println).forEach(File::delete);
-				currentVersionFile.delete();
-				remoteVersionFile.renameTo(currentVersionFile); //on further download error - this will be deleted
+				OutputStream versionStream = new FileOutputStream(currentVersionFile);
+				versionStream.write(remoteBuf); //this will overwrite the old content
+				versionStream.close();
 				//} TODO: end
-			} //else
-			remoteVersionFile.delete(); //nothing has changed
+			}
 		}
 		catch (IOException e)
 		{
