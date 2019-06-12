@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -79,7 +79,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	private static String selectedWebPackageIndex = MAIN_WEBPACKAGEINDEX;
 	private AvoidMultipleExecutionsJob reloadWPMSpecsJob;
 
-	private static HashMap<String, Pair<Long, List<JSONObject>>> remotePackagesCache = new HashMap<String, Pair<Long, List<JSONObject>>>();
+	private static ConcurrentHashMap<String, Pair<Long, List<JSONObject>>> remotePackagesCache = new ConcurrentHashMap<String, Pair<Long, List<JSONObject>>>();
 
 	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
 	{
@@ -319,7 +319,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			checkForNewRemotePackagesJob.setPriority(Job.LONG);
 			checkForNewRemotePackagesJob.schedule();
 		}
-		return sortPackages(remotePackages);
+		return remotePackages;
 	}
 
 	private static synchronized List<JSONObject> getRemotePackages(String webPackageIndex, boolean useCache) throws Exception
@@ -404,6 +404,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 					}
 				}
 			}
+			sortPackages(result);
 			if (useCache)
 			{
 				remotePackagesCache.put(webPackageIndex, new Pair<Long, List<JSONObject>>(Long.valueOf(getChecksum(result)), result));
