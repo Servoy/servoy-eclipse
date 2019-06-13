@@ -20,11 +20,19 @@ package com.servoy.eclipse.debug.handlers;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,7 +63,10 @@ import com.servoy.j2db.util.Utils;
  */
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
-	static final String NGDESKTOP_VERSION = "2019.06";
+	static final String NGDESKTOP_MAJOR_VERSION = "2019";
+	static final String NGDESKTOP_MINOR_VERSION = "06";
+	static final String NGDESKTOP_VERSION = NGDESKTOP_MAJOR_VERSION + "." + NGDESKTOP_MINOR_VERSION;
+	static private int BUFFER_SIZE = 1024;
 	static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
 	static final String MAC_EXTENSION = ".app";
 	static final String WINDOWS_EXTENSION = ".exe";
@@ -183,6 +194,52 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	}
 
+	private byte[] getBytes(InputStream in) throws IOException
+	{
+		try
+		{
+			byte versionBuffer[] = new byte[BUFFER_SIZE]; //default initialize to '0'
+			int bytesRead = in.read(versionBuffer, 0, BUFFER_SIZE);
+			return bytesRead != -1 ? Arrays.copyOf(versionBuffer, bytesRead) : null;
+		}
+		finally
+		{
+			in.close();
+		}
+	}
+
+	/*
+	 * Compare the remote NGDesktop version with current version and delete current if it's the case. Deleting current version will enforce remote version
+	 * download
+	 */
+	private void checkForHigherVersion(File location)
+	{
+		try
+		{
+			File parentFile = location.getParentFile();
+			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
+				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
+			File currentVersionFile = new File(parentFile.getAbsolutePath() + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
+				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
+
+			byte[] remoteBuf = getBytes(fileUrl.openStream());
+			byte[] currentBuf = currentVersionFile.exists() ? getBytes(new FileInputStream(currentVersionFile)) : null;
+			if (!Arrays.equals(remoteBuf, currentBuf))
+			{
+				//TODO: notify user. if (user decide to download higher version) {
+				Files.walk(location.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+				OutputStream versionStream = new FileOutputStream(currentVersionFile);
+				versionStream.write(remoteBuf); //this will overwrite the old content
+				versionStream.close();
+				//} TODO: end
+			}
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError("Exception while checking for higher version: ", e);
+		}
+	}
+
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
 		StartClientHandler.setLastCommand(StartClientHandler.START_NG_DESKTOP_CLIENT);
@@ -223,6 +280,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 					: stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + extension);
 
 				File executable = new File(pathToExecutable);
+				checkForHigherVersion(executable.getParentFile());
 
 				if (executable.exists())
 				{
@@ -280,11 +338,12 @@ class DownloadElectron implements IRunnableWithProgress
 	@Override
 	public void run(IProgressMonitor monitor)
 	{
+		File f = null;
 		try
 		{
 			monitor.beginTask("Downloading NGDesktop executable", 3);
 
-			File f = new File(Activator.getDefault().getStateLocation().toOSString());
+			f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
 			URL fileUrl = new URL(
@@ -298,6 +357,11 @@ class DownloadElectron implements IRunnableWithProgress
 		}
 		catch (Exception e)
 		{
+			//on download error delete current version file, this will enforce a new download on the next attempt to run the solution
+			File currentVersionFile = new File(f.getAbsolutePath() + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
+				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
+			if (currentVersionFile.exists()) currentVersionFile.delete();
+
 			ServoyLog.logError("Cannot find Electron in download center", e);
 		}
 	}
