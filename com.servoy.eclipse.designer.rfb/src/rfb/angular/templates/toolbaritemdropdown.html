@@ -1,9 +1,11 @@
 <div class="btn-group">
-	<button type="button" title="{{model.tooltip}}" class="btn btn-xs" ng-click="model.onclick(model.text)" ng-disabled="!model.enabled">{{model.text}}</button>
-	<button type="button" class="btn btn-xs dropdown-toggle" data-toggle="dropdown" ng-disabled="!model.enabled">
-		<span class="caret"></span>
+	<button type="button" ng-if="!model.getIconStyle" title="{{model.tooltip}}" class="btn btn-xs" ng-click="model.onclick(model.text)" ng-disabled="!model.enabled">{{model.getIconStyle ? "" : model.text}}</button>
+	<button type="button" class="btn" ng-class="model.getIconStyle ? '' : 'btn-xs dropdown-toggle'" data-toggle="dropdown" ng-disabled="!model.enabled" 
+	style="background-repeat:no-repeat;background-position:left center;min-width:26px;height:24px;"
+	ng-style="model.getIconStyle(model.text)" ng-click="model.onclick(model.text)" title="{{model.tooltip}}">
+		<span ng-class="model.getIconStyle ? '' : 'caret'"></span>
 	</button>
 	<ul class="dropdown-menu dropdown-menu-right" role="menu" style="min-width:inherit;">
-		<li ng-repeat="item in model.list"><a href="#" ng-click="onselection(item)">{{item}}</a></li> 
+		<li ng-repeat="item in model.list"><a href="#" style="height:24px;background-repeat:no-repeat;background-position:left center;" ng-style="item.iconStyle" ng-click="onselection(item.text)">{{item.text ? item.text : item}}</a></li> 
 	</ul>
 </div>
