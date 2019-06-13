@@ -235,10 +235,10 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 					{
 						toggleShowSolutionCss();
 					}
-					/*if (editorScope.getEditorContentRootScope().showSolutionLayoutsCss)
+					if (!editorScope.getEditorContentRootScope().showSolutionLayoutsCss)
 					{
 						toggleShowSolutionLayoutsCss();
-					}*/
+					}
 				}
 			},
 			list: [{"text":TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS, "iconStyle":{'background-image':TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS_ICON}},
