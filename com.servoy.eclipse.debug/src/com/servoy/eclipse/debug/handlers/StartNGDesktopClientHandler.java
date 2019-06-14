@@ -210,7 +210,10 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			if (!Arrays.equals(remoteBuf, currentBuf))
 			{
 				//TODO: notify user. if (user decide to download higher version) {
-				Files.walk(location.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+				if (location.exists())
+				{
+					Files.walk(location.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+				}
 				OutputStream versionStream = new FileOutputStream(currentVersionFile);
 				versionStream.write(remoteBuf); //this will overwrite the old content
 				versionStream.close();
