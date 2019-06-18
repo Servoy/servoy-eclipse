@@ -472,9 +472,9 @@ public class TreeSelectViewer extends StructuredViewer implements IStatusProvide
 			{
 				text.setForeground(valid ? textForeground : text.getDisplay().getSystemColor(SWT.COLOR_RED));
 			}
-			if (openButton != null && !valid)
+			if (openButton != null)
 			{
-				openButton.setEnabled(false);
+				openButton.setEnabled(valid && canOpen());
 			}
 
 			fireStateChange(valid);

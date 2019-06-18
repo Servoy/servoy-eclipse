@@ -621,15 +621,6 @@ public class ValueListEditor extends PersistEditor
 		}
 
 		doRefresh();
-
-		Display.getCurrent().asyncExec(new Thread()
-		{
-			@Override
-			public void run()
-			{
-				globalMethodSelect.setEnabled(true);
-			}
-		});
 	}
 
 	public void updateTypeDefinitionWidgets()
