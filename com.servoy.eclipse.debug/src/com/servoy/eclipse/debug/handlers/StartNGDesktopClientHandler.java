@@ -200,8 +200,10 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		try
 		{
 			File parentFile = location.getParentFile();
-			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
-				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
+			String downloadUrl = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
+			if (!downloadUrl.endsWith("/")) downloadUrl += "/";
+			URL fileUrl = new URL(
+				downloadUrl + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION + StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
 			File currentVersionFile = new File(parentFile.getAbsolutePath() + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
 				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
 
@@ -332,7 +334,9 @@ class DownloadElectron implements IRunnableWithProgress
 			f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
-			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+			String downloadUrl = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
+			if (!downloadUrl.endsWith("/")) downloadUrl += "/";
+			URL fileUrl = new URL(downloadUrl + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
 				(Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
 			ZipUtils.extractTarGZ(fileUrl, f);
 			monitor.worked(2);
