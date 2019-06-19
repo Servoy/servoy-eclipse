@@ -82,6 +82,11 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
 	}
 
+	static
+	{
+		if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
+	}
+
 	public static ITagResolver noReplacementResolver = new ITagResolver()
 	{
 		public String getStringValue(String name)
@@ -355,6 +360,7 @@ class DownloadElectron implements IRunnableWithProgress
 			f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
+<<<<<<< HEAD
 <<<<<<< Upstream, based on branch 'master' of https://github.com/Servoy/servoy-eclipse
 <<<<<<< Upstream, based on branch 'master' of https://github.com/Servoy/servoy-eclipse
 			URL fileUrl = new URL(
@@ -370,6 +376,9 @@ class DownloadElectron implements IRunnableWithProgress
 =======
 			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
 >>>>>>> 686ba3e SVY-13826 Download automatically newer NGDesktop version
+=======
+			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+>>>>>>> refs/heads/release
 				(Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
 >>>>>>> 3d6ccd6 SVY-13826 Download automatically newer NGDesktop version
 			ZipUtils.extractTarGZ(fileUrl, f);
