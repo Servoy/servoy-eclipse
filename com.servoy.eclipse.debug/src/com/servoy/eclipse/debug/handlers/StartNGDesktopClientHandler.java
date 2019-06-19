@@ -360,27 +360,8 @@ class DownloadElectron implements IRunnableWithProgress
 			f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
-<<<<<<< HEAD
-<<<<<<< Upstream, based on branch 'master' of https://github.com/Servoy/servoy-eclipse
-<<<<<<< Upstream, based on branch 'master' of https://github.com/Servoy/servoy-eclipse
-			URL fileUrl = new URL(
-				"http://download.servoy.com/ngdesktop/" + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
-					StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-					(Utils.isAppleMacOS() ? StartNGDesktopClientHandler.ELECTRON_MAC_BUILD_PLATFORM : (Utils.isWindowsOS()
-						? StartNGDesktopClientHandler.ELECTRON_WINDOWS_BUILD_PLATFORM : StartNGDesktopClientHandler.ELECTRON_LINUX_BUILD_PLATFORM)) +
-					".tar.gz");
-=======
-			String downloadUrl = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
-			if (!downloadUrl.endsWith("/")) downloadUrl += "/";
-			URL fileUrl = new URL(downloadUrl + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-=======
 			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
->>>>>>> 686ba3e SVY-13826 Download automatically newer NGDesktop version
-=======
-			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
->>>>>>> refs/heads/release
 				(Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
->>>>>>> 3d6ccd6 SVY-13826 Download automatically newer NGDesktop version
 			ZipUtils.extractTarGZ(fileUrl, f);
 			monitor.worked(2);
 		}
