@@ -66,6 +66,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	static final String NGDESKTOP_MAJOR_VERSION = "2019";
 	static final String NGDESKTOP_MINOR_VERSION = "06";
 	static final String NGDESKTOP_VERSION = NGDESKTOP_MAJOR_VERSION + "." + NGDESKTOP_MINOR_VERSION;
+	static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
 	static private int BUFFER_SIZE = 1024;
 	static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
 	static final String MAC_EXTENSION = ".app";
@@ -75,6 +76,11 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	static final String ELECTRON_WINDOWS_BUILD_PLATFORM = "win";
 	static final String ELECTRON_MAC_BUILD_PLATFORM = "mac";
 	static final String ELECTRON_LINUX_BUILD_PLATFORM = "linux";
+
+	static
+	{
+		if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
+	}
 
 	public static ITagResolver noReplacementResolver = new ITagResolver()
 	{
@@ -217,10 +223,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		try
 		{
 			File parentFile = location.getParentFile();
-			String downloadUrl = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
-			if (!downloadUrl.endsWith("/")) downloadUrl += "/";
 			URL fileUrl = new URL(
-				downloadUrl + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION + StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
+				DOWNLOAD_URL + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION + StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
 			File currentVersionFile = new File(parentFile.getAbsolutePath() + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
 				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
 
@@ -352,6 +356,7 @@ class DownloadElectron implements IRunnableWithProgress
 			f.mkdirs();
 
 <<<<<<< Upstream, based on branch 'master' of https://github.com/Servoy/servoy-eclipse
+<<<<<<< Upstream, based on branch 'master' of https://github.com/Servoy/servoy-eclipse
 			URL fileUrl = new URL(
 				"http://download.servoy.com/ngdesktop/" + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
 					StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
@@ -362,6 +367,9 @@ class DownloadElectron implements IRunnableWithProgress
 			String downloadUrl = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
 			if (!downloadUrl.endsWith("/")) downloadUrl += "/";
 			URL fileUrl = new URL(downloadUrl + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+=======
+			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+>>>>>>> 686ba3e SVY-13826 Download automatically newer NGDesktop version
 				(Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
 >>>>>>> 3d6ccd6 SVY-13826 Download automatically newer NGDesktop version
 			ZipUtils.extractTarGZ(fileUrl, f);
