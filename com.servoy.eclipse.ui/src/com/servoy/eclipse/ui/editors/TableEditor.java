@@ -249,7 +249,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		if (!activeSolutionIsMobile())
 		{
 			addPage(600, securityComposite = new SecurityComposite(getContainer(), SWT.None, this,
-				ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution()), "Security");
+				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingSolution()), "Security");
 		}
 	}
 

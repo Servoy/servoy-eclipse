@@ -142,8 +142,8 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	private EditorServiceHandler editorServiceHandler;
 
 	private String layout = null;
-	private WebsocketSessionKey editorKey = null;
-	private WebsocketSessionKey clientKey = null;
+	protected WebsocketSessionKey editorKey = null;
+	protected WebsocketSessionKey clientKey = null;
 	private AbstractContainer showedContainer;
 
 	private final PartListener partListener = new PartListener();

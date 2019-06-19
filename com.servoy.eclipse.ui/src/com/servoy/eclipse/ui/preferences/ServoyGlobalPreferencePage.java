@@ -20,6 +20,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -277,11 +278,9 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, closeEditorOnExitButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
-		prefs.setPrimaryKeySequenceType(
-			((Integer)((ObjectWrapper)((IStructuredSelection)primaryKeySequenceTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
+		prefs.setPrimaryKeySequenceType(getFirstElementValue(primaryKeySequenceTypeCombo, DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT));
 		prefs.setShowNavigatorDefault(showNavigatorDefaultButton.getSelection());
-		prefs.setEncapsulationType(
-			((Integer)((ObjectWrapper)((IStructuredSelection)encapsulationTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
+		prefs.setEncapsulationType(getFirstElementValue(encapsulationTypeCombo, DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL));
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
 		prefs.setSkipFunctionBodyWhenParsingJS(jsValidationButton.getSelection());
 		prefs.setUseChromiumBrowser(chromiumButton.getSelection());
@@ -299,6 +298,26 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * @param viewer
+	 * @param default
+	 * @return
+	 */
+	protected int getFirstElementValue(ComboViewer viewer, int defaultValue)
+	{
+		ISelection selection = viewer.getSelection();
+		if (selection instanceof IStructuredSelection)
+		{
+			Object firstElement = ((IStructuredSelection)selection).getFirstElement();
+			if (firstElement instanceof ObjectWrapper)
+			{
+				Object type = ((ObjectWrapper)firstElement).getType();
+				if (type instanceof Integer) return ((Integer)type).intValue();
+			}
+		}
+		return defaultValue;
 	}
 
 	private void setPrimaryKeySequenceTypeValue(int pk_seq_type)

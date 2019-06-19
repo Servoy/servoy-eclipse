@@ -71,14 +71,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 		btnNORights.setText("No rights unless explicitly specified");
 		btnNORights.setToolTipText(
 			"When this is checked, all groups will have by default no right for this table, unless it is specified by editor. If unchecked, by default read/insert/update/delete are available.");
-		try
-		{
-			btnNORights.setSelection(solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
-		}
-		catch (RepositoryException e2)
-		{
-			ServoyLog.logError(e2);
-		}
+		btnNORights.setSelection(solution.getImplicitSecurityNoRights(te.getTable().getDataSource()));
 		btnNORights.addSelectionListener(new SelectionListener()
 		{
 
@@ -98,15 +91,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 				if (sel instanceof IStructuredSelection)
 				{
 					Object first = ((IStructuredSelection)sel).getFirstElement();
-					try
-					{
-						settingsComposite.setValues(first != null ? first.toString() : null,
-							solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
-					}
-					catch (RepositoryException e1)
-					{
-						ServoyLog.logError(e1);
-					}
+					settingsComposite.setValues(first != null ? first.toString() : null, btnNORights.getSelection());
 				}
 			}
 
@@ -143,15 +128,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 				if (sel instanceof IStructuredSelection)
 				{
 					Object first = ((IStructuredSelection)sel).getFirstElement();
-					try
-					{
-						settingsComposite.setValues(first != null ? first.toString() : null,
-							solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					settingsComposite.setValues(first != null ? first.toString() : null, solution.getImplicitSecurityNoRights(te.getTable().getDataSource()));
 				}
 
 			}

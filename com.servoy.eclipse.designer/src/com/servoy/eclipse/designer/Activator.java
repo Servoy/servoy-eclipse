@@ -52,6 +52,8 @@ public class Activator extends AbstractUIPlugin
 	public static final String PLUGIN_ID = "com.servoy.eclipse.designer";
 	public static final String SHOW_DATA_IN_ANGULAR_DESIGNER = "showDataInDesigner";
 	public static final String SHOW_WIREFRAME_IN_ANGULAR_DESIGNER = "showWireframeInDesigner";
+	public static final String SHOW_SOLUTION_LAYOUTS_CSS_IN_ANGULAR_DESIGNER = "showSolutionLayoutsCssInDesigner";
+	public static final String SHOW_SOLUTION_CSS_IN_ANGULAR_DESIGNER = "showSolutionCssInDesigner";
 	public static final String SHOW_HIGHLIGHT_IN_ANGULAR_DESIGNER = "showHighlightInDesigner";
 
 	// The shared instance

@@ -4107,25 +4107,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														ValueList valuelist = (ValueList)flattenedSolution.searchPersist(valuelistUUID.toString());
 														if (valuelist != null)
 														{
-															int realValueType = valuelist.getRealValueType();
-															if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
-															{
-																boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
-																	((realValueType == IColumnTypes.INTEGER &&
-																		dataProvider.getDataProviderType() == IColumnTypes.NUMBER) ||
-																		(realValueType == IColumnTypes.NUMBER &&
-																			dataProvider.getDataProviderType() == IColumnTypes.INTEGER));
-
-																if (!isValidNumberVariable)
-																{
-																	ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-																		elementName != null ? elementName : "", inForm);
-																	IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
-																		VALUELIST_DATAPROVIDER_TYPE_MISMATCH, IMarker.PRIORITY_NORMAL, null, o);
-																	marker.setAttribute("Uuid", valuelistUUID.toString());
-																	marker.setAttribute("SolutionName", valuelist.getRootObject().getName());
-																}
-															}
+															checkValueListRealValueToDataProviderTypeMatch(valuelist, dataProvider, elementName, inForm,
+																solution, valuelistUUID);
 														}
 													}
 												}
@@ -4139,24 +4122,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											ValueList valuelist = persistFlattenedSolution.getValueList(valuelistID);
 											if (valuelist != null)
 											{
-												int realValueType = valuelist.getRealValueType();
-												if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
-												{
-													boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
-														((realValueType == IColumnTypes.INTEGER && dataProvider.getDataProviderType() == IColumnTypes.NUMBER) ||
-															(realValueType == IColumnTypes.NUMBER &&
-																dataProvider.getDataProviderType() == IColumnTypes.INTEGER));
-
-													if (!isValidNumberVariable)
-													{
-														ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-															elementName != null ? elementName : "", inForm);
-														IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
-															VALUELIST_DATAPROVIDER_TYPE_MISMATCH, IMarker.PRIORITY_NORMAL, null, o);
-														marker.setAttribute("Uuid", valuelist.getUUID().toString());
-														marker.setAttribute("SolutionName", project.getName());
-													}
-												}
+												checkValueListRealValueToDataProviderTypeMatch(valuelist, dataProvider, elementName, inForm, solution,
+													valuelist.getUUID());
 											}
 
 											String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
@@ -4386,6 +4353,28 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							exceptionCount++;
 							if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
+						}
+					}
+
+					private void checkValueListRealValueToDataProviderTypeMatch(ValueList valuelist, IDataProvider dataProvider, String elementName,
+						String inForm, IPersist o, Object valuelistUUID) throws CoreException
+					{
+						int realValueType = valuelist.getRealValueType();
+						if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
+						{
+							boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
+								((realValueType == IColumnTypes.INTEGER && dataProvider.getDataProviderType() == IColumnTypes.NUMBER) ||
+									(realValueType == IColumnTypes.NUMBER && dataProvider.getDataProviderType() == IColumnTypes.INTEGER));
+
+							if (!isValidNumberVariable)
+							{
+								ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
+									elementName != null ? elementName : "", inForm);
+								IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+									IMarker.PRIORITY_NORMAL, null, o);
+								marker.setAttribute("Uuid", valuelistUUID.toString());
+								marker.setAttribute("SolutionName", valuelist.getRootObject().getName());
+							}
 						}
 					}
 

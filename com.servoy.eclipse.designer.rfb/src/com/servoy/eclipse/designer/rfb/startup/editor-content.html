@@ -108,7 +108,7 @@
 			}
 		</style>
 		<!-- component_contributions -->
-		<link ng-repeat="path in solutionSettings.styleSheetPaths" rel="stylesheet" ng-href='{{path}}'>
+		<link ng-if="showSolutionCss" ng-repeat="path in solutionSettings.styleSheetPaths" rel="stylesheet" ng-href='{{path}}'>
 	</head>
 	<body class="user-selection-off content">
 		<div class="drag-scroll-preventer max" style="overflow: hidden; z-index: 0">

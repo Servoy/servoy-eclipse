@@ -1,4 +1,14 @@
-angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry, $selectionUtils, $window, EDITOR_EVENTS, EDITOR_CONSTANTS) {
+angular.module('toolbaractions', ['toolbar', 'editor'])
+.value("TOOLBAR_CONSTANTS",
+{
+	LAYOUTS_COMPONENTS_CSS: "Layouts & Components CSS",
+	COMPONENTS_CSS: "Components CSS",
+	NO_CSS: "No CSS",
+	LAYOUTS_COMPONENTS_CSS_ICON: "url(images/layouts_components_css.png)",
+	COMPONENTS_CSS_ICON: "url(images/components_css.png)",
+	NO_CSS_ICON: "url(images/no_css.png)",
+})
+.run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry, $selectionUtils, $window, EDITOR_EVENTS, EDITOR_CONSTANTS, TOOLBAR_CONSTANTS) {
 
 	var editorScope = null;
 	var utils = null;
@@ -45,6 +55,18 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 			btnHideInheritedElements.state = result;
 			$editorService.hideInheritedElements(result);
 		});		
+		var solutionLayoutsCssPromise = $editorService.isShowSolutionLayoutsCss();
+		solutionLayoutsCssPromise.then(function(result) {
+			if (!result) btnSolutionCss.text = TOOLBAR_CONSTANTS.COMPONENTS_CSS;
+			editorScope.getEditorContentRootScope().showSolutionLayoutsCss = result;
+			editorScope.getEditorContentRootScope().$digest();
+		});
+		var solutionCssPromise = $editorService.isShowSolutionCss();
+		solutionCssPromise.then(function(result) {
+			if (!result) btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
+			editorScope.getEditorContentRootScope().showSolutionCss = result;
+			editorScope.getEditorContentRootScope().$digest();
+		});
 	});
 	var btnPlaceField = {
 		text: "Place Field Wizard",
@@ -149,9 +171,88 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 		}
 	};
 
+	function toggleShowSolutionLayoutsCss()
+	{
+		var promise = $editorService.toggleShowSolutionLayoutsCss();
+		promise.then(function(result) {
+			editorScope.getEditorContentRootScope().showSolutionLayoutsCss = result;
+			editorScope.getEditorContentRootScope().$apply();
+			$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
+		});
+	};
+	
+	function toggleShowSolutionCss()
+	{
+		var promise = $editorService.toggleShowSolutionCss();
+		promise.then(function(result) {
+			editorScope.getEditorContentRootScope().showSolutionCss = result;
+			editorScope.getEditorContentRootScope().$apply();
+			$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
+		});
+	};
+	
+	var btnSolutionCss = {
+			text: TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS,
+			tooltip: "Enable/disable solution css",
+			getIconStyle: function(selection){ 
+				if (selection == TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS) {
+					return {'background-image':TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS_ICON};
+				}
+				if (selection == TOOLBAR_CONSTANTS.COMPONENTS_CSS) {
+					return {'background-image':TOOLBAR_CONSTANTS.COMPONENTS_CSS_ICON};
+				}
+				if (selection == TOOLBAR_CONSTANTS.NO_CSS) {
+					return {'background-image':TOOLBAR_CONSTANTS.NO_CSS_ICON};
+				}
+			},
+			enabled: true,
+			onclick: function(selection) {
+				if (selection == TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS)
+				{	
+					if (!editorScope.getEditorContentRootScope().showSolutionCss)
+					{
+						toggleShowSolutionCss();
+					}
+					if (!editorScope.getEditorContentRootScope().showSolutionLayoutsCss)
+					{
+						toggleShowSolutionLayoutsCss();
+					}
+				}
+				if (selection == TOOLBAR_CONSTANTS.COMPONENTS_CSS)
+				{
+					if (!editorScope.getEditorContentRootScope().showSolutionCss)
+					{
+						toggleShowSolutionCss();
+					}
+					if (editorScope.getEditorContentRootScope().showSolutionLayoutsCss)
+					{
+						toggleShowSolutionLayoutsCss();
+					}
+				}
+				if (selection == TOOLBAR_CONSTANTS.NO_CSS)
+				{
+					if (editorScope.getEditorContentRootScope().showSolutionCss)
+					{
+						toggleShowSolutionCss();
+					}
+					if (!editorScope.getEditorContentRootScope().showSolutionLayoutsCss)
+					{
+						toggleShowSolutionLayoutsCss();
+					}
+				}
+			},
+			list: [{"text":TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS, "iconStyle":{'background-image':TOOLBAR_CONSTANTS.LAYOUTS_COMPONENTS_CSS_ICON}},
+			 {"text":TOOLBAR_CONSTANTS.COMPONENTS_CSS, "iconStyle":{'background-image':TOOLBAR_CONSTANTS.COMPONENTS_CSS_ICON}}, 
+			 {"text":TOOLBAR_CONSTANTS.NO_CSS, "iconStyle":{'background-image':TOOLBAR_CONSTANTS.NO_CSS_ICON}}],
+			onselection: function(selection) {
+				this.onclick(selection);
+				return selection;
+			}
+		};
 
 	$toolbar.add(btnToggleShowData, TOOLBAR_CATEGORIES.SHOW_DATA);
 	$toolbar.add(btnToggleDesignMode, TOOLBAR_CATEGORIES.DESIGN_MODE);
+	$toolbar.add(btnSolutionCss, TOOLBAR_CATEGORIES.DESIGN_MODE);
 
 	var btnTabSequence = {
 		text: "Set tab sequence",

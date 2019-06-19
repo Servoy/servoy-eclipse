@@ -65,7 +65,7 @@ public class SystemVisualFormEditorDesignPage extends RfbVisualFormEditorDesignP
 		try
 		{
 			// install fake WebSocket in case browser does not support it
-//			SwtWebsocket.installFakeWebSocket(browser, editorKey.getClientnr(), clientKey.getClientnr());
+			SwtWebsocket.installFakeWebSocket(browser, editorKey.getClientnr(), clientKey.getClientnr());
 			// install console
 			new BrowserFunction(browser, "consoleLog")
 			{
@@ -100,7 +100,7 @@ public class SystemVisualFormEditorDesignPage extends RfbVisualFormEditorDesignP
 	@Override
 	protected void showUrl(String url)
 	{
-		if (!browser.isDisposed()) browser.setUrl(url); // + "&replacewebsocket=true");
+		if (!browser.isDisposed()) browser.setUrl(url + "&replacewebsocket=true"); // + "&replacewebsocket=true");
 	}
 
 	@Override

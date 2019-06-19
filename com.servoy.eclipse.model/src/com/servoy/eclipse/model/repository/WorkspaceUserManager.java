@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1418,10 +1419,11 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		return false;
 	}
 
-	public Map<Object, Integer> getSecurityAccess(String clientId, int[] solution_ids, int[] releaseNumbers, String[] groups)
+	public Pair<Map<Object, Integer>, Set<Object>> getSecurityAccess(String clientId, int[] solution_ids, int[] releaseNumbers, String[] groups)
 	{
 		Map<Object, Integer> retval = new HashMap<Object, Integer>();
-		Map<Object, Pair<Integer, Boolean>> groupsWithNonDefaultAccess = new HashMap<Object, Pair<Integer, Boolean>>(); // true stands for form elements, false for table columns
+		Set<Object> implicitRights = new HashSet<>();
+		Map<Object, Integer> groupsWithNonDefaultAccess = new HashMap<>();
 		for (int i = 0; i < solution_ids.length; i++)
 		{
 			int solution_id = solution_ids[i];
@@ -1437,12 +1439,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError("Cannot get security access for solution with id, release = " + solution_id + ", " + releaseNumber, e);
-					return retval;
+					return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
 				}
 				if (solution == null)
 				{
 					ServoyLog.logError("Cannot get security access because of missing solution with id, release = " + solution_id + ", " + releaseNumber, null);
-					return retval;
+					return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
 				}
 			}
 
@@ -1475,14 +1477,14 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 									{
 										value = new Integer(si.access);
 									}
-									Pair<Integer, Boolean> old = groupsWithNonDefaultAccess.get(uuid);
+									Integer old = groupsWithNonDefaultAccess.get(uuid);
 									if (old == null)
 									{
-										groupsWithNonDefaultAccess.put(uuid, new Pair<Integer, Boolean>(Integer.valueOf(1), Boolean.TRUE));
+										groupsWithNonDefaultAccess.put(uuid, Integer.valueOf(1));
 									}
 									else
 									{
-										old.setLeft(Integer.valueOf(old.getLeft().intValue() + 1));
+										groupsWithNonDefaultAccess.put(uuid, Integer.valueOf(old.intValue() + 1));
 									}
 									retval.put(uuid, (Integer)value);
 								}
@@ -1515,20 +1517,32 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					{
 						value = new Integer(si.access);
 					}
-					Pair<Integer, Boolean> old = groupsWithNonDefaultAccess.get(cid);
+					Integer old = groupsWithNonDefaultAccess.get(cid);
 					if (old == null)
 					{
-						groupsWithNonDefaultAccess.put(cid, new Pair<Integer, Boolean>(Integer.valueOf(1), Boolean.FALSE));
+						groupsWithNonDefaultAccess.put(cid, Integer.valueOf(1));
 					}
 					else
 					{
-						old.setLeft(Integer.valueOf(old.getLeft().intValue() + 1));
+						groupsWithNonDefaultAccess.put(cid, Integer.valueOf(old.intValue() + 1));
 					}
 					retval.put(cid, (Integer)value); //server.table.column -> int
 				}
 			}
 		}
-		return retval;
+		if (groups.length > 1)
+		{
+			// implicit values for all values that are in the map that are not already VIEWABLE|ACCESSIBLE must be looked at if they would have that implicit value
+			for (Entry<Object, Integer> entry : retval.entrySet())
+			{
+				Integer gwnda = groupsWithNonDefaultAccess.get(entry.getKey());
+				if (gwnda.intValue() < groups.length)
+				{
+					implicitRights.add(entry.getKey());
+				}
+			}
+		}
+		return new Pair<Map<Object, Integer>, Set<Object>>(retval, implicitRights);
 	}
 
 	private boolean formIsChildOfPersist(IPersist persist, final UUID formUUID)
