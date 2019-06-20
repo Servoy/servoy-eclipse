@@ -282,7 +282,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 					}
 					catch (IOException e)
 					{
-						e.printStackTrace();
+						ServoyLog.logError("error adjusting the ngdesktop executable (servoy.json)", e);
 					}
 				}
 				else
