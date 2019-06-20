@@ -171,7 +171,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 											canDrop.dropTarget.insertBefore(insertedClone, canDrop.beforeChild);
 											angularElement.css('opacity', '1');
 											insertedCloneParent = canDrop.dropTarget;
-										} else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append) {
+										} else if (angularElement.parent()[0] && angularElement.parent()[0] != canDrop.dropTarget || canDrop.append) {
 											if (insertedClone == null) insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
 											angular.element(canDrop.dropTarget).append(insertedClone);
 											angularElement.css('opacity', '1');
@@ -387,8 +387,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							$document[0].body.removeChild(dragClone[0]);
 							utils.setDraggingFromPallete(null);
 						}
-						else if (angularElement) {
-							$scope.getEditorContentRootScope().getDesignFormElement().removeChild(angularElement);
+						if (angularElement) {
+							angularElement.remove();
 						}
 					});
 				}
