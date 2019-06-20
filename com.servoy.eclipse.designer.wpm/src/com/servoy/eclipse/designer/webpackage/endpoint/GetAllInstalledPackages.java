@@ -292,7 +292,6 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			final String wpIndex = selectedWebPackageIndex;
 			if (checkForNewRemotePackagesJob == null)
 			{
-				System.err.println("Making Job ");
 				checkForNewRemotePackagesJob = new Job("Check for new remote Servoy packages")
 				{
 					@Override
