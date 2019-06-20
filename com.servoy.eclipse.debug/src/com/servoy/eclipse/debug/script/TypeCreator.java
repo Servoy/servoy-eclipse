@@ -1037,10 +1037,13 @@ public class TypeCreator extends TypeCache
 					}
 					else
 					{
-						addType(constants.getPrefix(), element);
 						if (prefix != null)
 						{
 							addType(prefix + constants.getPrefix(), element);
+						}
+						else
+						{
+							addType(constants.getPrefix(), element);
 						}
 					}
 				}
@@ -1072,10 +1075,13 @@ public class TypeCreator extends TypeCache
 						name = sd.scriptingName().trim();
 					}
 
-					addType(name, element);
 					if (prefix != null)
 					{
 						addType(prefix + name, element);
+					}
+					else
+					{
+						addType(name, element);
 					}
 				}
 
