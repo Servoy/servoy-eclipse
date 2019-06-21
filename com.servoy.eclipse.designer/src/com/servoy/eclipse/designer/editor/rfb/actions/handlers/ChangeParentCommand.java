@@ -125,8 +125,8 @@ public class ChangeParentCommand extends Command
 		// undo hierarchy change
 		if (oldParent != null)
 		{
-			oldParent.addChild(child);
 			newParent.removeChild(child);
+			oldParent.addChild(child);
 		}
 		//undo position change
 		ISupportChilds flattenedNewParent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(child.getParent()), form,
