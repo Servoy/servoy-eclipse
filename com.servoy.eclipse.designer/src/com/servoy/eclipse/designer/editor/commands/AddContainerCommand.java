@@ -51,7 +51,6 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPosition;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
@@ -276,16 +275,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										Iterator<IPersist> it = parent.getAllObjects();
 										while (it.hasNext())
 										{
-											IPersist next = it.next();
-											IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, activeEditor.getForm()));
-											if (child.getParent() instanceof Form && !child.equals(next))
-											{
-												child.getParent().removeChild(child);
-											}
-											changes.add(child);
-											if (child.equals(next)) continue;
-											parent.removeChild(next);
-											parent.addChild(child);
+											// why do we need to override all siblings here ?
+											ElementUtil.getOverridePersist(PersistContext.create(it.next(), activeEditor.getForm()));
 										}
 									}
 									else
