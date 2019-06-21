@@ -1238,7 +1238,7 @@ public class Activator extends Plugin
 								installFile = "install_postgres.bat";
 							}
 							dialog.run(true, false, new CreatedDatabaseJob(new File(file.getParentFile(), installFile), // TODO batch file should be sh for none windows...
-								new String[] { "repository_server", "bug_db", "example", "log_data", "udm", "pdf_forms", "user_data" }, appServer));
+								new String[] { "repository_server", "bug_db", "example_data", "log_data", "udm", "pdf_forms", "user_data" }, appServer));
 						}
 						catch (InvocationTargetException | InterruptedException e)
 						{
