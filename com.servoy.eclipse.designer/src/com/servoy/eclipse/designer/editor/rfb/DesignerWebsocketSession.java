@@ -769,7 +769,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 						if (frm == null) continue;
 						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(fe, pd, (JSONObject)propertyValue, frm, fs);
-						formComponentTemplates.put(cache.getCacheUUID(), cache.getTemplate());
+						formComponentTemplates.put(cache.getHtmlTemplateUUIDForAngular(), cache.getTemplate());
 					}
 				}
 			}
