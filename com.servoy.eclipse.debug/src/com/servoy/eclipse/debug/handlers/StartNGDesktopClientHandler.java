@@ -360,8 +360,8 @@ class DownloadElectron implements IRunnableWithProgress
 			f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
-			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + "servoyngdesktop-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-				(Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
+			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
+				StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + (Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
 			ZipUtils.extractTarGZ(fileUrl, f);
 			monitor.worked(2);
 		}
