@@ -651,7 +651,9 @@ public class ColumnComposite extends Composite
 				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType(t);
 				if (defaultFirstColumnSequenceType == ColumnInfo.UUID_GENERATOR)
 				{
-					Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.TEXT, 36);
+					int columnType = new DesignerPreferences().getPrimaryKeyUuidType();
+					int length = columnType == IColumnTypes.TEXT ? 36 : 16;
+					Column id = t.createNewColumn(nameValidator, colname, columnType, length);
 					id.setDatabasePK(true);
 					id.setSequenceType(defaultFirstColumnSequenceType);
 					id.setFlag(IBaseColumn.UUID_COLUMN, true);
