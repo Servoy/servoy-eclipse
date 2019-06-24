@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -24,13 +25,22 @@ import org.eclipse.jface.bindings.Binding;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.internal.WorkbenchPage;
 import org.eclipse.ui.keys.IBindingService;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Utils;
@@ -67,117 +77,122 @@ public class KeyPressedHandler implements IServerService
 	 */
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
-//		switch (keyCode)
-//		{
-//			case 46 : // delete
-//				Display.getDefault().asyncExec(new Runnable()
-//				{
-//					public void run()
-//					{
-//						List<Object> contextSelection = new ArrayList<>(((IStructuredSelection)selectionProvider.getSelection()).toList());
-//						List<IPersist> selection = new ArrayList<IPersist>();
-//						for (Object selected : contextSelection)
-//						{
-//							IPersist persist = null;
-//							if (selected instanceof IPersist)
-//							{
-//								persist = (IPersist)selected;
-//							}
-//							else if (selected instanceof PersistContext)
-//							{
-//								persist = ((PersistContext)selected).getPersist();
-//							}
-//							if (persist != null && !(persist instanceof Form))
-//							{
-//								selection.add(persist);
-//							}
-//						}
-//						if (selection.size() > 0 && !containsInheritedElements(selection))
-//						{
-//							editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[selection.size()])));
-//							selectionProvider.setSelection(new StructuredSelection(editorPart.getForm()));
-//						}
-//					}
-//				});
-//				break;
-//
-//			case 83 : // s
-//				if (isCtrl && isShift) // ctrl+shift+s (save all)
-//				{
-//					Display.getDefault().asyncExec(new Runnable()
-//					{
-//						public void run()
-//						{
-//							IWorkbenchPage page = editorPart.getSite().getPage();
-//							((WorkbenchPage)page).saveAllEditors(false, false, true);
-//						}
-//					});
-//				}
-//				break;
-//
-//			case 90 : // z
-//				if (isCtrl && isShift)
-//				{
-//					Display.getDefault().asyncExec(new Runnable()
-//					{
-//						public void run()
-//						{
-//							EditorUtil.openScriptEditor(editorPart.getForm(), null, true);
-//						}
-//					});
-//				}
-//				break;
-//			case 115 : //f4
-//				Display.getDefault().asyncExec(new Runnable()
-//				{
-//					public void run()
-//					{
-//						try
-//						{
-//							new OpenFormHierarchyHandler(selectionProvider).executeMethod(null, null);
-//						}
-//						catch (Exception e)
-//						{
-//							ServoyLog.logError(e);
-//						}
-//					}
-//				});
-//		}
 		int keyCode = args.optInt("keyCode");
 		boolean isCtrl = args.optBoolean("ctrl");
 		boolean isShift = args.optBoolean("shift");
-
-		IBindingService bindingService = editorPart.getSite().getService(IBindingService.class);
-		int modifier = 0;
-		if (isCtrl) modifier = SWT.CTRL;
-		if (isShift) modifier = SWT.SHIFT | modifier;
-		if (keyCode == 46 || keyCode == 8) keyCode = SWT.DEL;
-		else if (keyCode == 115) keyCode = SWT.F4;
-		Binding perfectMatch = bindingService.getPerfectMatch(KeySequence.getInstance(KeyStroke.getInstance(modifier, keyCode)));
-		if (perfectMatch == null)
+		// if default browser do not handle all actions, eclipse should do that; for chromium handle everything
+		if (new DesignerPreferences().useChromiumBrowser())
 		{
-			@SuppressWarnings("unchecked")
-			Collection<Binding> partialMatches = bindingService.getConflictsFor(KeySequence.getInstance(KeyStroke.getInstance(modifier, keyCode)));
-			if (partialMatches != null) for (Binding bid : partialMatches)
+			IBindingService bindingService = editorPart.getSite().getService(IBindingService.class);
+			int modifier = 0;
+			if (isCtrl) modifier = SWT.CTRL;
+			if (isShift) modifier = SWT.SHIFT | modifier;
+			if (keyCode == 46 || keyCode == 8) keyCode = SWT.DEL;
+			else if (keyCode == 115) keyCode = SWT.F4;
+			Binding perfectMatch = bindingService.getPerfectMatch(KeySequence.getInstance(KeyStroke.getInstance(modifier, keyCode)));
+			if (perfectMatch == null)
 			{
-				if (bid.getParameterizedCommand().getCommand().isEnabled())
+				@SuppressWarnings("unchecked")
+				Collection<Binding> partialMatches = bindingService.getConflictsFor(KeySequence.getInstance(KeyStroke.getInstance(modifier, keyCode)));
+				if (partialMatches != null) for (Binding bid : partialMatches)
 				{
-					perfectMatch = bid;
+					if (bid.getParameterizedCommand().getCommand().isEnabled())
+					{
+						perfectMatch = bid;
+					}
+				}
+			}
+			if (perfectMatch != null && perfectMatch.getParameterizedCommand().getCommand().isEnabled())
+			{
+				try
+				{
+					perfectMatch.getParameterizedCommand().executeWithChecks(null, null);
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
 				}
 			}
 		}
-		if (perfectMatch != null && perfectMatch.getParameterizedCommand().getCommand().isEnabled())
+		else
 		{
-			try
+			switch (keyCode)
 			{
-				perfectMatch.getParameterizedCommand().executeWithChecks(null, null);
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
+				case 46 : // delete
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							List<Object> contextSelection = new ArrayList<>(((IStructuredSelection)selectionProvider.getSelection()).toList());
+							List<IPersist> selection = new ArrayList<IPersist>();
+							for (Object selected : contextSelection)
+							{
+								IPersist persist = null;
+								if (selected instanceof IPersist)
+								{
+									persist = (IPersist)selected;
+								}
+								else if (selected instanceof PersistContext)
+								{
+									persist = ((PersistContext)selected).getPersist();
+								}
+								if (persist != null && !(persist instanceof Form))
+								{
+									selection.add(persist);
+								}
+							}
+							if (selection.size() > 0 && !containsInheritedElements(selection))
+							{
+								editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[selection.size()])));
+								selectionProvider.setSelection(new StructuredSelection(editorPart.getForm()));
+							}
+						}
+					});
+					break;
+
+				case 83 : // s
+					if (isCtrl && isShift) // ctrl+shift+s (save all)
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								IWorkbenchPage page = editorPart.getSite().getPage();
+								((WorkbenchPage)page).saveAllEditors(false, false, true);
+							}
+						});
+					}
+					break;
+
+				case 90 : // z
+					if (isCtrl && isShift)
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								EditorUtil.openScriptEditor(editorPart.getForm(), null, true);
+							}
+						});
+					}
+					break;
+				case 115 : //f4
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							try
+							{
+								new OpenFormHierarchyHandler(selectionProvider).executeMethod(null, null);
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+					});
 			}
 		}
-
 		return null;
 	}
 }
