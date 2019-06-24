@@ -43,6 +43,7 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 			btnToggleDesignMode.state = result;
 			editorScope.getEditorContentRootScope().showWireframe = result;
 			editorScope.getEditorContentRootScope().$digest();
+			editorScope.$evalAsync( function() { $editorService.setContentSizes(); });
 		});
 		var highlightPromise = $editorService.isShowHighlight();
 		highlightPromise.then(function(result) {
@@ -60,12 +61,14 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 			if (!result) btnSolutionCss.text = TOOLBAR_CONSTANTS.COMPONENTS_CSS;
 			editorScope.getEditorContentRootScope().showSolutionLayoutsCss = result;
 			editorScope.getEditorContentRootScope().$digest();
+			editorScope.$evalAsync( function() { $editorService.setContentSizes(); });
 		});
 		var solutionCssPromise = $editorService.isShowSolutionCss();
 		solutionCssPromise.then(function(result) {
 			if (!result) btnSolutionCss.text = TOOLBAR_CONSTANTS.NO_CSS;
 			editorScope.getEditorContentRootScope().showSolutionCss = result;
 			editorScope.getEditorContentRootScope().$digest();
+			editorScope.$evalAsync( function() { $editorService.setContentSizes(); });
 		});
 	});
 	var btnPlaceField = {
@@ -167,6 +170,7 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 				editorScope.getEditorContentRootScope().showWireframe = result;
 				editorScope.getEditorContentRootScope().$apply();
 				$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
+				editorScope.$evalAsync( function() { $editorService.setContentSizes(); });
 			});
 		}
 	};
@@ -178,6 +182,7 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 			editorScope.getEditorContentRootScope().showSolutionLayoutsCss = result;
 			editorScope.getEditorContentRootScope().$apply();
 			$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
+		    editorScope.$evalAsync( function() { $editorService.setContentSizes(); });			
 		});
 	};
 	
@@ -188,6 +193,7 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 			editorScope.getEditorContentRootScope().showSolutionCss = result;
 			editorScope.getEditorContentRootScope().$apply();
 			$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
+			editorScope.$evalAsync( function() { $editorService.setContentSizes(); });
 		});
 	};
 	
