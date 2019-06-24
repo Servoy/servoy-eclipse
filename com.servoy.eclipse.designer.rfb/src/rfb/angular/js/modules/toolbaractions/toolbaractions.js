@@ -156,8 +156,8 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 	};
 
 	var btnToggleDesignMode = {
-		text: "Wireframe",
-		icon: "toolbaractions/icons/wireframe.png",
+		text: "Exploded view",
+		icon: "toolbaractions/icons/exploded-view.png",
 		enabled: true,
 		state: false,
 		onclick: function() {
