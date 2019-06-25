@@ -58,6 +58,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -641,12 +642,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				{
 					writer.value(parent.getUUID().toString());
 				}
-				writer.key("index");
-				if (parent instanceof AbstractContainer && form.isResponsiveLayout())
+				writer.key("location");
+				if (p instanceof ISupportBounds && parent instanceof AbstractContainer && form.isResponsiveLayout())
 				{
-					parent = PersistHelper.getFlattenedPersist(fs, form, parent);
-					ArrayList<IPersist> children = ((AbstractContainer)parent).getSortedChildren();
-					writer.value(children.indexOf(p));
+					writer.value(((ISupportBounds)p).getLocation().x);
 				}
 				else
 				{

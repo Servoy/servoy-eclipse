@@ -452,8 +452,11 @@ angular.module('editorContent',['servoyApp'])
     if(elementTemplate.length) {
     	var domParentUUID = elementTemplate.parent().closest('[svy-id]').attr('svy-id');
     	var currentParentUUID = updateData.childParentMap[elementId].uuid;
-    	if(forceUpdate || domParentUUID != currentParentUUID ||
-    		((updateData.childParentMap[elementId].index > -1) && (updateData.childParentMap[elementId].index != elementTemplate.index()))) {
+    	if(forceUpdate || domParentUUID != currentParentUUID) {
+    		elementsToRemove.push(elementTemplate);
+    	}
+    	else if (updateData.childParentMap[elementId].location > -1 && updateData.childParentMap[elementId].location != parseInt(elementTemplate.attr('svy-location'))){
+    		// location(order) is changed, we need to reinsert this node
     		elementsToRemove.push(elementTemplate);
     	}
     	else {
