@@ -421,10 +421,26 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		{
 			for (IPersist persist : persists)
 			{
-				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
-				if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
+				if (showedContainer != null)
 				{
-					filtered.add(persist);
+					IPersist parent = persist;
+					while (parent != null)
+					{
+						if (parent == showedContainer)
+						{
+							filtered.add(persist);
+							break;
+						}
+						parent = parent.getParent();
+					}
+				}
+				else
+				{
+					IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+					if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
+					{
+						filtered.add(persist);
+					}
 				}
 			}
 			// if there are other persist left, check if they are in the hierarchy

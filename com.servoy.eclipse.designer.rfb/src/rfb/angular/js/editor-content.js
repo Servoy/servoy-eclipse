@@ -419,6 +419,10 @@ angular.module('editorContent',['servoyApp'])
 	    if (!parent.length) {
 	      parent = angular.element(document.querySelectorAll("[svy-id='" + parentId + "']"));
 	    }
+	    if (!parent.length) {
+	    	// element is the showedContainer and its parent is missing
+	    	 parent = angular.element(document.getElementById('svyDesignForm'));
+	    }
 	    var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
 	    var old_element = document.querySelectorAll("[svy-id='" + tpl[0].getAttribute("svy-id") + "']");
 		if (old_element.length == 1) return; //when it's already there, we don't do anything (this happens when the parent is overridden)
