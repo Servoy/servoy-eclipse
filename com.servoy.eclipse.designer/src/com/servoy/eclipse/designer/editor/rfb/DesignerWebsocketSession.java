@@ -31,12 +31,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecificationBuilder;
 import org.sablo.websocket.BaseWebsocketSession;
@@ -576,8 +580,29 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.value(container.getUUID().toString());
 				for (Entry<String, String> attribute : attributes.entrySet())
 				{
-					writer.key(attribute.getKey());
-					writer.value(attribute.getValue());
+					String key = attribute.getKey();
+					String value = attribute.getValue();
+
+					writer.key(key);
+
+					if ("class".equals(key))
+					{
+						WebLayoutSpecification spec = null;
+						if (container.getPackageName() != null)
+						{
+							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
+								container.getPackageName());
+							if (pkg != null)
+							{
+								spec = pkg.getSpecification(container.getSpecName());
+							}
+						}
+						List<String> containerStyleClasses = FormLayoutStructureGenerator.getStyleClassValues(spec, container.getCssClasses());
+						// only update solutionStyleClasses
+						value = Arrays.stream(container.getCssClasses().split(" ")).filter(cls -> !containerStyleClasses.contains(cls)).collect(
+							Collectors.joining(" "));
+					}
+					writer.value(value);
 				}
 				writer.endObject();
 			}
