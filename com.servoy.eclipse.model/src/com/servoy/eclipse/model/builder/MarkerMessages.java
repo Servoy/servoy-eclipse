@@ -342,6 +342,8 @@ public class MarkerMessages
 	public static ServoyMarker FormComponentForFoundsetInvalidDataSource = new ServoyMarker(
 		"Element \"{0}\" has form component property \"{1}\" attached with form \"{2}\" which has different datasource than forFoundset property \"{3}\".",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+	public static ServoyMarker FormComponentNestedList = new ServoyMarker("List form component \"{0}\" has a nested list form component \"{1}\".",
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	/**
 	 * This means that when using form inheritance a cycle was introduced in the dependency relation of some forms. This is not allowed.

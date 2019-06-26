@@ -66,6 +66,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	static final String NGDESKTOP_MAJOR_VERSION = "2019";
 	static final String NGDESKTOP_MINOR_VERSION = "06";
 	static final String NGDESKTOP_VERSION = NGDESKTOP_MAJOR_VERSION + "." + NGDESKTOP_MINOR_VERSION;
+	static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
 	static private int BUFFER_SIZE = 1024;
 	static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
 	static final String MAC_EXTENSION = ".app";
@@ -75,6 +76,16 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	static final String ELECTRON_WINDOWS_BUILD_PLATFORM = "win";
 	static final String ELECTRON_MAC_BUILD_PLATFORM = "mac";
 	static final String ELECTRON_LINUX_BUILD_PLATFORM = "linux";
+
+	static
+	{
+		if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
+	}
+
+	static
+	{
+		if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
+	}
 
 	public static ITagResolver noReplacementResolver = new ITagResolver()
 	{
@@ -217,8 +228,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		try
 		{
 			File parentFile = location.getParentFile();
-			URL fileUrl = new URL("http://download.servoy.com/ngdesktop/version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
-				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
+			URL fileUrl = new URL(
+				DOWNLOAD_URL + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION + StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
 			File currentVersionFile = new File(parentFile.getAbsolutePath() + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
 				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
 
@@ -293,7 +304,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 					}
 					catch (IOException e)
 					{
-						e.printStackTrace();
+						ServoyLog.logError("error adjusting the ngdesktop executable (servoy.json)", e);
 					}
 				}
 				else
@@ -349,12 +360,8 @@ class DownloadElectron implements IRunnableWithProgress
 			f = new File(Activator.getDefault().getStateLocation().toOSString());
 			f.mkdirs();
 
-			URL fileUrl = new URL(
-				"http://download.servoy.com/ngdesktop/" + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
-					StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-					(Utils.isAppleMacOS() ? StartNGDesktopClientHandler.ELECTRON_MAC_BUILD_PLATFORM : (Utils.isWindowsOS()
-						? StartNGDesktopClientHandler.ELECTRON_WINDOWS_BUILD_PLATFORM : StartNGDesktopClientHandler.ELECTRON_LINUX_BUILD_PLATFORM)) +
-					".tar.gz");
+			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
+				StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + (Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
 			ZipUtils.extractTarGZ(fileUrl, f);
 			monitor.worked(2);
 		}

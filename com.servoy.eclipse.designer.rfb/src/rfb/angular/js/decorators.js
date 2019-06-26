@@ -115,7 +115,7 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 						};
 						
 						currentNode.cls = "";
-						if (currentNode.isContainer && $editorService.getEditor().getEditorContentRootScope().showWireframe)
+						if (currentNode.isContainer && $editorService.getEditor().getEditorContentRootScope().showWireframe && node.width() > 0 && node.height() > 0)
 						{
 							currentNode.svytitle = node.attr('svy-title');
 							currentNode.cls = "showWireframe";

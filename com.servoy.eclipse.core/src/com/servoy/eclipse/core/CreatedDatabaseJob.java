@@ -181,6 +181,8 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 		{
 			case "repository_server" :
 				return "servoy_repository";
+			case "example_data" :
+				return "example";
 		}
 		return serverName;
 	}

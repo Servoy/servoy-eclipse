@@ -30,6 +30,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Control;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -38,6 +39,19 @@ import com.servoy.j2db.query.ColumnType;
 
 public class ColumnTypeEditingSupport extends EditingSupport
 {
+	private static final String[] types;
+	static
+	{
+		int length = Column.allDefinedTypes.length;
+		types = new String[length + 2];
+		for (int i = 0; i < length; i++)
+		{
+			types[i] = Column.getDisplayTypeString(Column.allDefinedTypes[i]);
+		}
+		types[length] = ColumnLabelProvider.UUID_MEDIA_16;
+		types[length + 1] = ColumnLabelProvider.UUID_TEXT_36;
+	}
+
 	public class ColumnTypeEditingObservable extends AbstractObservable
 	{
 
@@ -79,11 +93,6 @@ public class ColumnTypeEditingSupport extends EditingSupport
 	{
 		super(tv);
 		this.tv = tv;
-		String[] types = new String[Column.allDefinedTypes.length];
-		for (int i = 0; i < types.length; i++)
-		{
-			types[i] = Column.getDisplayTypeString(Column.allDefinedTypes[i]);
-		}
 		editor = new FixedComboBoxCellEditor(tv.getTable(), types, SWT.READ_ONLY);
 		Control control = editor.getControl();
 		CCombo c = (CCombo)control;
@@ -117,26 +126,47 @@ public class ColumnTypeEditingSupport extends EditingSupport
 		{
 			Column pi = (Column)element;
 			column = pi;
-			int type = Column.allDefinedTypes[Integer.parseInt(value.toString())];
-
 			int length = pi.getConfiguredColumnType().getLength();
+			int type;
 
-			// if sequence type is uuid generator automaticaly fill MEDIA with length 16 and TEXT with length 36
-			if (pi.getSequenceType() == ColumnInfo.UUID_GENERATOR && !pi.getExistInDB())
+			int selectedIndex = Integer.parseInt(value.toString());
+			if (types[selectedIndex] == ColumnLabelProvider.UUID_MEDIA_16)
 			{
-				if (type == IColumnTypes.TEXT)
-				{
-					length = 36;
-				}
-				else if (type == IColumnTypes.MEDIA)
-				{
-					length = 16;
-				}
+				type = IColumnTypes.MEDIA;
+				length = 16;
+				column.setFlag(IBaseColumn.UUID_COLUMN, true);
 			}
-			else if (type == IColumnTypes.NUMBER || type == IColumnTypes.MEDIA)
+			else if (types[selectedIndex] == ColumnLabelProvider.UUID_TEXT_36)
 			{
-				// default create unlimited
-				length = 0;
+				type = IColumnTypes.TEXT;
+				length = 36;
+				column.setFlag(IBaseColumn.UUID_COLUMN, true);
+			}
+			else
+			{
+				type = Column.allDefinedTypes[selectedIndex];
+
+				// if sequence type is uuid generator automaticaly fill MEDIA with length 16 and TEXT with length 36
+				if (pi.getSequenceType() == ColumnInfo.UUID_GENERATOR && !pi.getExistInDB())
+				{
+					if (type == IColumnTypes.TEXT)
+					{
+						length = 36;
+					}
+					else if (type == IColumnTypes.MEDIA)
+					{
+						length = 16;
+					}
+				}
+				else if (type == IColumnTypes.NUMBER || type == IColumnTypes.MEDIA)
+				{
+					// default create unlimited
+					length = 0;
+				}
+				if (column.hasFlag(IBaseColumn.UUID_COLUMN) && !(type == IColumnTypes.MEDIA || type == IColumnTypes.TEXT))
+				{
+					column.setFlag(IBaseColumn.UUID_COLUMN, false);
+				}
 			}
 			pi.getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(type, length, 0));
 			if (!pi.getExistInDB()) pi.updateColumnType(type, length, 0);
@@ -153,7 +183,17 @@ public class ColumnTypeEditingSupport extends EditingSupport
 	{
 		if (element instanceof Column)
 		{
-			int type = Column.mapToDefaultType(((Column)element).getConfiguredColumnType().getSqlType());
+			Column col = (Column)element;
+			if (col.hasFlag(IBaseColumn.UUID_COLUMN))
+			{
+				int type = Column.mapToDefaultType(col.getConfiguredColumnType().getSqlType());
+				if (type == IColumnTypes.MEDIA)
+				{
+					return Integer.valueOf(Column.allDefinedTypes.length);
+				}
+				return Integer.valueOf(Column.allDefinedTypes.length + 1);
+			}
+			int type = Column.mapToDefaultType(col.getConfiguredColumnType().getSqlType());
 			int index = 0;
 			for (int i = 0; i < Column.allDefinedTypes.length; i++)
 			{

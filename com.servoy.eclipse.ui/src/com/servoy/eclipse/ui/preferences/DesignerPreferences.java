@@ -33,6 +33,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -109,6 +110,7 @@ public class DesignerPreferences
 	public static final String ENCAPSULATION_TYPE = "encapsulationType";
 	public static final String SKIP_FUNCTION_BODY_PARSING = "skipFunctionBodyParsing";
 	public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
+	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final String WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME = "servoy.test.solution-load.timeout"; // in seconds; if you modify this, modify it in ServoyGlobalPreferencePage
@@ -168,6 +170,12 @@ public class DesignerPreferences
 	public static final boolean SKIP_FUNCTION_BODY_PARSING_DEFAULT = true;
 
 	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = false;
+
+
+	public static final int UUD_BYTE_ARRAY_TYPE = IColumnTypes.MEDIA;
+	public static final int UUD_STRING_ARRAY_TYPE = IColumnTypes.TEXT;
+
+	public static final int ARRAY_UTF8_TYPE_DEFAULT = UUD_BYTE_ARRAY_TYPE;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
@@ -865,4 +873,16 @@ public class DesignerPreferences
 		setProperty(SKIP_FUNCTION_BODY_PARSING, skip);
 	}
 
+	/**
+	 * @param firstElementValue
+	 */
+	public void setPrimaryKeyUuidType(int type)
+	{
+		setProperty(UUD_ARRAY_TYPE, type);
+	}
+
+	public int getPrimaryKeyUuidType()
+	{
+		return getProperty(UUD_ARRAY_TYPE, UUD_BYTE_ARRAY_TYPE);
+	}
 }

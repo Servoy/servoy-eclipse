@@ -536,6 +536,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_INVALID_DATASOURCE = new Pair<String, ProblemSeverity>("formComponentInvalidDataSource",
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_NESTED_LIST = new Pair<String, ProblemSeverity>("formComponentNestedList",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>("methodNumberOfArgsMismatch",
@@ -2704,6 +2706,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (frm == null) continue;
 										if (pd.getConfig() instanceof ComponentTypeConfig)
 										{
+											checkForListFormComponent(frm, o);
 											String forFoundsetName = ((ComponentTypeConfig)pd.getConfig()).forFoundset;
 											String datasource = null;
 											String foundsetValue = null;
@@ -3855,6 +3858,54 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						checkCancel();
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
+					}
+
+					private void checkForListFormComponent(Form form, IPersist listFormComponent)
+					{
+						form.acceptVisitor(new IPersistVisitor()
+						{
+							@Override
+							public Object visit(IPersist o)
+							{
+								if (o instanceof WebComponent)
+								{
+									WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
+									if (spec != null)
+									{
+										Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+										if (properties.size() > 0)
+										{
+											FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((WebComponent)o, flattenedSolution, null,
+												true);
+											boolean hasComponentTypeConfig = false; // has forFoundset
+											Form frm = null;
+											for (PropertyDescription pd : properties)
+											{
+												Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+												frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
+												if (frm == null) continue;
+												if (pd.getConfig() instanceof ComponentTypeConfig)
+												{
+													hasComponentTypeConfig = true;
+													break;
+												}
+											}
+											if (hasComponentTypeConfig)
+											{
+												ServoyMarker mk = MarkerMessages.FormComponentNestedList.fill(listFormComponent, o);
+												addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_NESTED_LIST, IMarker.PRIORITY_NORMAL, null,
+													listFormComponent);
+											}
+											else
+											{
+												checkForListFormComponent(frm, listFormComponent);
+											}
+										}
+									}
+								}
+								return IPersistVisitor.CONTINUE_TRAVERSAL;
+							}
+						});
 					}
 
 					private void checkDataProviders(final IPersist o, IPersist context)

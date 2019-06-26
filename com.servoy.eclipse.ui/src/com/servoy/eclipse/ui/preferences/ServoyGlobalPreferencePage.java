@@ -68,6 +68,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button useDarkIconsButton;
 	private Button jsValidationButton;
 	private Button chromiumButton;
+	private ComboViewer primaryKeyUuidTypeCombo;
 
 	public void init(IWorkbench workbench)
 	{
@@ -149,6 +150,18 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			new ObjectWrapper[] { new ObjectWrapper("Servoy Sequence", new Integer(ColumnInfo.SERVOY_SEQUENCE)), new ObjectWrapper("Database Sequence",
 				new Integer(ColumnInfo.DATABASE_SEQUENCE)), new ObjectWrapper("Database Identity",
 					new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper("UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) });
+		primaryKeySequenceTypeCombo.addSelectionChangedListener((event) -> {
+			int selected = getFirstElementValue(primaryKeySequenceTypeCombo, DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT);
+			primaryKeyUuidTypeCombo.getCombo().setEnabled(selected == ColumnInfo.UUID_GENERATOR);
+		});
+
+		new Label(defaultPrimaryKeySequenceType, SWT.NONE).setText("Column Type");
+		primaryKeyUuidTypeCombo = new ComboViewer(defaultPrimaryKeySequenceType);
+		primaryKeyUuidTypeCombo.setContentProvider(new ArrayContentProvider());
+		primaryKeyUuidTypeCombo.setLabelProvider(new LabelProvider());
+		primaryKeyUuidTypeCombo.setInput(
+			new ObjectWrapper[] { new ObjectWrapper("UUID (byte(16))", new Integer(DesignerPreferences.UUD_BYTE_ARRAY_TYPE)), new ObjectWrapper(
+				"UUID (string(36))", new Integer(DesignerPreferences.UUD_STRING_ARRAY_TYPE)) });
 
 		//Form Properties
 		Group formProperties = new Group(rootContainer, SWT.NONE);
@@ -241,6 +254,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(prefs.getPrimaryKeySequenceType());
+		setPrimaryKeyUuidTypeValue(prefs.getPrimaryKeyUuidType());
+		primaryKeyUuidTypeCombo.getCombo().setEnabled(prefs.getPrimaryKeySequenceType() == ColumnInfo.UUID_GENERATOR);
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
@@ -259,6 +274,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT);
+		setPrimaryKeyUuidTypeValue(DesignerPreferences.ARRAY_UTF8_TYPE_DEFAULT);
+		primaryKeyUuidTypeCombo.getCombo().setEnabled(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT == ColumnInfo.UUID_GENERATOR);
 		showNavigatorDefaultButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
 		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
@@ -279,6 +296,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
 		prefs.setPrimaryKeySequenceType(getFirstElementValue(primaryKeySequenceTypeCombo, DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT));
+		prefs.setPrimaryKeyUuidType(getFirstElementValue(primaryKeyUuidTypeCombo, DesignerPreferences.ARRAY_UTF8_TYPE_DEFAULT));
 		prefs.setShowNavigatorDefault(showNavigatorDefaultButton.getSelection());
 		prefs.setEncapsulationType(getFirstElementValue(encapsulationTypeCombo, DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL));
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
@@ -328,6 +346,19 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 			if (ow.getType().equals(seqType))
 			{
 				primaryKeySequenceTypeCombo.setSelection(new StructuredSelection(ow));
+				return;
+			}
+		}
+	}
+
+	private void setPrimaryKeyUuidTypeValue(int pk_type)
+	{
+		Integer seqType = Integer.valueOf(pk_type);
+		for (ObjectWrapper ow : (ObjectWrapper[])primaryKeyUuidTypeCombo.getInput())
+		{
+			if (ow.getType().equals(seqType))
+			{
+				primaryKeyUuidTypeCombo.setSelection(new StructuredSelection(ow));
 				return;
 			}
 		}
