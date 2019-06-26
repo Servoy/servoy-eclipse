@@ -602,7 +602,10 @@ angular.module('editorContent',['servoyApp'])
                 if(element) {
                   for (attribute in data.containers[j]) {
                       if('uuid' === attribute) continue;
-                      element.attr('class' === attribute ? 'svy-solution-layout-class' : attribute, data.containers[j][attribute]);
+                      element.attr(attribute, data.containers[j][attribute]);
+                      if('svy-layout-class' === attribute || 'svy-solution-layout-class' === attribute) {
+                        element.attr('svy-title', data.containers[j]['svy-layout-class'] + " " + data.containers[j]['svy-solution-layout-class']);
+                      }
                   }
                 }
               }
@@ -774,16 +777,22 @@ angular.module('editorContent',['servoyApp'])
 			scope.$watch(function() {
         return element.attr('svy-solution-layout-class');
       }, function(newVal, oldValue) {
-        updateElementClass(oldValue);
+        updateElementClass('svy-solution-layout-class', $rootScope.showSolutionLayoutsCss, oldValue);
       });
       
+			scope.$watch(function() {
+        return element.attr('svy-layout-class');
+      }, function(newVal, oldValue) {
+        updateElementClass('svy-layout-class', true, oldValue);
+      });
+
       scope.$watch(function() {
         return $rootScope.showSolutionLayoutsCss;
       }, function(newVal) {
-        updateElementClass();
+        updateElementClass('svy-solution-layout-class', $rootScope.showSolutionLayoutsCss);
       });
 
-      function updateElementClass(toRemove) {
+      function updateElementClass(fromClass, isAdding, toRemove) {
         var classes;
         if(toRemove) {
           classes = toRemove.split(" ");
@@ -791,9 +800,9 @@ angular.module('editorContent',['servoyApp'])
             element.removeClass(classes[i]);
           }
         }
-        classes = element.attr('svy-solution-layout-class').split(" ");
+        classes = element.attr(fromClass).split(" ");
         for(var i = 0; i < classes.length; i++) {
-          if($rootScope.showSolutionLayoutsCss) {
+          if(isAdding) {
               if(!element.hasClass(classes[i])) {
                 element.addClass(classes[i]);
               }

@@ -583,8 +583,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					String key = attribute.getKey();
 					String value = attribute.getValue();
 
-					writer.key(key);
-
 					if ("class".equals(key))
 					{
 						WebLayoutSpecification spec = null;
@@ -598,11 +596,21 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							}
 						}
 						List<String> containerStyleClasses = FormLayoutStructureGenerator.getStyleClassValues(spec, container.getCssClasses());
-						// only update solutionStyleClasses
+
+						writer.key("svy-layout-class");
+						value = containerStyleClasses.stream().collect(Collectors.joining(" "));
+						writer.value(value);
+
+						writer.key("svy-solution-layout-class");
 						value = Arrays.stream(container.getCssClasses().split(" ")).filter(cls -> !containerStyleClasses.contains(cls)).collect(
 							Collectors.joining(" "));
+						writer.value(value);
 					}
-					writer.value(value);
+					else
+					{
+						writer.key(key);
+						writer.value(value);
+					}
 				}
 				writer.endObject();
 			}
