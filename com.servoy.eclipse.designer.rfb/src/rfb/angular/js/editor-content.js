@@ -601,56 +601,19 @@ angular.module('editorContent',['servoyApp'])
                 var key = data.containers[j].uuid;
                 var element = updateElementIfParentChange(key, data, { layoutId: key },false,domElementsToRemove);
                 if(element) {
-          		  for (attribute in data.containers[j]) {
-          		      if('uuid' === attribute) continue;
-          			  if ('class' === attribute)
-          			  {
-          				  var oldValue = element.attr(attribute);
-          				  var newValue = data.containers[j][attribute];
-          				  if (oldValue)
-          				  {
-          					  var oldValuesArray = oldValue.split(" ");
-          					  var newValuesArray = newValue.split(" ");
-          					  var ngClassValues = [];
-          					  var ngClassValue= element.attr('ng-class');
-          					  if (ngClassValue)
-          					  {
-          						  // this is not valid json, how to parse it ?
-          						  ngClassValue = ngClassValue.replace("{","").replace("}","").replace(/"/g,"");
-          						  ngClassValues = ngClassValue.split(":");
-          						  for (var i=0;i< ngClassValues.length-1;i++ )
-          						  {
-          							  if (ngClassValues[i].indexOf(',') >= 0)
-          							  {
-          								  ngClassValues[i] = ngClassValues[i].slice(ngClassValues[i].lastIndexOf(',')+1,ngClassValues[i].length);
-          							  }	  
-          						  }	  
-          					  }	  
-          					  for (var i=0;i< oldValuesArray.length;i++)
-          					  {
-          						  if (newValuesArray.indexOf(oldValuesArray[i]) < 0 && ngClassValues.indexOf(oldValuesArray[i]) >= 0)
-          						  {
-          							  //this value is missing, check if servoy added class
-          							  newValue += " " + oldValuesArray[i];
-          						  }	  
-          					  }	  
-          				  }	
-          				  element.attr(attribute,newValue); 
-          			  }
-          			  else
-          			  {
-          				  element.attr(attribute,data.containers[j][attribute]); 
-          			  }	  
-                    }
+                  for (attribute in data.containers[j]) {
+                      if('uuid' === attribute) continue;
+                      element.attr('class' === attribute ? 'svy-solution-layout-class' : attribute, data.containers[j][attribute]);
+                  }
                 }
               }
-            }          
+          }          
             
-            for (var index in data.deletedContainers) {
-              var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
-              toDelete.remove();
+          for (var index in data.deletedContainers) {
+            var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
+            toDelete.remove();
 
-            }          
+          }          
           
           if(data.updatedFormComponentsDesignId) {
         	  for (var index in data.updatedFormComponentsDesignId) {
@@ -792,4 +755,42 @@ angular.module('editorContent',['servoyApp'])
     showLoading: function() {},
     hideLoading: function() {}
   }
+}).directive('svySolutionLayoutClass',  function ($rootScope) {
+	return {
+		restrict: 'A',
+		link: function (scope, element) {
+			scope.$watch(function() {
+        return element.attr('svy-solution-layout-class');
+      }, function(newVal, oldValue) {
+        updateElementClass(oldValue);
+      });
+      
+      scope.$watch(function() {
+        return $rootScope.showSolutionLayoutsCss;
+      }, function(newVal) {
+        updateElementClass();
+      });
+
+      function updateElementClass(toRemove) {
+        var classes;
+        if(toRemove) {
+          classes = toRemove.split(" ");
+          for(var i = 0; i < classes.length; i++) {
+            element.removeClass(classes[i]);
+          }
+        }
+        classes = element.attr('svy-solution-layout-class').split(" ");
+        for(var i = 0; i < classes.length; i++) {
+          if($rootScope.showSolutionLayoutsCss) {
+              if(!element.hasClass(classes[i])) {
+                element.addClass(classes[i]);
+              }
+          }
+          else {
+              element.removeClass(classes[i]);
+          }
+        }
+      }
+		}
+	}
 });
