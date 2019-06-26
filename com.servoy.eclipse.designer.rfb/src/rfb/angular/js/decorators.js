@@ -127,7 +127,7 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 						$scope.nodes[i].style.display = 'none';
 					}
 
-					if (!doNotScrollIntoView && $scope.nodes.length > 0) {
+					if (!doNotScrollIntoView && $scope.nodes.length > 0 && selection.length > 0) {
 						var ghost = $scope.getGhost($scope.nodes[0].node.attr("svy-id"));
 
 						if (!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM && ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART)) {
