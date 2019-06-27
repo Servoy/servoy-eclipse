@@ -65,6 +65,11 @@ angular.module('editorContent',['servoyApp'])
     return el;
   }
   
+	//trigger content loaded to set content sizes
+	$scope.$on('content-loaded:ready', function() {
+   		$rootScope.$broadcast("CONTENT_LOADED"); 
+	});	      
+  
   //this preventDefault should not be needed because we have the glasspane 
   //however, the SWT browser on OS X needs this in order to show our editor context menu when right-clicking on the iframe 
   window.addEventListener('contextmenu', function (e) { // Not compatible with IE < 9
@@ -786,4 +791,17 @@ angular.module('editorContent',['servoyApp'])
     showLoading: function() {},
     hideLoading: function() {}
   }
+}).directive('elementReady', function($timeout, $rootScope) {
+	return {
+      restrict: 'A',
+      link: function(scope, element, attrs) {
+        $timeout(function(){
+          element.ready(function() {
+            scope.$apply(function() {
+              $rootScope.$broadcast(attrs.elementReady+':ready');
+            });
+          });
+        });
+      }
+    };
 });
