@@ -288,6 +288,11 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		}
 	}
 
+	public void requestSelection()
+	{
+		selectionListener.updateSelection(true);
+	}
+
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
 	{

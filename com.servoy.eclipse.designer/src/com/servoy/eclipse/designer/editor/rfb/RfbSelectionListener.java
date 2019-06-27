@@ -60,27 +60,32 @@ public class RfbSelectionListener implements ISelectionListener
 		{
 			currentSelection = selection;
 
-			Display.getCurrent().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					final List<String> uuids = getPersistUUIDS((IStructuredSelection)currentSelection);
-					if (uuids != null && (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection))))
-					{
-						lastSelection = uuids;
-						editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
-						{
-							@Override
-							public void run()
-							{
-								editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
-									new Object[] { uuids.toArray() });
-							}
-						});
-					}
-				}
-			});
+			updateSelection(false);
 		}
+	}
+
+	public void updateSelection(boolean force)
+	{
+		Display.getCurrent().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				final List<String> uuids = getPersistUUIDS((IStructuredSelection)currentSelection);
+				if (force || uuids != null && (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection))))
+				{
+					lastSelection = uuids;
+					editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
+								new Object[] { uuids.toArray() });
+						}
+					});
+				}
+			}
+		});
 	}
 
 	/**
