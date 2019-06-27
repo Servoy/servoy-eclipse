@@ -31,7 +31,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	INITIALIZED: "INITIALIZED",
 	RENDER_DECORATORS: "RENDER_DECORATORS",
 	HIDE_DECORATORS: "HIDE_DECORATORS",
-	RENDER_PALETTE: "RENDER_PALETTE"
+	RENDER_PALETTE: "RENDER_PALETTE",
+	CONTENT_LOADED: "CONTENT_LOADED"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 100,
 	PART_LABEL_HEIGHT: 22,
@@ -1034,6 +1035,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
+				editorContentRootScope.$on(EDITOR_EVENTS.CONTENT_LOADED, function() {
+					$editorService.setContentSizes();
+				})
+				//call set content sizes 
+				//in the less likely situation in which we missed the CONTENT_LOADED event
+				//because the editorContentRootScope was not set yet
+				editorContentRootScope.$evalAsync(function() { $editorService.setContentSizes()});
+				
 				//workaround to make the contextmenu show on osx
 				editorContentRootScope.ctxmenu = $scope.ctxmenu;
 				delete $scope.ctxmenu;
