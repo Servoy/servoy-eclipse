@@ -603,9 +603,6 @@ angular.module('editorContent',['servoyApp'])
                   for (attribute in data.containers[j]) {
                       if('uuid' === attribute) continue;
                       element.attr(attribute, data.containers[j][attribute]);
-                      if('svy-layout-class' === attribute || 'svy-solution-layout-class' === attribute) {
-                        element.attr('svy-title', data.containers[j]['svy-layout-class'] + " " + data.containers[j]['svy-solution-layout-class']);
-                      }
                   }
                 }
               }

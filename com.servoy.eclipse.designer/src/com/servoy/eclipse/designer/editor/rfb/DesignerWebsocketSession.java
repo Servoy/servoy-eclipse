@@ -605,6 +605,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						value = Arrays.stream(container.getCssClasses().split(" ")).filter(cls -> !containerStyleClasses.contains(cls)).collect(
 							Collectors.joining(" "));
 						writer.value(value);
+
+						writer.key("svy-title");
+						writer.value(FormLayoutStructureGenerator.getLayouContainerTitle(container));
 					}
 					else
 					{
