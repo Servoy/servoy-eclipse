@@ -113,6 +113,7 @@ public class ChangeParentCommand extends Command
 			oldParent = initialParent;
 			initialParent.removeChild(child);
 			newParent.addChild(child);
+			child.flagChanged();
 			updateChildPosition(flattenedNewParent, changes, false);
 		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
