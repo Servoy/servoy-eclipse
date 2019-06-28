@@ -616,7 +616,7 @@ angular.module('editorContent',['servoyApp'])
                   }
                 }
               }
-          }          
+          }
             
           for (var index in data.deletedContainers) {
             var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
