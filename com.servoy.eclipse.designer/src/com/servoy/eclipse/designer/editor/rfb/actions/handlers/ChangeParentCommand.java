@@ -128,6 +128,7 @@ public class ChangeParentCommand extends Command
 		{
 			newParent.removeChild(child);
 			oldParent.addChild(child);
+			child.flagChanged();
 		}
 		//undo position change
 		ISupportChilds flattenedNewParent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(child.getParent()), form,
