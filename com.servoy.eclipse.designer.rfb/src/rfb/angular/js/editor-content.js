@@ -433,10 +433,10 @@ angular.module('editorContent',['servoyApp'])
 	    if (parent.children().length > 0) {
 	    	// we have to calculate insert point based on ordered location, just like on server side
 	    	var inserted = false;
-	    	var nodeLocation = parseInt(tpl.attr('svy-location'));
+	    	var nodeLocation = parseInt((formData.formProperties.absoluteLayout[''] && tpl.children(0)) ? tpl.children(0).attr('form-index') : tpl.attr('svy-location'));
 	    	for (var i=0;i<parent.children().length;i++)
 	    	{
-	    		var currentLocation = parseInt(parent.children()[i].getAttribute('svy-location'));
+	    		var currentLocation = parseInt((formData.formProperties.absoluteLayout[''] && parent.children()[i].children(0)) ? parent.children()[i].children(0).getAttribute('form-index') : parent.children()[i].getAttribute('svy-location'));
 	    		if (nodeLocation <= currentLocation)
 	    		{
 	    			tpl.insertBefore(parent.children()[i]);
@@ -465,6 +465,10 @@ angular.module('editorContent',['servoyApp'])
     		elementsToRemove.push(elementTemplate);
     	}
     	else if (updateData.childParentMap[elementId].location > -1 && updateData.childParentMap[elementId].location != parseInt(elementTemplate.attr('svy-location'))){
+    		// location(order) is changed, we need to reinsert this node
+    		elementsToRemove.push(elementTemplate);
+    	}
+    	else if (updateData.childParentMap[elementId].formIndex > -1 && elementTemplate.children(0) && updateData.childParentMap[elementId].formIndex != parseInt(elementTemplate.children(0).attr('form-index'))){
     		// location(order) is changed, we need to reinsert this node
     		elementsToRemove.push(elementTemplate);
     	}
