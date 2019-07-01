@@ -3321,7 +3321,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 									}
 									relation = relations[relations.length - 1];
-									if (!relation.isGlobal() && relation.getPrimaryDataSource() != null)
+									if (!relation.isGlobal() && relation.getForeignDataSource() != null)
 									{
 										Form form = tabFlattenedSolution.getForm(tab.getContainsFormID());
 										if (form != null && !relation.getForeignDataSource().equals(form.getDataSource()))
