@@ -71,7 +71,7 @@ public class RfbSelectionListener implements ISelectionListener
 			public void run()
 			{
 				final List<String> uuids = getPersistUUIDS((IStructuredSelection)currentSelection);
-				if (force || uuids != null && (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection))))
+				if (uuids != null && (force || (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection)))))
 				{
 					lastSelection = uuids;
 					editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
