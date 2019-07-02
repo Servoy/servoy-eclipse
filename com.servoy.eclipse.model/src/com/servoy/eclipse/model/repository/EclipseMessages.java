@@ -19,8 +19,6 @@ package com.servoy.eclipse.model.repository;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,7 +29,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.eclipse.core.resources.IContainer;
@@ -69,6 +66,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
 
 public class EclipseMessages implements ICustomMessageLoader
@@ -393,21 +391,7 @@ public class EclipseMessages implements ICustomMessageLoader
 			Properties output = languagesOutput.get(lang);
 			if (output == null)
 			{
-				output = new Properties() // sorted properties
-				{
-					@Override
-					public synchronized Enumeration keys()
-					{
-						Enumeration keysEnum = super.keys();
-						Vector keyList = new Vector();
-						while (keysEnum.hasMoreElements())
-						{
-							keyList.add(keysEnum.nextElement());
-						}
-						Collections.sort(keyList);
-						return keyList.elements();
-					}
-				};
+				output = new SortedProperties();
 				languagesOutput.put(lang, output);
 			}
 			String v = entry.getValue().getValue();
