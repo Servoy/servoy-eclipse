@@ -392,7 +392,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						xMouseDown = event.clientX;
 						yMouseDown = event.clientY;
 					}
-					if (lassoStarted || hasClass(event.target, "contentframe-overlay") || hasClass(event.target, "ghostcontainer")
+					if (lassoStarted || hasClass(event.target, "contentframe-overlay") || hasClass(event.target, "decorator") || hasClass(event.target, "ghostcontainer")
 							|| hasClass(event.target, "ghostContainerPropName") || hasClass(event.target, "ghost") || hasClass(event.target, "knob") || event.target.id == "highlight") {
 						xMouseDown -= editorScope.glasspane.parentElement.offsetLeft;
 						yMouseDown -= editorScope.glasspane.parentElement.offsetTop;
@@ -410,12 +410,12 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 				getNode: function(event, skipGlass, skipNodeId, returnNonSelectable) {
 					var glassPaneMousePosition = this.getMousePosition(event);
 					var glassPaneMousePosition1 = {
-						top: glassPaneMousePosition.top + 1,
-						left: glassPaneMousePosition.left + 1
+						top: glassPaneMousePosition.top + 0.5,
+						left: glassPaneMousePosition.left + 0.5
 					};
 					var glassPaneMousePosition2 = {
-						top: glassPaneMousePosition.top - 1,
-						left: glassPaneMousePosition.left - 1
+						top: glassPaneMousePosition.top - 0.5,
+						left: glassPaneMousePosition.left - 0.5
 					};
 					var nonSelectableNode;
 					var elements = this.getElementsByRectangle(glassPaneMousePosition1, glassPaneMousePosition2, 0.000001, true, !skipGlass, skipNodeId);
@@ -484,7 +484,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 							
 						// always return the one on top (visible); this is due to formIndex implementation
 						var el = null;
-						for (var i=elements.length;--i;) {
+						for (var i = elements.length-1; i >= 0; i--) {
 							if (!(angular.element(elements[i]).is("[svy-non-selectable]"))) {
 								if (el == null || this.hasGreaterZIndex(elements[i], el))
 								{
