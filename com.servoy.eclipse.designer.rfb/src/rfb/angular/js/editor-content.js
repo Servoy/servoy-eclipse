@@ -556,25 +556,25 @@ angular.module('editorContent',['servoyApp'])
     	delete cssPositionObject.height;
     	delete cssPositionObject['min-width'];
     	delete cssPositionObject['min-height'];
-    	if (cssPosition.left != -1)
+    	if (cssPosition.left != -1 && cssPosition.left !== undefined)
     	{
-    		cssPositionObject.left = isNaN(parseInt(cssPosition.left)) ? cssPosition.left : (cssPosition.left + 'px');
+    		cssPositionObject.left = isNaN(parseInt(cssPosition.left)) ? cssPosition.left : (parseInt(cssPosition.left) + 'px');
     	}
-    	if (cssPosition.right != -1)
+    	if (cssPosition.right != -1 && cssPosition.right !== undefined)
     	{
-    		cssPositionObject.right = isNaN(parseInt(cssPosition.right)) ? cssPosition.right : (cssPosition.right + 'px');
+    		cssPositionObject.right = isNaN(parseInt(cssPosition.right)) ? cssPosition.right : (parseInt(cssPosition.right) + 'px');
     	}
-    	if (cssPosition.top != -1)
+    	if (cssPosition.top != -1 && cssPosition.top !== undefined)
     	{
-    		cssPositionObject.top = isNaN(parseInt(cssPosition.top)) ? cssPosition.top : (cssPosition.top + 'px');
+    		cssPositionObject.top = isNaN(parseInt(cssPosition.top)) ? cssPosition.top : (parseInt(cssPosition.top) + 'px');
     	}
-    	if (cssPosition.bottom != -1)
+    	if (cssPosition.bottom != -1 && cssPosition.bottom !== undefined)
     	{
-    		cssPositionObject.bottom = isNaN(parseInt(cssPosition.bottom)) ? cssPosition.bottom : (cssPosition.bottom + 'px');
+    		cssPositionObject.bottom = isNaN(parseInt(cssPosition.bottom)) ? cssPosition.bottom : (parseInt(cssPosition.bottom) + 'px');
     	}
-    	if (cssPosition.width != -1)
+    	if (cssPosition.width != -1 && cssPosition.width !== undefined)
     	{
-    		if (cssPosition.left != -1 && cssPosition.right != -1)
+    		if (cssPosition.left != -1 && cssPosition.left !== undefined && cssPosition.right != -1 && cssPosition.right !== undefined)
     		{
     			cssPositionObject['min-width'] = cssPosition.width;
     		}
@@ -583,9 +583,9 @@ angular.module('editorContent',['servoyApp'])
     			cssPositionObject.width = cssPosition.width;
     		}	
     	}
-    	if (cssPosition.height != -1)
+    	if (cssPosition.height != -1 && cssPosition.height !== undefined)
     	{
-    		if (cssPosition.top != -1 && cssPosition.bottom != -1)
+    		if (cssPosition.top != -1 && cssPosition.top !== undefined && cssPosition.bottom != -1 && cssPosition.bottom !== undefined)
     		{
     			cssPositionObject['min-height'] = cssPosition.height;
     		}
