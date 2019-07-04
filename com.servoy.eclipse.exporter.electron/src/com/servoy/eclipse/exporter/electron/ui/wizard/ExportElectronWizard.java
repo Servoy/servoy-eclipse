@@ -56,11 +56,12 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 
 	}
 	
-	private CustomArchiveObject customizeEntry(TarArchiveInputStream tarIS, ArchiveEntry entry, String url, String platform) throws IOException{
-		//TarArchiveInputStream doesn't implement reset(). So - we are forced to 
-		//set the size for entry and write output with one single read from tarIS.
-		if (entry == null) return null;
-		if (entry.getName().endsWith("/servoy.json")) {
+	private CustomArchiveObject customizeEntry(TarArchiveInputStream tarIS, ArchiveEntry entry, String url, String platform, String archiveName) throws IOException{
+		//TarArchiveInputStream doesn't implement reset() - store stream content and compute required size in one step for further archive entry 
+		if (platform.contentEquals(ExportPage.WINDOWS_PLATFORM)) {//for windows need to use zip entries and not tar entries
+			entry = tarIS.available() > 0 ? new ZipArchiveEntry(entry.getName().substring(entry.getName().indexOf(archiveName))) : null;
+		}
+		if (entry != null && entry.getName().endsWith("/servoy.json")) {
 			List<String> lines = IOUtils.readLines(tarIS, StandardCharsets.UTF_8);
 			int entrySize = 0;
 			for (int index = 0; index < lines.size(); index ++) {
@@ -78,9 +79,8 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		return new CustomArchiveObject(entry, null);
 	}
 	
-	private void updateUrl(File source, File destination, String url, String platform, String archiveName) throws IOException, ArchiveException {
-		FileInputStream fis = new FileInputStream(source);
-		TarArchiveInputStream tarIS = new TarArchiveInputStream(new GzipCompressorInputStream(fis));
+	private void updateUrl(InputStream is, File destination, String url, String platform, String archiveName) throws IOException, ArchiveException {
+		TarArchiveInputStream tarIS = new TarArchiveInputStream(new GzipCompressorInputStream(is));
 		 
 		OutputStream fileOutputStream = new FileOutputStream(destination);
 	    ArchiveOutputStream os = null;;
@@ -95,10 +95,10 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		 
 	    ArchiveEntry entry = tarIS.getNextTarEntry();
 	    while (entry != null) {
-	    	if (platform.equals("win")) {
+	    	if (platform.contentEquals(ExportPage.WINDOWS_PLATFORM)) {
    				entry = tarIS.available() > 0 ? new ZipArchiveEntry(entry.getName().substring(entry.getName().indexOf(archiveName))) : null;
     		}
-	    	CustomArchiveObject caro = customizeEntry(tarIS, entry, url, platform);
+	    	CustomArchiveObject caro = customizeEntry(tarIS, entry, url, platform, archiveName);
 	    	if (caro != null && caro.getEntry() != null) {
 	    		os.putArchiveEntry(caro.getEntry());
 	    		if (caro.getLines() != null) {
@@ -130,31 +130,13 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 			{
 				selectedPlatforms.forEach((platform) -> {
 					String archiveName = StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform ;
-					String extension = ((platform.equals(ExportPage.WINDOWS_PLATFORM)) ? ".zip" : ".tar.gz.tmp");
-					File sourceArchiveFile = new File(saveDir + archiveName + ".tar.gz");
-					File targetArchiveFile = new File(saveDir + archiveName + extension);
-					
-					sourceArchiveFile.getParentFile().mkdirs();
-
+					String extension = ((platform.equals(ExportPage.WINDOWS_PLATFORM)) ? ".zip" : ".tar.gz");
+					File archiveFile = new File(saveDir + archiveName + extension);
+					archiveFile.getParentFile().mkdirs();
 					try {
-						//download sources
-						if (sourceArchiveFile.exists()) sourceArchiveFile.delete();
+						if (archiveFile.exists()) archiveFile.delete();
 						URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveName + ".tar.gz");
-						InputStream is = fileUrl.openStream();
-						FileOutputStream os = new FileOutputStream(sourceArchiveFile);
-						int n = 0;
-						byte buffer[] = new byte[BUFFER_SIZE];
-						while ((n = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
-							os.write(buffer, 0, n);
-						}
-						is.close();
-						os.close();
-						
-						//update archive
-						updateUrl(sourceArchiveFile, targetArchiveFile, appUrl, platform, archiveName);
-						sourceArchiveFile.delete();
-						if (!platform.equals(ExportPage.WINDOWS_PLATFORM))
-							targetArchiveFile.renameTo(sourceArchiveFile);//for windows this has no effect - tmpArchiveFile does not exists
+						updateUrl(fileUrl.openStream(), archiveFile, appUrl, platform, archiveName);
 					} catch (IOException | ArchiveException e) {
 						ServoyLog.logError(e);
 					} 
