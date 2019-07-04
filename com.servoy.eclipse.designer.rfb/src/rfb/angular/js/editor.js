@@ -930,7 +930,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					}
 					
 					 $scope.$evalAsync( function() {  
-						if ( $($scope.contentDocument).find('.svy-form')[0] && $($scope.contentDocument).find('.svy-form')[0].offsetHeight < EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT)
+						if (!$scope.isAbsoluteFormLayout() && $($scope.contentDocument).find('.svy-form')[0] && $($scope.contentDocument).find('.svy-form')[0].offsetHeight < EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT)
 						{ 
 							$scope.getEditorContentRootScope().sfcontentStyle = {'height': EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px'};
 						}
