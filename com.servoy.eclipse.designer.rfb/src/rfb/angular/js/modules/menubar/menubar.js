@@ -28,6 +28,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         var droptarget = $scope.node.node[0].parentNode.getAttribute("svy-id");
                         if (droptarget)  component.dropTargetUUID = droptarget;
                         component.rightSibling = $scope.node.node.attr("svy-id");
+                        component.keepOldSelection = true;
                         $editorService.createComponent(component);
                     }
                 },
@@ -55,6 +56,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService)
                         {
                         	component.rightSibling = $scope.node.node[0].nextSibling.getAttribute("svy-id");
                         }
+                        component.keepOldSelection = true;
                         $editorService.createComponent(component);
                     }
                 },

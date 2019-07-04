@@ -31,7 +31,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	INITIALIZED: "INITIALIZED",
 	RENDER_DECORATORS: "RENDER_DECORATORS",
 	HIDE_DECORATORS: "HIDE_DECORATORS",
-	RENDER_PALETTE: "RENDER_PALETTE"
+	RENDER_PALETTE: "RENDER_PALETTE",
+	CONTENT_LOADED: "CONTENT_LOADED"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 100,
 	PART_LABEL_HEIGHT: 22,
@@ -530,6 +531,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				updateGhostsAccordingToSelection(selection);
 			})
 			
+			$rootScope.$on(EDITOR_EVENTS.INITIALIZED, function() {
+				$editorService.requestSelection();
+			})
+			
 			function getMousePosition(event) {
 				var xMouse = -1;
 				var yMouse = -1;
@@ -925,7 +930,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					}
 					
 					 $scope.$evalAsync( function() {  
-						if ( $($scope.contentDocument).find('.svy-form')[0] && $($scope.contentDocument).find('.svy-form')[0].offsetHeight < EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT)
+						if (!$scope.isAbsoluteFormLayout() && $($scope.contentDocument).find('.svy-form')[0] && $($scope.contentDocument).find('.svy-form')[0].offsetHeight < EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT)
 						{ 
 							$scope.getEditorContentRootScope().sfcontentStyle = {'height': EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px'};
 						}
@@ -1030,6 +1035,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
+				editorContentRootScope.$on(EDITOR_EVENTS.CONTENT_LOADED, function() {
+					$editorService.setContentSizes();
+				})
+				//call set content sizes 
+				//in the less likely situation in which we missed the CONTENT_LOADED event
+				//because the editorContentRootScope was not set yet
+				editorContentRootScope.$evalAsync(function() { $editorService.setContentSizes()});
+				
 				//workaround to make the contextmenu show on osx
 				editorContentRootScope.ctxmenu = $scope.ctxmenu;
 				delete $scope.ctxmenu;
@@ -1364,6 +1377,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			return wsSession.callService('formeditor', 'getSystemFont', null, false)
 		},
 
+		requestSelection: function(node) {
+			return wsSession.callService('formeditor', 'requestSelection', null, true)
+		},
+		
 		isInheritedForm: function() {
 			return wsSession.callService('formeditor', 'getBooleanState', {
 				"isInheritedForm": true
@@ -1471,9 +1488,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 		},
 
-		updateSelection: function(ids) {
-			if (editorScope.updateSel) $timeout.cancel(editorScope.updateSel);
-			editorScope.updateSel = $timeout(function() {
+		updateSelection: function(ids,timeout) {
+			if (editorScope.updateSel)
+			{
+				$timeout.cancel(editorScope.updateSel);
+			}
+			function tryUpdateSelection (){
 				var prevSelection = editorScope.getSelection();
 				var changed = false;
 				var selection = [];
@@ -1481,6 +1501,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
 					var ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
 					nodes = nodes.concat(ghosts);
+					if (nodes.length == 0)
+					{
+						$timeout(tryUpdateSelection, 400);
+						return;
+					}	
 					for (var i = 0; i < nodes.length; i++) {
 						var id = nodes[i].getAttribute("svy-id");
 						if (ids.indexOf(id) != -1) {
@@ -1493,7 +1518,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					changed = true;
 				}
 				if (changed) editorScope.setSelection(selection);
-			}, 400);
+			}
+			editorScope.updateSel = $timeout(tryUpdateSelection, 400);
 		},
 		
 		refreshPalette: function()

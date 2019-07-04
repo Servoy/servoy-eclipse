@@ -40,12 +40,15 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IPageSite;
@@ -107,7 +110,6 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	private ISupportChilds dropTarget;
 	private IPersist dropTargetComponent;
 
-
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
 	{
 		this.form = form;
@@ -127,6 +129,20 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE : FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE,
 			form)));
 		getTreeViewer().setInput(form);
+
+		// hack around the fact that somehow if you click directly inside the outline view when coming from the Chromium browser editor, the right part is not activated.
+		getTreeViewer().getControl().addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusGained(FocusEvent e)
+			{
+				IViewPart outlinePart = getSite().getPage().findView("org.eclipse.ui.views.ContentOutline");
+				if (outlinePart != null && getSite().getPage().getActivePart() != outlinePart)
+				{
+					Display.getDefault().asyncExec(() -> getSite().getPage().activate(outlinePart));
+				}
+			}
+		});
 
 		if (form != null)
 		{

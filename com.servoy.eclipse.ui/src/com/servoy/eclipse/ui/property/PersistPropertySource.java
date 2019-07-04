@@ -2921,7 +2921,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			persistContainingFoundsetProperty = ((WebCustomType)persistContainingFoundsetProperty).getParent();
 		}
-		String forFoundsetName = differentFoundsetDueToProperty(propertyDescription);
+		else if (persistContainingFoundsetProperty instanceof WebFormComponentChildType)
+		{
+			persistContainingFoundsetProperty = persistContainingFoundsetProperty.getAncestor(IRepository.WEBCOMPONENTS);
+		}
+		String forFoundsetName = differentFoundsetDueToProperty(propertyDescription, persistContext);
 		if (forFoundsetName == null)
 		{
 			forFoundsetName = differentFoundsetDueToComponent(propertyDescription, persistContainingFoundsetProperty);
@@ -3034,41 +3038,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				if (form == null) return null;
 
-				if (persistContext.getPersist() instanceof WebFormComponentChildType)
-				{
-					WebComponent parentComponent = (WebComponent)persistContext.getPersist().getAncestor(IRepository.WEBCOMPONENTS);
-					if (parentComponent != null)
-					{
-						WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
-							parentComponent.getTypeName());
-						Collection<PropertyDescription> foundsetProperties = spec.getProperties(FoundsetPropertyType.INSTANCE);
-						if (!foundsetProperties.isEmpty())
-						{
-							PropertyDescription firstFoundsetProperty = foundsetProperties.iterator().next();
-							Object foundsetPropertyValue = parentComponent.getProperty(firstFoundsetProperty.getName());
-							if (foundsetPropertyValue instanceof JSONObject)
-							{
-								String foundsetSelector = (String)ServoyJSONObject.jsonNullToNull(
-									((JSONObject)foundsetPropertyValue).opt(FoundsetPropertyType.FOUNDSET_SELECTOR));
-								Relation[] relations = flattenedEditingSolution.getRelationSequence(foundsetSelector);
-								if (relations != null && relations.length > 0)
-								{
-									String foreignDS = relations[relations.length - 1].getForeignDataSource();
-									table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foreignDS);
-								}
-								else if (!"".equals(foundsetSelector))
-								{
-									table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foundsetSelector);
-								}
-							}
-						}
-					}
-				}
-				if (table == null)
-				{
-					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
-						flattenedEditingSolution.getFlattenedForm(form).getDataSource());
-				}
+				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+					flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
 					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 
@@ -3289,7 +3260,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return forFoundsetName;
 	}
 
-	private static String differentFoundsetDueToProperty(PropertyDescription propertyDescription)
+	private static String differentFoundsetDueToProperty(PropertyDescription propertyDescription, PersistContext persistContext)
 	{
 		String forFoundsetName = null;
 		if (propertyDescription.getType() instanceof FoundsetLinkedPropertyType< ? , ? >)
@@ -3299,6 +3270,23 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		if (propertyDescription.getType() instanceof FormComponentPropertyType && propertyDescription.getConfig() instanceof ComponentTypeConfig)
 		{
 			forFoundsetName = ((ComponentTypeConfig)propertyDescription.getConfig()).forFoundset;
+		}
+		if (persistContext.getPersist() instanceof WebFormComponentChildType)
+		{
+			WebComponent parentComponent = (WebComponent)persistContext.getPersist().getAncestor(IRepository.WEBCOMPONENTS);
+			if (parentComponent != null)
+			{
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(parentComponent.getTypeName());
+				Collection<PropertyDescription> formComponentProperties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+				if (!formComponentProperties.isEmpty())
+				{
+					PropertyDescription firstFormComponentProperty = formComponentProperties.iterator().next();
+					if (firstFormComponentProperty.getConfig() instanceof ComponentTypeConfig)
+					{
+						forFoundsetName = ((ComponentTypeConfig)firstFormComponentProperty.getConfig()).forFoundset;
+					}
+				}
+			}
 		}
 		return forFoundsetName;
 	}

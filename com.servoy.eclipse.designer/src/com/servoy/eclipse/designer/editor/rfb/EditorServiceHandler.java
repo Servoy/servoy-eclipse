@@ -226,6 +226,17 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("requestSelection", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).requestSelection();
+				return null;
+			}
+		});
+
 		configuredHandlers.put("toggleShow", new IServerService()
 		{
 			@Override

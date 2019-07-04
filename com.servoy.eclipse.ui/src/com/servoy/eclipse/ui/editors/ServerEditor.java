@@ -41,6 +41,8 @@ import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -124,6 +126,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private CCombo validationTypeField;
 	private Text maxPreparedStatementsIdleField;
 	private Text maxIdleField;
+	private Text logTableName;
 	private Text maxActiveField;
 	private Text idleTimoutField;
 	private CCombo dataModel_cloneFromField;
@@ -596,6 +599,12 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		Composite buttonsComposite = new Composite(advancedSettingsComposite, SWT.NONE);
 
+		Label logTableLabel = new Label(buttonsComposite, SWT.LEFT);
+		logTableLabel.setText("Log Table Name");
+
+		logTableName = new Text(buttonsComposite, SWT.BORDER);
+		logTableName.setToolTipText("Log table name, default is \"log\"");
+
 		createLogTableButton = new Button(buttonsComposite, SWT.PUSH);
 		createLogTableButton.setText("Create Log Table");
 		createLogTableButton.addSelectionListener(new SelectionAdapter()
@@ -613,6 +622,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 				try
 				{
+					ServoyModel.getServerManager().setLogTableName(logTableName.getText());
 					Table logTable = logServer.getLogTable();
 					if (logTable == null)
 					{
@@ -845,13 +855,17 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		buttonsComposite.setLayoutData(col34GD());
 
-		gridLayout = new GridLayout(2, false);
+		gridLayout = new GridLayout(4, false);
 		gridLayout.marginWidth = gridLayout.marginHeight = 0;
 		gridLayout.horizontalSpacing = 10;
 		buttonsComposite.setLayout(gridLayout);
 
+		logTableLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gd.minimumWidth = 100;
+		logTableName.setLayoutData(gd);
 		createLogTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		createClientstatsTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		createClientstatsTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
 		gridLayout = new GridLayout(1, false);
 		gridLayout.marginWidth = gridLayout.marginHeight = 0;
@@ -863,6 +877,16 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		initComboData();
 		initDataBindings();
 		updateSaveButton();
+
+		logTableName.addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+				flagModified();
+			}
+		});
+
 
 		collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 
@@ -1143,6 +1167,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				if (log_server)
 				{
 					serverManager.setLogServerName(currentServerName);
+					serverManager.setLogTableName(logTableName.getText());
 				}
 				else
 				{
@@ -1437,6 +1462,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		logServerButton.setSelection(serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName()));
 
+		logTableName.setText(ServoyModel.getServerManager().getLogTableName());
+
 		updateTestConnectionButton();
 	}
 
@@ -1569,6 +1596,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		{
 			createLogTableButton.setEnabled(false);
 			createClientstatsTableButton.setEnabled(false);
+			logTableName.setEnabled(false);
 		}
 	}
 

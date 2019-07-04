@@ -22,7 +22,6 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -174,12 +173,17 @@ public class CreateComponentHandler implements IServerService
 					{
 						try
 						{
-							newPersist = createComponent(args);
+							List<IPersist> changedPersists = new ArrayList<IPersist>();
+							newPersist = createComponent(args, changedPersists);
 							if (newPersist != null)
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(newPersist));
-								IStructuredSelection structuredSelection = new StructuredSelection(newPersist.length > 0 ? newPersist[0] : newPersist);
-								selectionProvider.setSelection(structuredSelection);
+								changedPersists.addAll(Arrays.asList(newPersist));
+								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
+								if (!args.optBoolean("keepOldSelection", false))
+								{
+									IStructuredSelection structuredSelection = new StructuredSelection(newPersist.length > 0 ? newPersist[0] : newPersist);
+									selectionProvider.setSelection(structuredSelection);
+								}
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
 									CSSPosition.isCSSPositionContainer((LayoutContainer)newPersist[0]))
 								{
@@ -230,7 +234,7 @@ public class CreateComponentHandler implements IServerService
 		return null;
 	}
 
-	protected IPersist[] createComponent(final JSONObject args) throws JSONException, RepositoryException
+	protected IPersist[] createComponent(final JSONObject args, final List<IPersist> extraChangedPersists) throws JSONException, RepositoryException
 	{
 		int x = args.optInt("x");
 		int y = args.optInt("y");
@@ -343,6 +347,7 @@ public class CreateComponentHandler implements IServerService
 									counter++;
 								}
 								((ISupportBounds)element).setLocation(new Point(counter, counter));
+								if (extraChangedPersists != null && element.isChanged()) extraChangedPersists.add(element);
 								counter++;
 							}
 						}
@@ -701,14 +706,14 @@ public class CreateComponentHandler implements IServerService
 								{
 									res.add(dropTarget);
 								}
-								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
-								{
-									LayoutContainer layoutContainer = (LayoutContainer)res.get(0);
-									List<IPersist> children = new ArrayList<>(((AbstractContainer)layoutContainer.getParent()).getAllObjectsAsList());
-									Collections.sort(children, PositionComparator.XY_PERSIST_COMPARATOR);
-									//only refresh if it's not the last element
-									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
-								}
+//								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
+//								{
+//									LayoutContainer layoutContainer = (LayoutContainer)res.get(0);
+//									List<IPersist> children = new ArrayList<>(((AbstractContainer)layoutContainer.getParent()).getAllObjectsAsList());
+//									Collections.sort(children, PositionComparator.XY_PERSIST_COMPARATOR);
+//									//only refresh if it's not the last element
+//									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
+//								}
 								IPersist[] result = res.toArray(new IPersist[0]);
 								if (fullRefreshNeeded)
 								{

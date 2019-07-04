@@ -113,7 +113,7 @@
 	<body class="user-selection-off content">
 		<div class="drag-scroll-preventer max" style="overflow: hidden; z-index: 0">
 			<!--Content-->
-			<div class="sfcontent" ng-style="sfcontentStyle" ng-include="getUrl()">
+			<div class="sfcontent" ng-style="sfcontentStyle" ng-include="getUrl()" element-ready="content-loaded">
 			</div>
 		</div>
 	</body>
