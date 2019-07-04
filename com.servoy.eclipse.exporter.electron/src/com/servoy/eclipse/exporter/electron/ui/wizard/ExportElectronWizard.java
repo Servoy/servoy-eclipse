@@ -129,20 +129,17 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				selectedPlatforms.forEach((platform) -> {
-					String sourceArchiveName = StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
-							StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform ;
-					String targetArchiveName = StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
-							StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform;
+					String archiveName = StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform ;
 					String extension = ((platform.equals(ExportPage.WINDOWS_PLATFORM)) ? ".zip" : ".tar.gz.tmp");
-					File sourceArchiveFile = new File(saveDir + sourceArchiveName + ".tar.gz");
-					File targetArchiveFile = new File(saveDir + targetArchiveName + extension);
+					File sourceArchiveFile = new File(saveDir + archiveName + ".tar.gz");
+					File targetArchiveFile = new File(saveDir + archiveName + extension);
 					
 					sourceArchiveFile.getParentFile().mkdirs();
 
 					try {
 						//download sources
 						if (sourceArchiveFile.exists()) sourceArchiveFile.delete();
-						URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + sourceArchiveName + ".tar.gz");
+						URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveName + ".tar.gz");
 						InputStream is = fileUrl.openStream();
 						FileOutputStream os = new FileOutputStream(sourceArchiveFile);
 						int n = 0;
@@ -154,7 +151,7 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 						os.close();
 						
 						//update archive
-						updateUrl(sourceArchiveFile, targetArchiveFile, appUrl, platform, sourceArchiveName);
+						updateUrl(sourceArchiveFile, targetArchiveFile, appUrl, platform, archiveName);
 						sourceArchiveFile.delete();
 						if (!platform.equals(ExportPage.WINDOWS_PLATFORM))
 							targetArchiveFile.renameTo(sourceArchiveFile);//for windows this has no effect - tmpArchiveFile does not exists
