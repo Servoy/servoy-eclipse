@@ -63,24 +63,22 @@ import com.servoy.j2db.util.Utils;
  */
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
+
 	static final String NGDESKTOP_MAJOR_VERSION = "2019";
 	static final String NGDESKTOP_MINOR_VERSION = "06";
-	static final String NGDESKTOP_VERSION = NGDESKTOP_MAJOR_VERSION + "." + NGDESKTOP_MINOR_VERSION;
-	static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
+
 	static private int BUFFER_SIZE = 1024;
-	static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
 	static final String MAC_EXTENSION = ".app";
 	static final String WINDOWS_EXTENSION = ".exe";
 	//Linux doesn't have any extension
 
-	static final String ELECTRON_WINDOWS_BUILD_PLATFORM = "win";
-	static final String ELECTRON_MAC_BUILD_PLATFORM = "mac";
-	static final String ELECTRON_LINUX_BUILD_PLATFORM = "linux";
+	public static final String WINDOWS_BUILD_PLATFORM = "win";
+	public static final String MAC_BUILD_PLATFORM = "mac";
+	public static final String LINUX_BUILD_PLATFORM = "linux";
 
-	static
-	{
-		if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
-	}
+	public static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
+	public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
+	public static final String NGDESKTOP_VERSION = NGDESKTOP_MAJOR_VERSION + "." + NGDESKTOP_MINOR_VERSION;
 
 	static
 	{
@@ -286,8 +284,8 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 				String extension = Utils.isAppleMacOS() ? MAC_EXTENSION : (Utils.isWindowsOS() ? WINDOWS_EXTENSION : "");
 
-				String folderName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION + "-" + ((Utils.isAppleMacOS() ? ELECTRON_MAC_BUILD_PLATFORM + extension
-					: (Utils.isWindowsOS()) ? ELECTRON_WINDOWS_BUILD_PLATFORM : ELECTRON_LINUX_BUILD_PLATFORM));
+				String folderName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION + "-" +
+					((Utils.isAppleMacOS() ? MAC_BUILD_PLATFORM + extension : (Utils.isWindowsOS()) ? WINDOWS_BUILD_PLATFORM : LINUX_BUILD_PLATFORM));
 
 				File stateLocation = Activator.getDefault().getStateLocation().append(folderName).toFile();
 				String pathToExecutable = (Utils.isAppleMacOS() ? stateLocation.getAbsolutePath()
@@ -361,7 +359,11 @@ class DownloadElectron implements IRunnableWithProgress
 			f.mkdirs();
 
 			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
-				StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + (Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
+				StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+				(Utils.isAppleMacOS() ? StartNGDesktopClientHandler.MAC_BUILD_PLATFORM
+					: (Utils.isWindowsOS() ? StartNGDesktopClientHandler.WINDOWS_BUILD_PLATFORM : StartNGDesktopClientHandler.LINUX_BUILD_PLATFORM)) +
+				".tar.gz");
+
 			ZipUtils.extractTarGZ(fileUrl, f);
 			monitor.worked(2);
 		}
@@ -375,6 +377,4 @@ class DownloadElectron implements IRunnableWithProgress
 			ServoyLog.logError("Cannot find Electron in download center", e);
 		}
 	}
-
-
 }

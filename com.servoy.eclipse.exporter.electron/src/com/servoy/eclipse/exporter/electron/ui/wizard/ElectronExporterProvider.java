@@ -19,7 +19,7 @@ public class ElectronExporterProvider implements IExportSolutionWizardProvider
 			activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY))
 		{
 			return new OpenWizardAction(ExportElectronWizard.class, null /*AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "$nl$/icons/war_export.png")*/,
-				"Electron Export");
+				"NG Desktop Export");
 		}
 		return null;
 	}

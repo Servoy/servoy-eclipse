@@ -67,6 +67,7 @@
 		    <unit id="com.github.jnr.ffi" version="2.1.4.v20180207-1730"/>
 		    <unit id="com.github.jnr.ffi.source" version="2.1.4.v20180207-1730"/>
 		    <unit id="jnr.x86asm" version="1.0.2.v201505052040"/>
+		    <unit id="org.apache.commons.compress" version="1.18.0.v20181121-2221"/>
 		    <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository"/>
 	    </location>
     </locations>

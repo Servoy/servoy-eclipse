@@ -17,13 +17,13 @@
 
 package com.servoy.eclipse.exporter.electron.ui.wizard;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -41,13 +41,16 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  */
 public class ExportPage extends WizardPage
 {
+	
+	public static String WINDOWS_PLATFORM = "win";
+	public static String MACOS_PLATFORM = "mac";
+	public static String LINUX_PLATFORM = "linux";
+	
 	private Text applicationURLText;
 	private Text saveDir;
 	private Group platformGroup;
-	private Group packageGroup;
-	private Button permanent;
-	private String selectedPlatform = "win";
-	private String selectedArchive = "tarball";
+	
+	private List<String> selectedPlatforms = new ArrayList<String>();
 
 	public ExportPage(ExportElectronWizard exportElectronWizard)
 	{
@@ -77,11 +80,13 @@ public class ExportPage extends WizardPage
 		platformGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 
 		
-		Button winBtn = new Button(platformGroup, SWT.RADIO);
-		winBtn.setData("win");
+		Button winBtn = new Button(platformGroup, SWT.CHECK);
+		winBtn.setData(WINDOWS_PLATFORM);
 		winBtn.setText("Windows");
+		selectedPlatforms.add(WINDOWS_PLATFORM);
 		winBtn.setSelection(true);
 		
+
 		winBtn.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -92,9 +97,9 @@ public class ExportPage extends WizardPage
 		});
 		 
 		
-		Button macBtn = new Button(platformGroup, SWT.RADIO);
+		Button macBtn = new Button(platformGroup, SWT.CHECK);
 		macBtn.setText("MacOS");
-		macBtn.setData("mac");
+		macBtn.setData(MACOS_PLATFORM);
 		
 		macBtn.addSelectionListener(new SelectionAdapter()
 		{
@@ -105,9 +110,9 @@ public class ExportPage extends WizardPage
 			}
 		});
 
-		Button linuxBtn = new Button(platformGroup, SWT.RADIO);
+		Button linuxBtn = new Button(platformGroup, SWT.CHECK);
 		linuxBtn.setText("Linux");
-		linuxBtn.setData("linux");
+		linuxBtn.setData(LINUX_PLATFORM);
 		
 		linuxBtn.addSelectionListener(new SelectionAdapter()
 		{
@@ -118,78 +123,10 @@ public class ExportPage extends WizardPage
 			}
 		});
 		
-		Button linuxMacBtn = new Button(platformGroup, SWT.RADIO);
-		linuxBtn.setText("Linux & Mac");
-		linuxBtn.setData("l_w");
-		
-		linuxBtn.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent event)
-			{
-				platformSelectionChangeListener((String)event.widget.getData());
-			}
-		});
 		 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		platformGroup.setLayoutData(gd);
-		
-		
-		Label packageLabel = new Label(composite, SWT.NONE);
-		packageLabel.setText("Target application package");
-		
-		packageGroup = new Group(composite, SWT.NONE);
-		packageGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
-		
-		Button tarballBtn = new Button(packageGroup, SWT.RADIO);
-		tarballBtn.setText("Tarball");
-		tarballBtn.setData("tarball");
-		tarballBtn.setSelection(true);
-		
-		tarballBtn.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent event)
-			{
-				packageSelectionChangeListener((String)event.widget.getData());
-			}
-		});
-		 
-		Button installerBtn = new Button(packageGroup, SWT.RADIO);
-		installerBtn.setText("Installer");
-		installerBtn.setData("installer");
-		
-		installerBtn.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent event)
-			{
-				packageSelectionChangeListener((String)event.widget.getData());
-			}
-		});
-		
-		Button zipBtn = new Button(packageGroup, SWT.RADIO);
-		zipBtn.setText("Zip");
-		zipBtn.setData("zip");
-		
-		zipBtn.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent event)
-			{
-				packageSelectionChangeListener((String)event.widget.getData());
-			}
-		});
-		
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 2;
-		packageGroup.setLayoutData(gd);
-		
-		
-		permanent = new Button(composite, SWT.CHECK);
-		permanent.setText("Keep download permanent");
-		permanent.setLayoutData(gd);
 		
 		
 		Label outputDirLabel = new Label(composite, SWT.NONE);
@@ -227,23 +164,12 @@ public class ExportPage extends WizardPage
 		return saveDir.getText();
 	}
 	
-	public void platformSelectionChangeListener(String selectedPlatform) {
-		this.selectedPlatform = selectedPlatform;
+	private Object platformSelectionChangeListener(String selectedPlatform) {
+		int index = selectedPlatforms.indexOf(selectedPlatform);
+		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform); //the result type is different depending on the execution leaf
 	}
 	
-	public void packageSelectionChangeListener(String selectedArchive) {
-		this.selectedArchive = selectedArchive;
-	}
-	
-	public String getSelectedPlatform() {
-		return selectedPlatform;
-	}
-	
-	public String getSelectedPackageType() {
-		return selectedArchive;
-	}
-	
-	public boolean getIsPermanent() {
-		return permanent.getSelection();
+	public List<String> getSelectedPlatforms() {
+		return selectedPlatforms;
 	}
 }
