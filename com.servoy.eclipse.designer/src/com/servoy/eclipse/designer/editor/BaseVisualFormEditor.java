@@ -63,6 +63,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -549,7 +550,8 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						// is it a removed child?
 						if (child == null)
 						{
-							full_refresh = true;
+							// if is form component element, will not be found in hierarchy, just ignore for now
+							if (!(changed instanceof WebFormComponentChildType)) full_refresh = true;
 							// add it so it gets cleared (refreshed) as child of the form
 							changedChildren.add(changed);
 						}
