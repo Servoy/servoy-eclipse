@@ -59,7 +59,7 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 	private CustomArchiveObject customizeEntry(TarArchiveInputStream tarIS, ArchiveEntry entry, String url, String platform, String archiveName) throws IOException{
 		//TarArchiveInputStream doesn't implement reset() - store stream content and compute required size in one step for further archive entry 
 		if (platform.contentEquals(ExportPage.WINDOWS_PLATFORM)) {//for windows need to use zip entries and not tar entries
-			entry = tarIS.available() > 0 ? new ZipArchiveEntry(entry.getName().substring(entry.getName().indexOf(archiveName))) : null;
+			entry = tarIS.available() > 0 ? new ZipArchiveEntry(entry.getName().substring(entry.getName().indexOf(archiveName))) : null;//use relative path for entry
 		}
 		if (entry != null && entry.getName().endsWith("/servoy.json")) {
 			List<String> lines = IOUtils.readLines(tarIS, StandardCharsets.UTF_8);
@@ -95,9 +95,6 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 		 
 	    ArchiveEntry entry = tarIS.getNextTarEntry();
 	    while (entry != null) {
-	    	if (platform.contentEquals(ExportPage.WINDOWS_PLATFORM)) {
-   				entry = tarIS.available() > 0 ? new ZipArchiveEntry(entry.getName().substring(entry.getName().indexOf(archiveName))) : null;
-    		}
 	    	CustomArchiveObject caro = customizeEntry(tarIS, entry, url, platform, archiveName);
 	    	if (caro != null && caro.getEntry() != null) {
 	    		os.putArchiveEntry(caro.getEntry());
