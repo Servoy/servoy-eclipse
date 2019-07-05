@@ -7,7 +7,7 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.exporter.electron.ui.wizard.ExportElectronWizard"
             id="com.servoy.eclipse.electronexporter.ExportElectronWizard"
-            name="Export Electron File">
+            name="Export NG Desktop File">
       </wizard>
    </extension>
     <extension
@@ -29,7 +29,7 @@
                  commandId="com.servoy.eclipse.exporter.electron.ui.StartElectronClient"
                  id="com.servoy.eclipse.exporter.electron.ui.StartElectronClient"
                  icon="icons/launch.png"
-                 label="Launch Electron Client"
+                 label="Launch NG Desktop Client"
                  style="push">
                  <visibleWhen>
            </visibleWhen>

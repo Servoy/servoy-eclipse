@@ -66,8 +66,8 @@ public class ExportElectronWizard extends Wizard implements IExportWizard
 			int entrySize = 0;
 			for (int index = 0; index < lines.size(); index ++) {
 				String line = lines.get(index);
-				if (line.trim().startsWith("\"url\":")) {
-					line = "    \"url\": \"" + url + "\",";
+				if ( line.indexOf("\"url\":") >= 0) {
+					line = line.substring(0, line.indexOf("\"url\":")) + "\"url\": \"" + url + "\",";
 					lines.set(index, line);
 				}
 				entrySize += line.getBytes().length + 1; 
