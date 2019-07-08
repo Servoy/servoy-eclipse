@@ -688,15 +688,17 @@ public class CreateComponentHandler implements IServerService
 							{
 								Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
 								LayoutContainer sameTypeChildContainer = null;
-								while (childContainersIte.hasNext())
+								if (!"div".equals(layoutSpec.getName()))
 								{
-									LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
-									if (layoutSpec.getName().equals(childContainer.getSpecName()))
+									while (childContainersIte.hasNext())
 									{
-										sameTypeChildContainer = childContainer;
+										LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
+										if (layoutSpec.getName().equals(childContainer.getSpecName()))
+										{
+											sameTypeChildContainer = childContainer;
+										}
 									}
 								}
-
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
