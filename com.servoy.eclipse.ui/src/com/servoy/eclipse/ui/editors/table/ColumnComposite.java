@@ -77,6 +77,7 @@ import com.servoy.eclipse.ui.editors.table.ColumnSeqTypeEditingSupport.ColumnSeq
 import com.servoy.eclipse.ui.editors.table.actions.CopyColumnNameAction;
 import com.servoy.eclipse.ui.editors.table.actions.SearchForDataProvidersReferencesAction;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.preferences.PrimaryKeyType;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.FlattenedSolution;
@@ -649,21 +650,21 @@ public class ColumnComposite extends Composite
 			try
 			{
 				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType(t);
+				PrimaryKeyType keyType;
 				if (defaultFirstColumnSequenceType == ColumnInfo.UUID_GENERATOR)
 				{
-					int columnType = new DesignerPreferences().getPrimaryKeyUuidType();
-					int length = columnType == IColumnTypes.TEXT ? 36 : 16;
-					Column id = t.createNewColumn(nameValidator, colname, columnType, length);
-					id.setDatabasePK(true);
-					id.setSequenceType(defaultFirstColumnSequenceType);
-					id.setFlag(IBaseColumn.UUID_COLUMN, true);
+					keyType = new DesignerPreferences().getPrimaryKeyUuidType();
 				}
 				else
 				{
-					Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.INTEGER, 0);
-					id.setDatabasePK(true);
-					id.setSequenceType(defaultFirstColumnSequenceType);
+					keyType = PrimaryKeyType.INTEGER;
 				}
+				Column id = t.createNewColumn(nameValidator, colname, keyType.getColumnType(), keyType.getLength());
+				id.setDatabasePK(true);
+				id.setSequenceType(defaultFirstColumnSequenceType);
+				id.setFlag(IBaseColumn.UUID_COLUMN, keyType.isUUID());
+				id.setFlag(IBaseColumn.NATIVE_COLUMN, keyType.isNative());
+				id.setNativetypeFlag(keyType.isNative());
 			}
 			catch (RepositoryException e)
 			{

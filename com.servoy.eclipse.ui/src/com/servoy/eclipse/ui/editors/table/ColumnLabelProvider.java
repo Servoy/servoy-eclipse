@@ -37,8 +37,9 @@ import com.servoy.j2db.util.Utils;
 
 public class ColumnLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider
 {
-	static final String UUID_TEXT_36 = "UUID (Text(36))";
-	static final String UUID_MEDIA_16 = "UUID (Media(16))";
+	public static final String UUID_TEXT_36 = "UUID (Text(36))";
+	public static final String UUID_MEDIA_16 = "UUID (Media(16))";
+	public static final String UUID_NATIVE = "UUID (DB native)";
 	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("check_on.png");
 	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("check_off.png");
 	public static final Image TRUE_RADIO = Activator.getDefault().loadImageFromBundle("radio_on.png");
@@ -92,6 +93,10 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		{
 			if (info.hasFlag(IBaseColumn.UUID_COLUMN))
 			{
+				if (info.hasFlag(IBaseColumn.NATIVE_COLUMN))
+				{
+					return UUID_NATIVE;
+				}
 				int type = Column.mapToDefaultType(info.getConfiguredColumnType().getSqlType());
 				if (type == IColumnTypes.MEDIA)
 				{
