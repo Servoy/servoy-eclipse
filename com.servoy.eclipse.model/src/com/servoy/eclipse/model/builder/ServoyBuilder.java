@@ -6430,6 +6430,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		try
 		{
 			IMarker marker = null;
+			String elementName = null;
 			if (persist != null)
 			{
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
@@ -6455,6 +6456,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
 								if (form != null)
 								{
+									elementName = name;
 									pathPair = SolutionSerializer.getFilePath(form, true);
 									path = new Path(pathPair.getLeft() + pathPair.getRight());
 									file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
@@ -6528,6 +6530,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("SolutionName", resource.getName());
+				if (elementName != null) marker.setAttribute("Name", elementName);
 				if (type.equals(INVALID_DATAPROVIDERID) && persist instanceof ISupportDataProviderID)
 				{
 					marker.setAttribute("DataProviderID", ((ISupportDataProviderID)persist).getDataProviderID());
