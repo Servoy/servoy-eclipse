@@ -282,7 +282,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return parent;
 			}
 
-			var realContainerPromise = null;
+			var realContainerPromise = {};
 			$scope.getGhostContainerStyle = function(ghostContainer) {
 				function showAndPositionGhostContainer(ghostContainer, parentCompBounds) {
 					if (!ghostContainer.style) ghostContainer.style = {};
@@ -308,16 +308,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 				
 				if (!$scope.isAbsoluteFormLayout()) {
-					if (realContainerPromise == null) {
+					if (realContainerPromise[ghostContainer.uuid] == null) {
 						var p = getRealContainerElement(ghostContainer.uuid);
 						if (p.then) {
-							realContainerPromise = p;
+							realContainerPromise[ghostContainer.uuid] = p;
 							p.then(function(parent) {
-								realContainerPromise = null;
+								delete realContainerPromise[ghostContainer.uuid];
 								showAndPositionGhostContainer(ghostContainer, parent.getBoundingClientRect());
 								ghostContainer.style.display = "block";
 							}, function() {
-								realContainerPromise = null;
+								delete realContainerPromise[ghostContainer.uuid];
 								ghostContainer.style.display = "none";
 							});
 						} else {
