@@ -522,19 +522,38 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						var clientWidth = rect.width != 0 ? rect.width : element.offsetWidth;
 						var clientHeight = rect.height != 0 ? rect.height : element.clientHeight;
 						
-						if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
-							if (p1.top <= top && p1.left <= left && p2.top >= top + clientHeight && p2.left >= left + clientWidth) {
-								matchedElements.push(element)
-							}
-						} else {
-							var overlapX = Math.max(0, Math.min(p2.left, left + clientWidth) - Math.max(p1.left, left))
-							var overlapY = Math.max(0, Math.min(p2.top, top + clientHeight) - Math.max(p1.top, top))
-
-							if (((clientWidth * clientHeight) / 100) * percentage < (overlapX * overlapY)) {
-								matchedElements.push(element)
+						if (this.isRectanglesOverlap(p1, p2, percentage, top, left, clientHeight, clientWidth)) {
+							matchedElements.push(element);
+						}
+						else if (parseInt(window.getComputedStyle(element, ":before").height) > 0) {
+							var computedStyle = window.getComputedStyle(element, ":before");
+							//the top and left positions of the before pseudo element are computed as the sum of:
+							//top/left position of the element, padding Top/Left of the element and margin Top/Left of the pseudo element
+							var topb = top + parseInt($(element).css('paddingTop')) + parseInt(computedStyle.marginTop);
+							var leftb = left + parseInt($(element).css('paddingLeft')) + parseInt(computedStyle.marginLeft);
+							var height = parseInt(computedStyle.height);
+							var width = parseInt(computedStyle.width);
+							if (this.isRectanglesOverlap(p1, p2, percentage, topb, leftb, height, width)) {
+								matchedElements.push(element);
 							}
 						}
 					}
+				},
+				
+				isRectanglesOverlap: function(p1, p2, percentage, top, left, clientHeight, clientWidth) {
+					if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
+						if (p1.top <= top && p1.left <= left && p2.top >= top + clientHeight && p2.left >= left + clientWidth) {
+							return true;
+						}
+					} else {
+						var overlapX = Math.max(0, Math.min(p2.left, left + clientWidth) - Math.max(p1.left, left))
+						var overlapY = Math.max(0, Math.min(p2.top, top + clientHeight) - Math.max(p1.top, top))
+
+						if (((clientWidth * clientHeight) / 100) * percentage < (overlapX * overlapY)) {
+							return true;
+						}
+					}
+					return false;
 				},
 
 				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass, skipId, skipConversion, selectType) {
