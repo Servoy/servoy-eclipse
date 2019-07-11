@@ -131,6 +131,12 @@ public class CreateComponentHandler implements IServerService
 
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
+		if (editorPart.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage &&
+			((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer() != null && args.has("name") && !args.has("dropTargetUUID"))
+		{
+			// if we drop directly on form while zoomed in , do nothing
+			return null;
+		}
 		if (args.has("name") && ("component".equals(args.getString("name")) || "template".equals(args.getString("name")) || "*".equals(args.getString("name"))))
 		{
 			String name = args.getString("name");
