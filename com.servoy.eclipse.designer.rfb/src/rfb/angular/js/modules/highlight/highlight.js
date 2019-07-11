@@ -58,6 +58,16 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 								highlightDiv.style.outline = "1px solid #FFBBBB";
 						}
 					}
+					if (node.getAttribute('svy-title') !== undefined && $editorService.getEditor().getEditorContentRootScope().showWireframe && node.clientWidth > 0 && node.clientHeight > 0)
+					{
+						highlightDiv.setAttribute('svytitle', node.getAttribute('svy-title'));
+						highlightDiv.classList.add("showWireframe");	
+						highlightDiv.style.setProperty('--svyBackgroundColor', $(node).css('backgroundColor'));					
+					}
+					else
+					{
+						highlightDiv.classList.remove("showWireframe");
+					}
 
 					if (!editorScope.isAbsoluteFormLayout()) {
 						var nodeParents = $(node).parents('[svy-id]');
