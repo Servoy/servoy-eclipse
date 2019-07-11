@@ -69,6 +69,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * A class for managing the loaded NG custom web components and services.
@@ -86,7 +87,7 @@ public abstract class BaseNGPackageManager
 
 	private ServoyNGPackageProject[] referencedNGPackageProjects;
 
-	private final Map<String, Map<String, IPackageReader>> projectNameToContainedPackages = new HashMap<>();
+	private final Map<String, Map<String, List<IPackageReader>>> projectNameToContainedPackages = new HashMap<>();
 
 	private final List<ILoadedNGPackagesListener> loadedNGPackagesListeners = Collections.synchronizedList(new ArrayList<ILoadedNGPackagesListener>());
 	private final List<IAvailableNGPackageProjectsListener> availableNGPackageProjectsListeners = Collections.synchronizedList(
@@ -209,6 +210,7 @@ public abstract class BaseNGPackageManager
 
 		monitor.worked(9);
 		monitor.setTaskName("Announcing ng packages load");
+		resourceChangeListener.clearAnyPendingChangesBecauseFullReloadWasDone(); // in case PRE_CLOSE or PRE_DELETE granular updates are waiting to be applied in resourceChangeListener, remove those as have just been told to do a full reload so those pending changes are obsolete and now out-of-sync with loaded content
 		ngPackagesChanged(changeReason, false);
 		monitor.worked(1);
 		monitor.done();
@@ -240,7 +242,7 @@ public abstract class BaseNGPackageManager
 									packageReaders.put(reader.getPackageName(), list);
 								}
 								list.add(reader);
-								getProjectContainedPackagesMap(project.getName()).put(reader.getPackageName(), reader);
+								getReadersListForThisPackageNameReferencedByTheSolutionProject(project.getName(), reader.getPackageName()).add(reader);
 							}
 						}
 					}
@@ -252,6 +254,17 @@ public abstract class BaseNGPackageManager
 			}
 		}
 		monitor.worked(8);
+	}
+
+	private List<IPackageReader> getReadersListForThisPackageNameReferencedByTheSolutionProject(String solutionProjectName, String ngPackageName)
+	{
+		List<IPackageReader> readersListForThisPackageNameForTheReferencingProject = getProjectContainedPackagesMap(solutionProjectName).get(ngPackageName);
+		if (readersListForThisPackageNameForTheReferencingProject == null)
+		{
+			readersListForThisPackageNameForTheReferencingProject = new ArrayList<>();
+			getProjectContainedPackagesMap(solutionProjectName).put(ngPackageName, readersListForThisPackageNameForTheReferencingProject);
+		}
+		return readersListForThisPackageNameForTheReferencingProject;
 	}
 
 	/**
@@ -281,18 +294,24 @@ public abstract class BaseNGPackageManager
 			Set<IPackageReader> packagesToLoad = projectChanges.getRight();
 
 			// first update our cache
-			Map<String, IPackageReader> projectContainedPackagesMap = getProjectContainedPackagesMap(projectName);
+			Map<String, List<IPackageReader>> projectContainedPackagesMap = getProjectContainedPackagesMap(projectName);
 			for (IPackageReader pr : packagesToUnload)
 			{
-				// TODO get to the key
-				projectContainedPackagesMap.remove(pr.getPackageName());
-			}
-			for (IPackageReader iPackageReader : packagesToLoad)
-			{
-				if (iPackageReader == null) continue;//spec reader marker will show in this case
-				projectContainedPackagesMap.put(iPackageReader.getPackageName(), iPackageReader);
+				List<IPackageReader> listOfReadersForThisPackageName = projectContainedPackagesMap.get(pr.getPackageName()); // maybe some package had both a zip version and a project version available
+				if (listOfReadersForThisPackageName != null)
+				{
+					listOfReadersForThisPackageName.removeIf((r) -> Utils.safeEquals(r.getResource(), pr.getResource()));
+					if (listOfReadersForThisPackageName.size() == 0) projectContainedPackagesMap.remove(projectName);
+				}
 			}
 
+			for (IPackageReader iPackageReader : packagesToLoad)
+			{
+				if (iPackageReader == null) continue; // spec reader marker will show in this case
+				List<IPackageReader> listOfReferencesFromSolProjectToThisReaderName = getReadersListForThisPackageNameReferencedByTheSolutionProject(
+					projectName, iPackageReader.getPackageName());
+				listOfReferencesFromSolProjectToThisReaderName.add(iPackageReader);
+			}
 
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			for (IPackageReader pr : packagesToUnload)
@@ -335,7 +354,8 @@ public abstract class BaseNGPackageManager
 		for (String currentProjectName : projectNameToContainedPackages.keySet())
 		{
 			if (currentProjectName.equals(referencingProjectName)) continue;
-			if (projectNameToContainedPackages.get(currentProjectName) != null && projectNameToContainedPackages.get(currentProjectName).containsValue(pr))
+			if (projectNameToContainedPackages.get(currentProjectName) != null &&
+				projectNameToContainedPackages.get(currentProjectName).values().stream().anyMatch(reader -> reader.equals(pr)))
 			{
 				// check that it won't be removed from this other found referencing project as well
 				Pair<Set<IPackageReader>, Set<IPackageReader>> changesForCurrentProject = ngPackageChangesPerReferencingProject.get(currentProjectName);
@@ -460,7 +480,7 @@ public abstract class BaseNGPackageManager
 					newPackageReaders.put(reader.getPackageName(), list);
 				}
 				list.add(reader);
-				getProjectContainedPackagesMap(solutionProjectName).put(reader.getPackageName(), reader);
+				getReadersListForThisPackageNameReferencedByTheSolutionProject(solutionProjectName, reader.getPackageName()).add(reader);
 			}
 		}
 		catch (Exception e)
@@ -503,7 +523,7 @@ public abstract class BaseNGPackageManager
 							readers.put(reader.getPackageName(), list);
 						}
 						list.add(reader);
-						getProjectContainedPackagesMap(iProject.getName()).put(reader.getPackageName(), reader);
+						getReadersListForThisPackageNameReferencedByTheSolutionProject(iProject.getName(), reader.getPackageName()).add(reader);
 					}
 					m.worked(1);
 				}
@@ -516,9 +536,9 @@ public abstract class BaseNGPackageManager
 		}
 	}
 
-	private Map<String, IPackageReader> getProjectContainedPackagesMap(String projectName)
+	private Map<String, List<IPackageReader>> getProjectContainedPackagesMap(String projectName)
 	{
-		Map<String, IPackageReader> map = projectNameToContainedPackages.get(projectName);
+		Map<String, List<IPackageReader>> map = projectNameToContainedPackages.get(projectName);
 		if (map == null)
 		{
 			map = new HashMap<>();
@@ -837,15 +857,16 @@ public abstract class BaseNGPackageManager
 	}
 
 	/**
-	 * Gets all the project names of referencing projects that have loaded the given package (by package name) from the given source (the "romResource").
+	 * Gets all the project names of referencing projects that have loaded the given package (by package name) from the given source (the "fromResource").
 	 */
 	public List<String> getReferencingProjectsThatLoaded(String ngPackageName, File fromResource)
 	{
 		List<String> referencingProjectsThatLoadedIt = new ArrayList<String>();
-		for (Entry<String, Map<String, IPackageReader>> e : projectNameToContainedPackages.entrySet())
+		for (Entry<String, Map<String, List<IPackageReader>>> e : projectNameToContainedPackages.entrySet())
 		{
-			IPackageReader reader = e.getValue().get(ngPackageName);
-			if (reader != null && fromResource.equals(reader.getResource())) referencingProjectsThatLoadedIt.add(e.getKey());
+			List<IPackageReader> readers = e.getValue().get(ngPackageName);
+			if (readers != null && readers.stream().anyMatch(reader -> fromResource.equals(reader.getResource())))
+				referencingProjectsThatLoadedIt.add(e.getKey());
 		}
 		return referencingProjectsThatLoadedIt;
 	}
@@ -856,10 +877,10 @@ public abstract class BaseNGPackageManager
 	public List<Pair<String, File>> getReferencingProjectsThatLoaded(String ngPackageName)
 	{
 		List<Pair<String, File>> referencingProjectsThatLoadedIt = new ArrayList<>();
-		for (Entry<String, Map<String, IPackageReader>> e : projectNameToContainedPackages.entrySet())
+		for (Entry<String, Map<String, List<IPackageReader>>> e : projectNameToContainedPackages.entrySet())
 		{
-			IPackageReader reader = e.getValue().get(ngPackageName);
-			if (reader != null) referencingProjectsThatLoadedIt.add(new Pair<>(e.getKey(), reader.getResource()));
+			List<IPackageReader> readers = e.getValue().get(ngPackageName);
+			if (readers != null) readers.forEach(reader -> referencingProjectsThatLoadedIt.add(new Pair<>(e.getKey(), reader.getResource())));
 		}
 		return referencingProjectsThatLoadedIt;
 	}
@@ -870,13 +891,12 @@ public abstract class BaseNGPackageManager
 	public List<String> getOldUsedPackageProjectsList(String solutionProjectName, IWorkspaceRoot workspaceRoot)
 	{
 		List<String> result = new ArrayList<>();
-		Map<String, IPackageReader> map = getProjectContainedPackagesMap(solutionProjectName);
-		for (IPackageReader containedPackage : map.values())
-		{
+		Map<String, List<IPackageReader>> map = getProjectContainedPackagesMap(solutionProjectName);
+		map.values().stream().flatMap(list -> list.stream()).forEach(containedPackage -> {
 			// get only the referenced web package projects, ignore the contained binary packages
 			IContainer[] containers = workspaceRoot.findContainersForLocationURI(containedPackage.getResource().toURI());
 			if (containers.length == 1 && containers[0] instanceof IProject) result.add(containers[0].getName());
-		}
+		});
 		return result;
 	}
 

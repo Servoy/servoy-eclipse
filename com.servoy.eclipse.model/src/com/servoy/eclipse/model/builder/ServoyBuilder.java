@@ -589,6 +589,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_INVALID_DATASOURCE = new Pair<String, ProblemSeverity>("formComponentInvalidDataSource",
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_COMPONENT_NESTED_LIST = new Pair<String, ProblemSeverity>("formComponentNestedList",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>("methodNumberOfArgsMismatch",
@@ -2757,6 +2759,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (frm == null) continue;
 										if (pd.getConfig() instanceof ComponentTypeConfig)
 										{
+											checkForListFormComponent(frm, o);
 											String forFoundsetName = ((ComponentTypeConfig)pd.getConfig()).forFoundset;
 											String datasource = null;
 											String foundsetValue = null;
@@ -3374,7 +3377,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 									}
 									relation = relations[relations.length - 1];
-									if (!relation.isGlobal() && relation.getPrimaryDataSource() != null)
+									if (!relation.isGlobal() && relation.getForeignDataSource() != null)
 									{
 										Form form = tabFlattenedSolution.getForm(tab.getContainsFormID());
 										if (form != null && !relation.getForeignDataSource().equals(form.getDataSource()))
@@ -3910,6 +3913,54 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}
 
+					private void checkForListFormComponent(Form form, IPersist listFormComponent)
+					{
+						form.acceptVisitor(new IPersistVisitor()
+						{
+							@Override
+							public Object visit(IPersist o)
+							{
+								if (o instanceof WebComponent)
+								{
+									WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
+									if (spec != null)
+									{
+										Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+										if (properties.size() > 0)
+										{
+											FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((WebComponent)o, flattenedSolution, null,
+												true);
+											boolean hasComponentTypeConfig = false; // has forFoundset
+											Form frm = null;
+											for (PropertyDescription pd : properties)
+											{
+												Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+												frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
+												if (frm == null) continue;
+												if (pd.getConfig() instanceof ComponentTypeConfig)
+												{
+													hasComponentTypeConfig = true;
+													break;
+												}
+											}
+											if (hasComponentTypeConfig)
+											{
+												ServoyMarker mk = MarkerMessages.FormComponentNestedList.fill(listFormComponent, o);
+												addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_NESTED_LIST, IMarker.PRIORITY_NORMAL, null,
+													listFormComponent);
+											}
+											else
+											{
+												checkForListFormComponent(frm, listFormComponent);
+											}
+										}
+									}
+								}
+								return IPersistVisitor.CONTINUE_TRAVERSAL;
+							}
+						});
+					}
+
 					private void checkDataProviders(final IPersist o, IPersist context)
 					{
 						String id = null;
@@ -4076,7 +4127,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									Form parentForm = (Form)context;
 									if (!missingServers.containsKey(parentForm.getServerName()))
 									{
-										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
+										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(context, flattenedSolution);
 										IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
 											servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
 										if (dataProvider == null)
@@ -4160,16 +4211,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														ValueList valuelist = (ValueList)flattenedSolution.searchPersist(valuelistUUID.toString());
 														if (valuelist != null)
 														{
-															int realValueType = valuelist.getRealValueType();
-															if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
-															{
-																ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-																	elementName != null ? elementName : "", inForm);
-																IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
-																	VALUELIST_DATAPROVIDER_TYPE_MISMATCH, IMarker.PRIORITY_NORMAL, null, o);
-																marker.setAttribute("Uuid", valuelistUUID.toString());
-																marker.setAttribute("SolutionName", project.getName());
-															}
+															checkValueListRealValueToDataProviderTypeMatch(valuelist, dataProvider, elementName, inForm,
+																solution, valuelistUUID);
 														}
 													}
 												}
@@ -4183,16 +4226,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											ValueList valuelist = persistFlattenedSolution.getValueList(valuelistID);
 											if (valuelist != null)
 											{
-												int realValueType = valuelist.getRealValueType();
-												if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
-												{
-													ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-														elementName != null ? elementName : "", inForm);
-													IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
-														IMarker.PRIORITY_NORMAL, null, o);
-													marker.setAttribute("Uuid", valuelist.getUUID().toString());
-													marker.setAttribute("SolutionName", project.getName());
-												}
+												checkValueListRealValueToDataProviderTypeMatch(valuelist, dataProvider, elementName, inForm, solution,
+													valuelist.getUUID());
 											}
 
 											String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
@@ -4422,6 +4457,28 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							exceptionCount++;
 							if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
+						}
+					}
+
+					private void checkValueListRealValueToDataProviderTypeMatch(ValueList valuelist, IDataProvider dataProvider, String elementName,
+						String inForm, IPersist o, Object valuelistUUID) throws CoreException
+					{
+						int realValueType = valuelist.getRealValueType();
+						if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
+						{
+							boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
+								((realValueType == IColumnTypes.INTEGER && dataProvider.getDataProviderType() == IColumnTypes.NUMBER) ||
+									(realValueType == IColumnTypes.NUMBER && dataProvider.getDataProviderType() == IColumnTypes.INTEGER));
+
+							if (!isValidNumberVariable)
+							{
+								ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
+									elementName != null ? elementName : "", inForm);
+								IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
+									IMarker.PRIORITY_NORMAL, null, o);
+								marker.setAttribute("Uuid", valuelistUUID.toString());
+								marker.setAttribute("SolutionName", valuelist.getRootObject().getName());
+							}
 						}
 					}
 
@@ -6426,26 +6483,37 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		try
 		{
 			IMarker marker = null;
+			String elementName = null;
 			if (persist != null)
 			{
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
 				Path path = new Path(pathPair.getLeft() + pathPair.getRight());
 				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-				if (persist instanceof IFormElement && persist.getParent() instanceof Form && ((Form)persist.getParent()).isFormComponent())
+				if (persist instanceof IFormElement)
 				{
-					String name = ((IFormElement)persist).getName();
-					if (name != null)
+					IPersist parent = persist;
+					while (parent != null)
 					{
-						String[] nameParts = name.split("\\$");
-						if (nameParts.length == 3)
+						parent = parent.getParent();
+						if (parent instanceof Form) break;
+					}
+					if (parent instanceof Form && ((Form)parent).isFormComponent())
+					{
+						String name = ((IFormElement)persist).getName();
+						if (name != null)
 						{
-							// look for real form to add marker on it
-							IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
-							if (form != null)
+							String[] nameParts = name.split("\\$");
+							if (nameParts.length == 3)
 							{
-								pathPair = SolutionSerializer.getFilePath(form, true);
-								path = new Path(pathPair.getLeft() + pathPair.getRight());
-								file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+								// look for real form to add marker on it
+								IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
+								if (form != null)
+								{
+									elementName = name;
+									pathPair = SolutionSerializer.getFilePath(form, true);
+									path = new Path(pathPair.getLeft() + pathPair.getRight());
+									file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+								}
 							}
 						}
 					}
@@ -6515,6 +6583,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("SolutionName", resource.getName());
+				if (elementName != null) marker.setAttribute("Name", elementName);
 				if (type.equals(INVALID_DATAPROVIDERID) && persist instanceof ISupportDataProviderID)
 				{
 					marker.setAttribute("DataProviderID", ((ISupportDataProviderID)persist).getDataProviderID());

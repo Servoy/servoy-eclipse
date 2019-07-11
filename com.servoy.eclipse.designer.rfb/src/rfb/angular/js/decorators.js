@@ -75,9 +75,7 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 							currentNode.isContainer = false;
 						} else {
 							currentNode.isContainer = node.attr('svy-layoutname') != undefined;
-						}	
-
-						currentNode.is
+						}
 
 						var offset = node.offset();
 						var display = 'block';
@@ -115,13 +113,21 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 							left: offset.left,
 							display: display
 						};
+						
+						currentNode.cls = "";
+						if (currentNode.isContainer && $editorService.getEditor().getEditorContentRootScope().showWireframe && node.width() > 0 && node.height() > 0)
+						{
+							currentNode.svytitle = node.attr('svy-title');
+							currentNode.cls = "showWireframe";
+							currentNode.style['--svyBackgroundColor'] = node.css('backgroundColor');							
+						}
 					}); // end of foreach
 
 					for (var i = selection.length; i<$scope.nodes.length; i++) {
 						$scope.nodes[i].style.display = 'none';
 					}
 
-					if (!doNotScrollIntoView && $scope.nodes.length > 0) {
+					if (!doNotScrollIntoView && $scope.nodes.length > 0 && selection.length > 0) {
 						var ghost = $scope.getGhost($scope.nodes[0].node.attr("svy-id"));
 
 						if (!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM && ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART)) {

@@ -142,8 +142,8 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	private EditorServiceHandler editorServiceHandler;
 
 	private String layout = null;
-	private WebsocketSessionKey editorKey = null;
-	private WebsocketSessionKey clientKey = null;
+	protected WebsocketSessionKey editorKey = null;
+	protected WebsocketSessionKey clientKey = null;
 	private AbstractContainer showedContainer;
 
 	private final PartListener partListener = new PartListener();
@@ -288,6 +288,11 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		}
 	}
 
+	public void requestSelection()
+	{
+		selectionListener.updateSelection(true);
+	}
+
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
 	{
@@ -421,10 +426,26 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		{
 			for (IPersist persist : persists)
 			{
-				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
-				if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
+				if (showedContainer != null)
 				{
-					filtered.add(persist);
+					IPersist parent = persist;
+					while (parent != null)
+					{
+						if (parent == showedContainer)
+						{
+							filtered.add(persist);
+							break;
+						}
+						parent = parent.getParent();
+					}
+				}
+				else
+				{
+					IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+					if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
+					{
+						filtered.add(persist);
+					}
 				}
 			}
 			// if there are other persist left, check if they are in the hierarchy

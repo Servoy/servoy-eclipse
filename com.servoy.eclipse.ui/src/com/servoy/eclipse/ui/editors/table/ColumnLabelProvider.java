@@ -23,18 +23,23 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.util.Utils;
 
 public class ColumnLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider
 {
+	public static final String UUID_TEXT_36 = "UUID (Text(36))";
+	public static final String UUID_MEDIA_16 = "UUID (Media(16))";
+	public static final String UUID_NATIVE = "UUID (DB native)";
 	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("check_on.png");
 	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("check_off.png");
 	public static final Image TRUE_RADIO = Activator.getDefault().loadImageFromBundle("radio_on.png");
@@ -86,6 +91,19 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		}
 		if (columnIndex == ColumnComposite.CI_TYPE + delta)
 		{
+			if (info.hasFlag(IBaseColumn.UUID_COLUMN))
+			{
+				if (info.hasFlag(IBaseColumn.NATIVE_COLUMN))
+				{
+					return UUID_NATIVE;
+				}
+				int type = Column.mapToDefaultType(info.getConfiguredColumnType().getSqlType());
+				if (type == IColumnTypes.MEDIA)
+				{
+					return UUID_MEDIA_16;
+				}
+				return UUID_TEXT_36;
+			}
 			return Column.getDisplayTypeString(columnType.getSqlType());
 		}
 		if (columnIndex == ColumnComposite.CI_LENGTH + delta)

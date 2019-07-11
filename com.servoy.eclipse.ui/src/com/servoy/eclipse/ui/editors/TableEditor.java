@@ -249,7 +249,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		if (!activeSolutionIsMobile())
 		{
 			addPage(600, securityComposite = new SecurityComposite(getContainer(), SWT.None, this,
-				ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution()), "Security");
+				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingSolution()), "Security");
 		}
 	}
 
@@ -853,7 +853,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				if (!col.getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN))
 				{
 					throw new Exception("Column '" + col.getName() +
-						"' has sequence type of 'UUID generator' , the column type should be TEXT(36) or MEDIA(16) with an UUID flag set.");
+						"' has sequence type of 'UUID generator' , the column type should be TEXT(36), MEDIA(16) or UUD(DB Native) with an UUID flag set.");
 				}
 				if (colType != IColumnTypes.TEXT && colType != IColumnTypes.MEDIA)
 				{
@@ -864,7 +864,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					((colType == IColumnTypes.MEDIA && col.getLength() < 16) || (colType == IColumnTypes.TEXT && col.getLength() < 36)))
 				{
 					throw new Exception(
-						"Column '" + col.getName() + "' with sequence type UUID generator has length to small (a minimum of 16 for MEDIA and 36 for TEXT).");
+						"Column '" + col.getName() + "' with sequence type UUID generator has length too small (a minimum of 16 for MEDIA and 36 for TEXT).");
 				}
 			}
 		}

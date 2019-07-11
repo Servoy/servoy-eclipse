@@ -226,6 +226,17 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("requestSelection", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args)
+			{
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).requestSelection();
+				return null;
+			}
+		});
+
 		configuredHandlers.put("toggleShow", new IServerService()
 		{
 			@Override
@@ -262,6 +273,18 @@ public class EditorServiceHandler implements IServerService
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER))
 							: Boolean.FALSE;
+					}
+					if (args.has("showSolutionLayoutsCss"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_SOLUTION_LAYOUTS_CSS_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_SOLUTION_LAYOUTS_CSS_IN_ANGULAR_DESIGNER))
+							: Boolean.TRUE;
+					}
+					if (args.has("showSolutionCss"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_SOLUTION_CSS_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_SOLUTION_CSS_IN_ANGULAR_DESIGNER))
+							: Boolean.TRUE;
 					}
 					if (args.has("showHighlight"))
 					{

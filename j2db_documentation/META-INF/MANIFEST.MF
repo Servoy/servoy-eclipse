@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Servoy Document Plug-in
+Bundle-SymbolicName: j2db_documentation;singleton:=true
+Bundle-Version: 2019.9.0.3520_rc
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: Servoy
+Require-Bundle: servoy_shared,
+ org.eclipse.dltk.javascript.rhino,
+ servoy_smart_client,
+ com.servoy.eclipse.core,
+ com.servoy.eclipse.debug,
+ j2db_server,
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore
+Export-Package: com.servoy.build.documentation
+Automatic-Module-Name: j2db_documentation

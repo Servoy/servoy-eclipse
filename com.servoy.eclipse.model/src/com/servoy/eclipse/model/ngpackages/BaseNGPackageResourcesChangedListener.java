@@ -568,4 +568,9 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 
 	}
 
+	public void clearAnyPendingChangesBecauseFullReloadWasDone()
+	{
+		preChangeProcessedHandlersForLater.clear();
+	}
+
 }

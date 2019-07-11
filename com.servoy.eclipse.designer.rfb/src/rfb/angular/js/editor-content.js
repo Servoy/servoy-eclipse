@@ -65,6 +65,11 @@ angular.module('editorContent',['servoyApp'])
     return el;
   }
   
+	//trigger content loaded to set content sizes
+	$scope.$on('content-loaded:ready', function() {
+   		$rootScope.$broadcast("CONTENT_LOADED"); 
+	});	      
+  
   //this preventDefault should not be needed because we have the glasspane 
   //however, the SWT browser on OS X needs this in order to show our editor context menu when right-clicking on the iframe 
   window.addEventListener('contextmenu', function (e) { // Not compatible with IE < 9
@@ -109,6 +114,8 @@ angular.module('editorContent',['servoyApp'])
     return dragCloneDiv;
   }
   $rootScope.showWireframe = false;
+  $rootScope.showSolutionLayoutsCss = true;
+  $rootScope.showSolutionCss = true;
   $solutionSettings.enableAnchoring = false;
   $scope.solutionSettings = $solutionSettings;
   var realConsole = $window.console;
@@ -250,7 +257,10 @@ angular.module('editorContent',['servoyApp'])
 	  formData.components = {};
   
   if (formData.formProperties && formData.formProperties.absoluteLayout) {
-	  $scope.absoluteLayout = formData.formProperties.absoluteLayout['']
+	  $scope.absoluteLayout = formData.formProperties.absoluteLayout[''];
+	  if ($scope.absoluteLayout) { 
+	 	 $rootScope.sfcontentStyle = {'position': 'absolute', 'left': '0px', 'top': '0px', 'right': '0px', 'bottom': '0px'};
+	  }
   }
 
   if (formData.parts) {
@@ -412,6 +422,10 @@ angular.module('editorContent',['servoyApp'])
 	    if (!parent.length) {
 	      parent = angular.element(document.querySelectorAll("[svy-id='" + parentId + "']"));
 	    }
+	    if (!parent.length) {
+	    	// element is the showedContainer and its parent is missing
+	    	 parent = angular.element(document.getElementById('svyDesignForm'));
+	    }
 	    var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
 	    var old_element = document.querySelectorAll("[svy-id='" + tpl[0].getAttribute("svy-id") + "']");
 		if (old_element.length == 1) return; //when it's already there, we don't do anything (this happens when the parent is overridden)
@@ -419,10 +433,10 @@ angular.module('editorContent',['servoyApp'])
 	    if (parent.children().length > 0) {
 	    	// we have to calculate insert point based on ordered location, just like on server side
 	    	var inserted = false;
-	    	var nodeLocation = parseInt(tpl.attr('svy-location'));
+	    	var nodeLocation = parseInt((formData.formProperties.absoluteLayout[''] && tpl.children(0)) ? tpl.children(0).attr('form-index') : tpl.attr('svy-location'));
 	    	for (var i=0;i<parent.children().length;i++)
 	    	{
-	    		var currentLocation = parseInt(parent.children()[i].getAttribute('svy-location'));
+	    		var currentLocation = parseInt((formData.formProperties.absoluteLayout[''] && parent.children()[i].children(0)) ? parent.children()[i].children(0).getAttribute('form-index') : parent.children()[i].getAttribute('svy-location'));
 	    		if (nodeLocation <= currentLocation)
 	    		{
 	    			tpl.insertBefore(parent.children()[i]);
@@ -447,8 +461,15 @@ angular.module('editorContent',['servoyApp'])
     if(elementTemplate.length) {
     	var domParentUUID = elementTemplate.parent().closest('[svy-id]').attr('svy-id');
     	var currentParentUUID = updateData.childParentMap[elementId].uuid;
-    	if(forceUpdate || domParentUUID != currentParentUUID ||
-    		((updateData.childParentMap[elementId].index > -1) && (updateData.childParentMap[elementId].index != elementTemplate.index()))) {
+    	if(forceUpdate || domParentUUID != currentParentUUID) {
+    		elementsToRemove.push(elementTemplate);
+    	}
+    	else if (updateData.childParentMap[elementId].location > -1 && updateData.childParentMap[elementId].location != parseInt(elementTemplate.attr('svy-location'))){
+    		// location(order) is changed, we need to reinsert this node
+    		elementsToRemove.push(elementTemplate);
+    	}
+    	else if (updateData.childParentMap[elementId].formIndex > -1 && elementTemplate.children(0) && updateData.childParentMap[elementId].formIndex != parseInt(elementTemplate.children(0).attr('form-index'))){
+    		// location(order) is changed, we need to reinsert this node
     		elementsToRemove.push(elementTemplate);
     	}
     	else {
@@ -535,25 +556,25 @@ angular.module('editorContent',['servoyApp'])
     	delete cssPositionObject.height;
     	delete cssPositionObject['min-width'];
     	delete cssPositionObject['min-height'];
-    	if (cssPosition.left != -1)
+    	if (cssPosition.left != -1 && cssPosition.left !== undefined)
     	{
-    		cssPositionObject.left = isNaN(parseInt(cssPosition.left)) ? cssPosition.left : (cssPosition.left + 'px');
+    		cssPositionObject.left = isNaN(parseInt(cssPosition.left)) ? cssPosition.left : (parseInt(cssPosition.left) + 'px');
     	}
-    	if (cssPosition.right != -1)
+    	if (cssPosition.right != -1 && cssPosition.right !== undefined)
     	{
-    		cssPositionObject.right = isNaN(parseInt(cssPosition.right)) ? cssPosition.right : (cssPosition.right + 'px');
+    		cssPositionObject.right = isNaN(parseInt(cssPosition.right)) ? cssPosition.right : (parseInt(cssPosition.right) + 'px');
     	}
-    	if (cssPosition.top != -1)
+    	if (cssPosition.top != -1 && cssPosition.top !== undefined)
     	{
-    		cssPositionObject.top = isNaN(parseInt(cssPosition.top)) ? cssPosition.top : (cssPosition.top + 'px');
+    		cssPositionObject.top = isNaN(parseInt(cssPosition.top)) ? cssPosition.top : (parseInt(cssPosition.top) + 'px');
     	}
-    	if (cssPosition.bottom != -1)
+    	if (cssPosition.bottom != -1 && cssPosition.bottom !== undefined)
     	{
-    		cssPositionObject.bottom = isNaN(parseInt(cssPosition.bottom)) ? cssPosition.bottom : (cssPosition.bottom + 'px');
+    		cssPositionObject.bottom = isNaN(parseInt(cssPosition.bottom)) ? cssPosition.bottom : (parseInt(cssPosition.bottom) + 'px');
     	}
-    	if (cssPosition.width != -1)
+    	if (cssPosition.width != -1 && cssPosition.width !== undefined)
     	{
-    		if (cssPosition.left != -1 && cssPosition.right != -1)
+    		if (cssPosition.left != -1 && cssPosition.left !== undefined && cssPosition.right != -1 && cssPosition.right !== undefined)
     		{
     			cssPositionObject['min-width'] = cssPosition.width;
     		}
@@ -562,9 +583,9 @@ angular.module('editorContent',['servoyApp'])
     			cssPositionObject.width = cssPosition.width;
     		}	
     	}
-    	if (cssPosition.height != -1)
+    	if (cssPosition.height != -1 && cssPosition.height !== undefined)
     	{
-    		if (cssPosition.top != -1 && cssPosition.bottom != -1)
+    		if (cssPosition.top != -1 && cssPosition.top !== undefined && cssPosition.bottom != -1 && cssPosition.bottom !== undefined)
     		{
     			cssPositionObject['min-height'] = cssPosition.height;
     		}
@@ -593,56 +614,19 @@ angular.module('editorContent',['servoyApp'])
                 var key = data.containers[j].uuid;
                 var element = updateElementIfParentChange(key, data, { layoutId: key },false,domElementsToRemove);
                 if(element) {
-          		  for (attribute in data.containers[j]) {
-          		      if('uuid' === attribute) continue;
-          			  if ('class' === attribute)
-          			  {
-          				  var oldValue = element.attr(attribute);
-          				  var newValue = data.containers[j][attribute];
-          				  if (oldValue)
-          				  {
-          					  var oldValuesArray = oldValue.split(" ");
-          					  var newValuesArray = newValue.split(" ");
-          					  var ngClassValues = [];
-          					  var ngClassValue= element.attr('ng-class');
-          					  if (ngClassValue)
-          					  {
-          						  // this is not valid json, how to parse it ?
-          						  ngClassValue = ngClassValue.replace("{","").replace("}","").replace(/"/g,"");
-          						  ngClassValues = ngClassValue.split(":");
-          						  for (var i=0;i< ngClassValues.length-1;i++ )
-          						  {
-          							  if (ngClassValues[i].indexOf(',') >= 0)
-          							  {
-          								  ngClassValues[i] = ngClassValues[i].slice(ngClassValues[i].lastIndexOf(',')+1,ngClassValues[i].length);
-          							  }	  
-          						  }	  
-          					  }	  
-          					  for (var i=0;i< oldValuesArray.length;i++)
-          					  {
-          						  if (newValuesArray.indexOf(oldValuesArray[i]) < 0 && ngClassValues.indexOf(oldValuesArray[i]) >= 0)
-          						  {
-          							  //this value is missing, check if servoy added class
-          							  newValue += " " + oldValuesArray[i];
-          						  }	  
-          					  }	  
-          				  }	
-          				  element.attr(attribute,newValue); 
-          			  }
-          			  else
-          			  {
-          				  element.attr(attribute,data.containers[j][attribute]); 
-          			  }	  
-                    }
+                  for (attribute in data.containers[j]) {
+                      if('uuid' === attribute) continue;
+                      element.attr(attribute, data.containers[j][attribute]);
+                  }
                 }
               }
-            }          
+          }
             
-            for (var index in data.deletedContainers) {
-              var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
-              toDelete.remove();
+          for (var index in data.deletedContainers) {
+            var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
+            toDelete.remove();
 
-            }          
+          }          
           
           if(data.updatedFormComponentsDesignId) {
         	  for (var index in data.updatedFormComponentsDesignId) {
@@ -784,4 +768,61 @@ angular.module('editorContent',['servoyApp'])
     showLoading: function() {},
     hideLoading: function() {}
   }
+}).directive('svySolutionLayoutClass',  function ($rootScope) {
+	return {
+		restrict: 'A',
+		link: function (scope, element) {
+			scope.$watch(function() {
+        return element.attr('svy-solution-layout-class');
+      }, function(newVal, oldValue) {
+        updateElementClass('svy-solution-layout-class', $rootScope.showSolutionLayoutsCss, oldValue);
+      });
+      
+			scope.$watch(function() {
+        return element.attr('svy-layout-class');
+      }, function(newVal, oldValue) {
+        updateElementClass('svy-layout-class', true, oldValue);
+      });
+
+      scope.$watch(function() {
+        return $rootScope.showSolutionLayoutsCss;
+      }, function(newVal) {
+        updateElementClass('svy-solution-layout-class', $rootScope.showSolutionLayoutsCss);
+      });
+
+      function updateElementClass(fromClass, isAdding, toRemove) {
+        var classes;
+        if(toRemove) {
+          classes = toRemove.split(" ");
+          for(var i = 0; i < classes.length; i++) {
+            element.removeClass(classes[i]);
+          }
+        }
+        classes = element.attr(fromClass).split(" ");
+        for(var i = 0; i < classes.length; i++) {
+          if(isAdding) {
+              if(!element.hasClass(classes[i])) {
+                element.addClass(classes[i]);
+              }
+          }
+          else {
+              element.removeClass(classes[i]);
+          }
+        }
+      }
+		}
+	}
+}).directive('elementReady', function($timeout, $rootScope) {
+	return {
+      restrict: 'A',
+      link: function(scope, element, attrs) {
+        $timeout(function(){
+          element.ready(function() {
+            scope.$apply(function() {
+              $rootScope.$broadcast(attrs.elementReady+':ready');
+            });
+          });
+        });
+      }
+    };
 });

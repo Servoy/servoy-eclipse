@@ -28,7 +28,6 @@ import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -47,7 +46,6 @@ import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.export.ExportSolutionJob;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.DeployPage;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.DeployProgressPage;
 import com.servoy.eclipse.ui.wizards.exportsolution.pages.ExportConfirmationPage;
@@ -61,7 +59,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
 
-public class ExportSolutionWizard extends Wizard implements IExportWizard
+public class ExportSolutionWizard extends DirtySaveExportWizard implements IExportWizard
 {
 
 	/**
@@ -347,27 +345,20 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		// needed for setting modules to export in case of File -> Export
 		if (wizardContainer instanceof WizardDialog)
 		{
-			if (EditorUtil.saveDirtyEditors(getShell(), true))
+			((WizardDialog)wizardContainer).addPageChangedListener(new IPageChangedListener()
 			{
-				((WizardDialog)wizardContainer).close();
-			}
-			else
-			{
-				((WizardDialog)wizardContainer).addPageChangedListener(new IPageChangedListener()
+				public void pageChanged(PageChangedEvent event)
 				{
-					public void pageChanged(PageChangedEvent event)
+					if (event.getSelectedPage() == modulesSelectionPage)
 					{
-						if (event.getSelectedPage() == modulesSelectionPage)
-						{
-							modulesSelectionPage.checkStateChanged(null);
-						}
-						if (event.getSelectedPage() == passwordPage)
-						{
-							passwordPage.requestPasswordFieldFocus();
-						}
+						modulesSelectionPage.checkStateChanged(null);
 					}
-				});
-			}
+					if (event.getSelectedPage() == passwordPage)
+					{
+						passwordPage.requestPasswordFieldFocus();
+					}
+				}
+			});
 		}
 	}
 

@@ -199,15 +199,25 @@ html, body
 	pointer-events: auto
 }
 
+.decorationOverlay.showWireframe::before {
+  content				  : attr(svytitle);
+  background-color		  : var(--svyBackgroundColor);
+  border                  : 1px solid #2BADDF;
+  border-bottom           : none;
+  border-top-left-radius  : 5px;
+  border-top-right-radius : 5px;
+  font					  : 12px Arial, sans-serif;
+  margin-top			  : -20px;
+  margin-left			  : 20px;
+  padding                 : 2px 10px 3px 10px;
+  position				  : absolute;
+}
+
 .decorationOverlay {
 	pointer-events: none;
 	box-sizing: border-box;
 	position: absolute;
-	border: 1px solid #4d4d4d;
-	cursor: move;
-	cursor: -webkit-grab;
-	cursor: -moz-grab;
-	cursor: grab;
+	border: 1px solid #0099FF;
 }
 
 .glasspane {
@@ -316,14 +326,18 @@ html, body
 /* Menubar */
 .menubar {
 	color: white;
-	background-color:#6495ed;
 	position: relative;
 	height: 16px;
-	top: -18px;
-	margin-left: 2px;
-	margin-right: 2px;
+	top: -10px;
+	width: auto;
+	float:right;
 	pointer-events: auto;
-	cursor: default;
+	cursor: pointer;
+	display:inline;
+	float:right;
+	overflow:hidden;
+	white-space:nowrap;
+	z-index: 10000;
 }
 
 .menubar .containerType {

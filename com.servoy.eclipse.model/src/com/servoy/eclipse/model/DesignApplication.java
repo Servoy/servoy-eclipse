@@ -838,7 +838,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	@Override
-	public Object getTenantValue()
+	public Object[] getTenantValue()
 	{
 		return getClientInfo().getTenantValue();
 	}

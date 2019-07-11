@@ -31,12 +31,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebObjectSpecificationBuilder;
 import org.sablo.websocket.BaseWebsocketSession;
@@ -58,6 +62,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -576,8 +581,40 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.value(container.getUUID().toString());
 				for (Entry<String, String> attribute : attributes.entrySet())
 				{
-					writer.key(attribute.getKey());
-					writer.value(attribute.getValue());
+					String key = attribute.getKey();
+					String value = attribute.getValue();
+
+					if ("class".equals(key))
+					{
+						WebLayoutSpecification spec = null;
+						if (container.getPackageName() != null)
+						{
+							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
+								container.getPackageName());
+							if (pkg != null)
+							{
+								spec = pkg.getSpecification(container.getSpecName());
+							}
+						}
+						List<String> containerStyleClasses = FormLayoutStructureGenerator.getStyleClassValues(spec, container.getCssClasses());
+
+						writer.key("svy-layout-class");
+						value = containerStyleClasses.stream().collect(Collectors.joining(" "));
+						writer.value(value);
+
+						writer.key("svy-solution-layout-class");
+						value = Arrays.stream(container.getCssClasses().split(" ")).filter(cls -> !containerStyleClasses.contains(cls)).collect(
+							Collectors.joining(" "));
+						writer.value(value);
+
+						writer.key("svy-title");
+						writer.value(FormLayoutStructureGenerator.getLayouContainerTitle(container));
+					}
+					else
+					{
+						writer.key(key);
+						writer.value(value);
+					}
 				}
 				writer.endObject();
 			}
@@ -641,12 +678,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				{
 					writer.value(parent.getUUID().toString());
 				}
-				writer.key("index");
-				if (parent instanceof AbstractContainer && form.isResponsiveLayout())
+				writer.key("location");
+				if (p instanceof ISupportBounds && parent instanceof AbstractContainer && form.isResponsiveLayout())
 				{
-					parent = PersistHelper.getFlattenedPersist(fs, form, parent);
-					ArrayList<IPersist> children = ((AbstractContainer)parent).getSortedChildren();
-					writer.value(children.indexOf(p));
+					writer.value(((ISupportBounds)p).getLocation().x);
+				}
+				else
+				{
+					writer.value(-1);
+				}
+				writer.key("formIndex");
+				if (p instanceof IFormElement && !form.isResponsiveLayout())
+				{
+					writer.value(((IFormElement)p).getFormIndex());
 				}
 				else
 				{
@@ -769,7 +813,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 						if (frm == null) continue;
 						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(fe, pd, (JSONObject)propertyValue, frm, fs);
-						formComponentTemplates.put(cache.getCacheUUID(), cache.getTemplate());
+						formComponentTemplates.put(cache.getHtmlTemplateUUIDForAngular(), cache.getTemplate());
 					}
 				}
 			}

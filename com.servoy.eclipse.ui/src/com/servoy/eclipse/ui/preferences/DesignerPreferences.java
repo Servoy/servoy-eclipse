@@ -109,6 +109,7 @@ public class DesignerPreferences
 	public static final String ENCAPSULATION_TYPE = "encapsulationType";
 	public static final String SKIP_FUNCTION_BODY_PARSING = "skipFunctionBodyParsing";
 	public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
+	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final String WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME = "servoy.test.solution-load.timeout"; // in seconds; if you modify this, modify it in ServoyGlobalPreferencePage
@@ -167,7 +168,9 @@ public class DesignerPreferences
 
 	public static final boolean SKIP_FUNCTION_BODY_PARSING_DEFAULT = true;
 
-	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = true;
+	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = false;
+
+	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_BYTE_ARRAY;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
@@ -865,4 +868,26 @@ public class DesignerPreferences
 		setProperty(SKIP_FUNCTION_BODY_PARSING, skip);
 	}
 
+	public void setPrimaryKeyUuidType(PrimaryKeyType type)
+	{
+		setProperty(UUD_ARRAY_TYPE, type == null ? null : type.name());
+	}
+
+	public PrimaryKeyType getPrimaryKeyUuidType()
+	{
+		String property = getProperty(UUD_ARRAY_TYPE, null);
+		if (property != null)
+		{
+			try
+			{
+				return PrimaryKeyType.valueOf(property);
+			}
+			catch (IllegalArgumentException e)
+			{
+				// old unsupported value?
+			}
+		}
+
+		return ARRAY_UTF8_TYPE_DEFAULT;
+	}
 }

@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -79,7 +79,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	private static String selectedWebPackageIndex = MAIN_WEBPACKAGEINDEX;
 	private AvoidMultipleExecutionsJob reloadWPMSpecsJob;
 
-	private static HashMap<String, Pair<Long, List<JSONObject>>> remotePackagesCache = new HashMap<String, Pair<Long, List<JSONObject>>>();
+	private static ConcurrentHashMap<String, Pair<Long, List<JSONObject>>> remotePackagesCache = new ConcurrentHashMap<String, Pair<Long, List<JSONObject>>>();
+	private volatile static Job checkForNewRemotePackagesJob;
 
 	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
 	{
@@ -228,6 +229,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 
 	private static String findModuleParent(Solution solution, String moduleName)
 	{
+		if (solution == null) return null;
 		String[] modules = Utils.getTokenElements(solution.getModulesNames(), ",", true);
 		List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 		if (modulesList.size() == 0)
@@ -288,38 +290,41 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		{
 			// check for new in a new thread
 			final String wpIndex = selectedWebPackageIndex;
-			Job checkForNewRemotePackagesJob = new Job("Check for new remote Servoy packages")
+			if (checkForNewRemotePackagesJob == null)
 			{
-				@Override
-				protected IStatus run(IProgressMonitor monitor)
+				checkForNewRemotePackagesJob = new Job("Check for new remote Servoy packages")
 				{
-					try
+					@Override
+					protected IStatus run(IProgressMonitor monitor)
 					{
-						Pair<Long, List<JSONObject>> currentPackages = remotePackagesCache.get(wpIndex);
-						if (currentPackages != null)
+						try
 						{
-							List<JSONObject> newRemotePackages = getRemotePackages(wpIndex, false);
-							if (getChecksum(newRemotePackages) != currentPackages.getLeft().longValue())
+							Pair<Long, List<JSONObject>> currentPackages = remotePackagesCache.get(wpIndex);
+							if (currentPackages != null)
 							{
-								remotePackagesCache.remove(wpIndex);
-								JSONObject jsonResult = new JSONObject();
-								jsonResult.put("method", REFRESH_REMOTE_PACKAGES_METHOD);
-								endpoint.send(jsonResult.toString());
+								List<JSONObject> newRemotePackages = getRemotePackages(wpIndex, false);
+								if (getChecksum(newRemotePackages) != currentPackages.getLeft().longValue())
+								{
+									remotePackagesCache.remove(wpIndex);
+									JSONObject jsonResult = new JSONObject();
+									jsonResult.put("method", REFRESH_REMOTE_PACKAGES_METHOD);
+									endpoint.send(jsonResult.toString());
+								}
 							}
 						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+						checkForNewRemotePackagesJob = null;
+						return Status.OK_STATUS;
 					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-					}
-
-					return Status.OK_STATUS;
-				}
-			};
-			checkForNewRemotePackagesJob.setPriority(Job.LONG);
-			checkForNewRemotePackagesJob.schedule();
+				};
+				checkForNewRemotePackagesJob.setPriority(Job.LONG);
+				checkForNewRemotePackagesJob.schedule();
+			}
 		}
-		return sortPackages(remotePackages);
+		return remotePackages;
 	}
 
 	private static synchronized List<JSONObject> getRemotePackages(String webPackageIndex, boolean useCache) throws Exception
@@ -404,6 +409,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 					}
 				}
 			}
+			sortPackages(result);
 			if (useCache)
 			{
 				remotePackagesCache.put(webPackageIndex, new Pair<Long, List<JSONObject>>(Long.valueOf(getChecksum(result)), result));
@@ -483,6 +489,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public void dispose()
 	{
 		resourceListenersOff();
+		Job job = checkForNewRemotePackagesJob;
+		if (job != null) job.cancel();
 	}
 
 	@Override

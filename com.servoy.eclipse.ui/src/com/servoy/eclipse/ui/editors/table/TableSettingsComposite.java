@@ -70,51 +70,60 @@ public class TableSettingsComposite extends Group
 		tableEditor = te;
 		securityInfo = new HashMap<String, Integer>();
 
+		final Button selectAllButton = new Button(this, SWT.CHECK);
+		final FormData fd_selectAllButton = new FormData();
+		fd_selectAllButton.left = new FormAttachment(0, 20);
+		fd_selectAllButton.top = new FormAttachment(0, 9);
+		fd_selectAllButton.right = new FormAttachment(100, 0);
+		selectAllButton.setLayoutData(fd_selectAllButton);
+		selectAllButton.setText("Select all");
+
+
 		readButton = new Button(this, SWT.CHECK);
 		final FormData fd_readButton = new FormData();
 		fd_readButton.left = new FormAttachment(0, 20);
-		fd_readButton.top = new FormAttachment(0, 9);
+		fd_readButton.top = new FormAttachment(0, 34);
 		fd_readButton.right = new FormAttachment(100, 0);
 		readButton.setLayoutData(fd_readButton);
 		readButton.setText("Read");
 
 		insertButton = new Button(this, SWT.CHECK);
 		final FormData fd_insertButton = new FormData();
-		fd_insertButton.right = new FormAttachment(100, 0);
 		fd_insertButton.left = new FormAttachment(0, 20);
-		fd_insertButton.top = new FormAttachment(0, 34);
+		fd_insertButton.top = new FormAttachment(0, 59);
+		fd_insertButton.right = new FormAttachment(100, 0);
 		insertButton.setLayoutData(fd_insertButton);
 		insertButton.setText("Insert");
 
 		updateButton = new Button(this, SWT.CHECK);
 		final FormData fd_updateButton = new FormData();
 		fd_updateButton.left = new FormAttachment(0, 20);
+		fd_updateButton.top = new FormAttachment(0, 84);
 		fd_updateButton.right = new FormAttachment(100, 0);
-		fd_updateButton.top = new FormAttachment(0, 59);
 		updateButton.setLayoutData(fd_updateButton);
 		updateButton.setText("Update");
 
 		deleteButton = new Button(this, SWT.CHECK);
 		final FormData fd_deleteButton = new FormData();
 		fd_deleteButton.left = new FormAttachment(0, 20);
+		fd_deleteButton.top = new FormAttachment(0, 109);
 		fd_deleteButton.right = new FormAttachment(100, 0);
-		fd_deleteButton.top = new FormAttachment(0, 84);
 		deleteButton.setLayoutData(fd_deleteButton);
 		deleteButton.setText("Delete");
 
 		trackingButton = new Button(this, SWT.CHECK);
 		final FormData fd_trackingButton = new FormData();
 		fd_trackingButton.left = new FormAttachment(0, 20);
+		fd_trackingButton.top = new FormAttachment(0, 134);
 		fd_trackingButton.right = new FormAttachment(100, 0);
-		fd_trackingButton.top = new FormAttachment(0, 109);
 		trackingButton.setLayoutData(fd_trackingButton);
 		trackingButton.setText("Tracking(Insert/Update/Delete)");
 
 		trackingSelectButton = new Button(this, SWT.CHECK);
 		final FormData fd_trackingSelectButton = new FormData();
 		fd_trackingSelectButton.left = new FormAttachment(0, 20);
+		fd_trackingSelectButton.top = new FormAttachment(0, 159);
 		fd_trackingSelectButton.right = new FormAttachment(100, 0);
-		fd_trackingSelectButton.top = new FormAttachment(0, 134);
 		trackingSelectButton.setLayoutData(fd_trackingSelectButton);
 		trackingSelectButton.setText("Tracking(Select)");
 
@@ -127,6 +136,27 @@ public class TableSettingsComposite extends Group
 				addGroupAccess();
 			}
 		};
+		selectAllButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (selectAllButton.getSelection())
+				{
+					selectAllButton.setText("Deslect all");
+				}
+				else
+				{
+					selectAllButton.setText("Select all");
+				}
+				readButton.setSelection(selectAllButton.getSelection());
+				updateButton.setSelection(selectAllButton.getSelection());
+				insertButton.setSelection(selectAllButton.getSelection());
+				deleteButton.setSelection(selectAllButton.getSelection());
+				tableEditor.flagModified();
+				addGroupAccess();
+			}
+		});
 		readButton.addSelectionListener(selectionListener);
 		updateButton.addSelectionListener(selectionListener);
 		insertButton.addSelectionListener(selectionListener);

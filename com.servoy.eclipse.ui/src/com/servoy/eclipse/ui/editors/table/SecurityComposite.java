@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -70,14 +71,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 		btnNORights.setText("No rights unless explicitly specified");
 		btnNORights.setToolTipText(
 			"When this is checked, all groups will have by default no right for this table, unless it is specified by editor. If unchecked, by default read/insert/update/delete are available.");
-		try
-		{
-			btnNORights.setSelection(solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
-		}
-		catch (RepositoryException e2)
-		{
-			ServoyLog.logError(e2);
-		}
+		btnNORights.setSelection(solution.getImplicitSecurityNoRights(te.getTable().getDataSource()));
 		btnNORights.addSelectionListener(new SelectionListener()
 		{
 
@@ -97,15 +91,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 				if (sel instanceof IStructuredSelection)
 				{
 					Object first = ((IStructuredSelection)sel).getFirstElement();
-					try
-					{
-						settingsComposite.setValues(first != null ? first.toString() : null,
-							solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
-					}
-					catch (RepositoryException e1)
-					{
-						ServoyLog.logError(e1);
-					}
+					settingsComposite.setValues(first != null ? first.toString() : null, btnNORights.getSelection());
 				}
 			}
 
@@ -117,7 +103,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 		});
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(0, 10);
-		formData.left = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(100, -5);
 		btnNORights.setLayoutData(formData);
 
 		SashForm sashForm = new SashForm(this, SWT.HORIZONTAL);
@@ -142,15 +128,7 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 				if (sel instanceof IStructuredSelection)
 				{
 					Object first = ((IStructuredSelection)sel).getFirstElement();
-					try
-					{
-						settingsComposite.setValues(first != null ? first.toString() : null,
-							solution.getOrCreateTableNode(te.getTable().getDataSource()).getImplicitSecurityNoRights());
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					settingsComposite.setValues(first != null ? first.toString() : null, solution.getImplicitSecurityNoRights(te.getTable().getDataSource()));
 				}
 
 			}
@@ -234,9 +212,11 @@ public class SecurityComposite extends Composite implements EclipseUserManager.I
 			}
 		});
 		EclipseUserManager eum = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
-		tableViewer.setInput(eum.getGroups(ApplicationServerRegistry.get().getClientId()));
+		IDataSet groups = eum.getGroups(ApplicationServerRegistry.get().getClientId());
+		tableViewer.setInput(groups);
 		tableViewer.setSorter(new ColumnsSorter(tableViewer, new TableColumn[] { nameColumn }, new Comparator[] { NameComparator.INSTANCE }));
 		eum.addUserGroupChangeListener(this);
+		if (groups.getRowCount() > 0) tableViewer.setSelection(new StructuredSelection(groups.getRow(0)[1]), true);
 	}
 
 	@Override

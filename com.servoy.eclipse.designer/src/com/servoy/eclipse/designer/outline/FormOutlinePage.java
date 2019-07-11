@@ -29,7 +29,6 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -41,12 +40,15 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IPageSite;
@@ -108,7 +110,6 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	private ISupportChilds dropTarget;
 	private IPersist dropTargetComponent;
 
-
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
 	{
 		this.form = form;
@@ -128,6 +129,20 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE : FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE,
 			form)));
 		getTreeViewer().setInput(form);
+
+		// hack around the fact that somehow if you click directly inside the outline view when coming from the Chromium browser editor, the right part is not activated.
+		getTreeViewer().getControl().addFocusListener(new FocusAdapter()
+		{
+			@Override
+			public void focusGained(FocusEvent e)
+			{
+				IViewPart outlinePart = getSite().getPage().findView("org.eclipse.ui.views.ContentOutline");
+				if (outlinePart != null && getSite().getPage().getActivePart() != outlinePart)
+				{
+					Display.getDefault().asyncExec(() -> getSite().getPage().activate(outlinePart));
+				}
+			}
+		});
 
 		if (form != null)
 		{
@@ -508,9 +523,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						{
 							persist = webFormComponentChildType != null ? webFormComponentChildType : (IPersist)searchPersist;
 						}
-						PersistContext context = PersistContext.create(persist, form);
-						selectionPath.add(context);
-						getTreeViewer().expandToLevel(context, AbstractTreeViewer.ALL_LEVELS);
+						selectionPath.add(PersistContext.create(persist, form));
 					}
 				}
 				else
@@ -531,10 +544,41 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				StructuredSelection newSelection = new StructuredSelection(selectionPath);
 				if (!newSelection.equals(getTreeViewer().getSelection()))
 				{
-					getTreeViewer().setSelection(newSelection);
+					// if responsive form and not grouped view, expand selection ancestors
+					if (form.isResponsiveLayout() && !FormOutlineContentProvider.getDisplayType())
+					{
+						for (Object selectionPathItem : selectionPath)
+						{
+							if (selectionPathItem instanceof PersistContext)
+							{
+								List<IPersist> ancestorHierarchy = FormOutlinePage.getPersistAncestorHierarchy(editingFlattenedSolution, form,
+									((PersistContext)selectionPathItem).getPersist());
+								for (IPersist p : ancestorHierarchy)
+								{
+									getTreeViewer().setExpandedState(PersistContext.create(p, form), true);
+								}
+							}
+						}
+					}
+					getTreeViewer().setSelection(newSelection, true);
 				}
 			}
 		}
+	}
+
+	private static List<IPersist> getPersistAncestorHierarchy(FlattenedSolution flattenedSolution, Form form, IPersist persist)
+	{
+		ArrayList<IPersist> anchestorHierarchy = new ArrayList<IPersist>();
+		IPersist parent = PersistHelper.getRealParent(persist);
+
+		while (parent != null && parent.getTypeID() != IRepository.FORMS)
+		{
+			anchestorHierarchy.add(0,
+				parent instanceof ISupportChilds ? PersistHelper.getFlattenedPersist(flattenedSolution, form, (ISupportChilds)parent) : parent);
+			parent = PersistHelper.getRealParent(parent);
+		}
+
+		return anchestorHierarchy;
 	}
 
 	@Override

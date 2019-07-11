@@ -131,6 +131,12 @@ public class CreateComponentHandler implements IServerService
 
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
+		if (editorPart.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage &&
+			((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer() != null && args.has("name") && !args.has("dropTargetUUID"))
+		{
+			// if we drop directly on form while zoomed in , do nothing
+			return null;
+		}
 		if (args.has("name") && ("component".equals(args.getString("name")) || "template".equals(args.getString("name")) || "*".equals(args.getString("name"))))
 		{
 			String name = args.getString("name");
@@ -173,12 +179,17 @@ public class CreateComponentHandler implements IServerService
 					{
 						try
 						{
-							newPersist = createComponent(args);
+							List<IPersist> changedPersists = new ArrayList<IPersist>();
+							newPersist = createComponent(args, changedPersists);
 							if (newPersist != null)
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(newPersist));
-								IStructuredSelection structuredSelection = new StructuredSelection(newPersist.length > 0 ? newPersist[0] : newPersist);
-								selectionProvider.setSelection(structuredSelection);
+								changedPersists.addAll(Arrays.asList(newPersist));
+								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
+								if (!args.optBoolean("keepOldSelection", false))
+								{
+									IStructuredSelection structuredSelection = new StructuredSelection(newPersist.length > 0 ? newPersist[0] : newPersist);
+									selectionProvider.setSelection(structuredSelection);
+								}
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
 									CSSPosition.isCSSPositionContainer((LayoutContainer)newPersist[0]))
 								{
@@ -229,7 +240,7 @@ public class CreateComponentHandler implements IServerService
 		return null;
 	}
 
-	protected IPersist[] createComponent(final JSONObject args) throws JSONException, RepositoryException
+	protected IPersist[] createComponent(final JSONObject args, final List<IPersist> extraChangedPersists) throws JSONException, RepositoryException
 	{
 		int x = args.optInt("x");
 		int y = args.optInt("y");
@@ -330,18 +341,28 @@ public class CreateComponentHandler implements IServerService
 					if (args.has("rightSibling"))
 					{
 						IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("rightSibling", null));
-						int counter = 1;
-
-						for (IPersist element : childArray)
+						if (rightSibling != null)
 						{
-							if (element == rightSibling)
+							int counter = 1;
+							for (IPersist element : childArray)
 							{
-								x = counter;
-								y = counter;
+								if (element.getUUID().equals(rightSibling.getUUID()))
+								{
+									x = counter;
+									y = counter;
+									counter++;
+								}
+								((ISupportBounds)element).setLocation(new Point(counter, counter));
+								if (extraChangedPersists != null && element.isChanged()) extraChangedPersists.add(element);
 								counter++;
 							}
-							((ISupportBounds)element).setLocation(new Point(counter, counter));
-							counter++;
+						}
+						else
+						{
+							Debug.log("Could not find rightsibling with uuid '" + args.optString("rightSibling", null) + "', inserting on last position.");
+							Point location = ((ISupportBounds)childArray[childArray.length - 1]).getLocation();
+							x = location.x + 1;
+							y = location.y + 1;
 						}
 					}
 					else
@@ -652,16 +673,7 @@ public class CreateComponentHandler implements IServerService
 							Iterator<IPersist> it = parent.getAllObjects();
 							while (it.hasNext())
 							{
-								IPersist next = it.next();
-								IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, editorPart.getForm()));
-								if (child.getParent() instanceof Form)
-								{
-									child.getParent().removeChild(child);
-								}
-								changes.add(child);
-								if (child.equals(next)) continue;
-								parent.removeChild(next);
-								parent.addChild(child);
+								ElementUtil.getOverridePersist(PersistContext.create(it.next(), editorPart.getForm()));
 							}
 						}
 						else
@@ -682,15 +694,17 @@ public class CreateComponentHandler implements IServerService
 							{
 								Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
 								LayoutContainer sameTypeChildContainer = null;
-								while (childContainersIte.hasNext())
+								if (!"div".equals(layoutSpec.getName()))
 								{
-									LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
-									if (layoutSpec.getName().equals(childContainer.getSpecName()))
+									while (childContainersIte.hasNext())
 									{
-										sameTypeChildContainer = childContainer;
+										LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
+										if (layoutSpec.getName().equals(childContainer.getSpecName()))
+										{
+											sameTypeChildContainer = childContainer;
+										}
 									}
 								}
-
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
@@ -700,6 +714,14 @@ public class CreateComponentHandler implements IServerService
 								{
 									res.add(dropTarget);
 								}
+//								else if (!fullRefreshNeeded && !res.isEmpty() && res.get(0).getParent() instanceof Form)
+//								{
+//									LayoutContainer layoutContainer = (LayoutContainer)res.get(0);
+//									List<IPersist> children = new ArrayList<>(((AbstractContainer)layoutContainer.getParent()).getAllObjectsAsList());
+//									Collections.sort(children, PositionComparator.XY_PERSIST_COMPARATOR);
+//									//only refresh if it's not the last element
+//									fullRefreshNeeded = !layoutContainer.getUUID().equals(children.get(children.size() - 1).getUUID());
+//								}
 								IPersist[] result = res.toArray(new IPersist[0]);
 								if (fullRefreshNeeded)
 								{

@@ -236,6 +236,7 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
+import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -415,6 +416,8 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType(JSSecurity.class);
 		addAnonymousClassType("servoyApi", ServoyApiObject.class);
 		addAnonymousClassType("console", ConsoleObject.class);
+		addAnonymousClassType("CSSPosition", ICSSPosition.class);
+		addAnonymousClassType("ICSSPosition", ICSSPosition.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 
 
@@ -1034,10 +1037,13 @@ public class TypeCreator extends TypeCache
 					}
 					else
 					{
-						addType(constants.getPrefix(), element);
 						if (prefix != null)
 						{
 							addType(prefix + constants.getPrefix(), element);
+						}
+						else
+						{
+							addType(constants.getPrefix(), element);
 						}
 					}
 				}
@@ -1069,10 +1075,13 @@ public class TypeCreator extends TypeCache
 						name = sd.scriptingName().trim();
 					}
 
-					addType(name, element);
 					if (prefix != null)
 					{
 						addType(prefix + name, element);
+					}
+					else
+					{
+						addType(name, element);
 					}
 				}
 

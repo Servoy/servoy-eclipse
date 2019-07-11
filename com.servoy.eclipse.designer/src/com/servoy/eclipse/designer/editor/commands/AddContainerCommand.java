@@ -51,13 +51,13 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.CSSPosition;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -252,6 +252,24 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									}
 									persist = parentPersist.createNewWebComponent(componentName, spec.getName());
 
+									if (activeEditor.getForm().isResponsiveLayout())
+									{
+										int maxLocation = 0;
+										ISupportChilds parent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist),
+											activeEditor.getForm(), parentPersist);
+										Iterator<IPersist> it = parent.getAllObjects();
+										while (it.hasNext())
+										{
+											IPersist currentPersist = it.next();
+											if (currentPersist != persist && currentPersist instanceof ISupportBounds)
+											{
+												Point location = ((ISupportBounds)currentPersist).getLocation();
+												if (location.x > maxLocation) maxLocation = location.x;
+												if (location.y > maxLocation) maxLocation = location.y;
+											}
+										}
+										((WebComponent)persist).setLocation(new Point(maxLocation + 1, maxLocation + 1));
+									}
 									Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
 									for (String string : allPropertiesNames)
 									{
@@ -276,16 +294,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										Iterator<IPersist> it = parent.getAllObjects();
 										while (it.hasNext())
 										{
-											IPersist next = it.next();
-											IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, activeEditor.getForm()));
-											if (child.getParent() instanceof Form && !child.equals(next))
-											{
-												child.getParent().removeChild(child);
-											}
-											changes.add(child);
-											if (child.equals(next)) continue;
-											parent.removeChild(next);
-											parent.addChild(child);
+											// why do we need to override all siblings here ?
+											ElementUtil.getOverridePersist(PersistContext.create(it.next(), activeEditor.getForm()));
 										}
 									}
 									else

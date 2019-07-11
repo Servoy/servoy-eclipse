@@ -31,7 +31,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	INITIALIZED: "INITIALIZED",
 	RENDER_DECORATORS: "RENDER_DECORATORS",
 	HIDE_DECORATORS: "HIDE_DECORATORS",
-	RENDER_PALETTE: "RENDER_PALETTE"
+	RENDER_PALETTE: "RENDER_PALETTE",
+	CONTENT_LOADED: "CONTENT_LOADED"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 100,
 	PART_LABEL_HEIGHT: 22,
@@ -44,9 +45,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_PART: "part",
 	GHOST_TYPE_FORM: "form",
 	GHOST_TYPE_INVISIBLE: "invisible",
-	GHOST_TYPE_GROUP: "group"
+	GHOST_TYPE_GROUP: "group",
+	RESPONSIVE_FORM_MIN_HEIGHT: 640
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
-	$editorService, $webSocket, $q, $interval,$allowedChildren,$document) {
+	$editorService, $webSocket, $q, $interval,$allowedChildren,$document,$websocketConstants) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -280,7 +282,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return parent;
 			}
 
-			var realContainerPromise = null;
+			var realContainerPromise = {};
 			$scope.getGhostContainerStyle = function(ghostContainer) {
 				function showAndPositionGhostContainer(ghostContainer, parentCompBounds) {
 					if (!ghostContainer.style) ghostContainer.style = {};
@@ -306,16 +308,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 				
 				if (!$scope.isAbsoluteFormLayout()) {
-					if (realContainerPromise == null) {
+					if (realContainerPromise[ghostContainer.uuid] == null) {
 						var p = getRealContainerElement(ghostContainer.uuid);
 						if (p.then) {
-							realContainerPromise = p;
+							realContainerPromise[ghostContainer.uuid] = p;
 							p.then(function(parent) {
-								realContainerPromise = null;
+								delete realContainerPromise[ghostContainer.uuid];
 								showAndPositionGhostContainer(ghostContainer, parent.getBoundingClientRect());
 								ghostContainer.style.display = "block";
 							}, function() {
-								realContainerPromise = null;
+								delete realContainerPromise[ghostContainer.uuid];
 								ghostContainer.style.display = "none";
 							});
 						} else {
@@ -529,6 +531,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				updateGhostsAccordingToSelection(selection);
 			})
 			
+			$rootScope.$on(EDITOR_EVENTS.INITIALIZED, function() {
+				$editorService.requestSelection();
+			})
+			
 			function getMousePosition(event) {
 				var xMouse = -1;
 				var yMouse = -1;
@@ -737,7 +743,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			    $scope.$apply();
 			}
 
-			function redrawDecorators()
+			$scope.redrawDecorators = function()
 			{
 				var selection = $editorService.getEditor().getSelection();
 				if (selection && selection.length > 0) 
@@ -769,7 +775,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				adjustGlassPaneSize(width, height);
 				if (fixedSize)
 				{
-					redrawDecorators()
+					$scope.redrawDecorators()
 				}	
 			}
 			$scope.setContentSizeFull = function(redraw) {
@@ -789,7 +795,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				adjustGlassPaneSize();
 				if (redraw)
 				{
-					redrawDecorators()
+					$scope.redrawDecorators()
 				}	
 			}
 			$scope.getContentSize = function() {
@@ -922,14 +928,28 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 //							}
 //						}
 					}
-					adjustGlassPaneSize();
+					
+					 $scope.$evalAsync( function() {  
+						if (!$scope.isAbsoluteFormLayout() && $($scope.contentDocument).find('.svy-form')[0] && $($scope.contentDocument).find('.svy-form')[0].offsetHeight < EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT)
+						{ 
+							$scope.getEditorContentRootScope().sfcontentStyle = {'height': EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px'};
+						}
+						adjustGlassPaneSize();
+					});
+					
 				}
 			}
 			
 			function adjustIFrameSize(){
 		        	delete $scope.contentStyle.height;
-		        	$element.find('.content')[0].style.height = "";
-		        	$element.find('.content')[0].style.bottom = "20px";
+		        	if (!$scope.isAbsoluteFormLayout()) {
+			        	$element.find('.content')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
+			        	$element.find('.content')[0].style.height = "";
+			        }
+			        else
+			       	{
+		        		$element.find('.content')[0].style.bottom = "20px";
+		        	}
 		        	$element.find('.contentframe')[0].style.height = "100%";
 		        	
 		        	$scope.contentStyle.bottom = "20px";
@@ -938,7 +958,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		        	//if (h > $element.find('.content-area')[0].offsetHeight) {
 		        	    delete $scope.contentStyle.bottom;
 		        	    $scope.contentStyle.height = h;
-		        	    $element.find('.content')[0].style.bottom = "";
+		        	    if (!$scope.isAbsoluteFormLayout()) {
+			        	    $element.find('.content')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
+			        	    $element.find('.contentframe')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
+			        	}
+			        	else
+			       		{
+		        	    	$element.find('.content')[0].style.bottom = "";
+		        	    }
 		        	    $element.find('.content')[0].style.height = h + "px";
 		        	    $element.find('.contentframe')[0].style.height = h + "px";
 				//}
@@ -961,7 +988,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					    	});
 					    	
 						if (contentDiv.clientHeight < height) {
-							$scope.glasspaneStyle.height = height + "px"; // 20 for the body ghost height
+							$scope.glasspaneStyle['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
+							$scope.glasspaneStyle.height = height + "px";// 20 for the body ghost height
+							
 						} else {
 							$scope.glasspaneStyle.height = '100%';
 						}
@@ -1006,6 +1035,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
+				editorContentRootScope.$on(EDITOR_EVENTS.CONTENT_LOADED, function() {
+					$editorService.setContentSizes();
+				})
+				//call set content sizes 
+				//in the less likely situation in which we missed the CONTENT_LOADED event
+				//because the editorContentRootScope was not set yet
+				editorContentRootScope.$evalAsync(function() { $editorService.setContentSizes()});
+				
 				//workaround to make the contextmenu show on osx
 				editorContentRootScope.ctxmenu = $scope.ctxmenu;
 				delete $scope.ctxmenu;
@@ -1163,7 +1200,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var containerID =  $webSocket.getURLParameter("cont") ? ("&cont="+$webSocket.getURLParameter("cont")) : "";
 				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&clientnr=" + $webSocket.getURLParameter(
 						"c_clientnr") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
-					replacews + containerID;
+					 "&" + $websocketConstants.CLEAR_SESSION_PARAM + "=true" + replacews + containerID;
 			})
 			
 			function areAllGhostContainersVisible() {
@@ -1340,6 +1377,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			return wsSession.callService('formeditor', 'getSystemFont', null, false)
 		},
 
+		requestSelection: function(node) {
+			return wsSession.callService('formeditor', 'requestSelection', null, true)
+		},
+		
 		isInheritedForm: function() {
 			return wsSession.callService('formeditor', 'getBooleanState', {
 				"isInheritedForm": true
@@ -1359,9 +1400,37 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		},
 
 		toggleShowWireframe: function() {
-			return wsSession.callService('formeditor', 'toggleShow', {
+			var res = wsSession.callService('formeditor', 'toggleShow', {
 				"show" : "showWireframeInDesigner"
+			}, false);
+			this.getEditor().redrawDecorators();
+			return res;
+		},
+		
+		isShowSolutionLayoutsCss: function() {
+			return wsSession.callService('formeditor', 'getBooleanState', {
+				"showSolutionLayoutsCss": true
 			}, false)
+		},
+		
+		toggleShowSolutionLayoutsCss: function() {
+			var res =  wsSession.callService('formeditor', 'toggleShow', {
+				"show" : "showSolutionLayoutsCssInDesigner"
+			}, false);
+			this.getEditor().redrawDecorators();
+			return res;
+		},
+		
+		isShowSolutionCss: function() {
+			return wsSession.callService('formeditor', 'getBooleanState', {
+				"showSolutionCss": true
+			}, false)
+		},
+		
+		toggleShowSolutionCss: function() {
+			return wsSession.callService('formeditor', 'toggleShow', {
+				"show" : "showSolutionCssInDesigner"
+			}, false);
 		},
 
 		createComponents: function(components) {
@@ -1419,9 +1488,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 		},
 
-		updateSelection: function(ids) {
-			if (editorScope.updateSel) $timeout.cancel(editorScope.updateSel);
-			editorScope.updateSel = $timeout(function() {
+		updateSelection: function(ids,timeout) {
+			if (editorScope.updateSel)
+			{
+				$timeout.cancel(editorScope.updateSel);
+			}
+			function tryUpdateSelection (){
 				var prevSelection = editorScope.getSelection();
 				var changed = false;
 				var selection = [];
@@ -1429,6 +1501,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
 					var ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
 					nodes = nodes.concat(ghosts);
+					if (nodes.length == 0)
+					{
+						$timeout(tryUpdateSelection, 400);
+						return;
+					}	
 					for (var i = 0; i < nodes.length; i++) {
 						var id = nodes[i].getAttribute("svy-id");
 						if (ids.indexOf(id) != -1) {
@@ -1441,7 +1518,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					changed = true;
 				}
 				if (changed) editorScope.setSelection(selection);
-			}, 400);
+			}
+			editorScope.updateSel = $timeout(tryUpdateSelection, 400);
 		},
 		
 		refreshPalette: function()
@@ -1547,6 +1625,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		setCssAnchoring: function(selection, anchors) {
 			wsSession.callService('formeditor', 'setCssAnchoring', {"selection":selection, "anchors":anchors}, true);
 		},
+		
+		setContentSizes: function() {
+			editorScope.setContentSizes();		
+		}
 
 		// add more service methods here
 	}

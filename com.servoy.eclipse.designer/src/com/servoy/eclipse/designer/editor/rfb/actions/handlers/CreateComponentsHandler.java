@@ -60,18 +60,20 @@ public class CreateComponentsHandler extends CreateComponentHandler
 					{
 						try
 						{
+							List<IPersist> changedPersists = new ArrayList<IPersist>();
 							if (args.has("components"))
 							{
 								JSONArray components = args.getJSONArray("components");
 								newPersists = new ArrayList<IPersist>();
 								for (int i = 0; i < components.length(); i++)
 								{
-									IPersist[] persist = createComponent(components.getJSONObject(i));
+									IPersist[] persist = createComponent(components.getJSONObject(i), changedPersists);
 									for (IPersist iPersist : persist)
 									{
 										if (persist != null)
 										{
 											newPersists.add(iPersist);
+											changedPersists.add(iPersist);
 										}
 										else
 										{
@@ -82,7 +84,7 @@ public class CreateComponentsHandler extends CreateComponentHandler
 							}
 							if (newPersists != null)
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, newPersists);
+								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changedPersists);
 								IStructuredSelection structuredSelection = new StructuredSelection(newPersists);
 								selectionProvider.setSelection(structuredSelection);
 							}

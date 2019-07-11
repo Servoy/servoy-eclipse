@@ -49,11 +49,14 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 					highlightDiv.style.width = rect.width + 'px';
 					//get to the first dom element that is a servoy component or layoutContainer
 					while (node.parentElement && !node.getAttribute("svy-id")) node = node.parentElement;
-					if (!angular.element(node).hasClass("inheritedElement")) {
-							highlightDiv.style.outline = "";
-					}
-					else {
-							highlightDiv.style.outline = "1px solid #FFBBBB";
+					if (utils.getDraggingFromPallete() != null)
+					{
+						if (!angular.element(node).hasClass("inheritedElement")) {
+								highlightDiv.style.outline = "";
+						}
+						else {
+								highlightDiv.style.outline = "1px solid #FFBBBB";
+						}
 					}
 
 					if (!editorScope.isAbsoluteFormLayout()) {

@@ -110,12 +110,63 @@ public class VisualFormEditorSecurityPage extends Composite
 		});
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(0, 10);
-		formData.left = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(100, -5);
 		btnNORights.setLayoutData(formData);
+
+		Button btnToggleAccessible = new Button(this, SWT.NONE);
+		btnToggleAccessible.setText("Toggle Accessible");
+		btnToggleAccessible.setToolTipText("Toggle accessible value for all elements in the form of selected group.");
+		btnToggleAccessible.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				toggleValues(IRepository.ACCESSIBLE);
+				editor.flagModified();
+				doRefresh();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+
+			}
+		});
+		formData = new FormData();
+		formData.top = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(btnNORights, -5);
+		btnToggleAccessible.setLayoutData(formData);
+
+		Button btnToggleViewable = new Button(this, SWT.NONE);
+		btnToggleViewable.setText("Toggle Viewable");
+		btnToggleViewable.setToolTipText("Toggle viewable value for all elements in the form of selected group.");
+		btnToggleViewable.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				toggleValues(IRepository.VIEWABLE);
+				editor.flagModified();
+				doRefresh();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+
+			}
+		});
+		formData = new FormData();
+		formData.top = new FormAttachment(0, 10);
+		formData.right = new FormAttachment(btnToggleAccessible, -5);
+		btnToggleViewable.setLayoutData(formData);
+
 
 		final SashForm sashForm = new SashForm(this, SWT.NONE);
 		formData = new FormData();
-		formData.top = new FormAttachment(btnNORights, 6);
+		formData.top = new FormAttachment(btnToggleViewable, 6);
 		formData.left = new FormAttachment(0, 10);
 		formData.right = new FormAttachment(100, -5);
 		formData.bottom = new FormAttachment(100, -5);
@@ -318,6 +369,20 @@ public class VisualFormEditorSecurityPage extends Composite
 	public void saveSecurityElements()
 	{
 		model.saveSecurityElements();
+	}
+
+	private void toggleValues(int mask)
+	{
+		Iterator< ? extends IPersist> it = editor.getForm().isResponsiveLayout() ? editor.getForm().getFlattenedObjects(NameComparator.INSTANCE).iterator()
+			: ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist elem = it.next();
+			if (elem instanceof IFormElement && ((IFormElement)elem).getName() != null && ((IFormElement)elem).getName().length() != 0)
+			{
+				model.setRight(!model.hasRight(elem, mask), elem, mask);
+			}
+		}
 	}
 
 }
