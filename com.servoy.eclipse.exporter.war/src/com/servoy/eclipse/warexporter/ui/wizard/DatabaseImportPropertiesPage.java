@@ -30,8 +30,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
 
@@ -41,7 +39,7 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
 /**
  * @author emera
  */
-public class DatabaseImportPropertiesPage extends WizardPage implements Listener, IRestoreDefaultPage
+public class DatabaseImportPropertiesPage extends WizardPage implements IRestoreDefaultPage
 {
 	private final ExportWarModel exportModel;
 
@@ -53,6 +51,7 @@ public class DatabaseImportPropertiesPage extends WizardPage implements Listener
 	private Button overrideSequenceTypesButton;
 	private Button overrideDefaultValuesButton;
 	private Button overwriteGroupsButton;
+	private final String ALLOW_DMC_TEXT = "Allow data model changes";
 
 	protected DatabaseImportPropertiesPage(ExportWarModel exportModel)
 	{
@@ -70,19 +69,24 @@ public class DatabaseImportPropertiesPage extends WizardPage implements Listener
 		composite.setLayout(gridLayout);
 
 		allowDataModelChangeButton = new Button(composite, SWT.CHECK);
-		allowDataModelChangeButton.setText("Allowed data model changes");
-		allowDataModelChangeButton.setSelection(true);
 		if ("false".equals(exportModel.getAllowDataModelChanges()))
 		{
 			allowDataModelChangeButton.setSelection(false);
+			allowDataModelChangeButton.setText(ALLOW_DMC_TEXT);
+		}
+		else
+		{
+			allowDataModelChangeButton.setSelection(true);
+			allowDataModelChangeButton.setText(ALLOW_DMC_TEXT + " (for all servers)"); // can be altered later if there is a list of allowed servers
 		}
 		allowDataModelChangeButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				exportModel.setAllowDataModelChanges(Boolean.toString(allowDataModelChangeButton.getSelection()));
+				setGlobalAllowDataModelChangesFlag(allowDataModelChangeButton.getSelection());
 			}
+
 		});
 		allowDataModelChangeButton.setToolTipText("Enable/Disable changes for all servers");
 
@@ -90,13 +94,40 @@ public class DatabaseImportPropertiesPage extends WizardPage implements Listener
 		allowDataModelServers = new CheckboxTableViewer(table);
 		allowDataModelServers.setContentProvider(ArrayContentProvider.getInstance());
 		allowDataModelServers.setInput(ServoyModel.getServerManager().getServerNames(true, false, true, true));
-		if (!"true".equals(exportModel.getAllowDataModelChanges()) && !"false".equals(exportModel.getAllowDataModelChanges()))
+		if ("true".equals(exportModel.getAllowDataModelChanges()))
+		{
+			allowDataModelServers.setAllChecked(true);
+		}
+		else if ("false".equals(exportModel.getAllowDataModelChanges()))
+		{
+			allowDataModelServers.setAllChecked(false);
+		}
+		else
 		{
 			allowDataModelServers.setCheckedElements(exportModel.getAllowDataModelChanges().split(","));
+			allowDataModelChangeButton.setText(ALLOW_DMC_TEXT + " (only for servers checked below)");
 		}
-		allowDataModelServers.addCheckStateListener(e -> {
-			setAllowDataModelChanges();
 
+		allowDataModelServers.addCheckStateListener(e -> {
+			boolean globalAllowValue = allowDataModelChangeButton.getSelection();
+			if (globalAllowValue)
+			{
+				Object[] checkedElements = allowDataModelServers.getCheckedElements();
+				if (checkedElements.length == 0)
+				{
+					setGlobalAllowDataModelChangesFlag(false);
+				}
+				else if (checkedElements.length == ((String[])allowDataModelServers.getInput()).length)
+				{
+					setGlobalAllowDataModelChangesFlag(true);
+				}
+				else
+				{
+					String selected = Arrays.stream(allowDataModelServers.getCheckedElements()).map(Object::toString).collect(Collectors.joining(","));
+					exportModel.setAllowDataModelChanges(selected);
+					allowDataModelChangeButton.setText(ALLOW_DMC_TEXT + " (only for servers checked below)");
+				}
+			}
 		});
 		allowDataModelServers.getTable().setBackground(composite.getBackground());
 		allowDataModelServers.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 3));
@@ -177,24 +208,20 @@ public class DatabaseImportPropertiesPage extends WizardPage implements Listener
 		setControl(composite);
 	}
 
-	protected void setAllowDataModelChanges()
+	private void setGlobalAllowDataModelChangesFlag(boolean newAllowValue)
 	{
-		String selected = Arrays.stream(allowDataModelServers.getCheckedElements()).map(Object::toString).collect(Collectors.joining(","));
-		if ("".equals(selected))
-		{
-			exportModel.setAllowDataModelChanges(Boolean.toString(allowDataModelChangeButton.getSelection()));
-		}
-		else
-		{
-			exportModel.setAllowDataModelChanges(selected);
-			allowDataModelChangeButton.setSelection(true);
-		}
+		allowDataModelChangeButton.setText(ALLOW_DMC_TEXT + (newAllowValue ? " (for all servers)" : ""));
+
+		allowDataModelChangeButton.setSelection(newAllowValue);
+		exportModel.setAllowDataModelChanges(Boolean.toString(newAllowValue));
+		allowDataModelServers.getTable().setEnabled(newAllowValue);
+		allowDataModelServers.setAllChecked(newAllowValue);
 	}
 
 	@Override
 	public void restoreDefaults()
 	{
-		allowDataModelChangeButton.setSelection(true);
+		setGlobalAllowDataModelChangesFlag(true);
 		exportModel.setAllowDataModelChanges("true");
 		skipDatabaseViewsUpdate.setSelection(false);
 		exportModel.setSkipDatabaseViewsUpdate(false);
@@ -224,12 +251,6 @@ public class DatabaseImportPropertiesPage extends WizardPage implements Listener
 			overwriteGroupsButton.setEnabled(exportModel.isExportActiveSolution());
 		}
 		super.setVisible(visible);
-	}
-
-	@Override
-	public void handleEvent(Event event)
-	{
-		setAllowDataModelChanges();
 	}
 
 	@Override

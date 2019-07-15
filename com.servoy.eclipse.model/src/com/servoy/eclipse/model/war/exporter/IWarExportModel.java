@@ -130,9 +130,9 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public String checkLog4jConfigurationFile();
 
-	public List<String> getNoneActiveSolutions();
+	public List<String> getNonActiveSolutions();
 
-	public boolean isExportNoneActiveSolutions();
+	public boolean isExportNonActiveSolutions();
 
 	public Map<String, String> getUpgradedLicenses();
 

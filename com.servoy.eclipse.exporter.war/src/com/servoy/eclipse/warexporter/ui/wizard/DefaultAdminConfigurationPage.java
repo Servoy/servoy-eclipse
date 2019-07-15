@@ -107,6 +107,7 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		label.setText("\nThe default administrator user will give access to the servoy-admin page, as long as no admin user is created in the server.");
 
 		setControl(composite);
+		checkPageComplete();
 	}
 
 	public void handleEvent(Event event)
@@ -123,28 +124,28 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		{
 			exportModel.setUseAsRealAdminUser(useAsRealAdmin.getSelection());
 		}
+		checkPageComplete();
 
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
 	}
 
-	@Override
-	public boolean canFlipToNextPage()
+	private void checkPageComplete()
 	{
 		setErrorMessage(null);
+		boolean pageComplete = true;
 		if (Utils.stringIsEmpty(defaultAdminUserText.getText()) || Utils.stringIsEmpty(defaultAdminPasswordText.getText()) ||
 			Utils.stringIsEmpty(defaultAdminPasswordText2.getText()))
 		{
-			return false;
+			pageComplete = false;
 		}
-
-		if (!defaultAdminPasswordText.getText().equals(defaultAdminPasswordText2.getText()))
+		else if (!defaultAdminPasswordText.getText().equals(defaultAdminPasswordText2.getText()))
 		{
 			setErrorMessage("Passwords are not the same");
-			return false;
+			pageComplete = false;
 		}
 
-		return true;
+		setPageComplete(pageComplete);
 	}
 
 	@Override

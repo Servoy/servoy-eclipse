@@ -188,8 +188,9 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		overwriteDBServerPropertiesBtn.setSelection(exportModel.isOverwriteDeployedDBServerProperties());
 		overwriteDBServerPropertiesBtn.addSelectionListener(this);
 		overwriteDBServerPropertiesBtn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
-		overwriteDBServerPropertiesBtn.setText("Overwrite DB servers properties");
-		overwriteDBServerPropertiesBtn.setToolTipText("Overwrite all DB servers related changes that were made on the previous deploy of the war");
+		overwriteDBServerPropertiesBtn.setText("Overwrite changed DB servers properties from previous deploymnet");
+		overwriteDBServerPropertiesBtn.setToolTipText(
+			"Overwrite all DB-server-configuration-related changes that were made after previous deployment of the war via admin page with the ones from war export.");
 
 		overwriteAllPropertiesBtn = new Button(composite, SWT.CHECK);
 		overwriteAllPropertiesBtn.setSelection(exportModel.isOverwriteDeployedServoyProperties());
@@ -241,22 +242,12 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		super.setVisible(visible);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
-	 */
 	@Override
 	public void handleEvent(Event event)
 	{
 		exportModel.setUserHome(userHomeText.getText());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-	 */
 	@Override
 	public void widgetSelected(SelectionEvent e)
 	{
@@ -270,11 +261,6 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-	 */
 	@Override
 	public void widgetDefaultSelected(SelectionEvent e)
 	{

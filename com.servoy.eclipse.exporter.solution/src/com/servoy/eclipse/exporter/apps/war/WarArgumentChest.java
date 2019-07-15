@@ -94,7 +94,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String license_nr_suffix = ".licenses";
 
 	private static final String userHomeDirectory = "userHomeDirectory";
-	private static final String overwriteDBServerProperties = "overwriteDBServerProperties";
+	private static final String doNotOverwriteDBServerProperties = "doNotOverwriteDBServerProperties";
 	private static final String overwriteAllProperties = "overwriteAllProperties";
 
 	private static final String webXmlFileName = "webXmlFileName";
@@ -261,10 +261,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + userHomeDirectory + " <user_home_directory> ... this must be a writable directory where\n"
 			+ "             Servoy application  related files  will be stored;  if not set, then the system\n"
 			+ "             user home directory will be used.\n"
-			+ "        -" + overwriteDBServerProperties + " ... overwrite  the  DB server properties  of an already\n"
-			+ "             deployed app. by using the DB servers from the servoy.properties of the war.\n"
-			+ "        -" + overwriteAllProperties + " ... overwrite   all   properties  of   an  already  deployed\n"
-			+ "             application by using the values from the servoy.properties of the war.\n"
+			+ "        -" + doNotOverwriteDBServerProperties + " ... SKIP overwrite of old DBserver properties - if\n"
+			+ "             they were stored separately by  a previously deployed war (due to changes to properties\n"
+			+ "             via admin page) - with the ones from this war export's servoy.properties.\n"
+			+ "             If -overwriteAllProperties below is set then this flag has no effect.\n"
+			+ "        -" + overwriteAllProperties + " ... overwrite  all  (potentially  changed  via  admin  page)\n"
+			+ "             properties  of  a  previously  deployed  war  application  with  the  values  from  the\n"
+			+ "             servoy.properties of this war export.\n"
 			+ "        -" + log4jConfigurationFile + " ... a  path  to a log4j  configuration file  that  should be\n"
 			+ "             included nstead of the default one.\n"
 			+ "        -" + webXmlFileName + " ... a path to a web.xml  that should be included instead  of default\n"
@@ -395,8 +398,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 	{
 		if (value == null || "".equals(value.trim()))
 		{
-			ServoyLog.logError(new Exception("Please specify license as -license.company_name <name> -license.code <code> -license.licenses <licenses number> " +
-				" or -license.<i>.company_name <name> -license.<i>.code <code> -license.<i>.licenses <licenses number>. The key '" + key + "' is not specified."));
+			ServoyLog.logError(
+				new Exception("Please specify license as -license.company_name <name> -license.code <code> -license.licenses <licenses number> " +
+					" or -license.<i>.company_name <name> -license.<i>.code <code> -license.<i>.licenses <licenses number>. The key '" + key +
+					"' is not specified."));
 			return false;
 		}
 		return true;
@@ -665,7 +670,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	public boolean isOverwriteDeployedDBServerProperties()
 	{
-		return argumentsMap.containsKey(overwriteDBServerProperties);
+		return !argumentsMap.containsKey(doNotOverwriteDBServerProperties);
 	}
 
 	public boolean isOverwriteDeployedServoyProperties()

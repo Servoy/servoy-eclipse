@@ -894,9 +894,9 @@ public class WarExporter
 			IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 			FlattenedSolution solution = servoyModel.getFlattenedSolution();
 			Solution[] modules = solution.getModules();
-			if (exportModel.isExportNoneActiveSolutions() && !exportModel.getNoneActiveSolutions().isEmpty())
+			if (exportModel.isExportNonActiveSolutions() && !exportModel.getNonActiveSolutions().isEmpty())
 			{
-				List<String> noneActiveSolutions = exportModel.getNoneActiveSolutions();
+				List<String> noneActiveSolutions = exportModel.getNonActiveSolutions();
 				Solution[] copy = null;
 				int start = 0;
 				if (modules != null && modules.length > 0)

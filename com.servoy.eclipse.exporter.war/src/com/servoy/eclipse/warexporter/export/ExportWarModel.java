@@ -553,12 +553,12 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.servoyPropertiesFileName = nonEmpty(servoyPropertiesFileName);
 	}
 
-	public boolean isExportNoneActiveSolutions()
+	public boolean isExportNonActiveSolutions()
 	{
 		return exportNoneActiveSolutions;
 	}
 
-	public void setExportNoneActiveSolutions(boolean exportNoneActiveSolutions)
+	public void setExportNonActiveSolutions(boolean exportNoneActiveSolutions)
 	{
 		this.exportNoneActiveSolutions = exportNoneActiveSolutions;
 	}
@@ -1008,7 +1008,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		licenses.clear();
 	}
 
-	public List<String> getNoneActiveSolutions()
+	public List<String> getNonActiveSolutions()
 	{
 		return noneActiveSolutions;
 	}

@@ -163,7 +163,7 @@ public class OpenWizardAction extends Action
 					}
 					if (wizard instanceof ICopyWarToCommandLineWizard)
 					{
-						copyWarToCmd = createButton(parent, 2, "Copy War", false);
+						copyWarToCmd = createButton(parent, 2, "Command line equiv.", false);
 						copyWarToCmd.setEnabled(false);
 						copyWarToCmd.addSelectionListener(new SelectionListener()
 						{
@@ -173,8 +173,8 @@ public class OpenWizardAction extends Action
 							{
 								((ICopyWarToCommandLineWizard)wizard).copyWarToCommandLine();
 								MessageBox box = new MessageBox(parent.getShell(), SWT.OK);
-								box.setText("War Export");
-								box.setMessage("War export command was copied to clipboard");
+								box.setText("War Export - cmd. line args");
+								box.setMessage("Command line war export equivalent (to this wizard war export) was copied to clipboard.");
 								box.open();
 							}
 
