@@ -13,6 +13,10 @@
 	border:2px solid #c2ecc2;
 }
 
+#svyDesignForm {
+	overflow: visible;
+}
+
 .invisible_element {
 	opacity: 0.3;
 	border: 2px dashed;
