@@ -1498,12 +1498,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var changed = false;
 				var selection = [];
 				if (ids && ids.length > 0) {
+					if (!editorScope.contentDocument || !editorScope.glasspane)
+					{
+						$timeout(tryUpdateSelection, 200);
+						return;
+					}
 					var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
 					var ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
 					nodes = nodes.concat(ghosts);
 					if (nodes.length == 0)
 					{
-						$timeout(tryUpdateSelection, 400);
+						$timeout(tryUpdateSelection, 200);
 						return;
 					}	
 					for (var i = 0; i < nodes.length; i++) {
