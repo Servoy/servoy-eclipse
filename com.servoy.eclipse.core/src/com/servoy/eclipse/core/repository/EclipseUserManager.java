@@ -297,7 +297,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 		{
 			public void persistChanges(Collection<IPersist> changes)
 			{
-				Set<IPersist> reloadedForms = null;
+				Set<Form> formsToReload = null;
 				for (IPersist persist : changes)
 				{
 					if (persist instanceof Form)
@@ -382,18 +382,25 @@ public class EclipseUserManager extends WorkspaceUserManager
 							}
 							else
 							{
-								if (reloadedForms == null)
+								if (formsToReload == null)
 								{
-									reloadedForms = new HashSet<IPersist>();
+									formsToReload = new HashSet<Form>();
 								}
-								if (!reloadedForms.contains(parent))
+								if (!formsToReload.contains(parent))
 								{
 									// maybe it was added, so reload
-									reloadSecurityInfo((Form)parent);
-									reloadedForms.add(parent);
+									formsToReload.add((Form)parent);
 								}
 							}
 						}
+					}
+				}
+				// first make sure the security file is updated with all deletes, reload form at the end
+				if (formsToReload != null)
+				{
+					for (Form form : formsToReload)
+					{
+						reloadSecurityInfo(form);
 					}
 				}
 			}
