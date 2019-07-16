@@ -2,5 +2,5 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Designer Rib Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.designer.rib;singleton:=true
-Bundle-Version: 2019.6.0.3502
+Bundle-Version: 2019.6.1.3503
 Bundle-Vendor: Servoy

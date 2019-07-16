@@ -5,10 +5,10 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>2019.6.0.3502</version>
+    <version>2019.6.1.3503</version>
   </parent>
   <artifactId>com.servoy.eclipse.jsunit</artifactId>
-  <version>2019.6.0.3502</version>
+  <version>2019.6.1.3503</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
