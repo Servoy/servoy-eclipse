@@ -4625,6 +4625,7 @@ public class TypeCreator extends TypeCache
 		@Override
 		public Type createType(String context, String fullTypeName)
 		{
+			if (fullTypeName.indexOf('<') == -1) return null;
 			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(wcTypeName);
