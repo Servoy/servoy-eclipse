@@ -91,7 +91,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 			+ "        -service_solution ... name    of    the   service   solution    (default   will   be\n"
 			+ "                              mySolutionName_service).\n"
 			+ "        -sync_timeout <seconds> ... client sync call timeout. Default: " + MobileExporter.DEFAULT_SYNC_TIMEOUT + " sec.\n"
-			+ getHelpMessageExistCodes();
+			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}
 

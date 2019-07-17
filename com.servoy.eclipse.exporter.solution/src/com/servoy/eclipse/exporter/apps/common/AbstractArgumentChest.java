@@ -226,7 +226,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		// @formatter:on
 	}
 
-	protected String getHelpMessageExistCodes()
+	protected String getHelpMessageExitCodes()
 	{
 		return "\nEXIT codes: 0 - normal, 1 - export stopped by user, 2 - export failed, 3 - invalid arguments";
 	}

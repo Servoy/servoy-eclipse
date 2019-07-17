@@ -146,7 +146,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			+ "             If present, will  be added to  export  file as  import_settings.json. This file\n"
 			+ "             should be  taken from a  developer export  (import_settings.json inside .servoy\n"
 			+ "             file).\n"
-			+ getHelpMessageExistCodes();
+			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}
 
