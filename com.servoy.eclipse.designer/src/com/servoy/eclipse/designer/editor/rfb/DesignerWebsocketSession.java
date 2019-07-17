@@ -78,6 +78,7 @@ import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
+import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator.DesignProperties;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.PersistHelper;
@@ -244,8 +245,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							componentFound = true;
 							IPersist parent = ((ISupportExtendsID)child).getRealParent();
 							parentuuid = parent instanceof Form ? null : parent.getUUID();
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
-								FormElementHelper.INSTANCE);
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w,
+								new DesignProperties(), FormElementHelper.INSTANCE);
 						}
 					}
 				}
