@@ -58,7 +58,7 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 								highlightDiv.style.outline = "1px solid #FFBBBB";
 						}
 					}
-					if (!editorScope.isAbsoluteFormLayout() && node.getAttribute('svy-title') !== undefined && $editorService.getEditor().getEditorContentRootScope().showWireframe && !node.getAttribute('data-maincontainer') && node.clientWidth > 0 && node.clientHeight > 0)
+					if (!editorScope.isAbsoluteFormLayout() && node.getAttribute('svy-layoutname') && node.getAttribute('svy-title') !== undefined && $editorService.getEditor().getEditorContentRootScope().showWireframe && !node.getAttribute('data-maincontainer') && node.clientWidth > 0 && node.clientHeight > 0)
 					{
 						highlightDiv.setAttribute('svytitle', node.getAttribute('svy-title'));
 						highlightDiv.classList.add("showWireframe");	
