@@ -258,9 +258,6 @@ angular.module('editorContent',['servoyApp'])
   
   if (formData.formProperties && formData.formProperties.absoluteLayout) {
 	  $scope.absoluteLayout = formData.formProperties.absoluteLayout[''];
-	  if ($scope.absoluteLayout) { 
-	 	 $rootScope.sfcontentStyle = {'position': 'absolute', 'left': '0px', 'top': '0px', 'right': '0px', 'bottom': '0px'};
-	  }
   }
 
   if (formData.parts) {
