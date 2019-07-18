@@ -2,6 +2,10 @@
 	outline:1px solid lightblue;
 }
 
+.highlight_child_element > :first-child {
+	outline:1px solid lightblue;
+}
+
 .inheritedElement {
 	cursor:not-allowed;
 }
