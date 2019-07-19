@@ -130,7 +130,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
       <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="4" />
       <plugin id="slf4j.api" autoStart="true" startLevel="0" />
-      <property name="osgi.instance.area.default" value="@user.home/workspace" />
+      <property name="osgi.instance.area.default" value="@user.home/servoy_workspace" />
    </configurations>
 
    <preferencesInfo>
