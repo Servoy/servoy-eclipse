@@ -6,12 +6,13 @@
                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
   version="3.0">
   <!--  this version below should be upped if servoy makes changes to this file! -->
-  <!--  servoy web.xml version:2 -->
+  <!--  servoy web.xml version:3 -->
   <!-- Servoy related servlets -->
   
   <absolute-ordering>
     <name>j2db_log4j</name>
     <name>log4j</name>
+    <name>sablo</name>
     <name>servoy_ngclient</name>
   </absolute-ordering>
    

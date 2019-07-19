@@ -94,6 +94,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
+import org.sablo.websocket.GetHttpSessionConfigurator;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
@@ -1197,6 +1198,7 @@ public class Activator extends Plugin
 			return;
 		}
 
+		GetHttpSessionConfigurator.setOriginCheck(GetHttpSessionConfigurator.DISABLE_ORIGIN_CHECK); // securityFiter is not configured in Developer
 		ss.setDeveloperStartup(true);
 		ss.init();
 		ss.setRepositoryFactory(repositoryFactory);
