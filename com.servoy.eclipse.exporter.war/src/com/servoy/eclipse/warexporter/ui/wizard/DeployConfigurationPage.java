@@ -188,7 +188,7 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		overwriteDBServerPropertiesBtn.setSelection(exportModel.isOverwriteDeployedDBServerProperties());
 		overwriteDBServerPropertiesBtn.addSelectionListener(this);
 		overwriteDBServerPropertiesBtn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 4, 1));
-		overwriteDBServerPropertiesBtn.setText("Overwrite changed DB servers properties from previous deploymnet");
+		overwriteDBServerPropertiesBtn.setText("Overwrite changed DB servers properties from previous deployment");
 		overwriteDBServerPropertiesBtn.setToolTipText(
 			"Overwrite all DB-server-configuration-related changes that were made after previous deployment of the war via admin page with the ones from war export.");
 
