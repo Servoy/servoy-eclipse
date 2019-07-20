@@ -2,7 +2,7 @@
 instructions.install = \
 org.eclipse.equinox.p2.touchpoint.eclipse.addProgramArg(programArg:-vm);\
 org.eclipse.equinox.p2.touchpoint.eclipse.addProgramArg(programArg:features/project.artifactId_version/jre/lib/j9vm/libjvm.so);\
-org.eclipse.equinox.p2.touchpoint.natives.chmod(targetDir:${installFolder}/features/project.artifactId_version/jre/,targetFile:bin,permissions:755,options:-R);\
+org.eclipse.equinox.p2.touchpoint.natives.chmod(targetDir:${installFolder}/features/project.artifactId_version/jre/,targetFile:bin,permissions:755,options:-R);
 instructions.uninstall = \
 org.eclipse.equinox.p2.touchpoint.eclipse.removeProgramArg(programArg:-vm);\
 org.eclipse.equinox.p2.touchpoint.eclipse.removeProgramArg(programArg:${installFolder}/features/project.artifactId_version/jre/lib/j9vm/libjvm.so);
