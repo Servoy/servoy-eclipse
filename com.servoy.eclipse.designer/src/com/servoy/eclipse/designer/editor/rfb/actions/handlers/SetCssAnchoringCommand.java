@@ -23,6 +23,7 @@ import java.awt.Point;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -53,28 +54,28 @@ public class SetCssAnchoringCommand extends BaseRestorableCommand
 		BaseComponent component = (BaseComponent)persist;
 		saveState(component);
 		CSSPosition position = component.getCssPosition();
-		Point location = CSSPosition.getLocation(component);
-		Dimension size = CSSPosition.getSize(component);
+		Point location = CSSPositionUtils.getLocation(component);
+		Dimension size = CSSPositionUtils.getSize(component);
 		String _top = top;
 		String _bottom = bottom;
 		String _left = left;
 		String _right = right;
 		//make sure we have at least one of the opposite anchors set
-		if (!CSSPosition.isSet(top) && !CSSPosition.isSet(bottom))
+		if (!CSSPositionUtils.isSet(top) && !CSSPositionUtils.isSet(bottom))
 		{
-			_top = !CSSPosition.isSet(position.top) && !CSSPosition.isSet(position.bottom) ? "0" : position.top;
+			_top = !CSSPositionUtils.isSet(position.top) && !CSSPositionUtils.isSet(position.bottom) ? "0" : position.top;
 			_bottom = position.bottom;
 		}
-		if (!CSSPosition.isSet(left) && !CSSPosition.isSet(right))
+		if (!CSSPositionUtils.isSet(left) && !CSSPositionUtils.isSet(right))
 		{
-			_left = !CSSPosition.isSet(position.left) && !CSSPosition.isSet(position.right) ? "0" : position.left;
+			_left = !CSSPositionUtils.isSet(position.left) && !CSSPositionUtils.isSet(position.right) ? "0" : position.left;
 			_right = position.right;
 		}
 
 		CSSPosition newPosition = new CSSPosition(_top, _right, _bottom, _left, position.width, position.height);
 		component.setCssPosition(newPosition);
-		CSSPosition.setLocation(component, location.x, location.y);
-		CSSPosition.setSize(component, size.width, size.height);
+		CSSPositionUtils.setLocation(component, location.x, location.y);
+		CSSPositionUtils.setSize(component, size.width, size.height);
 		super.execute();
 	}
 }

@@ -34,7 +34,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -117,7 +117,7 @@ public class ConvertToCSSPositionFormAction extends Action implements ISelection
 								// skip abstract forms
 								ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
 									toConvert.getSolution().getName());
-								CSSPosition.convertToCSSPosition(toConvert);
+								CSSPositionUtils.convertToCSSPosition(toConvert);
 								servoyProject.saveEditingSolutionNodes(new IPersist[] { toConvert }, true);
 							}
 						}

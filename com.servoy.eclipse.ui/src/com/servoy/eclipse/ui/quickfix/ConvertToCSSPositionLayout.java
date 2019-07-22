@@ -21,7 +21,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -54,7 +54,7 @@ public class ConvertToCSSPositionLayout implements IMarkerResolution
 	{
 		try
 		{
-			CSSPosition.convertToCSSPosition(form);
+			CSSPositionUtils.convertToCSSPosition(form);
 			project.saveEditingSolutionNodes(new IPersist[] { form }, false);
 		}
 		catch (RepositoryException e)

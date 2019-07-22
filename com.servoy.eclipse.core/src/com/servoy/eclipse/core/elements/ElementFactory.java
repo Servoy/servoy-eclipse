@@ -67,6 +67,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -232,7 +233,7 @@ public class ElementFactory
 	{
 		RectShape rectShape = parent.createNewRectangle(new java.awt.Point(location.x, location.y));
 		rectShape.setLineSize(1);
-		CSSPosition.setSize(rectShape, 70, 70);
+		CSSPositionUtils.setSize(rectShape, 70, 70);
 		placeElementOnTop(rectShape);
 		return rectShape;
 	}
@@ -301,12 +302,12 @@ public class ElementFactory
 		{
 			CSSPosition cssPosition = ((BaseComponent)copy).getCssPosition();
 
-			int left = CSSPosition.getPixelsValue(cssPosition.left);
+			int left = CSSPositionUtils.getPixelsValue(cssPosition.left);
 			if (left >= 0)
 			{
 				cssPosition.left = String.valueOf(x);
 			}
-			int top = CSSPosition.getPixelsValue(cssPosition.top);
+			int top = CSSPositionUtils.getPixelsValue(cssPosition.top);
 			if (top >= 0)
 			{
 				cssPosition.top = String.valueOf(y);
@@ -315,7 +316,7 @@ public class ElementFactory
 		}
 		else if (copy instanceof ISupportBounds)
 		{
-			CSSPosition.setLocation((ISupportBounds)copy, x, y);
+			CSSPositionUtils.setLocation((ISupportBounds)copy, x, y);
 		}
 		if (name != null)
 		{
@@ -354,7 +355,7 @@ public class ElementFactory
 				labeldim = new Dimension(10, 10 + dif);
 			}
 		}
-		CSSPosition.setSize(label, labeldim.width, labeldim.height);
+		CSSPositionUtils.setSize(label, labeldim.width, labeldim.height);
 		placeElementOnTop(label);
 		return label;
 	}
@@ -377,7 +378,7 @@ public class ElementFactory
 			webComponent = parent.createNewWebComponent(compName, name);
 			if (webComponent != null)
 			{
-				CSSPosition.setLocation(webComponent, location == null ? 0 : location.x, location == null ? 0 : location.y);
+				CSSPositionUtils.setLocation(webComponent, location == null ? 0 : location.x, location == null ? 0 : location.y);
 				int width = 80;
 				int height = 80;
 				PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
@@ -386,7 +387,7 @@ public class ElementFactory
 					width = ((JSONObject)description.getDefaultValue()).optInt("width", 80);
 					height = ((JSONObject)description.getDefaultValue()).optInt("height", 80);
 				}
-				CSSPosition.setSize(webComponent, width, height);
+				CSSPositionUtils.setSize(webComponent, width, height);
 			}
 			return webComponent;
 		}
@@ -642,7 +643,7 @@ public class ElementFactory
 						label = createLabel(parent, labelText, loc);
 						java.awt.Dimension labeldim = label.getSize();
 						labeldim.width = configuration.isPlaceHorizontally() ? 140 /* field width */ : 80;
-						CSSPosition.setSize(label, labeldim.width, labeldim.height);
+						CSSPositionUtils.setSize(label, labeldim.width, labeldim.height);
 					}
 					lst.add(label);
 
@@ -656,7 +657,7 @@ public class ElementFactory
 					{
 						currentSize.width = labelSize.width;
 					}
-					CSSPosition.setSize(label, currentSize.width, currentSize.height);
+					CSSPositionUtils.setSize(label, currentSize.width, currentSize.height);
 
 					if (configuration.isFillName())
 					{
@@ -747,7 +748,7 @@ public class ElementFactory
 						bc = createField(parent, dataProvider, loc);
 						java.awt.Dimension dim = bc.getSize();
 						dim.width = 140;
-						CSSPosition.setSize(bc, dim.width, dim.height);
+						CSSPositionUtils.setSize(bc, dim.width, dim.height);
 					}
 				}
 				lst.add(bc);
@@ -762,7 +763,7 @@ public class ElementFactory
 				{
 					currentSize.width = fieldSize.width;
 				}
-				CSSPosition.setSize(bc, currentSize.width, currentSize.height);
+				CSSPositionUtils.setSize(bc, currentSize.width, currentSize.height);
 				if (configuration.isFillName())
 				{
 					bc.setName(name);
@@ -991,7 +992,7 @@ public class ElementFactory
 			tabPanel.setTransparent(true);
 			tabPanel.setPrintable(false);
 			tabPanel.setTabOrientation(tabOrientation);
-			CSSPosition.setLocation(tabPanel, location == null ? 0 : location.x, location == null ? 0 : location.y);
+			CSSPositionUtils.setLocation(tabPanel, location == null ? 0 : location.x, location == null ? 0 : location.y);
 			placeElementOnTop(tabPanel);
 		}
 		else if (parent instanceof TabPanel)
@@ -1067,7 +1068,7 @@ public class ElementFactory
 		if (parent instanceof Form)
 		{
 			// set size of the maximum dimension form
-			CSSPosition.setSize(tabPanel, maxDimension == null ? 280 : maxDimension.width, maxDimension == null ? 150 : maxDimension.height);
+			CSSPositionUtils.setSize(tabPanel, maxDimension == null ? 280 : maxDimension.width, maxDimension == null ? 150 : maxDimension.height);
 		}
 		if (tabs == null || tabs.size() == 0)
 		{
@@ -1186,7 +1187,7 @@ public class ElementFactory
 				lst.add(new Pair<IDataProvider, Object>((IDataProvider)dp, null));
 			}
 			Dimension portaldim = new Dimension(dataProviders.length * 140, 50);
-			CSSPosition.setSize(portal, portaldim.width, portaldim.height);
+			CSSPositionUtils.setSize(portal, portaldim.width, portaldim.height);
 			portal.setRelationName(relationName.toString());
 
 			IPlaceDataProviderConfiguration config = new IPlaceDataProviderConfiguration()
@@ -1280,7 +1281,7 @@ public class ElementFactory
 		java.awt.Point location = null;
 		if (form.getUseCssPosition())
 		{
-			location = CSSPosition.getLocationFromPixels(persists);
+			location = CSSPositionUtils.getLocationFromPixels(persists);
 		}
 		else
 		{
@@ -1307,7 +1308,7 @@ public class ElementFactory
 			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, true, repository, false, null);
 			if (persist instanceof ISupportSize) // some objects have default size programmed in the getter
 			{
-				object.put(Template.PROP_SIZE, repository.convertObjectToArgumentString(IRepository.DIMENSION, CSSPosition.getSize((ISupportSize)persist)));
+				object.put(Template.PROP_SIZE, repository.convertObjectToArgumentString(IRepository.DIMENSION, CSSPositionUtils.getSize((ISupportSize)persist)));
 			}
 			elements.put(cleanTemplateElement(repository, flattenedSolution, form, object, location));
 		}
@@ -1342,7 +1343,7 @@ public class ElementFactory
 			// width, height, right , bottom stay unchanged; only modify left and top if they are pixels
 			if (base.x != 0)
 			{
-				int left = CSSPosition.getPixelsValue(cssPosition.left);
+				int left = CSSPositionUtils.getPixelsValue(cssPosition.left);
 				if (left >= 0)
 				{
 					cssPosition.left = String.valueOf(left - base.x);
@@ -1350,7 +1351,7 @@ public class ElementFactory
 			}
 			if (base.y != 0)
 			{
-				int top = CSSPosition.getPixelsValue(cssPosition.top);
+				int top = CSSPositionUtils.getPixelsValue(cssPosition.top);
 				if (top >= 0)
 				{
 					cssPosition.top = String.valueOf(top - base.y);
@@ -1526,7 +1527,7 @@ public class ElementFactory
 								int x, y;
 								if (setFormProperties || persists.size() > 1)
 								{
-									java.awt.Point ploc = CSSPosition.getLocation((ISupportBounds)o);
+									java.awt.Point ploc = CSSPositionUtils.getLocation((ISupportBounds)o);
 									x = ploc.x;
 									y = ploc.y;
 								}
@@ -1537,12 +1538,12 @@ public class ElementFactory
 								if (parentForm.getUseCssPosition() && o instanceof BaseComponent)
 								{
 									CSSPosition cssPosition = ((BaseComponent)o).getCssPosition();
-									int left = CSSPosition.getPixelsValue(cssPosition.left);
+									int left = CSSPositionUtils.getPixelsValue(cssPosition.left);
 									if (left >= 0)
 									{
 										cssPosition.left = String.valueOf(awtLocation.x + x);
 									}
-									int top = CSSPosition.getPixelsValue(cssPosition.top);
+									int top = CSSPositionUtils.getPixelsValue(cssPosition.top);
 									if (top >= 0)
 									{
 										cssPosition.top = String.valueOf(awtLocation.y + y);
@@ -1551,7 +1552,7 @@ public class ElementFactory
 								}
 								else
 								{
-									CSSPosition.setLocation((ISupportBounds)o, awtLocation.x + x, awtLocation.y + y);
+									CSSPositionUtils.setLocation((ISupportBounds)o, awtLocation.x + x, awtLocation.y + y);
 								}
 							}
 							if (o instanceof ISupportUpdateableName)
@@ -1697,8 +1698,8 @@ public class ElementFactory
 					if (form != null)
 					{
 						CSSPosition cssPosition = PersistHelper.createCSSPosition((String)object.opt("cssPosition"));
-						java.awt.Point location = CSSPosition.getLocation(cssPosition, form.getSize());
-						Dimension size = CSSPosition.getSize(cssPosition, form.getSize());
+						java.awt.Point location = CSSPositionUtils.getLocation(cssPosition, form.getSize());
+						Dimension size = CSSPositionUtils.getSize(cssPosition, form.getSize());
 						rectangle = new Rectangle(location, size);
 					}
 				}

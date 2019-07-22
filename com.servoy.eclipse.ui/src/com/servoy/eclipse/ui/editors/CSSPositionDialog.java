@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.ui.dialogs.PageFormatDialog.NumberVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 
 /**
  * @author lvostinar
@@ -144,7 +144,7 @@ public class CSSPositionDialog extends Dialog
 		calc1Text.setEditable(false);
 		calc2Text.setEditable(false);
 
-		if (!CSSPosition.isSet(value))
+		if (!CSSPositionUtils.isSet(value))
 		{
 			notSetChoice.setSelection(true);
 		}

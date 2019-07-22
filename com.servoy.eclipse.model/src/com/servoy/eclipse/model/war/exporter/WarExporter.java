@@ -342,7 +342,9 @@ public class WarExporter
 			FileUtils.copyInputStreamToFile(WarExporter.class.getResource("resources/wro.properties").openStream(), wroPropertiesFile);
 
 			String pathSeparator = System.getProperty("file.separator");
-			String java = System.getProperty("java.home") + pathSeparator + "bin" + pathSeparator + "java";
+			String path = System.getProperty("java.home");
+			if (!path.endsWith(pathSeparator)) path += pathSeparator;
+			String java = path + "bin" + pathSeparator + "java";
 			File javaFile = new File(java);
 			if (!javaFile.exists())
 			{
