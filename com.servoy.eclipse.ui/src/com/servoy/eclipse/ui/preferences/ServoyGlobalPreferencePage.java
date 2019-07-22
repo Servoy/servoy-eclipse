@@ -71,6 +71,13 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button chromiumButton;
 	private ComboViewer primaryKeyUuidTypeCombo;
 
+	private final ObjectWrapper[] uuidInput = new ObjectWrapper[] { //
+		new ObjectWrapper(ColumnLabelProvider.UUID_MEDIA_16, PrimaryKeyType.UUD_BYTE_ARRAY), //
+		new ObjectWrapper(ColumnLabelProvider.UUID_TEXT_36, PrimaryKeyType.UUD_STRING_ARRAY), //
+		new ObjectWrapper(ColumnLabelProvider.UUID_NATIVE, PrimaryKeyType.UUD_NATIVE) };
+	private final ObjectWrapper[] otherTypesInput = new ObjectWrapper[] { //
+		new ObjectWrapper("INTEGER", PrimaryKeyType.INTEGER) };
+
 	public void init(IWorkbench workbench)
 	{
 		/*
@@ -153,17 +160,14 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 					new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper("UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) });
 		primaryKeySequenceTypeCombo.addSelectionChangedListener((event) -> {
 			Integer selected = getFirstElementValue(primaryKeySequenceTypeCombo, Integer.valueOf(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT));
-			primaryKeyUuidTypeCombo.getCombo().setEnabled(selected.intValue() == ColumnInfo.UUID_GENERATOR);
+			primaryKeyUuidTypeCombo.setInput(selected.intValue() == ColumnInfo.UUID_GENERATOR ? uuidInput : otherTypesInput);
+			primaryKeyUuidTypeCombo.getCombo().select(0);
 		});
 
 		new Label(defaultPrimaryKeySequenceType, SWT.NONE).setText("Column Type");
 		primaryKeyUuidTypeCombo = new ComboViewer(defaultPrimaryKeySequenceType);
 		primaryKeyUuidTypeCombo.setContentProvider(new ArrayContentProvider());
 		primaryKeyUuidTypeCombo.setLabelProvider(new LabelProvider());
-		primaryKeyUuidTypeCombo.setInput(new ObjectWrapper[] { //
-			new ObjectWrapper(ColumnLabelProvider.UUID_MEDIA_16, PrimaryKeyType.UUD_BYTE_ARRAY), //
-			new ObjectWrapper(ColumnLabelProvider.UUID_TEXT_36, PrimaryKeyType.UUD_STRING_ARRAY), //
-			new ObjectWrapper(ColumnLabelProvider.UUID_NATIVE, PrimaryKeyType.UUD_NATIVE) });
 
 		//Form Properties
 		Group formProperties = new Group(rootContainer, SWT.NONE);
@@ -256,8 +260,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton.setSelection(prefs.getShowColumnsInDbOrder());
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(prefs.getPrimaryKeySequenceType());
+		primaryKeyUuidTypeCombo.setInput(prefs.getPrimaryKeySequenceType() == ColumnInfo.UUID_GENERATOR ? uuidInput : otherTypesInput);
 		setPrimaryKeyUuidTypeValue(prefs.getPrimaryKeyUuidType());
-		primaryKeyUuidTypeCombo.getCombo().setEnabled(prefs.getPrimaryKeySequenceType() == ColumnInfo.UUID_GENERATOR);
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
@@ -276,8 +280,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showColumnsInDbOrderButton.setSelection(DesignerPreferences.SHOW_COLUMNS_IN_DB_ORDER_DEFAULT);
 		showColumnsInAlphabeticOrderButton.setSelection(!showColumnsInDbOrderButton.getSelection());
 		setPrimaryKeySequenceTypeValue(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT);
+		primaryKeyUuidTypeCombo.setInput(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT == ColumnInfo.UUID_GENERATOR ? uuidInput : otherTypesInput);
 		setPrimaryKeyUuidTypeValue(DesignerPreferences.ARRAY_UTF8_TYPE_DEFAULT);
-		primaryKeyUuidTypeCombo.getCombo().setEnabled(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT == ColumnInfo.UUID_GENERATOR);
 		showNavigatorDefaultButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
 		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
