@@ -68,7 +68,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private final SortedSet<String> selectedServerNames = new TreeSet<String>();
 	private String servoyPropertiesFileName;
 	private String startRMIPort = "1099";
-	private boolean startRMI = true;
+	private boolean startRMI = false;
 	private boolean exportActiveSolution;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
