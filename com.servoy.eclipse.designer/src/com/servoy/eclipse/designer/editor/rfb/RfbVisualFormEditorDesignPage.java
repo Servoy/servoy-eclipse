@@ -72,7 +72,7 @@ import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -238,7 +238,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		boolean isCSSPositionContainer = false;
 		if (showedContainer instanceof LayoutContainer)
 		{
-			isCSSPositionContainer = CSSPosition.isCSSPositionContainer((LayoutContainer)showedContainer);
+			isCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)showedContainer);
 		}
 
 		String newLayout = computeLayout(flattenedForm, isCSSPositionContainer);
@@ -364,7 +364,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		if (persists != null)
 		{
 			if (persists.size() == 1 && persists.get(0) == showedContainer && showedContainer instanceof LayoutContainer &&
-				CSSPosition.isCSSPositionContainer((LayoutContainer)showedContainer))
+				CSSPositionUtils.isCSSPositionContainer((LayoutContainer)showedContainer))
 			{
 				// probably size has changed we need a full refresh
 				refreshBrowserUrl(true);

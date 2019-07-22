@@ -73,7 +73,7 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -163,7 +163,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							IPersist real = ((PersistContext)element).getPersist();
 							if (real != null)
 							{
-								if (CSSPosition.isInAbsoluteLayoutMode(real))
+								if (CSSPositionUtils.isInAbsoluteLayoutMode(real))
 								{
 									// do not allow d&d from absolute layout div
 									event.doit = false;

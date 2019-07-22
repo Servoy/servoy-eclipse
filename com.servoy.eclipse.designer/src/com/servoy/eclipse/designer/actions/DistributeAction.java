@@ -29,7 +29,7 @@ import com.servoy.eclipse.designer.editor.PersistGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.DesignerActionFactory;
 import com.servoy.eclipse.designer.editor.commands.MultipleSelectionAction;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -69,7 +69,7 @@ public class DistributeAction extends MultipleSelectionAction
 				IPersist o2 = ((PersistGraphicalEditPart)e2).getPersist();
 				if (o1 instanceof ISupportBounds && o2 instanceof ISupportBounds)
 				{
-					return PositionComparator.comparePoint(xy, CSSPosition.getLocation((ISupportBounds)o1), CSSPosition.getLocation((ISupportBounds)o2));
+					return PositionComparator.comparePoint(xy, CSSPositionUtils.getLocation((ISupportBounds)o1), CSSPositionUtils.getLocation((ISupportBounds)o2));
 				}
 				if (o1 instanceof ISupportBounds && !(o2 instanceof ISupportBounds))
 				{

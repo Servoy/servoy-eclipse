@@ -53,7 +53,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -111,13 +111,13 @@ public class GhostHandler implements IServerService
 		{
 			private Point getGhostContainerLocation(IBasicWebComponent bean, ArrayList<IBasicWebComponent> parentFormComponentPath)
 			{
-				Point location = CSSPosition.getLocation(bean);
+				Point location = CSSPositionUtils.getLocation(bean);
 				if (parentFormComponentPath != null)
 				{
 					for (IBasicWebComponent parentFormComponent : parentFormComponentPath)
 					{
-						location.setLocation(location.getX() + CSSPosition.getLocation(parentFormComponent).getX(),
-							location.getY() + CSSPosition.getLocation(parentFormComponent).getY());
+						location.setLocation(location.getX() + CSSPositionUtils.getLocation(parentFormComponent).getX(),
+							location.getY() + CSSPositionUtils.getLocation(parentFormComponent).getY());
 					}
 				}
 				return location;

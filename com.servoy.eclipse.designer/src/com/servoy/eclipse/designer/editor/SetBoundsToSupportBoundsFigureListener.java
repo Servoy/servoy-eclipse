@@ -25,7 +25,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import com.servoy.eclipse.designer.property.FormElementGroupPropertySource;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -61,7 +61,7 @@ public class SetBoundsToSupportBoundsFigureListener implements FigureListener
 			bounds.translate(-parentBounds.x, -parentBounds.y);
 		}
 
-		Point loc = CSSPosition.getLocation(element);
+		Point loc = CSSPositionUtils.getLocation(element);
 		if (loc == null || loc.x != bounds.x || loc.y != bounds.y)
 		{
 			Point newLocation = new Point(bounds.x, bounds.y);
@@ -75,7 +75,7 @@ public class SetBoundsToSupportBoundsFigureListener implements FigureListener
 				element.setLocation(newLocation);
 			}
 		}
-		Dimension dim = CSSPosition.getSize(element);
+		Dimension dim = CSSPositionUtils.getSize(element);
 		if (dim == null || dim.width != bounds.width || dim.height != bounds.height)
 		{
 			Dimension newSize = new Dimension(bounds.width, bounds.height);
