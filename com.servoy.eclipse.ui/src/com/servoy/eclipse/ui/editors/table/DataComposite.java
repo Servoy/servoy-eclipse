@@ -74,6 +74,7 @@ public class DataComposite extends Composite
 				@Override
 				public DataSet getDataSet() throws Exception
 				{
+					if (!table.getExistInDB()) return null;
 					String servername = table.getServerName();
 					Alias alias = SQLExplorerPlugin.getDefault().getAliasManager().getAlias(servername);
 					Session session = alias.getDefaultUser().createSession();
