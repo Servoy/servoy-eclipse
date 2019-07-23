@@ -35,7 +35,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IDesignValueConverter;
@@ -155,14 +155,14 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				((fe.getParent() instanceof Form && ((Form)fe.getParent()).getUseCssPosition().booleanValue())))
 			{
 				BaseComponent formComponent = (BaseComponent)((WebFormComponentChildType)obj).getParent();
-				CSSPosition.setLocationEx(formComponent, (WebFormComponentChildType)obj, ((Point)value).x, ((Point)value).y, formComponent.getSize());
+				CSSPositionUtils.setLocationEx(formComponent, (WebFormComponentChildType)obj, ((Point)value).x, ((Point)value).y, formComponent.getSize());
 				return;
 			}
 			else if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(getName()) && value instanceof Dimension &&
 				((fe.getParent() instanceof Form && ((Form)fe.getParent()).getUseCssPosition().booleanValue())))
 			{
 				BaseComponent formComponent = (BaseComponent)((WebFormComponentChildType)obj).getParent();
-				CSSPosition.setSizeEx(formComponent, (WebFormComponentChildType)obj, ((Dimension)value).width, ((Dimension)value).height,
+				CSSPositionUtils.setSizeEx(formComponent, (WebFormComponentChildType)obj, ((Dimension)value).width, ((Dimension)value).height,
 					formComponent.getSize());
 				return;
 			}

@@ -42,7 +42,7 @@ import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -130,7 +130,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 				{
 					if (model instanceof ISupportBounds)
 					{
-						Point location = CSSPosition.getLocation(((ISupportBounds)model));
+						Point location = CSSPositionUtils.getLocation(((ISupportBounds)model));
 						minx = minx < location.x ? minx : location.x;
 						miny = miny < location.y ? miny : location.y;
 					}

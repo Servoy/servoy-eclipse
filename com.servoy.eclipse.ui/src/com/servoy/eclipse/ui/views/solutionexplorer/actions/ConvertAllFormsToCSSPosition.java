@@ -31,7 +31,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -86,7 +86,7 @@ public class ConvertAllFormsToCSSPosition extends Action implements ISelectionCh
 						{
 							Form form = (Form)object;
 							form.setUseCssPosition(true);
-							CSSPosition.convertToCSSPosition(form);
+							CSSPositionUtils.convertToCSSPosition(form);
 						}
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}

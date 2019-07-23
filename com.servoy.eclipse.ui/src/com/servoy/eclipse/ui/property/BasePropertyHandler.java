@@ -46,6 +46,7 @@ import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -232,15 +233,15 @@ public class BasePropertyHandler implements IPropertyHandler
 		{
 			if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist())))
+					CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist())))
 			{
-				CSSPosition.setLocation((ISupportBounds)obj, ((Point)value).x, ((Point)value).y);
+				CSSPositionUtils.setLocation((ISupportBounds)obj, ((Point)value).x, ((Point)value).y);
 			}
 			else if (StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(getName()) && value instanceof Dimension && persistContext != null &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist())))
+					CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist())))
 			{
-				CSSPosition.setSize((ISupportBounds)obj, ((Dimension)value).width, ((Dimension)value).height);
+				CSSPositionUtils.setSize((ISupportBounds)obj, ((Dimension)value).width, ((Dimension)value).height);
 			}
 			else
 			{
@@ -281,7 +282,7 @@ public class BasePropertyHandler implements IPropertyHandler
 				return false;
 			}
 			if (IContentSpecConstants.PROPERTY_CSS_POSITION.equals(name) && persistContext.getContext() instanceof Form &&
-				!((Form)persistContext.getContext()).getUseCssPosition() && !CSSPosition.isInAbsoluteLayoutMode(persistContext.getPersist()))
+				!((Form)persistContext.getContext()).getUseCssPosition() && !CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist()))
 			{
 				return false;
 			}

@@ -47,7 +47,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
@@ -128,7 +128,7 @@ public class PersistEditPolicy extends ComponentEditPolicy
 				VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType())))
 		{
 			Portal portal = (Portal)persist;
-			java.awt.Point portalLocation = CSSPosition.getLocation(portal);
+			java.awt.Point portalLocation = CSSPositionUtils.getLocation(portal);
 			Point fieldsLocation;
 			if (request instanceof DataRequest && ((DataRequest)request).getlocation() != null)
 			{

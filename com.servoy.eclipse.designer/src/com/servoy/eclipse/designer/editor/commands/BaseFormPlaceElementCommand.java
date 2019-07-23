@@ -58,6 +58,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -228,8 +229,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			ISupportBounds element = (ISupportBounds)model;
 
-			Dimension oldElementSize = CSSPosition.getSize(element);
-			java.awt.Point oldElementLocation = CSSPosition.getLocation(element);
+			Dimension oldElementSize = CSSPositionUtils.getSize(element);
+			java.awt.Point oldElementLocation = CSSPositionUtils.getLocation(element);
 
 			Dimension newElementSize = new Dimension((int)(oldElementSize.width * factorW), (int)(oldElementSize.height * factorH));
 
@@ -265,8 +266,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			else
 			{
-				CSSPosition.setSize(element, newElementSize.width, newElementSize.height);
-				CSSPosition.setLocation(element, location.x, location.y);
+				CSSPositionUtils.setSize(element, newElementSize.width, newElementSize.height);
+				CSSPositionUtils.setLocation(element, location.x, location.y);
 			}
 		}
 	}
@@ -342,12 +343,12 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				{
 					CSSPosition cssPosition = ((BaseComponent)element).getCssPosition();
 
-					int left = CSSPosition.getPixelsValue(cssPosition.left);
+					int left = CSSPositionUtils.getPixelsValue(cssPosition.left);
 					if (left >= 0)
 					{
 						cssPosition.left = String.valueOf(location.x + entry.getValue().x - minx);
 					}
-					int top = CSSPosition.getPixelsValue(cssPosition.top);
+					int top = CSSPositionUtils.getPixelsValue(cssPosition.top);
 					if (top >= 0)
 					{
 						cssPosition.top = String.valueOf(location.y + entry.getValue().y - miny);
@@ -356,7 +357,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				}
 				else
 				{
-					CSSPosition.setLocation(entry.getKey(), location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny);
+					CSSPositionUtils.setLocation(entry.getKey(), location.x + entry.getValue().x - minx, location.y + entry.getValue().y - miny);
 				}
 			}
 		}
@@ -463,8 +464,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			if (location == null)
 			{
 				int copyPasteOffset = new DesignerPreferences().getCopyPasteOffset();
-				x = CSSPosition.getLocation(supportBounds).x + copyPasteOffset;
-				y = CSSPosition.getLocation(supportBounds).y + copyPasteOffset;
+				x = CSSPositionUtils.getLocation(supportBounds).x + copyPasteOffset;
+				y = CSSPositionUtils.getLocation(supportBounds).y + copyPasteOffset;
 			}
 			else
 			{
@@ -509,7 +510,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			{
 				((ISupportTabSeq)persist).setTabSeq(ISupportTabSeq.DEFAULT);
 			}
-			origLocations.put((ISupportBounds)persist, CSSPosition.getLocation(supportBounds));
+			origLocations.put((ISupportBounds)persist, CSSPositionUtils.getLocation(supportBounds));
 			return toArrAy(persist);
 		}
 
