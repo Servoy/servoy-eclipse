@@ -635,7 +635,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table already exists",
 							"Log table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
-					createLogTableButton.setEnabled(logTable != null);
+					createLogTableButton.setEnabled(logTable == null);
 				}
 				catch (RepositoryException re)
 				{
@@ -1564,6 +1564,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		if (serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName()))
 		{
+			logTableName.setEnabled(true);
 			if (ServoyModel.getServerManager().logTableExists())
 			{
 				createLogTableButton.setEnabled(false);
