@@ -63,6 +63,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWindowListener;
@@ -432,6 +433,24 @@ public class Activator extends Plugin
 						@Override
 						public void run()
 						{
+							IWorkbenchWindow active = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+							if (active != null)
+							{
+								IWorkbenchPage page = active.getActivePage();
+								if (page != null)
+								{
+									IEditorReference[] editorReferences = page.getEditorReferences();
+									for (IEditorReference editorReference : editorReferences)
+									{
+										if (editorReference.getEditor(false) instanceof StartPageBrowserEditor ||
+											StartPageBrowserEditorInput.NAME.equals(editorReference.getPartName()))
+										{
+											// for some reason eclipse saved the start page editor, close it then
+											page.closeEditors(new IEditorReference[] { editorReference }, false);
+										}
+									}
+								}
+							}
 							try
 							{
 								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
