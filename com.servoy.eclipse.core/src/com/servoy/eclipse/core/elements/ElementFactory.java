@@ -1019,7 +1019,7 @@ public class ElementFactory
 		if (loc2 == null)
 		{
 			// no other tabs yet
-			java.awt.Point tabloc = tabPanel.getLocation();
+			java.awt.Point tabloc = CSSPositionUtils.getLocation(tabPanel);
 			tabspos = new java.awt.Point(tabloc.x - 80, tabloc.y + 30);
 		}
 		else
@@ -1308,7 +1308,8 @@ public class ElementFactory
 			ServoyJSONObject object = SolutionSerializer.generateJSONObject(persist, true, true, repository, false, null);
 			if (persist instanceof ISupportSize) // some objects have default size programmed in the getter
 			{
-				object.put(Template.PROP_SIZE, repository.convertObjectToArgumentString(IRepository.DIMENSION, CSSPositionUtils.getSize((ISupportSize)persist)));
+				object.put(Template.PROP_SIZE,
+					repository.convertObjectToArgumentString(IRepository.DIMENSION, CSSPositionUtils.getSize((ISupportSize)persist)));
 			}
 			elements.put(cleanTemplateElement(repository, flattenedSolution, form, object, location));
 		}
