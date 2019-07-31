@@ -2701,6 +2701,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									Form form = (Form)o.getAncestor(IRepository.FORMS);
 									for (PropertyDescription pd : properties)
 									{
+										String datasource = null;
 										Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 										Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
 										if (frm == null) continue;
@@ -2708,7 +2709,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											checkForListFormComponent(frm, o);
 											String forFoundsetName = ((ComponentTypeConfig)pd.getConfig()).forFoundset;
-											String datasource = null;
 											String foundsetValue = null;
 											if (((WebComponent)o).hasProperty(forFoundsetName))
 											{
@@ -2774,7 +2774,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											(JSONObject)propertyValue, frm, flattenedSolution);
 										for (FormElement element : cache.getFormComponentElements())
 										{
-											checkDataProviders(element.getPersistIfAvailable(), context);
+											checkDataProviders(element.getPersistIfAvailable(), context, datasource);
 										}
 									}
 								}
@@ -2792,7 +2792,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						checkDataProviders(o, context);
+						checkDataProviders(o, context, null);
 						checkCancel();
 						if (o instanceof IFormElement)
 						{
@@ -3908,7 +3908,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						});
 					}
 
-					private void checkDataProviders(final IPersist o, IPersist context)
+					private void checkDataProviders(final IPersist o, IPersist context, String datasource)
 					{
 						String id = null;
 						if (o instanceof ISupportDataProviderID)
@@ -3962,7 +3962,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												for (String dp : links.dataProviderIDs)
 												{
-													checkDataProvider(o, context, dp, pd);
+													checkDataProvider(o, context, dp, pd, datasource);
 												}
 											}
 											continue;
@@ -4035,7 +4035,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													JSONObject dataproviders = val.getJSONObject("dataproviders");
 													for (String dp : dataproviders.keySet())
 													{
-														checkDataProvider(o, context, dataproviders.optString(dp), pd);
+														checkDataProvider(o, context, dataproviders.optString(dp), pd, datasource);
 													}
 												}
 											}
@@ -4048,18 +4048,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										else
 										{
-											checkDataProvider(o, context, (String)propertyValue, pd);
+											checkDataProvider(o, context, (String)propertyValue, pd, datasource);
 										}
 									}
 								}
 							}
 
 						}
-						checkDataProvider(o, context, id, null);
+						checkDataProvider(o, context, id, null, datasource);
 
 					}
 
-					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd)
+					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd, String datasource)
 					{
 						try
 						{
@@ -4076,7 +4076,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(context, flattenedSolution);
 										IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
-											servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
+											servoyModel.getDataSourceManager().getDataSource(datasource != null ? datasource : parentForm.getDataSource()), id);
 										if (dataProvider == null)
 										{
 											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(context);
