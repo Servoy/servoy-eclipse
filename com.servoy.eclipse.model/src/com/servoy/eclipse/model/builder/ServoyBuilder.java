@@ -71,6 +71,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.xml.sax.SAXException;
@@ -353,6 +354,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
+	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -549,6 +551,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> PARAMETERS_MISMATCH_SEVERITY = new Pair<String, ProblemSeverity>("parametersMismatch",
+		ProblemSeverity.WARNING);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -922,6 +926,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
 					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
+					deleteMarkers(module.getProject(), PARAMETERS_MISMATCH);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
@@ -984,6 +989,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					catch (CoreException e)
 					{
 						ServoyLog.logError(e);
+					}
+				}
+			}
+			else
+			{
+				Collection<WebObjectFunctionDefinition> handlers = spec.getHandlers().values();
+				for (WebObjectFunctionDefinition handler : handlers)
+				{
+					List<Object> instanceMethodArguments = ((WebComponent)o).getFlattenedMethodArguments(handler.getName());
+					if (instanceMethodArguments != null && instanceMethodArguments.size() > 0 &&
+						handler.getParameters().size() >= instanceMethodArguments.size())
+					{
+						ServoyMarker mk = MarkerMessages.Parameters_Mismatch.fill(((WebComponent)o).getName(), handler.getName());
+						addMarker(project, mk.getType(), mk.getText(), -1, PARAMETERS_MISMATCH_SEVERITY, IMarker.PRIORITY_NORMAL, null, o);
 					}
 				}
 			}
@@ -2107,6 +2126,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_SPEC);
 		deleteMarkers(project, METHOD_OVERRIDE);
 		deleteMarkers(project, DEPRECATED_SPEC);
+		deleteMarkers(project, PARAMETERS_MISMATCH);
 		try
 		{
 			if (project.getReferencedProjects() != null)
