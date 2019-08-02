@@ -9,3 +9,10 @@
     <p *ngIf="isNeedRefresh()" class="warning">There are new packages available! Reopen the Web Package Manager to load them.</p>
     <p class="wpm-subtitle">Manage Web Packages of the active solution {{ !!getActiveSolution() ? "'" + getActiveSolution() + "'" : ""}} and it's modules...</p>
 </div>
+<div *ngIf="!isContentAvailable()" class="offline-message">
+    <span><mat-icon class="offline-icon">cloud_off</mat-icon></span>
+    <span>Cannot load remote web packages, either you're not connected to the internet or the remote repository is not accesible.</span>
+    <span>Please check the Servoy log file for more details. Click the refrseh bellow to try again.</span>
+    <br>
+    <span><button mat-raised-button (click)="refresh()">Refresh</button></span>
+</div>

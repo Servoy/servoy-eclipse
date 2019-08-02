@@ -87,17 +87,27 @@ public class InstallWebPackageHandler implements IDeveloperService
 		JSONObject pck = msg.getJSONObject("package");
 		String selected = pck.optString("selected");
 		if (selected == null) return null;
-		importPackage(pck, selected, resourceListenerSwitch);
+		try
+		{
+			importPackage(pck, selected, resourceListenerSwitch);
+		}
+		catch (IOException ex)
+		{
+			Debug.error("Error installing package", ex);
+			JSONObject err = new JSONObject();
+			err.put("err", ex.toString());
+			return err;
+		}
 		return null;
 	}
 
 
-	public static void importPackage(JSONObject pck, String selectedVersion, IWPMController resourceListenerSwitch)
+	public static void importPackage(JSONObject pck, String selectedVersion, IWPMController resourceListenerSwitch) throws IOException
 	{
 		importPackage(pck, selectedVersion, null, resourceListenerSwitch);
 	}
 
-	private static void importPackage(JSONObject pck, String selectedVersion, String selectedSolution, IWPMController resourceListenerSwitch)
+	private static void importPackage(JSONObject pck, String selectedVersion, String selectedSolution, IWPMController resourceListenerSwitch) throws IOException
 	{
 		String urlString = null;
 		JSONArray jsonArray = pck.getJSONArray("releases");
@@ -112,150 +122,135 @@ public class InstallWebPackageHandler implements IDeveloperService
 				break;
 			}
 		}
-		try
+
+		URL url = new URL(urlString);
+		URLConnection conn = url.openConnection();
+
+		String packageName = pck.getString("name");
+		String packageType = pck.getString("packageType");
+		String packageVersion = pck.optString("selected");
+		String solutionName = pck.optString("activeSolution", null);
+		String installedResource = pck.optString("installedResource", null);
+
+		if (solutionName == null)
 		{
+			solutionName = selectedSolution != null ? selectedSolution : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+		}
 
-			URL url = new URL(urlString);
-			URLConnection conn = url.openConnection();
-
-			String packageName = pck.getString("name");
-			String packageType = pck.getString("packageType");
-			String packageVersion = pck.optString("selected");
-			String solutionName = pck.optString("activeSolution", null);
-			String installedResource = pck.optString("installedResource", null);
-
-			if (solutionName == null)
+		try (InputStream in = conn.getInputStream())
+		{
+			if ("Solution".equals(packageType))
 			{
-				solutionName = selectedSolution != null ? selectedSolution : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+				importSolution(in, packageName, packageVersion, solutionName, resourceListenerSwitch);
 			}
-
-			try (InputStream in = conn.getInputStream())
+			else
 			{
-				if ("Solution".equals(packageType))
-				{
-					importSolution(in, packageName, packageVersion, solutionName, resourceListenerSwitch);
-				}
-				else
-				{
-					IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
-					importZipFileComponent(componentsFolder, in, packageName, installedResource);
-				}
-			}
-
-			if (dependency != null)
-			{
-				try
-				{
-					ServoyProject activeSolutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
-					JSONArray allInstalledPackages = null;
-					String[] packages = dependency.split(",");
-					for (String dependendPck : packages)
-					{
-						String[] nameAndVersion = dependendPck.split("#");
-
-						// if active solution has an ng-package-project with the same name, skip downloading from WPM
-						boolean hasNGPackageProject = false;
-						for (ServoyNGPackageProject ngProject : activeSolutionProject.getNGPackageProjects())
-						{
-							DirPackageReader dirPackageReader = new DirPackageReader(ngProject.getProject().getLocation().toFile());
-							if (nameAndVersion[0].equals(dirPackageReader.getPackageName()))
-							{
-								hasNGPackageProject = true;
-								break;
-							}
-						}
-						if (hasNGPackageProject)
-						{
-							continue;
-						}
-
-						if (allInstalledPackages == null)
-						{
-							allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages();
-						}
-
-						for (Object pckObj : allInstalledPackages)
-						{
-							if (pckObj instanceof JSONObject)
-							{
-								JSONObject pckObject = (JSONObject)pckObj;
-								if (pckObject.get("name").equals(nameAndVersion[0]))
-								{
-									String installedVersion = pckObject.optString("installed");
-									JSONArray releases = pckObject.getJSONArray("releases");
-									if (nameAndVersion.length > 1)
-									{
-										String version = "";
-										String prefix = "=";
-										if (nameAndVersion[1].startsWith(">="))
-										{
-											prefix = nameAndVersion[1].substring(0, 2);
-											version = nameAndVersion[1].substring(2);
-										}
-										else if (nameAndVersion[1].startsWith(">"))
-										{
-											prefix = nameAndVersion[1].substring(0, 1);
-											version = nameAndVersion[1].substring(1);
-										}
-
-										// if no compatible version already installed try to install one
-										if (installedVersion.isEmpty() || !versionCheck(installedVersion, version, prefix))
-										{
-											for (int j = 0; j < releases.length(); j++)
-											{
-												if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
-												{
-													String installVersion = releases.getJSONObject(j).optString("version");
-													int[] response = { Window.OK };
-													if (!installedVersion.isEmpty())
-													{
-														Display.getDefault().syncExec(new Runnable()
-														{
-															public void run()
-															{
-																response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager",
-																	null,
-																	"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
-																		", but you already have version " + installedVersion +
-																		" installed. Do you want to overwrite the installed one?",
-																	MessageDialog.QUESTION,
-																	new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0).open();
-															}
-														});
-													}
-													if (response[0] == Window.OK)
-													{
-														importPackage(pckObject, installVersion, solutionName, resourceListenerSwitch);
-													}
-													break;
-												}
-											}
-										}
-									}
-									else
-									{
-										// if not installed, install the latest release
-										if (installedVersion.isEmpty())
-										{
-											importPackage(pckObject, releases.getJSONObject(0).optString("version"), solutionName, resourceListenerSwitch);
-										}
-									}
-									break;
-								}
-							}
-						}
-
-					}
-				}
-				catch (Exception e)
-				{
-					Debug.log(e);
-				}
+				IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
+				importZipFileComponent(componentsFolder, in, packageName, installedResource);
 			}
 		}
-		catch (IOException e)
+
+		if (dependency != null)
 		{
-			Debug.log(e);
+			ServoyProject activeSolutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
+			JSONArray allInstalledPackages = null;
+			String[] packages = dependency.split(",");
+			for (String dependendPck : packages)
+			{
+				String[] nameAndVersion = dependendPck.split("#");
+
+				// if active solution has an ng-package-project with the same name, skip downloading from WPM
+				boolean hasNGPackageProject = false;
+				for (ServoyNGPackageProject ngProject : activeSolutionProject.getNGPackageProjects())
+				{
+					DirPackageReader dirPackageReader = new DirPackageReader(ngProject.getProject().getLocation().toFile());
+					if (nameAndVersion[0].equals(dirPackageReader.getPackageName()))
+					{
+						hasNGPackageProject = true;
+						break;
+					}
+				}
+				if (hasNGPackageProject)
+				{
+					continue;
+				}
+
+				if (allInstalledPackages == null)
+				{
+					allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages();
+				}
+
+				for (Object pckObj : allInstalledPackages)
+				{
+					if (pckObj instanceof JSONObject)
+					{
+						JSONObject pckObject = (JSONObject)pckObj;
+						if (pckObject.get("name").equals(nameAndVersion[0]))
+						{
+							String installedVersion = pckObject.optString("installed");
+							JSONArray releases = pckObject.getJSONArray("releases");
+							if (nameAndVersion.length > 1)
+							{
+								String version = "";
+								String prefix = "=";
+								if (nameAndVersion[1].startsWith(">="))
+								{
+									prefix = nameAndVersion[1].substring(0, 2);
+									version = nameAndVersion[1].substring(2);
+								}
+								else if (nameAndVersion[1].startsWith(">"))
+								{
+									prefix = nameAndVersion[1].substring(0, 1);
+									version = nameAndVersion[1].substring(1);
+								}
+
+								// if no compatible version already installed try to install one
+								if (installedVersion.isEmpty() || !versionCheck(installedVersion, version, prefix))
+								{
+									for (int j = 0; j < releases.length(); j++)
+									{
+										if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
+										{
+											String installVersion = releases.getJSONObject(j).optString("version");
+											int[] response = { Window.OK };
+											if (!installedVersion.isEmpty())
+											{
+												Display.getDefault().syncExec(new Runnable()
+												{
+													public void run()
+													{
+														response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager", null,
+															"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
+																", but you already have version " + installedVersion +
+																" installed. Do you want to overwrite the installed one?",
+															MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL },
+															0).open();
+													}
+												});
+											}
+											if (response[0] == Window.OK)
+											{
+												importPackage(pckObject, installVersion, solutionName, resourceListenerSwitch);
+											}
+											break;
+										}
+									}
+								}
+							}
+							else
+							{
+								// if not installed, install the latest release
+								if (installedVersion.isEmpty())
+								{
+									importPackage(pckObject, releases.getJSONObject(0).optString("version"), solutionName, resourceListenerSwitch);
+								}
+							}
+							break;
+						}
+					}
+				}
+
+			}
 		}
 	}
 

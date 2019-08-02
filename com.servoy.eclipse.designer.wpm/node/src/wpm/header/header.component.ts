@@ -46,6 +46,14 @@ export class HeaderComponent implements OnInit {
     return this.wpmService.isNeedRefresh();
   }
 
+  refresh() {
+    window.location.reload();
+  }
+
+  isContentAvailable(): boolean {
+    return this.wpmService.isContentAvailable();
+  }
+
   onActiveRepositoryChange() {
     if(this.activeRepository == ADD_REMOVE_TEXT) {
       this.showAddRepositoryDialog();
