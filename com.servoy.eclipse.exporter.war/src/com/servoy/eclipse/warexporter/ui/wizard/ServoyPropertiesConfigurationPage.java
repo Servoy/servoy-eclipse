@@ -106,6 +106,8 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 			"\nNOTE: If running of smart clients is enabled, please take in consideration\nthat on each restart of the application context in the web container,\nRMI related classes cannot be GC and that may lead to out-of-memory errors.");
 
 		setControl(composite);
+
+		checkPageComplete();
 	}
 
 	public void handleEvent(Event event)
@@ -115,15 +117,15 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 			String rmiPort = startRMIPortText.getText();
 			exportModel.setStartRMIPort(rmiPort);
 		}
+		checkPageComplete();
 
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
 	}
 
-	@Override
-	public boolean canFlipToNextPage()
+	private void checkPageComplete()
 	{
-		return !useRMI.getSelection() || (startRMIPortText.getText() != null && startRMIPortText.getText().length() > 0);
+		setPageComplete(!useRMI.getSelection() || (startRMIPortText.getText() != null && startRMIPortText.getText().length() > 0));
 	}
 
 	@Override

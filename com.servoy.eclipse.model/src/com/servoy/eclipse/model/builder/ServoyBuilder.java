@@ -71,6 +71,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.xml.sax.SAXException;
@@ -118,7 +119,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -353,6 +354,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
+	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -549,6 +551,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> PARAMETERS_MISMATCH_SEVERITY = new Pair<String, ProblemSeverity>("parametersMismatch",
+		ProblemSeverity.WARNING);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -922,6 +926,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
 					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
+					deleteMarkers(module.getProject(), PARAMETERS_MISMATCH);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
@@ -987,8 +992,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 				}
 			}
+			else
+			{
+				Collection<WebObjectFunctionDefinition> handlers = spec.getHandlers().values();
+				for (WebObjectFunctionDefinition handler : handlers)
+				{
+					List<Object> instanceMethodArguments = ((WebComponent)o).getFlattenedMethodArguments(handler.getName());
+					if (instanceMethodArguments != null && instanceMethodArguments.size() > 0 &&
+						handler.getParameters().size() >= instanceMethodArguments.size())
+					{
+						ServoyMarker mk = MarkerMessages.Parameters_Mismatch.fill(((WebComponent)o).getName(), handler.getName());
+						addMarker(project, mk.getType(), mk.getText(), -1, PARAMETERS_MISMATCH_SEVERITY, IMarker.PRIORITY_NORMAL, null, o);
+					}
+				}
+			}
 		}
-		if (o instanceof LayoutContainer && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
+		if (o instanceof LayoutContainer && ((LayoutContainer)o).getPackageName() != null && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
 		{
 			WebLayoutSpecification spec = null;
 			PackageSpecification<WebLayoutSpecification> pkg = componentsSpecProviderState.getLayoutSpecifications().get(((LayoutContainer)o).getPackageName());
@@ -2107,6 +2126,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_SPEC);
 		deleteMarkers(project, METHOD_OVERRIDE);
 		deleteMarkers(project, DEPRECATED_SPEC);
+		deleteMarkers(project, PARAMETERS_MISMATCH);
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -2701,6 +2721,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									Form form = (Form)o.getAncestor(IRepository.FORMS);
 									for (PropertyDescription pd : properties)
 									{
+										String datasource = null;
 										Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 										Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
 										if (frm == null) continue;
@@ -2708,7 +2729,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											checkForListFormComponent(frm, o);
 											String forFoundsetName = ((ComponentTypeConfig)pd.getConfig()).forFoundset;
-											String datasource = null;
 											String foundsetValue = null;
 											if (((WebComponent)o).hasProperty(forFoundsetName))
 											{
@@ -2774,7 +2794,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											(JSONObject)propertyValue, frm, flattenedSolution);
 										for (FormElement element : cache.getFormComponentElements())
 										{
-											checkDataProviders(element.getPersistIfAvailable(), context);
+											checkDataProviders(element.getPersistIfAvailable(), context, datasource);
 										}
 									}
 								}
@@ -2792,7 +2812,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						checkDataProviders(o, context);
+						checkDataProviders(o, context, null);
 						checkCancel();
 						if (o instanceof IFormElement)
 						{
@@ -2811,7 +2831,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							form = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(form);
 							if (form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null)
 							{
-								Point location = CSSPosition.getLocation((BaseComponent)o);
+								Point location = CSSPositionUtils.getLocation((BaseComponent)o);
 								if (location != null)
 								{
 									boolean outsideForm = false;
@@ -2824,7 +2844,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (startPos <= location.y && endPos > location.y)
 										{
 											// found the part
-											int height = CSSPosition.getSize((BaseComponent)o).height;
+											int height = CSSPositionUtils.getSize((BaseComponent)o).height;
 											if (location.y + height > endPos)
 											{
 												String elementName = null;
@@ -2870,7 +2890,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (width < location.x + CSSPosition.getSize((BaseComponent)o).width)
+											if (width < location.x + CSSPositionUtils.getSize((BaseComponent)o).width)
 											{
 												outsideForm = true;
 											}
@@ -3908,7 +3928,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						});
 					}
 
-					private void checkDataProviders(final IPersist o, IPersist context)
+					private void checkDataProviders(final IPersist o, IPersist context, String datasource)
 					{
 						String id = null;
 						if (o instanceof ISupportDataProviderID)
@@ -3962,7 +3982,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												for (String dp : links.dataProviderIDs)
 												{
-													checkDataProvider(o, context, dp, pd);
+													checkDataProvider(o, context, dp, pd, datasource);
 												}
 											}
 											continue;
@@ -4035,7 +4055,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													JSONObject dataproviders = val.getJSONObject("dataproviders");
 													for (String dp : dataproviders.keySet())
 													{
-														checkDataProvider(o, context, dataproviders.optString(dp), pd);
+														checkDataProvider(o, context, dataproviders.optString(dp), pd, datasource);
 													}
 												}
 											}
@@ -4048,18 +4068,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										else
 										{
-											checkDataProvider(o, context, (String)propertyValue, pd);
+											checkDataProvider(o, context, (String)propertyValue, pd, datasource);
 										}
 									}
 								}
 							}
 
 						}
-						checkDataProvider(o, context, id, null);
+						checkDataProvider(o, context, id, null, datasource);
 
 					}
 
-					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd)
+					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd, String datasource)
 					{
 						try
 						{
@@ -4076,7 +4096,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(context, flattenedSolution);
 										IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
-											servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
+											servoyModel.getDataSourceManager().getDataSource(datasource != null ? datasource : parentForm.getDataSource()), id);
 										if (dataProvider == null)
 										{
 											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(context);
@@ -6430,6 +6450,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		try
 		{
 			IMarker marker = null;
+			String elementName = null;
 			if (persist != null)
 			{
 				Pair<String, String> pathPair = SolutionSerializer.getFilePath(persist, true);
@@ -6455,6 +6476,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								IPersist form = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(nameParts[0]);
 								if (form != null)
 								{
+									elementName = name;
 									pathPair = SolutionSerializer.getFilePath(form, true);
 									path = new Path(pathPair.getLeft() + pathPair.getRight());
 									file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
@@ -6528,6 +6550,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("SolutionName", resource.getName());
+				if (elementName != null) marker.setAttribute("Name", elementName);
 				if (type.equals(INVALID_DATAPROVIDERID) && persist instanceof ISupportDataProviderID)
 				{
 					marker.setAttribute("DataProviderID", ((ISupportDataProviderID)persist).getDataProviderID());

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { WpmService } from './wpm.service';
 
 @Component({
   selector: 'app-wpm',
@@ -6,4 +7,10 @@ import { Component } from '@angular/core';
   styleUrls: ['./main.component.css']
 })
 export class MainComponent {
+  constructor(public wpmService: WpmService) {
+  }
+
+  isContentAvailable(): boolean {
+    return this.wpmService.isContentAvailable();
+  }
 }

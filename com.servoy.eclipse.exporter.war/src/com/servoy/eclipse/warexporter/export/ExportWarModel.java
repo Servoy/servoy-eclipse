@@ -68,7 +68,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private final SortedSet<String> selectedServerNames = new TreeSet<String>();
 	private String servoyPropertiesFileName;
 	private String startRMIPort = "1099";
-	private boolean startRMI = true;
+	private boolean startRMI = false;
 	private boolean exportActiveSolution;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
@@ -553,12 +553,12 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.servoyPropertiesFileName = nonEmpty(servoyPropertiesFileName);
 	}
 
-	public boolean isExportNoneActiveSolutions()
+	public boolean isExportNonActiveSolutions()
 	{
 		return exportNoneActiveSolutions;
 	}
 
-	public void setExportNoneActiveSolutions(boolean exportNoneActiveSolutions)
+	public void setExportNonActiveSolutions(boolean exportNoneActiveSolutions)
 	{
 		this.exportNoneActiveSolutions = exportNoneActiveSolutions;
 	}
@@ -1008,7 +1008,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		licenses.clear();
 	}
 
-	public List<String> getNoneActiveSolutions()
+	public List<String> getNonActiveSolutions()
 	{
 		return noneActiveSolutions;
 	}

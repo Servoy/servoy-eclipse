@@ -65,13 +65,6 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		this(pagename, title, description, directory, files, requiredFiles, selectAll, false, null);
 	}
 
-	/**
-	 * @param string
-	 * @param string2
-	 * @param string3
-	 * @param pluginDir
-	 * @param beanSelectionPage
-	 */
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
 		boolean selectAll, boolean includeSubdirectories, String helpString)
 	{

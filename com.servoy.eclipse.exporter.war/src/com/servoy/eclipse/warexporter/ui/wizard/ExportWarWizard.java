@@ -111,7 +111,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private boolean isNGExport;
 
-	private ListSelectionPage noneActiveSolutionPage;
+	private ListSelectionPage nonActiveSolutionPage;
 
 	private DatabaseImportPropertiesPage databaseImportProperties;
 
@@ -180,7 +180,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			return false;
 		}
-		noneActiveSolutionPage.storeInput();
+		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
 		beanSelectionPage.storeInput();
@@ -349,7 +349,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
 			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
 			userHomeSelectionPage = new DeployConfigurationPage("userhomepage", exportModel);
-			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, this);
+			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
 			if (isNGExport)
 			{
 				componentsSelectionPage = new ComponentsSelectionPage(exportModel, WebComponentSpecProvider.getSpecProviderState(), "componentspage",
@@ -386,15 +386,15 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 					tmp.add(servoyProject.getProject().getName());
 				}
 			}
-			noneActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the non-active solutions",
+			nonActiveSolutionPage = new ListSelectionPage("noneactivesolutions", "Choose the non-active solutions",
 				"Select the solutions that you want to include in this WAR. Be aware that these solutions are not checked for builder markers!", tmp,
-				exportModel.getNoneActiveSolutions(), false, "export_war_none_active_solutions");
+				exportModel.getNonActiveSolutions(), false, "export_war_none_active_solutions");
 			fileSelectionPage = new FileSelectionPage(exportModel);
 			databaseImportProperties = new DatabaseImportPropertiesPage(exportModel);
 
 			addPage(fileSelectionPage);
 			addPage(databaseImportProperties);
-			addPage(noneActiveSolutionPage);
+			addPage(nonActiveSolutionPage);
 			addPage(userHomeSelectionPage);
 			addPage(pluginSelectionPage);
 			addPage(beanSelectionPage);
@@ -429,30 +429,15 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	}
 
 	@Override
-	public boolean canFinish()
-	{
-		IWizardPage[] allPages = getPages();
-		for (IWizardPage page : allPages)
-		{
-			if (page instanceof ServerConfigurationPage && page.getNextPage() == null) continue;
-			if (!page.canFlipToNextPage())
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	@Override
 	public IWizardPage getNextPage(IWizardPage page)
 	{
 		if (page.equals(fileSelectionPage) && !exportModel.isExportActiveSolution())
 		{
-			return !exportModel.isExportNoneActiveSolutions() ? super.getNextPage(noneActiveSolutionPage) : super.getNextPage(databaseImportProperties);
+			return !exportModel.isExportNonActiveSolutions() ? super.getNextPage(nonActiveSolutionPage) : super.getNextPage(databaseImportProperties);
 		}
-		if (page.equals(databaseImportProperties) && !exportModel.isExportNoneActiveSolutions())
+		if (page.equals(databaseImportProperties) && !exportModel.isExportNonActiveSolutions())
 		{
-			return super.getNextPage(noneActiveSolutionPage);
+			return super.getNextPage(nonActiveSolutionPage);
 		}
 		if (page.equals(componentsSelectionPage))
 		{
@@ -522,7 +507,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 	@Override
 	public void copyWarToCommandLine()
 	{
-		noneActiveSolutionPage.storeInput();
+		nonActiveSolutionPage.storeInput();
 		driverSelectionPage.storeInput();
 		pluginSelectionPage.storeInput();
 		beanSelectionPage.storeInput();
@@ -544,26 +529,26 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		appendToBuilder(sb, " -defaultAdminPassword ", exportModel.getDefaultAdminPassword());
 		appendToBuilder(sb, " -p ", exportModel.getServoyPropertiesFileName());
 		appendToBuilder(sb, " -as ", exportModel.getServoyApplicationServerDir());
-		appendToBuilder(sb, " -dbi ", exportModel.isExportUsingDbiFileInfoOnly());
+		appendToBuilder(sb, " -dbi", exportModel.isExportUsingDbiFileInfoOnly());
 
 		if (!exportModel.isExportActiveSolution()) appendToBuilder(sb, " -active ", exportModel.isExportActiveSolution());
 
-		appendToBuilder(sb, " -b ", exportModel.getBeans(), beanSelectionPage.getCheckboxesNumber(), " ");
-		appendToBuilder(sb, " -l ", exportModel.getLafs(), lafSelectionPage.getCheckboxesNumber(), " ");
-		appendToBuilder(sb, " -d ", exportModel.getDrivers(), driverSelectionPage.getCheckboxesNumber(), " ");
-		appendToBuilder(sb, " -pi ", exportModel.getPlugins(), pluginSelectionPage.getCheckboxesNumber(), " ");
+		appendToBuilder(sb, " -b", exportModel.getBeans(), beanSelectionPage.getCheckboxesNumber());
+		appendToBuilder(sb, " -l", exportModel.getLafs(), lafSelectionPage.getCheckboxesNumber());
+		appendToBuilder(sb, " -d", exportModel.getDrivers(), driverSelectionPage.getCheckboxesNumber());
+		appendToBuilder(sb, " -pi", exportModel.getPlugins(), pluginSelectionPage.getCheckboxesNumber());
 
-		if (exportModel.isExportNoneActiveSolutions()) appendToBuilder(sb, " -nas ", exportModel.getNoneActiveSolutions(), -1, " ");
+		if (exportModel.isExportNonActiveSolutions()) appendToBuilder(sb, " -nas", exportModel.getNonActiveSolutions(), -1);
 
 		if (exportModel.getPluginLocations().size() > 1 && !exportModel.getPluginLocations().get(0).equals("plugins/"))
-			appendToBuilder(sb, " -pluginLocations ", exportModel.getPluginLocations(), pluginSelectionPage.getCheckboxesNumber(), " ");
+			appendToBuilder(sb, " -pluginLocations", exportModel.getPluginLocations(), pluginSelectionPage.getCheckboxesNumber());
 
 		if (exportModel.getUsedComponents().size() == exportModel.getExportedComponents().size()) sb.append(" -crefs ");
 		else if (componentsSelectionPage.getAvailableItems().size() != 0)
 		{
 			List<String> notUsedComponents = exportModel.getExportedComponents().stream().filter(
 				comp -> !exportModel.getUsedComponents().contains(comp)).collect(Collectors.toList());
-			appendToBuilder(sb, " -crefs ", notUsedComponents, -1, " ");
+			appendToBuilder(sb, " -crefs", notUsedComponents, -1);
 		}
 
 		if (exportModel.getUsedServices().size() == exportModel.getExportedServices().size()) sb.append(" -srefs ");
@@ -571,17 +556,17 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		{
 			List<String> notUsedServices = exportModel.getExportedServices().stream().filter(svc -> !exportModel.getUsedServices().contains(svc)).collect(
 				Collectors.toList());
-			appendToBuilder(sb, " -srefs ", notUsedServices, -1, " ");
+			appendToBuilder(sb, " -srefs", notUsedServices, -1);
 		}
 
-		appendToBuilder(sb, " -md ", exportModel.isExportMetaData());
-		appendToBuilder(sb, " -checkmd ", exportModel.isExportMetaData() && exportModel.isCheckMetadataTables());
-		appendToBuilder(sb, " -sd ", exportModel.isExportSampleData());
+		appendToBuilder(sb, " -md", exportModel.isExportMetaData());
+		appendToBuilder(sb, " -checkmd", exportModel.isExportMetaData() && exportModel.isCheckMetadataTables());
+		appendToBuilder(sb, " -sd", exportModel.isExportSampleData());
 		if (exportModel.isExportSampleData()) appendToBuilder(sb, " -sdcount ", String.valueOf(exportModel.getNumberOfSampleDataExported()));
 
-		appendToBuilder(sb, " -i18n ", exportModel.isExportI18NData());
-		appendToBuilder(sb, " -users ", exportModel.isExportUsers());
-		appendToBuilder(sb, " -tables ", exportModel.isExportAllTablesFromReferencedServers());
+		appendToBuilder(sb, " -i18n", exportModel.isExportI18NData());
+		appendToBuilder(sb, " -users", exportModel.isExportUsers());
+		appendToBuilder(sb, " -tables", exportModel.isExportAllTablesFromReferencedServers());
 
 		if (exportModel.getWarFileName() != null)
 		{
@@ -590,30 +575,30 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				appendToBuilder(sb, " -warFileName ", warFile.getName());
 		}
 
-		appendToBuilder(sb, " -overwriteGroups ", exportModel.isOverwriteGroups());
-		appendToBuilder(sb, " -allowSQLKeywords ", exportModel.isExportSampleData());
+		appendToBuilder(sb, " -overwriteGroups", exportModel.isOverwriteGroups());
+		appendToBuilder(sb, " -allowSQLKeywords", exportModel.isExportSampleData());
 		appendToBuilder(sb, " -allowDataModelChanges ", exportModel.getAllowDataModelChanges());
-		appendToBuilder(sb, " -skipDatabaseViewsUpdate ", exportModel.isSkipDatabaseViewsUpdate());
-		appendToBuilder(sb, " -overrideSequenceTypes ", exportModel.isOverrideSequenceTypes());
-		appendToBuilder(sb, " -overrideDefaultValues ", exportModel.isOverrideDefaultValues());
-		appendToBuilder(sb, " -insertNewI18NKeysOnly ", exportModel.isInsertNewI18NKeysOnly());
+		appendToBuilder(sb, " -skipDatabaseViewsUpdate", exportModel.isSkipDatabaseViewsUpdate());
+		appendToBuilder(sb, " -overrideSequenceTypes", exportModel.isOverrideSequenceTypes());
+		appendToBuilder(sb, " -overrideDefaultValues", exportModel.isOverrideDefaultValues());
+		appendToBuilder(sb, " -insertNewI18NKeysOnly", exportModel.isInsertNewI18NKeysOnly());
 
 		if (exportModel.getImportUserPolicy() != 1) appendToBuilder(sb, " -importUserPolicy ", String.valueOf(exportModel.getImportUserPolicy()));
 
-		appendToBuilder(sb, " -addUsersToAdminGroup ", exportModel.isAddUsersToAdminGroup());
-		appendToBuilder(sb, " -updateSequence ", exportModel.isUpdateSequences());
-		appendToBuilder(sb, " -upgradeRepository ", exportModel.isAutomaticallyUpgradeRepository());
+		appendToBuilder(sb, " -addUsersToAdminGroup", exportModel.isAddUsersToAdminGroup());
+		appendToBuilder(sb, " -updateSequence", exportModel.isUpdateSequences());
+		appendToBuilder(sb, " -upgradeRepository", exportModel.isAutomaticallyUpgradeRepository());
 
 		if (exportModel.isCreateTomcatContextXML())
 		{
-			appendToBuilder(sb, " -antiResourceLocking ", exportModel.isAntiResourceLocking());
-			appendToBuilder(sb, " -clearReferencesStatic ", exportModel.isClearReferencesStatic());
-			appendToBuilder(sb, " -clearReferencesStopThreads ", exportModel.isClearReferencesStopThreads());
-			appendToBuilder(sb, " -clearReferencesStopTimerThreads ", exportModel.isClearReferencesStopTimerThreads());
+			appendToBuilder(sb, " -antiResourceLocking", exportModel.isAntiResourceLocking());
+			appendToBuilder(sb, " -clearReferencesStatic", exportModel.isClearReferencesStatic());
+			appendToBuilder(sb, " -clearReferencesStopThreads", exportModel.isClearReferencesStopThreads());
+			appendToBuilder(sb, " -clearReferencesStopTimerThreads", exportModel.isClearReferencesStopTimerThreads());
 		}
 
-		appendToBuilder(sb, " -useAsRealAdminUser ", exportModel.isUseAsRealAdminUser());
-		appendToBuilder(sb, " -minimize ", exportModel.isMinimizeJsCssResources());
+		appendToBuilder(sb, " -useAsRealAdminUser", exportModel.isUseAsRealAdminUser());
+		appendToBuilder(sb, " -minimize", exportModel.isMinimizeJsCssResources());
 
 		if (exportModel.getLicenses() != null && exportModel.getLicenses().size() > 0)
 		{
@@ -630,8 +615,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		if (exportModel.getUserHome() != null && !exportModel.getUserHome().equals("") && !exportModel.getUserHome().equals(System.getProperty("user.home")))
 			appendToBuilder(sb, " -userHomeDirectory ", exportModel.getUserHome());
 
-		appendToBuilder(sb, " -overwriteDBServerProperties ", exportModel.isOverwriteDeployedDBServerProperties());
-		appendToBuilder(sb, " -overwriteAllProperties ", exportModel.isOverwriteDeployedServoyProperties());
+		appendToBuilder(sb, " -doNotOverwriteDBServerProperties", !exportModel.isOverwriteDeployedDBServerProperties());
+		appendToBuilder(sb, " -overwriteAllProperties", exportModel.isOverwriteDeployedServoyProperties());
 		appendToBuilder(sb, " -log4jConfigurationFile ", exportModel.getLog4jConfigurationFile());
 		appendToBuilder(sb, " -webXmlFileName ", exportModel.getWebXMLFileName());
 
@@ -650,7 +635,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		if (property) appendToBuilder(sb, argument, "");
 	}
 
-	public void appendToBuilder(StringBuilder sb, String argument, Collection< ? > property, int totalItems, String separator)
+	public void appendToBuilder(StringBuilder sb, String argument, Collection< ? > property, int totalItems)
 	{
 
 		if (property.size() > 0)
@@ -658,13 +643,11 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			if (property.size() != totalItems)
 			{
 				sb.append(argument);
-				property.forEach(prop -> sb.append(prop).append(separator));
-				sb.replace(sb.length() - 1, sb.length(), "");
+				property.forEach(prop -> sb.append(" ").append(prop));
 			}
 
 		}
-		else if (argument.equals(" -b ") || argument.equals(" -pi ") || argument.equals(" -l ") || argument.equals(" -d "))
-			sb.append(argument).append('"').append("<none>").append('"');
+		else if (argument.equals(" -b") || argument.equals(" -pi") || argument.equals(" -l") || argument.equals(" -d")) sb.append(argument).append(" <none>");
 	}
 
 }

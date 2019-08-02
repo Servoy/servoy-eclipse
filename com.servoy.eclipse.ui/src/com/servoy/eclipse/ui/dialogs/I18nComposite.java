@@ -363,17 +363,14 @@ public class I18nComposite extends Composite
 	private GroupLayout getLayout(Composite container, Combo languageCombo, Combo countryCombo)
 	{
 		GroupLayout i18NLayout = new GroupLayout(this);
-		i18NLayout.setHorizontalGroup(
-			i18NLayout.createParallelGroup(
-				GroupLayout.LEADING).add(
-					i18NLayout.createSequentialGroup().addContainerGap().add(
-						i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, container, GroupLayout.PREFERRED_SIZE, 0,
-							Short.MAX_VALUE).add(i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-								GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(filterText, GroupLayout.PREFERRED_SIZE, 0,
-									Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(languageLabel, GroupLayout.PREFERRED_SIZE,
-										GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(languageCombo,
-											GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-												countryCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
+		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
+			i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, container, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).add(
+				i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(filterText, GroupLayout.PREFERRED_SIZE, 0,
+						Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+							GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(languageCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH,
+								GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(countryCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH,
+									GroupLayout.PREFERRED_SIZE))).addContainerGap()));
 		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
 			i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 				GroupLayout.PREFERRED_SIZE).add(filterText, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(languageCombo, GroupLayout.PREFERRED_SIZE,
@@ -398,7 +395,7 @@ public class I18nComposite extends Composite
 
 
 		tableViewer.setInput(
-			messagesModel.getMessages(filter, null, null, null, ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()));
+			messagesModel.getMessages(filter, null, null, null, ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile(), null));
 	}
 
 
@@ -493,7 +490,7 @@ public class I18nComposite extends Composite
 		}
 	}
 
-	public void refresh()
+	public void refresh(I18NMessagesModelEntry selectedEntry)
 	{
 		String selection = getSelectedKey();
 		if (selectionChangedListener != null)
@@ -501,7 +498,7 @@ public class I18nComposite extends Composite
 			tableViewer.removeSelectionChangedListener(selectionChangedListener);
 		}
 		tableViewer.setInput(messagesModel.getMessages(filterText.getText(), null, null, null,
-			ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()));
+			ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile(), selectedEntry));
 		if (selectionChangedListener != null)
 		{
 			tableViewer.addSelectionChangedListener(selectionChangedListener);

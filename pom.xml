@@ -15,7 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.11/</eclipse.url>
+		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.12/</eclipse.url>
 		<orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository</orbit.url>
 		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.06/</dltk.url>
 		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/2019.06/</servoy-shiplibs.url>
@@ -279,6 +279,7 @@
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>org.eclipse.help.ui</module>
+				<module>j2db_documentation</module>
 			</modules>
 		</profile>
 		<profile>

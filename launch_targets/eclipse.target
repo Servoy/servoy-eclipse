@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target includeMode="feature" name="eclipse" sequenceNumber="60">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target includeMode="feature" name="eclipse" sequenceNumber="60">
     <locations>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://download.eclipse.org/eclipse/updates/4.11/"/>
-		    <unit id="org.eclipse.sdk.ide" version="4.11.0.I20190307-0500"/>
-	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
 		    <repository location="http://developer.servoy.com/sqlexplorer/"/>
@@ -69,6 +67,10 @@
 		    <unit id="jnr.x86asm" version="1.0.2.v201505052040"/>
 		    <unit id="org.apache.commons.compress" version="1.18.0.v20181121-2221"/>
 		    <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository"/>
+	    </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <repository location="http://download.eclipse.org/eclipse/updates/4.12/"/>
+		    <unit id="org.eclipse.sdk.ide" version="4.12.0.I20190605-1800"/>
 	    </location>
     </locations>
 </target>

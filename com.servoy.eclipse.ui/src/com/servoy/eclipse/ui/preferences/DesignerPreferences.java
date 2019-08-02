@@ -33,7 +33,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -171,11 +170,7 @@ public class DesignerPreferences
 
 	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = false;
 
-
-	public static final int UUD_BYTE_ARRAY_TYPE = IColumnTypes.MEDIA;
-	public static final int UUD_STRING_ARRAY_TYPE = IColumnTypes.TEXT;
-
-	public static final int ARRAY_UTF8_TYPE_DEFAULT = UUD_BYTE_ARRAY_TYPE;
+	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_BYTE_ARRAY;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
@@ -873,16 +868,26 @@ public class DesignerPreferences
 		setProperty(SKIP_FUNCTION_BODY_PARSING, skip);
 	}
 
-	/**
-	 * @param firstElementValue
-	 */
-	public void setPrimaryKeyUuidType(int type)
+	public void setPrimaryKeyUuidType(PrimaryKeyType type)
 	{
-		setProperty(UUD_ARRAY_TYPE, type);
+		setProperty(UUD_ARRAY_TYPE, type == null ? null : type.name());
 	}
 
-	public int getPrimaryKeyUuidType()
+	public PrimaryKeyType getPrimaryKeyUuidType()
 	{
-		return getProperty(UUD_ARRAY_TYPE, UUD_BYTE_ARRAY_TYPE);
+		String property = getProperty(UUD_ARRAY_TYPE, null);
+		if (property != null)
+		{
+			try
+			{
+				return PrimaryKeyType.valueOf(property);
+			}
+			catch (IllegalArgumentException e)
+			{
+				// old unsupported value?
+			}
+		}
+
+		return ARRAY_UTF8_TYPE_DEFAULT;
 	}
 }

@@ -50,13 +50,14 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -251,6 +252,24 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									}
 									persist = parentPersist.createNewWebComponent(componentName, spec.getName());
 
+									if (activeEditor.getForm().isResponsiveLayout())
+									{
+										int maxLocation = 0;
+										ISupportChilds parent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist),
+											activeEditor.getForm(), parentPersist);
+										Iterator<IPersist> it = parent.getAllObjects();
+										while (it.hasNext())
+										{
+											IPersist currentPersist = it.next();
+											if (currentPersist != persist && currentPersist instanceof ISupportBounds)
+											{
+												Point location = ((ISupportBounds)currentPersist).getLocation();
+												if (location.x > maxLocation) maxLocation = location.x;
+												if (location.y > maxLocation) maxLocation = location.y;
+											}
+										}
+										((WebComponent)persist).setLocation(new Point(maxLocation + 1, maxLocation + 1));
+									}
 									Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
 									for (String string : allPropertiesNames)
 									{
@@ -361,7 +380,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				container.setPackageName(packageName);
 				parent.addChild(container);
 				container.setLocation(new Point(index, index));
-				if (CSSPosition.isCSSPositionContainer(container)) container.setSize(new Dimension(200, 200));
+				if (CSSPositionUtils.isCSSPositionContainer(container)) container.setSize(new Dimension(200, 200));
 				if (configJson != null)
 				{
 					Iterator keys = configJson.keys();

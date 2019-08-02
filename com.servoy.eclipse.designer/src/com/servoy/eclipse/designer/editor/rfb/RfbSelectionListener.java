@@ -94,6 +94,7 @@ public class RfbSelectionListener implements ISelectionListener
 	 */
 	private List<String> getPersistUUIDS(IStructuredSelection selection)
 	{
+		if (selection == null) return null;
 		// ignore persist that are not from the current form.
 		boolean forCurrentForm = false;
 		final List<String> uuids = new ArrayList<String>();

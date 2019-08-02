@@ -1536,17 +1536,20 @@ public class SolutionExplorerTreeContentProvider
 		Image img = imageCache.get(path);
 		if (img == null)
 		{
-			Display display = Display.getDefault();
-			try
-			{
-				int px = Math.round(16 * display.getDPI().y / 96f);
-				img = new Image(display, new ImageData(is).scaledTo(px, px));
-				if (img != null) imageCache.put(path, img);
-			}
-			catch (SWTException e)
-			{
-				Debug.log(e);
-			}
+			Display.getDefault().syncExec(() -> {
+				Display display = Display.getDefault();
+				try
+				{
+					int px = Math.round(16 * display.getDPI().y / 96f);
+					Image image = new Image(display, new ImageData(is).scaledTo(px, px));
+					if (image != null) imageCache.put(path, image);
+				}
+				catch (SWTException e)
+				{
+					Debug.log(e);
+				}
+			});
+			img = imageCache.get(path);
 		}
 		return img;
 	}

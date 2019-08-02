@@ -258,9 +258,6 @@ angular.module('editorContent',['servoyApp'])
   
   if (formData.formProperties && formData.formProperties.absoluteLayout) {
 	  $scope.absoluteLayout = formData.formProperties.absoluteLayout[''];
-	  if ($scope.absoluteLayout) { 
-	 	 $rootScope.sfcontentStyle = {'position': 'absolute', 'left': '0px', 'top': '0px', 'right': '0px', 'bottom': '0px'};
-	  }
   }
 
   if (formData.parts) {
@@ -436,7 +433,9 @@ angular.module('editorContent',['servoyApp'])
 	    	var nodeLocation = parseInt((formData.formProperties.absoluteLayout[''] && tpl.children(0)) ? tpl.children(0).attr('form-index') : tpl.attr('svy-location'));
 	    	for (var i=0;i<parent.children().length;i++)
 	    	{
-	    		var currentLocation = parseInt((formData.formProperties.absoluteLayout[''] && parent.children()[i].children(0)) ? parent.children()[i].children(0).getAttribute('form-index') : parent.children()[i].getAttribute('svy-location'));
+          //skip parts
+          if(formData.formProperties.absoluteLayout[''] && parent.children()[i].children.length == 0) continue;
+	    		var currentLocation = parseInt((formData.formProperties.absoluteLayout[''] && parent.children()[i].children[0]) ? parent.children()[i].children[0].getAttribute('form-index') : parent.children()[i].getAttribute('svy-location'));
 	    		if (nodeLocation <= currentLocation)
 	    		{
 	    			tpl.insertBefore(parent.children()[i]);

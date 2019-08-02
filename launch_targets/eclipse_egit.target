@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target includeMode="feature" name="eclipse_egit" sequenceNumber="60">
     <locations>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://download.eclipse.org/eclipse/updates/4.11/"/>
-		    <unit id="org.eclipse.sdk.ide" version="4.11.0.I20190307-0500"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
 		    <repository location="http://developer.servoy.com/sqlexplorer/"/>
 	    </location>
@@ -71,18 +67,13 @@
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/egit/updates"/>
-		    <unit id="org.eclipse.egit.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.egit.gitflow.feature.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.egit.source.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.egit.ui.smartimport" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.jgit.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.jgit.pgm.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.jgit.pgm.source.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.jgit.source.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.jgit.ssh.apache.feature.group" version="5.3.0.201903130848-r"/>
-		    <unit id="org.eclipse.jgit.ssh.apache.source.feature.group" version="5.3.0.201903130848-r"/>
+		    <unit id="org.eclipse.egit.feature.group" version="5.4.0.201906121030-r"/>
+		    <unit id="org.eclipse.jgit.feature.group" version="5.4.0.201906121030-r"/>
+		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.4.0.201906121030-r"/>
+	    </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <repository location="http://download.eclipse.org/eclipse/updates/4.12/"/>
+		    <unit id="org.eclipse.sdk.ide" version="4.12.0.I20190605-1800"/>
 	    </location>
     </locations>
 </target>

@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.editors;
 
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -26,6 +28,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodListOptions;
 import com.servoy.eclipse.ui.dialogs.MethodDialog.MethodTreeContentProvider;
@@ -33,7 +36,9 @@ import com.servoy.eclipse.ui.labelproviders.MethodLabelProvider;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.IControlFactory;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ScriptMethod;
 
 /**
  * A cell editor that manages a method field.
@@ -75,9 +80,31 @@ public class MethodCellEditor extends DialogCellEditor
 			public Control createControl(Composite composite)
 			{
 				final AddMethodButtonsComposite buttons = new AddMethodButtonsComposite(composite, SWT.NONE);
+				String methodName = id.toString();
 				IScriptProvider scriptProvider = !getSelection().isEmpty() && getSelection().getFirstElement() instanceof MethodWithArguments
 					? MethodLabelProvider.getScriptProvider((MethodWithArguments)getSelection().getFirstElement(), persistContext) : null;
-				buttons.setContext(persistContext, scriptProvider != null ? scriptProvider.getName() : id.toString());
+				if (scriptProvider != null && scriptProvider.getParent() instanceof Form)
+				{
+					Form form = (Form)scriptProvider.getParent();
+					if (form.getExtendsID() > 0)
+					{
+						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution().getFormHierarchy(
+							form);
+						for (Form f : formHierarchy)
+						{
+							if (f != form)
+							{
+								ScriptMethod superMethod = f.getScriptMethod(scriptProvider.getName());
+								if (superMethod != null)
+								{
+									methodName = scriptProvider.getName();
+									break;
+								}
+							}
+						}
+					}
+				}
+				buttons.setContext(persistContext, methodName);
 				buttons.setDialog(dialog);
 				buttons.searchSelectedScope((IStructuredSelection)dialog.getTreeViewer().getViewer().getSelection());
 				dialog.getTreeViewer().addSelectionChangedListener(new ISelectionChangedListener()

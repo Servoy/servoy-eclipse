@@ -74,6 +74,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 {
 	public static final String CLIENT_SERVER_METHOD = "requestAllInstalledPackages";
 	public static final String REFRESH_REMOTE_PACKAGES_METHOD = "refreshRemotePackages";
+	public static final String CONTENT_NOT_AVAILABLE_METHOD = "contentNotAvailable";
+	public static final String INSTALL_ERROR_METHOD = "installError";
 	public static final String MAIN_WEBPACKAGEINDEX = "https://servoy.github.io/webpackageindex/";
 	private final WebPackageManagerEndpoint endpoint;
 	private static String selectedWebPackageIndex = MAIN_WEBPACKAGEINDEX;
@@ -303,7 +305,13 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							if (currentPackages != null)
 							{
 								List<JSONObject> newRemotePackages = getRemotePackages(wpIndex, false);
-								if (getChecksum(newRemotePackages) != currentPackages.getLeft().longValue())
+								if (newRemotePackages.isEmpty())
+								{
+									JSONObject jsonResult = new JSONObject();
+									jsonResult.put("method", CONTENT_NOT_AVAILABLE_METHOD);
+									endpoint.send(jsonResult.toString());
+								}
+								else if (getChecksum(newRemotePackages) != currentPackages.getLeft().longValue())
 								{
 									remotePackagesCache.remove(wpIndex);
 									JSONObject jsonResult = new JSONObject();
@@ -334,85 +342,93 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			List<JSONObject> result = new ArrayList<>();
 			String repositoriesIndex = getUrlContents(webPackageIndex);
 
-			JSONArray repoArray = new JSONArray(repositoriesIndex);
-			for (int i = repoArray.length(); i-- > 0;)
+			if (repositoriesIndex != null)
 			{
-				Object repo = repoArray.get(i);
-				if (repo instanceof JSONObject)
+				JSONArray repoArray = new JSONArray(repositoriesIndex);
+				for (int i = repoArray.length(); i-- > 0;)
 				{
-					JSONObject repoObject = (JSONObject)repo;
-					String packageResponse = getUrlContents(repoObject.getString("url"));
-					if (packageResponse == null)
+					Object repo = repoArray.get(i);
+					if (repo instanceof JSONObject)
 					{
-						Debug.log("Couldn't get the package contents of: " + repoObject);
-						continue;
-					}
-					try
-					{
-						String currentVersion = ClientVersion.getPureVersion();
-						JSONObject packageObject = new JSONObject(packageResponse);
-						JSONArray jsonArray = packageObject.getJSONArray("releases");
-
-						if (repoObject.has("top")) packageObject.put("top", repoObject.getBoolean("top"));
-						else packageObject.put("top", false);
-						List<JSONObject> toSort = new ArrayList<>();
-						for (int k = jsonArray.length(); k-- > 0;)
+						JSONObject repoObject = (JSONObject)repo;
+						String packageResponse = getUrlContents(repoObject.getString("url"));
+						if (packageResponse == null)
 						{
-							JSONObject jsonObject = jsonArray.getJSONObject(k);
-							if (jsonObject.has("servoy-version"))
-							{
-								String servoyVersion = jsonObject.getString("servoy-version");
-								String[] minAndMax = servoyVersion.split(" - ");
-								if (versionCompare(minAndMax[0], currentVersion) <= 0)
-								{
-									toSort.add(jsonObject);
-								}
-							}
-							else toSort.add(jsonObject);
+							Debug.error("Couldn't get the package contents of: " + repoObject);
+							continue;
 						}
-						if (toSort.size() > 0)
+						try
 						{
-							Collections.sort(toSort, new Comparator<JSONObject>()
-							{
-								@Override
-								public int compare(JSONObject o1, JSONObject o2)
-								{
-									return o2.optString("version", "").compareTo(o1.optString("version", ""));
-								}
-							});
+							String currentVersion = ClientVersion.getPureVersion();
+							JSONObject packageObject = new JSONObject(packageResponse);
+							JSONArray jsonArray = packageObject.getJSONArray("releases");
 
-							List<JSONObject> currentVersionReleases = new ArrayList<>();
-							for (JSONObject jsonObject : toSort)
+							if (repoObject.has("top")) packageObject.put("top", repoObject.getBoolean("top"));
+							else packageObject.put("top", false);
+							List<JSONObject> toSort = new ArrayList<>();
+							for (int k = jsonArray.length(); k-- > 0;)
 							{
+								JSONObject jsonObject = jsonArray.getJSONObject(k);
 								if (jsonObject.has("servoy-version"))
 								{
 									String servoyVersion = jsonObject.getString("servoy-version");
 									String[] minAndMax = servoyVersion.split(" - ");
-									if (minAndMax.length > 1 && versionCompare(minAndMax[1], currentVersion) <= 0)
+									if (versionCompare(minAndMax[0], currentVersion) <= 0)
 									{
-										break;
+										toSort.add(jsonObject);
 									}
 								}
-								currentVersionReleases.add(jsonObject);
+								else toSort.add(jsonObject);
 							}
-							if (currentVersionReleases.size() > 0)
+							if (toSort.size() > 0)
 							{
-								packageObject.put("releases", currentVersionReleases);
-								result.add(packageObject);
+								Collections.sort(toSort, new Comparator<JSONObject>()
+								{
+									@Override
+									public int compare(JSONObject o1, JSONObject o2)
+									{
+										return o2.optString("version", "").compareTo(o1.optString("version", ""));
+									}
+								});
+
+								List<JSONObject> currentVersionReleases = new ArrayList<>();
+								for (JSONObject jsonObject : toSort)
+								{
+									if (jsonObject.has("servoy-version"))
+									{
+										String servoyVersion = jsonObject.getString("servoy-version");
+										String[] minAndMax = servoyVersion.split(" - ");
+										if (minAndMax.length > 1 && versionCompare(minAndMax[1], currentVersion) <= 0)
+										{
+											break;
+										}
+									}
+									currentVersionReleases.add(jsonObject);
+								}
+								if (currentVersionReleases.size() > 0)
+								{
+									packageObject.put("releases", currentVersionReleases);
+									result.add(packageObject);
+								}
 							}
 						}
-					}
-					catch (Exception e)
-					{
-						Debug.log("Couldn't get the package contents of: " + repoObject + " error parsing: " + packageResponse, e);
-						continue;
+						catch (Exception e)
+						{
+							Debug.log("Couldn't get the package contents of: " + repoObject + " error parsing: " + packageResponse, e);
+							continue;
+						}
 					}
 				}
+				sortPackages(result);
 			}
-			sortPackages(result);
+			else
+			{
+				remotePackagesCache.remove(webPackageIndex);
+				Debug.error("Couldn't get web packages list for: " + webPackageIndex);
+			}
 			if (useCache)
 			{
-				remotePackagesCache.put(webPackageIndex, new Pair<Long, List<JSONObject>>(Long.valueOf(getChecksum(result)), result));
+				if (!result.isEmpty()) remotePackagesCache.put(webPackageIndex, new Pair<Long, List<JSONObject>>(Long.valueOf(getChecksum(result)), result));
 			}
 			else
 			{
@@ -480,7 +496,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		}
 		catch (Exception e)
 		{
-			Debug.log(e);
+			Debug.error(e);
 		}
 		return null;
 	}
@@ -509,8 +525,15 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				{
 					JSONArray packages = executeMethod(null);
 					JSONObject jsonResult = new JSONObject();
-					jsonResult.put("method", CLIENT_SERVER_METHOD);
-					jsonResult.put("result", packages);
+					if (packages.length() == 0)
+					{
+						jsonResult.put("method", GetAllInstalledPackages.CONTENT_NOT_AVAILABLE_METHOD);
+					}
+					else
+					{
+						jsonResult.put("method", CLIENT_SERVER_METHOD);
+						jsonResult.put("result", packages);
+					}
 					endpoint.send(jsonResult.toString());
 
 					return Status.OK_STATUS;

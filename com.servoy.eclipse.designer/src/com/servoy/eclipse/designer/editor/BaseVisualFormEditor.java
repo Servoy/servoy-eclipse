@@ -58,14 +58,15 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.FlattenedTabPanel;
@@ -274,11 +275,23 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						elementUuid = SolutionDeserializer.getUUID(marker.getResource().getLocation().toFile(),
 							Utils.getAsInteger(marker.getAttribute(IMarker.CHAR_START, -1)));
 					}
+					try
+					{
+						String name = (String)marker.getAttribute("Name");
+						if (name != null && name.indexOf('$') >= 0)
+						{
+							elementUuid = name;
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
 					if (elementUuid != null)
 					{
 						try
 						{
-							showPersist(AbstractRepository.searchPersist(form, UUID.fromString(elementUuid)));
+							showPersist(PersistFinder.INSTANCE.searchForPersist(BaseVisualFormEditor.this, elementUuid));
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -549,7 +562,8 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						// is it a removed child?
 						if (child == null)
 						{
-							full_refresh = true;
+							// if is form component element, will not be found in hierarchy, just ignore for now
+							if (!(changed instanceof WebFormComponentChildType)) full_refresh = true;
 							// add it so it gets cleared (refreshed) as child of the form
 							changedChildren.add(changed);
 						}

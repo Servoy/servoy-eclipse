@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.webpackage.endpoint;
 
 import java.util.HashMap;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -52,8 +53,21 @@ public class WebPackagesServiceHandler
 		Object result = iServerService.executeMethod(msg);
 		if (result == null) return null;
 		JSONObject jsonResult = new JSONObject();
-		jsonResult.put("method", method);
-		jsonResult.put("result", result);
+
+		if ("install".equals(method)) // there is an error during install, the result contains the error message
+		{
+			jsonResult.put("method", GetAllInstalledPackages.INSTALL_ERROR_METHOD);
+		}
+		else if (GetAllInstalledPackages.CLIENT_SERVER_METHOD.equals(method) && ((JSONArray)result).length() == 0)
+		{
+			jsonResult.put("method", GetAllInstalledPackages.CONTENT_NOT_AVAILABLE_METHOD);
+		}
+		else
+		{
+			jsonResult.put("method", method);
+			jsonResult.put("result", result);
+		}
+
 		return jsonResult.toString();
 	}
 

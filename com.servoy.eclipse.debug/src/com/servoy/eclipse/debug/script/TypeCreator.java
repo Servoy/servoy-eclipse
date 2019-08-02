@@ -84,6 +84,7 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
@@ -438,6 +439,7 @@ public class TypeCreator extends TypeCache
 		addScopeType("Scopes", new ScopesScopeCreator());
 		addScopeType("Scope", new ScopeScopeCreator());
 		addScopeType("FormComponentType", new FormComponentTypeCreator());
+		addScopeType("RuntimeWebComponent", new WebComponentTypeCreator());
 		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
@@ -4611,6 +4613,55 @@ public class TypeCreator extends TypeCache
 		{
 		}
 	}
+
+	public class WebComponentTypeCreator implements IScopeTypeCreator
+	{
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#createType(java.lang.String, java.lang.String)
+		 */
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			if (fullTypeName.indexOf('<') == -1) return null;
+			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(wcTypeName);
+			if (spec != null)
+			{
+				wcTypeNames.put(fullTypeName, spec);
+				return createWebComponentType(context, fullTypeName, spec);
+			}
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#getClientSupport()
+		 */
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.All;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#flush()
+		 */
+		@Override
+		public void flush()
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+	}
+
 
 	/**
 	 * @param context

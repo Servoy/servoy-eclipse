@@ -73,7 +73,7 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -163,7 +163,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							IPersist real = ((PersistContext)element).getPersist();
 							if (real != null)
 							{
-								if (CSSPosition.isInAbsoluteLayoutMode(real))
+								if (CSSPositionUtils.isInAbsoluteLayoutMode(real))
 								{
 									// do not allow d&d from absolute layout div
 									event.doit = false;
@@ -544,10 +544,41 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				StructuredSelection newSelection = new StructuredSelection(selectionPath);
 				if (!newSelection.equals(getTreeViewer().getSelection()))
 				{
+					// if responsive form and not grouped view, expand selection ancestors
+					if (form.isResponsiveLayout() && !FormOutlineContentProvider.getDisplayType())
+					{
+						for (Object selectionPathItem : selectionPath)
+						{
+							if (selectionPathItem instanceof PersistContext)
+							{
+								List<IPersist> ancestorHierarchy = FormOutlinePage.getPersistAncestorHierarchy(editingFlattenedSolution, form,
+									((PersistContext)selectionPathItem).getPersist());
+								for (IPersist p : ancestorHierarchy)
+								{
+									getTreeViewer().setExpandedState(PersistContext.create(p, form), true);
+								}
+							}
+						}
+					}
 					getTreeViewer().setSelection(newSelection, true);
 				}
 			}
 		}
+	}
+
+	private static List<IPersist> getPersistAncestorHierarchy(FlattenedSolution flattenedSolution, Form form, IPersist persist)
+	{
+		ArrayList<IPersist> anchestorHierarchy = new ArrayList<IPersist>();
+		IPersist parent = PersistHelper.getRealParent(persist);
+
+		while (parent != null && parent.getTypeID() != IRepository.FORMS)
+		{
+			anchestorHierarchy.add(0,
+				parent instanceof ISupportChilds ? PersistHelper.getFlattenedPersist(flattenedSolution, form, (ISupportChilds)parent) : parent);
+			parent = PersistHelper.getRealParent(parent);
+		}
+
+		return anchestorHierarchy;
 	}
 
 	@Override

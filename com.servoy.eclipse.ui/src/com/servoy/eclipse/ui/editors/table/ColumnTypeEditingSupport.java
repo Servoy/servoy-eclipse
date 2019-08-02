@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.editors.table;
 import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeSupport;
 import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.IObservable;
 import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -43,18 +42,18 @@ public class ColumnTypeEditingSupport extends EditingSupport
 	static
 	{
 		int length = Column.allDefinedTypes.length;
-		types = new String[length + 2];
+		types = new String[length + 3];
 		for (int i = 0; i < length; i++)
 		{
 			types[i] = Column.getDisplayTypeString(Column.allDefinedTypes[i]);
 		}
-		types[length] = ColumnLabelProvider.UUID_MEDIA_16;
-		types[length + 1] = ColumnLabelProvider.UUID_TEXT_36;
+		types[length++] = ColumnLabelProvider.UUID_MEDIA_16;
+		types[length++] = ColumnLabelProvider.UUID_TEXT_36;
+		types[length++] = ColumnLabelProvider.UUID_NATIVE;
 	}
 
 	public class ColumnTypeEditingObservable extends AbstractObservable
 	{
-
 		public ColumnTypeEditingObservable(Realm realm)
 		{
 			super(realm);
@@ -85,7 +84,6 @@ public class ColumnTypeEditingSupport extends EditingSupport
 
 	private final CellEditor editor;
 	private final ChangeSupport changeSupport;
-	private final IObservable observable;
 	private Column column;
 	private final TableViewer tv;
 
@@ -116,7 +114,7 @@ public class ColumnTypeEditingSupport extends EditingSupport
 			{
 			}
 		};
-		observable = new ColumnTypeEditingObservable(Realm.getDefault());
+		new ColumnTypeEditingObservable(Realm.getDefault());
 	}
 
 	@Override
@@ -130,11 +128,13 @@ public class ColumnTypeEditingSupport extends EditingSupport
 			int type;
 
 			int selectedIndex = Integer.parseInt(value.toString());
-			if (types[selectedIndex] == ColumnLabelProvider.UUID_MEDIA_16)
+			if (types[selectedIndex] == ColumnLabelProvider.UUID_MEDIA_16 || types[selectedIndex] == ColumnLabelProvider.UUID_NATIVE)
 			{
 				type = IColumnTypes.MEDIA;
 				length = 16;
 				column.setFlag(IBaseColumn.UUID_COLUMN, true);
+				column.setFlag(IBaseColumn.NATIVE_COLUMN, types[selectedIndex] == ColumnLabelProvider.UUID_NATIVE);
+
 			}
 			else if (types[selectedIndex] == ColumnLabelProvider.UUID_TEXT_36)
 			{
@@ -184,6 +184,10 @@ public class ColumnTypeEditingSupport extends EditingSupport
 		if (element instanceof Column)
 		{
 			Column col = (Column)element;
+			if (col.hasFlag(IBaseColumn.NATIVE_COLUMN))
+			{
+				return Integer.valueOf(Column.allDefinedTypes.length + 2);
+			}
 			if (col.hasFlag(IBaseColumn.UUID_COLUMN))
 			{
 				int type = Column.mapToDefaultType(col.getConfiguredColumnType().getSqlType());
@@ -194,16 +198,14 @@ public class ColumnTypeEditingSupport extends EditingSupport
 				return Integer.valueOf(Column.allDefinedTypes.length + 1);
 			}
 			int type = Column.mapToDefaultType(col.getConfiguredColumnType().getSqlType());
-			int index = 0;
 			for (int i = 0; i < Column.allDefinedTypes.length; i++)
 			{
 				if (Column.allDefinedTypes[i] == type)
 				{
-					index = i;
-					break;
+					return Integer.valueOf(i);
 				}
 			}
-			return Integer.valueOf(index);
+			return Integer.valueOf(0);
 		}
 		return null;
 	}

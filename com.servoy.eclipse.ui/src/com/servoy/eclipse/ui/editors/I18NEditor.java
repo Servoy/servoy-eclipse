@@ -87,7 +87,7 @@ public class I18NEditor extends EditorPart
 				String currentLocaleText = I18NEditor.this.localeText.getText();
 				if (currentLocaleText == null) currentLocaleText = "";
 				i18nComposite.setSelectionChangedListener(null);
-				onChange(row.key, currentRefText.trim(), currentLocaleText.trim());
+				onChange(row.key, currentRefText.trim(), currentLocaleText.trim(), true);
 				i18nComposite.setSelectionChangedListener(i18nCompositeSelectionChangedListener);
 			}
 		}
@@ -263,7 +263,7 @@ public class I18NEditor extends EditorPart
 			keyTextValue = keyTextValue.trim();
 			if (keyTextValue.length() > 0)
 			{
-				onChange(keyTextValue, referenceText.getText(), localeText.getText());
+				onChange(keyTextValue, referenceText.getText(), localeText.getText(), false);
 				i18nComposite.selectKey("i18n:" + keyTextValue);
 			}
 		}
@@ -278,7 +278,7 @@ public class I18NEditor extends EditorPart
 	private void onDelete(String messageKey)
 	{
 		messagesManager.removeMessage(i18nDatasource, messageKey);
-		i18nComposite.refresh();
+		i18nComposite.refresh(null);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
 
@@ -294,11 +294,11 @@ public class I18NEditor extends EditorPart
 		}
 	}
 
-	private void onChange(String key, String refText, String locText)
+	private void onChange(String key, String refText, String locText, boolean keepSelection)
 	{
 		messagesManager.addMessage(i18nDatasource, new MessageEntry(null, key, refText));
 		messagesManager.addMessage(i18nDatasource, new MessageEntry(i18nComposite.getSelectedLanguage().toString(), key, locText));
-		i18nComposite.refresh();
+		i18nComposite.refresh(keepSelection ? new I18NMessagesModelEntry(key, refText, locText) : null);
 		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
 
@@ -363,7 +363,7 @@ public class I18NEditor extends EditorPart
 
 	public void refresh()
 	{
-		i18nComposite.refresh();
+		i18nComposite.refresh(null);
 	}
 
 	@Override

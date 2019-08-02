@@ -1,9 +1,15 @@
-angular.module("menubar",[]).directive("menubar", function($editorService)
+angular.module("menubar",[]).directive("menubar", function($editorService, $rootScope, EDITOR_EVENTS)
 {
 	return {
         restrict: 'E',
         transclude: true,
 		link: function($scope, $element, $attrs) {
+
+		$scope.selection = $editorService.getEditor().getSelection();
+		$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, sel) {
+			$scope.selection = sel;
+		});
+		if ($scope.selection.length != 1) return;		
 
 			$scope.menu={};
             $scope.menu.actions = [

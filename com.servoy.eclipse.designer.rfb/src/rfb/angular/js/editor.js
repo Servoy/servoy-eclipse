@@ -282,7 +282,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return parent;
 			}
 
-			var realContainerPromise = null;
+			var realContainerPromise = {};
 			$scope.getGhostContainerStyle = function(ghostContainer) {
 				function showAndPositionGhostContainer(ghostContainer, parentCompBounds) {
 					if (!ghostContainer.style) ghostContainer.style = {};
@@ -308,16 +308,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 				
 				if (!$scope.isAbsoluteFormLayout()) {
-					if (realContainerPromise == null) {
+					if (realContainerPromise[ghostContainer.uuid] == null) {
 						var p = getRealContainerElement(ghostContainer.uuid);
 						if (p.then) {
-							realContainerPromise = p;
+							realContainerPromise[ghostContainer.uuid] = p;
 							p.then(function(parent) {
-								realContainerPromise = null;
+								delete realContainerPromise[ghostContainer.uuid];
 								showAndPositionGhostContainer(ghostContainer, parent.getBoundingClientRect());
 								ghostContainer.style.display = "block";
 							}, function() {
-								realContainerPromise = null;
+								delete realContainerPromise[ghostContainer.uuid];
 								ghostContainer.style.display = "none";
 							});
 						} else {
@@ -1498,12 +1498,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var changed = false;
 				var selection = [];
 				if (ids && ids.length > 0) {
+					if (!editorScope.contentDocument || !editorScope.glasspane)
+					{
+						$timeout(tryUpdateSelection, 200);
+						return;
+					}
 					var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
 					var ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
 					nodes = nodes.concat(ghosts);
 					if (nodes.length == 0)
 					{
-						$timeout(tryUpdateSelection, 400);
+						$timeout(tryUpdateSelection, 200);
 						return;
 					}	
 					for (var i = 0; i < nodes.length; i++) {

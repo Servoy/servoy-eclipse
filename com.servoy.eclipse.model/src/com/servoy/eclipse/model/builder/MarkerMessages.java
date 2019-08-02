@@ -688,4 +688,7 @@ public class MarkerMessages
 		ServoyBuilder.METHOD_OVERRIDE);
 
 	public static ServoyMarker DeprecatedSpecification = new ServoyMarker("The type \"{0}\" of the {1} is deprecated. {2}", ServoyBuilder.DEPRECATED_SPEC);
+
+	public static ServoyMarker Parameters_Mismatch = new ServoyMarker(
+		"Component {0} has handler \"{1}\" which has different number of parameters in spec and properties view.", ServoyBuilder.PARAMETERS_MISMATCH);
 }

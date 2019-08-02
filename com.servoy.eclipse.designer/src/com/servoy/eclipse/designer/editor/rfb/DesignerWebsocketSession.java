@@ -56,7 +56,7 @@ import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -78,6 +78,7 @@ import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
+import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator.DesignProperties;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.PersistHelper;
@@ -214,7 +215,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
 							{
 								AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
-								if (container instanceof LayoutContainer && CSSPosition.isCSSPositionContainer((LayoutContainer)container))
+								if (container instanceof LayoutContainer && CSSPositionUtils.isCSSPositionContainer((LayoutContainer)container))
 								{
 									responsive = false;
 								}
@@ -244,8 +245,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							componentFound = true;
 							IPersist parent = ((ISupportExtendsID)child).getRealParent();
 							parentuuid = parent instanceof Form ? null : parent.getUUID();
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
-								FormElementHelper.INSTANCE);
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w,
+								new DesignProperties(), FormElementHelper.INSTANCE);
 						}
 					}
 				}

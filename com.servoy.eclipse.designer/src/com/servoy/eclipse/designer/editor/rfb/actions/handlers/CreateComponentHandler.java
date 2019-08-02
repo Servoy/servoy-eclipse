@@ -76,7 +76,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -131,6 +131,12 @@ public class CreateComponentHandler implements IServerService
 
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
+		if (editorPart.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage &&
+			((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).getShowedContainer() != null && args.has("name") && !args.has("dropTargetUUID"))
+		{
+			// if we drop directly on form while zoomed in , do nothing
+			return null;
+		}
 		if (args.has("name") && ("component".equals(args.getString("name")) || "template".equals(args.getString("name")) || "*".equals(args.getString("name"))))
 		{
 			String name = args.getString("name");
@@ -185,7 +191,7 @@ public class CreateComponentHandler implements IServerService
 									selectionProvider.setSelection(structuredSelection);
 								}
 								if (newPersist.length == 1 && newPersist[0] instanceof LayoutContainer &&
-									CSSPosition.isCSSPositionContainer((LayoutContainer)newPersist[0]))
+									CSSPositionUtils.isCSSPositionContainer((LayoutContainer)newPersist[0]))
 								{
 									if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(), "Edit css position container",
 										"Do you want to zoom into the layout container so you can edit it ?"))
@@ -311,7 +317,7 @@ public class CreateComponentHandler implements IServerService
 				}
 			}
 			if (editorPart.getForm().isResponsiveLayout() &&
-				!CSSPosition.isCSSPositionContainer(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
+				!CSSPositionUtils.isCSSPositionContainer(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
 			{
 				List<IPersist> children = new ArrayList<IPersist>();
 				Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
@@ -408,104 +414,104 @@ public class CreateComponentHandler implements IServerService
 					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
 					gc.setText("button");
 					gc.setOnActionMethodID(-1);
-					CSSPosition.setLocation(gc, x, y);
-					CSSPosition.setSize(gc, w, h);
+					CSSPositionUtils.setLocation(gc, x, y);
+					CSSPositionUtils.setSize(gc, w, h);
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-label".equals(name))
 				{
 					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
 					gc.setText(args.has("text") ? args.getString("text") : "label");
-					CSSPosition.setLocation(gc, x, y);
-					CSSPosition.setSize(gc, w, h);
+					CSSPositionUtils.setLocation(gc, x, y);
+					CSSPositionUtils.setSize(gc, w, h);
 					return new IPersist[] { gc };
 				}
 				else if ("servoydefault-combobox".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.COMBOBOX);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-textfield".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TEXT_FIELD);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-textarea".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TEXT_AREA);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-password".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.PASSWORD);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-calendar".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.CALENDAR);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-typeahead".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.TYPE_AHEAD);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-spinner".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.SPINNER);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.CHECKS);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.RADIOS);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-imagemedia".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.IMAGE_MEDIA);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-listbox".equals(name))
 				{
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.LIST_BOX);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-htmlarea".equals(name))
@@ -513,8 +519,8 @@ public class CreateComponentHandler implements IServerService
 					Field field = parentSupportingElements.createNewField(new Point(x, y));
 					field.setDisplayType(Field.HTML_AREA);
 					field.setEditable(true);
-					CSSPosition.setLocation(field, x, y);
-					CSSPosition.setSize(field, w, h);
+					CSSPositionUtils.setLocation(field, x, y);
+					CSSPositionUtils.setSize(field, w, h);
 					return new IPersist[] { field };
 				}
 				else if ("servoydefault-tabpanel".equals(name))
@@ -533,8 +539,8 @@ public class CreateComponentHandler implements IServerService
 					{
 						tabPanel = editorPart.getForm().createNewTabPanel(compName);
 					}
-					CSSPosition.setLocation(tabPanel, x, y);
-					CSSPosition.setSize(tabPanel, w, h);
+					CSSPositionUtils.setLocation(tabPanel, x, y);
+					CSSPositionUtils.setSize(tabPanel, w, h);
 					return new IPersist[] { tabPanel };
 				}
 				else if ("servoydefault-splitpane".equals(name))
@@ -554,8 +560,8 @@ public class CreateComponentHandler implements IServerService
 						tabPanel = editorPart.getForm().createNewTabPanel(compName);
 					}
 					tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
-					CSSPosition.setLocation(tabPanel, x, y);
-					CSSPosition.setSize(tabPanel, w, h);
+					CSSPositionUtils.setLocation(tabPanel, x, y);
+					CSSPositionUtils.setSize(tabPanel, w, h);
 					return new IPersist[] { tabPanel };
 				}
 				else if ("servoycore-portal".equals(name))
@@ -574,16 +580,16 @@ public class CreateComponentHandler implements IServerService
 					{
 						portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
 					}
-					CSSPosition.setLocation(portal, x, y);
-					CSSPosition.setSize(portal, w, h);
+					CSSPositionUtils.setLocation(portal, x, y);
+					CSSPositionUtils.setSize(portal, w, h);
 					return new IPersist[] { portal };
 				}
 				else if ("servoydefault-rectangle".equals(name))
 				{
 					RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
 					shape.setLineSize(1);
-					CSSPosition.setLocation(shape, x, y);
-					CSSPosition.setSize(shape, w, h);
+					CSSPositionUtils.setLocation(shape, x, y);
+					CSSPositionUtils.setSize(shape, w, h);
 					return new IPersist[] { shape };
 				}
 				else
@@ -620,8 +626,8 @@ public class CreateComponentHandler implements IServerService
 							webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
 
 						}
-						CSSPosition.setLocation(webComponent, x, y);
-						CSSPosition.setSize(webComponent, w, h);
+						CSSPositionUtils.setLocation(webComponent, x, y);
+						CSSPositionUtils.setSize(webComponent, w, h);
 						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 						if (description != null && description.getDefaultValue() instanceof JSONObject)
 						{
@@ -644,7 +650,7 @@ public class CreateComponentHandler implements IServerService
 										if (form != null)
 										{
 											Dimension size = form.getSize();
-											CSSPosition.setSize(webComponent, size.width, size.height);
+											CSSPositionUtils.setSize(webComponent, size.width, size.height);
 										}
 									}
 								}
@@ -688,15 +694,17 @@ public class CreateComponentHandler implements IServerService
 							{
 								Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
 								LayoutContainer sameTypeChildContainer = null;
-								while (childContainersIte.hasNext())
+								if (!"div".equals(layoutSpec.getName()))
 								{
-									LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
-									if (layoutSpec.getName().equals(childContainer.getSpecName()))
+									while (childContainersIte.hasNext())
 									{
-										sameTypeChildContainer = childContainer;
+										LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
+										if (layoutSpec.getName().equals(childContainer.getSpecName()))
+										{
+											sameTypeChildContainer = childContainer;
+										}
 									}
 								}
-
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
 								boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 									initialDropTarget.getParent() instanceof Form;
@@ -774,8 +782,8 @@ public class CreateComponentHandler implements IServerService
 					IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 					ISupportChilds parent = dropTarget instanceof ISupportChilds ? (ISupportChilds)dropTarget : persist.getParent();
 					IPersist newPersist = ((AbstractBase)persist).cloneObj(parent, true, validator, true, true, true);
-					CSSPosition.setLocation((ISupportBounds)newPersist, x, y);
-					if (w > 0 && h > 0) CSSPosition.setSize((ISupportBounds)newPersist, w, h);
+					CSSPositionUtils.setLocation((ISupportBounds)newPersist, x, y);
+					if (w > 0 && h > 0) CSSPositionUtils.setSize((ISupportBounds)newPersist, w, h);
 
 					final ArrayList<IPersist> newPersists = new ArrayList<IPersist>();
 					newPersist.acceptVisitor(new IPersistVisitor()
@@ -851,7 +859,7 @@ public class CreateComponentHandler implements IServerService
 		parent.addChild(container);
 		container.setLocation(new Point(index, index));
 		newPersists.add(container);
-		if (CSSPosition.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
+		if (CSSPositionUtils.isCSSPositionContainer(layoutSpec)) container.setSize(new Dimension(200, 200));
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)

@@ -28,7 +28,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -176,8 +176,8 @@ public class ChangeBoundsCommand extends BaseRestorableCommand implements ISuppo
 	protected boolean changeBounds(GraphicalEditPart ep, boolean change, boolean allowResize)
 	{
 		ISupportBounds model = (ISupportBounds)ep.getModel();
-		java.awt.Point location = CSSPosition.getLocation(model);
-		java.awt.Dimension size = CSSPosition.getSize(model);
+		java.awt.Point location = CSSPositionUtils.getLocation(model);
+		java.awt.Dimension size = CSSPositionUtils.getSize(model);
 
 		boolean moved = false;
 		int x = location.x;

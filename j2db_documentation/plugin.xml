@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.servoy.eclipse.debug.shortcuts">
+      <shortcut
+            class="com.servoy.build.documentation.XMLManualWriter"
+            keystroke="shift ctrl alt pressed M"
+            name="dumpDocs">
+      </shortcut>
+   </extension>
+   <extension
+         point="com.servoy.eclipse.core.docmanager">
+      <docmanagerprovider
+            class="com.servoy.build.documentation.DocumentationManagerProvider"
+            id="j2db_documentation.docmanagerprovider">
+      </docmanagerprovider>
+   </extension>
+</plugin>

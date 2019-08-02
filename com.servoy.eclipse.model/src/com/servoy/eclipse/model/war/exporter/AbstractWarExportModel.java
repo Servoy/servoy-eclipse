@@ -222,11 +222,6 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
 					{
 
-						/*
-						 * (non-Javadoc)
-						 *
-						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitCallExpression(org.eclipse.dltk.javascript.ast.CallExpression)
-						 */
 						@Override
 						public ASTNode visitCallExpression(CallExpression node)
 						{
@@ -276,22 +271,12 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedComponents()
-	 */
 	@Override
 	public Set<String> getUsedComponents()
 	{
 		return usedComponents;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedServices()
-	 */
 	@Override
 	public Set<String> getUsedServices()
 	{
@@ -428,66 +413,36 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		return isNgExport;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setUserHome(java.lang.String)
-	 */
 	@Override
 	public void setUserHome(String userHome)
 	{
 		this.userHome = userHome;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUserHome()
-	 */
 	@Override
 	public String getUserHome()
 	{
 		return userHome;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#isOverwriteDeployedDBServerProperties()
-	 */
 	@Override
 	public boolean isOverwriteDeployedDBServerProperties()
 	{
 		return isOverwriteDeployedDBServerProperties;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#isOverwriteDeployedServoyProperties()
-	 */
 	@Override
 	public boolean isOverwriteDeployedServoyProperties()
 	{
 		return isOverwriteDeployedServoyProperties;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setOverwriteDeployedDBServerProperties(boolean)
-	 */
 	@Override
 	public void setOverwriteDeployedDBServerProperties(boolean isOverwriteDeployedDBServerProperties)
 	{
 		this.isOverwriteDeployedDBServerProperties = isOverwriteDeployedDBServerProperties;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setOverwriteDeployedServoyProperties(boolean)
-	 */
 	@Override
 	public void setOverwriteDeployedServoyProperties(boolean isOverwriteDeployedServoyProperties)
 	{
@@ -577,7 +532,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	/**
 	 * Check all the licenses from the selected properties file, auto-upgrade if it is the case
 	 * and save to the file.
-	 * @return Object[], on position 0 a boolean representing the result of auto upgrade,
+	 * @return Object[] null if licenses were upgraded and any changes were saved successfully back to the properties file,
+	 *                  else on position 0 false if upgrade failed and true if it succeeded but it could not be saved to prop. file,
 	 * 	                the old license code on position 1
 	 * 					the new license code or error message on position 2
 	 */

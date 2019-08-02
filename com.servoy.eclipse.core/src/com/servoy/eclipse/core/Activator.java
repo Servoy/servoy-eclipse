@@ -63,6 +63,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWindowListener;
@@ -94,6 +95,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
+import org.sablo.websocket.GetHttpSessionConfigurator;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
@@ -431,6 +433,24 @@ public class Activator extends Plugin
 						@Override
 						public void run()
 						{
+							IWorkbenchWindow active = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+							if (active != null)
+							{
+								IWorkbenchPage page = active.getActivePage();
+								if (page != null)
+								{
+									IEditorReference[] editorReferences = page.getEditorReferences();
+									for (IEditorReference editorReference : editorReferences)
+									{
+										if (editorReference.getEditor(false) instanceof StartPageBrowserEditor ||
+											StartPageBrowserEditorInput.NAME.equals(editorReference.getPartName()))
+										{
+											// for some reason eclipse saved the start page editor, close it then
+											page.closeEditors(new IEditorReference[] { editorReference }, false);
+										}
+									}
+								}
+							}
 							try
 							{
 								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
@@ -1197,6 +1217,7 @@ public class Activator extends Plugin
 			return;
 		}
 
+		GetHttpSessionConfigurator.setOriginCheck(GetHttpSessionConfigurator.DISABLE_ORIGIN_CHECK); // securityFiter is not configured in Developer
 		ss.setDeveloperStartup(true);
 		ss.init();
 		ss.setRepositoryFactory(repositoryFactory);
