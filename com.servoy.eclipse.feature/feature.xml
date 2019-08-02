@@ -104,6 +104,26 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          os="win32"
          arch="x86_64"/>
 
+   <includes
+         id="org.eclipse.egit"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.jgit"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.jgit.http.apache"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.jgit.lfs"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.jgit.ssh.apache"
+         version="0.0.0"/>
+
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
