@@ -547,7 +547,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
-         id="com.servoy.eclipse.exporter.electron"
+         id="com.servoy.eclipse.exporter.ngdesktop"
          download-size="0"
          install-size="0"
          version="2019.9.0.3520_rc"
