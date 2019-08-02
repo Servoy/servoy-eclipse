@@ -271,7 +271,7 @@
 				<module>com.servoy.eclipse.designer.rib</module>
 				<module>com.servoy.eclipse.designer.wpm</module>
 				<module>com.servoy.eclipse.jsunit</module>
-				<module>com.servoy.eclipse.exporter.electron</module>
+				<module>com.servoy.eclipse.exporter.ngdesktop</module>
 				<module>com.servoy.eclipse.exporter.mobile</module>
 				<module>com.servoy.eclipse.exporter.solution</module>
 				<module>com.servoy.eclipse.exporter.war</module>
