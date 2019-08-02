@@ -1,4 +1,4 @@
-package com.servoy.eclipse.exporter.electron;
+package com.servoy.eclipse.exporter.ngdesktop;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

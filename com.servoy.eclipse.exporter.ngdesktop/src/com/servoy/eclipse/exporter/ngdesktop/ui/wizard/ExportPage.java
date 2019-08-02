@@ -15,11 +15,12 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.exporter.electron.ui.wizard;
+package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -39,27 +40,26 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 /**
  * @author gboros
  */
-public class ExportPage extends WizardPage
-{
-	
+public class ExportPage extends WizardPage {
+
 	public static String WINDOWS_PLATFORM = "win";
 	public static String MACOS_PLATFORM = "mac";
 	public static String LINUX_PLATFORM = "linux";
-	
+
 	private Text applicationURLText;
 	private Text saveDir;
 	private Group platformGroup;
-	
-	private List<String> selectedPlatforms = new ArrayList<String>();
 
-	public ExportPage(ExportElectronWizard exportElectronWizard)
-	{
+	private List<String> selectedPlatforms = new ArrayList<String>();
+	private ExportNGDesktopWizard exportElectronWizard;
+
+	public ExportPage(ExportNGDesktopWizard exportElectronWizard) {
 		super("page1");
+		this.exportElectronWizard = exportElectronWizard;
 		setTitle("Export Servoy application in electron");
 	}
 
-	public void createControl(Composite parent)
-	{
+	public void createControl(Composite parent) {
 		GridLayout gridLayout = new GridLayout(3, false);
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
@@ -68,108 +68,117 @@ public class ExportPage extends WizardPage
 		applicationURLLabel.setText("Servoy application URL");
 		applicationURLText = new Text(composite, SWT.BORDER);
 		applicationURLText.setText(getInitialApplicationURL());
-		
+
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		applicationURLText.setLayoutData(gd);
 
 		Label platformLabel = new Label(composite, SWT.NONE);
 		platformLabel.setText("Platform");
-		
+
 		platformGroup = new Group(composite, SWT.NONE);
 		platformGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 
-		
 		Button winBtn = new Button(platformGroup, SWT.CHECK);
 		winBtn.setData(WINDOWS_PLATFORM);
 		winBtn.setText("Windows");
-		selectedPlatforms.add(WINDOWS_PLATFORM);
-		winBtn.setSelection(true);
-		
+		winBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("win_export"));
+		if (winBtn.getSelection())
+			selectedPlatforms.add(WINDOWS_PLATFORM);
 
-		winBtn.addSelectionListener(new SelectionAdapter()
-		{
+		winBtn.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent event)
-			{
-				platformSelectionChangeListener((String)event.widget.getData());
+			public void widgetSelected(SelectionEvent event) {
+				platformSelectionChangeListener((String) event.widget.getData());
 			}
 		});
-		 
-		
+
 		Button macBtn = new Button(platformGroup, SWT.CHECK);
 		macBtn.setText("MacOS");
 		macBtn.setData(MACOS_PLATFORM);
-		
-		macBtn.addSelectionListener(new SelectionAdapter()
-		{
+		macBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("osx_export"));
+		if (macBtn.getSelection())
+			selectedPlatforms.add(MACOS_PLATFORM);
+
+		macBtn.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent event)
-			{
-				platformSelectionChangeListener((String)event.widget.getData());
+			public void widgetSelected(SelectionEvent event) {
+				platformSelectionChangeListener((String) event.widget.getData());
 			}
 		});
 
 		Button linuxBtn = new Button(platformGroup, SWT.CHECK);
 		linuxBtn.setText("Linux");
 		linuxBtn.setData(LINUX_PLATFORM);
-		
-		linuxBtn.addSelectionListener(new SelectionAdapter()
-		{
+		linuxBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("linux_export"));
+		if (linuxBtn.getSelection())
+			selectedPlatforms.add(LINUX_PLATFORM);
+
+		linuxBtn.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent event)
-			{
-				platformSelectionChangeListener((String)event.widget.getData());
+			public void widgetSelected(SelectionEvent event) {
+				platformSelectionChangeListener((String) event.widget.getData());
 			}
 		});
-		
-		 
+
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		platformGroup.setLayoutData(gd);
-		
-		
+
 		Label outputDirLabel = new Label(composite, SWT.NONE);
-		outputDirLabel.setText("Save directory");	
-		
+		outputDirLabel.setText("Save directory");
+
 		saveDir = new Text(composite, SWT.BORDER);
 		saveDir.setText(getInitialSaveDir());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
 		saveDir.setLayoutData(gd);
-		
+
 		setControl(composite);
 	}
-	
-	private String getInitialApplicationURL()
-	{
-		String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
-		String applicationURL = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solutionName +
-				"/index.html";
+
+	private String getInitialApplicationURL() {
+		String applicationURL = exportElectronWizard.getDialogSettings().get("application_url");
+		if (applicationURL == null) {
+			String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()
+					.getSolution().getName();
+			applicationURL = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/"
+					+ solutionName + "/index.html";
+		}
 		return applicationURL;
 	}
-	
-	public String getApplicationURL()
-	{
+
+	public String getApplicationURL() {
 		return applicationURLText.getText();
 	}
-	
-	private String getInitialSaveDir()
-	{
+
+	private String getInitialSaveDir() {
+		String saveDir = exportElectronWizard.getDialogSettings().get("save_dir");
+		if (saveDir != null)
+			return saveDir;
 		return System.getProperty("user.home");
 	}
-	
-	public String getSaveDir()
-	{
+
+	public String getSaveDir() {
 		return saveDir.getText();
 	}
-	
+
 	private Object platformSelectionChangeListener(String selectedPlatform) {
 		int index = selectedPlatforms.indexOf(selectedPlatform);
-		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform); //the result type is different depending on the execution leaf
+		// the result type is different depending on the execution leaf
+		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform); 
 	}
-	
+
 	public List<String> getSelectedPlatforms() {
 		return selectedPlatforms;
+	}
+
+	public void saveState() {
+		IDialogSettings settings = exportElectronWizard.getDialogSettings();
+		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
+		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
+		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);
+		settings.put("save_dir", getSaveDir());
+		settings.put("application_url", getApplicationURL());
 	}
 }
