@@ -83,7 +83,7 @@ public class MethodCellEditor extends DialogCellEditor
 				String methodName = id.toString();
 				IScriptProvider scriptProvider = !getSelection().isEmpty() && getSelection().getFirstElement() instanceof MethodWithArguments
 					? MethodLabelProvider.getScriptProvider((MethodWithArguments)getSelection().getFirstElement(), persistContext) : null;
-				if (scriptProvider.getParent() instanceof Form)
+				if (scriptProvider != null && scriptProvider.getParent() instanceof Form)
 				{
 					Form form = (Form)scriptProvider.getParent();
 					if (form.getExtendsID() > 0)
