@@ -228,7 +228,6 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								angularElement.css(css);
 							}
 						}
-						ev.preventDefault();
 					});
 					
 					mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(){
@@ -391,6 +390,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							angularElement.remove();
 						}
 					});
+					// prevent the drag of anchors from browser; this code was in mousemove, was preventing cursor to change in IE
+					event.preventDefault();
 				}
 			},
 			templateUrl: 'templates/palette.html',
