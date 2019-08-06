@@ -225,7 +225,7 @@ public class WarExporter
 
 		exportAdminUser(tmpWarDir);
 
-		monitor.setWorkRemaining(exportModel.isNGExport() ? 9 : 3);
+		monitor.setWorkRemaining(exportModel.isNGExport() ? 10 : 4);
 		if (exportModel.isNGExport())
 		{
 			monitor.subTask("Copying NGClient components/services...");
@@ -241,6 +241,17 @@ public class WarExporter
 			compileLessResources(tmpWarDir);
 			monitor.worked(1);
 		}
+		try
+		{
+			// just always copy the nglibs to it even if it is just puur smart client
+			// the log4j libs are always needed.
+			copyNGLibs(targetLibDir);
+		}
+		catch (IOException e)
+		{
+			throw new ExportException("Could not copy the libs " + Arrays.toString(NG_LIBS) + ", " + pluginFiles, e);
+		}
+		monitor.worked(1);
 		monitor.subTask("Creating deploy properties");
 		createDeployPropertiesFile(tmpWarDir);
 		monitor.worked(1);
@@ -689,7 +700,6 @@ public class WarExporter
 
 			copyAllHtmlTemplates(tmpWarDir, allTemplates);
 
-			copyNGLibs(targetLibDir);
 			monitor.worked(1);
 		}
 		catch (IOException e)
