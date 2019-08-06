@@ -1156,6 +1156,17 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 			boolean log_server = logServerButton.getSelection();
 
+			if (serverConfig.isOracleDriver() && (serverConfig.getSchema() == null || serverConfig.getSchema().trim().length() == 0))
+			{
+				// if you do not specify the schema in oracle you see thousands of non-useful system tables/views in that server
+				if (MessageDialog.openConfirm(getSite().getShell(), "Fill Oracle chema",
+					"Schema should be filled for Oracle servers, mostly the same as the user name. Should we fill it in? \n\nNot specifying a schema will probably result in seing lots of system tables/views in this server, not just user tables/views."))
+				{
+					//serverConfigObservable.setPropertyValue("schema", serverConfig.getUserName());
+					schemaField.setText(serverConfig.getUserName());
+				}
+			}
+
 			if (serverConfig.isEnabled())
 			{
 				serverManager.testServerConfigConnection(serverConfig, 0); //test if we connect
@@ -1186,12 +1197,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			updateTitle();
 			setInput(new ServerEditorInput(serverConfig));
 			initDataBindings();
-			if (serverConfig.isOracleDriver() && (serverConfig.getSchema() == null || serverConfig.getSchema().trim().length() == 0))
-			{
-				// if you do not specify the schema in oracle you see thousands of non-useful system tables/views in that server
-				MessageDialog.openInformation(getSite().getShell(), "Oracle server",
-					"You should add a 'schema' for Oracle servers = the Oracle user name.\n\nNot specifying a schema will probably result in seing lots of system tables/views in this server, not just user tables/views.");
-			}
 			if (serverConfig.getDataModelCloneFrom() != null && !Utils.equalObject(dataModelCloneFrom, serverConfig.getDataModelCloneFrom()))
 			{
 				DataModelManager dataModelManager = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
