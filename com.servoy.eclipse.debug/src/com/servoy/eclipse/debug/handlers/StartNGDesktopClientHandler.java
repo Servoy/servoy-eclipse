@@ -153,8 +153,10 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		String fileUrl = osxContent + File.separator + (Utils.isAppleMacOS() ? "Resources" : "resources") + File.separator + "app.asar.unpacked" +
 			File.separator + "config" + File.separator + "servoy.json";
 
+		String fPath = stateLocation.getAbsolutePath();
+		if (Utils.isAppleMacOS()) fPath += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + StartNGDesktopClientHandler.MAC_EXTENSION;
 
-		File f = new File(stateLocation.getAbsolutePath() + File.separator + fileUrl);
+		File f = new File(fPath + File.separator + fileUrl);
 
 		//Store servoy.json file as a JSONObject
 		String jsonFile = Utils.getTXTFileContent(f, Charset.forName("UTF-8"));
@@ -181,12 +183,13 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		try
 		{
 			String[] command;
-			if (Utils.isWindowsOS() || Utils.isLinuxOS())
-				command = new String[] { stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
-			else
+			if (Utils.isAppleMacOS())
 			{
-				command = new String[] { "/usr/bin/open", stateLocation.getAbsolutePath() +
-					(Utils.isAppleMacOS() ? "" : File.separator + NG_DESKTOP_APP_NAME + fileExtension) };
+				command = new String[] { "/usr/bin/open", stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
+			}
+			else
+			{//windows || linux
+				command = new String[] { stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
 			}
 			monitor.beginTask("Open NGDesktop", 3);
 			Runtime.getRuntime().exec(command);
@@ -281,11 +284,10 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				String extension = Utils.isAppleMacOS() ? MAC_EXTENSION : (Utils.isWindowsOS() ? WINDOWS_EXTENSION : "");
 
 				String folderName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION + "-" +
-					((Utils.isAppleMacOS() ? MAC_BUILD_PLATFORM + extension : (Utils.isWindowsOS()) ? WINDOWS_BUILD_PLATFORM : LINUX_BUILD_PLATFORM));
+					((Utils.isAppleMacOS() ? MAC_BUILD_PLATFORM : (Utils.isWindowsOS()) ? WINDOWS_BUILD_PLATFORM : LINUX_BUILD_PLATFORM));
 
 				File stateLocation = Activator.getDefault().getStateLocation().append(folderName).toFile();
-				String pathToExecutable = (Utils.isAppleMacOS() ? stateLocation.getAbsolutePath()
-					: stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + extension);
+				String pathToExecutable = stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + extension;
 
 				File executable = new File(pathToExecutable);
 				checkForHigherVersion(executable.getParentFile());
@@ -344,8 +346,16 @@ class DownloadElectron implements IRunnableWithProgress
 		{
 			monitor.beginTask("Downloading NGDesktop executable", 3);
 
-			f = new File(Activator.getDefault().getStateLocation().toOSString());
+			String fString = Activator.getDefault().getStateLocation().toOSString();
+
+			if (Utils.isAppleMacOS())
+			{
+				fString += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+					StartNGDesktopClientHandler.MAC_BUILD_PLATFORM;
+			}
+			f = new File(fString);
 			f.mkdirs();
+
 
 			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
 				StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
