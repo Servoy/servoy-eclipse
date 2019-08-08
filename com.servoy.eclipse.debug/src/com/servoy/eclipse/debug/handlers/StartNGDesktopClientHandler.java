@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.debug.handlers;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,9 +31,17 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -46,7 +55,6 @@ import org.json.JSONObject;
 import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.ZipUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -66,7 +74,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	static final String NGDESKTOP_MAJOR_VERSION = "2019";
 	static final String NGDESKTOP_MINOR_VERSION = "09";
 
-	static private int BUFFER_SIZE = 1024;
+	static final int BUFFER_SIZE = 16 * 1024;
 	static final String MAC_EXTENSION = ".app";
 	static final String WINDOWS_EXTENSION = ".exe";
 	//Linux doesn't have any extension
@@ -363,7 +371,7 @@ class DownloadElectron implements IRunnableWithProgress
 					: (Utils.isWindowsOS() ? StartNGDesktopClientHandler.WINDOWS_BUILD_PLATFORM : StartNGDesktopClientHandler.LINUX_BUILD_PLATFORM)) +
 				".tar.gz");
 
-			ZipUtils.extractTarGZ(fileUrl, f);
+			extractTarGz(fileUrl.openStream(), f.toPath().toAbsolutePath().normalize());
 			monitor.worked(2);
 		}
 		catch (Exception e)
@@ -375,5 +383,81 @@ class DownloadElectron implements IRunnableWithProgress
 
 			ServoyLog.logError("Cannot find Electron in download center", e);
 		}
+	}
+
+	private void extractTarGz(InputStream is, Path outputPath) throws IOException
+	{
+		TarArchiveInputStream archIS = new TarArchiveInputStream(
+			new GzipCompressorInputStream(new BufferedInputStream(is, StartNGDesktopClientHandler.BUFFER_SIZE)));
+		TarArchiveEntry entry = null;
+		while ((entry = archIS.getNextTarEntry()) != null)
+		{
+			Path path = outputPath.resolve(entry.getName()).normalize();
+			if (entry.isDirectory())
+			{
+				Files.createDirectories(path);
+			}
+			else if (entry.isSymbolicLink())
+			{
+				Files.createDirectories(path.getParent());
+				String dest = entry.getLinkName();
+				Files.createSymbolicLink(path, Paths.get(dest));
+			}
+			else
+			{
+				Files.createDirectories(path.getParent());
+				try (OutputStream out = Files.newOutputStream(path))
+				{
+					IOUtils.copy(archIS, out);//copy current archIS entry
+				}
+			}
+			if (!Files.isSymbolicLink(path) && !Utils.isWindowsOS())
+			{
+				Files.setPosixFilePermissions(path, getPosixFilePermissions(entry));
+			}
+		}
+	}
+
+	private Set<PosixFilePermission> getPosixFilePermissions(TarArchiveEntry entry)
+	{
+		int mode = entry.getMode();
+		Set<PosixFilePermission> perms = new HashSet<>();
+		if ((mode & 0400) != 0)
+		{
+			perms.add(PosixFilePermission.OWNER_READ);
+		}
+		if ((mode & 0200) != 0)
+		{
+			perms.add(PosixFilePermission.OWNER_WRITE);
+		}
+		if ((mode & 0100) != 0)
+		{
+			perms.add(PosixFilePermission.OWNER_EXECUTE);
+		}
+		if ((mode & 0040) != 0)
+		{
+			perms.add(PosixFilePermission.GROUP_READ);
+		}
+		if ((mode & 0020) != 0)
+		{
+			perms.add(PosixFilePermission.GROUP_WRITE);
+		}
+		if ((mode & 0010) != 0)
+		{
+			perms.add(PosixFilePermission.GROUP_EXECUTE);
+		}
+		if ((mode & 0004) != 0)
+		{
+			perms.add(PosixFilePermission.OTHERS_READ);
+		}
+		if ((mode & 0002) != 0)
+		{
+			perms.add(PosixFilePermission.OTHERS_WRITE);
+		}
+		if ((mode & 0001) != 0)
+		{
+			perms.add(PosixFilePermission.OTHERS_EXECUTE);
+		}
+		return perms;
 	}
 }
