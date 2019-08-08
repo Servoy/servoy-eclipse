@@ -935,6 +935,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		try
 		{
+			file.refreshLocal(IResource.DEPTH_ONE, null);
 			if (file.exists())
 			{
 				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
