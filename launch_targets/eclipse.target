@@ -74,7 +74,7 @@
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://dl.maketechnology.io/chromium-swt/rls/repository"/>
-		    <unit id="org.eclipse.swt.chromium.feature.feature.group" version="0.10.2.201908070808"/>
+		    <unit id="org.eclipse.swt.chromium.feature.feature.group" version="0.10.2.201908071629"/>
 	    </location>
     </locations>
 </target>
