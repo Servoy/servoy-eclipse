@@ -12,7 +12,11 @@
 
 	<artifactId>com.servoy.jre.win32.x86_64.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>12</version>
+	<version>12.0.2</version>
+	
+	<properties>
+		<jre.version>jdk-12.0.2+10-jre</jre.version>
+	</properties>
 	
 	<build>
 		<plugins>
@@ -59,7 +63,7 @@
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>
 				<artifactId>download-maven-plugin</artifactId>
-				<version>1.4.0</version>
+				<version>1.4.2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -67,7 +71,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://api.adoptopenjdk.net/v2/binary/releases/openjdk12?openjdk_impl=openj9&amp;os=windows&amp;arch=x64&amp;release=latest&amp;type=jre</url>
+							<url>https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10_openj9-0.15.1/OpenJDK12U-jre_x64_windows_openj9_12.0.2_10_openj9-0.15.1.zip</url>
 							<outputFileName>jre12.zip</outputFileName>
 							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
 							<unpack>true</unpack>
@@ -89,7 +93,7 @@
 							<outputDirectory>${basedir}/jre</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.build.directory}/jdk-12.0.1+12-jre/</directory>
+									<directory>${project.build.directory}/${jre.version}/</directory>
 								</resource>
 							</resources>
 						</configuration>
