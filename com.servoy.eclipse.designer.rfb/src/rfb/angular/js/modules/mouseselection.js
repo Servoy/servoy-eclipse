@@ -331,6 +331,37 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 									beforeChild: dropTarget
 								};
 							}
+							else
+							{
+								// we drop directly on the node, try to determine its position between children
+								var beforeNode = null;
+								for (var i=dropTarget.childNodes.length-1;i>=0;i--)
+								{
+									var node = dropTarget.childNodes[i];
+									if (node && node.getAttribute && node.getAttribute('svy-id'))
+									{
+										var clientRec = node.getBoundingClientRect();
+										var absolutePoint = editorScope.convertToAbsolutePoint({
+											x: clientRec.right,
+											y: clientRec.bottom
+										});
+										// if cursor is in rectangle between 0,0 and bottom right corner of component we consider it to be before that component
+										// can we enhance it ?
+										if (event.pageY < absolutePoint.y && event.pageX < absolutePoint.x)
+										{
+											beforeNode = node;
+										}
+										else
+											break;
+												
+									}	
+								}	
+								return {
+									dropAllowed: true,
+									dropTarget: dropTarget,
+									beforeChild: beforeNode
+								};
+							}	
 						}
 					} else if (type != "component" && type != "template") {
 						dropTarget = this.getNode(event);
