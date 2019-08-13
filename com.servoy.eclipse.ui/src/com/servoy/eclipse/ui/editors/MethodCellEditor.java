@@ -83,9 +83,9 @@ public class MethodCellEditor extends DialogCellEditor
 				String methodName = id.toString();
 				IScriptProvider scriptProvider = !getSelection().isEmpty() && getSelection().getFirstElement() instanceof MethodWithArguments
 					? MethodLabelProvider.getScriptProvider((MethodWithArguments)getSelection().getFirstElement(), persistContext) : null;
-				if (scriptProvider != null && scriptProvider.getParent() instanceof Form)
+				if (scriptProvider != null && persistContext.getContext() instanceof Form)
 				{
-					Form form = (Form)scriptProvider.getParent();
+					Form form = (Form)persistContext.getContext();
 					if (form.getExtendsID() > 0)
 					{
 						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution().getFormHierarchy(
