@@ -541,7 +541,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					for (var i = 0; i < fromList.length; i++) {
 						var element = fromList[i]
 						var rect = element.getBoundingClientRect();
-						if(this.isUnknownElement(element) && !element.clientWidth && !element.clientHeight && element.firstElementChild && !this.isUnknownElement(element.firstElementChild)) {
+						if( (this.isUnknownElement(element) || !element.clientWidth && !element.clientHeight) && element.firstElementChild && !this.isUnknownElement(element.firstElementChild)) {
 							rect = element.firstElementChild.getBoundingClientRect();
 						}
 						var left = rect.left;
@@ -551,7 +551,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 							left = left - element.parentElement.parentElement.getBoundingClientRect().left;
 						}
 						var clientWidth = rect.width != 0 ? rect.width : element.offsetWidth;
-						var clientHeight = rect.height != 0 ? rect.height : element.clientHeight;
+						var clientHeight = rect.height != 0 ? rect.height : element.offsetHeight;
 						
 						if (this.isRectanglesOverlap(p1, p2, percentage, top, left, clientHeight, clientWidth)) {
 							matchedElements.push(element);
