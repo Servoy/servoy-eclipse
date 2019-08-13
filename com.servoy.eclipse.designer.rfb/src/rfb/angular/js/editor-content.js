@@ -64,10 +64,50 @@ angular.module('editorContent',['servoyApp'])
     $rootScope.getDesignFormElement().append(el);
     return el;
   }
-  
+
+	var getFormHeight = function() {
+		var children = $document.querySelectorAll('#svyDesignForm').children();
+		var height = 0;
+		for (var i = 0; i < children.length; i++) {
+			height += children[i].scrollHeight;
+		}
+		return height;
+	}
+	var toCheckSize = undefined;
+	var adjustFormSize = function(newValue){	
+			//we want to adjust the content sizes if the form height changes
+			//there is no way to find out when all the css changes are applied
+			//so we check it a few times, until it becomes stable
+			
+			if (toCheckSize !== undefined)
+			{
+				clearTimeout(toCheckSize);
+			}
+			var height = getFormHeight();
+			var timesChecked = 0;
+			var checkSize = function() { 
+				if (timesChecked < 5) {
+					if (getFormHeight() !== height) {
+						$rootScope.$broadcast("ADJUST_SIZE");
+						height = getFormHeight();
+						timesChecked = 0;
+					}
+					timesChecked++;
+					toCheckSize = setTimeout(checkSize, 1000);
+				}
+			};
+			toCheckSize = setTimeout(checkSize, 500);
+	};
+	
 	//trigger content loaded to set content sizes
 	$scope.$on('content-loaded:ready', function() {
-   		$rootScope.$broadcast("CONTENT_LOADED"); 
+	
+		$rootScope.$broadcast("ADJUST_SIZE");
+	
+		//register the watchers only when the form is loaded because we need the form div to be present
+		$rootScope.$watch('showWireframe', adjustFormSize);
+		$rootScope.$watch('showSolutionLayoutsCss', adjustFormSize);
+		$rootScope.$watch('showSolutionCss', adjustFormSize);
 	});	      
   
   //this preventDefault should not be needed because we have the glasspane 

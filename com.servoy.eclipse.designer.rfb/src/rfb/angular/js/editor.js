@@ -32,7 +32,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	RENDER_DECORATORS: "RENDER_DECORATORS",
 	HIDE_DECORATORS: "HIDE_DECORATORS",
 	RENDER_PALETTE: "RENDER_PALETTE",
-	CONTENT_LOADED: "CONTENT_LOADED"
+	ADJUST_SIZE: "ADJUST_SIZE"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 100,
 	PART_LABEL_HEIGHT: 22,
@@ -45,8 +45,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_PART: "part",
 	GHOST_TYPE_FORM: "form",
 	GHOST_TYPE_INVISIBLE: "invisible",
-	GHOST_TYPE_GROUP: "group",
-	RESPONSIVE_FORM_MIN_HEIGHT: 640
+	GHOST_TYPE_GROUP: "group"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
 	$editorService, $webSocket, $q, $interval,$allowedChildren,$document,$websocketConstants) {
 	return {
@@ -772,7 +771,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				$element.find('.content')[0].style.width = width + "px";
 				$element.find('.content')[0].style.right = "";
 				$element.find('.content')[0].style.minWidth = "";
-				adjustGlassPaneSize(width, height);
+				$scope.adjustGlassPaneSize(width, height);
 				if (fixedSize)
 				{
 					$scope.redrawDecorators()
@@ -792,7 +791,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				delete $scope.contentStyle.height;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
-				adjustGlassPaneSize();
+				$scope.adjustGlassPaneSize();
 				if (redraw)
 				{
 					$scope.redrawDecorators()
@@ -930,26 +929,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					}
 					
 					 $scope.$evalAsync( function() {  
-						if (!$scope.isAbsoluteFormLayout() && $($scope.contentDocument).find('.svy-form')[0] && $($scope.contentDocument).find('.svy-form')[0].offsetHeight < EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT)
-						{ 
-							$scope.getEditorContentRootScope().sfcontentStyle = {'height': EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px'};
-						}
-						adjustGlassPaneSize();
+						$scope.adjustGlassPaneSize();
 					});
 					
 				}
 			}
 			
-			function adjustIFrameSize(){
+			$scope.adjustIFrameSize = function(){
 		        	delete $scope.contentStyle.height;
-		        	if (!$scope.isAbsoluteFormLayout()) {
-			        	$element.find('.content')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
-			        	$element.find('.content')[0].style.height = "";
-			        }
-			        else
-			       	{
-		        		$element.find('.content')[0].style.bottom = "20px";
-		        	}
+		        	$element.find('.content')[0].style.height = "";
+		        	$element.find('.content')[0].style.bottom = "20px";
 		        	$element.find('.contentframe')[0].style.height = "100%";
 		        	
 		        	$scope.contentStyle.bottom = "20px";
@@ -958,20 +947,13 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		        	//if (h > $element.find('.content-area')[0].offsetHeight) {
 		        	    delete $scope.contentStyle.bottom;
 		        	    $scope.contentStyle.height = h;
-		        	    if (!$scope.isAbsoluteFormLayout()) {
-			        	    $element.find('.content')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
-			        	    $element.find('.contentframe')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
-			        	}
-			        	else
-			       		{
-		        	    	$element.find('.content')[0].style.bottom = "";
-		        	    }
+		        	    $element.find('.content')[0].style.bottom = "";
 		        	    $element.find('.content')[0].style.height = h + "px";
 		        	    $element.find('.contentframe')[0].style.height = h + "px";
 				//}
 			}
 
-			function adjustGlassPaneSize(gpWidth, gpHeight) {
+			$scope.adjustGlassPaneSize = function(gpWidth, gpHeight) {
 				if ($scope.isAbsoluteFormLayout()) {
 				    	var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
 					if (sizes.height > 0 && sizes.width > 0) {
@@ -988,9 +970,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					    	});
 					    	
 						if (contentDiv.clientHeight < height) {
-							$scope.glasspaneStyle['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
 							$scope.glasspaneStyle.height = height + "px";// 20 for the body ghost height
-							
 						} else {
 							$scope.glasspaneStyle.height = '100%';
 						}
@@ -1006,7 +986,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					        if (contentDiv.offsetHeight > 0 ){
 					            if ($scope.isContentSizeFull()) 
 					            {	
-					            	adjustIFrameSize();
+					            	$scope.adjustIFrameSize();
 					            }
 					            
 					            // we need to wait for the contentDiv to render with the values set for the content size
@@ -1035,8 +1015,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
-				editorContentRootScope.$on(EDITOR_EVENTS.CONTENT_LOADED, function() {
-					$editorService.setContentSizes();
+				editorContentRootScope.$on(EDITOR_EVENTS.ADJUST_SIZE, function() {
+					$editorService.adjustSizes();
 				})
 				//call set content sizes 
 				//in the less likely situation in which we missed the CONTENT_LOADED event
@@ -1633,6 +1613,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		
 		setContentSizes: function() {
 			editorScope.setContentSizes();		
+		},
+		
+		adjustSizes: function() {
+			editorScope.adjustIFrameSize();
+			editorScope.adjustGlassPaneSize();
+			editorScope.redrawDecorators();
 		}
 
 		// add more service methods here
