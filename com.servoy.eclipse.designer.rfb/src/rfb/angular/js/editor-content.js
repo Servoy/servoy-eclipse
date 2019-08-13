@@ -100,14 +100,15 @@ angular.module('editorContent',['servoyApp'])
 	};
 	
 	//trigger content loaded to set content sizes
-	$scope.$on('content-loaded:ready', function() {
+	$scope.$on('content-loaded:ready', function() {	
+		if (!$rootScope.getDesignFormControllerScope().absoluteLayout) {
+			$rootScope.$broadcast("ADJUST_SIZE");
 	
-		$rootScope.$broadcast("ADJUST_SIZE");
-	
-		//register the watchers only when the form is loaded because we need the form div to be present
-		$rootScope.$watch('showWireframe', adjustFormSize);
-		$rootScope.$watch('showSolutionLayoutsCss', adjustFormSize);
-		$rootScope.$watch('showSolutionCss', adjustFormSize);
+			//register the watchers only when the form is loaded because we need the form div to be present
+			$rootScope.$watch('showWireframe', adjustFormSize);
+			$rootScope.$watch('showSolutionLayoutsCss', adjustFormSize);
+			$rootScope.$watch('showSolutionCss', adjustFormSize);
+		}
 	});	      
   
   //this preventDefault should not be needed because we have the glasspane 
