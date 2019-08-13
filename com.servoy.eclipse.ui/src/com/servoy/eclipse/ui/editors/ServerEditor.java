@@ -94,6 +94,7 @@ import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
 import com.servoy.eclipse.ui.util.WrappingControl;
 import com.servoy.eclipse.ui.util.XLControl;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -1222,6 +1223,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 					"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
 				{
 					PlatformUI.getWorkbench().restart();
+				}
+				else
+				{
+					IServer server = serverManager.getServer(currentServerName);
+					if (server instanceof IServerInternal && server.isValid())
+					{
+						((IServerInternal)server).reloadTables();
+					}
 				}
 			}
 		}
