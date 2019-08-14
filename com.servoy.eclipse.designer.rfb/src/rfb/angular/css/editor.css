@@ -299,10 +299,12 @@ html, body
 #highlight.showWireframe::before {
   content				  : attr(svytitle);
   background-color		  : var(--svyBackgroundColor);
-  border                  : 1px solid #2BADDF;
+  border                  : 1px dotted rgb(0, 153, 255);
   border-bottom           : none;
   border-top-left-radius  : 5px;
   border-top-right-radius : 5px;
+  box-shadow			  : 0px 3px 1px 0px  var(--svyBackgroundColor), 0px 0px 3px 0px rgba(0, 153, 255, 0.67);
+  -webkit-box-shadow	  : 0px 3px 1px 0px  var(--svyBackgroundColor), 0px 0px 3px 0px rgba(0, 153, 255, 0.67);
   font					  : 12px Arial, sans-serif;
   margin-top			  : -20px;
   margin-left			  : 20px;
@@ -316,8 +318,10 @@ html, body
 	top: 0px;
 	height:20px;
 	width:20px;
-	outline:1px solid rgb(0, 153, 255);
-	display: none
+	outline: 1px dotted rgb(0, 153, 255);
+	display: none;
+	box-shadow: 0px 0px 3px 0px rgba(0, 153, 255, 0.67);
+	-webkit-box-shadow: 0px 0px 3px 0px rgba(0, 153, 255, 0.67);
 }
 
 #directEdit[contentEditable] {
