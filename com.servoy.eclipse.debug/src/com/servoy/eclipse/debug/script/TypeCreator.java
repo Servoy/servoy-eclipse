@@ -90,6 +90,7 @@ import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
@@ -440,6 +441,7 @@ public class TypeCreator extends TypeCache
 		addScopeType("Scope", new ScopeScopeCreator());
 		addScopeType("FormComponentType", new FormComponentTypeCreator());
 		addScopeType("RuntimeWebComponent", new WebComponentTypeCreator());
+		addScopeType("CustomType", new CustomTypeCreator());
 		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
@@ -502,7 +504,7 @@ public class TypeCreator extends TypeCache
 			{
 				IPropertyType< ? > iPropertyType = foundTypes.get(typeName);
 				Type type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setName(iPropertyType.getName());
+				type.setName("CustomType<" + iPropertyType.getName() + ">");
 				type.setKind(TypeKind.JAVA);
 				EList<Member> members = type.getMembers();
 				addType(null, type);
@@ -526,7 +528,19 @@ public class TypeCreator extends TypeCache
 							JSType memberType = getType(null, pd);
 							String pdTypeName = pd.getType().getName();
 							if ("object".equals(pdTypeName)) pdTypeName = "Object";
-							if (memberType == null) memberType = getTypeRef(null, pdTypeName);
+							if (memberType == null)
+							{
+								if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+									((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+								{
+
+									memberType = getTypeRef(null, "CustomType<" + pdTypeName + ">");
+								}
+								else
+								{
+									memberType = getTypeRef(null, pdTypeName);
+								}
+							}
 							if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
 							{
 								memberType = TypeUtil.arrayOf(memberType);
@@ -1151,6 +1165,24 @@ public class TypeCreator extends TypeCache
 	 * @param spec
 	 * @return
 	 */
+	private Type createCustomType(String context, String customTypeName, WebObjectSpecification spec)
+	{
+		if (!specTypesCreated)
+		{
+			createSpecTypeDefinitions();
+		}
+
+		Type type = TypeInfoModelFactory.eINSTANCE.createType();
+		type.setName(customTypeName);
+		return addType(null, type); //returning the type already created on createSpecTypeDefinitions()
+	}
+
+	/**
+	 * @param context
+	 * @param fullTypeName
+	 * @param spec
+	 * @return
+	 */
 	private Type createWebComponentType(String context, String fullTypeName, WebObjectSpecification spec)
 	{
 		String bucket = null;
@@ -1194,7 +1226,21 @@ public class TypeCreator extends TypeCache
 					memberType = getTypeRef(context, "FormComponentType<" + configProperties.get(pd.getName()) + ">");
 					bucket = context;
 				}
-				if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
+
+				if (memberType == null)
+				{
+					if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+						((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+					{
+
+						memberType = getTypeRef(null, "CustomType<" + pd.getType().getName() + ">");
+					}
+					else
+					{
+						memberType = getTypeRef(null, pd.getType().getName());
+					}
+				}
+
 				if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
 				{
 					memberType = TypeUtil.arrayOf(memberType);
@@ -4612,6 +4658,57 @@ public class TypeCreator extends TypeCache
 		public void flush()
 		{
 		}
+	}
+
+	public class CustomTypeCreator implements IScopeTypeCreator
+	{
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#createType(java.lang.String, java.lang.String)
+		 */
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			System.out.println(fullTypeName);
+			//Custom component type can be defined only in WebComponents objects. So get WebComponentSpec
+			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1) return null;
+			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			String[] typeNames = wcTypeName.split("\\.");
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeNames[0]);
+			if (spec != null)
+			{
+				return createCustomType(context, fullTypeName, spec);
+			}
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#getClientSupport()
+		 */
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			// TODO Auto-generated method stub
+			return ClientSupport.All;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.debug.script.TypeCreator.IScopeTypeCreator#flush()
+		 */
+		@Override
+		public void flush()
+		{
+			// TODO Auto-generated method stub
+
+		}
+
 	}
 
 	public class WebComponentTypeCreator implements IScopeTypeCreator
