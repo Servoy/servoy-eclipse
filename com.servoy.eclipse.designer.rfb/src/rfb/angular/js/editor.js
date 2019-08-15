@@ -1040,7 +1040,13 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						}
 						// f4 open form hierarchy
 						if (fixedKeyEvent.keyCode == 115) {
-							// send the DELETE key code to the server
+							// send the F4 key code to the server
+							$editorService.keyPressed(objEvent);
+							return false;
+						}
+						// refresh
+						if (fixedKeyEvent.keyCode == 116) {
+							// send the F5 key code to the server
 							$editorService.keyPressed(objEvent);
 							return false;
 						}

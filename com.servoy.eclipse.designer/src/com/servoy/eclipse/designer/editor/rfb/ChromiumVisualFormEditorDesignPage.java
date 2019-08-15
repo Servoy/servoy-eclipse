@@ -103,4 +103,9 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 	{
 		browser.setFocus();
 	}
+
+	public void refresh()
+	{
+		browser.refresh();
+	}
 }

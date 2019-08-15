@@ -37,6 +37,7 @@ import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.eclipse.designer.editor.rfb.ChromiumVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -89,6 +90,14 @@ public class KeyPressedHandler implements IServerService
 			if (isShift) modifier = SWT.SHIFT | modifier;
 			if (keyCode == 46 || keyCode == 8) keyCode = SWT.DEL;
 			else if (keyCode == 115) keyCode = SWT.F4;
+			else if (keyCode == 116)
+			{
+				// refresh the editor
+				if (editorPart.getGraphicaleditor() instanceof ChromiumVisualFormEditorDesignPage)
+				{
+					((ChromiumVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refresh();
+				}
+			}
 			Binding perfectMatch = bindingService.getPerfectMatch(KeySequence.getInstance(KeyStroke.getInstance(modifier, keyCode)));
 			if (perfectMatch == null)
 			{
