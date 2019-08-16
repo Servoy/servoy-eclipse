@@ -54,7 +54,7 @@
 	    </location>
 	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.201904250337"/>
+		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.201908130254"/>
 		    <repository location="http://dl.maketechnology.io/chromium-cef/rls/repository"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -74,7 +74,7 @@
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://dl.maketechnology.io/chromium-swt/rls/repository"/>
-		    <unit id="org.eclipse.swt.chromium.feature.feature.group" version="0.10.2.201908071629"/>
+		    <unit id="org.eclipse.swt.chromium.feature.feature.group" version="0.10.2.201908130308"/>
 	    </location>
     </locations>
 </target>
