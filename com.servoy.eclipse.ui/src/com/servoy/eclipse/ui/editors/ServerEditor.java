@@ -1160,7 +1160,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			if (serverConfig.isOracleDriver() && (serverConfig.getSchema() == null || serverConfig.getSchema().trim().length() == 0))
 			{
 				// if you do not specify the schema in oracle you see thousands of non-useful system tables/views in that server
-				if (MessageDialog.openConfirm(getSite().getShell(), "Fill Oracle chema",
+				if (MessageDialog.openConfirm(getSite().getShell(), "Fill Oracle schema",
 					"Schema should be filled for Oracle servers, mostly the same as the user name. Should we fill it in? \n\nNot specifying a schema will probably result in seing lots of system tables/views in this server, not just user tables/views."))
 				{
 					//serverConfigObservable.setPropertyValue("schema", serverConfig.getUserName());
