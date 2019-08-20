@@ -106,6 +106,6 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 
 	public void refresh()
 	{
-		browser.refresh();
+		super.refreshBrowserUrl(true);
 	}
 }
