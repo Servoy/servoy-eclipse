@@ -246,7 +246,11 @@ public abstract class AbstractRenameAction extends Action
 	public boolean isEnabled()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
+		if (node.parent.getRealObject() instanceof IPackageReader)
+		{
 		IResource packageRoot = SolutionExplorerTreeContentProvider.getResource((IPackageReader)node.parent.getRealObject());
 		return (packageRoot instanceof IContainer);
+		}
+		return false;
 	}
 }
