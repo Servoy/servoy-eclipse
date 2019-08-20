@@ -136,7 +136,12 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				}
 				return addToCache(memberType, collection);
 			}
-			addToCache(memberType, EMPTY);
+
+			if (!creatingCollection.get().contains(file))
+			{
+				//avoid to add empty types for recursive calls
+				addToCache(memberType, EMPTY);
+			}
 			return null;
 		}
 
