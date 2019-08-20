@@ -48,9 +48,9 @@
 		    <unit id="de.inetsoftware.jlessc" version="1.8.0.201903221450"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.201905081119"/>
-		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201905081121"/>
-		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.06/"/>
+		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.201908201455"/>
+		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201908201458"/>
+		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.09/"/>
 	    </location>
 	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
