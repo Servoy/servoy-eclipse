@@ -26,7 +26,6 @@ import org.eclipse.gef.internal.GEFMessages;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
@@ -34,12 +33,9 @@ import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.actions.PasteCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.mobile.commands.SelectModelsCommandWrapper;
-import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 
 /** Command to past previously copied editor models.
@@ -52,6 +48,7 @@ public class PasteAction extends SelectionAction
 	private final IApplication application;
 	private final ISelectionProvider selectionProvider;
 	private final IFieldPositioner fieldPositioner;
+	private final Form context;
 
 	/**
 	 * Constructs a <code>CopyAction</code> using the specified part.
@@ -59,12 +56,13 @@ public class PasteAction extends SelectionAction
 	 * @param part
 	 *            The part for this action
 	 */
-	public PasteAction(IApplication application, ISelectionProvider selectionProvider, IWorkbenchPart part, IFieldPositioner fieldPositioner)
+	public PasteAction(IApplication application, ISelectionProvider selectionProvider, BaseVisualFormEditor part, IFieldPositioner fieldPositioner)
 	{
 		super(part);
 		this.application = application;
 		this.selectionProvider = selectionProvider;
 		this.fieldPositioner = fieldPositioner;
+		this.context = part.getForm();
 	}
 
 	@Override
@@ -86,37 +84,20 @@ public class PasteAction extends SelectionAction
 	{
 		final Object selected = objects.get(0);
 
-		Form context = null;
 		ISupportChilds parent = null;
-		if (selected instanceof FormElementGroup)
+		IPersist persist = Platform.getAdapterManager().getAdapter(selected, IPersist.class);
+		if (persist != null)
 		{
-			context = ((FormElementGroup)selected).getParent();
-		}
-		else
-		{
-			IPersist persist = Platform.getAdapterManager().getAdapter(selected, IPersist.class);
-			if (persist != null)
+			if (persist instanceof ISupportChilds)
 			{
-				if (selected instanceof PersistContext)
-				{
-					context = (Form)((PersistContext)selected).getContext();
-				}
-				else
-				{
-					context = (Form)persist.getAncestor(IRepository.FORMS);
-				}
-				if (persist instanceof ISupportChilds)
-				{
-					parent = (ISupportChilds)persist;
-				}
-				else
-				{
-					parent = context;
-				}
+				parent = (ISupportChilds)persist;
+			}
+			else
+			{
+				parent = context;
 			}
 		}
 
-		if (context == null) return null;
 		return new SelectModelsCommandWrapper(selectionProvider, new PasteCommand(application, parent, Collections.emptyMap(), context, fieldPositioner));
 	}
 
