@@ -107,7 +107,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						for (i = 0; i < editorScope.selectionToDrag.length; i++) {
 							type = "component";
 							layoutName = node.getAttribute("svy-layoutname");
-							if (layoutName) type = "layout"
+							if (layoutName) {
+								type = "layout";
+								topContainer = utils.isTopContainer(layoutName);
+							}
 							if (ghostObject)
 								type = ghostObject.propertyType;
 							canDrop = getDropNode(type, topContainer, layoutName, event, node.getAttribute("svy-id"));
@@ -649,7 +652,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 						editorScope.getEditorContentRootScope().$apply();
 
-						var topContainer = null;
+						var topContainer = utils.isTopContainer(layoutName);
 
 						var canDrop = getDropNode(type, topContainer, layoutName, event);
 						if (!canDrop.dropAllowed) {

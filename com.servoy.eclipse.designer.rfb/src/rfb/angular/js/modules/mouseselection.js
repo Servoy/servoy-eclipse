@@ -647,6 +647,26 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						return this.getZIndex(el.parent(), limit);
 					}
 					return -9999999;//Number.MIN_SAFE_INTEGER doesn't work in ie
+				},
+				setupTopContainers: function(packages) {
+					editorScope.topContainers = [];
+					for (var i = 0; i< packages.length; i++) {
+						if (packages[i].components[0] && packages[i].components[0].componentType == "layout") {
+							for (var j = 0; j < packages[i].components.length; j++) {
+								if (packages[i].components[j].topContainer) {
+									editorScope.topContainers.push(packages[i].packageName + "." + packages[i].components[j].layoutName);
+								}
+							}
+						}
+					}
+				},
+				isTopContainer: function(container) {
+					for (var i = 0; i < editorScope.topContainers.length; i++) {
+            			if (editorScope.topContainers[i] == container) {
+                			return true;
+            			}
+    				}
+    				return false;
 				}
 			}
 		}

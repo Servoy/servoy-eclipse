@@ -56,6 +56,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					{
 						$scope.packages = got.data;
 					}
+					utils.setupTopContainers($scope.packages);
 					packageOrder = {};
 					packageOrder[layoutType] = [];
 					for(var i = 0; i < $scope.packages.length; i++) {
