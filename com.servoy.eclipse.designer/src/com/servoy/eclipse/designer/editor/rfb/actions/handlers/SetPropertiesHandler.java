@@ -31,6 +31,8 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -90,26 +92,38 @@ public class SetPropertiesHandler implements IServerService
 										propertyName, properties.opt(propertyName)));
 								}
 							}
-							if (properties.has("x") && properties.has("y"))
+							if (persist instanceof BaseComponent && CSSPositionUtils.useCSSPosition(persist) && properties.has("x") && properties.has("y") &&
+								properties.has("width") && properties.has("height"))
 							{
-								if (persist instanceof WebCustomType)
-								{
-									if (reorderCustomTypesCommand == null) reorderCustomTypesCommand = new ReorderCustomTypesCommand((WebCustomType)persist);
-									cc.add(new MoveCustomTypeCommand((WebCustomType)persist, new Point(properties.optInt("x"), properties.optInt("y"))));
-								}
-								else
-								{
-									cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(context, false),
-										StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(),
-										new Point(properties.optInt("x"), properties.optInt("y"))));
-								}
-
-							}
-							if (properties.has("width") && properties.has("height"))
-							{
+								// we need to calculate the new cssposition
 								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
-									StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(),
-									new Dimension(properties.optInt("width"), properties.optInt("height"))));
+									StaticContentSpecLoader.PROPERTY_CSS_POSITION.getPropertyName(), CSSPositionUtils.adjustCSSPosition((BaseComponent)persist,
+										properties.optInt("x"), properties.optInt("y"), properties.optInt("width"), properties.optInt("height"))));
+							}
+							else
+							{
+								if (properties.has("x") && properties.has("y"))
+								{
+									if (persist instanceof WebCustomType)
+									{
+										if (reorderCustomTypesCommand == null)
+											reorderCustomTypesCommand = new ReorderCustomTypesCommand((WebCustomType)persist);
+										cc.add(new MoveCustomTypeCommand((WebCustomType)persist, new Point(properties.optInt("x"), properties.optInt("y"))));
+									}
+									else
+									{
+										cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(context, false),
+											StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(),
+											new Point(properties.optInt("x"), properties.optInt("y"))));
+									}
+
+								}
+								if (properties.has("width") && properties.has("height"))
+								{
+									cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
+										StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(),
+										new Dimension(properties.optInt("width"), properties.optInt("height"))));
+								}
 							}
 						}
 						else if (persist instanceof Part)
