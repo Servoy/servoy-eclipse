@@ -9,7 +9,6 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 
 		function getHighlightNode(event) {
 			if (utils.getDraggingFromPallete() != null && editorScope.getEditorContentRootScope().drop_highlight) {
-				var drop = editorScope.getEditorContentRootScope().drop_highlight.split(".");
 				var canDrop = utils.getDropNode(utils.getDraggingFromPallete(), null, editorScope.getEditorContentRootScope().drop_highlight, event);
 				if (canDrop && canDrop.dropAllowed && canDrop.dropTarget)
 				{
