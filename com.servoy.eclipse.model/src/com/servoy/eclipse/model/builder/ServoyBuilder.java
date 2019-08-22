@@ -6380,7 +6380,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										return CONTINUE_TRAVERSAL;
 									}
 								}
-								memTables.put(node.getTableName(), table);
+								if (table != null)
+								{
+									memTables.put(node.getTableName(), table);
+								}
+								else
+								{
+									Debug.log("Could not find mem table for datasource '" + node.getDataSource() + "', solution " + solutionName);
+								}
 							}
 							catch (Exception e)
 							{
