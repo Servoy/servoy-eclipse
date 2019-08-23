@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.j2db.IApplication;
@@ -79,6 +80,11 @@ public class Activator extends Plugin
 	public IEclipsePreferences getEclipsePreferences(IProject project)
 	{
 		return new ProjectScope(project).getNode(PLUGIN_ID);
+	}
+
+	public IEclipsePreferences getEclipsePreferences()
+	{
+		return InstanceScope.INSTANCE.getNode(PLUGIN_ID);
 	}
 
 	public DesignApplication getDesignClient()
