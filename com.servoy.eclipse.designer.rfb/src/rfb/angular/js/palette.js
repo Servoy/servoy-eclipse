@@ -161,6 +161,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								$scope.glasspane.style.cursor = "not-allowed";
 							} else $scope.glasspane.style.cursor = "pointer";
 
+							if (canDrop.dropAllowed && canDrop.beforeChild && !canDrop.dropTarget) canDrop.dropTarget = $(".contentframe").contents().find("#svyDesignForm").get(0);
+							
 							if (canDrop.dropTarget && !$scope.isAbsoluteFormLayout() && angularElement) {
 								if ($scope.glasspane.style.cursor == "pointer") {
 
