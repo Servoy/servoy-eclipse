@@ -207,8 +207,8 @@ public class DesignerFilter implements Filter
 								startedArray = true;
 							}
 						}
-						else if (componentsSpecProviderState.getWebObjectSpecifications().containsKey(key) &&
-							isAccesibleInLayoutType(componentsSpecProviderState.getWebObjectSpecifications().get(key), layoutType))
+						else if (componentsSpecProviderState.getWebObjectSpecifications().containsKey(key) && ("servoydefault".equals(key) ||
+							isAccesibleInLayoutType(componentsSpecProviderState.getWebObjectSpecifications().get(key), layoutType)))
 						{
 							PackageSpecification<WebObjectSpecification> pkg = componentsSpecProviderState.getWebObjectSpecifications().get(key);
 							jsonWriter.object();
@@ -335,14 +335,27 @@ public class DesignerFilter implements Filter
 						if (startedArray && componentsSpecProviderState.getWebObjectSpecifications().containsKey(key))
 						{
 							PackageSpecification<WebObjectSpecification> pkg = componentsSpecProviderState.getWebObjectSpecifications().get(key);
-							Collection<WebObjectSpecification> webComponentSpecsCollection = pkg.getSpecifications().values();
-							if ("servoydefault".equals(key))
+							Collection<WebObjectSpecification> webComponentSpecsCollection = null;
+							if ("servoydefault".equals(key) && "Responsive-Layout".equals(layoutType))
 							{
-								ArrayList<WebObjectSpecification> webComponentSpecsCollectionEx = new ArrayList<WebObjectSpecification>(
-									webComponentSpecsCollection);
-								webComponentSpecsCollectionEx.addAll(
-									componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecifications().values());
-								webComponentSpecsCollection = webComponentSpecsCollectionEx;
+								// make sure form component is visible in responsive mode
+								webComponentSpecsCollection = new ArrayList<WebObjectSpecification>();
+								webComponentSpecsCollection.add(
+									componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecification("servoycore-formcomponent"));
+								webComponentSpecsCollection.add(componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecification(
+									"servoycore-listformcomponent"));
+							}
+							else
+							{
+								webComponentSpecsCollection = pkg.getSpecifications().values();
+								if ("servoydefault".equals(key))
+								{
+									ArrayList<WebObjectSpecification> webComponentSpecsCollectionEx = new ArrayList<WebObjectSpecification>(
+										webComponentSpecsCollection);
+									webComponentSpecsCollectionEx.addAll(
+										componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecifications().values());
+									webComponentSpecsCollection = webComponentSpecsCollectionEx;
+								}
 							}
 							for (WebObjectSpecification spec : webComponentSpecsCollection)
 							{
