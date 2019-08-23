@@ -380,6 +380,31 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 											break;
 												
 									}	
+								}
+								if (!beforeNode)
+								{
+									// is this really last or we didn't detect it well, try again with new rectangle
+									for (var i=dropTarget.childNodes.length-1;i>=0;i--)
+									{
+										var node = dropTarget.childNodes[i];
+										if (node && node.getAttribute && node.getAttribute('svy-id'))
+										{
+											var clientRec = node.getBoundingClientRect();
+											var absolutePoint = editorScope.convertToAbsolutePoint({
+												x: clientRec.left,
+												y: clientRec.bottom
+											});
+											// if cursor is in rectangle between bottom left corner of component and top right corner of form we consider it to be before that component
+											// can we enhance it ?
+											if (event.pageY < absolutePoint.y && event.pageX > absolutePoint.x)
+											{
+												beforeNode = node;
+											}
+											else
+												break;
+													
+										}	
+									}
 								}	
 								return {
 									dropAllowed: true,
