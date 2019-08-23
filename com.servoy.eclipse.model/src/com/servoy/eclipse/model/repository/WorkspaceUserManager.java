@@ -935,7 +935,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		try
 		{
-			file.refreshLocal(IResource.DEPTH_ONE, null);
+			// this results in deadlocks beween jobs/threads
+//			file.refreshLocal(IResource.DEPTH_ONE, null);
 			if (file.exists())
 			{
 				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
@@ -2252,8 +2253,10 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				{
 					for (IProject project : projects)
 					{
-						Solution solution = (Solution)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObject(project.getName(),
-							IRepository.SOLUTIONS);
+						Solution solution = (Solution)ApplicationServerRegistry.get()
+							.getDeveloperRepository()
+							.getActiveRootObject(project.getName(),
+								IRepository.SOLUTIONS);
 						if (solution != null)
 						{
 							Iterator<Form> iterator = solution.getForms(null, false);
