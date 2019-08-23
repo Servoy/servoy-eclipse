@@ -45,7 +45,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_PART: "part",
 	GHOST_TYPE_FORM: "form",
 	GHOST_TYPE_INVISIBLE: "invisible",
-	GHOST_TYPE_GROUP: "group"
+	GHOST_TYPE_GROUP: "group",
+	RESPONSIVE_FORM_MIN_HEIGHT: 480
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
 	$editorService, $webSocket, $q, $interval,$allowedChildren,$document,$websocketConstants) {
 	return {
@@ -929,6 +930,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					}
 					
 					 $scope.$evalAsync( function() {  
+					 	if (!$scope.isAbsoluteFormLayout() && $($scope.contentDocument).find('.svy-form')[0] && $($scope.contentDocument).find('.svy-form')[0].offsetHeight < EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT)
+						{ 
+							$scope.getEditorContentRootScope().sfcontentStyle = {'height': EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px'};
+						} 
 						$scope.adjustGlassPaneSize();
 					});
 					
@@ -937,8 +942,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			
 			$scope.adjustIFrameSize = function(){
 		        	delete $scope.contentStyle.height;
-		        	$element.find('.content')[0].style.height = "";
-		        	$element.find('.content')[0].style.bottom = "20px";
+		        	if (!$scope.isAbsoluteFormLayout()) {
+			        	$element.find('.content')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
+			        	$element.find('.content')[0].style.height = "";
+			        }
+			        else
+			       	{
+		        		$element.find('.content')[0].style.bottom = "20px";
+		        	}
 		        	$element.find('.contentframe')[0].style.height = "100%";
 		        	
 		        	$scope.contentStyle.bottom = "20px";
@@ -947,8 +958,15 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		        	//if (h > $element.find('.content-area')[0].offsetHeight) {
 		        	    delete $scope.contentStyle.bottom;
 		        	    $scope.contentStyle.height = h;
-		        	    $element.find('.content')[0].style.bottom = "";
-		        	    $element.find('.content')[0].style.height = h + "px";
+		        	    if (!$scope.isAbsoluteFormLayout()) {
+			        	    $element.find('.content')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
+			        	    $element.find('.contentframe')[0].style['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
+			        	}
+			        	else
+			       		{
+		        	    	$element.find('.content')[0].style.bottom = "";
+		        	    }
+		        	  	$element.find('.content')[0].style.height = h + "px";
 		        	    $element.find('.contentframe')[0].style.height = h + "px";
 				//}
 			}
@@ -970,6 +988,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					    	});
 					    	
 						if (contentDiv.clientHeight < height) {
+							$scope.glasspaneStyle['min-height'] = EDITOR_CONSTANTS.RESPONSIVE_FORM_MIN_HEIGHT+'px';
 							$scope.glasspaneStyle.height = height + "px";// 20 for the body ghost height
 						} else {
 							$scope.glasspaneStyle.height = '100%';

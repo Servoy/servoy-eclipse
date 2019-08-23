@@ -113,7 +113,7 @@
 	<body class="user-selection-off content">
 		<div class="drag-scroll-preventer max" style="overflow: hidden; z-index: 0">
 			<!--Content-->
-			<div class="sfcontent" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px;" ng-include="getUrl()" element-ready="content-loaded">
+			<div class="sfcontent" style="position: absolute; left: 0px; top: 0px; right: 0px;" ng-style="::(addBottom && {'bottom' : '0px'})" ng-include="getUrl()" element-ready="content-loaded">
 			</div>
 		</div>
 	</body>

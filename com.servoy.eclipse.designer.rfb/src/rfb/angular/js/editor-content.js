@@ -300,6 +300,7 @@ angular.module('editorContent',['servoyApp'])
   if (formData.formProperties && formData.formProperties.absoluteLayout) {
 	  $scope.absoluteLayout = formData.formProperties.absoluteLayout[''];
   }
+  $rootScope.addBottom = $scope.absoluteLayout || /MSIE\//.test(window.navigator.userAgent) || /Trident\//.test(window.navigator.userAgent);
 
   if (formData.parts) {
     for (var name in formData.parts) {
