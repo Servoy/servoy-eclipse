@@ -93,6 +93,10 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 							String position = value.toString().trim();
 							if (position.startsWith("calc"))
 							{
+								if (!position.startsWith("calc("))
+								{
+									return "Calculation call should start with calc(";
+								}
 								if (position.indexOf("(") > 0 && position.indexOf(")") > 0)
 								{
 									position = position.substring(position.indexOf("(") + 1, position.lastIndexOf(")"));
