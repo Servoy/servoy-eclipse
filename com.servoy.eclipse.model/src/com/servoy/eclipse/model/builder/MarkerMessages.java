@@ -161,6 +161,8 @@ public class MarkerMessages
 	public static ServoyMarker DuplicateReferencedFormFound = new ServoyMarker(
 		"Duplicate referenced form \"{0}\" found in form \"{1}\". This is not supported.", ServoyBuilder.DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
 
+	public static ServoyMarker DuplicateOverrideFound = new ServoyMarker(
+		"Duplicate form element found \"{0}\" in {1}. This is caused by wrong parent of override element.", ServoyBuilder.WRONG_OVERRIDE_POSITION);
 
 	/**
 	 * This means that for a mobile solution, they use for variables names that are reserved because of the window object in a browser.

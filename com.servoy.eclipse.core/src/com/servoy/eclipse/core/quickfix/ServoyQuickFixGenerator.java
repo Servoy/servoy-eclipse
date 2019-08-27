@@ -225,6 +225,14 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				fixes = new IMarkerResolution[] { new AddTemplateArgumentsQuickFix(uuid, solName,
 					Utils.getAsInteger(marker.getAttribute(IMarker.LINE_NUMBER), false), eventName) };
 			}
+			else if (type.equals(ServoyBuilder.WRONG_OVERRIDE_POSITION))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+				String uuid = (String)marker.getAttribute("Uuid");
+				IPersist persist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), UUID.fromString(uuid));
+				fixes = new IMarkerResolution[] { new MoveElementOverride(persist, servoyProject) };
+			}
 			else if (type.equals(ServoyBuilder.PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE))
 			{
 				String solName = (String)marker.getAttribute("SolutionName");

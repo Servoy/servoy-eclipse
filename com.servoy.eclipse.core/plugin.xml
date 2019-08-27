@@ -475,6 +475,10 @@
       </markerResolutionGenerator>
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.wrongOverridePosition">
+      </markerResolutionGenerator>
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.duplicateSiblingUUID">
       </markerResolutionGenerator>
       <markerResolutionGenerator

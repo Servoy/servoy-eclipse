@@ -355,6 +355,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
 	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
+	public static final String WRONG_OVERRIDE_POSITION = _PREFIX + ".wrongOverridePosition";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -412,6 +413,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DUPLICATION_SAME_REFERENCED_FORM = new Pair<String, ProblemSeverity>("duplicationSameReferencedForm",
 		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DUPLICATION_DUPLICATE_OVERRIDE_FOUND = new Pair<String, ProblemSeverity>(
+		"duplicationDuplicateOverrideFound", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_PROPERTY = new Pair<String, ProblemSeverity>("reservedWindowObjectProperty",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_COLUMN = new Pair<String, ProblemSeverity>("reservedWindowObjectColumn",
@@ -1525,11 +1528,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 			});
 			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
+			final Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
 			flattenedForm.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
 				{
+					String namess = flattenedForm.getName();
 					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
 						((ISupportName)o).getName() != null)
 					{
@@ -1538,13 +1542,53 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							for (IPersist duplicatePersist : duplicates)
 							{
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(),
-									((Form)persist).getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-									duplicatePersist);
+								UUID wrongOverrideUUID = null;
+								if (duplicatePersist instanceof IFormElement && ((IFormElement)duplicatePersist).getExtendsID() == o.getID())
+								{
+									wrongOverrideUUID = duplicatePersist.getUUID();
+								}
+								else if (o instanceof IFormElement && ((IFormElement)o).getExtendsID() == duplicatePersist.getID())
+								{
+									wrongOverrideUUID = o.getUUID();
+								}
+								if (wrongOverrideUUID != null)
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), ((Form)persist).getName());
+									IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_OVERRIDE_FOUND,
+										IMarker.PRIORITY_NORMAL, null, duplicatePersist);
+									try
+									{
+										marker.setAttribute("Uuid", wrongOverrideUUID.toString());
+										marker.setAttribute("SolutionName", project.getName());
+									}
+									catch (CoreException e)
+									{
+										ServoyLog.logError(e);
+									}
 
-								mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+									mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), ((Form)persist).getName());
+									marker = addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_OVERRIDE_FOUND, IMarker.PRIORITY_NORMAL,
+										null, o);
+									try
+									{
+										marker.setAttribute("Uuid", wrongOverrideUUID.toString());
+										marker.setAttribute("SolutionName", project.getName());
+									}
+									catch (CoreException e)
+									{
+										ServoyLog.logError(e);
+									}
+								}
+								else
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(),
+										((Form)persist).getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
+										duplicatePersist);
+
+									mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+								}
 							}
 						}
 						else
@@ -1667,6 +1711,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				deleteMarkers(module.getProject(), DUPLICATE_NAME_MARKER_TYPE);
 				deleteMarkers(module.getProject(), DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
+				deleteMarkers(module.getProject(), WRONG_OVERRIDE_POSITION);
 			}
 			for (final ServoyProject module : modules)
 			{
@@ -2093,6 +2138,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DUPLICATE_UUID);
 		deleteMarkers(project, DUPLICATE_SIBLING_UUID);
 		deleteMarkers(project, DUPLICATE_NAME_MARKER_TYPE);
+		deleteMarkers(project, WRONG_OVERRIDE_POSITION);
 		deleteMarkers(project, DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
 		deleteMarkers(project, RESERVED_WINDOW_OBJECT_USAGE_TYPE);
 		deleteMarkers(project, MISSING_SERVER);

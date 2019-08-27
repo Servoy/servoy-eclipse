@@ -299,6 +299,23 @@
       </attribute>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.wrongOverridePosition"
+         name="Wrong Override Parent"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+      <attribute
+            name="Uuid">
+      </attribute>
+      <attribute
+            name="SolutionName">
+      </attribute>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.duplicateSiblingUUID"
          name="Duplicate UUID"
          point="org.eclipse.core.resources.markers">
