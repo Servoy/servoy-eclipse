@@ -589,52 +589,14 @@ angular.module('editorContent',['servoyApp'])
       layoutData = data;
     },
     setCSSPositionProperties: function(cssPositionObject,cssPosition){
-    	delete cssPositionObject.left;
-    	delete cssPositionObject.right;
-    	delete cssPositionObject.top;
-    	delete cssPositionObject.bottom;
-    	delete cssPositionObject.width;
-    	delete cssPositionObject.height;
-    	delete cssPositionObject['min-width'];
-    	delete cssPositionObject['min-height'];
-    	if (cssPosition.left != -1 && cssPosition.left !== undefined)
-    	{
-    		cssPositionObject.left = isNaN(parseInt(cssPosition.left)) ? cssPosition.left : (parseInt(cssPosition.left) + 'px');
-    	}
-    	if (cssPosition.right != -1 && cssPosition.right !== undefined)
-    	{
-    		cssPositionObject.right = isNaN(parseInt(cssPosition.right)) ? cssPosition.right : (parseInt(cssPosition.right) + 'px');
-    	}
-    	if (cssPosition.top != -1 && cssPosition.top !== undefined)
-    	{
-    		cssPositionObject.top = isNaN(parseInt(cssPosition.top)) ? cssPosition.top : (parseInt(cssPosition.top) + 'px');
-    	}
-    	if (cssPosition.bottom != -1 && cssPosition.bottom !== undefined)
-    	{
-    		cssPositionObject.bottom = isNaN(parseInt(cssPosition.bottom)) ? cssPosition.bottom : (parseInt(cssPosition.bottom) + 'px');
-    	}
-    	if (cssPosition.width != -1 && cssPosition.width !== undefined)
-    	{
-    		if (cssPosition.left != -1 && cssPosition.left !== undefined && cssPosition.right != -1 && cssPosition.right !== undefined)
+    	var properties = ['left','right','top','bottom','width','height','min-width','min-height'];
+    	properties.forEach(prop => {
+    		delete cssPositionObject[prop];
+    		if (cssPosition[prop] !== undefined)
     		{
-    			cssPositionObject['min-width'] = cssPosition.width;
-    		}
-    		else
-    		{
-    			cssPositionObject.width = cssPosition.width;
-    		}	
-    	}
-    	if (cssPosition.height != -1 && cssPosition.height !== undefined)
-    	{
-    		if (cssPosition.top != -1 && cssPosition.top !== undefined && cssPosition.bottom != -1 && cssPosition.bottom !== undefined)
-    		{
-    			cssPositionObject['min-height'] = cssPosition.height;
-    		}
-    		else
-    		{
-    			cssPositionObject.height = cssPosition.height;
-    		}	
-    	}
+    			cssPositionObject[prop] = cssPosition[prop] ;
+    		} 
+    	});
     	return cssPositionObject;
     },
     updateFormData: function(updates) {
