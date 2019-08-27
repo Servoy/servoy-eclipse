@@ -81,6 +81,14 @@ public class EditorEndpoint extends WebsocketEndpoint
 	{
 		if (t instanceof IOException)
 		{
+			String msg = t.getMessage();
+			// Ignore  "broken pipe" errors, those are fired when websocket is closed by the client (navigate to a different url),
+			// then the server gets the close event, but also tries to send a message back to the already closed client, to confirm the close!
+			// According to Tomcat this is because: "RFC 6455, section 5.5.1 Close is a two-stage process and closing the TCP connection is the server's responsibility."
+			if (msg != null && msg.toLowerCase().indexOf("broken pipe") != -1)
+			{
+				return;
+			}
 			log.error("IOException happened", t.getMessage()); // TODO if it has no message but has a 'cause' it will not print anything useful
 		}
 		else
