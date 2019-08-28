@@ -1857,7 +1857,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			ServoyProject solutionProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
 			if (solutionProject != null)
 			{
-				solution = solutionProject.getSolution();
+				solution = solutionProject.getEditingSolution();
 			}
 			if (solution != null)
 			{
@@ -2253,10 +2253,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				{
 					for (IProject project : projects)
 					{
-						Solution solution = (Solution)ApplicationServerRegistry.get()
-							.getDeveloperRepository()
-							.getActiveRootObject(project.getName(),
-								IRepository.SOLUTIONS);
+						Solution solution = (Solution)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObject(project.getName(),
+							IRepository.SOLUTIONS);
 						if (solution != null)
 						{
 							Iterator<Form> iterator = solution.getForms(null, false);
