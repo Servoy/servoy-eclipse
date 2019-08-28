@@ -772,19 +772,29 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				$element.find('.content')[0].style.width = width + "px";
 				$element.find('.content')[0].style.right = "";
 				$element.find('.content')[0].style.minWidth = "";
+				$($scope.contentDocument).find('.svy-form').css('width', width);
+				$($scope.contentDocument).find('.svy-form').css('height', height);
+				$element.find('.content')[0].style.height = height;
+		       	$element.find('.contentframe')[0].style.height = height;
 				$scope.adjustGlassPaneSize(width, height);
-				if (fixedSize)
-				{
-					$scope.redrawDecorators()
-				}	
+				$scope.redrawDecorators();
 			}
+			
+			var initialWidth;
+			$scope.getFormInitialWidth = function() {
+				if (!initialWidth)
+				{
+					initialWidth = $element.find('.content')[0].getBoundingClientRect().width + "px";
+				}
+				return initialWidth;
+			}
+			
 			$scope.setContentSizeFull = function(redraw) {
 				$scope.contentStyle = {
 					position: "absolute",
 					top: "20px",
 					left: "20px",
 					right: "20px",
-					minWidth: "992px",
 					bottom: "20px"
 				};
 				$scope.contentSizeFull = true;
@@ -792,6 +802,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				delete $scope.contentStyle.height;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
+				$($scope.contentDocument).find('.svy-form').css('height', '');
+				$($scope.contentDocument).find('.svy-form').css('width', '');
 				$scope.adjustGlassPaneSize();
 				if (redraw)
 				{
@@ -1034,8 +1046,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
+				var deferred = $q.defer();
+				$scope.contentLoaded = deferred.promise;
 				editorContentRootScope.$on(EDITOR_EVENTS.ADJUST_SIZE, function() {
 					$editorService.adjustSizes();
+					deferred.resolve();
 				})
 				//call set content sizes 
 				//in the less likely situation in which we missed the CONTENT_LOADED event
@@ -1644,6 +1659,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			editorScope.adjustIFrameSize();
 			editorScope.adjustGlassPaneSize();
 			editorScope.redrawDecorators();
+		},
+		
+		getFormFixedSize: function() {
+			return wsSession.callService('formeditor', 'getFormFixedSize');
+		},
+
+		setFormFixedSize: function(args) {
+			return wsSession.callService('formeditor', 'setFormFixedSize', args);
 		}
 
 		// add more service methods here
