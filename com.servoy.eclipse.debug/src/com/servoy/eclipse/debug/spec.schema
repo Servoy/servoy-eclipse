@@ -485,6 +485,10 @@
 							"description": "Execute this api call async (don't wait for return value).",
 							"type": "boolean"
 						},
+						"async-now": {
+							"description": "Execute this api call async (don't wait for return value) but execute it right away.",
+							"type": "boolean"
+						},
 						"globalExclusive": {
 							"description": "Deprecated. Use discardPreviouslyQueuedSimilarCalls instead.",
 							"type": "boolean"
