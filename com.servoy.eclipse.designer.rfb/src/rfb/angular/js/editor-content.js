@@ -590,13 +590,15 @@ angular.module('editorContent',['servoyApp'])
     },
     setCSSPositionProperties: function(cssPositionObject,cssPosition){
     	var properties = ['left','right','top','bottom','width','height','min-width','min-height'];
-    	properties.forEach(prop => {
+    	for ( var i = 0 ;i<properties.length;i++)
+    	{
+    		var prop = properties[i];
     		delete cssPositionObject[prop];
     		if (cssPosition[prop] !== undefined)
     		{
     			cssPositionObject[prop] = cssPosition[prop] ;
-    		} 
-    	});
+    		}
+    	}	
     	return cssPositionObject;
     },
     updateFormData: function(updates) {
