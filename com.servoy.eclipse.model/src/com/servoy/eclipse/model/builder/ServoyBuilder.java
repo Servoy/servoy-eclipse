@@ -355,7 +355,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
 	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
-	public static final String WRONG_OVERRIDE_POSITION = _PREFIX + ".wrongOverridePosition";
+	public static final String WRONG_OVERRIDE_PARENT = _PREFIX + ".wrongOverridePosition";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -1711,7 +1711,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				deleteMarkers(module.getProject(), DUPLICATE_NAME_MARKER_TYPE);
 				deleteMarkers(module.getProject(), DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
-				deleteMarkers(module.getProject(), WRONG_OVERRIDE_POSITION);
+				deleteMarkers(module.getProject(), WRONG_OVERRIDE_PARENT);
 			}
 			for (final ServoyProject module : modules)
 			{
@@ -2138,7 +2138,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DUPLICATE_UUID);
 		deleteMarkers(project, DUPLICATE_SIBLING_UUID);
 		deleteMarkers(project, DUPLICATE_NAME_MARKER_TYPE);
-		deleteMarkers(project, WRONG_OVERRIDE_POSITION);
+		deleteMarkers(project, WRONG_OVERRIDE_PARENT);
 		deleteMarkers(project, DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
 		deleteMarkers(project, RESERVED_WINDOW_OBJECT_USAGE_TYPE);
 		deleteMarkers(project, MISSING_SERVER);
