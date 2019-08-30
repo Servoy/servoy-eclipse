@@ -40,6 +40,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	private String appServerDir = "../../application_server";
 	private boolean exportUsingDbiFileInfoOnly = false;
 	private boolean ignoreBuildErrors = false;
+	private boolean skipBuild = false;
 	protected String MANDATORY_ARGS_INDENT = "   ";
 
 
@@ -63,6 +64,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			if (argsMap.containsKey("pl")) aggregateWorkspace = true;
 			if (argsMap.containsKey("dbi") || argsMap.containsKey("dbd")) exportUsingDbiFileInfoOnly = true;
 			if (argsMap.containsKey("ie")) ignoreBuildErrors = true;
+			if (argsMap.containsKey("sb")) skipBuild = true;
 
 			if (!mustShowHelp) parseArguments(argsMap);
 
@@ -202,6 +204,9 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "             and so on.\n"
 			+ "        -ie ignore build errors.  CAUTION! the use of this flag is discouraged; it can cause\n"
 			+ "             invalid solutions to be exported.\n"
+			+ "        -sb skip build. No build markers will be generated. This can greatly decrease\n"
+			+ "             export time. CAUTION! the use of this flag is discouraged;\n"
+			+ "             it can cause invalid solutions to be exported.\n"
 			+ getHelpMessageDbi();
 		// @formatter:on
 	}
@@ -303,6 +308,12 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	public boolean shouldIgnoreBuildErrors()
 	{
 		return ignoreBuildErrors;
+	}
+
+	@Override
+	public boolean skipBuild()
+	{
+		return skipBuild;
 	}
 
 }

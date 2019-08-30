@@ -51,4 +51,5 @@ public interface IArgumentChest
 
 	public String getExportFilePath();
 
+	public boolean skipBuild();
 }
