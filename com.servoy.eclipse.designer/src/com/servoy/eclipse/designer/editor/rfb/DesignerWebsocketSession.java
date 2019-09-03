@@ -203,6 +203,17 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				UUID parentuuid = null;
 
 				boolean componentFound = false;
+				boolean responsive = form.isResponsiveLayout();
+				int mainContainerID = -1;
+				if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
+				{
+					AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
+					if (container instanceof LayoutContainer)
+					{
+						responsive = !CSSPositionUtils.isCSSPositionContainer((LayoutContainer)container);
+						mainContainerID = container.getID();
+					}
+				}
 				if (name != null)
 				{
 					Collection<IFormElement> baseComponents = wrapper.getBaseComponents();
@@ -211,15 +222,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
-							boolean responsive = form.isResponsiveLayout();
-							if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
-							{
-								AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
-								if (container instanceof LayoutContainer && CSSPositionUtils.isCSSPositionContainer((LayoutContainer)container))
-								{
-									responsive = false;
-								}
-							}
 							if (!responsive) FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
 							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm);
 							if (!responsive) FormLayoutGenerator.generateEndDiv(w);
@@ -246,7 +248,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							IPersist parent = ((ISupportExtendsID)child).getRealParent();
 							parentuuid = parent instanceof Form ? null : parent.getUUID();
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w,
-								new DesignProperties(), FormElementHelper.INSTANCE);
+								new DesignProperties(mainContainerID), FormElementHelper.INSTANCE);
 						}
 					}
 				}
