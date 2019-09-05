@@ -36,7 +36,6 @@ angular.module("menubar",[]).directive("menubar", function($editorService, $root
                         component.rightSibling = $scope.node.node.attr("svy-id");
                         component.keepOldSelection = true;
                         $editorService.createComponent(component);
-                        $editorService.adjustSizes();
                     }
                 },
                  {
@@ -65,7 +64,6 @@ angular.module("menubar",[]).directive("menubar", function($editorService, $root
                         }
                         component.keepOldSelection = true;
                         $editorService.createComponent(component);
- 						$editorService.adjustSizes();
                     }
                 },
                 {
@@ -127,7 +125,6 @@ angular.module("menubar",[]).directive("menubar", function($editorService, $root
                     {
                         e.stopPropagation();
 						$editorService.keyPressed({"keyCode":46});
-						$editorService.adjustSizes();
                     }
                 }
             ];

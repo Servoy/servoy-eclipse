@@ -108,8 +108,12 @@ angular.module('editorContent',['servoyApp'])
 			$rootScope.$watch('showWireframe', adjustFormSize);
 			$rootScope.$watch('showSolutionLayoutsCss', adjustFormSize);
 			$rootScope.$watch('showSolutionCss', adjustFormSize);
+			
+			$scope.$on('UPDATE_FORM_DATA', function() {	
+				adjustFormSize();
+			});
 		}
-	});	      
+	});
   
   //this preventDefault should not be needed because we have the glasspane 
   //however, the SWT browser on OS X needs this in order to show our editor context menu when right-clicking on the iframe 
@@ -759,6 +763,9 @@ angular.module('editorContent',['servoyApp'])
           }
 
           renderDecorators();
+          if (!$rootScope.getDesignFormControllerScope().absoluteLayout) {
+			$rootScope.$broadcast("UPDATE_FORM_DATA");
+		  }
         });
       }
       if (data && data.solutionProperties && formData.solutionProperties.styleSheets) {
