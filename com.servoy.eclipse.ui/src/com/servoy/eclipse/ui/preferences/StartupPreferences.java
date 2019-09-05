@@ -38,6 +38,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -58,9 +59,11 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS = "debugger.showConfirmationDialogWhenErrors";
 	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS = "debugger.showConfirmationDialogWhenWarnings";
 	public static final String STARTUP_EXTENSION_UPDATE_CHECK = "startup.checkForExtensionUpdates";
+	public static final String STARTUP_SHOW_START_PAGE = "servoy.developer.showStartPage";
 	public static boolean DEFAULT_ERROR_CONFIRMATION = true;
 	public static boolean DEFAULT_WARNING_CONFIRMATION = false;
 	public static boolean DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK = false;
+	public static boolean DEFAULT_STARTUP_SHOW_START_PAGE = true;
 
 	private static final int RETRIES_DEFAULT = 5;
 
@@ -71,6 +74,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	private Button showErrorsConfirmation;
 	private Button showWarningsConfirmation;
 	private Button startupExtensionUpdateCheck;
+	private Button showStartPageCheck;
 
 	public void init(IWorkbench workbench)
 	{
@@ -122,6 +126,8 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		showErrorsConfirmation.setText("Check for error markers when launching (debug) client");
 		showWarningsConfirmation = new Button(others, SWT.CHECK);
 		showWarningsConfirmation.setText("Check for warning markers when launching (debug) client");
+		showStartPageCheck = new Button(others, SWT.CHECK);
+		showStartPageCheck.setText("Show start page");
 
 		// layout contents
 		GridLayoutFactory gridFactory = GridLayoutFactory.fillDefaults();
@@ -155,6 +161,12 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		showErrorsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, DEFAULT_ERROR_CONFIRMATION));
 		showWarningsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, DEFAULT_WARNING_CONFIRMATION));
 		startupExtensionUpdateCheck.setSelection(eclipsePreferences.getBoolean(STARTUP_EXTENSION_UPDATE_CHECK, DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK));
+		showStartPageCheck.setSelection(Utils.getAsBoolean(Settings.getInstance().getProperty(STARTUP_SHOW_START_PAGE, "true")));
+		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
+		{
+			showStartPageCheck.setEnabled(false);
+			showStartPageCheck.setSelection(true);
+		}
 	}
 
 	@Override
@@ -181,6 +193,11 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, showErrorsConfirmation.getSelection());
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, showWarningsConfirmation.getSelection());
 		eclipsePreferences.putBoolean(STARTUP_EXTENSION_UPDATE_CHECK, startupExtensionUpdateCheck.getSelection());
+		Settings.getInstance().setProperty(STARTUP_SHOW_START_PAGE, new Boolean(showStartPageCheck.getSelection()).toString());
+		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
+		{
+			Settings.getInstance().setProperty(STARTUP_SHOW_START_PAGE, "true");
+		}
 		return true;
 	}
 
@@ -197,6 +214,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		startupExtensionUpdateCheck.setSelection(DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK);
 		showErrorsConfirmation.setSelection(DEFAULT_ERROR_CONFIRMATION);
 		showWarningsConfirmation.setSelection(DEFAULT_WARNING_CONFIRMATION);
+		showStartPageCheck.setSelection(DEFAULT_STARTUP_SHOW_START_PAGE);
 		super.performDefaults();
 	}
 }
