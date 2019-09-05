@@ -505,7 +505,7 @@ angular.module('editorContent',['servoyApp'])
     	if(forceUpdate || domParentUUID != currentParentUUID) {
     		elementsToRemove.push(elementTemplate);
     	}
-    	else if (updateData.childParentMap[elementId].location > -1 && updateData.childParentMap[elementId].location != parseInt(elementTemplate.attr('svy-location'))){
+    	else if (updateData.childParentMap[elementId].location > -1 && elementTemplate.attr('svy-location') && updateData.childParentMap[elementId].location != parseInt(elementTemplate.attr('svy-location'))){
     		// location(order) is changed, we need to reinsert this node
     		elementsToRemove.push(elementTemplate);
     	}
