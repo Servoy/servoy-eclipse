@@ -153,6 +153,7 @@ public class EditorContentFilter implements Filter
 			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionAndFormName.getLeft());
 			FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
 			Form flattenedForm = fs.getFlattenedForm(fs.getForm(solutionAndFormName.getRight()));
+			if (flattenedForm == null) return; //form renamed
 			HTTPUtils.setNoCacheHeaders((HttpServletResponse)response);
 
 			String containerID = httpServletRequest.getParameter("cont");

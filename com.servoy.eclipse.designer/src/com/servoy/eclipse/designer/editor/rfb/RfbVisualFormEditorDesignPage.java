@@ -142,6 +142,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	private EditorServiceHandler editorServiceHandler;
 
 	private String layout = null;
+	private String formName = null;
 	protected WebsocketSessionKey editorKey = null;
 	protected WebsocketSessionKey clientKey = null;
 	private AbstractContainer showedContainer;
@@ -242,9 +243,10 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		}
 
 		String newLayout = computeLayout(flattenedForm, isCSSPositionContainer);
-		if (!Utils.equalObjects(layout, newLayout) || force)
+		if (!Utils.equalObjects(layout, newLayout) || !Utils.equalObjects(formName, flattenedForm.getName()) || force)
 		{
 			layout = newLayout;
+			formName = flattenedForm.getName();
 			Dimension formSize = flattenedForm.getSize();
 			if (isCSSPositionContainer) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
