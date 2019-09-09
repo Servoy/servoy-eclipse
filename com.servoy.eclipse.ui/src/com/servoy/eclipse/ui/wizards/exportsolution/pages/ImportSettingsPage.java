@@ -261,7 +261,7 @@ public class ImportSettingsPage extends WizardPage implements Listener
 			public void modifyText(ModifyEvent e)
 			{
 				checkbox.setSelection(true);
-				importSettings.put(ALLOWED_DATA_MODEL_CHANGES, allowedServers.getText());
+				importSettings.put(ALLOWED_DATA_MODEL_CHANGES, "".equals(allowedServers.getText()) ? Boolean.toString(true) : allowedServers.getText());
 				exportSolutionWizard.getModel().setImportSettings(importSettings);
 			}
 		});
