@@ -1098,7 +1098,15 @@ public class TypeCreator extends TypeCache
 		type.setName(fullTypeName);
 		type.setKind(TypeKind.JAVA);
 		// test form formcomponnent properties
-		String specName = fullTypeName.substring(RUNTIME_WEB_COMPONENT.length() + 1, fullTypeName.length() - 1);
+		String specName = null;
+		if (fullTypeName.startsWith(RUNTIME_WEB_COMPONENT))
+		{
+			specName = fullTypeName.substring(RUNTIME_WEB_COMPONENT.length() + 1, fullTypeName.length() - 1);
+		}
+		else
+		{
+			specName = fullTypeName.substring("WebService".length() + 1, fullTypeName.length() - 1);
+		}
 		int index = specName.indexOf('<');
 		Map<String, String> configProperties = new HashMap<String, String>();
 		if (index != -1)
