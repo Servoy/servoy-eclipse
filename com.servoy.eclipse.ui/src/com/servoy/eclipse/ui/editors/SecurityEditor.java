@@ -66,6 +66,7 @@ import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
+import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -112,6 +113,8 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 
 		groupText = new Text(container, SWT.BORDER);
 
+		groupText.addVerifyListener(DocumentValidatorVerifyListener.IDENT_JSON_VERIFIER);
+
 		Button newGroupButton;
 		newGroupButton = new Button(container, SWT.NONE);
 		newGroupButton.setText("New Group");
@@ -121,6 +124,8 @@ public class SecurityEditor extends EditorPart implements IActiveProjectListener
 		newUserButton.setText("New User");
 
 		userNameText = new Text(container, SWT.BORDER);
+
+		userNameText.addVerifyListener(DocumentValidatorVerifyListener.IDENT_JSON_VERIFIER);
 
 		treeContainer = new Composite(container, SWT.NONE);
 		tableContainer = new Composite(container, SWT.NONE);

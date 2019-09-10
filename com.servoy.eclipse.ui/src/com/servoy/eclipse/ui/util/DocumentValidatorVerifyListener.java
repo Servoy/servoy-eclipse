@@ -34,17 +34,20 @@ import com.servoy.j2db.util.docvalidator.ValidatingDocument.IDocumentValidator;
 
 /**
  * Verify listener that uses document validators for validating changes.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class DocumentValidatorVerifyListener implements VerifyListener
 {
-	public static final DocumentValidatorVerifyListener IDENT_SQL_VERIFIER = new DocumentValidatorVerifyListener(new IdentDocumentValidator(
-		IdentDocumentValidator.TYPE_SQL));
-	public static final DocumentValidatorVerifyListener IDENT_SERVOY_VERIFIER = new DocumentValidatorVerifyListener(new IdentDocumentValidator(
-		IdentDocumentValidator.TYPE_SERVOY));
+	public static final DocumentValidatorVerifyListener IDENT_SQL_VERIFIER = new DocumentValidatorVerifyListener(
+		new IdentDocumentValidator(IdentDocumentValidator.TYPE_SQL));
+	public static final DocumentValidatorVerifyListener IDENT_SERVOY_VERIFIER = new DocumentValidatorVerifyListener(
+		new IdentDocumentValidator(IdentDocumentValidator.TYPE_SERVOY));
 	public static final DocumentValidatorVerifyListener NUMBER_VERIFIER = new DocumentValidatorVerifyListener(new NumberDocumentValidator());
+
+	public static final DocumentValidatorVerifyListener IDENT_JSON_VERIFIER = new DocumentValidatorVerifyListener(
+		new IdentDocumentValidator(IdentDocumentValidator.TYPE_JSON));
 
 	private final IDocumentValidator[] validators;
 
