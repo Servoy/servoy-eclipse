@@ -345,13 +345,23 @@ public class ProfilerView extends ViewPart
 			sb.append("\" source=\"");
 			sb.append(sourceName);
 			sb.append("\">");
+			Collection<DataCallProfileData> dataCallProfileDatas = getDataCallProfileDataMap();
+			if (dataCallProfileDatas != null)
+			{
+				for (DataCallProfileData dataCallProfileData : dataCallProfileDatas)
+				{
+					sb.append('\n');
+					sb.append(childPrefix);
+					dataCallProfileData.toXML(sb);
+				}
+			}
 			for (AggregateData child : callees)
 			{
 				sb.append('\n');
 				sb.append(childPrefix);
 				child.toXML(sb);
 			}
-			sb.append("</aggregatedata>");
+			sb.append("\n</aggregatedata>\n");
 		}
 
 		public Collection<DataCallProfileData> getDataCallProfileDataMap()
