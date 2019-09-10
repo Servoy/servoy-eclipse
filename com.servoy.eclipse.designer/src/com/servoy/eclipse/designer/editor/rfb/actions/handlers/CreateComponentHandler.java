@@ -673,7 +673,7 @@ public class CreateComponentHandler implements IServerService
 							Iterator<IPersist> it = parent.getAllObjects();
 							while (it.hasNext())
 							{
-								ElementUtil.getOverridePersist(PersistContext.create(it.next(), editorPart.getForm()));
+								changes.add(ElementUtil.getOverridePersist(PersistContext.create(it.next(), editorPart.getForm())));
 							}
 						}
 						else
