@@ -350,7 +350,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		{
 			var canDrop = utils.getDropNode(type, topContainer, layoutName, event, undefined, svyId);
 			canDrop.dropAllowed = canDrop.dropAllowed && angular.element(dragNode).hasClass("inheritedElement")
-					&& initialParent[0].getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
+					&& initialParent !== null && initialParent[0].getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
 			return canDrop;
 		}
 		
@@ -664,7 +664,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						if (canDrop.dropTarget && editorScope.selectionToDrag) {
 								for (var i = 0; i < editorScope.selectionToDrag.length; i++) {
 									var node = angular.element(editorScope.selectionToDrag[i]);
-									if (editorScope.glasspane.style.cursor == "pointer") {
+									if (editorScope.glasspane.style.cursor == "pointer" && !node[0].contains(canDrop.dropTarget)) {
 										if (canDrop.beforeChild) {
 											node.insertBefore(canDrop.beforeChild);
 										} else if (node.parent()[0] != canDrop.dropTarget || canDrop.append) {

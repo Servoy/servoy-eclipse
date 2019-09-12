@@ -942,6 +942,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$scope.adjustIFrameSize = function(){
 		        	delete $scope.contentStyle.height;
 		        	if (!$scope.isAbsoluteFormLayout()) {
+						$scope.glasspaneStyle['min-height'] = $scope.contentArea.clientHeight-20+'px';
 			        	$element.find('.content')[0].style['min-height'] = $scope.contentArea.clientHeight-40+'px';
 			        	$element.find('.content')[0].style.height = "";
 			        }
