@@ -7,12 +7,12 @@
 <parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2019.9.0.3520_rc</version>
+		<version>2019.9.0.3521_rc2</version>
 	</parent>
 
 	<artifactId>com.servoy.jre.macosx.x86_64.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>12.0.2</version>
+	<version>12.0.0</version>
 	
 	<properties>
 		<jre.version>jdk-12.0.2+10-jre</jre.version>
