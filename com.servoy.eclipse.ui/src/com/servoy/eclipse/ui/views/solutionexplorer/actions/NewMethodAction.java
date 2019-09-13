@@ -369,7 +369,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 											}
 											if (spec.getDeclaredCustomObjectTypes().containsKey(argumentType))
 											{
-												argumentType = spec.getName() + "." + argumentType;
+												argumentType = "CustomType<" + spec.getName() + "." + argumentType + ">";
 											}
 											if (isArray)
 											{
