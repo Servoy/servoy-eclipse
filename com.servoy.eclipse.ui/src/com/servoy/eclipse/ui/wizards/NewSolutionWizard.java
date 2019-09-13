@@ -268,6 +268,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				monitor.beginTask(jobName, 1);
 				// set this solution as the new active solution or add it as a module
 				ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+				if (newProject == null)
+				{
+					servoyModel.refreshServoyProjects();
+					newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+				}
 				if (newProject != null)
 				{
 					if (addAsModuleToActiveSolution)
@@ -351,38 +356,46 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 				{
-					IProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-						configPage.getNewSolutionName()).getProject();
-					try
+					ServoyProject newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
+					if (newProject == null)
 					{
-						project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+						servoyModel.refreshServoyProjects();
+						newProject = servoyModel.getServoyProject(configPage.getNewSolutionName());
 					}
-					catch (CoreException e1)
+					if (newProject != null)
 					{
-						e1.printStackTrace();
-					}
-					IFolder folder = project.getFolder(SolutionSerializer.NG_PACKAGES_DIR_NAME);
-
-					try
-					{
-						folder.create(true, true, new NullProgressMonitor());
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
-					}
-
-					for (String name : packs)
-					{
-						InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
-						IFile eclipseFile = folder.getFile(name + ".zip");
+						IProject project = newProject.getProject();
 						try
 						{
-							eclipseFile.create(is, IResource.NONE, new NullProgressMonitor());
+							project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+						}
+						catch (CoreException e1)
+						{
+							e1.printStackTrace();
+						}
+						IFolder folder = project.getFolder(SolutionSerializer.NG_PACKAGES_DIR_NAME);
+
+						try
+						{
+							folder.create(true, true, new NullProgressMonitor());
 						}
 						catch (CoreException e)
 						{
-							Debug.log(e);
+							ServoyLog.logError(e);
+						}
+
+						for (String name : packs)
+						{
+							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+							IFile eclipseFile = folder.getFile(name + ".zip");
+							try
+							{
+								eclipseFile.create(is, IResource.NONE, new NullProgressMonitor());
+							}
+							catch (CoreException e)
+							{
+								Debug.log(e);
+							}
 						}
 					}
 				}
