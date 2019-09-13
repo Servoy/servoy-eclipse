@@ -288,6 +288,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class TypeCreator extends TypeCache
 {
+	static final String WEB_SERVICE = "WebService";
 	static final String RUNTIME_WEB_COMPONENT = "RuntimeWebComponent";
 	static final String CUSTOM_TYPE = "CustomType";
 	private static final String STANDARD_ELEMENT_NAME = "elements.elem";
@@ -1105,7 +1106,7 @@ public class TypeCreator extends TypeCache
 		}
 		else
 		{
-			specName = fullTypeName.substring("WebService".length() + 1, fullTypeName.length() - 1);
+			specName = fullTypeName.substring(WEB_SERVICE.length() + 1, fullTypeName.length() - 1);
 		}
 		int index = specName.indexOf('<');
 		Map<String, String> configProperties = new HashMap<String, String>();
@@ -1179,10 +1180,22 @@ public class TypeCreator extends TypeCache
 			{
 				method.setDeprecated(api.isDeprecated());
 			}
-			JSType returnType = getType(context, api.getReturnType());
-			if (returnType == null && api.getReturnType() != null)
+
+			PropertyDescription pd = api.getReturnType();
+			JSType returnType = getType(context, pd);
+			if (returnType == null && pd != null)
 			{
-				returnType = getTypeRef(null, api.getReturnType().getType().getName());
+				if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+					((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+				{
+
+					returnType = getTypeRef(null, CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
+				}
+				else
+				{
+					returnType = getTypeRef(null, pd.getType().getName());
+				}
+
 				if (PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
 				{
 					returnType = TypeUtil.arrayOf(returnType);
@@ -1210,7 +1223,7 @@ public class TypeCreator extends TypeCache
 			}
 			members.add(method);
 		}
-		if (!fullTypeName.startsWith("WebService"))
+		if (!fullTypeName.startsWith(WEB_SERVICE))
 		{
 			boolean hasStyleclass = spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
 				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0;
