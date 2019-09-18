@@ -3962,7 +3962,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_NESTED_LIST, IMarker.PRIORITY_NORMAL, null,
 													listFormComponent);
 											}
-											else
+											else if (frm != null)
 											{
 												checkForListFormComponent(frm, listFormComponent);
 											}
