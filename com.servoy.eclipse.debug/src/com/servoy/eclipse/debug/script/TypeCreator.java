@@ -4626,34 +4626,29 @@ public class TypeCreator extends TypeCache
 							continue;
 						}
 						String name = pd.getName();
-						// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
-						// and skip the dataprovider properties (those are not accesable through scripting)
-						if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
+						JSType memberType = getType(null, pd);
+						String pdTypeName = pd.getType().getName();
+						if ("object".equals(pdTypeName)) pdTypeName = "Object";
+						if (memberType == null)
 						{
-							JSType memberType = getType(null, pd);
-							String pdTypeName = pd.getType().getName();
-							if ("object".equals(pdTypeName)) pdTypeName = "Object";
-							if (memberType == null)
+							if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+								((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
 							{
-								if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
-									((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
-								{
 
-									memberType = getTypeRef(null, CUSTOM_TYPE + '<' + pdTypeName + '>');
-								}
-								else
-								{
-									memberType = getTypeRef(null, pdTypeName);
-								}
+								memberType = getTypeRef(null, CUSTOM_TYPE + '<' + pdTypeName + '>');
 							}
-							if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
+							else
 							{
-								memberType = TypeUtil.arrayOf(memberType);
+								memberType = getTypeRef(null, pdTypeName);
 							}
-							Property property = createProperty(name, false, memberType, "", null);
-							property.setDeprecated(pd.isDeprecated());
-							members.add(property);
 						}
+						if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
+						{
+							memberType = TypeUtil.arrayOf(memberType);
+						}
+						Property property = createProperty(name, false, memberType, "", null);
+						property.setDeprecated(pd.isDeprecated());
+						members.add(property);
 					}
 				}
 				return addType(null, type);
