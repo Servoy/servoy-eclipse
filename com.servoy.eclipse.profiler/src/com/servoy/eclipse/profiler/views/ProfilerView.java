@@ -63,7 +63,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -100,11 +99,13 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.profiler.Activator;
+import com.servoy.eclipse.ui.editors.table.ColumnsSorter;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.debug.DataCallProfileData;
 import com.servoy.j2db.debug.IProfileListener;
 import com.servoy.j2db.debug.ProfileData;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.ScriptVariable;
 
 /**
@@ -928,10 +929,6 @@ public class ProfilerView extends ViewPart
 		}
 	}
 
-	class NameSorter extends ViewerSorter
-	{
-	}
-
 	private TreeColumn methodNameColumn;
 	private TreeColumn ownTimeColumn;
 	private TreeColumn timeColumn;
@@ -1018,7 +1015,60 @@ public class ProfilerView extends ViewPart
 
 		methodCallViewer.setContentProvider(methodCallContentProvider);
 		methodCallViewer.setLabelProvider(new MethodCallLabelProvider());
-		// viewer.setSorter(new NameSorter());
+		methodCallViewer.setSorter(new ColumnsSorter(methodCallViewer, new TreeColumn[] { methodNameColumn, timeColumn, ownTimeColumn, fileColumn, argsColumn },
+			new Comparator[] { new Comparator()
+			{
+
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					String name1 = o1 instanceof ProfileData ? ((ProfileData)o1).getMethodName() : ((AggregateData)o1).getMethodName();
+					String name2 = o2 instanceof ProfileData ? ((ProfileData)o2).getMethodName() : ((AggregateData)o2).getMethodName();
+					return NameComparator.INSTANCE.compare(name1, name2);
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTime() : ((AggregateData)o1).getTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTime() : ((AggregateData)o2).getTime();
+					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getOwnTime() : ((AggregateData)o1).getOwnTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getOwnTime() : ((AggregateData)o2).getOwnTime();
+					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					String path1 = o1 instanceof ProfileData ? ((ProfileData)o1).getSourceName() : ((AggregateData)o1).getSourceName();
+					String path2 = o2 instanceof ProfileData ? ((ProfileData)o2).getSourceName() : ((AggregateData)o2).getSourceName();
+					return NameComparator.INSTANCE.compare(path1, path2);
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					if (o1 instanceof ProfileData)
+					{
+						return NameComparator.INSTANCE.compare(((ProfileData)o1).getArgs(), ((ProfileData)o2).getArgs());
+					}
+					else
+					{
+						return ((AggregateData)o1).getCount() - ((AggregateData)o2).getCount();
+					}
+				}
+			} }));
+
 		methodCallViewer.setInput(getViewSite());
 
 		sqlDataViewer = new TableViewer(sashForm);
