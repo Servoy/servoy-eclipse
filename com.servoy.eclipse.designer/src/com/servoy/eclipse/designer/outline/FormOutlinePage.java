@@ -40,8 +40,8 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -131,10 +131,10 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		getTreeViewer().setInput(form);
 
 		// hack around the fact that somehow if you click directly inside the outline view when coming from the Chromium browser editor, the right part is not activated.
-		getTreeViewer().getControl().addFocusListener(new FocusAdapter()
+		getTreeViewer().getControl().addMouseListener(new MouseAdapter()
 		{
 			@Override
-			public void focusGained(FocusEvent e)
+			public void mouseDown(MouseEvent e)
 			{
 				IViewPart outlinePart = getSite().getPage().findView("org.eclipse.ui.views.ContentOutline");
 				if (outlinePart != null && getSite().getPage().getActivePart() != outlinePart)
