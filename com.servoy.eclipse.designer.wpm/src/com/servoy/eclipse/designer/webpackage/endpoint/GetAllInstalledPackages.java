@@ -27,8 +27,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
@@ -135,7 +137,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 
 				if ("Solution".equals(type))
 				{
-					String moduleParent = findModuleParent(ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolution(), name);
+					String moduleParent = findModuleParent(ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolution(), name,
+						new HashSet<String>());
 					if (moduleParent != null)
 					{
 						pack.put("activeSolution", moduleParent);
@@ -229,9 +232,10 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
-	private static String findModuleParent(Solution solution, String moduleName)
+	private static String findModuleParent(Solution solution, String moduleName, Set<String> alreadyCheckedSolutions)
 	{
 		if (solution == null) return null;
+		alreadyCheckedSolutions.add(solution.getName());
 		String[] modules = Utils.getTokenElements(solution.getModulesNames(), ",", true);
 		List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
 		if (modulesList.size() == 0)
@@ -246,10 +250,11 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		{
 			for (String module : modulesList)
 			{
+				if (alreadyCheckedSolutions.contains(module)) continue;
 				ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(module);
 				if (solutionProject != null)
 				{
-					String moduleParent = findModuleParent(solutionProject.getSolution(), moduleName);
+					String moduleParent = findModuleParent(solutionProject.getSolution(), moduleName, alreadyCheckedSolutions);
 					if (moduleParent != null)
 					{
 						return moduleParent;
