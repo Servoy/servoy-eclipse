@@ -12,10 +12,10 @@
 
 	<artifactId>com.servoy.jre.macosx.x86_64.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>12.0.2</version>
+	<version>12.0.0</version>
 	
 	<properties>
-		<jre.version>jdk-12.0.2+10-jre</jre.version>
+		<jre.version>jdk-13+33-jre</jre.version>
 	</properties>
 	
 	<build>
@@ -71,7 +71,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk12-binaries/releases/download/jdk-12.0.2%2B10.2_openj9-0.15.1/OpenJDK12U-jre_x64_mac_openj9_12.0.2_10_openj9-0.15.1.tar.gz</url>
+							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33_openj9-0.16.0/OpenJDK13U-jre_x64_mac_openj9_13_33_openj9-0.16.0.tar.gz</url>
 							<outputFileName>jre12.tar.gz</outputFileName>
 						</configuration>
 					</execution>

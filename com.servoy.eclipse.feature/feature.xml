@@ -88,19 +88,19 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="com.servoy.jre.linux.x86_64.feature"
-         version="0.0.0"
+         version="12.0.0"
          os="linux"
          arch="x86_64"/>
 
    <includes
          id="com.servoy.jre.macosx.x86_64.feature"
-         version="0.0.0"
+         version="12.0.0"
          os="macosx"
          arch="x86_64"/>
 
    <includes
          id="com.servoy.jre.win32.x86_64.feature"
-         version="0.0.0"
+         version="12.0.0"
          os="win32"
          arch="x86_64"/>
 
