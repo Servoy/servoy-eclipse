@@ -299,6 +299,12 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
 				fixes = new IMarkerResolution[] { new ClearLingeringTableFilesQuickFix(persist, servoyProject) };
 			}
+			else if (type.equals(ServoyBuilder.INVALID_TABLE_NO_PRIMARY_KEY_TYPE))
+			{
+				final String serverName = (String)marker.getAttribute("serverName");
+				final String tableName = (String)marker.getAttribute("tableName");
+				fixes = new IMarkerResolution[] { new InvalidTableBecauseNoPrimaryKeyQuickFix(serverName, tableName) };
+			}
 		}
 		catch (CoreException e)
 		{

@@ -356,6 +356,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
 	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
 	public static final String WRONG_OVERRIDE_PARENT = _PREFIX + ".wrongOverridePosition";
+	public static final String INVALID_TABLE_NO_PRIMARY_KEY_TYPE = _PREFIX + ".invalidTableNoPrimaryKey";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -432,6 +433,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE = new Pair<String, ProblemSeverity>("DBIColumnSequenceTypeOverride",
 		ProblemSeverity.WARNING);
 	public static final Pair<String, ProblemSeverity> LINGERING_TABLE_FILES = new Pair<String, ProblemSeverity>("LingeringTableFiles", ProblemSeverity.ERROR);
+	public static final Pair<String, ProblemSeverity> INVALID_TABLE_NO_PRIMARY_KEY = new Pair<String, ProblemSeverity>("InvalidTableNoPrimaryKey",
+		ProblemSeverity.ERROR);
 	public static final Pair<String, ProblemSeverity> DUPLICATE_MEM_TABLE = new Pair<String, ProblemSeverity>("DuplicateMemTable", ProblemSeverity.ERROR);
 
 	// column problems
@@ -5414,6 +5417,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (referenced.exists() && referenced.isOpen() && referenced.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						deleteMarkers(referenced, COLUMN_MARKER_TYPE);
+						deleteMarkers(referenced, INVALID_TABLE_NO_PRIMARY_KEY_TYPE);
 						if (!hasDeletedMarkers)
 						{
 							deleteMarkers(referenced, DEPRECATED_SCRIPT_ELEMENT_USAGE);
@@ -5429,7 +5433,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 		hasDeletedMarkers = false;
 		String[] array = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, false, true);
-		for (String server_name : array)
+		for (String serverName : array)
 		{
 			try
 			{
@@ -5437,23 +5441,39 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Set<String> dataSources = getDataSourceCollectorVisitor().getDataSources();
 				SortedSet<String> serverNames = DataSourceUtils.getServerNames(dataSources);
 
-				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(server_name, true, true);
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
 				if (server != null) // server may have become invalid in the mean time
 				{
 					List<String> tableNames = server.getTableAndViewNames(true);
 					Iterator<String> tables = tableNames.iterator();
 					while (tables.hasNext())
 					{
-						String tableName = tables.next();
+						final String tableName = tables.next();
+						final ITable table = server.getTable(tableName);
+						IResource res = project;
+						if (getServoyModel().getDataModelManager() != null &&
+							getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
+						{
+							res = getServoyModel().getDataModelManager().getDBIFile(serverName, tableName);
+						}
+						if (table.isTableInvalidInDeveloperBecauseNoPk() && !table.isMarkedAsHiddenInDeveloper())
+						{
+
+							final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
+							final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
+								IMarker.PRIORITY_HIGH, null, null);
+							try
+							{
+								marker.setAttribute("serverName", serverName);
+								marker.setAttribute("tableName", tableName);
+							}
+							catch (CoreException e)
+							{
+								Debug.error(e);
+							}
+						}
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
-							ITable table = server.getTable(tableName);
-							IResource res = project;
-							if (getServoyModel().getDataModelManager() != null &&
-								getServoyModel().getDataModelManager().getDBIFile(server_name, tableName).exists())
-							{
-								res = getServoyModel().getDataModelManager().getDBIFile(server_name, tableName);
-							}
 							Map<String, Column> columnsByName = new HashMap<String, Column>();
 							Map<String, Column> columnsByDataProviderID = new HashMap<String, Column>();
 							for (Column column : table.getColumns())
@@ -5689,8 +5709,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if ((getServoyModel().getServoyProject(project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE ||
 										getServoyModel().getServoyProject(
 											project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE_MODULE) &&
-										serverNames.contains(server_name) &&
-										DataSourceUtils.getServerTablenames(dataSources, server_name).contains(tableName) && column.hasBadNaming(true))
+										serverNames.contains(serverName) &&
+										DataSourceUtils.getServerTablenames(dataSources, serverName).contains(tableName) && column.hasBadNaming(true))
 									{
 										ServoyMarker mk = MarkerMessages.ReservedWindowObjectColumn.fill(column.getName());
 										addMarker(res, mk.getType(), mk.getText(), -1, RESERVED_WINDOW_OBJECT_COLUMN, IMarker.PRIORITY_NORMAL, null,

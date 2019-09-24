@@ -62,6 +62,8 @@ import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -154,6 +156,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
@@ -1121,35 +1124,42 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return createTables(s, type, new ArrayList<SimpleUserNode>());
 	}
 
-	public static SimpleUserNode[] createTables(IServerInternal s, UserNodeType type, List<SimpleUserNode> dlm)
+	public static SimpleUserNode[] createTables(IServerInternal server, UserNodeType type, List<SimpleUserNode> dlm)
 	{
-		if (s.isValid() && s.getConfig().isEnabled())
+		if (server.isValid() && server.getConfig().isEnabled())
 		{
 			try
 			{
-				List<String> tableNames = s.getTableNames(true);
+				List<String> tableNames = server.getTableNames(true);
 				Collections.sort(tableNames);
 
 				List<String> hiddenTables = null;
+				List<String> invalidBecauseNoPK = null;
 				List<String> metadataTables = null;
 				for (String tableName : tableNames)
 				{
-					if (s.isTableMarkedAsHiddenInDeveloper(tableName))
+					final Table tabel = (Table)server.getTable(tableName);
+					if (server.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (hiddenTables == null) hiddenTables = new ArrayList<String>();
 						hiddenTables.add(tableName);
 					}
-					else if (s.isTableMarkedAsMetaData(tableName))
+					else if (server.isTableMarkedAsMetaData(tableName))
 					{
 						if (metadataTables == null) metadataTables = new ArrayList<String>();
 						metadataTables.add(tableName);
+					}
+					else if (isTableInvalidInDeveloperBecauseNoPk(tabel) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
+					{
+						if (invalidBecauseNoPK == null) invalidBecauseNoPK = new ArrayList<String>();
+						invalidBecauseNoPK.add(tableName);
 					}
 					else
 					{
 						// The table may not have been initialized yet (i.e. loaded columns).
 						// Do not get the table object here because that may cause loading all columns of all tables from
 						// developer rendering developer unresponsive for a long time.
-						String dataSource = s.getTableDatasource(tableName);
+						String dataSource = server.getTableDatasource(tableName);
 						UserNode node = new UserNode(tableName, type, new DataSourceFeedback(dataSource), DataSourceWrapperFactory.getWrapper(dataSource),
 							uiActivator.loadImageFromBundle("table.png"));
 						node.setClientSupport(ClientSupport.All);
@@ -1160,7 +1170,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				{
 					for (String name : metadataTables)
 					{
-						String dataSource = s.getTableDatasource(name);
+						String dataSource = server.getTableDatasource(name);
 
 						Image image = uiActivator.loadImageFromBundle("metadata_table.png");
 						if (image == null)
@@ -1182,7 +1192,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
 					for (String name : hiddenTables)
 					{
-						String dataSource = s.getTable(name).getDataSource();
+						if (invalidBecauseNoPK != null && invalidBecauseNoPK.contains(name))
+						{
+							continue;
+						}
+						String dataSource = server.getTable(name).getDataSource();
 						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource),
 							uiActivator.loadImageFromBundle("portal.png", true));
 						node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
@@ -1190,13 +1204,60 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						dlm.add(node);
 					}
 				}
+				if (invalidBecauseNoPK != null)
+				{
+					// tables and views that are marked by user as "hiddenInDeveloperBecauseNoPK" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
+					// the icon will be rendered with an error icon on the bottom left
+					for (String name : invalidBecauseNoPK)
+					{
+						String dataSource = server.getTable(name).getDataSource();
+						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource), loadImageForTableNode());
+						//node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
+						node.setToolTipText(Messages.SolutionExplorerListContentProvider_hiddenBecauseNoPK);
+						dlm.add(node);
+					}
+				}
+
 			}
 			catch (RepositoryException e)
 			{
-				ServoyLog.logError("error creating tables nodes for server: " + s, e);
+				ServoyLog.logError("error creating tables nodes for server: " + server, e);
 			}
 		}
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
+	}
+
+
+	/**
+	 * @param tabel
+	 * @return
+	 */
+	private static boolean isTableInvalidInDeveloperBecauseNoPk(final Table tabel)
+	{
+		if (tabel != null)
+		{
+			return tabel.isTableInvalidInDeveloperBecauseNoPk();
+		}
+		return false;
+	}
+
+	private static Image loadImageForTableNode()
+	{
+		final String TABLE_ERROR_IMAGE = "table.png_IMG_DEC_FIELD_ERROR";
+
+		Image errorIcon = uiActivator.loadImageFromCache(TABLE_ERROR_IMAGE);
+		if (errorIcon == null)
+		{
+			Image IMG_ERROR = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+			if (IMG_ERROR != null)
+			{
+				errorIcon = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("table.png"), ImageDescriptor.createFromImage(IMG_ERROR),
+					IDecoration.BOTTOM_LEFT).createImage();
+				uiActivator.putImageInCache(TABLE_ERROR_IMAGE, errorIcon);
+			}
+		}
+
+		return errorIcon;
 	}
 
 	public static SimpleUserNode[] createProcedures(IServerInternal s, UserNodeType type)

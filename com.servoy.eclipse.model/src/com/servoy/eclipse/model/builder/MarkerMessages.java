@@ -606,6 +606,8 @@ public class MarkerMessages
 		ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 	public static ServoyMarker LingeringTableFiles = new ServoyMarker(
 		"Table \"{0}\" was deleted, but tbl file and possibly calculations/aggregations still exist.", ServoyBuilder.LINGERING_TABLE_FILES_TYPE);
+	public static ServoyMarker InvalidTableNoPrimaryKey = new ServoyMarker("Table \"{0}\" has no primary key.",
+		ServoyBuilder.INVALID_TABLE_NO_PRIMARY_KEY_TYPE);
 	public static ServoyMarker DuplicateMemTable = new ServoyMarker("Duplicate Mem Table \"{0}\" in solutions \"{1}\" and \"{2}\"",
 		ServoyBuilder.DUPLICATE_MEM_TABLE_TYPE);
 

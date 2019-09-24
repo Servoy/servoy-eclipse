@@ -544,7 +544,11 @@
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.lingeringTableFiles">
-      </markerResolutionGenerator>      
+      </markerResolutionGenerator> 
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.invalidTableNoPrimaryKey">
+      </markerResolutionGenerator>     
    </extension>
    <extension
          point="org.eclipse.ui.splashHandlers">

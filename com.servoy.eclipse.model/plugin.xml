@@ -599,6 +599,17 @@
       </persistent>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.invalidTableNoPrimaryKey"
+         name="Invalid Table No Primary Key"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.servoyProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.duplicateMemTable"
          name="Duplicate Mem Tables"
          point="org.eclipse.core.resources.markers">
@@ -608,8 +619,8 @@
       <persistent
             value="true">
       </persistent>
-  	 </extension>
-  	 <extension
+    </extension>
+  	<extension
          id="com.servoy.eclipse.core.superformProblem"
          name="Superform problem"
          point="org.eclipse.core.resources.markers">
@@ -862,7 +873,7 @@
             	label="Non externalized string"/>
         </section>
    </extension>
-    <extension
+   <extension
          id="com.servoy.eclipse.core.methodOverride"
          name="Method Override Problem"
          point="org.eclipse.core.resources.markers">

@@ -762,8 +762,8 @@ public class DataModelManager implements IColumnInfoManager
 
 		if (t.getRowIdentColumnsCount() == 0)
 		{
-			t.setHiddenInDeveloperBecauseNoPk(true);
-			s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
+			t.setTableInvalidInDeveloperBecauseNoPk(true);
+			//s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
 		}
 		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
 
