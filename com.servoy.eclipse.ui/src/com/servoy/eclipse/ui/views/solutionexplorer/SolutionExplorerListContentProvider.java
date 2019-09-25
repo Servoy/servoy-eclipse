@@ -1192,10 +1192,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
 					for (String name : hiddenTables)
 					{
-						if (invalidBecauseNoPK != null && invalidBecauseNoPK.contains(name))
-						{
-							continue;
-						}
 						String dataSource = server.getTable(name).getDataSource();
 						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource),
 							uiActivator.loadImageFromBundle("portal.png", true));
