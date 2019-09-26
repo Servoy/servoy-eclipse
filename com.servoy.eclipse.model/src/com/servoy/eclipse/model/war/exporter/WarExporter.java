@@ -221,6 +221,8 @@ public class WarExporter
 		{
 			monitor.subTask("Copy the active solution");
 			copyActiveSolution(monitor.newChild(2), tmpWarDir);
+			// TODO this only compiles the less resources of the active project (and its modules) not for the none active solutions that could also be exported
+			compileLessResources(tmpWarDir);
 		}
 
 		exportAdminUser(tmpWarDir);
@@ -237,8 +239,6 @@ public class WarExporter
 			monitor.subTask("Grouping JS and CSS resources");
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.subTask("Compile less resources");
-			// TODO this only compiles the less resources of the active project (and its modules) not for the none active solutions that could also be exported
-			compileLessResources(tmpWarDir);
 			monitor.worked(1);
 		}
 		try
