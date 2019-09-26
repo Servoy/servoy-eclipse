@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Electron Exporter Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.exporter.ngdesktop;singleton:=true
-Bundle-Version: 2019.9.0.3521_rc2
+Bundle-Version: 2019.9.0.3522
 Bundle-Activator: com.servoy.eclipse.exporter.ngdesktop.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
