@@ -37,6 +37,7 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.IWebComponent;
 
 /** Command to past previously copied editor models.
  *
@@ -88,7 +89,11 @@ public class PasteAction extends SelectionAction
 		IPersist persist = Platform.getAdapterManager().getAdapter(selected, IPersist.class);
 		if (persist != null)
 		{
-			if (persist instanceof ISupportChilds)
+			if (persist instanceof IWebComponent)
+			{
+				parent = persist.getParent();
+			}
+			else if (persist instanceof ISupportChilds)
 			{
 				parent = (ISupportChilds)persist;
 			}
