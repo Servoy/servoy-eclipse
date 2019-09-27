@@ -63,6 +63,7 @@ import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -85,6 +86,7 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -434,6 +436,10 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				return null;
 			}
 		}
+		if (draggedPersist == parent)
+		{
+			parent = draggedPersist.getParent();
+		}
 
 		if (parent instanceof ISupportFormElements)
 		{
@@ -484,6 +490,10 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				}
 				else
 				{
+					if (alternativeParent == null)
+					{
+						alternativeParent = draggedPersist.getParent();
+					}
 					if (alternativeParent instanceof TabPanel)
 					{
 						persist = ElementFactory.copyComponent((ISupportChilds)alternativeParent, (Tab)draggedPersist, x, y, IRepository.TABS, groupMap);
@@ -523,6 +533,12 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				((ISupportTabSeq)persist).setTabSeq(ISupportTabSeq.DEFAULT);
 			}
 			origLocations.put((ISupportBounds)persist, CSSPositionUtils.getLocation(supportBounds));
+			return toArrAy(persist);
+		}
+		else if (draggedPersist instanceof WebCustomType && parent instanceof IBasicWebComponent)
+		{
+			WebCustomType iChildWebObject = (WebCustomType)draggedPersist;
+			IPersist persist = AddContainerCommand.addCustomType((IBasicWebComponent)parent, iChildWebObject.getJsonKey(), iChildWebObject.getTypeName(), -1);
 			return toArrAy(persist);
 		}
 
