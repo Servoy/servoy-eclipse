@@ -83,6 +83,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 
+import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.Activator;
@@ -141,6 +142,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
@@ -2882,10 +2884,42 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					return null;
 				}
 
+				private String findDocInHierarchy(Form methodForm, String methodName)
+				{
+					Iterator<ScriptMethod> methods = methodForm.getObjects(IRepositoryConstants.METHODS);
+
+					while (methods.hasNext())
+					{
+						ScriptMethod method = methods.next();
+						if (method.getName().equals(methodName))
+						{
+							return method.getRuntimeProperty(IScriptProvider.COMMENT);
+						}
+					}
+					return null;
+				}
+
+				private boolean containsInheritDoc(String value)
+				{
+					return (value != null) && (value.indexOf("@inheritDoc") >= 0);
+				}
+
 				@Override
 				public String getToolTip(String methodName)
 				{
-					return getParsedComment(sm.getRuntimeProperty(IScriptProvider.COMMENT), null, false);
+					String comment = sm.getRuntimeProperty(IScriptProvider.COMMENT);
+					Form extendsForm = null;
+					ISupportChilds parent = sm.getParent();
+					if (parent instanceof Form)
+					{
+						extendsForm = (Form)parent;
+						while (containsInheritDoc(comment))
+						{
+							comment = findDocInHierarchy(extendsForm, methodName);
+							extendsForm = extendsForm.getExtendsForm();
+						}
+					}
+					return getParsedComment(comment, null, false);
 				}
 
 				@Override

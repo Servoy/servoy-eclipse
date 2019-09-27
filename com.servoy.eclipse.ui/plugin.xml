@@ -1349,4 +1349,10 @@
           plugin="com.servoy.eclipse.ui">
     </contexts>
  </extension>
+ <extension
+       point="org.eclipse.dltk.javascript.ui.jsExtendsForm">
+    <jsExtendsForm
+          class="com.servoy.eclipse.ui.editors.JSExtendsForm">
+    </jsExtendsForm>
+ </extension>
 </plugin>
