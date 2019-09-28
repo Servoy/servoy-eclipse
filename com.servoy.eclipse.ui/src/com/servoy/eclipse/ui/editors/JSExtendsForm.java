@@ -38,7 +38,7 @@ public class JSExtendsForm implements IJsExtendsForm
 	public String getExtendsForm(String formName)
 	{
 
-		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject("TestSol");
+		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		Form myForm = servoyProject.getEditingFlattenedSolution().getForm(formName);
 		Form extendsForm = myForm.getExtendsForm();
 		if (extendsForm != null)
