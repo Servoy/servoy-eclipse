@@ -83,7 +83,6 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -371,7 +370,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						}
 						catch (CoreException e1)
 						{
-							e1.printStackTrace();
+							ServoyLog.logError(e1);
 						}
 						IFolder folder = project.getFolder(SolutionSerializer.NG_PACKAGES_DIR_NAME);
 
@@ -394,7 +393,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 							}
 							catch (CoreException e)
 							{
-								Debug.log(e);
+								ServoyLog.logError(e);
 							}
 						}
 					}
