@@ -16,8 +16,8 @@
 		    <repository location="http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.201908201455"/>
-		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201908201458"/>
+		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.201909270905"/>
+		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201909270913"/>
 		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.12/"/>
 	    </location>
 	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
