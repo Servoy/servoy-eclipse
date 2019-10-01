@@ -771,10 +771,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				$element.find('.content')[0].style.width = width + "px";
 				$element.find('.content')[0].style.right = "";
 				$element.find('.content')[0].style.minWidth = "";
-				$($scope.contentDocument).find('.svy-form').css('width', width);
-				$($scope.contentDocument).find('.svy-form').css('height', height);
-				$element.find('.content')[0].style.height = height;
-		       	$element.find('.contentframe')[0].style.height = height;
+				if (!$scope.isAbsoluteFormLayout()) {
+					$($scope.contentDocument).find('.svy-form').css('width', width);
+					$($scope.contentDocument).find('.svy-form').css('height', height);
+					$element.find('.content')[0].style.height = height;
+		       		$element.find('.contentframe')[0].style.height = height;
+				}
 				$scope.adjustGlassPaneSize(width, height);
 				$scope.redrawDecorators();
 			}
