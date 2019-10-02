@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
-import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -41,16 +40,15 @@ public class PasteCommand extends ContentOutlineCommand
 
 	{
 
-		List<IPersist> selection = getSelection();
+		final List<IPersist> selection = getSelection();
 		if (selection.size() > 0)
 		{
 
 			final BaseVisualFormEditor editorPart = getEditorPart();
-			final BaseVisualFormEditor activeEditor = DesignerUtil.getActiveEditor();
-			ISelectionProvider sp = activeEditor.getEditorSite().getSelectionProvider();
+			final ISelectionProvider sp = editorPart.getEditorSite().getSelectionProvider();
 
-			PasteAction pa = new PasteAction(Activator.getDefault().getDesignClient(), sp, DesignerUtil.getActiveEditor(), null);
-			Command pasteC = pa.createPasteCommand(selection);
+			final PasteAction pa = new PasteAction(Activator.getDefault().getDesignClient(), sp, editorPart, null);
+			final Command pasteC = pa.createPasteCommand(selection);
 			if (editorPart != null) editorPart.getCommandStack().execute(pasteC);
 		}
 
