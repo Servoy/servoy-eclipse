@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.List;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.gef.commands.Command;
@@ -26,6 +28,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * @author costinchiulan
@@ -37,12 +40,19 @@ public class PasteCommand extends ContentOutlineCommand
 	public Object execute(ExecutionEvent event) throws ExecutionException
 
 	{
-		final BaseVisualFormEditor activeEditor = DesignerUtil.getActiveEditor();
-		ISelectionProvider sp = activeEditor.getEditorSite().getSelectionProvider();
 
-		PasteAction pa = new PasteAction(Activator.getDefault().getDesignClient(), sp, DesignerUtil.getActiveEditor(), null);
-		Command pasteC = pa.createPasteCommand(getSelection());
-		pasteC.execute();
+		List<IPersist> selection = getSelection();
+		if (selection.size() > 0)
+		{
+
+			final BaseVisualFormEditor editorPart = getEditorPart();
+			final BaseVisualFormEditor activeEditor = DesignerUtil.getActiveEditor();
+			ISelectionProvider sp = activeEditor.getEditorSite().getSelectionProvider();
+
+			PasteAction pa = new PasteAction(Activator.getDefault().getDesignClient(), sp, DesignerUtil.getActiveEditor(), null);
+			Command pasteC = pa.createPasteCommand(selection);
+			if (editorPart != null) editorPart.getCommandStack().execute(pasteC);
+		}
 
 		return null;
 	}
