@@ -13,7 +13,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  slf4j.api,
  org.apache.commons.lang3
-Export-Package: com.servoy.eclipse.notification.rss
+Export-Package: com.servoy.eclipse.notification,
+ com.servoy.eclipse.notification.mylyn,
+ com.servoy.eclipse.notification.rss
 Bundle-ClassPath: .,
  lib/rome-1.7.5-SNAPSHOT.jar,
  lib/jdom2-2.0.6.jar,
