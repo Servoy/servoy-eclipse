@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.eclipse.gef.commands.CompoundCommand;
@@ -25,13 +26,20 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * @author jcompagner
@@ -103,6 +111,33 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 							Debug.error(e);
 						}
 						IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, rightSibling);
+						ISupportChilds initialParent = persist instanceof ISupportExtendsID ? ((ISupportExtendsID)persist).getRealParent()
+							: persist.getParent();
+						if (initialParent == parent)
+						{
+							FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(initialParent);
+							ISupportChilds flattenedParent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), initialParent);
+							Class< ? > childPositionClass = persist instanceof ISupportBounds ? ISupportBounds.class
+								: (persist instanceof IChildWebObject ? IChildWebObject.class : null);
+							if (childPositionClass != null)
+							{
+								ArrayList<IPersist> children = new ArrayList<IPersist>();
+								Iterator<IPersist> it = flattenedParent.getAllObjects();
+								while (it.hasNext())
+								{
+									IPersist child = it.next();
+									if (childPositionClass.isInstance(persist))
+									{
+										children.add(
+											child instanceof IFlattenedPersistWrapper ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child);
+									}
+								}
+								if (children.size() == 1)
+								{
+									continue;
+								}
+							}
+						}
 						cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, editorPart.getForm(), false));
 					}
 				}
