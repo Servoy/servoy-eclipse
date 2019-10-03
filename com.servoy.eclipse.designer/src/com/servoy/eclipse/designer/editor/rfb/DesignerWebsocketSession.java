@@ -324,12 +324,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			containers.add((LayoutContainer)layout);
 			List<IPersist> children = ((LayoutContainer)layout).getAllObjectsAsList();
-			for (int i = 0; i < children.size(); i++)
+			for (IPersist element : children)
 			{
-				if (children.get(i) != null)
+				if (element != null)
 				{
-					boolean auxGhost = checkLayoutHierarchyRecursively(children.get(i), containers, components, children.get(i).getClass(), compAttributes,
-						deletedComponents, formComponentChild, refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
+					boolean auxGhost = checkLayoutHierarchyRecursively(element, containers, components, element.getClass(), compAttributes, deletedComponents,
+						formComponentChild, refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
 					if (auxGhost) ghost = auxGhost;
 				}
 			}
@@ -454,6 +454,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<IFormElement> compAttributes = new HashSet<>();
 		boolean renderGhosts = editor.isRenderGhosts();
 		editor.setRenderGhosts(false);
+		AbstractContainer showedContainer = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 		for (IPersist persist : persists)
 		{
 			boolean formComponentChild = false;
@@ -493,6 +494,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				else
 				{
 					deletedLayoutContainers.add((LayoutContainer)persist);
+				}
+				if (deletedLayoutContainers.contains(persist) && persist.equals(showedContainer))
+				{
+					//showed container was deleted, need to zoom out
+					((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).showContainer(null);
+					return null;
 				}
 			}
 			else
