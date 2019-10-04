@@ -64,11 +64,56 @@ angular.module('editorContent',['servoyApp'])
     $rootScope.getDesignFormElement().append(el);
     return el;
   }
-  
+
+	var getFormHeight = function() {
+		var children = $document.querySelectorAll('#svyDesignForm').children();
+		var height = 0;
+		for (var i = 0; i < children.length; i++) {
+			height += children[i].scrollHeight;
+		}
+		return height;
+	}
+	var toCheckSize = undefined;
+	var adjustFormSize = function(newValue){	
+			//we want to adjust the content sizes if the form height changes
+			//there is no way to find out when all the css changes are applied
+			//so we check it a few times, until it becomes stable
+			
+			if (toCheckSize !== undefined)
+			{
+				clearTimeout(toCheckSize);
+			}
+			var height = getFormHeight();
+			var timesChecked = 0;
+			var checkSize = function() { 
+				if (timesChecked < 5) {
+					if (getFormHeight() !== height) {
+						$rootScope.$broadcast("ADJUST_SIZE");
+						height = getFormHeight();
+						timesChecked = 0;
+					}
+					timesChecked++;
+					toCheckSize = setTimeout(checkSize, 1000);
+				}
+			};
+			toCheckSize = setTimeout(checkSize, 500);
+	};
+	
 	//trigger content loaded to set content sizes
-	$scope.$on('content-loaded:ready', function() {
-   		$rootScope.$broadcast("CONTENT_LOADED"); 
-	});	      
+	$scope.$on('content-loaded:ready', function() {	
+		if (!$rootScope.getDesignFormControllerScope().absoluteLayout) {
+			$rootScope.$broadcast("ADJUST_SIZE");
+	
+			//register the watchers only when the form is loaded because we need the form div to be present
+			$rootScope.$watch('showWireframe', adjustFormSize);
+			$rootScope.$watch('showSolutionLayoutsCss', adjustFormSize);
+			$rootScope.$watch('showSolutionCss', adjustFormSize);
+			
+			$scope.$on('UPDATE_FORM_DATA', function() {	
+				adjustFormSize();
+			});
+		}
+	});
   
   //this preventDefault should not be needed because we have the glasspane 
   //however, the SWT browser on OS X needs this in order to show our editor context menu when right-clicking on the iframe 
@@ -258,10 +303,8 @@ angular.module('editorContent',['servoyApp'])
   
   if (formData.formProperties && formData.formProperties.absoluteLayout) {
 	  $scope.absoluteLayout = formData.formProperties.absoluteLayout[''];
-	  if ($scope.absoluteLayout) { 
-	 	 $rootScope.sfcontentStyle = {'position': 'absolute', 'left': '0px', 'top': '0px', 'right': '0px', 'bottom': '0px'};
-	  }
   }
+  $rootScope.addBottom = $scope.absoluteLayout || /MSIE\//.test(window.navigator.userAgent) || /Trident\//.test(window.navigator.userAgent);
 
   if (formData.parts) {
     for (var name in formData.parts) {
@@ -436,7 +479,9 @@ angular.module('editorContent',['servoyApp'])
 	    	var nodeLocation = parseInt((formData.formProperties.absoluteLayout[''] && tpl.children(0)) ? tpl.children(0).attr('form-index') : tpl.attr('svy-location'));
 	    	for (var i=0;i<parent.children().length;i++)
 	    	{
-	    		var currentLocation = parseInt((formData.formProperties.absoluteLayout[''] && parent.children()[i].children(0)) ? parent.children()[i].children(0).getAttribute('form-index') : parent.children()[i].getAttribute('svy-location'));
+          //skip parts
+          if(formData.formProperties.absoluteLayout[''] && parent.children()[i].children.length == 0) continue;
+	    		var currentLocation = parseInt((formData.formProperties.absoluteLayout[''] && parent.children()[i].children[0]) ? parent.children()[i].children[0].getAttribute('form-index') : parent.children()[i].getAttribute('svy-location'));
 	    		if (nodeLocation <= currentLocation)
 	    		{
 	    			tpl.insertBefore(parent.children()[i]);
@@ -464,7 +509,7 @@ angular.module('editorContent',['servoyApp'])
     	if(forceUpdate || domParentUUID != currentParentUUID) {
     		elementsToRemove.push(elementTemplate);
     	}
-    	else if (updateData.childParentMap[elementId].location > -1 && updateData.childParentMap[elementId].location != parseInt(elementTemplate.attr('svy-location'))){
+    	else if (updateData.childParentMap[elementId].location > -1 && elementTemplate.attr('svy-location') && updateData.childParentMap[elementId].location != parseInt(elementTemplate.attr('svy-location'))){
     		// location(order) is changed, we need to reinsert this node
     		elementsToRemove.push(elementTemplate);
     	}
@@ -548,52 +593,16 @@ angular.module('editorContent',['servoyApp'])
       layoutData = data;
     },
     setCSSPositionProperties: function(cssPositionObject,cssPosition){
-    	delete cssPositionObject.left;
-    	delete cssPositionObject.right;
-    	delete cssPositionObject.top;
-    	delete cssPositionObject.bottom;
-    	delete cssPositionObject.width;
-    	delete cssPositionObject.height;
-    	delete cssPositionObject['min-width'];
-    	delete cssPositionObject['min-height'];
-    	if (cssPosition.left != -1 && cssPosition.left !== undefined)
+    	var properties = ['left','right','top','bottom','width','height','min-width','min-height'];
+    	for ( var i = 0 ;i<properties.length;i++)
     	{
-    		cssPositionObject.left = isNaN(parseInt(cssPosition.left)) ? cssPosition.left : (parseInt(cssPosition.left) + 'px');
-    	}
-    	if (cssPosition.right != -1 && cssPosition.right !== undefined)
-    	{
-    		cssPositionObject.right = isNaN(parseInt(cssPosition.right)) ? cssPosition.right : (parseInt(cssPosition.right) + 'px');
-    	}
-    	if (cssPosition.top != -1 && cssPosition.top !== undefined)
-    	{
-    		cssPositionObject.top = isNaN(parseInt(cssPosition.top)) ? cssPosition.top : (parseInt(cssPosition.top) + 'px');
-    	}
-    	if (cssPosition.bottom != -1 && cssPosition.bottom !== undefined)
-    	{
-    		cssPositionObject.bottom = isNaN(parseInt(cssPosition.bottom)) ? cssPosition.bottom : (parseInt(cssPosition.bottom) + 'px');
-    	}
-    	if (cssPosition.width != -1 && cssPosition.width !== undefined)
-    	{
-    		if (cssPosition.left != -1 && cssPosition.left !== undefined && cssPosition.right != -1 && cssPosition.right !== undefined)
+    		var prop = properties[i];
+    		delete cssPositionObject[prop];
+    		if (cssPosition[prop] !== undefined)
     		{
-    			cssPositionObject['min-width'] = cssPosition.width;
+    			cssPositionObject[prop] = cssPosition[prop] ;
     		}
-    		else
-    		{
-    			cssPositionObject.width = cssPosition.width;
-    		}	
-    	}
-    	if (cssPosition.height != -1 && cssPosition.height !== undefined)
-    	{
-    		if (cssPosition.top != -1 && cssPosition.top !== undefined && cssPosition.bottom != -1 && cssPosition.bottom !== undefined)
-    		{
-    			cssPositionObject['min-height'] = cssPosition.height;
-    		}
-    		else
-    		{
-    			cssPositionObject.height = cssPosition.height;
-    		}	
-    	}
+    	}	
     	return cssPositionObject;
     },
     updateFormData: function(updates) {
@@ -754,6 +763,9 @@ angular.module('editorContent',['servoyApp'])
           }
 
           renderDecorators();
+          if (!$rootScope.getDesignFormControllerScope().absoluteLayout) {
+			$rootScope.$broadcast("UPDATE_FORM_DATA");
+		  }
         });
       }
       if (data && data.solutionProperties && formData.solutionProperties.styleSheets) {

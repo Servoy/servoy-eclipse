@@ -173,11 +173,6 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			String ds = form.getDataSource() != null ? form.getDataSource() : Form.DATASOURCE_NONE;
 			formToDataSource.put(form, ds);
 			getFormsByDatasource(ds, false).add(form);
-
-			if (form.isFormComponent().booleanValue())
-			{
-				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
-			}
 		}
 	}
 

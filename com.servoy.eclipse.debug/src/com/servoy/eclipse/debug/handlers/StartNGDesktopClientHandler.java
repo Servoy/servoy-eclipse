@@ -17,23 +17,31 @@
 
 package com.servoy.eclipse.debug.handlers;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -47,7 +55,6 @@ import org.json.JSONObject;
 import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.ZipUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -63,24 +70,22 @@ import com.servoy.j2db.util.Utils;
  */
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
+
 	static final String NGDESKTOP_MAJOR_VERSION = "2019";
-	static final String NGDESKTOP_MINOR_VERSION = "06";
-	static final String NGDESKTOP_VERSION = NGDESKTOP_MAJOR_VERSION + "." + NGDESKTOP_MINOR_VERSION;
-	static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
-	static private int BUFFER_SIZE = 1024;
-	static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
+	static final String NGDESKTOP_MINOR_VERSION = "09";
+
+	static final int BUFFER_SIZE = 16 * 1024;
 	static final String MAC_EXTENSION = ".app";
 	static final String WINDOWS_EXTENSION = ".exe";
 	//Linux doesn't have any extension
 
-	static final String ELECTRON_WINDOWS_BUILD_PLATFORM = "win";
-	static final String ELECTRON_MAC_BUILD_PLATFORM = "mac";
-	static final String ELECTRON_LINUX_BUILD_PLATFORM = "linux";
+	public static final String WINDOWS_BUILD_PLATFORM = "win";
+	public static final String MAC_BUILD_PLATFORM = "mac";
+	public static final String LINUX_BUILD_PLATFORM = "linux";
 
-	static
-	{
-		if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
-	}
+	public static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
+	public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
+	public static final String NGDESKTOP_VERSION = NGDESKTOP_MAJOR_VERSION + "." + NGDESKTOP_MINOR_VERSION;
 
 	static
 	{
@@ -145,7 +150,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	 * Here can be also changed icon, url, or used modules.
 	 */
 
-	private void writeElectronJsonFile(Solution solution, File stateLocation, String fileExtension, IProgressMonitor monitor) throws IOException
+	private void writeElectronJsonFile(Solution solution, File stateLocation, String fileExtension, IProgressMonitor monitor)
 	{
 
 		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html";
@@ -153,46 +158,46 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		String osxContent = Utils.isAppleMacOS() ? File.separator + "Contents" : "";
 
 		//Mac folder structure is different, we should adapt url to that.
-		String fileUrl = osxContent + File.separator + (Utils.isAppleMacOS() ? "Resources" : "resources") + File.separator + "app" + File.separator + "config" +
-			File.separator + "servoy.json";
+		String fileUrl = osxContent + File.separator + (Utils.isAppleMacOS() ? "Resources" : "resources") + File.separator + "app.asar.unpacked" +
+			File.separator + "config" + File.separator + "servoy.json";
 
+		String fPath = stateLocation.getAbsolutePath();
+		if (Utils.isAppleMacOS()) fPath += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + StartNGDesktopClientHandler.MAC_EXTENSION;
 
-		File f = new File(stateLocation.getAbsolutePath() + File.separator + fileUrl);
+		File f = new File(fPath + File.separator + fileUrl);
 
 		//Store servoy.json file as a JSONObject
-		StringBuffer jsonFile = new StringBuffer();
-		String line = null;
-		BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
-		while ((line = bufferedReader.readLine()) != null)
-		{
-			jsonFile.append(line);
-		}
-
-		JSONObject configFile = new JSONObject(jsonFile.toString());
+		String jsonFile = Utils.getTXTFileContent(f, Charset.forName("UTF-8"));
+		JSONObject configFile = new JSONObject(jsonFile);
 
 		JSONObject options = (JSONObject)configFile.get("options");
-
 		//put url and other options in servoy.json(we can put image also here, check servoy.json to see available options.
 		options.put("url", solutionUrl);
+		options.put("showMenu", true);
 		configFile.put("options", options);
 
-		bufferedReader.close();
-
-		FileWriter file = new FileWriter(f);
-		BufferedWriter out = new BufferedWriter(file);
-		out.write(configFile.toString());
-		out.close();
+		try (FileWriter file = new FileWriter(f))
+		{
+			BufferedWriter out = new BufferedWriter(file);
+			out.write(configFile.toString());
+			out.close();
+		}
+		catch (IOException e1)
+		{
+			ServoyLog.logError("Error writing  in servoy.json file " + fileUrl, e1);
+		}
 
 		//Now try opening servoyNGDesktop app.
 		try
 		{
 			String[] command;
-			if (Utils.isWindowsOS() || Utils.isLinuxOS())
-				command = new String[] { stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
-			else
+			if (Utils.isAppleMacOS())
 			{
-				command = new String[] { "/usr/bin/open", stateLocation.getAbsolutePath() +
-					(Utils.isAppleMacOS() ? "" : File.separator + NG_DESKTOP_APP_NAME + fileExtension) };
+				command = new String[] { "/usr/bin/open", stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
+			}
+			else
+			{//windows || linux
+				command = new String[] { stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
 			}
 			monitor.beginTask("Open NGDesktop", 3);
 			Runtime.getRuntime().exec(command);
@@ -286,26 +291,18 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 				String extension = Utils.isAppleMacOS() ? MAC_EXTENSION : (Utils.isWindowsOS() ? WINDOWS_EXTENSION : "");
 
-				String folderName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION + "-" + ((Utils.isAppleMacOS() ? ELECTRON_MAC_BUILD_PLATFORM + extension
-					: (Utils.isWindowsOS()) ? ELECTRON_WINDOWS_BUILD_PLATFORM : ELECTRON_LINUX_BUILD_PLATFORM));
+				String folderName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION + "-" +
+					((Utils.isAppleMacOS() ? MAC_BUILD_PLATFORM : (Utils.isWindowsOS()) ? WINDOWS_BUILD_PLATFORM : LINUX_BUILD_PLATFORM));
 
 				File stateLocation = Activator.getDefault().getStateLocation().append(folderName).toFile();
-				String pathToExecutable = (Utils.isAppleMacOS() ? stateLocation.getAbsolutePath()
-					: stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + extension);
+				String pathToExecutable = stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + extension;
 
 				File executable = new File(pathToExecutable);
 				checkForHigherVersion(executable.getParentFile());
 
 				if (executable.exists())
 				{
-					try
-					{
-						writeElectronJsonFile(solution, stateLocation, extension, monitor);
-					}
-					catch (IOException e)
-					{
-						ServoyLog.logError("error adjusting the ngdesktop executable (servoy.json)", e);
-					}
+					writeElectronJsonFile(solution, stateLocation, extension, monitor);
 				}
 				else
 				{
@@ -357,12 +354,24 @@ class DownloadElectron implements IRunnableWithProgress
 		{
 			monitor.beginTask("Downloading NGDesktop executable", 3);
 
-			f = new File(Activator.getDefault().getStateLocation().toOSString());
+			String fString = Activator.getDefault().getStateLocation().toOSString();
+
+			if (Utils.isAppleMacOS())
+			{
+				fString += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+					StartNGDesktopClientHandler.MAC_BUILD_PLATFORM;
+			}
+			f = new File(fString);
 			f.mkdirs();
 
+
 			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
-				StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + (Utils.isAppleMacOS() ? "mac" : (Utils.isWindowsOS() ? "win" : "linux")) + ".tar.gz");
-			ZipUtils.extractTarGZ(fileUrl, f);
+				StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+				(Utils.isAppleMacOS() ? StartNGDesktopClientHandler.MAC_BUILD_PLATFORM
+					: (Utils.isWindowsOS() ? StartNGDesktopClientHandler.WINDOWS_BUILD_PLATFORM : StartNGDesktopClientHandler.LINUX_BUILD_PLATFORM)) +
+				".tar.gz");
+
+			extractTarGz(fileUrl.openStream(), f.toPath().toAbsolutePath().normalize());
 			monitor.worked(2);
 		}
 		catch (Exception e)
@@ -376,5 +385,79 @@ class DownloadElectron implements IRunnableWithProgress
 		}
 	}
 
+	private void extractTarGz(InputStream is, Path outputPath) throws IOException
+	{
+		TarArchiveInputStream archIS = new TarArchiveInputStream(
+			new GzipCompressorInputStream(new BufferedInputStream(is, StartNGDesktopClientHandler.BUFFER_SIZE)));
+		TarArchiveEntry entry = null;
+		while ((entry = archIS.getNextTarEntry()) != null)
+		{
+			Path path = outputPath.resolve(entry.getName()).normalize();
+			if (entry.isDirectory())
+			{
+				Files.createDirectories(path);
+			}
+			else if (entry.isSymbolicLink())
+			{
+				Files.createDirectories(path.getParent());
+				String dest = entry.getLinkName();
+				Files.createSymbolicLink(path, Paths.get(dest));
+			}
+			else
+			{
+				Files.createDirectories(path.getParent());
+				try (OutputStream out = Files.newOutputStream(path))
+				{
+					IOUtils.copy(archIS, out);//copy current archIS entry
+				}
+			}
+			if (!Files.isSymbolicLink(path) && !Utils.isWindowsOS())
+			{
+				Files.setPosixFilePermissions(path, getPosixFilePermissions(entry));
+			}
+		}
+	}
 
+	private Set<PosixFilePermission> getPosixFilePermissions(TarArchiveEntry entry)
+	{
+		int mode = entry.getMode();
+		Set<PosixFilePermission> perms = new HashSet<>();
+		if ((mode & 0400) != 0)
+		{
+			perms.add(PosixFilePermission.OWNER_READ);
+		}
+		if ((mode & 0200) != 0)
+		{
+			perms.add(PosixFilePermission.OWNER_WRITE);
+		}
+		if ((mode & 0100) != 0)
+		{
+			perms.add(PosixFilePermission.OWNER_EXECUTE);
+		}
+		if ((mode & 0040) != 0)
+		{
+			perms.add(PosixFilePermission.GROUP_READ);
+		}
+		if ((mode & 0020) != 0)
+		{
+			perms.add(PosixFilePermission.GROUP_WRITE);
+		}
+		if ((mode & 0010) != 0)
+		{
+			perms.add(PosixFilePermission.GROUP_EXECUTE);
+		}
+		if ((mode & 0004) != 0)
+		{
+			perms.add(PosixFilePermission.OTHERS_READ);
+		}
+		if ((mode & 0002) != 0)
+		{
+			perms.add(PosixFilePermission.OTHERS_WRITE);
+		}
+		if ((mode & 0001) != 0)
+		{
+			perms.add(PosixFilePermission.OTHERS_EXECUTE);
+		}
+		return perms;
+	}
 }

@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.dataprocessing.IDataSet;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -108,6 +109,11 @@ public class VisualFormEditorSecurityPage extends Composite
 
 			}
 		});
+		if (formEditor.getForm().getExtendsForm() != null && formEditor.getForm().getExtendsForm().getImplicitSecurityNoRights())
+		{
+			// if parent form is explicit, shouldn't be able to change it in child
+			btnNORights.setEnabled(false);
+		}
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(0, 10);
 		formData.right = new FormAttachment(100, -5);
@@ -352,8 +358,9 @@ public class VisualFormEditorSecurityPage extends Composite
 	private void setElements()
 	{
 		List<IPersist> formElements = new ArrayList<IPersist>();
-		Iterator< ? extends IPersist> it = editor.getForm().isResponsiveLayout() ? editor.getForm().getFlattenedObjects(NameComparator.INSTANCE).iterator()
-			: ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getAllObjects();
+		Form flatForm = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm());
+		Iterator< ? extends IPersist> it = editor.getForm().isResponsiveLayout() ? flatForm.getFlattenedObjects(NameComparator.INSTANCE).iterator()
+			: flatForm.getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist elem = it.next();

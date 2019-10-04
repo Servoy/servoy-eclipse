@@ -21,6 +21,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -65,6 +66,7 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.CoolBar;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.ISelectionListener;
@@ -88,6 +90,8 @@ import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.notification.INotification;
+import com.servoy.eclipse.notification.NotificationPopUpUI;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -496,6 +500,38 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
 
 		super.createPartControl(composite);
+		if (editorPart.getForm().getUseCssPosition())
+		{
+
+			Display.getCurrent().asyncExec(() -> {
+				ArrayList<INotification> notifications = new ArrayList<INotification>();
+				notifications.add(new INotification()
+				{
+					public String getTitle()
+					{
+						return "Incompatible editor for form '" + editorPart.getForm().getName() + "'";
+					}
+
+					public String getDescription()
+					{
+						return "CSS Position Form is not fully supported in classic editor.\n For full functionality use HTML editor.";
+					}
+
+					public String getLink()
+					{
+						return "https://wiki.servoy.com/display/DOCS/CSS+Positioning";
+					}
+
+					public Date getDate()
+					{
+						return null;
+					}
+				});
+				NotificationPopUpUI notificationPopUpUI = new NotificationPopUpUI(Display.getCurrent(), notifications, null);
+				notificationPopUpUI.setDelayClose(0);
+				notificationPopUpUI.open();
+			});
+		}
 	}
 
 	protected void addToolbarAction(String bar, IAction action)

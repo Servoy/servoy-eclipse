@@ -94,6 +94,7 @@ import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
 import com.servoy.eclipse.ui.util.WrappingControl;
 import com.servoy.eclipse.ui.util.XLControl;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -635,7 +636,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table already exists",
 							"Log table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
-					createLogTableButton.setEnabled(logTable != null);
+					createLogTableButton.setEnabled(logTable == null);
 				}
 				catch (RepositoryException re)
 				{
@@ -1156,6 +1157,17 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 			boolean log_server = logServerButton.getSelection();
 
+			if (serverConfig.isOracleDriver() && (serverConfig.getSchema() == null || serverConfig.getSchema().trim().length() == 0))
+			{
+				// if you do not specify the schema in oracle you see thousands of non-useful system tables/views in that server
+				if (MessageDialog.openConfirm(getSite().getShell(), "Fill Oracle schema",
+					"Schema should be filled for Oracle servers, mostly the same as the user name. Should we fill it in? \n\nNot specifying a schema will probably result in seing lots of system tables/views in this server, not just user tables/views."))
+				{
+					//serverConfigObservable.setPropertyValue("schema", serverConfig.getUserName());
+					schemaField.setText(serverConfig.getUserName());
+				}
+			}
+
 			if (serverConfig.isEnabled())
 			{
 				serverManager.testServerConfigConnection(serverConfig, 0); //test if we connect
@@ -1186,12 +1198,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			updateTitle();
 			setInput(new ServerEditorInput(serverConfig));
 			initDataBindings();
-			if (serverConfig.isOracleDriver() && (serverConfig.getSchema() == null || serverConfig.getSchema().trim().length() == 0))
-			{
-				// if you do not specify the schema in oracle you see thousands of non-useful system tables/views in that server
-				MessageDialog.openInformation(getSite().getShell(), "Oracle server",
-					"You should add a 'schema' for Oracle servers = the Oracle user name.\n\nNot specifying a schema will probably result in seing lots of system tables/views in this server, not just user tables/views.");
-			}
 			if (serverConfig.getDataModelCloneFrom() != null && !Utils.equalObject(dataModelCloneFrom, serverConfig.getDataModelCloneFrom()))
 			{
 				DataModelManager dataModelManager = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
@@ -1217,6 +1223,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 					"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
 				{
 					PlatformUI.getWorkbench().restart();
+				}
+				else
+				{
+					IServer server = serverManager.getServer(currentServerName);
+					if (server instanceof IServerInternal && server.isValid())
+					{
+						((IServerInternal)server).reloadTables();
+					}
 				}
 			}
 		}
@@ -1564,6 +1578,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		if (serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName()))
 		{
+			logTableName.setEnabled(true);
 			if (ServoyModel.getServerManager().logTableExists())
 			{
 				createLogTableButton.setEnabled(false);

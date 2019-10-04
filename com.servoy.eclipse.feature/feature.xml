@@ -88,21 +88,41 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="com.servoy.jre.linux.x86_64.feature"
-         version="0.0.0"
+         version="12.0.0"
          os="linux"
          arch="x86_64"/>
 
    <includes
          id="com.servoy.jre.macosx.x86_64.feature"
-         version="0.0.0"
+         version="12.0.0"
          os="macosx"
          arch="x86_64"/>
 
    <includes
          id="com.servoy.jre.win32.x86_64.feature"
-         version="0.0.0"
+         version="12.0.0"
          os="win32"
          arch="x86_64"/>
+
+   <includes
+         id="org.eclipse.egit"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.jgit"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.jgit.http.apache"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.jgit.lfs"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.jgit.ssh.apache"
+         version="0.0.0"/>
 
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
@@ -340,7 +360,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.io"
          download-size="0"
          install-size="0"
-         version="2.6.0"
+         version="2.6.0.v20190123-2029"
          unpack="false"/>
 
    <plugin
@@ -354,14 +374,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.jsoup"
          download-size="0"
          install-size="0"
-         version="1.11.3"
+         version="1.12.1"
          unpack="false"/>
 
    <plugin
          id="org.freemarker.freemarker"
          download-size="0"
          install-size="0"
-         version="2.3.28.stable"
+         version="2.3.29.stable"
          unpack="false"/>
 
    <plugin
@@ -382,14 +402,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.httpcomponents.httpcore"
          download-size="0"
          install-size="0"
-         version="4.4.9.v20180409-1525"
+         version="4.4.10.v20190123-2214"
          unpack="false"/>
 
    <plugin
          id="org.apache.httpcomponents.httpclient"
          download-size="0"
          install-size="0"
-         version="4.5.5.v20180409-1525"
+         version="4.5.6.v20190503-0009"
          unpack="false"/>
 
    <plugin
@@ -410,7 +430,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.equinox.concurrent"
          download-size="0"
          install-size="0"
-         version="1.1.200.v20180827-1235"
+         version="1.1.400.v20190621-0852"
          unpack="false"/>
 
    <plugin
@@ -452,14 +472,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="7.0.0.v20181030-2244"
+         version="7.1.0.v20190412-2143"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="7.0.0.v20181030-2244"
+         version="7.1.0.v20190412-2143"
          unpack="false"/>
 
    <plugin
@@ -473,21 +493,21 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.logging.log4j.api"
          download-size="0"
          install-size="0"
-         version="2.11.2"
+         version="2.12.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.core"
          download-size="0"
          install-size="0"
-         version="2.11.2"
+         version="2.12.1"
          unpack="false"/>
 
    <plugin
          id="org.apache.logging.log4j.slf4j18-impl"
          download-size="0"
          install-size="0"
-         version="2.11.2"
+         version="2.12.1"
          unpack="false"/>
 
    <plugin
@@ -508,35 +528,35 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.lang3"
          download-size="0"
          install-size="0"
-         version="3.8.1"
+         version="3.9.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.commons-collections4"
          download-size="0"
          install-size="0"
-         version="4.2.0"
+         version="4.4.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.commons-dbcp2"
          download-size="0"
          install-size="0"
-         version="2.5.0"
+         version="2.7.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.commons.commons-pool2"
          download-size="0"
          install-size="0"
-         version="2.6.0"
+         version="2.7.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle"
          download-size="0"
          install-size="0"
-         version="1.2.0"
+         version="1.2.3"
          unpack="false"/>
 
    <plugin
@@ -545,6 +565,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          install-size="0"
          version="1.1.3"
          unpack="false"/>
+         
 
    <plugin
          id="com.servoy.eclipse.ngclient.ui"
@@ -579,5 +600,12 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="8.5.0.3600_b1"/>
+
+   <plugin
+         id="com.servoy.eclipse.exporter.ngdesktop"
+         download-size="0"
+         install-size="0"
+         version="2019.12.0.3540_rc"
+         unpack="false"/>
 
 </feature>

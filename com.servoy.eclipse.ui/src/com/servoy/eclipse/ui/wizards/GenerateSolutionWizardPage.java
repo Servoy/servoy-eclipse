@@ -277,6 +277,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 
 	protected boolean validatePage()
 	{
+		setMessage(null, NONE);
 		HashMap<String, List<String>> servers = null;
 		if (!wizard.canCreateMissingServers() && !(servers = wizard.searchMissingServers(getSolutionsToImport())).isEmpty())
 		{

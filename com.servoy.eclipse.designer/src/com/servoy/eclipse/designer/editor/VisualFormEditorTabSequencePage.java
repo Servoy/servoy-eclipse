@@ -436,7 +436,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 						}
 					}
 					properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
-					if (properties.size() > 0)
+					if (properties.size() > 0 && !FormElementHelper.isListFormComponent(properties))
 					{
 						FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editor.getForm());
 						FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement(persist, fs, null, true);

@@ -40,14 +40,17 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
+import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 
 /**
@@ -69,6 +72,17 @@ public class FormEditPolicy extends ComponentEditPolicy
 	{
 		Command command = null;
 		Form form = ((FormGraphicalEditPart)getHost()).getPersist();
+		ISupportFormElements parent = form;
+		if (((FormGraphicalEditPart)getHost()).getEditorPart() != null &&
+			((FormGraphicalEditPart)getHost()).getEditorPart().getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
+		{
+			RfbVisualFormEditorDesignPage rfbPage = (RfbVisualFormEditorDesignPage)((FormGraphicalEditPart)getHost()).getEditorPart().getGraphicaleditor();
+			if (rfbPage.getShowedContainer() instanceof LayoutContainer &&
+				CSSPositionUtils.isCSSPositionContainer((LayoutContainer)rfbPage.getShowedContainer()))
+			{
+				parent = rfbPage.getShowedContainer();
+			}
+		}
 		if (VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) ||
 			VisualFormEditor.REQ_PLACE_BEAN.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) ||
 			VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType()) ||
@@ -76,20 +90,21 @@ public class FormEditPolicy extends ComponentEditPolicy
 		{
 			Object data = request instanceof DataRequest ? ((DataRequest)request).getData() : null;
 			final org.eclipse.draw2d.geometry.Point location = request instanceof DataRequest ? ((DataRequest)request).getlocation() : null;
-			command = new FormPlaceElementCommand(application, form, data, request.getType(), request.getExtendedData(), fieldPositioner,
+			command = new FormPlaceElementCommand(application, parent, data, request.getType(), request.getExtendedData(), fieldPositioner,
 				location == null ? null : location.getSWTPoint(), null, form);
 		}
 		else if (VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
-			command = new FormPlacePortalCommand(application, form, dataFieldRequest.getData(), dataFieldRequest.getType(), dataFieldRequest.getExtendedData(),
-				fieldPositioner, dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.fillText,
+			command = new FormPlacePortalCommand(application, parent, dataFieldRequest.getData(), dataFieldRequest.getType(),
+				dataFieldRequest.getExtendedData(), fieldPositioner,
+				dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.fillText,
 				dataFieldRequest.fillName, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels, form);
 		}
 		else if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
-			command = new FormPlaceFieldCommand(application, form, dataFieldRequest.getType(), dataFieldRequest.getExtendedData(), form, fieldPositioner,
+			command = new FormPlaceFieldCommand(application, parent, dataFieldRequest.getType(), dataFieldRequest.getExtendedData(), form, fieldPositioner,
 				dataFieldRequest.getlocation() != null ? dataFieldRequest.getlocation().getSWTPoint() : null, null, form, dataFieldRequest);
 		}
 		else if ((BaseVisualFormEditor.REQ_COPY.equals(request.getType()) || BaseVisualFormEditor.REQ_CUT.equals(request.getType())) &&
@@ -130,7 +145,7 @@ public class FormEditPolicy extends ComponentEditPolicy
 				{
 					if (model instanceof ISupportBounds)
 					{
-						Point location = CSSPosition.getLocation(((ISupportBounds)model));
+						Point location = CSSPositionUtils.getLocation(((ISupportBounds)model));
 						minx = minx < location.x ? minx : location.x;
 						miny = miny < location.y ? miny : location.y;
 					}

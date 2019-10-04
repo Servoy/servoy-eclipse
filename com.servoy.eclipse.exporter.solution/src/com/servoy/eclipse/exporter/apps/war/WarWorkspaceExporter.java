@@ -58,10 +58,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	{
 		private final WarArgumentChest configuration;
 
-		/**
-		 * @param configuration
-		 * @param isNGExport
-		 */
 		private CommandLineWarExportModel(WarArgumentChest configuration, boolean isNGExport)
 		{
 			super(isNGExport);
@@ -128,12 +124,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public boolean isExportNoneActiveSolutions()
+		public boolean isExportNonActiveSolutions()
 		{
 			return configuration.getNoneActiveSolutions() != null;
 		}
 
-		public List<String> getNoneActiveSolutions()
+		public List<String> getNonActiveSolutions()
 		{
 			if (configuration.getNoneActiveSolutions() != null)
 			{

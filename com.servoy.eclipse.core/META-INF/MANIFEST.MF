@@ -46,7 +46,6 @@ Require-Bundle: org.eclipse.core.runtime,
  sablo,
  org.apache.commons.io;bundle-version="2.6.0",
  sj.jsonschemavalidation,
- org.tukaani.xz,
  slf4j.api
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.core,

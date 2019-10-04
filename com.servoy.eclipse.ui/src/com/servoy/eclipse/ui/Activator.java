@@ -18,11 +18,13 @@ package com.servoy.eclipse.ui;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -144,7 +146,7 @@ public class Activator extends AbstractUIPlugin
 						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 						{
 							ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
-							final List<String> processedPackages = new ArrayList<String>();
+							final Map<String, Set<String>> processedPackages = new HashMap<>();
 							for (final ServoyProject module : modules)
 							{
 								module.getSolution().acceptVisitor(new IPersistVisitor()
@@ -154,7 +156,7 @@ public class Activator extends AbstractUIPlugin
 									public Object visit(IPersist o)
 									{
 										String missingPackage = null;
-										if (o instanceof WebComponent)
+										if (o instanceof WebComponent && ((WebComponent)o).getTypeName() != null)
 										{
 											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
 												((WebComponent)o).getTypeName());
@@ -172,37 +174,51 @@ public class Activator extends AbstractUIPlugin
 												missingPackage = ((LayoutContainer)o).getPackageName();
 											}
 										}
-										if (missingPackage != null && !processedPackages.contains(missingPackage))
+										if (missingPackage != null)
 										{
-											processedPackages.add(missingPackage);
-											final String automaticDownloadPackage = missingPackage;
-											Display.getDefault().syncExec(new Runnable()
+											Set<String> list = processedPackages.get(missingPackage);
+											if (list == null)
 											{
-
-												@Override
-												public void run()
-												{
-													Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-													final MessageDialog dialog = new MessageDialog(active, "Missing package '" + automaticDownloadPackage + "'",
-														null,
-														"Missing package was detected in solution '" + module.getProject().getName() + "': '" +
-															automaticDownloadPackage + "'. Do you want to try to download it using Servoy Package Manager?",
-														MessageDialog.QUESTION, new String[] { "Automatic install", "Skip" }, 0);
-													dialog.setBlockOnOpen(true);
-													int pressedButton = dialog.open();
-													if (pressedButton == 0)
-													{
-														List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
-															IAutomaticImportWPMPackages.EXTENSION_ID);
-														if (defaultImports != null && defaultImports.size() > 0)
-														{
-															defaultImports.get(0).importPackage(automaticDownloadPackage);
-														}
-													}
-												}
-											});
+												list = new TreeSet<>();
+												processedPackages.put(missingPackage, list);
+											}
+											list.add(module.getSolution().getName());
 										}
 										return null;
+									}
+								});
+							}
+							if (processedPackages.size() > 0)
+							{
+								Display.getDefault().syncExec(new Runnable()
+								{
+
+									@Override
+									public void run()
+									{
+										Iterator<Entry<String, Set<String>>> iterator = processedPackages.entrySet().iterator();
+										while (iterator.hasNext())
+										{
+											Entry<String, Set<String>> entry = iterator.next();
+											String automaticDownloadPackage = entry.getKey();
+											String mods = String.join(",", entry.getValue());
+											Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+											final MessageDialog dialog = new MessageDialog(active, "Missing package '" + automaticDownloadPackage + "'", null,
+												"Missing package '" + automaticDownloadPackage + "' was detected in solution(s): " + mods +
+													". Do you want to try to download it using Servoy Package Manager?",
+												MessageDialog.QUESTION, new String[] { "Automatic install", "Skip" }, 0);
+											dialog.setBlockOnOpen(true);
+											int pressedButton = dialog.open();
+											if (pressedButton == 0)
+											{
+												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
+													IAutomaticImportWPMPackages.EXTENSION_ID);
+												if (defaultImports != null && defaultImports.size() > 0)
+												{
+													defaultImports.get(0).importPackage(automaticDownloadPackage);
+												}
+											}
+										}
 									}
 								});
 							}

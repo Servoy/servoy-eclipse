@@ -41,6 +41,7 @@ public class Messages extends NLS
 
 	public static String SolutionExplorerTreeContentProvider_active;
 	public static String SolutionExplorerListContentProvider_hidden;
+	public static String SolutionExplorerListContentProvider_hiddenBecauseNoPK;
 	public static String SolutionExplorerView_cannotFindSolution;
 	public static String SolutionExplorerView_deserialize;
 	public static String SolutionExplorerView_doubleClick;

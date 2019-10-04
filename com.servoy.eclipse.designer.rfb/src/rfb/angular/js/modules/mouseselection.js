@@ -290,9 +290,34 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 									dropAllowed: false
 								};
 							}
+							var beforeNode = null;
+							dropTarget = $(".contentframe").contents().find("#svyDesignForm").get(0);
+							//droptarget is the form but has no svy-id
+							for (var i=dropTarget.childNodes.length-1;i>=0;i--)
+							{
+								var node = dropTarget.childNodes[i];
+								if (node && node.getAttribute && node.getAttribute('svy-id'))
+								{
+									var clientRec = node.getBoundingClientRect();
+									var absolutePoint = editorScope.convertToAbsolutePoint({
+										x: clientRec.right,
+										y: clientRec.bottom
+									});
+									// if cursor is in rectangle between 0,0 and bottom right corner of component we consider it to be before that component
+									// can we enhance it ?
+									if (event.pageY < absolutePoint.y && event.pageX < absolutePoint.x)
+									{
+										beforeNode = node;
+									}
+									else
+										break;
+
+								}	
+							}	
 							return {
 								dropAllowed: true,
-								dropTarget: null
+								dropTarget: null,
+								beforeChild: beforeNode
 							};
 						} else {
 							var realDropTarget = this.getParent($(dropTarget),realName);
@@ -331,6 +356,62 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 									beforeChild: dropTarget
 								};
 							}
+							else
+							{
+								// we drop directly on the node, try to determine its position between children
+								var beforeNode = null;
+								for (var i=dropTarget.childNodes.length-1;i>=0;i--)
+								{
+									var node = dropTarget.childNodes[i];
+									if (node && node.getAttribute && node.getAttribute('svy-id'))
+									{
+										var clientRec = node.getBoundingClientRect();
+										var absolutePoint = editorScope.convertToAbsolutePoint({
+											x: clientRec.right,
+											y: clientRec.bottom
+										});
+										// if cursor is in rectangle between 0,0 and bottom right corner of component we consider it to be before that component
+										// can we enhance it ?
+										if (event.pageY < absolutePoint.y && event.pageX < absolutePoint.x)
+										{
+											beforeNode = node;
+										}
+										else
+											break;
+												
+									}	
+								}
+								if (!beforeNode)
+								{
+									// is this really last or we didn't detect it well, try again with new rectangle
+									for (var i=dropTarget.childNodes.length-1;i>=0;i--)
+									{
+										var node = dropTarget.childNodes[i];
+										if (node && node.getAttribute && node.getAttribute('svy-id'))
+										{
+											var clientRec = node.getBoundingClientRect();
+											var absolutePoint = editorScope.convertToAbsolutePoint({
+												x: clientRec.left,
+												y: clientRec.bottom
+											});
+											// if cursor is in rectangle between bottom left corner of component and top right corner of form we consider it to be before that component
+											// can we enhance it ?
+											if (event.pageY < absolutePoint.y && event.pageX > absolutePoint.x)
+											{
+												beforeNode = node;
+											}
+											else
+												break;
+													
+										}	
+									}
+								}	
+								return {
+									dropAllowed: true,
+									dropTarget: dropTarget,
+									beforeChild: beforeNode
+								};
+							}	
 						}
 					} else if (type != "component" && type != "template") {
 						dropTarget = this.getNode(event);
@@ -510,7 +591,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					for (var i = 0; i < fromList.length; i++) {
 						var element = fromList[i]
 						var rect = element.getBoundingClientRect();
-						if(this.isUnknownElement(element) && !element.clientWidth && !element.clientHeight && element.firstElementChild && !this.isUnknownElement(element.firstElementChild)) {
+						if( (this.isUnknownElement(element) || !element.clientWidth && !element.clientHeight) && element.firstElementChild && !this.isUnknownElement(element.firstElementChild)) {
 							rect = element.firstElementChild.getBoundingClientRect();
 						}
 						var left = rect.left;
@@ -520,7 +601,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 							left = left - element.parentElement.parentElement.getBoundingClientRect().left;
 						}
 						var clientWidth = rect.width != 0 ? rect.width : element.offsetWidth;
-						var clientHeight = rect.height != 0 ? rect.height : element.clientHeight;
+						var clientHeight = rect.height != 0 ? rect.height : element.offsetHeight;
 						
 						if (this.isRectanglesOverlap(p1, p2, percentage, top, left, clientHeight, clientWidth)) {
 							matchedElements.push(element);
@@ -616,6 +697,26 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						return this.getZIndex(el.parent(), limit);
 					}
 					return -9999999;//Number.MIN_SAFE_INTEGER doesn't work in ie
+				},
+				setupTopContainers: function(packages) {
+					editorScope.topContainers = [];
+					for (var i = 0; i< packages.length; i++) {
+						if (packages[i].components[0] && packages[i].components[0].componentType == "layout") {
+							for (var j = 0; j < packages[i].components.length; j++) {
+								if (packages[i].components[j].topContainer) {
+									editorScope.topContainers.push(packages[i].packageName + "." + packages[i].components[j].layoutName);
+								}
+							}
+						}
+					}
+				},
+				isTopContainer: function(container) {
+					for (var i = 0; i < editorScope.topContainers.length; i++) {
+            			if (editorScope.topContainers[i] == container) {
+                			return true;
+            			}
+    				}
+    				return false;
 				}
 			}
 		}

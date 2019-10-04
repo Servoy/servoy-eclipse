@@ -209,7 +209,7 @@ public abstract class AbstractMemTable extends AbstractTable
 	 * @see com.servoy.j2db.persistence.ITable#setHiddenInDeveloperBecauseNoPk(boolean)
 	 */
 	@Override
-	public void setHiddenInDeveloperBecauseNoPk(boolean b)
+	public void setTableInvalidInDeveloperBecauseNoPk(boolean b)
 	{
 		// TODO Auto-generated method stub
 
@@ -221,7 +221,7 @@ public abstract class AbstractMemTable extends AbstractTable
 	 * @see com.servoy.j2db.persistence.ITable#isHiddenInDeveloperBecauseNoPk()
 	 */
 	@Override
-	public boolean isHiddenInDeveloperBecauseNoPk()
+	public boolean isTableInvalidInDeveloperBecauseNoPk()
 	{
 		// TODO Auto-generated method stub
 		return false;

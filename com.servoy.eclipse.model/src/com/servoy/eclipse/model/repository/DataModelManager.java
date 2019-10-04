@@ -55,6 +55,7 @@ import com.servoy.eclipse.model.builder.MarkerMessages;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
+import com.servoy.eclipse.model.preferences.DbiPreferences;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
@@ -761,8 +762,8 @@ public class DataModelManager implements IColumnInfoManager
 
 		if (t.getRowIdentColumnsCount() == 0)
 		{
-			t.setHiddenInDeveloperBecauseNoPk(true);
-			s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
+			t.setTableInvalidInDeveloperBecauseNoPk(true);
+			//s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
 		}
 		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
 
@@ -833,7 +834,9 @@ public class DataModelManager implements IColumnInfoManager
 			colNames.add(column.getName());
 		}
 
-		Iterator<Column> it = t.getColumnsSortedByName();
+		Iterator<Column> it = null;
+		String dbiSortingKey = new DbiPreferences().getDbiSortingKey();
+		it = (DbiPreferences.DBI_SORT_BY_INDEX.equals(dbiSortingKey)) ? t.getColumnsSortedByIndex(colNames) : t.getColumnsSortedByName();
 		while (it.hasNext())
 		{
 			Column column = it.next();

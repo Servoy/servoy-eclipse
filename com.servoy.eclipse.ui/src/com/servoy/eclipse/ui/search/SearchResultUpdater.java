@@ -128,7 +128,8 @@ public class SearchResultUpdater implements IResourceChangeListener, IQueryListe
 									}
 									else
 									{
-										org.eclipse.search.internal.ui.text.LineElement le = ((org.eclipse.search.internal.ui.text.FileMatch)m).getLineElement();
+										org.eclipse.search.internal.ui.text.LineElement le = ((org.eclipse.search.internal.ui.text.FileMatch)m)
+											.getLineElement();
 										startOfLine = le.getOffset();
 										lengthToSearch = le.getLength();
 										lineElementContents = le.getContents();
@@ -138,6 +139,7 @@ public class SearchResultUpdater implements IResourceChangeListener, IQueryListe
 									int ind1 = lineElementContents.indexOf(searchText) - 1;
 									int ind2 = lineElementContents.indexOf(searchText) + searchText.length() + 1;
 									if (startOfLine < 0 || ind1 < 0) continue;
+									if (startOfLine >= fileText.length() || (startOfLine + lengthToSearch) > fileText.length()) continue;
 
 									//safety: make sure we don't take out unnecessary stuff when doubleclicking on a match
 									String newLineOfText = fileText.substring(startOfLine, startOfLine + lengthToSearch);

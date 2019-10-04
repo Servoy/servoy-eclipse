@@ -299,6 +299,23 @@
       </attribute>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.wrongOverridePosition"
+         name="Wrong Override Parent"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+      <attribute
+            name="Uuid">
+      </attribute>
+      <attribute
+            name="SolutionName">
+      </attribute>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.duplicateSiblingUUID"
          name="Duplicate UUID"
          point="org.eclipse.core.resources.markers">
@@ -582,6 +599,17 @@
       </persistent>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.invalidTableNoPrimaryKey"
+         name="Invalid Table No Primary Key"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.servoyProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.duplicateMemTable"
          name="Duplicate Mem Tables"
          point="org.eclipse.core.resources.markers">
@@ -591,8 +619,8 @@
       <persistent
             value="true">
       </persistent>
-  	 </extension>
-  	 <extension
+    </extension>
+  	<extension
          id="com.servoy.eclipse.core.superformProblem"
          name="Superform problem"
          point="org.eclipse.core.resources.markers">
@@ -803,6 +831,17 @@
             type="com.servoy.eclipse.core.builderProblem">
       </super>
    </extension>
+    <extension
+         id="com.servoy.eclipse.core.parametersMismatch"
+         name="Parameters mismatch"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>
    <extension
          id="com.servoy.eclipse.core.deprecatedSpec"
          name="Deprecated Spec"
@@ -834,7 +873,7 @@
             	label="Non externalized string"/>
         </section>
    </extension>
-    <extension
+   <extension
          id="com.servoy.eclipse.core.methodOverride"
          name="Method Override Problem"
          point="org.eclipse.core.resources.markers">

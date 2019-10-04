@@ -76,6 +76,8 @@ export class WpmService {
 
   needRefresh: boolean = false;
 
+  contentAvailable: boolean = true;
+
   constructor(wsService: WebsocketService) {
     const loc = window.location;
     const uri = "ws://"+loc.host+"/wpm/angular2/websocket";
@@ -175,6 +177,10 @@ export class WpmService {
     return this.needRefresh;
   }
 
+  isContentAvailable(): boolean {
+    return this.contentAvailable;
+  }
+
   setNewSelectedRepository(repositoryName: string) {
     const command: Message = { method: "setSelectedRepository", name: repositoryName };
     this.clearPackages();
@@ -213,17 +219,19 @@ export class WpmService {
       const packages: Package[] = typeOfPackages.get(packagesArray[i].packageType);
       packages.push(packagesArray[i]);
     }
-    
-    if(this.packagesObserver) {
-      // fill missing package types so they are refreshed in the view
-      for(let packageType of ALL_PACKAGE_TYPES) {
-        if(!typeOfPackages.has(packageType)) {
-          typeOfPackages.set(packageType, []);
+
+    if(typeOfPackages.size > 0) {
+      if(this.packagesObserver) {
+        // fill missing package types so they are refreshed in the view
+        for(let packageType of ALL_PACKAGE_TYPES) {
+          if(!typeOfPackages.has(packageType)) {
+            typeOfPackages.set(packageType, []);
+          }
         }
+        typeOfPackages.forEach((pks, typ) => {
+          this.packagesObserver.next({ packageType: typ, packages: pks });  
+        });
       }
-      typeOfPackages.forEach((pks, typ) => {
-        this.packagesObserver.next({ packageType: typ, packages: pks });  
-      });
     }
   }
 
@@ -235,10 +243,18 @@ export class WpmService {
     this.repositoriesObserver.next(repositoriesArray);
   }
 
-  refreshRemotePackages = function(){
+  refreshRemotePackages = function() {
 		this.needRefresh = true;
   }
   
+  contentNotAvailable = function() {
+    this.contentAvailable = false;
+  }
+
+  installError = function() {
+    this.contentAvailable = false;
+  }
+
   addRepository(newPackagesAndRepositories: PackagesAndRepositories) {
     this.getRepositories(newPackagesAndRepositories.repositories)
     this.requestAllInstalledPackages(newPackagesAndRepositories.packages);

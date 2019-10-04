@@ -16,11 +16,14 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import org.eclipse.ui.PlatformUI;
+
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.persistence.IAnchorConstants;
 
 /**
  * An action to set the anchoring of selected objects.
- * 
+ *
  * @author rgansevles
  */
 public abstract class SetAnchoringActionDelegateHandler extends SetPropertyActionDelegateHandler
@@ -28,6 +31,21 @@ public abstract class SetAnchoringActionDelegateHandler extends SetPropertyActio
 	public SetAnchoringActionDelegateHandler(int anchoring)
 	{
 		super("anchors", "set anchoring", Integer.valueOf(anchoring));
+	}
+
+	@Override
+	protected boolean calculateEnabled()
+	{
+		if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null && PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null &&
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor() instanceof BaseVisualFormEditor)
+		{
+			BaseVisualFormEditor editor = (BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+			if (editor.getForm().getUseCssPosition())
+			{
+				return false;
+			}
+		}
+		return super.calculateEnabled();
 	}
 
 	public static class SetAnchoringTopLeft extends SetAnchoringActionDelegateHandler

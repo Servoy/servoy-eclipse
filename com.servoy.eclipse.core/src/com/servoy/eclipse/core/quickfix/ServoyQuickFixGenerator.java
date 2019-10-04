@@ -225,6 +225,14 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				fixes = new IMarkerResolution[] { new AddTemplateArgumentsQuickFix(uuid, solName,
 					Utils.getAsInteger(marker.getAttribute(IMarker.LINE_NUMBER), false), eventName) };
 			}
+			else if (type.equals(ServoyBuilder.WRONG_OVERRIDE_PARENT))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+				String uuid = (String)marker.getAttribute("Uuid");
+				IPersist persist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), UUID.fromString(uuid));
+				fixes = new IMarkerResolution[] { new MoveElementOverride(persist, servoyProject) };
+			}
 			else if (type.equals(ServoyBuilder.PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE))
 			{
 				String solName = (String)marker.getAttribute("SolutionName");
@@ -290,6 +298,12 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
 				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
 				fixes = new IMarkerResolution[] { new ClearLingeringTableFilesQuickFix(persist, servoyProject) };
+			}
+			else if (type.equals(ServoyBuilder.INVALID_TABLE_NO_PRIMARY_KEY_TYPE))
+			{
+				final String serverName = (String)marker.getAttribute("serverName");
+				final String tableName = (String)marker.getAttribute("tableName");
+				fixes = new IMarkerResolution[] { new InvalidTableBecauseNoPrimaryKeyQuickFix(serverName, tableName) };
 			}
 		}
 		catch (CoreException e)

@@ -9,8 +9,7 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 
 		function getHighlightNode(event) {
 			if (utils.getDraggingFromPallete() != null && editorScope.getEditorContentRootScope().drop_highlight) {
-				var drop = editorScope.getEditorContentRootScope().drop_highlight.split(".");
-				var canDrop = utils.getDropNode(utils.getDraggingFromPallete(), null, drop[drop.length-1], event);
+				var canDrop = utils.getDropNode(utils.getDraggingFromPallete(), null, editorScope.getEditorContentRootScope().drop_highlight, event);
 				if (canDrop && canDrop.dropAllowed && canDrop.dropTarget)
 				{
 					return canDrop.dropTarget;
@@ -57,6 +56,16 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 						else {
 								highlightDiv.style.outline = "1px solid #FFBBBB";
 						}
+					}
+					if (!editorScope.isAbsoluteFormLayout() && node.getAttribute('svy-layoutname') && node.getAttribute('svy-title') !== undefined && $editorService.getEditor().getEditorContentRootScope().showWireframe && !node.getAttribute('data-maincontainer') && node.clientWidth > 0 && node.clientHeight > 0)
+					{
+						highlightDiv.setAttribute('svytitle', node.getAttribute('svy-title'));
+						highlightDiv.classList.add("showWireframe");	
+						highlightDiv.style.setProperty('--svyBackgroundColor', $(node).css('backgroundColor'));					
+					}
+					else
+					{
+						highlightDiv.classList.remove("showWireframe");
 					}
 
 					if (!editorScope.isAbsoluteFormLayout()) {

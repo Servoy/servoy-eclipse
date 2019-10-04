@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.exporter.ngdesktop.ui.wizard.ExportNGDesktopWizard"
+            id="com.servoy.eclipse.electronexporter.ExportElectronWizard"
+            name="Export NG Desktop File">
+      </wizard>
+   </extension>
+    <extension
+         point="com.servoy.eclipse.ui.exportSolutionProvider">
+      <provider
+            class="com.servoy.eclipse.exporter.ngdesktop.ui.wizard.NGDesktopExporterProvider"
+            id="com.servoy.eclipse.exporter.electron.exportSolutionProvider"
+            name="Provides Solution Electron Export">
+      </provider>
+   </extension>
+   
+   
+   
+</plugin>

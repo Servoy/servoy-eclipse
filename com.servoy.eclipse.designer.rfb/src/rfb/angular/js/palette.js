@@ -56,6 +56,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					{
 						$scope.packages = got.data;
 					}
+					utils.setupTopContainers($scope.packages);
 					packageOrder = {};
 					packageOrder[layoutType] = [];
 					for(var i = 0; i < $scope.packages.length; i++) {
@@ -160,6 +161,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								$scope.glasspane.style.cursor = "not-allowed";
 							} else $scope.glasspane.style.cursor = "pointer";
 
+							if (canDrop.dropAllowed && canDrop.beforeChild && !canDrop.dropTarget) canDrop.dropTarget = $(".contentframe").contents().find("#svyDesignForm").get(0);
+							
 							if (canDrop.dropTarget && !$scope.isAbsoluteFormLayout() && angularElement) {
 								if ($scope.glasspane.style.cursor == "pointer") {
 
@@ -228,7 +231,6 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								angularElement.css(css);
 							}
 						}
-						ev.preventDefault();
 					});
 					
 					mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(){
@@ -391,6 +393,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							angularElement.remove();
 						}
 					});
+					// prevent the drag of anchors from browser; this code was in mousemove, was preventing cursor to change in IE
+					event.preventDefault();
 				}
 			},
 			templateUrl: 'templates/palette.html',

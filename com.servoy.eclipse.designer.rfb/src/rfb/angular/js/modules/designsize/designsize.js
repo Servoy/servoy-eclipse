@@ -1,4 +1,10 @@
-angular.module('designsize',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $pluginRegistry){
+angular.module('designsize',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $pluginRegistry, $editorService){
+	var setSize = function(width, height,fixedSize) {
+		editor.setContentSize(width, height, fixedSize);
+		lastWidth = btnCustomWidth.text =  width;
+		lastHeight = btnCustomHeight.text = height;
+		$editorService.setFormFixedSize({"width": lastWidth, "height" : lastHeight});
+	}
 	
 	var btnDesktopSize = {
 			text: "Desktop",
@@ -6,6 +12,9 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			enabled: true,
 			onclick: function() { 
 				editor.setContentSizeFull(true);
+				lastWidth = btnCustomWidth.text = editor.getFormInitialWidth();
+				lastHeight = btnCustomHeight.text = "auto";
+				$editorService.setFormFixedSize({"width": lastWidth, "height" : lastHeight});
 			},
 		};
 
@@ -17,10 +26,12 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			enabled: true,
 			onclick: function() {
 				if(lastClicked == "Tablet") isPortrait = !isPortrait;
-				if(isPortrait) 
-					editor.setContentSize("768px", "1024px",true);
-				else
-					editor.setContentSize("1024px", "768px",true);
+				if(isPortrait)  {
+					setSize("768px", "1024px",true);
+				}
+				else {
+					setSize("1024px", "768px",true);
+				}
 				lastClicked = "Tablet";
 			},
 		};	
@@ -31,31 +42,27 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			enabled: true,
 			onclick: function() {
 				if(lastClicked == "Phone") isPortrait = !isPortrait;
-				if(isPortrait) 
-					editor.setContentSize("320px", "568px",false);
-				else
-					editor.setContentSize("568px", "320px",false);
+				if(isPortrait) {
+					setSize("320px", "568px",false);
+				}
+				else {
+					setSize("568px", "320px",false);
+				}
 				lastClicked = "Phone";
 			},
 		};
-
-	var btnCustomSize = {
-			text: "Stretch",
-			tooltip: "Switch landscape/portrait mode",
+	
+	var btnCustomWidth;// will be defined when we have the editor scope	
+	var lastWidth;
+	var lastHeight = "auto";
+	var btnCustomHeight = {
+			text: "auto",
+			tooltip: "Fixed design height",
 			enabled: true,
 			onclick: function(selection) {
-				if(lastClicked == selection) isPortrait = !isPortrait;
-				var s = selection.split("x");
-				if (s.length == 2)
-				{
-					if(isPortrait) 
-						editor.setContentSize(s[0] + "px", s[1] + "px",true);
-					else
-						editor.setContentSize(s[1] + "px", s[0] + "px",true);
-				}
-				lastClicked = selection;
+				setSize(lastWidth, selection,true);
 			},
-			list: ["240x480", "480x640"],
+			list: [{"text": "auto"}, {"text": "480px"}, {"text": "640px"}, {"text": "1024px"}, {"text": "2048px"}],
 			onselection: function(selection) {
 				this.onclick(selection);
 				return selection;
@@ -77,11 +84,44 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		editor = editorScope;
 		if(!editor.isAbsoluteFormLayout()) {
+			lastWidth = editor.getFormInitialWidth();
+			btnCustomWidth = {
+				text: lastWidth,
+				tooltip: "Fixed design width",
+				enabled: true,
+				onclick: function(selection) {
+					editor.setContentSize(selection, lastHeight, true);
+					lastWidth = selection;
+					$editorService.setFormFixedSize({"width" : lastWidth});
+				},
+				list: [{"text": "320px"}, {"text": "568px"}, {"text": "640px"}, {"text": "768px"}, {"text" : lastWidth}],
+				onselection: function(selection) {
+					this.onclick(selection);
+					return selection;
+				},
+				faIcon: "fa fa-times fa-lg"
+			};
+			
 			$toolbar.add(btnDesktopSize, TOOLBAR_CATEGORIES.STICKY);
 			$toolbar.add(btnTabletSize, TOOLBAR_CATEGORIES.STICKY);
 			$toolbar.add(btnMobileSize, TOOLBAR_CATEGORIES.STICKY);
-			$toolbar.add(btnCustomSize, TOOLBAR_CATEGORIES.STICKY);
+			$toolbar.add(btnCustomWidth, TOOLBAR_CATEGORIES.STICKY);
+			$toolbar.add(btnCustomHeight, TOOLBAR_CATEGORIES.STICKY);
 			//$toolbar.add(btnRotate, TOOLBAR_CATEGORIES.STICKY);
+			
+			
+			var formSizePromise = $editorService.getFormFixedSize();
+			formSizePromise.then(function(result) {
+				lastHeight = result.height ? result.height : lastHeight;
+				btnCustomHeight.text = lastHeight;
+				lastWidth = result.width ? result.width : lastWidth;
+				btnCustomWidth.text = lastWidth;
+				if (result.height || result.width) {
+					editor.contentLoaded.then(function() {
+						setSize(lastWidth, lastHeight, true);
+					});
+				}
+			});
 		}
 	});
 	

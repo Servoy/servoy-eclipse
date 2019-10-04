@@ -59,6 +59,7 @@ import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
+import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator.DesignProperties;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -152,6 +153,7 @@ public class EditorContentFilter implements Filter
 			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionAndFormName.getLeft());
 			FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
 			Form flattenedForm = fs.getFlattenedForm(fs.getForm(solutionAndFormName.getRight()));
+			if (flattenedForm == null) return; //form renamed
 			HTTPUtils.setNoCacheHeaders((HttpServletResponse)response);
 
 			String containerID = httpServletRequest.getParameter("cont");
@@ -169,7 +171,7 @@ public class EditorContentFilter implements Filter
 						if (container instanceof LayoutContainer)
 						{
 							FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)container, flattenedForm, fs, w, true,
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)container, flattenedForm, fs, w, new DesignProperties(id),
 								FormElementHelper.INSTANCE);
 							FormLayoutGenerator.generateFormEndTag(w, true);
 						}
@@ -183,7 +185,7 @@ public class EditorContentFilter implements Filter
 			}
 			else if (flattenedForm.isResponsiveLayout())
 			{
-				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), fs, w, true);
+				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), fs, w, new DesignProperties());
 			}
 			else
 			{

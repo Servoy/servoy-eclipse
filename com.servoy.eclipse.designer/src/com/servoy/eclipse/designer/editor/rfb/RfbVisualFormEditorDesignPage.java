@@ -72,7 +72,7 @@ import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -142,6 +142,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	private EditorServiceHandler editorServiceHandler;
 
 	private String layout = null;
+	private String formName = null;
 	protected WebsocketSessionKey editorKey = null;
 	protected WebsocketSessionKey clientKey = null;
 	private AbstractContainer showedContainer;
@@ -238,13 +239,14 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		boolean isCSSPositionContainer = false;
 		if (showedContainer instanceof LayoutContainer)
 		{
-			isCSSPositionContainer = CSSPosition.isCSSPositionContainer((LayoutContainer)showedContainer);
+			isCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)showedContainer);
 		}
 
 		String newLayout = computeLayout(flattenedForm, isCSSPositionContainer);
-		if (!Utils.equalObjects(layout, newLayout) || force)
+		if (!Utils.equalObjects(layout, newLayout) || !Utils.equalObjects(formName, flattenedForm.getName()) || force)
 		{
 			layout = newLayout;
+			formName = flattenedForm.getName();
 			Dimension formSize = flattenedForm.getSize();
 			if (isCSSPositionContainer) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
@@ -369,7 +371,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		if (persists != null)
 		{
 			if (persists.size() == 1 && persists.get(0) == showedContainer && showedContainer instanceof LayoutContainer &&
-				CSSPosition.isCSSPositionContainer((LayoutContainer)showedContainer))
+				CSSPositionUtils.isCSSPositionContainer((LayoutContainer)showedContainer))
 			{
 				// probably size has changed we need a full refresh
 				refreshBrowserUrl(true);

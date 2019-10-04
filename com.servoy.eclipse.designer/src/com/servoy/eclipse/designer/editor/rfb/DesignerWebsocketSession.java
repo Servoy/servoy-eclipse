@@ -56,7 +56,7 @@ import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -78,6 +78,7 @@ import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
+import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator.DesignProperties;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.PersistHelper;
@@ -202,6 +203,17 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				UUID parentuuid = null;
 
 				boolean componentFound = false;
+				boolean responsive = form.isResponsiveLayout();
+				int mainContainerID = -1;
+				if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
+				{
+					AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
+					if (container instanceof LayoutContainer)
+					{
+						responsive = !CSSPositionUtils.isCSSPositionContainer((LayoutContainer)container);
+						mainContainerID = container.getID();
+					}
+				}
 				if (name != null)
 				{
 					Collection<IFormElement> baseComponents = wrapper.getBaseComponents();
@@ -210,15 +222,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
-							boolean responsive = form.isResponsiveLayout();
-							if (editor != null && editor.getGraphicaleditor() instanceof RfbVisualFormEditorDesignPage)
-							{
-								AbstractContainer container = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
-								if (container instanceof LayoutContainer && CSSPosition.isCSSPositionContainer((LayoutContainer)container))
-								{
-									responsive = false;
-								}
-							}
 							if (!responsive) FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
 							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm);
 							if (!responsive) FormLayoutGenerator.generateEndDiv(w);
@@ -244,8 +247,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							componentFound = true;
 							IPersist parent = ((ISupportExtendsID)child).getRealParent();
 							parentuuid = parent instanceof Form ? null : parent.getUUID();
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
-								FormElementHelper.INSTANCE);
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w,
+								new DesignProperties(mainContainerID), FormElementHelper.INSTANCE);
 						}
 					}
 				}
@@ -321,12 +324,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			containers.add((LayoutContainer)layout);
 			List<IPersist> children = ((LayoutContainer)layout).getAllObjectsAsList();
-			for (int i = 0; i < children.size(); i++)
+			for (IPersist element : children)
 			{
-				if (children.get(i) != null)
+				if (element != null)
 				{
-					boolean auxGhost = checkLayoutHierarchyRecursively(children.get(i), containers, components, children.get(i).getClass(), compAttributes,
-						deletedComponents, formComponentChild, refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
+					boolean auxGhost = checkLayoutHierarchyRecursively(element, containers, components, element.getClass(), compAttributes, deletedComponents,
+						formComponentChild, refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
 					if (auxGhost) ghost = auxGhost;
 				}
 			}
@@ -451,6 +454,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<IFormElement> compAttributes = new HashSet<>();
 		boolean renderGhosts = editor.isRenderGhosts();
 		editor.setRenderGhosts(false);
+		AbstractContainer showedContainer = ((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).getShowedContainer();
 		for (IPersist persist : persists)
 		{
 			boolean formComponentChild = false;
@@ -490,6 +494,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				else
 				{
 					deletedLayoutContainers.add((LayoutContainer)persist);
+				}
+				if (deletedLayoutContainers.contains(persist) && persist.equals(showedContainer))
+				{
+					//showed container was deleted, need to zoom out
+					((RfbVisualFormEditorDesignPage)editor.getGraphicaleditor()).showContainer(null);
+					return null;
 				}
 			}
 			else

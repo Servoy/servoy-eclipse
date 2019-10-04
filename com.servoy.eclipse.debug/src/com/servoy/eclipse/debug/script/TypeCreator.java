@@ -84,11 +84,13 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
@@ -244,6 +246,7 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
 import com.servoy.j2db.server.ngclient.scripting.ConsoleObject;
 import com.servoy.j2db.server.ngclient.scripting.ServoyApiObject;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -286,6 +289,9 @@ import com.servoy.j2db.util.Utils;
  */
 public class TypeCreator extends TypeCache
 {
+	static final String WEB_SERVICE = "WebService";
+	static final String RUNTIME_WEB_COMPONENT = "RuntimeWebComponent";
+	static final String CUSTOM_TYPE = "CustomType";
 	private static final String STANDARD_ELEMENT_NAME = "elements.elem";
 	static final String HIDDEN_IN_RELATED = "HIDDEN_IN_RELATED";
 
@@ -362,7 +368,6 @@ public class TypeCreator extends TypeCache
 	 */
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
-	private final ConcurrentMap<String, WebObjectSpecification> wcTypeNames = new ConcurrentHashMap<String, WebObjectSpecification>();
 	private final ConcurrentMap<String, WebObjectSpecification> wcServices = new ConcurrentHashMap<String, WebObjectSpecification>();
 
 
@@ -393,9 +398,6 @@ public class TypeCreator extends TypeCache
 	private final ServoyStaticMetaType staticMetaType = new ServoyStaticMetaType(servoyStaticTypeSystem);
 
 	private final MetaType javaMetaType = new JavaRuntimeMetaType(servoyStaticTypeSystem);
-
-	private boolean specTypesCreated = false;
-
 
 	public TypeCreator()
 	{
@@ -438,6 +440,8 @@ public class TypeCreator extends TypeCache
 		addScopeType("Scopes", new ScopesScopeCreator());
 		addScopeType("Scope", new ScopeScopeCreator());
 		addScopeType("FormComponentType", new FormComponentTypeCreator());
+		addScopeType(RUNTIME_WEB_COMPONENT, new WebComponentTypeCreator());
+		addScopeType(CUSTOM_TYPE, new CustomTypeCreator());
 		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
@@ -482,62 +486,6 @@ public class TypeCreator extends TypeCache
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 		addScopeType(JSViewDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSViewDataSource.class, ClientSupport.ng_wc_sc));
-	}
-
-	private void createSpecTypeDefinitions()
-	{
-		specTypesCreated = true;
-		WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
-		WebObjectSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
-			WebServiceSpecProvider.getSpecProviderState());
-		Collection<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
-		Collections.addAll(specs, webComponentSpecifications);
-		Collections.addAll(specs, webServiceSpecifications);
-		for (WebObjectSpecification webComponentSpecification : specs)
-		{
-			Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getDeclaredCustomObjectTypes();
-			for (String typeName : foundTypes.keySet())
-			{
-				IPropertyType< ? > iPropertyType = foundTypes.get(typeName);
-				Type type = TypeInfoModelFactory.eINSTANCE.createType();
-				type.setName(iPropertyType.getName());
-				type.setKind(TypeKind.JAVA);
-				EList<Member> members = type.getMembers();
-				addType(null, type);
-				if (iPropertyType instanceof ICustomType< ? >)
-				{
-					ICustomType< ? > customType = (ICustomType< ? >)iPropertyType;
-					PropertyDescription customJSONTypeDefinition = customType.getCustomJSONTypeDefinition();
-					Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
-					for (PropertyDescription pd : properties.values())
-					{
-						if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
-						{
-							// skip design properties
-							continue;
-						}
-						String name = pd.getName();
-						// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
-						// and skip the dataprovider properties (those are not accesable through scripting)
-						if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
-						{
-							JSType memberType = getType(null, pd);
-							String pdTypeName = pd.getType().getName();
-							if ("object".equals(pdTypeName)) pdTypeName = "Object";
-							if (memberType == null) memberType = getTypeRef(null, pdTypeName);
-							if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
-							{
-								memberType = TypeUtil.arrayOf(memberType);
-							}
-							Property property = createProperty(name, false, memberType, "", null);
-							property.setDeprecated(pd.isDeprecated());
-							members.add(property);
-						}
-					}
-				}
-
-			}
-		}
 	}
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
@@ -769,7 +717,6 @@ public class TypeCreator extends TypeCache
 				}
 				servoyStaticTypeSystem.reset();
 				clear(null);
-				specTypesCreated = false;
 				flushCache();
 				docCache.clear();
 				return Status.OK_STATUS;
@@ -974,6 +921,8 @@ public class TypeCreator extends TypeCache
 	public final Set<String> getTypeNames(String prefix)
 	{
 		Set<String> names = new HashSet<String>(classTypes.keySet());
+		names.add(CUSTOM_TYPE);
+		names.add(RUNTIME_WEB_COMPONENT);
 		if (prefix != null && !"".equals(prefix.trim()))
 		{
 			String lowerCasePrefix = prefix.toLowerCase();
@@ -1130,11 +1079,6 @@ public class TypeCreator extends TypeCache
 		{
 			return createType(context, fullTypeName, cls);
 		}
-		WebObjectSpecification spec = wcTypeNames.get(typeNameClassName);
-		if (spec != null)
-		{
-			return createWebComponentType(context, fullTypeName, spec);
-		}
 		WebObjectSpecification webComponentSpecification = wcServices.get(typeNameClassName);
 		if (webComponentSpecification != null)
 		{
@@ -1152,20 +1096,24 @@ public class TypeCreator extends TypeCache
 	private Type createWebComponentType(String context, String fullTypeName, WebObjectSpecification spec)
 	{
 		String bucket = null;
-		if (!specTypesCreated)
-		{
-			createSpecTypeDefinitions();
-		}
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(fullTypeName);
 		type.setKind(TypeKind.JAVA);
-		EList<Member> members = type.getMembers();
-		Map<String, PropertyDescription> properties = spec.getProperties();
-		int index = fullTypeName.indexOf('<');
+		// test form formcomponnent properties
+		String specName = null;
+		if (fullTypeName.startsWith(RUNTIME_WEB_COMPONENT))
+		{
+			specName = fullTypeName.substring(RUNTIME_WEB_COMPONENT.length() + 1, fullTypeName.length() - 1);
+		}
+		else
+		{
+			specName = fullTypeName.substring(WEB_SERVICE.length() + 1, fullTypeName.length() - 1);
+		}
+		int index = specName.indexOf('<');
 		Map<String, String> configProperties = new HashMap<String, String>();
 		if (index != -1)
 		{
-			String part = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
+			String part = specName.substring(index + 1, specName.length() - 1);
 			String[] props = part.split(",");
 			for (String prop : props)
 			{
@@ -1174,6 +1122,8 @@ public class TypeCreator extends TypeCache
 			}
 
 		}
+		EList<Member> members = type.getMembers();
+		Map<String, PropertyDescription> properties = spec.getProperties();
 		for (PropertyDescription pd : properties.values())
 		{
 			if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
@@ -1192,7 +1142,21 @@ public class TypeCreator extends TypeCache
 					memberType = getTypeRef(context, "FormComponentType<" + configProperties.get(pd.getName()) + ">");
 					bucket = context;
 				}
-				if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
+
+				if (memberType == null)
+				{
+					if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+						((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+					{
+
+						memberType = getTypeRef(null, CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
+					}
+					else
+					{
+						memberType = getTypeRef(null, pd.getType().getName());
+					}
+				}
+
 				if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
 				{
 					memberType = TypeUtil.arrayOf(memberType);
@@ -1217,10 +1181,22 @@ public class TypeCreator extends TypeCache
 			{
 				method.setDeprecated(api.isDeprecated());
 			}
-			JSType returnType = getType(context, api.getReturnType());
-			if (returnType == null && api.getReturnType() != null)
+
+			PropertyDescription pd = api.getReturnType();
+			JSType returnType = getType(context, pd);
+			if (returnType == null && pd != null)
 			{
-				returnType = getTypeRef(null, api.getReturnType().getType().getName());
+				if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+					((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+				{
+
+					returnType = getTypeRef(null, CUSTOM_TYPE + '<' + pd.getType().getName() + '>');
+				}
+				else
+				{
+					returnType = getTypeRef(null, pd.getType().getName());
+				}
+
 				if (PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
 				{
 					returnType = TypeUtil.arrayOf(returnType);
@@ -1248,7 +1224,7 @@ public class TypeCreator extends TypeCache
 			}
 			members.add(method);
 		}
-		if (!fullTypeName.startsWith("WebService"))
+		if (!fullTypeName.startsWith(WEB_SERVICE))
 		{
 			boolean hasStyleclass = spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
 				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0;
@@ -1363,8 +1339,8 @@ public class TypeCreator extends TypeCache
 		if (type == BooleanPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.BOOLEAN);
 		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE)
 			return getTypeRef(context, ITypeNames.NUMBER);
-		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE)
-			return getTypeRef(context, ITypeNames.STRING);
+		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE ||
+			type == TitleStringPropertyType.NG_INSTANCE) return getTypeRef(context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
 		if (FoundsetPropertyType.TYPE_NAME.equals(type.getName()))
 		{
@@ -4515,14 +4491,13 @@ public class TypeCreator extends TypeCache
 					if (FormTemplateGenerator.isWebcomponentBean(formElement))
 					{
 						WebObjectSpecification spec = FormTemplateGenerator.getWebObjectSpecification(formElement);
-						String typeName = spec.getName();
-						wcTypeNames.put(typeName, spec);
+						String typeName = null;
 						Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
 						if (properties.size() > 0)
 						{
 							FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 							AbstractBase element = (AbstractBase)formElement;
-							StringBuilder sb = new StringBuilder(spec.getName());
+							StringBuilder sb = new StringBuilder(RUNTIME_WEB_COMPONENT + '<' + spec.getName());
 							sb.append('<');
 							for (PropertyDescription pd : properties)
 							{
@@ -4536,15 +4511,19 @@ public class TypeCreator extends TypeCache
 								}
 								sb.append(',');
 							}
-							sb.append('>');
+							sb.append(">>");
 							typeName = sb.toString();
 						}
-						elementType = getTypeRef(context, typeName);
-						if (formElement.getParent() instanceof Form && !((Form)formElement.getParent()).isResponsiveLayout())
+						else if (formElement.getParent() instanceof Form && !((Form)formElement.getParent()).isResponsiveLayout())
 						{
-							wcTypeNames.put(elementType.getName() + _ABS_POSTFIX, spec);
-							elementType = getTypeRef(context, elementType.getName() + _ABS_POSTFIX);
+//							wcTypeNames.put(elementType.getName() + _ABS_POSTFIX, spec);
+							typeName = RUNTIME_WEB_COMPONENT + '<' + spec.getName() + _ABS_POSTFIX + '>';
 						}
+						else
+						{
+							typeName = RUNTIME_WEB_COMPONENT + '<' + spec.getName() + '>';
+						}
+						elementType = getTypeRef(context, typeName);
 					}
 					else
 					{
@@ -4611,6 +4590,118 @@ public class TypeCreator extends TypeCache
 		{
 		}
 	}
+
+	public class CustomTypeCreator implements IScopeTypeCreator
+	{
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			//Custom component type can be defined only in WebComponents objects. So get WebComponentSpec
+			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1) return null;
+			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			String[] typeNames = wcTypeName.split("\\.");
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeNames[0]);
+			if (spec == null)
+			{
+				spec = WebServiceSpecProvider.getSpecProviderState().getWebComponentSpecification(typeNames[0]);
+			}
+			if (spec != null)
+			{
+				IPropertyType< ? > iPropertyType = spec.getDeclaredCustomObjectTypes().get(typeNames[1]);
+
+				Type type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setName(CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
+				type.setKind(TypeKind.JAVA);
+				EList<Member> members = type.getMembers();
+				if (iPropertyType instanceof ICustomType< ? >)
+				{
+					ICustomType< ? > customType = (ICustomType< ? >)iPropertyType;
+					PropertyDescription customJSONTypeDefinition = customType.getCustomJSONTypeDefinition();
+					Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
+					for (PropertyDescription pd : properties.values())
+					{
+						if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
+						{
+							// skip design properties
+							continue;
+						}
+						String name = pd.getName();
+						JSType memberType = getType(null, pd);
+						String pdTypeName = pd.getType().getName();
+						if ("object".equals(pdTypeName)) pdTypeName = "Object";
+						if (memberType == null)
+						{
+							if (pd.getType() instanceof CustomJSONObjectType || (pd.getType() instanceof CustomJSONArrayType &&
+								((CustomJSONArrayType< ? , ? >)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof CustomJSONObjectType))
+							{
+
+								memberType = getTypeRef(null, CUSTOM_TYPE + '<' + pdTypeName + '>');
+							}
+							else
+							{
+								memberType = getTypeRef(null, pdTypeName);
+							}
+						}
+						if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
+						{
+							memberType = TypeUtil.arrayOf(memberType);
+						}
+						Property property = createProperty(name, false, memberType, "", null);
+						property.setDeprecated(pd.isDeprecated());
+						members.add(property);
+					}
+				}
+				return addType(null, type);
+			}
+			return null;
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+	public class WebComponentTypeCreator implements IScopeTypeCreator
+	{
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			int smallerThenIndex = fullTypeName.indexOf('<');
+			if (smallerThenIndex == -1) return null;
+			String wcTypeName = fullTypeName.substring(smallerThenIndex + 1, fullTypeName.length() - 1);
+			// test for form component
+			if ((smallerThenIndex = wcTypeName.indexOf('<')) != -1) wcTypeName = wcTypeName.substring(0, smallerThenIndex);
+			// test for absolute forms
+			if (wcTypeName.endsWith(_ABS_POSTFIX)) wcTypeName = wcTypeName.substring(0, wcTypeName.length() - _ABS_POSTFIX.length());
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(wcTypeName);
+			if (spec != null)
+			{
+				return createWebComponentType(context, fullTypeName, spec);
+			}
+			return null;
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
 
 	/**
 	 * @param context

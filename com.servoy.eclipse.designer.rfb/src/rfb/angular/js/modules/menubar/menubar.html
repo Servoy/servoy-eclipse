@@ -1,4 +1,4 @@
-<div class="menubar" ng-mousedown="onmousedown($event)" ng-if="node.node.width() > 0 && node.node.height() > 0">
+<div class="menubar" ng-mousedown="onmousedown($event)" ng-if="selection.length == 1 && node.node.width() > 0 && node.node.height() > 0">
 	<span class="containerAction" ng-repeat="action in menu.actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></span>
-	<span class="containerAction" ng-repeat="action in deleteMenu.actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></span>
+	<span class="containerAction"ng-if="!node.node.hasClass('inheritedElement')" ng-repeat="action in deleteMenu.actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></span>
 </div>

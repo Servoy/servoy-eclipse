@@ -16,14 +16,15 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.11/</eclipse.url>
+		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.13/</eclipse.url>
+		<git.url>http://download.eclipse.org/egit/updates</git.url>
 		<orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository</orbit.url>
-		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.06/</dltk.url>
-		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/2019.06/</servoy-shiplibs.url>
+		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.12/</dltk.url>
+		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/2019.12/</servoy-shiplibs.url>
 		<sqlexplorer.url>http://developer.servoy.com/sqlexplorer/</sqlexplorer.url>
 		<gef.url>http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/</gef.url>
 		<emf.url>http://download.eclipse.org/modeling/emf/emf/builds/release/2.16/</emf.url>
-		<chromium.url>http://developer.servoy.com/p2_repository/chromium/</chromium.url>
+		<chromium.url>http://dl.maketechnology.io/chromium-swt/rls/repository</chromium.url>
 		<cef.url>http://dl.maketechnology.io/chromium-cef/rls/repository</cef.url>
 	</properties>
 
@@ -34,6 +35,10 @@
 			<layout>p2</layout>
 		</repository>
 		<repository>
+			<id>git</id>
+			<url>${git.url}</url>
+			<layout>p2</layout>
+		</repository>		<repository>
 			<id>dltk</id>
 			<url>${dltk.url}</url>
 			<layout>p2</layout>
@@ -299,6 +304,7 @@
 				<module>com.servoy.eclipse.designer.rib</module>
 				<module>com.servoy.eclipse.designer.wpm</module>
 				<module>com.servoy.eclipse.jsunit</module>
+				<module>com.servoy.eclipse.exporter.ngdesktop</module>
 				<module>com.servoy.eclipse.exporter.mobile</module>
 				<module>com.servoy.eclipse.exporter.solution</module>
 				<module>com.servoy.eclipse.exporter.war</module>

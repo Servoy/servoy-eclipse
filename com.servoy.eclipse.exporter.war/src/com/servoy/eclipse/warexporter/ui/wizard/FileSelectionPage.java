@@ -58,14 +58,12 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
  */
 public class FileSelectionPage extends WizardPage implements Listener, IRestoreDefaultPage
 {
-	/**
-	 *
-	 */
+
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
 	private Button exportActiveSolution;
-	private Button exportNoneActiveSolutions;
+	private Button exportSomeNonActiveSolutions;
 	private Button allRowsRadioButton;
 	private Button exportI18NDataButton;
 	private Button exportUsersButton;
@@ -134,15 +132,17 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			}
 		});
 
-		exportNoneActiveSolutions = new Button(composite, SWT.CHECK);
-		exportNoneActiveSolutions.setText(" Include non-active solutions.");
-		exportNoneActiveSolutions.setSelection(exportModel.isExportNoneActiveSolutions());
-		exportNoneActiveSolutions.addSelectionListener(new SelectionAdapter()
+		exportSomeNonActiveSolutions = new Button(composite, SWT.CHECK);
+		exportSomeNonActiveSolutions.setText("Include some non-active solutions (you will be able to choose which ones later)");
+		exportSomeNonActiveSolutions.setToolTipText(
+			"It can be useful if you want your war deployment to include some batch processor solutions as well (for example).");
+		exportSomeNonActiveSolutions.setSelection(exportModel.isExportNonActiveSolutions());
+		exportSomeNonActiveSolutions.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				exportModel.setExportNoneActiveSolutions(exportNoneActiveSolutions.getSelection());
+				exportModel.setExportNonActiveSolutions(exportSomeNonActiveSolutions.getSelection());
 			}
 		});
 
@@ -492,7 +492,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	 */
 	private void enableSolutionExportData()
 	{
-		exportNoneActiveSolutions.setEnabled(exportActiveSolution.getSelection());
+		exportSomeNonActiveSolutions.setEnabled(exportActiveSolution.getSelection());
 		exportAllTablesFromReferencedServers.setEnabled(exportActiveSolution.getSelection());
 		exportMetadataTablesButton.setEnabled(exportActiveSolution.getSelection());
 		checkMetadataTablesButton.setEnabled(exportMetadataTablesButton.getEnabled() && exportMetadataTablesButton.getSelection());
@@ -641,7 +641,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	public void restoreDefaults()
 	{
 		fileNameText.setText("");
-		exportNoneActiveSolutions.setSelection(false);
+		exportSomeNonActiveSolutions.setSelection(false);
 		exportModel.setFileName(null);
 		exportActiveSolution.setSelection(false);
 		exportModel.setExportActiveSolution(false);

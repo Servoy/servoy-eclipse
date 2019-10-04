@@ -20,14 +20,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TreeColumn;
 
 import com.servoy.j2db.persistence.Column;
 
@@ -40,33 +44,32 @@ public class ColumnsSorter extends ViewerSorter
 		int columnIndex;
 		Comparator comparator;
 		boolean descending;
-		TableColumn tc;
+		Item column;
 	}
 
-	private final TableViewer viewer;
+	private final ColumnViewer viewer;
 	private final SortInfo[] infos;
-	private boolean firstTime;
+	private final boolean[] firstTime = new boolean[] { true };
 
-	public ColumnsSorter(TableViewer viewer, TableColumn[] columns, Comparator[] comparators)
+	public ColumnsSorter(ColumnViewer viewer, Item[] columns, Comparator[] comparators)
 	{
 		this.viewer = viewer;
 		infos = new SortInfo[columns.length];
 		for (int i = 0; i < columns.length; i++)
 		{
 			infos[i] = new SortInfo();
-			infos[i].tc = columns[i];
+			infos[i].column = columns[i];
 			infos[i].columnIndex = i;
 			infos[i].comparator = comparators[i];
 			infos[i].descending = false;
-			createSelectionListener(viewer.getTable(), columns[i], infos[i]);
+			createSelectionListener(columns[i], infos[i]);
 		}
-		firstTime = true;
 	}
 
 	@Override
 	public int compare(Viewer viewer, Object favorite1, Object favorite2)
 	{
-		if (firstTime) return 0;
+		if (firstTime[0]) return 0;
 
 		//for table columns, let newly created columns add up at the end of the list, and allow full sorting only at save time
 		if ((favorite1 instanceof Column && !((Column)favorite1).getExistInDB()) && (favorite2 instanceof Column && !((Column)favorite2).getExistInDB()))
@@ -107,19 +110,41 @@ public class ColumnsSorter extends ViewerSorter
 		return 0;
 	}
 
-	private void createSelectionListener(final Table table, final TableColumn column, final SortInfo info)
+	private void createSelectionListener(final Item column, final SortInfo info)
 	{
-		column.addSelectionListener(new SelectionAdapter()
+		SelectionListener listener = new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				firstTime = false;
-				table.setSortColumn(info.tc);
+				firstTime[0] = false;
+				if (viewer instanceof TableViewer)
+				{
+					((TableViewer)viewer).getTable().setSortColumn((TableColumn)info.column);
+				}
+				if (viewer instanceof TreeViewer)
+				{
+					((TreeViewer)viewer).getTree().setSortColumn((TreeColumn)info.column);
+				}
 				sortUsing(info);
-				table.setSortDirection((info.descending ? SWT.UP : SWT.DOWN));
+				if (viewer instanceof TableViewer)
+				{
+					((TableViewer)viewer).getTable().setSortDirection((info.descending ? SWT.UP : SWT.DOWN));
+				}
+				if (viewer instanceof TreeViewer)
+				{
+					((TreeViewer)viewer).getTree().setSortDirection((info.descending ? SWT.UP : SWT.DOWN));
+				}
 			}
-		});
+		};
+		if (viewer instanceof TableViewer)
+		{
+			((TableColumn)column).addSelectionListener(listener);
+		}
+		if (viewer instanceof TreeViewer)
+		{
+			((TreeColumn)column).addSelectionListener(listener);
+		}
 	}
 
 	protected void sortUsing(SortInfo info)

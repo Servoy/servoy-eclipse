@@ -161,6 +161,8 @@ public class MarkerMessages
 	public static ServoyMarker DuplicateReferencedFormFound = new ServoyMarker(
 		"Duplicate referenced form \"{0}\" found in form \"{1}\". This is not supported.", ServoyBuilder.DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
 
+	public static ServoyMarker DuplicateOverrideFound = new ServoyMarker(
+		"Duplicate form element found \"{0}\" in {1}. This is caused by wrong parent of override element.", ServoyBuilder.WRONG_OVERRIDE_PARENT);
 
 	/**
 	 * This means that for a mobile solution, they use for variables names that are reserved because of the window object in a browser.
@@ -604,6 +606,8 @@ public class MarkerMessages
 		ServoyBuilder.DATABASE_INFORMATION_MARKER_TYPE);
 	public static ServoyMarker LingeringTableFiles = new ServoyMarker(
 		"Table \"{0}\" was deleted, but tbl file and possibly calculations/aggregations still exist.", ServoyBuilder.LINGERING_TABLE_FILES_TYPE);
+	public static ServoyMarker InvalidTableNoPrimaryKey = new ServoyMarker("Table \"{0}\" has no primary key.",
+		ServoyBuilder.INVALID_TABLE_NO_PRIMARY_KEY_TYPE);
 	public static ServoyMarker DuplicateMemTable = new ServoyMarker("Duplicate Mem Table \"{0}\" in solutions \"{1}\" and \"{2}\"",
 		ServoyBuilder.DUPLICATE_MEM_TABLE_TYPE);
 
@@ -688,4 +692,7 @@ public class MarkerMessages
 		ServoyBuilder.METHOD_OVERRIDE);
 
 	public static ServoyMarker DeprecatedSpecification = new ServoyMarker("The type \"{0}\" of the {1} is deprecated. {2}", ServoyBuilder.DEPRECATED_SPEC);
+
+	public static ServoyMarker Parameters_Mismatch = new ServoyMarker(
+		"Component {0} has handler \"{1}\" which has different number of parameters in spec and properties view.", ServoyBuilder.PARAMETERS_MISMATCH);
 }

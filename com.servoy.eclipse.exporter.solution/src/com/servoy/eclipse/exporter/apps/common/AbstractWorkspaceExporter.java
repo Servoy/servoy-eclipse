@@ -308,17 +308,24 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 						if (!mustStop)
 						{
-							outputExtra("Checking for problem markers");
-							sm.buildActiveProjects(null, true);
-
 							// check project markers
 							// for solution and/or (some) modules
 							List<IMarker> errors = new ArrayList<IMarker>();
 							List<IMarker> warnings = new ArrayList<IMarker>();
-							checkProjectMarkers(modules, errors, warnings, configuration);
+							if (configuration.skipBuild())
+							{
+								outputExtra("Servoy build is skipped due to given configuration; make sure your solution is correct when using this option.");
+							}
+							else
+							{
+								outputExtra("Checking for problem markers");
+								sm.buildActiveProjects(null, true);
 
-							// for resources project
-							splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
+								checkProjectMarkers(modules, errors, warnings, configuration);
+
+								// for resources project
+								splitMarkers(sm.getActiveResourcesProject().getProject(), errors, warnings);
+							}
 
 							if (errors.size() > 0)
 							{

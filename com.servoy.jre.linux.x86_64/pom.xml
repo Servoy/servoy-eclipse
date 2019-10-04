@@ -7,12 +7,16 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2019.9.0.3520_rc</version>
+		<version>2019.12.0.3540_rc</version>
 	</parent>
 	
 	<artifactId>com.servoy.jre.linux.x86_64.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>12</version>
+	<version>12.0.0</version>
+	
+	<properties>
+		<jre.version>jdk-13+33-jre</jre.version>
+	</properties>
 	
 	<build>
 		<plugins>
@@ -59,7 +63,7 @@
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>
 				<artifactId>download-maven-plugin</artifactId>
-				<version>1.4.0</version>
+				<version>1.4.2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -67,7 +71,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://api.adoptopenjdk.net/v2/binary/releases/openjdk12?openjdk_impl=openj9&amp;os=linux&amp;arch=x64&amp;release=latest&amp;type=jre&amp;heap_size=normal</url>
+							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33_openj9-0.16.0/OpenJDK13U-jre_x64_linux_openj9_13_33_openj9-0.16.0.tar.gz</url>
 							<outputFileName>jre12.tar.gz</outputFileName>
 							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
 						</configuration>
@@ -107,7 +111,7 @@
 							<outputDirectory>${basedir}/jre</outputDirectory>
 							<resources>
 								<resource>
-									<directory>${project.build.directory}/jdk-12.0.1+12-jre/</directory>
+									<directory>${project.build.directory}/${jre.version}/</directory>
 									<!-- Workaround https://github.com/eclipse/openj9/issues/2239 -->
 									<exclude>lib/libfreetype.so.6</exclude>
 								</resource>

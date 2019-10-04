@@ -692,6 +692,8 @@ public class UIUtils
 			PipedInputStream inBytes = new PipedInputStream(outBytes);
 			if (Debug.tracing()) Debug.trace("Trying to get a png in thread: " + Thread.currentThread().getName());
 			ImageIO.write(bufferedImage, "PNG", outBytes);
+			outBytes.flush();
+			outBytes.close();
 			if (Debug.tracing()) Debug.trace("Got a png in thread: " + Thread.currentThread().getName());
 			return new Image(device, inBytes);
 		}

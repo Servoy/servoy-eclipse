@@ -64,7 +64,7 @@ import com.servoy.j2db.persistence.Part;
 /**
  * Edit policy for moving/resizing elements.
  * Alignment feedback is given.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -307,6 +307,10 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 			return;
 		}
 
+		if (container != null && container.getEditorPart().getForm().getUseCssPosition())
+		{
+			return;
+		}
 		if (anchoringFigureTracker == null && getHost().getModel() instanceof ISupportAnchors && getHost().getModel() instanceof IPersist)
 		{
 			Clickable anchoringFigure = new Clickable(new AnchoringFigure((ISupportAnchors)getHost().getModel()), SWT.NONE);
@@ -318,8 +322,8 @@ final public class AlignmentfeedbackEditPolicy extends ResizableEditPolicy
 				}
 			});
 			getLayer(LayerConstants.HANDLE_LAYER).add(anchoringFigure);
-			anchoringFigureTracker = new PersistChangedTracker(anchoringFigure, (IPersist)getHost().getModel(), new AbsoluteLocator(getHost().getFigure(),
-				false, 4, true, 2));
+			anchoringFigureTracker = new PersistChangedTracker(anchoringFigure, (IPersist)getHost().getModel(),
+				new AbsoluteLocator(getHost().getFigure(), false, 4, true, 2));
 		}
 	}
 

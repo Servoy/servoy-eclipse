@@ -46,7 +46,7 @@ import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -552,7 +552,7 @@ public class ElementUtil
 	{
 		List<IFormElement> overlappingElements = null;
 
-		Rectangle formElementRectangle = new Rectangle(CSSPosition.getLocation(formElement), CSSPosition.getSize(formElement));
+		Rectangle formElementRectangle = new Rectangle(CSSPositionUtils.getLocation(formElement), CSSPositionUtils.getSize(formElement));
 
 		Iterator<IPersist> it = flattenedForm.getAllObjects();
 		while (it.hasNext())
@@ -566,7 +566,7 @@ public class ElementUtil
 					continue;
 				}
 
-				if (new Rectangle(CSSPosition.getLocation(itFormElement), CSSPosition.getSize(itFormElement)).intersects(formElementRectangle))
+				if (new Rectangle(CSSPositionUtils.getLocation(itFormElement), CSSPositionUtils.getSize(itFormElement)).intersects(formElementRectangle))
 				{
 					if (overlappingElements == null)
 					{
@@ -690,11 +690,11 @@ public class ElementUtil
 		if (e2 instanceof IFormElement) element2 = (IFormElement)e2;
 		else return false;
 
-		Rectangle element1Rectangle = new Rectangle(CSSPosition.getSize(element1));
-		element1Rectangle.setLocation(CSSPosition.getLocation(element1));
+		Rectangle element1Rectangle = new Rectangle(CSSPositionUtils.getSize(element1));
+		element1Rectangle.setLocation(CSSPositionUtils.getLocation(element1));
 
-		Rectangle element2Rectangle = new Rectangle(CSSPosition.getSize(element2));
-		element2Rectangle.setLocation(CSSPosition.getLocation(element2));
+		Rectangle element2Rectangle = new Rectangle(CSSPositionUtils.getSize(element2));
+		element2Rectangle.setLocation(CSSPositionUtils.getLocation(element2));
 
 		return element1Rectangle.intersects(element2Rectangle);
 	}

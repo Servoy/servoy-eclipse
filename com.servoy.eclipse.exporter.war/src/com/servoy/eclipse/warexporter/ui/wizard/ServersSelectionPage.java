@@ -56,14 +56,6 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	private SelectAllButtonsBar selectAllButtons;
 	private final HashMap<String, IWizardPage> serverConfigurationPages;
 
-	/**
-	 * @param serverConfigurationPages
-	 * @param string
-	 * @param string2
-	 * @param string3
-	 * @param pluginDir
-	 * @param beanSelectionPage
-	 */
 	public ServersSelectionPage(String pagename, String title, String description, SortedSet<String> selectedServers, String[] requiredServers,
 		HashMap<String, IWizardPage> serverConfigurationPages)
 	{
@@ -163,11 +155,6 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		if (!selectedServers.contains(IServer.REPOSITORY_SERVER)) selectedServers.add(IServer.REPOSITORY_SERVER);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
-	 */
 	@Override
 	public IWizardPage getNextPage()
 	{
@@ -197,11 +184,6 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.core.commands.IStateListener#handleStateChange(org.eclipse.core.commands.State, java.lang.Object)
-	 */
 	@Override
 	public void checkStateChanged(CheckStateChangedEvent event)
 	{
@@ -224,22 +206,12 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#selectAll()
-	 */
 	@Override
 	public void selectAll()
 	{
 		checkboxTableViewer.setAllChecked(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#deselectAll()
-	 */
 	@Override
 	public void deselectAll()
 	{
@@ -265,4 +237,5 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_server_selection");
 	}
+
 }

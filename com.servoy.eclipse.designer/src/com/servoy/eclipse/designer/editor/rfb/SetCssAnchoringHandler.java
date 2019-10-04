@@ -34,6 +34,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetCssAnchoringCommand;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -102,10 +103,10 @@ public class SetCssAnchoringHandler implements IServerService
 			if (persist instanceof BaseComponent)
 			{
 				CSSPosition position = ((BaseComponent)persist).getCssPosition();
-				selectedAnchors[0] = selectedAnchors[0] && CSSPosition.isSet(position.top);
-				selectedAnchors[1] = selectedAnchors[1] && CSSPosition.isSet(position.right);
-				selectedAnchors[2] = selectedAnchors[2] && CSSPosition.isSet(position.bottom);
-				selectedAnchors[3] = selectedAnchors[3] && CSSPosition.isSet(position.left);
+				selectedAnchors[0] = selectedAnchors[0] && CSSPositionUtils.isSet(position.top);
+				selectedAnchors[1] = selectedAnchors[1] && CSSPositionUtils.isSet(position.right);
+				selectedAnchors[2] = selectedAnchors[2] && CSSPositionUtils.isSet(position.bottom);
+				selectedAnchors[3] = selectedAnchors[3] && CSSPositionUtils.isSet(position.left);
 			}
 		});
 		List<String> checked = new ArrayList<>();

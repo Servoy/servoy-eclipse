@@ -57,13 +57,6 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage impleme
 	private Set<String> availableComponents;
 	private final String type;
 
-	/**
-	 * @param exportModel
-	 * @param pageName
-	 * @param title
-	 * @param type
-	 * @param titleImage
-	 */
 	protected AbstractComponentsSelectionPage(ExportWarModel exportModel, String pageName, String title, String description, String type)
 	{
 		super(pageName);
@@ -73,11 +66,6 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage impleme
 		this.type = type;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public void createControl(Composite parent)
 	{
@@ -283,4 +271,5 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage impleme
 		availableComponents = getAvailableItems();
 		availableComponentsList.setItems(availableComponents.toArray(new String[availableComponents.size()]));
 	}
+
 }

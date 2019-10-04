@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
@@ -29,6 +30,10 @@ import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeProvider;
 import org.eclipse.dltk.javascript.typeinfo.TypeMode;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.j2db.FlattenedSolution;
@@ -39,6 +44,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.querybuilder.impl.QBSelect;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -224,6 +230,31 @@ public class TypeProvider implements ITypeProvider
 					{
 						Debug.error(e);
 					}
+				}
+			}
+			if (TypeCreator.CUSTOM_TYPE.toLowerCase().startsWith(prefixLower))
+			{
+				WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+				WebObjectSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
+					WebServiceSpecProvider.getSpecProviderState());
+				Collection<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
+				Collections.addAll(specs, webComponentSpecifications);
+				Collections.addAll(specs, webServiceSpecifications);
+				for (WebObjectSpecification webComponentSpecification : specs)
+				{
+					Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getDeclaredCustomObjectTypes();
+					for (IPropertyType< ? > type : foundTypes.values())
+					{
+						names.add(TypeCreator.CUSTOM_TYPE + '<' + type.getName() + '>');
+					}
+				}
+			}
+			if (TypeCreator.RUNTIME_WEB_COMPONENT.toLowerCase().startsWith(prefixLower))
+			{
+				WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+				for (WebObjectSpecification webComponentSpecification : webComponentSpecifications)
+				{
+					names.add(TypeCreator.RUNTIME_WEB_COMPONENT + '<' + webComponentSpecification.getName() + '>');
 				}
 			}
 			if ("form".startsWith(prefixLower) || "runtimeform".startsWith(prefixLower))

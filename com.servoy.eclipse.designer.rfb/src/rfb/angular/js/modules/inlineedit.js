@@ -69,6 +69,9 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 							if (directEditProperty) {
 								var nodeId = node.getAttribute("svy-id");
 								$editorService.getComponentPropertyWithTags(nodeId, directEditProperty).then(function(propertyValue) {
+									if (node.clientHeight == 0 && node.clientWidth == 0 && node.firstElementChild) {
+										node = node.firstElementChild;
+									}
 									var absolutePoint = editorScope.convertToAbsolutePoint({
 										x: node.getBoundingClientRect().left,
 										y: node.getBoundingClientRect().top

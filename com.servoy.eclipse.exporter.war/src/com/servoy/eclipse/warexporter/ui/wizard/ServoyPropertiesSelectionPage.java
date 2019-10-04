@@ -55,9 +55,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class ServoyPropertiesSelectionPage extends WizardPage implements Listener, IRestoreDefaultPage
 {
-	/**
-	 *
-	 */
+
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
@@ -65,13 +63,11 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 	private Button browseLog4jConfigurationFileButton;
 	private Text fileWebXmlNameText;
 	private Button browseWebXmlButton;
-	private final ExportWarWizard wizard;
 
-	public ServoyPropertiesSelectionPage(ExportWarModel exportModel, ExportWarWizard wizard)
+	public ServoyPropertiesSelectionPage(ExportWarModel exportModel)
 	{
 		super("servoypropertyselection");
 		this.exportModel = exportModel;
-		this.wizard = wizard;
 		setTitle("Choose an existing servoy properties file, log4j configuration file or web.xml (skip to generate default)");
 		setDescription("Select the servoy properties file, log4j configuration file or web.xml that you want to use, skip if default should be generated");
 	}
@@ -141,19 +137,12 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				fileNameText.setText("");
-				log4jConfigurationFileText.setText("");
-				fileWebXmlNameText.setText("");
-				exportModel.setServoyPropertiesFileName(null);
-				exportModel.setLog4jConfigurationFile(null);
-				exportModel.setWebXMLFileName(null);
-				canFlipToNextPage();
-				getWizard().getContainer().updateButtons();
-				getWizard().getContainer().updateMessage();
+				restoreDefaults();
 			}
 		});
 
 		setControl(composite);
+		checkPageComplete();
 	}
 
 	public void handleEvent(Event event)
@@ -163,7 +152,6 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			String potentialFileName = fileNameText.getText();
 			exportModel.setServoyPropertiesFileName(potentialFileName);
 			exportModel.setOverwriteSocketFactoryProperties(false);
-			checkLicenses();
 		}
 		else if (event.widget == log4jConfigurationFileText)
 		{
@@ -248,23 +236,25 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 				}
 			}
 		}
-		canFlipToNextPage();
+		checkPageComplete();
+
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
 	}
 
-	@Override
-	public boolean canFlipToNextPage()
+	private void checkPageComplete()
 	{
 		exportModel.setServoyPropertiesFileName(fileNameText.getText());
 		boolean messageSet = false;
-		boolean result = exportModel.getServoyPropertiesFileName() == null;
-		if (!result)
+		if (exportModel.getServoyPropertiesFileName() != null) checkLicenses(); // this can set WARNING message on wizard page
+
+		boolean servoyPropertiesFileIsGiven = (exportModel.getServoyPropertiesFileName() != null);
+		if (servoyPropertiesFileIsGiven)
 		{
 			String checkFileMessage = exportModel.checkServoyPropertiesFileExists();
 			if (checkFileMessage != null)
 			{
-				setMessage(checkFileMessage, IMessageProvider.WARNING);
+				setMessage(checkFileMessage, IMessageProvider.ERROR);
 				messageSet = true;
 			}
 			else
@@ -274,31 +264,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 					Properties prop = new Properties();
 					prop.load(fis);
 
-					String numberOfServers = prop.getProperty("ServerManager.numberOfServers");
-					if (numberOfServers != null)
-					{
-						int nrOfServers = Utils.getAsInteger(numberOfServers.trim(), false);
-						boolean repositoryExists = false;
-						for (int i = 0; i < nrOfServers && !repositoryExists; i++)
-						{
-							String serverName = prop.getProperty("server." + i + ".serverName");
-							if (serverName.equals(IServer.REPOSITORY_SERVER)) repositoryExists = true;
-						}
-						if (!repositoryExists)
-						{
-							setMessage("Servoy properties file: " + exportModel.getServoyPropertiesFileName() +
-								" is not valid because it doesn't contain repository_server database which is required.", IMessageProvider.WARNING);
-							messageSet = true;
-						}
-
-					}
-					else
-					{
-						setMessage("Servoy properties file: " + exportModel.getServoyPropertiesFileName() +
-							" doesn't look like a valid servoy properties file, no servers configured", IMessageProvider.WARNING);
-						messageSet = true;
-					}
-
+					boolean propertiesFileFieldWasCleared = false;
 					String rmiServerFactory = prop.getProperty("SocketFactory.rmiServerFactory");
 					if (exportModel.getStartRMI() && !exportModel.allowOverwriteSocketFactoryProperties() &&
 						(rmiServerFactory == null || !rmiServerFactory.equals("com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory")))
@@ -309,8 +275,11 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						{
 							public void run()
 							{
-								ok[0] = MessageDialog.openConfirm(shell, "Overwrite SocketFactory properties",
-									"In the selected properties file SocketFactory.rmiServerFactory is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'. Please allow exporter to overwrite properties or select another properties file.");
+								ok[0] = MessageDialog.open(MessageDialog.QUESTION, shell, "SocketFactory properties override needed",
+									"In the servoy.properties file this is currently configured for this export - " +
+										exportModel.getServoyPropertiesFileName() +
+										" - the property 'SocketFactory.rmiServerFactory' is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'.\n\nPlease allow exporter to automatically change socket factory properties, or select another properties file.",
+									SWT.NONE, "Allow exporter to alter socket factory properties", "Do not use this properties file") == 0;
 							}
 						});
 						if (ok[0])
@@ -321,14 +290,45 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						{
 							exportModel.setServoyPropertiesFileName(null);
 							fileNameText.setText("");
-							return false;
+							propertiesFileFieldWasCleared = true;
+							// blank value is ok - it will prompt more wizard pages afterwards
+							// so continue validating the rest of the textfields on the page
+						}
+					}
+
+					if (!propertiesFileFieldWasCleared)
+					{
+						String numberOfServers = prop.getProperty("ServerManager.numberOfServers");
+						if (numberOfServers != null)
+						{
+							int nrOfServers = Utils.getAsInteger(numberOfServers.trim(), false);
+							boolean repositoryExists = false;
+							for (int i = 0; i < nrOfServers && !repositoryExists; i++)
+							{
+								String serverName = prop.getProperty("server." + i + ".serverName");
+								if (serverName.equals(IServer.REPOSITORY_SERVER)) repositoryExists = true;
+							}
+							if (!repositoryExists)
+							{
+								setMessage("Servoy properties file '" + exportModel.getServoyPropertiesFileName() +
+									"' is not valid because it doesn't contain 'repository_server' database (which is required).", IMessageProvider.ERROR);
+								messageSet = true;
+							}
+
+						}
+						else
+						{
+							setMessage("File '" + exportModel.getServoyPropertiesFileName() +
+								"' doesn't look like a valid servoy properties file; no database servers are defined (ServerManager.numberOfServers is not defined).",
+								IMessageProvider.ERROR);
+							messageSet = true;
 						}
 					}
 				}
 				catch (IOException e)
 				{
 					setMessage("Couldn't load the servoy properties file: " + exportModel.getServoyPropertiesFileName() + ", error: " + e.getMessage(),
-						IMessageProvider.WARNING);
+						IMessageProvider.ERROR);
 					messageSet = true;
 				}
 
@@ -341,7 +341,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			String message = exportModel.checkLog4jConfigurationFile();
 			if (message != null)
 			{
-				setMessage(message, WARNING);
+				setMessage(message, ERROR);
 				messageSet = true;
 			}
 		}
@@ -352,7 +352,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			String message = exportModel.checkWebXML();
 			if (message != null)
 			{
-				setMessage(message, WARNING);
+				setMessage(message, ERROR);
 				messageSet = true;
 			}
 		}
@@ -362,7 +362,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			setMessage(null);
 		}
 
-		return getMessageType() != IMessageProvider.WARNING;
+		setPageComplete(getMessageType() != IMessageProvider.ERROR);
 	}
 
 	protected void checkLicenses()
@@ -372,8 +372,8 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		{
 			if (!Utils.getAsBoolean(upgrade[0]))
 			{
-				setErrorMessage(
-					"License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""));
+				setMessage("License code '" + upgrade[1] + "' defined in the selected properties file is invalid." + (upgrade[2] != null ? upgrade[2] : ""),
+					WARNING);
 			}
 			else
 			{
@@ -381,6 +381,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 					String message = "License code '" + upgrade[1] + "' was auto upgraded to '" + upgrade[2] +
 						"' but the changes could not be written to the selected properties file. Please adjust the '" +
 						exportModel.getServoyPropertiesFileName() + "' file manually.";
+					setMessage(message, WARNING);
 					ServoyLog.logInfo(message);
 					MessageDialog.openWarning(getShell(), "Could not save changes to the properties file", message);
 				});
@@ -402,11 +403,13 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 	public void restoreDefaults()
 	{
 		fileNameText.setText("");
+		log4jConfigurationFileText.setText("");
 		fileWebXmlNameText.setText("");
 		exportModel.setServoyPropertiesFileName(null);
 		exportModel.setLog4jConfigurationFile(null);
 		exportModel.setWebXMLFileName(null);
-		canFlipToNextPage();
+		checkPageComplete();
+
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
 	}

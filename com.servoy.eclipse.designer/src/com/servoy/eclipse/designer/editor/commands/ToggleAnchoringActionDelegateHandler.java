@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import org.eclipse.ui.PlatformUI;
+
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
 import com.servoy.j2db.persistence.IAnchorConstants;
 
@@ -29,6 +32,21 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 	public ToggleAnchoringActionDelegateHandler(String anchoringProperty, int flag)
 	{
 		super("anchors." + anchoringProperty, "toggle anchoring", flag);
+	}
+
+	@Override
+	protected boolean calculateEnabled()
+	{
+		if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null && PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null &&
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor() instanceof BaseVisualFormEditor)
+		{
+			BaseVisualFormEditor editor = (BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+			if (editor.getForm().getUseCssPosition())
+			{
+				return false;
+			}
+		}
+		return super.calculateEnabled();
 	}
 
 	public static class ToggleAnchoringTop extends ToggleAnchoringActionDelegateHandler

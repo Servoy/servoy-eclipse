@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -407,6 +408,45 @@ public class EditorServiceHandler implements IServerService
 		});
 
 		configuredHandlers.put("setCssAnchoring", new SetCssAnchoringHandler(editorPart));
+
+		configuredHandlers.put("getFormFixedSize", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				JSONObject result = new JSONObject();
+				IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+				if (preferenceStore.contains(editorPart.getForm().getUUID() + "_width"))
+				{
+					result.put("width", preferenceStore.getString(editorPart.getForm().getUUID() + "_width"));
+				}
+				if (preferenceStore.contains(editorPart.getForm().getUUID() + "_height"))
+				{
+					result.put("height", preferenceStore.getString(editorPart.getForm().getUUID() + "_height"));
+				}
+				return result;
+			}
+		});
+		configuredHandlers.put("setFormFixedSize", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				if (args != null)
+				{
+					IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+					if (args.has("width"))
+					{
+						preferenceStore.setValue(editorPart.getForm().getUUID() + "_width", args.getString("width"));
+					}
+					if (args.has("height"))
+					{
+						preferenceStore.setValue(editorPart.getForm().getUUID() + "_height", args.getString("height"));
+					}
+				}
+				return null;
+			}
+		});
 
 	}
 

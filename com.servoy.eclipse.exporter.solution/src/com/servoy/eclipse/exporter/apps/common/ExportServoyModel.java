@@ -49,8 +49,18 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 		if (getNGPackageManager() == null) super.initialize(); // if super is not already initialized by a previous call do it now
 
 		setActiveProjectReferenceInternal(getServoyProject(solutionName));
-		setActiveResourcesProject(activeProject != null ? activeProject.getResourcesProject() : null);
 		updateFlattenedSolution();
+
+		ServoyResourcesProject servoyResourcesProject = (activeProject != null ? activeProject.getResourcesProject() : null);
+		if (activeResourcesProject != servoyResourcesProject)
+		{
+			setActiveResourcesProject(servoyResourcesProject); // this does reload all security info (not just resources proj. related) as well as dbis/seq. provider/templates/styles
+		}
+		else
+		{
+			// resources project remained the same, just the active solution changed; so fully reload security information to be in sync
+			((WorkspaceUserManager)ApplicationServerRegistry.get().getUserManager()).reloadAllSecurityInformation();
+		}
 
 		if (activeProject != null)
 		{
@@ -69,32 +79,35 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 
 	private void setActiveResourcesProject(ServoyResourcesProject servoyResourcesProject)
 	{
-		if (activeResourcesProject != servoyResourcesProject)
+		activeResourcesProject = servoyResourcesProject;
+		try
 		{
-			activeResourcesProject = servoyResourcesProject;
-			try
-			{
-				if (activeResourcesProject != null) activeResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
-
-			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
-
-			if (dataModelManager != null) sm.removeGlobalColumnInfoProvider(dataModelManager);
-			dataModelManager = (activeResourcesProject != null ? new DataModelManager(activeResourcesProject.getProject(), sm) : null);
-			if (dataModelManager != null) sm.addGlobalColumnInfoProvider(dataModelManager);
-			sm.setGlobalSequenceProvider(dataModelManager != null ? new EclipseSequenceProvider(dataModelManager) : null);
-			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(
-				activeResourcesProject != null ? activeResourcesProject.getProject().getName() : null, IRepository.STYLES);
-			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(
-				activeResourcesProject != null ? activeResourcesProject.getProject().getName() : null, IRepository.TEMPLATES);
-
+			if (activeResourcesProject != null) activeResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+
+		IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
+
+		if (dataModelManager != null) sm.removeGlobalColumnInfoProvider(dataModelManager);
+		dataModelManager = (activeResourcesProject != null ? new DataModelManager(activeResourcesProject.getProject(), sm) : null);
+		if (dataModelManager != null) sm.addGlobalColumnInfoProvider(dataModelManager);
+
+		sm.setGlobalSequenceProvider(dataModelManager != null ? new EclipseSequenceProvider(dataModelManager) : null);
+
+		// refresh old repository level styles
+		((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(
+			activeResourcesProject != null ? activeResourcesProject.getProject().getName() : null, IRepository.STYLES);
+
+		// refresh repository level templates
+		((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(
+			activeResourcesProject != null ? activeResourcesProject.getProject().getName() : null, IRepository.TEMPLATES);
+
+		// change user manager resources project and fully reload security information
 		((WorkspaceUserManager)ApplicationServerRegistry.get().getUserManager()).setResourcesProject(
-			activeResourcesProject != null ? activeResourcesProject.getProject() : null); // this needs to always be done to refresh in case the main solution changed
+			activeResourcesProject != null ? activeResourcesProject.getProject() : null);
 	}
 
 	@Override

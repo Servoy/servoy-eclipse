@@ -32,6 +32,7 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.WebComponent;
 
 /**
  * An action to change the tab sequence of selected objects.
@@ -88,7 +89,7 @@ public class SetTabSequenceAction extends DesignerSelectionAction
 		while (allObjects.hasNext())
 		{
 			IPersist ipersist = allObjects.next();
-			if (ipersist instanceof ISupportTabSeq)
+			if (ipersist instanceof ISupportTabSeq || ipersist instanceof WebComponent)
 			{
 				EditPart ep = editPartRegistry.get(ipersist);
 				if (ep != null)

@@ -39,6 +39,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -63,19 +64,27 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
@@ -94,17 +103,20 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.WorkbenchJob;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.profiler.Activator;
+import com.servoy.eclipse.ui.editors.table.ColumnsSorter;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.debug.DataCallProfileData;
 import com.servoy.j2db.debug.IProfileListener;
 import com.servoy.j2db.debug.ProfileData;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.ScriptVariable;
 
 /**
@@ -128,6 +140,7 @@ public class ProfilerView extends ViewPart
 	public static final String METHOD_NAME_COLUMN_WIDTH_SETTING = "profilerView.methodNameColumnWidth";
 	public static final String OWN_TIME_COLUMN_WIDTH_SETTING = "profilerView.ownTimeColumnWidth";
 	public static final String TIME_COLUMN_WIDTH_SETTING = "profilerView.timeColumnWidth";
+	public static final String TIME_QUERY_COLUMN_WIDTH_SETTING = "profilerView.timeQueryColumnWidth";
 	public static final String FILE_COLUMN_WIDTH_SETTING = "profilerView.fileColumnWidth";
 	public static final String ARGS_COLUMN_WIDTH_SETTING = "profilerView.argsColumnWidth";
 	public static final String NAME_TABLE_COLUMN_WIDTH_SETTING = "profilerView.nameTableColumnWidth";
@@ -143,8 +156,9 @@ public class ProfilerView extends ViewPart
 	public static final int METHOD_NAME_COLUMN_WIDTH_DEFAULT = 200;
 	public static final int OWN_TIME_COLUMN_WIDTH_DEFAULT = 100;
 	public static final int TIME_COLUMN_WIDTH_DEFAULT = 80;
-	public static final int FILE_COLUMN_WIDTH_DEFAULT = 400;
+	public static final int FILE_COLUMN_WIDTH_DEFAULT = 300;
 	public static final int ARGS_COLUMN_WIDTH_DEFAULT = 120;
+	public static final int TIME_QUERY_COLUMN_WIDTH_DEFAULT = 80;
 	public static final int NAME_TABLE_COLUMN_WIDTH_DEFAULT = 100;
 	public static final int TIME_TABLE_COLUMN_WIDTH_DEFAULT = 70;
 	public static final int QUERY_TABLE_COLUMN_WIDTH_DEFAULT = 350;
@@ -345,19 +359,42 @@ public class ProfilerView extends ViewPart
 			sb.append("\" source=\"");
 			sb.append(sourceName);
 			sb.append("\">");
+			Collection<DataCallProfileData> dataCallProfileDatas = getDataCallProfileDataMap();
+			if (dataCallProfileDatas != null)
+			{
+				for (DataCallProfileData dataCallProfileData : dataCallProfileDatas)
+				{
+					sb.append('\n');
+					sb.append(childPrefix);
+					dataCallProfileData.toXML(sb);
+				}
+			}
 			for (AggregateData child : callees)
 			{
 				sb.append('\n');
 				sb.append(childPrefix);
 				child.toXML(sb);
 			}
-			sb.append("</aggregatedata>");
+			sb.append("\n</aggregatedata>\n");
 		}
 
 		public Collection<DataCallProfileData> getDataCallProfileDataMap()
 		{
 			if (dataCallProfileDataMap != null) return dataCallProfileDataMap.values();
 			else return null;
+		}
+
+		public long getDataQueriesTime()
+		{
+			long time = 0;
+			if (dataCallProfileDataMap != null && dataCallProfileDataMap.size() > 0)
+			{
+				for (DataCallProfileData profile : dataCallProfileDataMap.values())
+				{
+					time += profile.getTime();
+				}
+			}
+			return time;
 		}
 	}
 
@@ -694,6 +731,8 @@ public class ProfilerView extends ViewPart
 					return null;
 				case 4 :
 					return null;
+				case 5 :
+					return null;
 			}
 			return null;
 		}
@@ -745,6 +784,8 @@ public class ProfilerView extends ViewPart
 					case 3 :
 						return pd.getArgs();
 					case 4 :
+						return Long.toString(pd.getDataQueriesTime());
+					case 5 :
 					{
 						sourceName = pd.getSourceName();
 						file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(new Path(sourceName));
@@ -788,6 +829,8 @@ public class ProfilerView extends ViewPart
 					case 3 :
 						return Integer.toString(pd.getCount());
 					case 4 :
+						return Long.toString(pd.getDataQueriesTime());
+					case 5 :
 						return pd.getSourceName();
 				}
 			}
@@ -918,13 +961,10 @@ public class ProfilerView extends ViewPart
 		}
 	}
 
-	class NameSorter extends ViewerSorter
-	{
-	}
-
 	private TreeColumn methodNameColumn;
 	private TreeColumn ownTimeColumn;
 	private TreeColumn timeColumn;
+	private TreeColumn timeQueryColumn;
 	private TreeColumn fileColumn;
 	private TableColumn name;
 	private TableColumn time;
@@ -944,6 +984,9 @@ public class ProfilerView extends ViewPart
 	SashForm sashForm;
 
 	private IMemento memento;
+	private final int[] searching = new int[] { 0 };
+	private final String[] filter = new String[] { null };
+	private WorkbenchJob refreshJob;
 
 	/**
 	 * This is a callback that will allow us to create the viewer and initialize
@@ -966,6 +1009,7 @@ public class ProfilerView extends ViewPart
 		int timeColumnWidth = getSavedState(TIME_COLUMN_WIDTH_SETTING, TIME_COLUMN_WIDTH_DEFAULT);
 		int fileColumnWidth = getSavedState(FILE_COLUMN_WIDTH_SETTING, FILE_COLUMN_WIDTH_DEFAULT);
 		int argsColumnWidth = getSavedState(ARGS_COLUMN_WIDTH_SETTING, ARGS_COLUMN_WIDTH_DEFAULT);
+		int timeQueryColumnWidth = getSavedState(TIME_QUERY_COLUMN_WIDTH_SETTING, TIME_QUERY_COLUMN_WIDTH_DEFAULT);
 		int nameTableColumnWidth = getSavedState(NAME_TABLE_COLUMN_WIDTH_SETTING, NAME_TABLE_COLUMN_WIDTH_DEFAULT);
 		int timeTableColumnWidth = getSavedState(TIME_TABLE_COLUMN_WIDTH_SETTING, TIME_TABLE_COLUMN_WIDTH_DEFAULT);
 		int queryTableColumnWidth = getSavedState(QUERY_TABLE_COLUMN_WIDTH_SETTING, QUERY_TABLE_COLUMN_WIDTH_DEFAULT);
@@ -1001,6 +1045,11 @@ public class ProfilerView extends ViewPart
 		argsColumn.setResizable(true);
 		argsColumn.setWidth(argsColumnWidth);
 
+		timeQueryColumn = new TreeColumn(tree, SWT.NONE);
+		timeQueryColumn.setText("SQL Own Time");
+		timeQueryColumn.setResizable(true);
+		timeQueryColumn.setWidth(timeQueryColumnWidth);
+
 		fileColumn = new TreeColumn(tree, SWT.NONE);
 		fileColumn.setText("Source File");
 		fileColumn.setResizable(true);
@@ -1008,7 +1057,69 @@ public class ProfilerView extends ViewPart
 
 		methodCallViewer.setContentProvider(methodCallContentProvider);
 		methodCallViewer.setLabelProvider(new MethodCallLabelProvider());
-		// viewer.setSorter(new NameSorter());
+		methodCallViewer.setSorter(new ColumnsSorter(methodCallViewer,
+			new TreeColumn[] { methodNameColumn, timeColumn, ownTimeColumn, fileColumn, argsColumn, timeQueryColumn }, new Comparator[] { new Comparator()
+			{
+
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					String name1 = o1 instanceof ProfileData ? ((ProfileData)o1).getMethodName() : ((AggregateData)o1).getMethodName();
+					String name2 = o2 instanceof ProfileData ? ((ProfileData)o2).getMethodName() : ((AggregateData)o2).getMethodName();
+					return NameComparator.INSTANCE.compare(name1, name2);
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getTime() : ((AggregateData)o1).getTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getTime() : ((AggregateData)o2).getTime();
+					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getOwnTime() : ((AggregateData)o1).getOwnTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getOwnTime() : ((AggregateData)o2).getOwnTime();
+					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					String path1 = o1 instanceof ProfileData ? ((ProfileData)o1).getSourceName() : ((AggregateData)o1).getSourceName();
+					String path2 = o2 instanceof ProfileData ? ((ProfileData)o2).getSourceName() : ((AggregateData)o2).getSourceName();
+					return NameComparator.INSTANCE.compare(path1, path2);
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					if (o1 instanceof ProfileData)
+					{
+						return NameComparator.INSTANCE.compare(((ProfileData)o1).getArgs(), ((ProfileData)o2).getArgs());
+					}
+					else
+					{
+						return ((AggregateData)o1).getCount() - ((AggregateData)o2).getCount();
+					}
+				}
+			}, new Comparator()
+			{
+				@Override
+				public int compare(Object o1, Object o2)
+				{
+					long time1 = o1 instanceof ProfileData ? ((ProfileData)o1).getDataQueriesTime() : ((AggregateData)o1).getDataQueriesTime();
+					long time2 = o2 instanceof ProfileData ? ((ProfileData)o2).getDataQueriesTime() : ((AggregateData)o2).getDataQueriesTime();
+					return (time1 > time2 ? 1 : (time1 < time2 ? -1 : 0));
+				}
+			} }));
+
 		methodCallViewer.setInput(getViewSite());
 
 		sqlDataViewer = new TableViewer(sashForm);
@@ -1054,6 +1165,7 @@ public class ProfilerView extends ViewPart
 
 		methodCallViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
+
 			public void selectionChanged(SelectionChangedEvent event)
 			{
 				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
@@ -1069,6 +1181,57 @@ public class ProfilerView extends ViewPart
 		});
 
 		sashForm.setWeights(sashFormWeights);
+		refreshJob = new WorkbenchJob("Refresh Filter")
+		{
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor)
+			{
+				try
+				{
+
+					if (methodCallViewer.getControl().isDisposed())
+					{
+						return Status.CANCEL_STATUS;
+					}
+					methodCallViewer.refresh(true);
+
+					return Status.OK_STATUS;
+				}
+				finally
+				{
+					searching[0]--;
+				}
+			}
+		};
+		refreshJob.setSystem(true);
+		methodCallViewer.getTree().addDisposeListener(new DisposeListener()
+		{
+			public void widgetDisposed(DisposeEvent e)
+			{
+				refreshJob.cancel();
+			}
+		});
+		methodCallViewer.addFilter(new ViewerFilter()
+		{
+
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element)
+			{
+				if (filter[0] != null && !"".equals(filter[0]))
+				{
+					if (element instanceof ProfileData && ((ProfileData)element).getMethodName().contains(filter[0]))
+					{
+						return true;
+					}
+					if (element instanceof AggregateData && ((AggregateData)element).getMethodName().contains(filter[0]))
+					{
+						return true;
+					}
+					return false;
+				}
+				return true;
+			}
+		});
 	}
 
 	/**
@@ -1156,6 +1319,55 @@ public class ProfilerView extends ViewPart
 
 	private void fillLocalToolBar(IToolBarManager manager)
 	{
+		manager.add(new ControlContribution("methodFilter")
+		{
+
+			@Override
+			protected Control createControl(Composite parent)
+			{
+				Text searchFld = new Text(parent, SWT.SEARCH);
+				searchFld.setMessage("filter");
+				searchFld.addFocusListener(new FocusListener()
+				{
+					public void focusGained(FocusEvent e)
+					{
+						Display.getCurrent().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								if (!searchFld.isDisposed()) searchFld.selectAll();
+							}
+						});
+					}
+
+					public void focusLost(FocusEvent e)
+					{
+						// not used
+					}
+				});
+				searchFld.addModifyListener(new ModifyListener()
+				{
+					public void modifyText(ModifyEvent e)
+					{
+						searching[0]++;
+						if (searching[0] > 1 && refreshJob.cancel())
+						{
+							searching[0]--;
+						}
+						filter[0] = searchFld.getText();
+						refreshJob.schedule(400);
+					}
+				});
+				return searchFld;
+			}
+
+			@Override
+			protected int computeWidth(Control control)
+			{
+				return 150;
+			}
+
+		});
 		manager.add(toggleProfile);
 		manager.add(toggleAggregateView);
 		manager.add(clearData);

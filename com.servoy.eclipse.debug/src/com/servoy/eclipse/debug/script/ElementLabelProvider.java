@@ -38,7 +38,7 @@ import com.servoy.j2db.scripting.IExecutingEnviroment;
 /**
  * Extension point implementation of {@link IElementLabelProvider} that returns the {@link TypeCreator#IMAGE_DESCRIPTOR} attribute
  * if set from a element
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -71,7 +71,7 @@ public class ElementLabelProvider implements IElementLabelProviderExtension
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProviderExtension#getLabel(org.eclipse.dltk.javascript.typeinfo.model.Element,
 	 * org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider.Mode, java.lang.Object)
 	 */
@@ -155,6 +155,8 @@ public class ElementLabelProvider implements IElementLabelProviderExtension
 		}
 		else if (element instanceof Type)
 		{
+			// for custom types that can be packagename.typename it should not change the name based on .
+			if (element.getName().startsWith(TypeCreator.CUSTOM_TYPE)) return null;
 			int lastDotIndex = element.getName().lastIndexOf('.');
 			if (lastDotIndex != -1)
 			{
@@ -167,7 +169,7 @@ public class ElementLabelProvider implements IElementLabelProviderExtension
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider#getLabel(org.eclipse.dltk.javascript.typeinfo.model.Element,
 	 * org.eclipse.dltk.javascript.ui.typeinfo.IElementLabelProvider.Mode)
 	 */

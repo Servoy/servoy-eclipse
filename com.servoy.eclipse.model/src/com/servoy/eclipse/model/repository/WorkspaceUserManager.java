@@ -935,6 +935,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 		try
 		{
+			// this results in deadlocks beween jobs/threads
+//			file.refreshLocal(IResource.DEPTH_ONE, null);
 			if (file.exists())
 			{
 				String fileContent = Utils.getTXTFileContent(file.getContents(true), Charset.forName("UTF8"));
@@ -1855,7 +1857,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			ServoyProject solutionProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
 			if (solutionProject != null)
 			{
-				solution = solutionProject.getSolution();
+				solution = solutionProject.getEditingSolution();
 			}
 			if (solution != null)
 			{

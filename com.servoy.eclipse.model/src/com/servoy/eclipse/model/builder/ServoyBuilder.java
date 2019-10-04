@@ -75,6 +75,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.xml.sax.SAXException;
@@ -122,7 +123,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -406,6 +407,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
 	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 	public static final String DEPRECATED_SPEC = _PREFIX + ".deprecatedSpec";
+	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
+	public static final String WRONG_OVERRIDE_PARENT = _PREFIX + ".wrongOverridePosition";
+	public static final String INVALID_TABLE_NO_PRIMARY_KEY_TYPE = _PREFIX + ".invalidTableNoPrimaryKey";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -463,6 +467,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DUPLICATION_SAME_REFERENCED_FORM = new Pair<String, ProblemSeverity>("duplicationSameReferencedForm",
 		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DUPLICATION_DUPLICATE_OVERRIDE_FOUND = new Pair<String, ProblemSeverity>(
+		"duplicationDuplicateOverrideFound", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_PROPERTY = new Pair<String, ProblemSeverity>("reservedWindowObjectProperty",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_COLUMN = new Pair<String, ProblemSeverity>("reservedWindowObjectColumn",
@@ -480,6 +486,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE = new Pair<String, ProblemSeverity>("DBIColumnSequenceTypeOverride",
 		ProblemSeverity.WARNING);
 	public static final Pair<String, ProblemSeverity> LINGERING_TABLE_FILES = new Pair<String, ProblemSeverity>("LingeringTableFiles", ProblemSeverity.ERROR);
+	public static final Pair<String, ProblemSeverity> INVALID_TABLE_NO_PRIMARY_KEY = new Pair<String, ProblemSeverity>("InvalidTableNoPrimaryKey",
+		ProblemSeverity.ERROR);
 	public static final Pair<String, ProblemSeverity> DUPLICATE_MEM_TABLE = new Pair<String, ProblemSeverity>("DuplicateMemTable", ProblemSeverity.ERROR);
 
 	// column problems
@@ -602,6 +610,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SPECIFICATION = new Pair<String, ProblemSeverity>("deprecatedSpec", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> PARAMETERS_MISMATCH_SEVERITY = new Pair<String, ProblemSeverity>("parametersMismatch",
+		ProblemSeverity.WARNING);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -975,6 +985,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
 					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
+					deleteMarkers(module.getProject(), PARAMETERS_MISMATCH);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
@@ -1040,8 +1051,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 				}
 			}
+			else
+			{
+				Collection<WebObjectFunctionDefinition> handlers = spec.getHandlers().values();
+				for (WebObjectFunctionDefinition handler : handlers)
+				{
+					List<Object> instanceMethodArguments = ((WebComponent)o).getFlattenedMethodArguments(handler.getName());
+					if (instanceMethodArguments != null && instanceMethodArguments.size() > 0 &&
+						handler.getParameters().size() >= instanceMethodArguments.size())
+					{
+						ServoyMarker mk = MarkerMessages.Parameters_Mismatch.fill(((WebComponent)o).getName(), handler.getName());
+						addMarker(project, mk.getType(), mk.getText(), -1, PARAMETERS_MISMATCH_SEVERITY, IMarker.PRIORITY_NORMAL, null, o);
+					}
+				}
+			}
 		}
-		if (o instanceof LayoutContainer && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
+		if (o instanceof LayoutContainer && ((LayoutContainer)o).getPackageName() != null && !PersistHelper.isOverrideOrphanElement((LayoutContainer)o))
 		{
 			WebLayoutSpecification spec = null;
 			PackageSpecification<WebLayoutSpecification> pkg = componentsSpecProviderState.getLayoutSpecifications().get(((LayoutContainer)o).getPackageName());
@@ -1559,11 +1584,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 			});
 			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
+			final Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
 			flattenedForm.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
 				{
+					String namess = flattenedForm.getName();
 					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
 						((ISupportName)o).getName() != null)
 					{
@@ -1572,13 +1598,53 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							for (IPersist duplicatePersist : duplicates)
 							{
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(),
-									((Form)persist).getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-									duplicatePersist);
+								UUID wrongOverrideUUID = null;
+								if (duplicatePersist instanceof IFormElement && ((IFormElement)duplicatePersist).getExtendsID() == o.getID())
+								{
+									wrongOverrideUUID = duplicatePersist.getUUID();
+								}
+								else if (o instanceof IFormElement && ((IFormElement)o).getExtendsID() == duplicatePersist.getID())
+								{
+									wrongOverrideUUID = o.getUUID();
+								}
+								if (wrongOverrideUUID != null)
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), ((Form)persist).getName());
+									IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_OVERRIDE_FOUND,
+										IMarker.PRIORITY_NORMAL, null, duplicatePersist);
+									try
+									{
+										marker.setAttribute("Uuid", wrongOverrideUUID.toString());
+										marker.setAttribute("SolutionName", project.getName());
+									}
+									catch (CoreException e)
+									{
+										ServoyLog.logError(e);
+									}
 
-								mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+									mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), ((Form)persist).getName());
+									marker = addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_OVERRIDE_FOUND, IMarker.PRIORITY_NORMAL,
+										null, o);
+									try
+									{
+										marker.setAttribute("Uuid", wrongOverrideUUID.toString());
+										marker.setAttribute("SolutionName", project.getName());
+									}
+									catch (CoreException e)
+									{
+										ServoyLog.logError(e);
+									}
+								}
+								else
+								{
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(),
+										((Form)persist).getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
+										duplicatePersist);
+
+									mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+								}
 							}
 						}
 						else
@@ -1701,6 +1767,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				deleteMarkers(module.getProject(), DUPLICATE_NAME_MARKER_TYPE);
 				deleteMarkers(module.getProject(), DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
+				deleteMarkers(module.getProject(), WRONG_OVERRIDE_PARENT);
 			}
 			for (final ServoyProject module : modules)
 			{
@@ -2127,6 +2194,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DUPLICATE_UUID);
 		deleteMarkers(project, DUPLICATE_SIBLING_UUID);
 		deleteMarkers(project, DUPLICATE_NAME_MARKER_TYPE);
+		deleteMarkers(project, WRONG_OVERRIDE_PARENT);
 		deleteMarkers(project, DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
 		deleteMarkers(project, RESERVED_WINDOW_OBJECT_USAGE_TYPE);
 		deleteMarkers(project, MISSING_SERVER);
@@ -2160,6 +2228,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_SPEC);
 		deleteMarkers(project, METHOD_OVERRIDE);
 		deleteMarkers(project, DEPRECATED_SPEC);
+		deleteMarkers(project, PARAMETERS_MISMATCH);
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -2754,6 +2823,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									Form form = (Form)o.getAncestor(IRepository.FORMS);
 									for (PropertyDescription pd : properties)
 									{
+										String datasource = null;
 										Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 										Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
 										if (frm == null) continue;
@@ -2761,7 +2831,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											checkForListFormComponent(frm, o);
 											String forFoundsetName = ((ComponentTypeConfig)pd.getConfig()).forFoundset;
-											String datasource = null;
 											String foundsetValue = null;
 											if (((WebComponent)o).hasProperty(forFoundsetName))
 											{
@@ -2827,7 +2896,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											(JSONObject)propertyValue, frm, flattenedSolution);
 										for (FormElement element : cache.getFormComponentElements())
 										{
-											checkDataProviders(element.getPersistIfAvailable(), context);
+											checkDataProviders(element.getPersistIfAvailable(), context, datasource);
 										}
 									}
 								}
@@ -2845,7 +2914,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						checkDataProviders(o, context);
+						checkDataProviders(o, context, null);
 						checkCancel();
 						if (o instanceof IFormElement)
 						{
@@ -2864,7 +2933,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							form = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(form);
 							if (form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null)
 							{
-								Point location = CSSPosition.getLocation((BaseComponent)o);
+								Point location = CSSPositionUtils.getLocation((BaseComponent)o);
 								if (location != null)
 								{
 									boolean outsideForm = false;
@@ -2877,7 +2946,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (startPos <= location.y && endPos > location.y)
 										{
 											// found the part
-											int height = CSSPosition.getSize((BaseComponent)o).height;
+											int height = CSSPositionUtils.getSize((BaseComponent)o).height;
 											if (location.y + height > endPos)
 											{
 												String elementName = null;
@@ -2923,7 +2992,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													}
 												}
 											}
-											if (width < location.x + CSSPosition.getSize((BaseComponent)o).width)
+											if (width < location.x + CSSPositionUtils.getSize((BaseComponent)o).width)
 											{
 												outsideForm = true;
 											}
@@ -3949,7 +4018,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_NESTED_LIST, IMarker.PRIORITY_NORMAL, null,
 													listFormComponent);
 											}
-											else
+											else if (frm != null)
 											{
 												checkForListFormComponent(frm, listFormComponent);
 											}
@@ -3961,7 +4030,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						});
 					}
 
-					private void checkDataProviders(final IPersist o, IPersist context)
+					private void checkDataProviders(final IPersist o, IPersist context, String datasource)
 					{
 						String id = null;
 						if (o instanceof ISupportDataProviderID)
@@ -4015,7 +4084,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												for (String dp : links.dataProviderIDs)
 												{
-													checkDataProvider(o, context, dp, pd);
+													checkDataProvider(o, context, dp, pd, datasource);
 												}
 											}
 											continue;
@@ -4088,7 +4157,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													JSONObject dataproviders = val.getJSONObject("dataproviders");
 													for (String dp : dataproviders.keySet())
 													{
-														checkDataProvider(o, context, dataproviders.optString(dp), pd);
+														checkDataProvider(o, context, dataproviders.optString(dp), pd, datasource);
 													}
 												}
 											}
@@ -4101,18 +4170,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 										else
 										{
-											checkDataProvider(o, context, (String)propertyValue, pd);
+											checkDataProvider(o, context, (String)propertyValue, pd, datasource);
 										}
 									}
 								}
 							}
 
 						}
-						checkDataProvider(o, context, id, null);
+						checkDataProvider(o, context, id, null, datasource);
 
 					}
 
-					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd)
+					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd, String datasource)
 					{
 						try
 						{
@@ -4129,7 +4198,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(context, flattenedSolution);
 										IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
-											servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
+											servoyModel.getDataSourceManager().getDataSource(datasource != null ? datasource : parentForm.getDataSource()), id);
 										if (dataProvider == null)
 										{
 											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(context);
@@ -5401,6 +5470,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (referenced.exists() && referenced.isOpen() && referenced.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						deleteMarkers(referenced, COLUMN_MARKER_TYPE);
+						deleteMarkers(referenced, INVALID_TABLE_NO_PRIMARY_KEY_TYPE);
 						if (!hasDeletedMarkers)
 						{
 							deleteMarkers(referenced, DEPRECATED_SCRIPT_ELEMENT_USAGE);
@@ -5416,7 +5486,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 		hasDeletedMarkers = false;
 		String[] array = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, false, true);
-		for (String server_name : array)
+		for (String serverName : array)
 		{
 			try
 			{
@@ -5424,23 +5494,39 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				Set<String> dataSources = getDataSourceCollectorVisitor().getDataSources();
 				SortedSet<String> serverNames = DataSourceUtils.getServerNames(dataSources);
 
-				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(server_name, true, true);
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
 				if (server != null) // server may have become invalid in the mean time
 				{
 					List<String> tableNames = server.getTableAndViewNames(true);
 					Iterator<String> tables = tableNames.iterator();
 					while (tables.hasNext())
 					{
-						String tableName = tables.next();
+						final String tableName = tables.next();
+						final ITable table = server.getTable(tableName);
+						IResource res = project;
+						if (getServoyModel().getDataModelManager() != null &&
+							getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
+						{
+							res = getServoyModel().getDataModelManager().getDBIFile(serverName, tableName);
+						}
+						if (table.isTableInvalidInDeveloperBecauseNoPk() && !table.isMarkedAsHiddenInDeveloper())
+						{
+
+							final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
+							final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
+								IMarker.PRIORITY_HIGH, null, null);
+							try
+							{
+								marker.setAttribute("serverName", serverName);
+								marker.setAttribute("tableName", tableName);
+							}
+							catch (CoreException e)
+							{
+								Debug.error(e);
+							}
+						}
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
-							ITable table = server.getTable(tableName);
-							IResource res = project;
-							if (getServoyModel().getDataModelManager() != null &&
-								getServoyModel().getDataModelManager().getDBIFile(server_name, tableName).exists())
-							{
-								res = getServoyModel().getDataModelManager().getDBIFile(server_name, tableName);
-							}
 							Map<String, Column> columnsByName = new HashMap<String, Column>();
 							Map<String, Column> columnsByDataProviderID = new HashMap<String, Column>();
 							for (Column column : table.getColumns())
@@ -5676,8 +5762,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if ((getServoyModel().getServoyProject(project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE ||
 										getServoyModel().getServoyProject(
 											project.getName()).getSolution().getSolutionType() == SolutionMetaData.MOBILE_MODULE) &&
-										serverNames.contains(server_name) &&
-										DataSourceUtils.getServerTablenames(dataSources, server_name).contains(tableName) && column.hasBadNaming(true))
+										serverNames.contains(serverName) &&
+										DataSourceUtils.getServerTablenames(dataSources, serverName).contains(tableName) && column.hasBadNaming(true))
 									{
 										ServoyMarker mk = MarkerMessages.ReservedWindowObjectColumn.fill(column.getName());
 										addMarker(res, mk.getType(), mk.getText(), -1, RESERVED_WINDOW_OBJECT_COLUMN, IMarker.PRIORITY_NORMAL, null,
@@ -6413,7 +6499,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										return CONTINUE_TRAVERSAL;
 									}
 								}
-								memTables.put(node.getTableName(), table);
+								if (table != null)
+								{
+									memTables.put(node.getTableName(), table);
+								}
+								else
+								{
+									Debug.log("Could not find mem table for datasource '" + node.getDataSource() + "', solution " + solutionName);
+								}
 							}
 							catch (Exception e)
 							{

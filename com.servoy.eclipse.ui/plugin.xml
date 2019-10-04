@@ -434,7 +434,13 @@
 			class="com.servoy.eclipse.ui.preferences.JSFileExternalizeNLSRemoverConfigurationPage"
 			id="org.eclipse.dltk.javascript.editor.preferences.removeNLS"
             name="Externalize Strings">
-      </page>            
+      </page>  
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.ui.preferences.TableCreationSettings"
+            id="com.servoy.eclipse.ui.tableCreationSettings"
+            name="Table Creation Settings">
+      </page>          
    </extension>
      <extension
          point="org.eclipse.ui.actionSets">
@@ -1342,5 +1348,11 @@
           file="help/contexts.xml"
           plugin="com.servoy.eclipse.ui">
     </contexts>
+ </extension>
+ <extension
+       point="org.eclipse.dltk.javascript.ui.jsExtendsForm">
+    <jsExtendsForm
+          class="com.servoy.eclipse.ui.editors.JSExtendsForm">
+    </jsExtendsForm>
  </extension>
 </plugin>
