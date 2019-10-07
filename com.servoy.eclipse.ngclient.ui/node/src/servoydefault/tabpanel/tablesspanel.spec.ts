@@ -22,7 +22,7 @@ describe( 'ServoyDefaultTabpanel', () => {
             declarations: [
                 ServoyDefaultTablesspanel
             ],
-            imports: [NgbModule.forRoot()],
+            imports: [NgbModule],
             providers: [WindowRefService, LoggerFactory]
         } ).compileComponents();
     } ) );

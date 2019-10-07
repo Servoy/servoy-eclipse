@@ -60,6 +60,7 @@ describe( 'SvLabel', () => {
     } );
     
     it( 'should render mnemonic ', () => {
+        debugger;
         component.text = "label";
         component.mnemonic = "l";
         component.ngOnChanges({

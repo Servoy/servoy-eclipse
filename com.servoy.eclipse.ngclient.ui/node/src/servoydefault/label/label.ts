@@ -9,6 +9,10 @@ import {ServoyDefaultBaseLabel} from  '../baselabel'
 export class ServoyDefaultLabel extends ServoyDefaultBaseLabel implements AfterViewInit {
   
     @Input() labelFor;
+    
+    // this is a hack for test, so that this has a none static child ref because the child is in a nested template
+    @ViewChild('child', {static: false}) child:ElementRef;
+    @ViewChild('element', {static: false}) elementRef:ElementRef;
 
     private changes: SimpleChanges;
 

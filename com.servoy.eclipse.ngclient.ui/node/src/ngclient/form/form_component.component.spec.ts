@@ -17,7 +17,7 @@ describe('FormComponent', () => {
 
   beforeEach(async(() => {
       sabloService = jasmine.createSpyObj("SabloService", ["callService"]);
-      formService = jasmine.createSpyObj("FormService", {getFormCache:{absolute:true,getComponent:()=>null}});
+      formService = jasmine.createSpyObj("FormService", {getFormCache:{absolute:true,getComponent:()=>null}, destroy:()=>null});
       servoyService = jasmine.createSpyObj("ServoyService", ["connect"]);
     TestBed.configureTestingModule({
       declarations: [ FormComponent,AddAttributeDirective ],

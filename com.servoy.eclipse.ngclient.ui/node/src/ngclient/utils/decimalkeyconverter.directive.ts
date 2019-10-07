@@ -22,7 +22,7 @@ export class DecimalkeyconverterDirective {
           this.element.value = (startString + numeral.localeData().delimiters.decimal + endString);
           this.element.focus();
           this.element.setSelectionRange(caretPos+1, caretPos+1);
-          e.preventDefault();
+          if (e.preventDefault) e.preventDefault();
       }
   }
 }

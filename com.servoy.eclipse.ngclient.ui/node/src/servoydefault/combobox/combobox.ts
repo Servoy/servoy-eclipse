@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, Renderer2 } from '@angular/core';
+import { Component, OnInit, HostListener, Renderer2,ViewChild ,ElementRef} from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ServoyDefaultBaseCombo, Item } from '../basecombo';
 import { FormattingService } from '../../ngclient/servoy_public';
@@ -14,6 +14,9 @@ import { FormattingService } from '../../ngclient/servoy_public';
 export class ServoyDefaultCombobox extends ServoyDefaultBaseCombo implements OnInit {
   isInputFocused: BehaviorSubject<boolean> = new BehaviorSubject(false);
   isLabelFocused = false;
+  
+  // this is a hack so that this can be none static access because this references in this component to a conditional template
+  @ViewChild('input', {static: false}) inputElement: ElementRef;
 
   constructor(renderer: Renderer2,    
               formattingService : FormattingService) {
