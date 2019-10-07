@@ -237,8 +237,12 @@ public class NodeFolderCreatorJob extends Job
 	 */
 	private void addAllDirs(File dir, WatchService watchService)
 	{
+		String filename = dir.toURI().getPath();
+		int index = filename.indexOf("/node/");
+		if (index == -1) return;
+		filename = filename.substring(index + 5);
 		// skip node modules
-		if (ignoredResource(dir.getName())) return;
+		if (ignoredResource(filename)) return;
 
 		try
 		{

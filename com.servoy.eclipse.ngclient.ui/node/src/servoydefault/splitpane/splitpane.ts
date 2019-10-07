@@ -37,7 +37,7 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent implements  OnIn
     @Input() resizeWeight; 
 
 
-    @ContentChild( TemplateRef )
+    @ContentChild( TemplateRef, {static: true} )
     templateRef: TemplateRef<any>;
     
     private leftTab:Tab;

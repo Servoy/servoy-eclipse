@@ -38,7 +38,7 @@ import { ComponentContributor } from './component_contributor.service';
     ],
     imports: [
         BrowserModule,
-        NgbModule.forRoot(),
+        NgbModule,
         FormsModule,
         SabloModule,
 		AllComponentsModule,

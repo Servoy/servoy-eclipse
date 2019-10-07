@@ -18,7 +18,7 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
     @Input() textRotation;
     @Input() verticalAlignment;
 
-    @ViewChild('child') child:ElementRef;
+    @ViewChild('child', {static: true}) child:ElementRef;
     
     constructor(renderer: Renderer2) {
         super(renderer);

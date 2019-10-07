@@ -6,7 +6,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
     @Input() servoyApi;
     @Input() servoyAttributes;
     
-    @ViewChild('element') elementRef:ElementRef;
+    @ViewChild('element', {static: true}) elementRef:ElementRef;
     
     private componentContributor:ComponentContributor;
 

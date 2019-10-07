@@ -16,7 +16,7 @@ import * as numeral from 'numeral';
 } )
 export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
 
-    @ViewChild( 'inputElement' ) inputElementRef: ElementRef;
+    @ViewChild( 'inputElement' ,{static: true} ) inputElementRef: ElementRef;
     
     public firstDayOfWeek = 1;
     public hour12Timer = false;

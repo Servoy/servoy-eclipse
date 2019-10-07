@@ -11,7 +11,7 @@ import * as numeral from 'numeral';
 
 class TestDecimalKeyConverterComponent {
     @Input() format;
-    @ViewChild('element') elementRef:ElementRef;
+    @ViewChild('element', {static: true}) elementRef:ElementRef;
 }
 
 describe('Directive: DecimalKeyConverter', () => {

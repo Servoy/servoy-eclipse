@@ -96,24 +96,24 @@ import { ServoyApi } from '../servoy_api'
 } )
 
 export class FormComponent implements OnInit, OnDestroy, OnChanges {
-    @ViewChild( 'svyResponsiveDiv' ) readonly svyResponsiveDiv: TemplateRef<any>;
+    @ViewChild( 'svyResponsiveDiv' ,{static: true}) readonly svyResponsiveDiv: TemplateRef<any>;
     // component template generate start
-    @ViewChild( 'servoydefaultTextfield' ) readonly servoydefaultTextfield: TemplateRef<any>;
-    @ViewChild( 'servoydefaultButton' ) readonly servoydefaultButton: TemplateRef<any>;
-    @ViewChild( 'servoydefaultLabel' ) readonly servoydefaultLabel: TemplateRef<any>;
-    @ViewChild( 'servoydefaultTabpanel' ) readonly servoydefaultTabpanel: TemplateRef<any>;
-    @ViewChild( 'servoydefaultTablesspanel' ) readonly servoydefaultTablesspanel: TemplateRef<any>;
-    @ViewChild( 'servoydefaultSplitpane' ) readonly servoydefaultSplitpane: TemplateRef<any>;
-    @ViewChild( 'servoydefaultCalendar' ) readonly servoydefaultCalendar: TemplateRef<any>;
+    @ViewChild( 'servoydefaultTextfield' ,{static: true}) readonly servoydefaultTextfield: TemplateRef<any>;
+    @ViewChild( 'servoydefaultButton',{static: true} ) readonly servoydefaultButton: TemplateRef<any>;
+    @ViewChild( 'servoydefaultLabel' ,{static: true}) readonly servoydefaultLabel: TemplateRef<any>;
+    @ViewChild( 'servoydefaultTabpanel',{static: true}) readonly servoydefaultTabpanel: TemplateRef<any>;
+    @ViewChild( 'servoydefaultTablesspanel' ,{static: true}) readonly servoydefaultTablesspanel: TemplateRef<any>;
+    @ViewChild( 'servoydefaultSplitpane',{static: true} ) readonly servoydefaultSplitpane: TemplateRef<any>;
+    @ViewChild( 'servoydefaultCalendar',{static: true} ) readonly servoydefaultCalendar: TemplateRef<any>;
     
-    @ViewChild( 'servoydefaultCombobox' ) readonly servoydefaultCombobox: TemplateRef<any>;
-    @ViewChild( 'servoydefaultTypeahead' ) readonly servoydefaultTypeahead: TemplateRef<any>;
-    @ViewChild( 'servoydefaultCheck' ) readonly servoydefaultCheck: TemplateRef<any>;
-    @ViewChild( 'servoydefaultCheckgroup' ) readonly servoydefaultCheckgroup: TemplateRef<any>;
-    @ViewChild( 'servoydefaultRadiogroup' ) readonly servoydefaultRadiogroup: TemplateRef<any>;
-    @ViewChild( 'servoydefaultPassword' ) readonly servoydefaultPassword: TemplateRef<any>;
-    @ViewChild( 'servoydefaultHtmlarea' ) readonly servoydefaultHtmlarea: TemplateRef<any>;
-    @ViewChild( 'servoydefaultSpinner' ) readonly servoydefaultSpinner: TemplateRef<any>;
+    @ViewChild( 'servoydefaultCombobox',{static: true}) readonly servoydefaultCombobox: TemplateRef<any>;
+    @ViewChild( 'servoydefaultTypeahead' ,{static: true}) readonly servoydefaultTypeahead: TemplateRef<any>;
+    @ViewChild( 'servoydefaultCheck' ,{static: true}) readonly servoydefaultCheck: TemplateRef<any>;
+    @ViewChild( 'servoydefaultCheckgroup' ,{static: true}) readonly servoydefaultCheckgroup: TemplateRef<any>;
+    @ViewChild( 'servoydefaultRadiogroup',{static: true} ) readonly servoydefaultRadiogroup: TemplateRef<any>;
+    @ViewChild( 'servoydefaultPassword' , {static: true}) readonly servoydefaultPassword: TemplateRef<any>;
+    @ViewChild( 'servoydefaultHtmlarea' , {static: true}) readonly servoydefaultHtmlarea: TemplateRef<any>;
+    @ViewChild( 'servoydefaultSpinner', {static: true}) readonly servoydefaultSpinner: TemplateRef<any>;
 
   // component template generate end
 

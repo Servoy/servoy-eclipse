@@ -15,7 +15,7 @@ import { NgbTabset, NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
     templateUrl: './tabpanel.html'
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
-    @ViewChild( 'tabset' )
+    @ViewChild( 'tabset' , {static: true})
     private tabset: NgbTabset;
 
     constructor( windowRefService: WindowRefService, log : LoggerFactory, renderer: Renderer2) {

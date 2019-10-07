@@ -36,7 +36,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent implements OnChan
     @Input() tabIndex;
     @Output() tabIndexChange = new EventEmitter();
 
-    @ContentChild( TemplateRef )
+    @ContentChild( TemplateRef  , {static: true})
     templateRef: TemplateRef<any>;
 
     private waitingForServerVisibility = {};

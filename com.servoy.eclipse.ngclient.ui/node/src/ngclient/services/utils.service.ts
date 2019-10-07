@@ -3,14 +3,14 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class SvyUtilsService {
     public createJSEvent(event:KeyboardEvent, eventType:string, contextFilter?:string, contextFilterElement?:any) {
-        let targetEl:Element = event.srcElement;
+        let targetEl = event.srcElement as Element
 // TODO check        if (event.target)
 //            targetEl = event.target;
 //        else if (event.srcElement)
 //            targetEl = event.srcElement;
 //        
         let form;
-        let parent:Element = targetEl;
+        let parent = targetEl;
         let targetElNameChain = new Array();
         let contextMatch = false;
         while (parent) {

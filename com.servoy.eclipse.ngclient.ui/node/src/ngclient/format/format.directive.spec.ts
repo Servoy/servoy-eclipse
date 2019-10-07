@@ -9,7 +9,7 @@ import {SvyFormat} from './format.directive';
   })
 class TestTextfield {
     @Input() format;
-    @ViewChild('element') elementRef:ElementRef;
+    @ViewChild('element', {static: true}) elementRef:ElementRef;
 }
 
 describe('SvyFormat', () => {

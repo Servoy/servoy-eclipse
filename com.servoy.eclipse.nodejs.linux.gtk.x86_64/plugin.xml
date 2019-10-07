@@ -6,9 +6,9 @@
       <nodejs
             id="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
             name="com.servoy.eclipse.nodejs.linux.gtk.x86_64"
-            nodePath="node-v10.0.0-linux-x64/bin/node"
-            npmPath="node-v10.0.0-linux-x64/bin/npm"
-            archive="node-v10.0.0-linux-x64.tar.xz">
+            nodePath="node-v12.11.1-linux-x64/bin/node"
+            npmPath="node-v12.11.1-linux-x64/bin/npm"
+            archive="node-v12.11.1-linux-x64.tar.xz">
       </nodejs>
    </extension>
 

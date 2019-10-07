@@ -1,7 +1,6 @@
 import {AfterViewInit, ElementRef, OnInit, Renderer2, ViewChild} from "@angular/core";
 import {FormattingService, PropertyUtils} from "../ngclient/servoy_public";
 import {ServoyDefaultBaseField} from "./basefield";
-import {forEach} from "@angular/router/src/utils/collection";
 
 export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements OnInit, AfterViewInit{
   

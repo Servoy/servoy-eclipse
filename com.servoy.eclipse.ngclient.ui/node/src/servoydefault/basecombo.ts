@@ -11,7 +11,7 @@ export interface Item {
 };
 
 export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
-  @ViewChild('input') inputElement: ElementRef;
+  @ViewChild('input', {static: true}) inputElement: ElementRef;
 
   styles: Object = {};
   valueList: Item[];

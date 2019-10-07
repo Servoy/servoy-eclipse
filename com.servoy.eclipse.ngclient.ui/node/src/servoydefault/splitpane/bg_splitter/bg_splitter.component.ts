@@ -21,7 +21,7 @@ export class BGSplitter implements AfterContentInit , OnChanges {
     @ContentChildren( BGPane )
     private panes: QueryList<BGPane>;
 
-    @ViewChild( 'element' )
+    @ViewChild( 'element' , {static: true})
     private elementRef: ElementRef;
 
     constructor( private readonly renderer: Renderer2 ) {
