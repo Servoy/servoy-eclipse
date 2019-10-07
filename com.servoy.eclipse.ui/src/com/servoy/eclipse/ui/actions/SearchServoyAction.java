@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.actions;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
@@ -23,10 +25,13 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.ServoySearchDialog;
 import com.servoy.eclipse.ui.dialogs.ServoySearchDialog.Scope;
 import com.servoy.eclipse.ui.dialogs.ServoySearchDialog.Table;
+import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 
 public class SearchServoyAction implements IWorkbenchWindowActionDelegate
@@ -51,7 +56,21 @@ public class SearchServoyAction implements IWorkbenchWindowActionDelegate
 		if (resultCode == IDialogConstants.OK_ID)
 		{
 			final Object result = ssd.getFirstResult();
-			if (result instanceof IPersist)
+			if (result instanceof Form)
+			{
+				IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
+				String formDblClickOption = store.get(SolutionExplorerPreferences.FORM_DOUBLE_CLICK_ACTION,
+					SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR);
+				if (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
+				{
+					EditorUtil.openFormDesignEditor((Form)result);
+				}
+				else
+				{
+					EditorUtil.openScriptEditor((Form)result, null, true);
+				}
+			}
+			else if (result instanceof IPersist)
 			{
 				EditorUtil.openPersistEditor((IPersist)result);
 			}

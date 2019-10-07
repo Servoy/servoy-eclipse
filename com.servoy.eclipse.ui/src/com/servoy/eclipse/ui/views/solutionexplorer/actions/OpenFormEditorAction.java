@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.Iterator;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -35,10 +34,8 @@ import com.servoy.j2db.persistence.Form;
 /**
  * @author gerzse
  */
-public class OpenFormEditorAction extends Action implements IActionDelegate, ISelectionChangedListener
+public class OpenFormEditorAction extends OpenEditorAction implements IActionDelegate, ISelectionChangedListener
 {
-
-	protected IStructuredSelection selection;
 
 	public OpenFormEditorAction()
 	{
