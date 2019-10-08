@@ -1140,7 +1140,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				List<String> metadataTables = null;
 				for (String tableName : tableNames)
 				{
-					final Table tabel = (Table)server.getTable(tableName);
+					final ITable tabel = server.getTable(tableName);
 					if (server.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (hiddenTables == null) hiddenTables = new ArrayList<String>();
@@ -1151,7 +1151,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						if (metadataTables == null) metadataTables = new ArrayList<String>();
 						metadataTables.add(tableName);
 					}
-					else if (isTableInvalidInDeveloperBecauseNoPk(tabel) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
+					else if (!type.equals(UserNodeType.INMEMORY_DATASOURCE) && isTableInvalidInDeveloperBecauseNoPk((Table)tabel) &&
+						!server.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (invalidBecauseNoPK == null) invalidBecauseNoPK = new ArrayList<String>();
 						invalidBecauseNoPK.add(tableName);
