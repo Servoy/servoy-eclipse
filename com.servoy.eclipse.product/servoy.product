@@ -25,12 +25,8 @@ and will be prosecuted to the maximum extent possible under law.
    </configIni>
 
    <launcherArgs>
-      <programArgs>--launcher.XXMaxPermSize
-256m
-      </programArgs>
       <vmArgs>-Xms40m
 -Xmx1G
--XX:MaxPermSize=256M
 --add-modules=ALL-SYSTEM
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
@@ -121,7 +117,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </features>
 
    <configurations>
-       <plugin id="j2db_log4j" autoStart="true" startLevel="0" />
+      <plugin id="j2db_log4j" autoStart="true" startLevel="0" />
       <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="0" />
       <plugin id="org.apache.aries.util" autoStart="true" startLevel="0" />
       <plugin id="org.apache.felix.scr" autoStart="true" startLevel="2" />
