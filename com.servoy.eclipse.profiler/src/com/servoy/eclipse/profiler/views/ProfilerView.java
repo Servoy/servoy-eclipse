@@ -984,7 +984,7 @@ public class ProfilerView extends ViewPart
 	SashForm sashForm;
 
 	private IMemento memento;
-	private final int[] searching = new int[] { 0 };
+	private int searching = 0;
 	private final String[] filter = new String[] { null };
 	private WorkbenchJob refreshJob;
 
@@ -1199,7 +1199,7 @@ public class ProfilerView extends ViewPart
 				}
 				finally
 				{
-					searching[0]--;
+					searching--;
 				}
 			}
 		};
@@ -1349,10 +1349,10 @@ public class ProfilerView extends ViewPart
 				{
 					public void modifyText(ModifyEvent e)
 					{
-						searching[0]++;
-						if (searching[0] > 1 && refreshJob.cancel())
+						searching++;
+						if (searching > 1 && refreshJob.cancel())
 						{
-							searching[0]--;
+							searching--;
 						}
 						filter[0] = searchFld.getText();
 						refreshJob.schedule(400);
