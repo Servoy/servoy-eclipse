@@ -222,9 +222,15 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
-							if (!responsive) FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
+							boolean isInCSSPositionContainer = false;
+							if (baseComponent.getParent() instanceof LayoutContainer)
+							{
+								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)baseComponent.getParent());
+							}
+							if (!responsive || isInCSSPositionContainer)
+								FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
 							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm);
-							if (!responsive) FormLayoutGenerator.generateEndDiv(w);
+							if (!responsive || isInCSSPositionContainer) FormLayoutGenerator.generateEndDiv(w);
 							if (responsive)
 							{
 								IPersist parent = ((ISupportExtendsID)fe.getPersistIfAvailable()).getRealParent();
