@@ -1151,7 +1151,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						if (metadataTables == null) metadataTables = new ArrayList<String>();
 						metadataTables.add(tableName);
 					}
-					else if (!type.equals(UserNodeType.INMEMORY_DATASOURCE) && isTableInvalidInDeveloperBecauseNoPk((Table)tabel) &&
+					else if (type.equals(UserNodeType.TABLE) && isTableInvalidInDeveloperBecauseNoPk((Table)tabel) &&
 						!server.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (invalidBecauseNoPK == null) invalidBecauseNoPK = new ArrayList<String>();
