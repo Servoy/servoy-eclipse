@@ -984,8 +984,7 @@ public class ProfilerView extends ViewPart
 	SashForm sashForm;
 
 	private IMemento memento;
-	private int searching = 0;
-	private final String[] filter = new String[] { null };
+	private String filter = null;
 	private WorkbenchJob refreshJob;
 
 	/**
@@ -1186,21 +1185,14 @@ public class ProfilerView extends ViewPart
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor)
 			{
-				try
-				{
 
-					if (methodCallViewer.getControl().isDisposed())
-					{
-						return Status.CANCEL_STATUS;
-					}
-					methodCallViewer.refresh(true);
-
-					return Status.OK_STATUS;
-				}
-				finally
+				if (methodCallViewer.getControl().isDisposed())
 				{
-					searching--;
+					return Status.CANCEL_STATUS;
 				}
+				methodCallViewer.refresh(true);
+
+				return Status.OK_STATUS;
 			}
 		};
 		refreshJob.setSystem(true);
@@ -1217,13 +1209,13 @@ public class ProfilerView extends ViewPart
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element)
 			{
-				if (filter[0] != null && !"".equals(filter[0]))
+				if (filter != null && !"".equals(filter))
 				{
-					if (element instanceof ProfileData && ((ProfileData)element).getMethodName().contains(filter[0]))
+					if (element instanceof ProfileData && ((ProfileData)element).getMethodName().contains(filter))
 					{
 						return true;
 					}
-					if (element instanceof AggregateData && ((AggregateData)element).getMethodName().contains(filter[0]))
+					if (element instanceof AggregateData && ((AggregateData)element).getMethodName().contains(filter))
 					{
 						return true;
 					}
@@ -1349,12 +1341,8 @@ public class ProfilerView extends ViewPart
 				{
 					public void modifyText(ModifyEvent e)
 					{
-						searching++;
-						if (searching > 1 && refreshJob.cancel())
-						{
-							searching--;
-						}
-						filter[0] = searchFld.getText();
+						refreshJob.cancel();
+						filter = searchFld.getText();
 						refreshJob.schedule(400);
 					}
 				});
