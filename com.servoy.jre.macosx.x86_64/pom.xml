@@ -71,8 +71,8 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33_openj9-0.16.0/OpenJDK13U-jre_x64_mac_openj9_13_33_openj9-0.16.0.tar.gz</url>
-							<outputFileName>jre12.tar.gz</outputFileName>
+							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13%2B33_openj9-0.16.0/OpenJDK13U-jre_x64_mac_openj9_13_33_openj9-0.16.0.tar.gz#1</url>
+							<outputFileName>${jre.version}.tar.gz</outputFileName>
 						</configuration>
 					</execution>
 				</executions>
@@ -87,7 +87,7 @@
             <phase>generate-resources</phase>  
             <configuration>  
                 <tasks>  
-		    		<untar src="${project.build.directory}/jre12.tar.gz" compression="gzip" dest="${project.build.directory}"/>
+		    		<untar src="${project.build.directory}/${jre.version}.tar.gz" compression="gzip" dest="${project.build.directory}"/>
 		    		<copy file="${project.build.directory}/${jre.version}/Contents/Home/lib/libjli.dylib" tofile="${project.build.directory}/${jre.version}/Contents/MacOS/libjli.dylib"/>
                 </tasks>  
             </configuration>  
