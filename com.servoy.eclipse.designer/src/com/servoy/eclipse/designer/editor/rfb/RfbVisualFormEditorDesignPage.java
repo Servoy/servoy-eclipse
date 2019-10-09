@@ -107,27 +107,16 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 
 	private final IFieldPositioner fieldPositioner = new DefaultFieldPositioner(new Point(40, 50))
 	{
-
-		private boolean locationNeverSet = true;
-
-		@Override
-		public void setDefaultLocation(Point defaultLocation)
-		{
-			super.setDefaultLocation(defaultLocation);
-			locationNeverSet = false;
-		}
-
 		@Override
 		public Point getNextLocation(Point location)
 		{
 			if (location == null)
 			{
-				if (locationNeverSet)
-				{
-					defaultLocation.x += 20;
-					defaultLocation.y += 20;
-				}
-				return defaultLocation;
+				// should we use designerPreferences.getCopyPasteOffset() here ?
+				Point point = new Point(defaultLocation.x, defaultLocation.y);
+				defaultLocation.x += 20;
+				defaultLocation.y += 20;
+				return point;
 			}
 			return location;
 		};
