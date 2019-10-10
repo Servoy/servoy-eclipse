@@ -20,10 +20,12 @@ package com.servoy.eclipse.core.quickfix;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -53,13 +55,15 @@ public class InvalidTableBecauseNoPrimaryKeyQuickFix implements IMarkerResolutio
 	}
 
 	@Override
-	public void run(IMarker marker)
+	public void run(final IMarker marker)
 	{
-		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
+		final DataModelManager dataModelManager = ServoyModelFinder.getServoyModel().getDataModelManager();
+		final IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
 		try
 		{
-			final ITable table = server.getTable(tableName);
-			table.setMarkedAsHiddenInDeveloperInternal(true);
+			final Table table = (Table)server.getTable(tableName);
+			server.setTableMarkedAsHiddenInDeveloper(tableName, true);
+			dataModelManager.updateHiddenInDeveloperState(table);
 		}
 		catch (RepositoryException e)
 		{
