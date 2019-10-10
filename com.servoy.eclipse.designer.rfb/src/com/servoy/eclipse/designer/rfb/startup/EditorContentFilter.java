@@ -142,7 +142,7 @@ public class EditorContentFilter implements Filter
 					}
 				}
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), css, formScripts, null, variableSubstitution, w, null,
-					NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
+					NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER, false);
 				w.flush();
 				return;
 			}
