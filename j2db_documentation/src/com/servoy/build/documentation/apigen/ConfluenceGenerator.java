@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -57,7 +58,9 @@ import org.apache.wicket.util.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.Scriptable;
 
 import com.jamesmurty.utils.XMLBuilder2;
 import com.servoy.base.scripting.api.IJSController;
@@ -76,12 +79,16 @@ import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.IFunctionDocumentation;
 import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.documentation.IParameterDocumentation;
+import com.servoy.j2db.persistence.CSSPosition;
+import com.servoy.j2db.querybuilder.IQueryBuilderColumn;
 import com.servoy.j2db.querybuilder.IQueryBuilderCondition;
 import com.servoy.j2db.querybuilder.IQueryBuilderLogicalCondition;
 import com.servoy.j2db.scripting.FormScope;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
+import com.servoy.j2db.scripting.solutionmodel.ICSSPosition;
 import com.servoy.j2db.solutionmodel.ISMPart;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * @author jcompagner
@@ -716,7 +723,7 @@ public class ConfluenceGenerator
 			{
 				return "Date";
 			}
-			else if (type == Object.class)
+			else if (type == Object.class || type == Scriptable.class || type == IdScriptableObject.class)
 			{
 				return "Object";
 			}
@@ -753,6 +760,10 @@ public class ConfluenceGenerator
 			{
 				return "JSField";
 			}
+			else if (IBaseSMComponent.class.isAssignableFrom(type))
+			{
+				return "JSComponent";
+			}
 			else if (IBaseSMMethod.class.isAssignableFrom(type))
 			{
 				return "JSMethod";
@@ -777,14 +788,30 @@ public class ConfluenceGenerator
 			{
 				return "QBCondition";
 			}
-			else if (IBaseSMComponent.class.isAssignableFrom(type))
+			else if (IQueryBuilderCondition.class.isAssignableFrom(type))
 			{
-				return "JSComponent";
+				return "QBCondition";
+			}
+			else if (IQueryBuilderColumn.class.isAssignableFrom(type))
+			{
+				return "QBColumn";
+			}
+			else if (ICSSPosition.class.isAssignableFrom(type) || CSSPosition.class == type)
+			{
+				return "CSSPosition";
 			}
 			else if (Color.class.isAssignableFrom(type) || Point.class.isAssignableFrom(type) || Dimension.class.isAssignableFrom(type) ||
 				Insets.class.isAssignableFrom(type))
 			{// special tabs that in scripting just map on a String
 				return "String";
+			}
+			else if (type == Map.class || type == ServoyJSONObject.class || type == JSONObject.class)
+			{
+				return "Object";
+			}
+			else if (type.isEnum())
+			{
+				return "enum";
 			}
 			String name = qualifiedToName.get(type.getCanonicalName());
 			if (name == null)
