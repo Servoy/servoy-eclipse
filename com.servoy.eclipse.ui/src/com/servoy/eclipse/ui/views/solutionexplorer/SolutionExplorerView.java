@@ -2308,6 +2308,7 @@ public class SolutionExplorerView extends ViewPart
 					else
 					{
 						((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
 					}
 				}
 

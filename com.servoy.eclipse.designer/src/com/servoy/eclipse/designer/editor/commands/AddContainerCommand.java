@@ -21,7 +21,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -108,7 +107,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						if (persistContext.getPersist() instanceof AbstractContainer)
 						{
-							TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
+							TreeSelectDialog dialog = new TreeSelectDialog(activeEditor.getEditorSite().getShell(), true, true, TreePatternFilter.FILTER_LEAFS,
 								FlatTreeContentProvider.INSTANCE, new LabelProvider()
 								{
 									@Override
@@ -165,7 +164,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								return NameComparator.INSTANCE.compare(labelProvider.getText(o1), labelProvider.getText(o2));
 							}
 						});
-						TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
+						TreeSelectDialog dialog = new TreeSelectDialog(activeEditor.getEditorSite().getShell(), true, true, TreePatternFilter.FILTER_LEAFS,
 							FlatTreeContentProvider.INSTANCE, labelProvider, null, null, SWT.NONE, "Select spec", specs.toArray(new WebObjectSpecification[0]),
 							null, false, "SpecDialog", null);
 						if (dialog.open() == Window.CANCEL)

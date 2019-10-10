@@ -68,7 +68,7 @@ public class FunctionTemplateModel
 	{
 		String sample = obj.getSample(ClientSupport.Default);
 		if (sample == null) return "";
-		return sample;
+		return sample.replace("%%prefix%%", "");
 	}
 
 }

@@ -18,21 +18,15 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.Iterator;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
-import com.servoy.eclipse.ui.node.UserNode;
-import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.ColumnWrapper;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -40,11 +34,10 @@ import com.servoy.j2db.util.Pair;
  *
  * @author acostescu
  */
-public class OpenScriptAction extends Action implements ISelectionChangedListener
+public class OpenScriptAction extends OpenEditorAction implements ISelectionChangedListener
 {
 
 	public static final String OPEN_SCRIPT_ID = "com.servoy.eclipse.ui.OpenFormJsAction";
-	protected IStructuredSelection selection;
 
 	/**
 	 * Creates a new open script action.
@@ -60,40 +53,6 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 	public void selectionChanged(SelectionChangedEvent event)
 	{
 		setSelection((IStructuredSelection)event.getSelection());
-	}
-
-	/**
-	 * @param selection
-	 */
-	public void setSelection(IStructuredSelection selection)
-	{
-		this.selection = selection;
-		Iterator< ? > it = selection.iterator();
-		boolean state = it.hasNext();
-		while (it.hasNext())
-		{
-			Object sel = it.next();
-			if (sel instanceof UserNode)
-			{
-				UserNodeType type = ((UserNode)sel).getType();
-				if (type != UserNodeType.FORM_METHOD && type != UserNodeType.GLOBAL_METHOD_ITEM && type != UserNodeType.GLOBAL_VARIABLE_ITEM &&
-					type != UserNodeType.FORM_VARIABLE_ITEM && type != UserNodeType.CALCULATIONS_ITEM && type != UserNodeType.GLOBALS_ITEM &&
-					type != UserNodeType.FORM_VARIABLES && type != UserNodeType.GLOBAL_VARIABLES)
-				{
-					state = false;
-				}
-			}
-			else if (!isEnabledFor(sel))
-			{
-				state = false;
-			}
-		}
-		setEnabled(state);
-	}
-
-	private boolean isEnabledFor(Object sel)
-	{
-		return (sel instanceof Form) || (sel instanceof ScriptMethod) || (sel instanceof ScriptVariable);
 	}
 
 	@Override

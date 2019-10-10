@@ -79,6 +79,35 @@ public class ChangeParentCommand extends Command
 	}
 
 	@Override
+	public boolean canExecute()
+	{
+		boolean canExecute = super.canExecute();
+		if (canExecute)
+		{
+			ISupportChilds initialParent = child instanceof ISupportExtendsID ? ((ISupportExtendsID)child).getRealParent() : child.getParent();
+			ISupportChilds possibleNewParent = newParent;
+			if (possibleNewParent == null) possibleNewParent = initialParent;
+
+			if (possibleNewParent != initialParent)
+			{
+				//different parent
+				if (PersistHelper.isOverrideElement((ISupportExtendsID)child) || child.getAncestor(IRepository.FORMS) != form)
+				{
+					// cannot modify structure for inherited or override element
+					return false;
+				}
+
+				// adding an element into its own child is not allowed
+				if (isChildOf(possibleNewParent, initialParent))
+				{
+					return false;
+				}
+			}
+		}
+		return canExecute;
+	}
+
+	@Override
 	public void execute()
 	{
 		List<IPersist> changes = new ArrayList<>();
@@ -104,12 +133,6 @@ public class ChangeParentCommand extends Command
 		}
 		else
 		{
-			//different parent
-			if (PersistHelper.isOverrideElement((ISupportExtendsID)child) || child.getAncestor(IRepository.FORMS) != form)
-			{
-				// cannot modify structure for inherited or override element
-				return;
-			}
 			oldParent = initialParent;
 			initialParent.removeChild(child);
 			newParent.addChild(child);
@@ -135,6 +158,21 @@ public class ChangeParentCommand extends Command
 			oldParent != null ? oldParent : newParent);
 		updateChildPosition(flattenedNewParent, changes, true);
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
+	}
+
+	private static boolean isChildOf(IPersist persist, ISupportChilds parent)
+	{
+		boolean isChildOf = false;
+		IPersist persistParent = persist;
+
+		do
+		{
+			persistParent = persistParent.getParent();
+			isChildOf = persistParent == parent;
+		}
+		while (persistParent != null && !isChildOf);
+
+		return isChildOf;
 	}
 
 	private ArrayList<IPersist> getChildrenSortedOnType(ISupportChilds parent, String jsonKey)
