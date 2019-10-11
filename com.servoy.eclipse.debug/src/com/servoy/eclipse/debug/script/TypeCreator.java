@@ -699,6 +699,10 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.STRING);
 			}
+			if (type.isEnum())
+			{
+				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
+			}
 
 			return getTypeRef(context, "Packages." + type.getName());
 		}
@@ -2264,10 +2268,11 @@ public class TypeCreator extends TypeCache
 						for (IParameter parameter : parameters)
 						{
 							sb.append("<b>@param</b> ");
-							if (parameter.getType() != null)
+							String type = parameter.getType();
+							if (type != null)
 							{
 								sb.append("{");
-								sb.append(parameter.getType());
+								sb.append(type.replace("<", "&lt;").replace(">", "&gt;"));
 								sb.append("} ");
 							}
 							sb.append(parameter.getName());
