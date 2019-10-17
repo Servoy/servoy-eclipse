@@ -34,6 +34,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.json.JSONObject;
@@ -54,9 +55,9 @@ import com.servoy.j2db.util.Utils;
 public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 {
 	private ExportPage exportPage;
-	private static int POLLING_INTERVAL = 2000;
+	private static int POLLING_INTERVAL = 1000;
 
-	public static final String NGDESKTOP_SERVICE_PROTOCOL = "http://";// do we need https?
+	public static final String NGDESKTOP_SERVICE_PROTOCOL = "http://";
 
 	public ExportNGDesktopWizard()
 	{
@@ -180,7 +181,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		BufferedReader reader = new BufferedReader(new FileReader(rebrandingFile));
 		while ((line = reader.readLine()) != null)
 		{
-			if (line.startsWith("#")) continue;
+			if (line.startsWith("#") || line.trim().length() == 0) continue;
 			String[] parts = line.split("=");
 			if (parts.length != 2) throw new Exception("Invalid data format: " + filePath);
 			String key = parts[0];
@@ -197,8 +198,9 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		List<String> selectedPlatforms = exportPage.getSelectedPlatforms();
 		final String saveDir = exportPage.getSaveDir().endsWith(File.separator) ? exportPage.getSaveDir() : exportPage.getSaveDir() + File.separator;
 		final String appUrl = exportPage.getApplicationURL();
+
 		final StringBuilder errorMsg = new StringBuilder();
-		
+
 		boolean downloadInstallers = false;
 
 		//TODO: refactoring after getting data through exportPage
@@ -209,10 +211,10 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		String rebrCopyrightStr = null;
 		InetAddress serviceAddress = null;
 		int servicePort = 0;
-		final String serviceProtocol = "http://";//will we support https://?
-		
+
 		String rebrandingPath = System.getProperty("ngclient.rebranding.data", null);
-		if (rebrandingPath != null) {
+		if (rebrandingPath != null)
+		{
 			rebrandingPath = rebrandingPath.replaceAll("\\\\", "/");
 			downloadInstallers = true;
 			try
@@ -228,11 +230,13 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			{
 				errorMsg.append(e.getMessage());
 			}
-			
-		} else {
+
+		}
+		else
+		{
 			errorMsg.append("No rebranding data found");
 		}
-		
+
 		//need final variables to be used in below interface implementation
 		final String iconPath = rebrIconPath != null ? rebrIconPath : null;
 		final String imagePath = rebrImagePath != null ? rebrImagePath : null;
@@ -240,7 +244,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final boolean downloadNgDesktopInstaller = downloadInstallers;
 		final InetAddress ngDesktopService = serviceAddress;
 		final int ngDesktopPort = servicePort;
-		
+
 		//TODO END refactoring
 
 		IRunnableWithProgress job = new IRunnableWithProgress()
@@ -249,39 +253,54 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			{
 				if (errorMsg.length() > 0) return;
 				selectedPlatforms.forEach((platform) -> {
-					
+
 					if (downloadNgDesktopInstaller && platform.equals(ExportPage.WINDOWS_PLATFORM)) //skip mac for now
 					{
 						try
 						{
 							NgDesktopClientConnection serviceConn = new NgDesktopClientConnection(NGDESKTOP_SERVICE_PROTOCOL, ngDesktopService, ngDesktopPort);
-														
+
 							String tokenId = serviceConn.startBuild(platform, iconPath, imagePath, copyrightInfo, appUrl);
-							
-							String status = serviceConn.getStatus(tokenId);
-							while (!NgDesktopClientConnection.READY.equals(status)) {//TODO: handling waiting times due to unresponsive server
+							if (tokenId.equals(NgDesktopClientConnection.BUILD_ALREADY_RUNNING) ||
+								tokenId.equals(NgDesktopClientConnection.REQUEST_ALREADY_REGISTERED) ||
+								tokenId.equals(NgDesktopClientConnection.REQUEST_STACK_FULL))
+							{
+
+								errorMsg.append(tokenId);
+							}
+							String status = null;
+							while (errorMsg.length() == 0 && !NgDesktopClientConnection.READY.equals(status))
+							{//TODO: handling waiting times due to unresponsive server
 								Thread.sleep(POLLING_INTERVAL);
 								status = serviceConn.getStatus(tokenId);
+
+								//TODO: progress bar
+								setInstallerStatus(status);
+								//end TODO
+
 								if (NgDesktopClientConnection.WAITING.equals(status) || NgDesktopClientConnection.PROCESSING.equals(status)) continue;
-								if (NgDesktopClientConnection.ERROR.equals(status)) {
-									errorMsg.append(serviceConn.getErrorDetails(tokenId));
-									break;
-								}
-								if (NgDesktopClientConnection.DELETED.equals(status)) {
-									errorMsg.append("Build does not exist: " + tokenId);
-									break;
-								}
-								
-								if (NgDesktopClientConnection.PROCESSING.equals(status)) {
-									errorMsg.append(serviceConn.getErrorDetails(tokenId));
-									break;
-								}
-								
-								if (NgDesktopClientConnection.READY.equals(status)) {
-									serviceConn.download(tokenId, saveDir);
+								if (NgDesktopClientConnection.ERROR.equals(status))
+								{
+									String errorMessage = serviceConn.getErrorDetails(tokenId);
+									errorMsg.append(errorMessage);
+									setInstallerStatus(status + ": " + errorMessage);
 									serviceConn.delete(tokenId);
+									break;
 								}
-								
+								if (NgDesktopClientConnection.DELETED.equals(status))
+								{
+									errorMsg.append("Build does not exist: " + tokenId);
+									setInstallerStatus(status + ": " + tokenId);
+									break;
+								}
+							}
+							if (NgDesktopClientConnection.READY.equals(status))
+							{
+								String binaryName = serviceConn.getBinaryName(tokenId);
+								setInstallerStatus("downloading " + binaryName);
+								serviceConn.download(tokenId, saveDir);
+								serviceConn.delete(tokenId);
+								setInstallerStatus("Done: " + saveDir + File.pathSeparator + binaryName);
 							}
 						}
 						catch (IOException | InterruptedException e)
@@ -346,5 +365,19 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	{
 		exportPage = new ExportPage(this);
 		addPage(exportPage);
+	}
+
+	/* Temporary hack to display a status. This will be delete after a progress bar will be implemented (IProgressMonitor) */
+	public void setInstallerStatus(String status)
+	{
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				Date myDate = new Date(System.currentTimeMillis());
+				exportPage.tempLabelStatus.setText(
+					"Status (debug mode): " + status + " - " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds());
+			}
+		});
 	}
 }
