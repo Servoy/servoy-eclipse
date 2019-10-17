@@ -37,7 +37,8 @@
 			<id>git</id>
 			<url>${git.url}</url>
 			<layout>p2</layout>
-		</repository>		<repository>
+		</repository>
+		<repository>
 			<id>dltk</id>
 			<url>${dltk.url}</url>
 			<layout>p2</layout>
@@ -86,6 +87,16 @@
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho.version}</version>
 				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<compilerArgument>-warn:none</compilerArgument>
+					<useProjectSettings>false</useProjectSettings>
+					<useJDK>BREE</useJDK>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -206,7 +217,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>1.4</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>sign</id>
