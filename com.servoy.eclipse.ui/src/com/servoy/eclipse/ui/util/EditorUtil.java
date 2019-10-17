@@ -1063,6 +1063,7 @@ public class EditorUtil
 	}
 
 	/**
+	 * The method returns an array of dirty editors from the project.
 	 * @return an array of IEditorPart
 	 */
 	public static IEditorPart[] getDirtyEditors()
