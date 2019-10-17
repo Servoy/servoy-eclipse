@@ -23,19 +23,24 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.DeleteResourceAction;
 
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Utils;
@@ -68,6 +73,33 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 	public void run()
 	{
 		deleteAction.selectionChanged(new StructuredSelection(selectedProjects));
+		boolean foundProject = false;
+		// checks if the selected projects that will be deleted contain the active project
+		for (IProject selectedProject : selectedProjects)
+		{
+			final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			if (servoyModel.getActiveProject().getProject().equals(selectedProject))
+			{
+				foundProject = true;
+				break;
+			}
+		}
+		if (foundProject) // only save the dirty editors if the selected projects that will be deleted contain the active project
+		{
+			final IEditorPart activeEditor = EditorUtil.getActivePage().getActiveEditor();
+			if (EditorUtil.saveDirtyEditors(activeEditor.getEditorSite().getShell(), true))
+			{
+				MessageDialog.openWarning(activeEditor.getEditorSite().getShell(), "Cannot delete",
+					"There are unsaved open editors that would be affected by this delete.\nPlease save or discard changes in these editors first.");
+				return;
+			}
+			if (EditorUtil.getDirtyEditors().length > 0)
+			{
+				MessageDialog.openWarning(activeEditor.getEditorSite().getShell(), "Cannot delete",
+					"There are unsaved open editors that would be affected by this delete.\nPlease save or discard changes in these editors first.");
+				return;
+			}
+		}
 		deleteAction.run();
 		ServoyProject[] activeProjects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 		if (activeProjects != null)
