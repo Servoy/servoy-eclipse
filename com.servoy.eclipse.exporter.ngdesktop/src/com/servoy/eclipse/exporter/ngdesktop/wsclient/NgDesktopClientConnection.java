@@ -13,6 +13,7 @@ import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -28,6 +29,7 @@ public class NgDesktopClientConnection
 	private String protocol = null;
 	private InetAddress serverAddress = null;
 	private int serverPort = 0;
+	private String statusMessage = null;
 
 	HttpClientBuilder httpBuilder = null;
 	private CloseableHttpClient httpClient = null;
@@ -38,17 +40,19 @@ public class NgDesktopClientConnection
 	private static String STATUS_ENDPOINT = "/ngdesktopws/status/";
 	private static String DOWNLOAD_ENDPOINT = "/ngdesktopws/download/";
 	private static String BINARY_NAME_ENDPOINT = "/ngdesktopws/binary/";
-	private static String BUILD_ERROR_ENDPOINT = "/ngdesktopws/error/";
 	private static String DELETE_ENDPOINT = "/ngdesktopws/delete/";
 
-	public final static String REQUEST_ALREADY_REGISTERED = "Already registered";
-	public final static String BUILD_ALREADY_RUNNING = "Already running";
-	public final static String REQUEST_STACK_FULL = "Requests full";
-	public final static String PROCESSING = "processing"; // installer is currently created
-	public final static String ERROR = "error"; // creating installer process has run into an error
-	public final static String READY = "ready"; // installer is ready for download
-	public final static String WAITING = "waiting"; // waiting in the requests queue
-	public final static String DELETED = "deleted"; // the build has been deleted
+	//START sync - this block need to be identical with the similar error codes from the NgDesktopMonitor in ngdesktop-service project
+	public final static int REQUESTS_FULL = 2;
+	public final static int BUILDS_FULL = 3;
+	public final static int PROCESSING = 4; // installer is currently created
+	public final static int ERROR = 5; // creating installer process has run into an error
+	public final static int READY = 6; // installer is ready for download
+	public final static int WAITING = 7; // waiting in the requests queue
+	public final static int CANCELED = 8; // the build has been cancelled
+	public final static int NOT_FOUND = 9;
+	public final static int ALREADY_STARTED = 10;
+	//END sync
 
 	public NgDesktopClientConnection(String protocol, InetAddress serverAddress, int serverPort)
 	{
@@ -107,6 +111,12 @@ public class NgDesktopClientConnection
 
 			HttpResponse httpResponse = httpClient.execute(postRequest);
 
+			//verify status code
+			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				throw new IOException("Http error: " + httpResponse.getStatusLine().getStatusCode() + ": " +
+					httpResponse.getStatusLine().getReasonPhrase());
+			}
+			
 			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
 
 			String output;
@@ -115,6 +125,9 @@ public class NgDesktopClientConnection
 				sb.append(output);
 
 			jsonObj = new JSONObject(sb.toString());
+			if (jsonObj.getInt("statusCode") != WAITING) { //this is the first status set on the service on a normal processing
+				throw new IOException(jsonObj.getString("statusMessage"));
+			}
 			//TODO: if tokenid = RESOURCE_BUSY - throw new IOException(stack service is full. Try again later)
 			return (String)jsonObj.get("tokenId");
 		}
@@ -123,23 +136,6 @@ public class NgDesktopClientConnection
 			// not the case
 		}
 		return null;
-	}
-
-	public String getErrorDetails(String tokenId) throws IOException
-	{
-		HttpGet getRequest = new HttpGet(protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + BUILD_ERROR_ENDPOINT + tokenId);
-		HttpResponse httpResponse = httpClient.execute(getRequest);
-
-		BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-		String output;
-		StringBuffer sb = new StringBuffer();
-		while ((output = br.readLine()) != null)
-			sb.append(output);
-
-		JSONObject jsonObj = new JSONObject(sb.toString());
-		String errorMessage = (String)jsonObj.get("errorMessage");
-		ServoyLog.logError(errorMessage, new Exception(errorMessage));
-		return errorMessage;
 	}
 
 	/**
@@ -151,7 +147,7 @@ public class NgDesktopClientConnection
 	 * 			ready - build is ready to download
 	 * @throws IOException
 	 */
-	public String getStatus(String tokenId) throws IOException
+	public int getStatus(String tokenId) throws IOException
 	{
 		HttpGet getRequest = new HttpGet(protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + STATUS_ENDPOINT + tokenId);
 		HttpResponse httpResponse = httpClient.execute(getRequest);
@@ -163,8 +159,13 @@ public class NgDesktopClientConnection
 			sb.append(output);
 
 		JSONObject jsonObj = new JSONObject(sb.toString());
-		//TODO: return data for a progress bar. NGDesktop service need to be modified to provide this information
-		return (String)jsonObj.get("status");
+		int statusCode = jsonObj.getInt("statusCode");
+		statusMessage = (String)jsonObj.get("statusMessage");
+		return statusCode;
+	}
+	
+	public String getStatusMessage() {
+		return statusMessage;
 	}
 
 	public String getBinaryName(String tokenId) throws IOException
@@ -210,26 +211,5 @@ public class NgDesktopClientConnection
 		fos.close();
 
 		ServoyLog.logInfo("Downloaded bytes: " + amount);
-	}
-
-	public void delete(String tokenId) throws IOException
-	{
-		HttpGet getRequest = new HttpGet(protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + DELETE_ENDPOINT + tokenId);
-		ServoyLog.logInfo("Delete request: " + protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + DELETE_ENDPOINT + tokenId);
-		HttpResponse httpResponse = httpClient.execute(getRequest);
-		BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-		String output;
-		StringBuffer sb = new StringBuffer();
-		while ((output = br.readLine()) != null)
-			sb.append(output);
-
-		JSONObject jsonObj = new JSONObject(sb.toString());
-		if (!DELETED.equals(jsonObj.get("status")))
-		{
-			String errorMessage = "Service error: delete failed for token " + tokenId;
-			IOException exception = new IOException(errorMessage);
-			ServoyLog.logError(errorMessage, exception);
-			throw exception;
-		}
 	}
 }

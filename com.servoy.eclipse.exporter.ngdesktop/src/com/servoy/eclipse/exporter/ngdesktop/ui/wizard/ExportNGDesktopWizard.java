@@ -261,45 +261,36 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 							NgDesktopClientConnection serviceConn = new NgDesktopClientConnection(NGDESKTOP_SERVICE_PROTOCOL, ngDesktopService, ngDesktopPort);
 
 							String tokenId = serviceConn.startBuild(platform, iconPath, imagePath, copyrightInfo, appUrl);
-							if (tokenId.equals(NgDesktopClientConnection.BUILD_ALREADY_RUNNING) ||
-								tokenId.equals(NgDesktopClientConnection.REQUEST_ALREADY_REGISTERED) ||
-								tokenId.equals(NgDesktopClientConnection.REQUEST_STACK_FULL))
-							{
-
-								errorMsg.append(tokenId);
-							}
-							String status = null;
-							while (errorMsg.length() == 0 && !NgDesktopClientConnection.READY.equals(status))
+							int status = serviceConn.getStatus(tokenId);
+							while (NgDesktopClientConnection.READY != status)
 							{//TODO: handling waiting times due to unresponsive server
 								Thread.sleep(POLLING_INTERVAL);
 								status = serviceConn.getStatus(tokenId);
 
 								//TODO: progress bar
-								setInstallerStatus(status);
+								setInstallerStatus(serviceConn.getStatusMessage());
 								//end TODO
 
-								if (NgDesktopClientConnection.WAITING.equals(status) || NgDesktopClientConnection.PROCESSING.equals(status)) continue;
-								if (NgDesktopClientConnection.ERROR.equals(status))
+								if (NgDesktopClientConnection.WAITING == status || NgDesktopClientConnection.PROCESSING == status) continue;
+								if (NgDesktopClientConnection.ERROR == status)
 								{
-									String errorMessage = serviceConn.getErrorDetails(tokenId);
+									String errorMessage = serviceConn.getStatusMessage();
 									errorMsg.append(errorMessage);
 									setInstallerStatus(status + ": " + errorMessage);
-									serviceConn.delete(tokenId);
 									break;
 								}
-								if (NgDesktopClientConnection.DELETED.equals(status))
+								if (NgDesktopClientConnection.NOT_FOUND == status)
 								{
 									errorMsg.append("Build does not exist: " + tokenId);
-									setInstallerStatus(status + ": " + tokenId);
+									setInstallerStatus("Build does not exist: " + tokenId);
 									break;
 								}
 							}
-							if (NgDesktopClientConnection.READY.equals(status))
+							if (NgDesktopClientConnection.READY == status)
 							{
 								String binaryName = serviceConn.getBinaryName(tokenId);
 								setInstallerStatus("downloading " + binaryName);
 								serviceConn.download(tokenId, saveDir);
-								serviceConn.delete(tokenId);
 								setInstallerStatus("Done: " + saveDir + File.pathSeparator + binaryName);
 							}
 						}
@@ -375,8 +366,9 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			public void run()
 			{
 				Date myDate = new Date(System.currentTimeMillis());
-				exportPage.tempLabelStatus.setText(
-					"Status (debug mode): " + status + " - " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds());
+				int sec = myDate.getSeconds();
+				String strSec = sec < 10 ? "0" + sec : Integer.toString(sec);
+				exportPage.tempLabelStatus.setText("Status (debug mode): " + status + " - " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + strSec);
 			}
 		});
 	}
