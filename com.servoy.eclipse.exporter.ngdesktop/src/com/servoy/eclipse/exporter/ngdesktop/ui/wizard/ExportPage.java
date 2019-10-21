@@ -40,7 +40,8 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 /**
  * @author gboros
  */
-public class ExportPage extends WizardPage {
+public class ExportPage extends WizardPage
+{
 
 	public static String WINDOWS_PLATFORM = "win";
 	public static String MACOS_PLATFORM = "mac";
@@ -49,17 +50,20 @@ public class ExportPage extends WizardPage {
 	private Text applicationURLText;
 	private Text saveDir;
 	private Group platformGroup;
+	public Label tempLabelStatus;
 
 	private List<String> selectedPlatforms = new ArrayList<String>();
 	private ExportNGDesktopWizard exportElectronWizard;
 
-	public ExportPage(ExportNGDesktopWizard exportElectronWizard) {
+	public ExportPage(ExportNGDesktopWizard exportElectronWizard)
+	{
 		super("page1");
 		this.exportElectronWizard = exportElectronWizard;
 		setTitle("Export Servoy application in electron");
 	}
 
-	public void createControl(Composite parent) {
+	public void createControl(Composite parent)
+	{
 		GridLayout gridLayout = new GridLayout(3, false);
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
@@ -83,13 +87,14 @@ public class ExportPage extends WizardPage {
 		winBtn.setData(WINDOWS_PLATFORM);
 		winBtn.setText("Windows");
 		winBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("win_export"));
-		if (winBtn.getSelection())
-			selectedPlatforms.add(WINDOWS_PLATFORM);
+		if (winBtn.getSelection()) selectedPlatforms.add(WINDOWS_PLATFORM);
 
-		winBtn.addSelectionListener(new SelectionAdapter() {
+		winBtn.addSelectionListener(new SelectionAdapter()
+		{
 			@Override
-			public void widgetSelected(SelectionEvent event) {
-				platformSelectionChangeListener((String) event.widget.getData());
+			public void widgetSelected(SelectionEvent event)
+			{
+				platformSelectionChangeListener((String)event.widget.getData());
 			}
 		});
 
@@ -97,13 +102,14 @@ public class ExportPage extends WizardPage {
 		macBtn.setText("MacOS");
 		macBtn.setData(MACOS_PLATFORM);
 		macBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("osx_export"));
-		if (macBtn.getSelection())
-			selectedPlatforms.add(MACOS_PLATFORM);
+		if (macBtn.getSelection()) selectedPlatforms.add(MACOS_PLATFORM);
 
-		macBtn.addSelectionListener(new SelectionAdapter() {
+		macBtn.addSelectionListener(new SelectionAdapter()
+		{
 			@Override
-			public void widgetSelected(SelectionEvent event) {
-				platformSelectionChangeListener((String) event.widget.getData());
+			public void widgetSelected(SelectionEvent event)
+			{
+				platformSelectionChangeListener((String)event.widget.getData());
 			}
 		});
 
@@ -111,13 +117,14 @@ public class ExportPage extends WizardPage {
 		linuxBtn.setText("Linux");
 		linuxBtn.setData(LINUX_PLATFORM);
 		linuxBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("linux_export"));
-		if (linuxBtn.getSelection())
-			selectedPlatforms.add(LINUX_PLATFORM);
+		if (linuxBtn.getSelection()) selectedPlatforms.add(LINUX_PLATFORM);
 
-		linuxBtn.addSelectionListener(new SelectionAdapter() {
+		linuxBtn.addSelectionListener(new SelectionAdapter()
+		{
 			@Override
-			public void widgetSelected(SelectionEvent event) {
-				platformSelectionChangeListener((String) event.widget.getData());
+			public void widgetSelected(SelectionEvent event)
+			{
+				platformSelectionChangeListener((String)event.widget.getData());
 			}
 		});
 
@@ -134,46 +141,60 @@ public class ExportPage extends WizardPage {
 		gd.horizontalSpan = 2;
 		saveDir.setLayoutData(gd);
 
+		if (System.getProperty("ngclient.rebranding.data", null) != null)
+		{
+			tempLabelStatus = new Label(composite, SWT.NONE);
+			tempLabelStatus.setText("Status (test mode): ");
+			gd = new GridData(GridData.FILL_HORIZONTAL);
+			gd.horizontalSpan = 2;
+			tempLabelStatus.setLayoutData(gd);
+			tempLabelStatus.setVisible(true);
+		}
 		setControl(composite);
 	}
 
-	private String getInitialApplicationURL() {
+	private String getInitialApplicationURL()
+	{
 		String applicationURL = exportElectronWizard.getDialogSettings().get("application_url");
-		if (applicationURL == null) {
-			String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()
-					.getSolution().getName();
-			applicationURL = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/"
-					+ solutionName + "/index.html";
+		if (applicationURL == null)
+		{
+			String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
+			applicationURL = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solutionName + "/index.html";
 		}
 		return applicationURL;
 	}
 
-	public String getApplicationURL() {
+	public String getApplicationURL()
+	{
 		return applicationURLText.getText();
 	}
 
-	private String getInitialSaveDir() {
+	private String getInitialSaveDir()
+	{
 		String saveDir = exportElectronWizard.getDialogSettings().get("save_dir");
-		if (saveDir != null)
-			return saveDir;
+		if (saveDir != null) return saveDir;
 		return System.getProperty("user.home");
 	}
 
-	public String getSaveDir() {
+	public String getSaveDir()
+	{
 		return saveDir.getText();
 	}
 
-	private Object platformSelectionChangeListener(String selectedPlatform) {
+	private Object platformSelectionChangeListener(String selectedPlatform)
+	{
 		int index = selectedPlatforms.indexOf(selectedPlatform);
 		// the result type is different depending on the execution leaf
-		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform); 
+		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
 	}
 
-	public List<String> getSelectedPlatforms() {
+	public List<String> getSelectedPlatforms()
+	{
 		return selectedPlatforms;
 	}
 
-	public void saveState() {
+	public void saveState()
+	{
 		IDialogSettings settings = exportElectronWizard.getDialogSettings();
 		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);

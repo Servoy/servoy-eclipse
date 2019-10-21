@@ -259,6 +259,7 @@ import com.servoy.j2db.ui.IScriptPortalComponentMethods;
 import com.servoy.j2db.ui.IScriptScriptLabelMethods;
 import com.servoy.j2db.ui.IScriptSplitPaneMethods;
 import com.servoy.j2db.ui.IScriptTabPanelMethods;
+import com.servoy.j2db.ui.runtime.IBaseRuntimeComponent;
 import com.servoy.j2db.ui.runtime.IRuntimeButton;
 import com.servoy.j2db.ui.runtime.IRuntimeCalendar;
 import com.servoy.j2db.ui.runtime.IRuntimeCheck;
@@ -276,6 +277,7 @@ import com.servoy.j2db.ui.runtime.IRuntimeRtfArea;
 import com.servoy.j2db.ui.runtime.IRuntimeSpinner;
 import com.servoy.j2db.ui.runtime.IRuntimeTextArea;
 import com.servoy.j2db.ui.runtime.IRuntimeTextField;
+import com.servoy.j2db.ui.runtime.IRuntimeWebComponent;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -697,6 +699,10 @@ public class TypeCreator extends TypeCache
 			{
 				return getTypeRef(context, ITypeNames.STRING);
 			}
+			if (type.isEnum())
+			{
+				return getTypeRef(context, "enum<" + type.getSimpleName() + '>');
+			}
 
 			return getTypeRef(context, "Packages." + type.getName());
 		}
@@ -922,7 +928,6 @@ public class TypeCreator extends TypeCache
 	{
 		Set<String> names = new HashSet<String>(classTypes.keySet());
 		names.add(CUSTOM_TYPE);
-		names.add(RUNTIME_WEB_COMPONENT);
 		if (prefix != null && !"".equals(prefix.trim()))
 		{
 			String lowerCasePrefix = prefix.toLowerCase();
@@ -1228,7 +1233,6 @@ public class TypeCreator extends TypeCache
 		{
 			boolean hasStyleclass = spec.getProperty(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()) != null ||
 				spec.getTaggedProperties("mainStyleClass", StyleClassPropertyType.INSTANCE).size() > 0;
-			Method method = null;
 
 			if (hasStyleclass)
 			{
@@ -1248,40 +1252,6 @@ public class TypeCreator extends TypeCache
 					createParam("String", "styleclass")));
 			}
 
-			members.add(fillParameter(
-				createMethod("getFormName", "Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();" +
-					"</br></br><b>@return</b> The name of the form.")));
-
-			members.add(
-				fillParameter(createMethod("getName", "Returns the name of the element. (may be null as well)</br></br>var name = elements.elem.getName();" +
-					"</br></br><b>@return</b> The name of the element.")));
-
-			members.add(fillParameter(createMethod("getElementType",
-				"Returns the web component type from specification file</br></br>var elementType = elements.elem.getElementType();" +
-					"</br></br><b>@return</b> The web component spec type.")));
-
-			members.add(fillParameter(createMethod("putClientProperty",
-				"Sets the value for the specified element client property key. NOTE: Depending on the operating system, a user interface property name may be available.</br>" +
-					"elements.elem.putClientProperty('ToolTipText','some text');</br></br>" +
-					"@param {Object} key user interface key (depends on operating system)</br>" + "@param {Object} value a predefined value for the key"),
-				createParam("String", "key"), createParam("Object", "value")
-
-			));
-			members.add(fillParameter(createMethod("getClientProperty",
-				"Gets the specified client property for the element based on a key. NOTE: Depending on the operating system, a user interface property name may be available.</br>" +
-					"var property = elements.elem.getClientProperty('ToolTipText');</br></br>" +
-					"@param {Object} key user interface key (depends on operating system)</br></br>" +
-					"@return Object The value of the property for specified key."),
-				createParam("String", "key")));
-
-			method = fillParameter(
-				createMethod("getDesignTimeProperty",
-					"Get a design-time property of an element.</br>" + "	var property = elements.elem.getDesignTimeProperty('myprop');</br></br>" +
-						"@param {Object} key the name of the property</br></br>" + "@return Object The value of the property for specified key."),
-				createParam("String", "key"));
-			method.setType(getTypeRef(null, ITypeNames.OBJECT));
-			members.add(method);
-
 			if (fullTypeName.endsWith(_ABS_POSTFIX))
 			{
 				members.add(fillParameter(createMethod("setLocation",
@@ -1297,6 +1267,12 @@ public class TypeCreator extends TypeCache
 				members.add(fillParameter(createMethod("getLocationY",
 					"Returns the x location of the current element. NOTE: getLocationY() can be used with getLocationY() to set the location of an element using the setLocation function.</br>For Example:</br> //returns the X and Y coordinates </br> var x = forms.company.elements.faxBtn.getLocationX(); </br> var y = forms.company.elements.faxBtn.getLocationY();</br> //sets the new location 10 px to the right; 10 px down from the current location </br>forms.company.elements.faxBtn.setLocation(x+10,y+10);</br>" +
 						"</br>		var y = elements.elem.getLocationY();</br></br>" + "</br><b>@return</b> Number The y location of the element in pixels.")));
+
+				type.setSuperType(getType(context, RUNTIME_WEB_COMPONENT + "<" + spec.getName() + ">"));
+			}
+			else
+			{
+				type.setSuperType(getType(context, RUNTIME_WEB_COMPONENT));
 			}
 		}
 		return addType(bucket, type);
@@ -2292,10 +2268,11 @@ public class TypeCreator extends TypeCache
 						for (IParameter parameter : parameters)
 						{
 							sb.append("<b>@param</b> ");
-							if (parameter.getType() != null)
+							String type = parameter.getType();
+							if (type != null)
 							{
 								sb.append("{");
-								sb.append(parameter.getType());
+								sb.append(type.replace("<", "&lt;").replace(">", "&gt;"));
 								sb.append("} ");
 							}
 							sb.append(parameter.getName());
@@ -4397,6 +4374,8 @@ public class TypeCreator extends TypeCache
 			typeNames.put(IScriptMobileBean.class.getSimpleName(), "RuntimeBean");
 			addType("RuntimeBean", IScriptMobileBean.class);
 			addType("RuntimeComponent", IRuntimeComponent.class);
+			addType(RUNTIME_WEB_COMPONENT, IRuntimeWebComponent.class);
+			addType("Component", IBaseRuntimeComponent.class);
 		}
 
 		public Type createType(String context, String typeName)

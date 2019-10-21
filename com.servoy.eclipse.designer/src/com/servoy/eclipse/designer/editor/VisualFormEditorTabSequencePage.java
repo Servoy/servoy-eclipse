@@ -436,79 +436,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 						}
 					}
 					properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
-					if (properties.size() > 0 && !FormElementHelper.isListFormComponent(properties))
-					{
-						FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editor.getForm());
-						FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement(persist, fs, null, true);
-						for (PropertyDescription pd : properties)
-						{
-							Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
-							Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
-							if (frm == null) continue;
-							FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
-								fs);
-							for (FormElement element : cache.getFormComponentElements())
-							{
-								IPersist p = element.getPersistIfAvailable();
-								if (p instanceof IFormElement)
-								{
-									String[] name = ((IFormElement)p).getName().split("\\$");
-									if (name.length > 2 && !name[name.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
-									{
-										StringBuilder keyBuilder = new StringBuilder();
-										for (int i = 1; i < name.length; i++)
-										{
-											if (i > 1) keyBuilder.append(".");
-											keyBuilder.append(name[i]);
-										}
-										WebFormComponentChildType formComponentChild = new WebFormComponentChildType(
-											persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getParentComponent()
-												: (IBasicWebObject)formComponentEl.getPersistIfAvailable(),
-											keyBuilder.toString(), fs);
-
-										if (p instanceof ISupportTabSeq)
-										{
-											if (((ISupportTabSeq)p).getTabSeq() >= 0)
-											{
-												selected.add(new TabSeqProperty(formComponentChild, "tabSeq"));
-											}
-											else
-											{
-												available.add(new TabSeqProperty(formComponentChild, "tabSeq"));
-											}
-										}
-										else if (FormTemplateGenerator.isWebcomponentBean(p))
-										{
-											IBasicWebComponent innerWebComponent = (IBasicWebComponent)p;
-											String innerComponentType = FormTemplateGenerator.getComponentTypeName(innerWebComponent);
-											WebObjectSpecification innerSpecification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
-												innerComponentType);
-											if (innerSpecification != null)
-											{
-												Collection<PropertyDescription> innerTabSeqproperties = innerSpecification.getProperties(
-													NGTabSeqPropertyType.NG_INSTANCE);
-												if (innerTabSeqproperties != null && innerTabSeqproperties.size() > 0)
-												{
-													for (PropertyDescription tabSeqPD : innerTabSeqproperties)
-													{
-														int tabseq = Utils.getAsInteger(formComponentChild.getProperty(tabSeqPD.getName()));
-														if (tabseq >= 0)
-														{
-															selected.add(new TabSeqProperty(formComponentChild, tabSeqPD.getName()));
-														}
-														else
-														{
-															available.add(new TabSeqProperty(formComponentChild, tabSeqPD.getName()));
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+					addFormComponentProperties(persist, properties, available, selected, (IBasicWebComponent)persist);
 				}
 			}
 			else if (persist instanceof ISupportTabSeq)
@@ -533,6 +461,81 @@ public class VisualFormEditorTabSequencePage extends Composite
 		configureButtons();
 
 		doRefresh = false;
+	}
+
+	private void addFormComponentProperties(IFormElement persist, Collection<PropertyDescription> properties, List<TabSeqProperty> available,
+		List<TabSeqProperty> selected, IBasicWebObject parentComponent)
+	{
+		if (properties.size() > 0 && !FormElementHelper.isListFormComponent(properties))
+		{
+			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editor.getForm());
+			FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement(persist, fs, null, true);
+			for (PropertyDescription pd : properties)
+			{
+				Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+				Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+				if (frm == null) continue;
+				FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm, fs);
+				for (FormElement element : cache.getFormComponentElements())
+				{
+					IPersist p = element.getPersistIfAvailable();
+					if (p instanceof IFormElement)
+					{
+						String[] name = ((IFormElement)p).getName().split("\\$");
+						if (name.length > 2 && !name[name.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
+						{
+							StringBuilder keyBuilder = new StringBuilder();
+							for (int i = 1; i < name.length; i++)
+							{
+								if (i > 1) keyBuilder.append(".");
+								keyBuilder.append(name[i]);
+							}
+							WebFormComponentChildType formComponentChild = new WebFormComponentChildType(parentComponent, keyBuilder.toString(), fs);
+
+							if (p instanceof ISupportTabSeq)
+							{
+								if (((ISupportTabSeq)p).getTabSeq() >= 0)
+								{
+									selected.add(new TabSeqProperty(formComponentChild, "tabSeq"));
+								}
+								else
+								{
+									available.add(new TabSeqProperty(formComponentChild, "tabSeq"));
+								}
+							}
+							else if (FormTemplateGenerator.isWebcomponentBean(p))
+							{
+								IBasicWebComponent innerWebComponent = (IBasicWebComponent)p;
+								String innerComponentType = FormTemplateGenerator.getComponentTypeName(innerWebComponent);
+								WebObjectSpecification innerSpecification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+									innerComponentType);
+								if (innerSpecification != null)
+								{
+									Collection<PropertyDescription> innerTabSeqproperties = innerSpecification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
+									if (innerTabSeqproperties != null && innerTabSeqproperties.size() > 0)
+									{
+										for (PropertyDescription tabSeqPD : innerTabSeqproperties)
+										{
+											int tabseq = Utils.getAsInteger(formComponentChild.getProperty(tabSeqPD.getName()));
+											if (tabseq >= 0)
+											{
+												selected.add(new TabSeqProperty(formComponentChild, tabSeqPD.getName()));
+											}
+											else
+											{
+												available.add(new TabSeqProperty(formComponentChild, tabSeqPD.getName()));
+											}
+										}
+									}
+								}
+								Collection<PropertyDescription> nestedProperties = innerSpecification.getProperties(FormComponentPropertyType.INSTANCE);
+								addFormComponentProperties(innerWebComponent, nestedProperties, available, selected, parentComponent);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override

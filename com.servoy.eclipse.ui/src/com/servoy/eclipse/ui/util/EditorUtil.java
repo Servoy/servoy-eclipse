@@ -1061,4 +1061,22 @@ public class EditorUtil
 			return new Integer(0);
 		}
 	}
+
+	/**
+	 * The method returns an array of dirty editors from the project.
+	 * @return an array of IEditorPart
+	 */
+	public static IEditorPart[] getDirtyEditors()
+	{
+		final IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (final IWorkbenchWindow element : windows)
+		{
+			final IWorkbenchPage[] pages = element.getPages();
+			for (final IWorkbenchPage element2 : pages)
+			{
+				return element2.getDirtyEditors();
+			}
+		}
+		return new IEditorPart[0];
+	}
 }

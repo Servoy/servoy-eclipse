@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -135,6 +136,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	protected WebsocketSessionKey editorKey = null;
 	protected WebsocketSessionKey clientKey = null;
 	private AbstractContainer showedContainer;
+	private final Stack<AbstractContainer> zoomed = new Stack<>();
 
 	private final PartListener partListener = new PartListener();
 
@@ -670,6 +672,17 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 		public void partActivated(IWorkbenchPartReference partRef)
 		{
 		}
+	}
+
+	public void zoomIn(LayoutContainer container)
+	{
+		zoomed.push(showedContainer);
+		showContainer(container);
+	}
+
+	public void zoomOut()
+	{
+		showContainer(zoomed.isEmpty() ? null : zoomed.pop());
 	}
 
 }

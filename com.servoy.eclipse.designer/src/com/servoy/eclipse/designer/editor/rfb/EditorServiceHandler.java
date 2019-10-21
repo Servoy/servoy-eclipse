@@ -185,7 +185,7 @@ public class EditorServiceHandler implements IServerService
 				}
 				if (currentPersist instanceof LayoutContainer)
 				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).showContainer((LayoutContainer)currentPersist);
+					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomIn((LayoutContainer)currentPersist);
 				}
 				return null;
 			}
@@ -198,7 +198,7 @@ public class EditorServiceHandler implements IServerService
 			@Override
 			public Object executeMethod(String methodName, JSONObject args)
 			{
-				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).showContainer(null);
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).zoomOut();
 				return null;
 			}
 		});
@@ -398,9 +398,9 @@ public class EditorServiceHandler implements IServerService
 
 				List<AbstractBase> forms = PersistHelper.getOverrideHierarchy(openForm);
 				JSONArray superforms = new JSONArray();
-				for (int i = 0; i < forms.size(); i++)
+				for (AbstractBase form : forms)
 				{
-					superforms.put(((ISupportName)forms.get(i)).getName());
+					superforms.put(((ISupportName)form).getName());
 				}
 				return superforms;
 			}
