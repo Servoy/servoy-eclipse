@@ -1656,8 +1656,8 @@ public class DataModelManager implements IColumnInfoManager
 
 	private static class TableDifferencesHolder
 	{
-		HashMap<String, Integer> differenceTypes = new HashMap<String, Integer>();
-		List<TableDifference> differences = new ArrayList<TableDifference>();
+		private final HashMap<String, Integer> differenceTypes = new HashMap<String, Integer>();
+		private final List<TableDifference> differences = new ArrayList<TableDifference>();
 
 		public synchronized void addDifference(TableDifference d)
 		{
@@ -1719,6 +1719,11 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			Integer result = differenceTypes.get(t.getServerName() + '.' + t.getName());
 			return result == null ? -1 : result.intValue();
+		}
+
+		public synchronized List<TableDifference> getDifferences()
+		{
+			return new ArrayList<TableDifference>(differences);
 		}
 	}
 
@@ -1875,7 +1880,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	private void restoreProblemMarkersFromDifferences()
 	{
-		for (TableDifference difference : differences.differences)
+		for (TableDifference difference : differences.getDifferences())
 		{
 			if (difference.getType() == TableDifference.DESERIALIZE_PROBLEM)
 				addDeserializeErrorMarker(difference.getServerName(), difference.getTableName(), difference.getCustomMessage(), true);
