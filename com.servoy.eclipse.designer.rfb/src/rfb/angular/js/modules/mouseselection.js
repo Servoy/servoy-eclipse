@@ -211,9 +211,16 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 				var el = angular.element(selection[0]);
 				var attrDirectEdit = el.attr('directeditpropertyname');
 				if (typeof attrDirectEdit == typeof undefined || attrDirectEdit == false) {
-					var fr = el.closest('.form_reference');
-					if(fr.length) {
-						editorScope.openContainedForm({"uuid" : fr.attr("svy-id")});
+					if (el.hasClass('maxLevelDesign'))
+					{
+						$editorService.executeAction('zoomIn');
+					}
+					else
+					{
+						var fr = el.closest('.form_reference');
+						if(fr.length) {
+							editorScope.openContainedForm({"uuid" : fr.attr("svy-id")});
+						}
 					}
 				}
 			}

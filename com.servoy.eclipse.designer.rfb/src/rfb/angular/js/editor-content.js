@@ -161,6 +161,7 @@ angular.module('editorContent',['servoyApp'])
   $rootScope.showWireframe = false;
   $rootScope.showSolutionLayoutsCss = true;
   $rootScope.showSolutionCss = true;
+  $rootScope.maxLevel = 3;
   $solutionSettings.enableAnchoring = false;
   $scope.solutionSettings = $solutionSettings;
   var realConsole = $window.console;
@@ -801,6 +802,73 @@ angular.module('editorContent',['servoyApp'])
       }, function(newVal) {
         updateElementClass('svy-solution-layout-class', $rootScope.showSolutionLayoutsCss);
       });
+
+		function removeContainerChildrenClass(element, children)
+		{
+			if (children > 0 && children < 10)
+			{
+				element.removeClass('containerChildren'+children);
+			}
+			if (children >= 10)
+			{
+				element.removeClass('containerChildren10')
+			}
+		}
+		
+		function addContainerChildrenClass(element, children)
+		{
+			if (children > 0 && children < 10)
+			{
+				element.addClass('containerChildren'+children);
+			}
+			if (children >= 10)
+			{
+				element.addClass('containerChildren10')
+			}
+		}
+		
+		scope.$watch(function() {
+			return $rootScope.maxLevel;
+		}, function(newVal, oldVal) {
+			if (!$rootScope.showWireframe) return;
+			var depth = element.parentsUntil('#svyDesignForm').length;
+			var children = element.children().length;
+			if (oldVal && depth == oldVal) {
+				element.removeClass('maxLevelDesign');
+				removeContainerChildrenClass(element, children);
+			}
+		
+			if (depth == $rootScope.maxLevel) {
+				element.addClass('maxLevelDesign');
+				addContainerChildrenClass(element, children);
+			}
+		});
+		
+		scope.$watch(function() {
+        	return $rootScope.showWireframe;
+      	}, function(newVal, oldVal) {
+			if (!$rootScope.showWireframe && element.hasClass('maxLevelDesign')) {
+				element.removeClass('maxLevelDesign');
+				removeContainerChildrenClass(element, element.children().length);
+			}
+			if ($rootScope.showWireframe)
+			{
+				var depth = element.parentsUntil('#svyDesignForm').length;
+				if (depth == $rootScope.maxLevel) {
+					element.addClass('maxLevelDesign');
+					addContainerChildrenClass(element, element.children().length);
+				}
+			}
+      });
+
+		scope.$watch(function() {
+			return element.children().length;
+		}, function(newVal, oldVal) {
+			if (!element.hasClass('maxLevelDesign')) return;
+			removeContainerChildrenClass(element, oldVal);
+			addContainerChildrenClass(element, newVal);
+		});
+
 
       function updateElementClass(fromClass, isAdding, toRemove) {
         var classes;

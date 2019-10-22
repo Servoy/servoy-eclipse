@@ -24,6 +24,14 @@
 		<toolbar-item ng-repeat="item in grouping" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
+	<div class="toolbar zoom" ng-if="zoom.length > 0">
+		<toolbar-item ng-repeat="item in zoom" ng-if="!item.hide" model="item" class="toolbar-action"/>
+	</div>
+	
+	<div class="toolbar zoom_level" ng-if="zoom_level.length > 0" style="border-left-width: 0px;">
+		<toolbar-spinner ng-repeat="item in zoom_level" ng-if="!item.hide" model="item" class="toolbar-action"/>
+	</div>
+	
 	<div class="toolbar form" ng-if="form.length > 0">
 		<toolbar-item ng-repeat="item in form" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>

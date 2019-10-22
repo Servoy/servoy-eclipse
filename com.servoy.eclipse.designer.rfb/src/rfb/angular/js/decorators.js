@@ -119,7 +119,13 @@ angular.module("decorators",['editor','margin','resizeknobs','menubar']).directi
 						{
 							currentNode.svytitle = node.attr('svy-title');
 							currentNode.cls = "showWireframe";
-							currentNode.style['--svyBackgroundColor'] = node.css('backgroundColor');							
+							currentNode.style['--svyBackgroundColor'] = node.css('backgroundColor');	
+							if (node.hasClass('maxLevelDesign'))
+							{	
+								//fix for IE container background, the one above is still needed for the ::before pseudoelement
+								currentNode.style['backgroundColor'] = node.css('backgroundColor');		
+								currentNode.cls +=" maxLevelDesign";
+							}			
 						}
 					}); // end of foreach
 

@@ -352,7 +352,6 @@ html, body
 	pointer-events: auto;
 	cursor: pointer;
 	display:inline;
-	float:right;
 	overflow:hidden;
 	white-space:nowrap;
 	z-index: 10000;
@@ -368,4 +367,11 @@ html, body
 
 .menubar .containerAction {
 	display: inline-block;
+}
+
+.showWireframe.maxLevelDesign {
+	background-repeat: no-repeat;
+	background-position: center;
+	background-color: var(--svyBackgroundColor);
+	background-image: url("../images/zoom_in.png");
 }

@@ -152,3 +152,36 @@
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 1px; 
 }
+
+.toolbarspinner::-webkit-inner-spin-button, 
+.toolbarspinner::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+.toolbarspinner {
+	-moz-appearance: textfield;
+  	margin: 0; 
+  	text-align: center;
+  	width: 48px;
+  	height: 24px;
+}
+
+.toolbar-action button.toolbarspinner-button {
+	color: #000000;
+	background-color: transparent;
+	border-color: #606060;
+	vertical-align: bottom;
+	z-index: 1;
+	height: 24px;
+}
+
+.toolbarspinner-button-left {
+	border-radius: 5px 0 0 5px;
+	margin-right: -5px;
+}
+
+.toolbarspinner-button-right {
+	border-radius: 0 5px 5px 0;
+	margin-left: -5px;
+}
