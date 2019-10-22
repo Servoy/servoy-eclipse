@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -172,7 +173,8 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	private Map getRebrandingData(String filePath) throws Exception
 	{
 		String line;
-		File rebrandingFile = new File(filePath);
+		String inputPath = Paths.get(filePath).normalize().toString();
+		File rebrandingFile = new File(inputPath);
 		if (!rebrandingFile.exists())
 		{
 			throw new Exception("File does not exists:" + filePath);
@@ -188,6 +190,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			String value = parts[1];
 			result.put(key, value);
 		}
+		reader.close();
 		return result;
 	}
 
@@ -200,6 +203,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		final String appUrl = exportPage.getApplicationURL();
 
 		final StringBuilder errorMsg = new StringBuilder();
+
 
 		boolean downloadInstallers = false;
 
@@ -238,8 +242,8 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 
 		//need final variables to be used in below interface implementation
-		final String iconPath = rebrIconPath != null ? rebrIconPath : null;
-		final String imagePath = rebrImagePath != null ? rebrImagePath : null;
+		final String iconPath = rebrIconPath != null ? Paths.get(rebrIconPath).normalize().toString() : null;
+		final String imagePath = rebrImagePath != null ? Paths.get(rebrImagePath).normalize().toString() : null;
 		final String copyrightInfo = rebrCopyrightStr != null ? rebrCopyrightStr : null;
 		final boolean downloadNgDesktopInstaller = downloadInstallers;
 		final InetAddress ngDesktopService = serviceAddress;
@@ -259,7 +263,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						try
 						{
 							NgDesktopClientConnection serviceConn = new NgDesktopClientConnection(NGDESKTOP_SERVICE_PROTOCOL, ngDesktopService, ngDesktopPort);
-
 							String tokenId = serviceConn.startBuild(platform, iconPath, imagePath, copyrightInfo, appUrl);
 							int status = serviceConn.getStatus(tokenId);
 							while (NgDesktopClientConnection.READY != status)
