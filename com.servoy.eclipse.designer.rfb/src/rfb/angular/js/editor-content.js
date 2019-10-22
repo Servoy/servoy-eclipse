@@ -108,6 +108,7 @@ angular.module('editorContent',['servoyApp'])
 			$rootScope.$watch('showWireframe', adjustFormSize);
 			$rootScope.$watch('showSolutionLayoutsCss', adjustFormSize);
 			$rootScope.$watch('showSolutionCss', adjustFormSize);
+			$rootScope.$watch('maxLevel', adjustFormSize);
 			
 			$scope.$on('UPDATE_FORM_DATA', function() {	
 				adjustFormSize();
