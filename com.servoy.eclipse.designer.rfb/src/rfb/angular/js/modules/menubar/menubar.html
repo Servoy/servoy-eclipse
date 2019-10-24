@@ -1,4 +1,14 @@
 <div class="menubar" ng-mousedown="onmousedown($event)" ng-if="selection.length == 1 && node.node.width() > 0 && node.node.height() > 0">
-	<span class="containerAction" ng-repeat="action in menu.actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></span>
-	<span class="containerAction"ng-if="!node.node.hasClass('inheritedElement')" ng-repeat="action in deleteMenu.actions" ng-style="action.style" ng-mousedown="action.execute($event)" ng-bind="action.label"></span>
+	<span class="containerAction" ng-if="!node.node.hasClass('maxLevelDesign')" ng-repeat="action in menu.actions" ng-style="action.style" ng-mousedown="action.execute($event)"></span>
+	<span class="containerAction" ng-if="!node.node.hasClass('maxLevelDesign') && !node.node.hasClass('inheritedElement')" ng-repeat="action in deleteMenu.actions" ng-style="action.style" ng-mousedown="action.execute($event)"></span>
+		
+	<div class="dropdownMenu moreMenuItem" ng-if="node.node.hasClass('maxLevelDesign')" ng-show="adjustMoreButtonPosition($event)">
+		<ul id="dropdownMenu" style="list-style-type:none;padding-left:5px;" role="menu" aria-labelledby="dropdownMenu">
+		<li ng-repeat="action in dropdownMenu.actions">
+      		<a tabindex="-1" href="#" ng-click="action.execute($event)" class="containerAction" style="padding-left:5px;height:24px;background-repeat:no-repeat;background-position:left center;" ng-style="action.style">
+      			<span style="margin-left:20px;text-decoration: none;">{{action.label}}</span>
+      		</a>
+      	</li>
+     	</ul>
+    </div>
 </div>

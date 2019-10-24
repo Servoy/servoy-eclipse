@@ -8,6 +8,7 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 		var execute = null;
 
 		function getHighlightNode(event) {
+			if (document.getElementById('dropdownMenu') !== null && window.getComputedStyle($(document.getElementById('dropdownMenu'))[0]).display !== 'none') return; //do not highlight when the menu is shown
 			if (utils.getDraggingFromPallete() != null && editorScope.getEditorContentRootScope().drop_highlight) {
 				var canDrop = utils.getDropNode(utils.getDraggingFromPallete(), null, editorScope.getEditorContentRootScope().drop_highlight, event);
 				if (canDrop && canDrop.dropAllowed && canDrop.dropTarget)
