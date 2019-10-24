@@ -1350,9 +1350,9 @@
     </contexts>
  </extension>
  <extension
-       point="org.eclipse.dltk.javascript.ui.jsExtendsForm">
+       point="org.eclipse.dltk.javascript.ui.extendsScope">
     <jsExtendsForm
-          class="com.servoy.eclipse.ui.editors.JSExtendsForm">
+          class="com.servoy.eclipse.ui.editors.JSExtendsScope">
     </jsExtendsForm>
  </extension>
 </plugin>

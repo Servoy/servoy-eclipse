@@ -17,7 +17,7 @@
 
 package com.servoy.eclipse.ui.editors;
 
-import org.eclipse.dltk.javascript.ui.IJsExtendsForm;
+import org.eclipse.dltk.javascript.ui.IJsExtendsScope;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -27,19 +27,19 @@ import com.servoy.j2db.persistence.Form;
  * @author vidmarian
  *
  */
-public class JSExtendsForm implements IJsExtendsForm
+public class JSExtendsScope implements IJsExtendsScope
 {
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see org.eclipse.dltk.javascript.scriptdoc.IJsExtendedForm#getInteritedJsDoc(org.eclipse.dltk.core.IMethod)
+	 * @see org.eclipse.dltk.javascript.scriptdoc.IJsExtendsScope#getInteritedJsDoc(org.eclipse.dltk.core.IMethod)
 	 */
 	@Override
-	public String getExtendsForm(String formName)
+	public String getExtendsScope(String scopeName)
 	{
 
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		Form myForm = servoyProject.getEditingFlattenedSolution().getForm(formName);
+		Form myForm = servoyProject.getEditingFlattenedSolution().getForm(scopeName);
 		Form extendsForm = myForm.getExtendsForm();
 		if (extendsForm != null)
 		{
