@@ -72,7 +72,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 {
 
 	static final String NGDESKTOP_MAJOR_VERSION = "2019";
-	static final String NGDESKTOP_MINOR_VERSION = "09";
+	static final String NGDESKTOP_MINOR_VERSION = "12";
 
 	static final int BUFFER_SIZE = 16 * 1024;
 	static final String MAC_EXTENSION = ".app";
