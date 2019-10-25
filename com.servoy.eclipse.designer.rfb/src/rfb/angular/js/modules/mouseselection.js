@@ -289,8 +289,9 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						dropTarget = this.getNode(event, true, skipNodeId);
 						if (!dropTarget) {
 							var formRect = $(".contentframe").get(0).getBoundingClientRect();
+							//it can be hard to drop on bottom, so just allow it to the end
 							var isForm = event.clientX > formRect.left && event.clientX < formRect.right &&
-							event.clientY > formRect.top && event.clientY < formRect.bottom;
+							event.clientY > formRect.top;
 							// this is on the form, can this layout container be dropped on the form?
 							if (!isForm || !topContainer) {
 								return {
