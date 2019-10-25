@@ -329,7 +329,7 @@ angular.module('editorContent',['servoyApp'])
 	  		  return arguments[1].indexOf(drop[1]) >= 0 && arguments[0] == drop[0];
 	  	  }	  
 	  	  var allowedChildren = $rootScope.allowedChildren[arguments[0]];
-	  	  if (allowedChildren.indexOf(drop[1]) >= 0) return true; //component
+	  	  if (allowedChildren && allowedChildren.indexOf(drop[1]) >= 0) return true; //component
 	      for (arg in allowedChildren){
 			var a = allowedChildren[arg].split(".");
 			if(a[0] == drop[0] && ((a[1] == "*") || (a[1] == drop[1]))) return true;
