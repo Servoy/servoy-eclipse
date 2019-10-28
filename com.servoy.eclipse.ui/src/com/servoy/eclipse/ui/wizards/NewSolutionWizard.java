@@ -151,7 +151,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						// create a new resource project
 						String resourceProjectName = configPage.getResourceProjectData().getNewResourceProjectName();
 						resourceProject = ServoyModel.getWorkspace().getRoot().getProject(resourceProjectName);
-						resourceProject.create(null);
+						String location = configPage.getProjectLocation();
+						IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(resourceProjectName);
+						if (location != null)
+						{
+							IPath path = new Path(location);
+							path = path.append(resourceProjectName);
+							description.setLocation(path);
+						}
+						resourceProject.create(description, null);
 						resourceProject.open(null);
 
 						// write repositoy UUID into the resource project

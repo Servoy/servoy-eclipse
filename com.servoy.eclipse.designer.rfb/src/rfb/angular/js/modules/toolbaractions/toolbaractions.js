@@ -70,6 +70,15 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 			editorScope.getEditorContentRootScope().$digest();
 			editorScope.$evalAsync( function() { $editorService.setContentSizes(); });
 		});
+		var zoomLevelPromise = $editorService.getZoomLevel();
+		zoomLevelPromise.then(function(result) {
+			if (result)
+			{
+				btnSetMaxLevelContainer.initialValue = result;
+				editorScope.getEditorContentRootScope().maxLevel = result;
+				editorScope.getEditorContentRootScope().$apply();
+			}
+		});
 	});
 	var btnPlaceField = {
 		text: "Place Field Wizard",
@@ -289,6 +298,26 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 				$editorService.executeAction('zoomOut');
 			},
 		};
+		
+	var btnSetMaxLevelContainer = {
+		max: 10,
+		min: 3,
+		decbutton_text: "Decrease zoom level",
+		decIcon: "../../images/zoom_out_xs.png",
+		incbutton_text: "Increase zoom level",
+		incIcon: "../../images/zoom_in_xs.png",
+		text: "Adjust zoom level",
+		enabled: function(){
+			return editorScope.getEditorContentRootScope().showWireframe;
+		},
+		state: false,
+		onSet: function(value) {
+			editorScope.getEditorContentRootScope().maxLevel = value;
+			editorScope.getEditorContentRootScope().$apply();
+			$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
+			$editorService.setZoomLevel(value);
+		},
+	}
 	
 	var btnSaveAsTemplate = {
 		text: "Save as template...",
@@ -299,9 +328,10 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 		},
 	};
 
+	$toolbar.add(btnZoomIn, TOOLBAR_CATEGORIES.ZOOM);
+	$toolbar.add(btnZoomOut, TOOLBAR_CATEGORIES.ZOOM);
+	$toolbar.add(btnSetMaxLevelContainer, TOOLBAR_CATEGORIES.ZOOM_LEVEL);
 	$toolbar.add(btnTabSequence, TOOLBAR_CATEGORIES.FORM);
-	$toolbar.add(btnZoomIn, TOOLBAR_CATEGORIES.FORM);
-	$toolbar.add(btnZoomOut, TOOLBAR_CATEGORIES.FORM);
 	$toolbar.add(btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
 	var btnHideInheritedElements = {

@@ -1669,7 +1669,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 		setFormFixedSize: function(args) {
 			return wsSession.callService('formeditor', 'setFormFixedSize', args);
-		}
+		},
+		
+		getZoomLevel: function() {
+			return wsSession.callService('formeditor', 'getZoomLevel', {}, false)
+		},
+		
+		setZoomLevel: function(value) {
+			return wsSession.callService('formeditor', 'setZoomLevel', {
+				"zoomLevel": value
+			}, false)
+		}		
 
 		// add more service methods here
 	}

@@ -59,6 +59,7 @@ import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -71,8 +72,9 @@ import com.servoy.j2db.util.Utils;
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
 
-	static final String NGDESKTOP_MAJOR_VERSION = "2019";
-	static final String NGDESKTOP_MINOR_VERSION = "09";
+	static final String NGDESKTOP_MAJOR_VERSION = Integer.toString(ClientVersion.getMajorVersion());
+	static final String NGDESKTOP_MINOR_VERSION = ClientVersion.getMiddleVersion() < 10 ? "0" + Integer.toString(ClientVersion.getMiddleVersion())
+		: Integer.toString(ClientVersion.getMiddleVersion());
 
 	static final int BUFFER_SIZE = 16 * 1024;
 	static final String MAC_EXTENSION = ".app";

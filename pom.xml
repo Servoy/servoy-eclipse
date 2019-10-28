@@ -11,12 +11,12 @@
 	<version>8.5.0.3600_b1</version>
 
 	<properties>
-		<tycho.version>1.5.0</tycho.version>
-		<tycho.extra.version>1.5.0</tycho.extra.version>
+		<tycho.version>1.5.1</tycho.version>
+		<tycho.extra.version>1.5.1</tycho.extra.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.13/</eclipse.url>
+		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.12/</eclipse.url>
 		<git.url>http://download.eclipse.org/egit/updates</git.url>
 		<orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository</orbit.url>
 		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.12/</dltk.url>

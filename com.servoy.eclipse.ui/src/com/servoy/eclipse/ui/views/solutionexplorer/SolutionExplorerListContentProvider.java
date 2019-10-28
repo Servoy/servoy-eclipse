@@ -158,7 +158,6 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
@@ -1151,8 +1150,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						if (metadataTables == null) metadataTables = new ArrayList<String>();
 						metadataTables.add(tableName);
 					}
-					else if (type.equals(UserNodeType.TABLE) && isTableInvalidInDeveloperBecauseNoPk((Table)tabel) &&
-						!server.isTableMarkedAsHiddenInDeveloper(tableName))
+					else if (isTableInvalidInDeveloperBecauseNoPk(tabel) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (invalidBecauseNoPK == null) invalidBecauseNoPK = new ArrayList<String>();
 						invalidBecauseNoPK.add(tableName);
@@ -1231,7 +1229,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 * @param tabel
 	 * @return
 	 */
-	private static boolean isTableInvalidInDeveloperBecauseNoPk(final Table tabel)
+	private static boolean isTableInvalidInDeveloperBecauseNoPk(final ITable tabel)
 	{
 		if (tabel != null)
 		{

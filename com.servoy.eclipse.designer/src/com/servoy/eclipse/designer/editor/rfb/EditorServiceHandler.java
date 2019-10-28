@@ -448,6 +448,41 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("getZoomLevel", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				if (args != null)
+				{
+					IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+					if (preferenceStore.contains(editorPart.getForm().getUUID() + "_zoomLevel"))
+					{
+						return new Integer(preferenceStore.getInt(editorPart.getForm().getUUID() + "_zoomLevel"));
+					}
+				}
+				return new Integer(3);
+			}
+
+		});
+
+		configuredHandlers.put("setZoomLevel", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				if (args != null)
+				{
+					IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+					if (args.has("zoomLevel"))
+					{
+						preferenceStore.setValue(editorPart.getForm().getUUID() + "_zoomLevel", args.getInt("zoomLevel"));
+					}
+				}
+				return null;
+			}
+
+		});
 	}
 
 	@Override

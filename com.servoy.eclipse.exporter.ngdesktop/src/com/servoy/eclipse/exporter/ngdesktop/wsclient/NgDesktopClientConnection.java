@@ -40,7 +40,6 @@ public class NgDesktopClientConnection
 	private static String STATUS_ENDPOINT = "/ngdesktopws/status/";
 	private static String DOWNLOAD_ENDPOINT = "/ngdesktopws/download/";
 	private static String BINARY_NAME_ENDPOINT = "/ngdesktopws/binary/";
-	private static String DELETE_ENDPOINT = "/ngdesktopws/delete/";
 
 	//START sync - this block need to be identical with the similar error codes from the NgDesktopMonitor in ngdesktop-service project
 	public final static int REQUESTS_FULL = 2;
@@ -112,11 +111,10 @@ public class NgDesktopClientConnection
 			HttpResponse httpResponse = httpClient.execute(postRequest);
 
 			//verify status code
-			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-				throw new IOException("Http error: " + httpResponse.getStatusLine().getStatusCode() + ": " +
-					httpResponse.getStatusLine().getReasonPhrase());
+			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+			{
+				throw new IOException("Http error: " + httpResponse.getStatusLine().getStatusCode() + ": " + httpResponse.getStatusLine().getReasonPhrase());
 			}
-			
 			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
 
 			String output;
@@ -125,10 +123,10 @@ public class NgDesktopClientConnection
 				sb.append(output);
 
 			jsonObj = new JSONObject(sb.toString());
-			if (jsonObj.getInt("statusCode") != WAITING) { //this is the first status set on the service on a normal processing
+			if (jsonObj.getInt("statusCode") != WAITING)
+			{ //this is the first status set on the service on a normal processing
 				throw new IOException(jsonObj.getString("statusMessage"));
 			}
-			//TODO: if tokenid = RESOURCE_BUSY - throw new IOException(stack service is full. Try again later)
 			return (String)jsonObj.get("tokenId");
 		}
 		catch (UnsupportedEncodingException | ClientProtocolException e)
@@ -163,7 +161,7 @@ public class NgDesktopClientConnection
 		statusMessage = (String)jsonObj.get("statusMessage");
 		return statusCode;
 	}
-	
+
 	public String getStatusMessage() {
 		return statusMessage;
 	}

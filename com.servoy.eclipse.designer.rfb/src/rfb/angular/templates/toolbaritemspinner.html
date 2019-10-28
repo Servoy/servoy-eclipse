@@ -1,0 +1,9 @@
+<div>
+	<button class="btn btn-xs toolbarspinner-button toolbarspinner-button-left" ng-click="dec()" ng-disabled="!model.enabled() || value <= model.min" title="{{model.decbutton_text}}">
+		<img src="js/modules/{{model.decIcon}}"/>
+	</button>
+	<input class="toolbarspinner" type="number" ng-model="value" min="{{model.min}}" max="{{model.max}}" title="{{model.text}}" ng-blur="checkInput()" ng-disabled="!model.enabled()">
+	<button class="btn btn-xs toolbarspinner-button toolbarspinner-button-right" ng-click="inc()" ng-disabled="!model.enabled() || value >= model.max" title="{{model.incbutton_text}}">
+		<img src="js/modules/{{model.incIcon}}"/>
+	</button>
+</div>

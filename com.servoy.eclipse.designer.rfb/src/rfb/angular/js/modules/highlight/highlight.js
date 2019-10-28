@@ -8,6 +8,7 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 		var execute = null;
 
 		function getHighlightNode(event) {
+			if (document.getElementById('dropdownMenu') !== null && window.getComputedStyle($(document.getElementById('dropdownMenu'))[0]).display !== 'none') return; //do not highlight when the menu is shown
 			if (utils.getDraggingFromPallete() != null && editorScope.getEditorContentRootScope().drop_highlight) {
 				var canDrop = utils.getDropNode(utils.getDraggingFromPallete(), null, editorScope.getEditorContentRootScope().drop_highlight, event);
 				if (canDrop && canDrop.dropAllowed && canDrop.dropTarget)
@@ -57,15 +58,23 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 								highlightDiv.style.outline = "1px solid #FFBBBB";
 						}
 					}
+					highlightDiv.classList.remove("showWireframe");
+					if (highlightDiv.classList.contains('maxLevelDesign'))
+					{
+						highlightDiv.classList.remove("maxLevelDesign");
+						highlightDiv.style.removeProperty('background-color', $(node).css('backgroundColor'));
+					}
 					if (!editorScope.isAbsoluteFormLayout() && node.getAttribute('svy-layoutname') && node.getAttribute('svy-title') !== undefined && $editorService.getEditor().getEditorContentRootScope().showWireframe && !node.getAttribute('data-maincontainer') && node.clientWidth > 0 && node.clientHeight > 0)
 					{
 						highlightDiv.setAttribute('svytitle', node.getAttribute('svy-title'));
 						highlightDiv.classList.add("showWireframe");	
-						highlightDiv.style.setProperty('--svyBackgroundColor', $(node).css('backgroundColor'));					
-					}
-					else
-					{
-						highlightDiv.classList.remove("showWireframe");
+						highlightDiv.style.setProperty('--svyBackgroundColor', $(node).css('backgroundColor'));
+						if(node.classList.contains('maxLevelDesign'))
+						{
+							highlightDiv.classList.add("maxLevelDesign");
+							//fix for IE container background image, the one above is still needed for the ::before pseudoelement
+							highlightDiv.style.setProperty('background-color', $(node).css('backgroundColor'));
+						}			
 					}
 
 					if (!editorScope.isAbsoluteFormLayout()) {
