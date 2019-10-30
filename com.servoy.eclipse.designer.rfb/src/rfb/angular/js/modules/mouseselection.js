@@ -1,5 +1,5 @@
 angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginRegistry, $selectionUtils,
-	EDITOR_CONSTANTS, $editorService) {
+	EDITOR_CONSTANTS, $editorService, EDITOR_EVENTS) {
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var selectedNodeMouseEvent;
 		var lassoStarted = false;
@@ -214,6 +214,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					if (el.hasClass('maxLevelDesign'))
 					{
 						$editorService.executeAction('zoomIn');
+						$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, editorScope.getSelection());
 					}
 					else
 					{
