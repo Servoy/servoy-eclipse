@@ -54,7 +54,6 @@ angular.module("menubar",[]).directive("menubar", function($editorService, $root
 		function zoomIn(e) {
 			 e.stopPropagation();
 			$editorService.executeAction('zoomIn');
-			$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, $editorService.getEditor().getSelection());
 		}
 
 			$scope.menu={};
