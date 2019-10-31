@@ -125,6 +125,7 @@ import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
+import com.servoy.j2db.documentation.scripting.docs.RuntimeContainer;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
@@ -721,6 +722,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			// Bean b = (Bean)un.getRealObject();
 			// lm = createBean(b);
 			// }
+			else if (type == UserNodeType.FORM_CONTAINERS_ITEM)
+			{
+				lm = TreeBuilder.docToNodes(RuntimeContainer.class, this, UserNodeType.ARRAY, "containers." + un.getName() + ".", null);
+			}
 			else if (type == UserNodeType.CALC_RELATION)
 			{
 				Relation r = (Relation)un.getRealObject();

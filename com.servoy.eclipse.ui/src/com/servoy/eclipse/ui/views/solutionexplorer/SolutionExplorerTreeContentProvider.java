@@ -2534,6 +2534,16 @@ public class SolutionExplorerTreeContentProvider
 		node.add(elementsNode);
 		addFormElementsChildren(elementsNode);
 
+		if (f.isResponsiveLayout())
+		{
+			PlatformSimpleUserNode containersNode = new PlatformSimpleUserNode(Messages.TreeStrings_containers, UserNodeType.FORM_CONTAINERS, f,
+				uiActivator.loadImageFromBundle("layoutcontainer.png"));
+			containersNode.parent = formNode;
+			node.add(containersNode);
+			addFormContainersChildren(containersNode);
+		}
+
+
 		if (f.getDataSource() != null)
 		{
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
@@ -2595,6 +2605,23 @@ public class SolutionExplorerTreeContentProvider
 			ServoyLog.logError(e);
 		}
 
+	}
+
+	private void addFormContainersChildren(PlatformSimpleUserNode elementsNode)
+	{
+		Form form = (Form)elementsNode.getRealObject();
+		Set<String> allLayoutNames = ContainersScope.getAllLayoutNames(
+			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getFlattenedForm(form));
+		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
+		for (String name : allLayoutNames)
+		{
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(name, UserNodeType.FORM_CONTAINERS_ITEM, null, null,
+				uiActivator.loadImageFromBundle("layoutcontainer.png"));
+			node.setDeveloperFeedback(new SimpleDeveloperFeedback(name + ".", null, null));
+			elements.add(node);
+			node.parent = elementsNode;
+		}
+		elementsNode.children = elements.toArray(new PlatformSimpleUserNode[elements.size()]);
 	}
 
 	private void addFormElementsChildren(PlatformSimpleUserNode elementsNode)
