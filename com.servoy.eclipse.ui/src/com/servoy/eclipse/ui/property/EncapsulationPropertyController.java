@@ -66,7 +66,7 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 	{
 		private static final int ALL = PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE + PersistEncapsulation.MODULE_SCOPE +
 			PersistEncapsulation.HIDE_CONTROLLER + PersistEncapsulation.HIDE_DATAPROVIDERS + PersistEncapsulation.HIDE_ELEMENTS +
-			PersistEncapsulation.HIDE_FOUNDSET;
+			PersistEncapsulation.HIDE_FOUNDSET + PersistEncapsulation.HIDE_ELEMENTS;
 
 		private static final String HIDE_IN_SCRIPTING_MODULE_SCOPE = "hide in scripting; module scope";
 		private static final String MODULE_SCOPE = "module scope";
@@ -74,6 +74,7 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		private static final String HIDE_FOUNDSET = "hide foundset";
 		private static final String HIDE_CONTROLLER = "hide controller";
 		private static final String HIDE_ELEMENTS = "hide elements";
+		private static final String HIDE_CONTAINERS = "hide containers";
 
 		public EncapsulationPropertySource(ComplexProperty<Integer> complexProperty)
 		{
@@ -101,7 +102,9 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 				new CheckboxPropertyDescriptor(HIDE_CONTROLLER,
 					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_CONTROLLER))), //
 				new CheckboxPropertyDescriptor(HIDE_ELEMENTS,
-					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_ELEMENTS))) //
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_ELEMENTS))), //
+				new CheckboxPropertyDescriptor(HIDE_CONTAINERS,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_CONTAINERS))) //
 			});
 		}
 
@@ -118,6 +121,7 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			if (HIDE_FOUNDSET.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_FOUNDSET) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			if (HIDE_CONTROLLER.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_CONTROLLER) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			if (HIDE_ELEMENTS.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_ELEMENTS) == 0 ? Boolean.FALSE : Boolean.TRUE;
+			if (HIDE_CONTAINERS.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_CONTAINERS) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			return null;
 		}
 
@@ -136,6 +140,7 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			else if (HIDE_FOUNDSET.equals(id)) flag = PersistEncapsulation.HIDE_FOUNDSET;
 			else if (HIDE_CONTROLLER.equals(id)) flag = PersistEncapsulation.HIDE_CONTROLLER;
 			else if (HIDE_ELEMENTS.equals(id)) flag = PersistEncapsulation.HIDE_ELEMENTS;
+			else if (HIDE_CONTAINERS.equals(id)) flag = PersistEncapsulation.HIDE_CONTAINERS;
 			else return null;
 
 			if (Boolean.TRUE.equals(v))
@@ -195,6 +200,11 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			{
 				if (retval.length() != 0) retval.append(',');
 				retval.append(Messages.HideElements);
+			}
+			if ((encapsulation & PersistEncapsulation.HIDE_CONTAINERS) == PersistEncapsulation.HIDE_CONTAINERS)
+			{
+				if (retval.length() != 0) retval.append(',');
+				retval.append(Messages.HideContainers);
 			}
 			return retval.toString();
 		}

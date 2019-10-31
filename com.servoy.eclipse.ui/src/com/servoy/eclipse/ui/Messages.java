@@ -98,6 +98,7 @@ public class Messages extends NLS
 	public static String HideFoundset;
 	public static String HideController;
 	public static String HideElements;
+	public static String HideContainers;
 
 	public static String JustifyLeading;
 	public static String JustifyTrailing;
