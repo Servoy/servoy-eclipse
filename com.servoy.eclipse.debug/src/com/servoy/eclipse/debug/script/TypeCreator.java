@@ -159,6 +159,7 @@ import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
 import com.servoy.j2db.documentation.scripting.docs.Globals;
+import com.servoy.j2db.documentation.scripting.docs.RuntimeContainer;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
@@ -248,6 +249,7 @@ import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
 import com.servoy.j2db.server.ngclient.scripting.ConsoleObject;
+import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.ServoyApiObject;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
@@ -311,6 +313,7 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("properties.png");
 	protected final static ImageDescriptor CONSTANT = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("constant.png");
 	protected final static ImageDescriptor ELEMENTS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("elements.png");
+	protected final static ImageDescriptor CONTAINERS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("layoutcontainer.png");
 	protected final static ImageDescriptor SPECIAL_PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("special_properties.png");
 
 	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_public.png");
@@ -432,6 +435,8 @@ public class TypeCreator extends TypeCache
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("RuntimeForm", new FormScopeCreator());
+		addScopeType("RuntimeContainers", new RuntimeContainersScopeCreator());
+		addType("RuntimeContainer", RuntimeContainer.class);
 		addScopeType("Elements", new ElementsScopeCreator());
 		addScopeType("Plugins", new PluginsScopeCreator());
 		addScopeType("Forms", new FormsScopeCreator());
@@ -3214,9 +3219,24 @@ public class TypeCreator extends TypeCache
 			overwrittenMembers.add(clone);
 			clone.setVisible(!PersistEncapsulation.hideElements(formToUse));
 
+			clone = TypeCreator.clone(getMember("containers", baseType), getTypeRef(context, "RuntimeContainers<" + config + '>'));
+			overwrittenMembers.add(clone);
+			if (form.isResponsiveLayout())
+			{
+				clone.setVisible(!PersistEncapsulation.hideContainers(formToUse));
+			}
+			else
+			{
+				clone.setVisible(false);
+			}
+
 			Type type = getCombinedTypeWithRelationsAndDataproviders(fs, context, typeName, ds, overwrittenMembers, superForm,
 				getImageDescriptorForFormEncapsulation(form.getEncapsulation()), !PersistEncapsulation.hideDataproviders(formToUse));
-			if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
+			if (type != null)
+			{
+				type.setAttribute(LAZY_VALUECOLLECTION, form);
+
+			}
 
 			return type;
 		}
@@ -3230,6 +3250,45 @@ public class TypeCreator extends TypeCache
 		public void flush()
 		{
 		}
+	}
+
+	private class RuntimeContainersScopeCreator implements IScopeTypeCreator
+	{
+
+		@Override
+		public Type createType(String context, String typeName)
+		{
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			if (fs == null) return null;
+			String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+			Form form = fs.getForm(config);
+			if (form == null || !form.isResponsiveLayout()) return null;
+
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, CONTAINERS);
+			EList<Member> members = type.getMembers();
+
+			for (String name : ContainersScope.getAllLayoutNames(fs.getFlattenedForm(form)))
+			{
+				members.add(createProperty(name, true, getTypeRef(context, "RuntimeContainer"), "runtime container", CONTAINERS));
+			}
+			return type;
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng;
+		}
+
+		@Override
+		public void flush()
+		{
+			// TODO Auto-generated method stub
+		}
+
 	}
 
 	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new ConcurrentHashMap<String, Class< ? >>();
