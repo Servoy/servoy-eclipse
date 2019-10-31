@@ -1629,7 +1629,16 @@ public class TypeCreator extends TypeCache
 									{
 										Class< ? > componentType = paramClass.getComponentType();
 										String jsTypeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(componentType);
-										parameter.setType(TypeUtil.arrayOf(getTypeRef(context, jsTypeName)));
+										if (memberbox[i].method().isVarArgs() && (parameters.size() + 1) == parameterTypes.length)
+										{
+											parameter.setType(getTypeRef(context, jsTypeName));
+											parameter.setKind(ParameterKind.VARARGS);
+										}
+										else
+										{
+											parameter.setType(TypeUtil.arrayOf(getTypeRef(context, jsTypeName)));
+											parameter.setKind(ParameterKind.NORMAL);
+										}
 										int index = jsTypeName.lastIndexOf('.');
 										parameter.setName(index == -1 ? jsTypeName : jsTypeName.substring(index + 1));
 									}
@@ -1639,8 +1648,8 @@ public class TypeCreator extends TypeCache
 										parameter.setType(getTypeRef(context, jsTypeName));
 										int index = jsTypeName.lastIndexOf('.');
 										parameter.setName(index == -1 ? jsTypeName : jsTypeName.substring(index + 1));
+										parameter.setKind(ParameterKind.NORMAL);
 									}
-									parameter.setKind(ParameterKind.NORMAL);
 									parameters.add(parameter);
 								}
 							}
