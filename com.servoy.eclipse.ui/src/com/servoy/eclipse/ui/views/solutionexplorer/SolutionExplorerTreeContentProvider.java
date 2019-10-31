@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
@@ -123,10 +124,12 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -149,6 +152,7 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
@@ -2977,28 +2981,31 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
-	public void refreshContent(Set<IPersist> persists)
+	public void refreshContent(Map<IPersist, Set<Class< ? extends IPersist>>> persists)
 	{
 		// optimize a bit so we don't refresh the same thing multiple times
-		Iterator<IPersist> it = persists.iterator();
+		Iterator<Entry<IPersist, Set<Class< ? extends IPersist>>>> it = persists.entrySet().iterator();
 		List<String> solutionsRefreshedForRelations = new ArrayList<String>();
 		while (it.hasNext())
 		{
-			IPersist persist = it.next();
+			Entry<IPersist, Set<Class< ? extends IPersist>>> entry = it.next();
+			IPersist persist = entry.getKey();
 			IRootObject root = persist.getRootObject();
 			boolean refreshedFormsNode = false;
 
-			if (persist instanceof IFormElement)
+			if (persist instanceof IFormElement || persist instanceof LayoutContainer)
 			{
 				// don't refresh if we also refresh the solution
-				if (persists.contains(root)) continue;
+				if (persists.containsKey(root)) continue;
 
-				IPersist parent = persist.getParent();
+				IPersist parent = persist.getAncestor(IRepository.FORMS);
 				if (parent instanceof Form)
 				{
 					// if the element's form was extended by other forms, the elements of those forms must be refreshed as well...
 					FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
-					refreshElementsForForm(flatSolution, (Form)parent, new HashSet<Form>());
+					HashSet<Class< ? extends IPersist>> set = new HashSet<>();
+					set.add(persist.getClass());
+					refreshElementsForForm(flatSolution, (Form)parent, new HashSet<Form>(), set);
 				}
 			}
 			else
@@ -3079,7 +3086,7 @@ public class SolutionExplorerTreeContentProvider
 						else if (persist instanceof Form)
 						{
 							// don't refresh if we also refresh the solution
-							if (persists.contains(s)) continue;
+							if (persists.containsKey(s)) continue;
 							boolean formAsComponent = ((Form)persist).isFormComponent().booleanValue();
 
 							if (formAsComponent) node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_FormComponents);
@@ -3103,7 +3110,17 @@ public class SolutionExplorerTreeContentProvider
 								else
 								{
 									node = formNode;
-									node.children = null;
+									if (entry.getValue() == null)
+									{
+										node.children = null;
+									}
+									else
+									{
+										// for now this is just layoutcontainers or formelements
+										// if the element's form was extended by other forms, the elements of those forms must be refreshed as well...
+										FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+										refreshElementsForForm(flatSolution, (Form)persist, new HashSet<Form>(), entry.getValue());
+									}
 								}
 								if (node != null)
 								{
@@ -3165,7 +3182,7 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
-	private void refreshElementsForForm(FlattenedSolution flatSolution, Form form, HashSet<Form> alreadyVisitedForms)
+	private void refreshElementsForForm(FlattenedSolution flatSolution, Form form, HashSet<Form> alreadyVisitedForms, Set<Class< ? extends IPersist>> set)
 	{
 		alreadyVisitedForms.add(form);
 		// see children of form
@@ -3175,7 +3192,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				if (!alreadyVisitedForms.contains(childForm))
 				{
-					refreshElementsForForm(flatSolution, childForm, alreadyVisitedForms);
+					refreshElementsForForm(flatSolution, childForm, alreadyVisitedForms, set);
 				}
 				else
 				{
@@ -3199,11 +3216,23 @@ public class SolutionExplorerTreeContentProvider
 					node = (PlatformSimpleUserNode)findChildNode(node, form.getName());
 					if (node != null)
 					{
-						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_elements);
-						if (node != null)
+						if (set.stream().anyMatch(cls -> IFormElement.class.isAssignableFrom(cls)))
 						{
-							addFormElementsChildren(node);
-							view.refreshTreeNodeFromModel(node);
+							PlatformSimpleUserNode elements = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_elements);
+							if (elements != null)
+							{
+								addFormElementsChildren(elements);
+								view.refreshTreeNodeFromModel(elements);
+							}
+						}
+						if (set.contains(LayoutContainer.class))
+						{
+							PlatformSimpleUserNode containers = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_containers);
+							if (containers != null)
+							{
+								addFormContainersChildren(containers);
+								view.refreshTreeNodeFromModel(containers);
+							}
 						}
 					}
 				}
