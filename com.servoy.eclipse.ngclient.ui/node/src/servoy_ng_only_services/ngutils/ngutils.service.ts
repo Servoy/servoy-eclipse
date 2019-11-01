@@ -3,14 +3,18 @@ import { Injectable } from '@angular/core';
 import {WindowRefService} from '../../sablo/util/windowref.service'
 
 import {ServiceChangeHandler} from '../../sablo/util/servicechangehandler'
+import { ServoyService } from "../../ngclient/servoy.service";
 
 @Injectable()
 export class NGUtilsService{
     private _tags:Tag[];
     private _styleclasses:Object;
+    private _backActionCB: any;
     private confirmMessage:string;
 
-    constructor(private windowRef:WindowRefService, private changeHandler : ServiceChangeHandler) {
+    constructor(private windowRef:WindowRefService,
+            private changeHandler : ServiceChangeHandler,
+            private servoyService : ServoyService) {
     }
     
     get contributedTags():Tag[] {
@@ -29,6 +33,11 @@ export class NGUtilsService{
     set styleclasses(styleclasses) {
          this._styleclasses = styleclasses;
          this.changeHandler.changed("ngclientutils","styleclasses", styleclasses);
+    }
+    
+    set backActionCB(backActionCB: any) {
+        this._backActionCB = backActionCB;
+        this.setBackActionCallback();
     }
 
     private beforeUnload(e) {
@@ -194,6 +203,21 @@ export class NGUtilsService{
     public setServiceChangeHandler(changeHandler : ServiceChangeHandler)
     {
         this.changeHandler = changeHandler;
+    }
+    
+    /**
+     * Cancel the default back button action from browser and do a callback when clicking on it. 
+     */
+    private setBackActionCallback() {
+        history.pushState('captureBack', null, null);
+        this.windowRef.nativeWindow.window.addEventListener("popstate", (event) => {
+            if (event.state && event.state == 'captureBack') {
+                event.stopPropagation();
+                event.preventDefault();
+                this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script,[]);
+                history.pushState('captureBack', null, null);
+            }
+        })
     }
 }
 
