@@ -160,7 +160,7 @@ public class DesignerPreferences
 	public static final boolean SHOW_NAVIGATOR_DEFAULT = false;
 
 	public static final int ENCAPSULATION_PUBLIC_HIDE_ALL = PersistEncapsulation.HIDE_DATAPROVIDERS | PersistEncapsulation.HIDE_ELEMENTS |
-		PersistEncapsulation.HIDE_FOUNDSET;
+		PersistEncapsulation.HIDE_CONTAINERS | PersistEncapsulation.HIDE_FOUNDSET;
 	public static final int ENCAPSULATION_PUBLIC = PersistEncapsulation.DEFAULT;
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well

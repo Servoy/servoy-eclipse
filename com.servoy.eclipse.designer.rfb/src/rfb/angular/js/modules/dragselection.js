@@ -618,7 +618,9 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					{
 						editorScope.selectionToDrag = [dragNode];
 					}	
-					editorScope.selectionToDrag = utils.addGhostsToSelection(editorScope.selectionToDrag);
+					if (editorScope.isAbsoluteFormLayout()) {
+						editorScope.selectionToDrag = utils.addGhostsToSelection(editorScope.selectionToDrag);
+					}
 				}
 
 				if (editorScope.selectionToDrag.length > 0) {

@@ -234,18 +234,21 @@ import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -255,7 +258,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ImageLoader;
@@ -1902,40 +1904,44 @@ public class SolutionExplorerView extends ViewPart
 			{
 				public void persistChanges(Collection<IPersist> changes)
 				{
-					Set<IPersist> parents = new HashSet<IPersist>();
+					Map<IPersist, Set<Class< ? extends IPersist>>> parents = new HashMap<>();
 					for (IPersist persist : changes)
 					{
-						if (!(persist instanceof ISupportChilds) && persist.getParent() != null)
-						{
-							parents.add(persist.getParent());
-						}
-					}
-					for (IPersist persist : changes)
-					{
-						if (persist instanceof ISupportChilds && !parents.contains(persist) && persist.getParent() != null)
+						if (!parents.containsKey(persist) && persist.getParent() != null)
 						{
 							if (persist instanceof Relation)
 							{
 								// don't send the solution as refresh object, then would have to refresh everything (forms + relations)
-								parents.add(persist);
+								parents.put(persist, null);
 							}
 							else if (persist instanceof TableNode && DataSourceUtils.getInmemDataSourceName(((TableNode)persist).getDataSource()) != null)
 							{
 								// for an in mem tablenode send just that tablenode so only that one is refreshed
-								parents.add(persist);
+								parents.put(persist, null);
 							}
 							else if (persist instanceof TableNode && DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
 							{
 								// for an view fs tablenode send just that tablenode so only that one is refreshed
-								parents.add(persist);
+								parents.put(persist, null);
 							}
-							else if (persist instanceof WebComponent)
+							else if (persist instanceof LayoutContainer || persist instanceof IFormElement)
 							{
-								parents.add(persist.getAncestor(IRepository.FORMS));
+								IPersist parent = persist.getAncestor(IRepository.FORMS);
+								Set<Class< ? extends IPersist>> persistTypeToRefresh = parents.get(parent);
+								if (persistTypeToRefresh == null && !parents.containsKey(parent))
+								{
+									persistTypeToRefresh = new HashSet<>();
+									parents.put(parent, persistTypeToRefresh);
+								}
+								if (persistTypeToRefresh != null) persistTypeToRefresh.add(persist.getClass());
+							}
+							else if (persist instanceof IScriptProvider || persist instanceof IScriptElement)
+							{
+								// ignore the refresh for the tree, this is not displayed
 							}
 							else
 							{
-								parents.add(persist.getParent());
+								parents.put(persist, null);
 							}
 						}
 					}
