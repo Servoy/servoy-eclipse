@@ -8,6 +8,7 @@ import { BGPane } from './splitpane/bg_splitter/bg_pane.component';
 import { BGSplitter } from './splitpane/bg_splitter/bg_splitter.component';
 
 import { ServoyDefaultTextField } from './textfield/textfield';
+import { ServoyDefaultTextArea } from './textarea/textarea';
 import { ServoyDefaultButton } from './button/button';
 import { ServoyDefaultLabel } from './label/label';
 import { ServoyDefaultTabpanel } from './tabpanel/tabpanel';
@@ -37,6 +38,7 @@ import {ServoyDefaultSpinner} from "./spinner/spinner";
 @NgModule({
   declarations: [
     ServoyDefaultTextField,
+    ServoyDefaultTextArea,
     ServoyDefaultButton,
     ServoyDefaultLabel,
     ServoyDefaultTabpanel,
@@ -73,6 +75,7 @@ import {ServoyDefaultSpinner} from "./spinner/spinner";
   ],
   exports: [
             ServoyDefaultTextField,
+            ServoyDefaultTextArea,
             ServoyDefaultButton,
             ServoyDefaultLabel,
             ServoyDefaultTabpanel,
