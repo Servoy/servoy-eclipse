@@ -14,15 +14,19 @@ import { WebsocketService } from '../../sablo/websocket.service';
 import { ConverterService } from '../../sablo/converter.service';
 import { LoggerFactory } from '../../sablo/logger.service'
 import { ServicesService } from '../../sablo/services.service'
+import { ServoyService } from "../../ngclient/servoy.service";
 
 describe('NGUtilsService', () => {
-  let windowRef;
+  let windowRef: any;
+  let servoyServiceRef: any;
   beforeEach(() => {
      windowRef =  {};
+     servoyServiceRef =  {};
      windowRef.nativeWindow = {};
      // we use a useFactory because when using useValue that will be cloned, so you can adjust windowRef later on.
     TestBed.configureTestingModule({
-      providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef }, ServiceChangeHandler, SabloService, WebsocketService, SessionStorageService, ConverterService, LoggerFactory,ServicesService]
+      providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef }, 
+                  ServiceChangeHandler, SabloService, WebsocketService, SessionStorageService, ConverterService, LoggerFactory, ServicesService, {provide: ServoyService, useFactory:()=> servoyServiceRef }]
     });
   });
 
