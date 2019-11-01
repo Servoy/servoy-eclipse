@@ -22,6 +22,7 @@ import { ServoyDefaultRadiogroup } from './radiogroup/radiogroup';
 import { ServoyDefaultCheck } from './check/check';
 import { ServoyDefaultPassword } from './password/password';
 import { ServoyDefaultHtmlarea } from "./htmlarea/htmlarea";
+import { ServoyDefaultRectangle } from './rectangle/rectangle';
 
 import { SabloModule } from '../sablo/sablo.module'
 
@@ -51,6 +52,7 @@ import {ServoyDefaultSpinner} from "./spinner/spinner";
     ServoyDefaultRadiogroup,
     ServoyDefaultCheck,
     ServoyDefaultPassword,
+    ServoyDefaultRectangle,
     ServoyDefaultHtmlarea,
     ServoyDefaultSpinner,
     FormatFilterPipe,
@@ -88,6 +90,7 @@ import {ServoyDefaultSpinner} from "./spinner/spinner";
             ServoyDefaultRadiogroup,
             ServoyDefaultCheck,
             ServoyDefaultPassword,
+            ServoyDefaultRectangle,
             ServoyDefaultHtmlarea,
             ServoyDefaultSpinner
 
