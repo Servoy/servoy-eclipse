@@ -763,6 +763,7 @@ public class EditorUtil
 	public static SaveDirtyEditorsOutputEnum saveDirtyEditors(final Shell shell, final boolean prompt)
 	{
 		final SaveDirtyEditorsOutputEnum[] saveDirtyEditorsOutput = new SaveDirtyEditorsOutputEnum[1];
+		saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.ALL_SAVED;
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
