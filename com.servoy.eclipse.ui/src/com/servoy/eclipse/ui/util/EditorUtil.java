@@ -770,17 +770,7 @@ public class EditorUtil
 				try
 				{
 					int noOfDirtyEditors = 0;
-					List<IEditorPart> dirtyParts = new ArrayList<IEditorPart>();
-					IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
-					for (IWorkbenchWindow element : windows)
-					{
-						IWorkbenchPage[] pages = element.getPages();
-						for (IWorkbenchPage element2 : pages)
-						{
-							IEditorPart[] eparts = element2.getDirtyEditors();
-							if (eparts != null && eparts.length > 0) dirtyParts.addAll(Arrays.asList(eparts));
-						}
-					}
+					List<IEditorPart> dirtyParts = getDirtyEditors();
 					if (dirtyParts.size() > 0)
 					{
 						noOfDirtyEditors = dirtyParts.size();
