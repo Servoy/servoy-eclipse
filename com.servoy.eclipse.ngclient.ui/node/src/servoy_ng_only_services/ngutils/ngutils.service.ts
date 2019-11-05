@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 
-import {WindowRefService} from '../../sablo/util/windowref.service'
-
-import {ServiceChangeHandler} from '../../sablo/util/servicechangehandler'
+import { PlatformLocation } from '@angular/common';
+import { WindowRefService } from '../../sablo/util/windowref.service'
+import { ServiceChangeHandler } from '../../sablo/util/servicechangehandler'
 import { ServoyService } from "../../ngclient/servoy.service";
 
 @Injectable()
@@ -14,7 +14,8 @@ export class NGUtilsService{
 
     constructor(private windowRef:WindowRefService,
             private changeHandler : ServiceChangeHandler,
-            private servoyService : ServoyService) {
+            private servoyService : ServoyService,
+            private platformLocation : PlatformLocation) {
     }
     
     get contributedTags():Tag[] {
@@ -208,14 +209,14 @@ export class NGUtilsService{
     /**
      * Cancel the default back button action from browser and do a callback when clicking on it. 
      */
-    private setBackActionCallback() {
-        history.pushState('captureBack', null, null);
-        this.windowRef.nativeWindow.window.addEventListener("popstate", (event) => {
+    public setBackActionCallback() {
+        this.platformLocation.pushState('captureBack', null, null);
+        this.platformLocation.onPopState((event: any) => {
             if (event.state && event.state == 'captureBack') {
                 event.stopPropagation();
                 event.preventDefault();
                 this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script,[]);
-                history.pushState('captureBack', null, null);
+                this.platformLocation.pushState('captureBack', null, null);
             }
         })
     }
