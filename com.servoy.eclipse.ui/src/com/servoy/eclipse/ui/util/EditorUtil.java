@@ -750,14 +750,19 @@ public class EditorUtil
 		return null;
 	}
 
+	public enum SaveDirtyEditorsOutputEnum
+	{
+		CANCELED, ALL_SAVED, SOME_SAVED;
+	}
+
 	/**
 	 * @param shell
 	 * @param prompt
 	 * @return if it is canceled or not.
 	 */
-	public static boolean saveDirtyEditors(final Shell shell, final boolean prompt)
+	public static SaveDirtyEditorsOutputEnum saveDirtyEditors(final Shell shell, final boolean prompt)
 	{
-		final boolean[] canceled = new boolean[1];
+		final SaveDirtyEditorsOutputEnum[] saveDirtyEditorsOutput = new SaveDirtyEditorsOutputEnum[1];
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
@@ -803,7 +808,7 @@ public class EditorUtil
 							}
 							else if (dialog.getReturnCode() == Window.CANCEL)
 							{
-								canceled[0] = true;
+								saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.CANCELED;
 								parts = null;
 							}
 							else parts = null;
@@ -822,6 +827,14 @@ public class EditorUtil
 								}
 							}
 						}
+						if (getDirtyEditors().length > 0)
+						{
+							saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.SOME_SAVED;
+						}
+						else
+						{
+							saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.ALL_SAVED;
+						}
 					}
 				}
 				catch (Exception ex)
@@ -830,7 +843,7 @@ public class EditorUtil
 				}
 			}
 		});
-		return canceled[0];
+		return saveDirtyEditorsOutput[0];
 	}
 
 	/**

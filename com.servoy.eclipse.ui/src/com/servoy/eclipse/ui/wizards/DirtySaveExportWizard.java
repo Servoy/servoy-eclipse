@@ -22,6 +22,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.EditorUtil.SaveDirtyEditorsOutputEnum;
 
 /**
  * @author Marian
@@ -35,7 +36,7 @@ public abstract class DirtySaveExportWizard extends Wizard
 		super.setContainer(wizardContainer);
 		//on cancel wizardContainer is null
 		if (wizardContainer != null && wizardContainer.getShell() != null) wizardContainer.getShell().getDisplay().asyncExec(() -> {
-			if (EditorUtil.saveDirtyEditors(getShell(), true)) ((WizardDialog)wizardContainer).close();
+			if (!SaveDirtyEditorsOutputEnum.ALL_SAVED.equals(EditorUtil.saveDirtyEditors(getShell(), true))) ((WizardDialog)wizardContainer).close();
 		});
 
 	}
