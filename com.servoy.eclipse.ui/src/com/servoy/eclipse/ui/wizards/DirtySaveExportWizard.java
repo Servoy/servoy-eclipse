@@ -36,7 +36,7 @@ public abstract class DirtySaveExportWizard extends Wizard
 		super.setContainer(wizardContainer);
 		//on cancel wizardContainer is null
 		if (wizardContainer != null && wizardContainer.getShell() != null) wizardContainer.getShell().getDisplay().asyncExec(() -> {
-			if (!SaveDirtyEditorsOutputEnum.ALL_SAVED.equals(EditorUtil.saveDirtyEditors(getShell(), true))) ((WizardDialog)wizardContainer).close();
+			if (SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(getShell(), true)) ((WizardDialog)wizardContainer).close();
 		});
 
 	}

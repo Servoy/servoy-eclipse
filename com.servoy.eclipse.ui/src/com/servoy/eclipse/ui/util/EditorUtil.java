@@ -769,7 +769,8 @@ public class EditorUtil
 			{
 				try
 				{
-					List<IEditorPart> dirtyparts = new ArrayList<IEditorPart>();
+					int noOfDirtyEditors = 0;
+					List<IEditorPart> dirtyParts = new ArrayList<IEditorPart>();
 					IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
 					for (IWorkbenchWindow element : windows)
 					{
@@ -777,12 +778,13 @@ public class EditorUtil
 						for (IWorkbenchPage element2 : pages)
 						{
 							IEditorPart[] eparts = element2.getDirtyEditors();
-							if (eparts != null && eparts.length > 0) dirtyparts.addAll(Arrays.asList(eparts));
+							if (eparts != null && eparts.length > 0) dirtyParts.addAll(Arrays.asList(eparts));
 						}
 					}
-					if (dirtyparts.size() > 0)
+					if (dirtyParts.size() > 0)
 					{
-						Object[] parts = dirtyparts.toArray();
+						noOfDirtyEditors = dirtyParts.size();
+						Object[] parts = dirtyParts.toArray();
 						if (prompt)
 						{
 							TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS,
@@ -798,7 +800,7 @@ public class EditorUtil
 										}
 										return super.getText(element);
 									}
-								}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true, null,
+								}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyParts, new StructuredSelection(dirtyParts), true, null,
 								null);
 
 							dialog.open();
@@ -827,7 +829,7 @@ public class EditorUtil
 								}
 							}
 						}
-						if (getDirtyEditors().length > 0)
+						if (noOfDirtyEditors > parts.length)
 						{
 							saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.SOME_SAVED;
 						}
@@ -1079,17 +1081,19 @@ public class EditorUtil
 	 * The method returns an array of dirty editors from the project.
 	 * @return an array of IEditorPart
 	 */
-	public static IEditorPart[] getDirtyEditors()
+	public static List<IEditorPart> getDirtyEditors()
 	{
-		final IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (final IWorkbenchWindow element : windows)
+		List<IEditorPart> dirtyParts = new ArrayList<IEditorPart>();
+		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (IWorkbenchWindow element : windows)
 		{
-			final IWorkbenchPage[] pages = element.getPages();
-			for (final IWorkbenchPage element2 : pages)
+			IWorkbenchPage[] pages = element.getPages();
+			for (IWorkbenchPage element2 : pages)
 			{
-				return element2.getDirtyEditors();
+				IEditorPart[] eparts = element2.getDirtyEditors();
+				if (eparts != null && eparts.length > 0) dirtyParts.addAll(Arrays.asList(eparts));
 			}
 		}
-		return new IEditorPart[0];
+		return dirtyParts;
 	}
 }

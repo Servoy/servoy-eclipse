@@ -149,8 +149,8 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 		if (!save.equals(MessageDialogWithToggle.NEVER))
 		{
 			IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
-			if ((workbenchWindows.length > 0) && !SaveDirtyEditorsOutputEnum.ALL_SAVED.equals(
-				EditorUtil.saveDirtyEditors(workbenchWindows[0].getShell(), save.equals(MessageDialogWithToggle.PROMPT))))
+			if ((workbenchWindows.length > 0) &&
+				SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(workbenchWindows[0].getShell(), save.equals(MessageDialogWithToggle.PROMPT)))
 			{
 				// there where dirty editors and the user canceled it.
 				return false;

@@ -77,7 +77,7 @@ public class OpenWizardAction extends Action
 	{
 		try
 		{
-			if (!SaveDirtyEditorsOutputEnum.ALL_SAVED.equals(EditorUtil.saveDirtyEditors(Display.getCurrent().getActiveShell(), true))) return;
+			if (SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(Display.getCurrent().getActiveShell(), true)) return;
 			final IWorkbenchWizard wizard = wizardClass.newInstance();
 
 			IStructuredSelection selection = StructuredSelection.EMPTY;
