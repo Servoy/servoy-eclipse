@@ -1,0 +1,12 @@
+<select size='2'
+		class='svy-listbox form-control input-sm svy-padding-xs'
+		sablo-tabseq='model.tabSeq'
+		style="width:100%; height:100%;"
+		[id]="servoyApi.getMarkupId()"
+		[hidden]=!visible
+		[(ngModel)]="dataProviderID"
+		(change)="update(dataProviderID)"
+    	#element>
+		<option *ngFor="let item of valuelistID"  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format?.display:format?.type:format}}</option>		    
+</select>
+

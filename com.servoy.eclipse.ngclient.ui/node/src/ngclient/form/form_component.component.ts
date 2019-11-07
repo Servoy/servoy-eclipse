@@ -94,6 +94,23 @@ import { ServoyApi } from '../servoy_api'
       <ng-template #servoydefaultSpinner let-state="state"><servoydefault-spinner [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [background]="state.model.background" [borderType]="state.model.borderType" [dataProviderID]="state.model.dataProviderID"  (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [displaysTags]="state.model.displaysTags" [enabled]="state.model.enabled" [editable]="state.model.editable" [name]="state.name" [fontType]="state.model.fontType" [foreground]="state.model.foreground" [horizontalAlignment]="state.model.horizontalAlignment" [location]="state.model.location" [margin]="state.model.margin" [size]="state.model.size" [styleClass]="state.model.styleClass" [tabSeq]="state.model.tabSeq" [text]="state.model.text" [toolTipText]="state.model.toolTipText" [transparent]="state.model.transparent" [valuelistID]="state.model.valuelistID" [visible]="state.model.visible" #cmp></servoydefault-spinner></ng-template>
       <ng-template #servoydefaultRectangle let-state="state"><servoydefault-rectangle  [borderType]="state.model.borderType" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [lineSize]="state.model.lineSize" [roundedRadius]="state.model.roundedRadius" [shapeType]="state.model.shapeType" [transparent]="state.model.transparent" [visible]="state.model.visible" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoydefault-rectangle></ng-template>
       <ng-template #servoydefaultHtmlview let-state="state"><servoydefault-htmlview  [borderType]="state.model.borderType" [text]="state.model.text" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [visible]="state.model.visible" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name"  [scrollbars]="state.model.scrollbars" [toolTipText]="state.model.toolTipText" [tabSeq]="state.model.tabSeq" [onActionMethodID]="getHandler(state,'onActionMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [dataProviderID]="state.model.dataProviderID" #cmp></servoydefault-htmlview></ng-template>
+      <ng-template #servoydefaultListbox let-state="state">
+        <servoydefault-listbox [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes"
+                                   [onActionMethodID]="getHandler(state,'onActionMethodID')"
+                                   [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')"
+                                   [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')"
+                                   [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')"
+                                   [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')"
+                                   [dataProviderID]="state.model.dataProviderID"
+                                   (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)"
+                                   [format]="state.model.format"
+                                   [name]="state.name"
+                                   [borderType]="state.model.borderType" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled"
+                                   [transparent]="state.model.transparent" [visible]="state.model.visible" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)"
+                                   [scrollbars]="state.model.scrollbars" [toolTipText]="state.model.toolTipText" [tabSeq]="state.model.tabSeq"
+                                   [multiselectListbox]="state.model.multiselectListbox"
+                                   [valuelistID]="state.model.valuelistID"#cmp></servoydefault-listbox>
+      </ng-template>
       <!-- component template generate end -->
    `
 } )
@@ -120,6 +137,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild( 'servoydefaultHtmlarea' , {static: true}) readonly servoydefaultHtmlarea: TemplateRef<any>;
     @ViewChild( 'servoydefaultSpinner', {static: true}) readonly servoydefaultSpinner: TemplateRef<any>;
     @ViewChild( 'servoydefaultHtmlview',{static: true} ) readonly servoydefaultHtmlview: TemplateRef<any>;
+    @ViewChild( 'servoydefaultListbox' ,{static: true}) readonly servoydefaultListbox: TemplateRef<any>;
     
   // component template generate end
 

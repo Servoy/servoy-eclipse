@@ -24,6 +24,7 @@ import { ServoyDefaultPassword } from './password/password';
 import { ServoyDefaultHtmlarea } from "./htmlarea/htmlarea";
 import { ServoyDefaultRectangle } from './rectangle/rectangle';
 import { ServoyDefaultHTMLView } from './htmlview/htmlview';
+import { ServoyDefaultListBox } from './listbox/listbox';
 
 import { SabloModule } from '../sablo/sablo.module'
 
@@ -57,6 +58,7 @@ import {ServoyDefaultSpinner} from "./spinner/spinner";
     ServoyDefaultHtmlarea,
     ServoyDefaultSpinner,
     ServoyDefaultHTMLView,
+    ServoyDefaultListBox,
     FormatFilterPipe,
     MnemonicletterFilterPipe,
     NotNullOrEmptyPipe,
@@ -95,7 +97,8 @@ import {ServoyDefaultSpinner} from "./spinner/spinner";
             ServoyDefaultRectangle,
             ServoyDefaultHtmlarea,
             ServoyDefaultSpinner,
-            ServoyDefaultHTMLView
+            ServoyDefaultHTMLView,
+            ServoyDefaultListBox
 
   ],
   providers: [
