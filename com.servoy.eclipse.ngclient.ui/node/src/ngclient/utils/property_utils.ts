@@ -75,7 +75,7 @@ export class PropertyUtils {
 
         renderer.removeStyle( element, 'font' );
         for ( var key in newVal ) {
-            renderer.setStyle( element, key , newVal.[key] );
+            renderer.setStyle( element, key , newVal[key] );
         };
     }
     
