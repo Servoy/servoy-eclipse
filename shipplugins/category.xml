@@ -90,4 +90,10 @@
 	<bundle id='de.inetsoftware.jlessc' version='1.8.0.201903221450'>
 		<category name="bundles" />
 	</bundle>
+	<bundle id='com.github.ua-parser.uap-java' version='1.4.4.SERVOY'>
+		<category name="bundles" />
+	</bundle>
+	<bundle id='org.yaml.snakeyaml' version='1.25.0'>
+		<category name="bundles" />
+	</bundle>
 </site>
