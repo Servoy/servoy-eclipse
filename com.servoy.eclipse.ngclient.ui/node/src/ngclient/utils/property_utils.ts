@@ -70,6 +70,15 @@ export class PropertyUtils {
         }
     }
 
+    public static setFont( element: any, renderer: Renderer2, newVal ) {
+        if ( typeof newVal !== 'object' || newVal == null ) { renderer.removeStyle( element, 'font' ); return; }
+
+        renderer.removeStyle( element, 'font' );
+        for ( var key in newVal ) {
+            renderer.setStyle( element, key , newVal.[key] );
+        };
+    }
+    
     public static addSelectOnEnter( element: any, renderer: Renderer2 ) {
         renderer.listen( element, "focus", () => {
             setTimeout(() => {

@@ -61,7 +61,7 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
                     this.renderer.setStyle(this.getNativeElement(), "color", change.currentValue );
                     break;
                 case "fontType":
-                    this.renderer.setStyle(this.getNativeElement(), "font", change.currentValue );
+                    PropertyUtils.setFont( this.getNativeElement(),this.renderer ,change.currentValue);
                     break;
                 case "format":
 //                    if ( formatState )
