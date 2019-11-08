@@ -32,19 +32,26 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
     }
 
     ngOnInit() {
-      if(this.onFocusGainedMethodID)
-        this.renderer.listen( this.getNativeElement(), 'focus', ( e ) => {
-          this.onFocusGainedMethodID(e);
-          this.valueBeforeChange = this.getNativeElement().value;
-        } );
-      if(this.onFocusLostMethodID)
-        this.renderer.listen( this.getNativeElement(), 'blur', ( e ) => {
-          this.onFocusLostMethodID(e);
-          this.valueBeforeChange = this.getNativeElement().value;
-        } );
       super.ngOnInit();
+      this.attachFocusListeners(this.getFocusElement());
+    }
+    
+    attachFocusListeners(nativeElement : any){
+        if(this.onFocusGainedMethodID)
+            this.renderer.listen( nativeElement, 'focus', ( e ) => {
+                this.onFocusGainedMethodID(e);
+                this.valueBeforeChange = nativeElement.value;
+            } );
+        if(this.onFocusLostMethodID)
+            this.renderer.listen( nativeElement, 'blur', ( e ) => {
+                this.onFocusLostMethodID(e);
+                this.valueBeforeChange = nativeElement.value;
+            } ); 
     }
 
+    getFocusElement() : any{
+        return this.getNativeElement();
+    }
     ngOnChanges( changes: SimpleChanges ) {
         for ( let property in changes ) {
             let change = changes[property];
