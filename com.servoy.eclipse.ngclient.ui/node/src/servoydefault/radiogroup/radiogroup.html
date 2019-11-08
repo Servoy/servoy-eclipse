@@ -3,6 +3,7 @@
      [hidden]='!visible'
      class='svy-radiogroup input-sm svy-padding-xs'
      [id]="servoyApi.getMarkupId()"
+     [svyTooltip]="toolTipText"
      #element>
   <label  class='svy-check-radio' *ngFor="let item of valuelistID | notNullOrEmpty">
     <input type="radio"

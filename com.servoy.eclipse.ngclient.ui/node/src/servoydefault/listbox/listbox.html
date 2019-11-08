@@ -5,6 +5,7 @@
 		[hidden]=!visible
 		[(ngModel)]="dataProviderID"
 		(change)="update(dataProviderID)"
+		[svyTooltip]="toolTipText"
     	#element>
 		<option *ngFor="let item of valuelistID"  [ngValue]="item.realValue">{{item.displayValue | formatFilter:format?.display:format?.type:format}}</option>		    
 </select>

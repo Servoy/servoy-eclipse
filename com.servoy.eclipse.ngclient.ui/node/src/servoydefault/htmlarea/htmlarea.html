@@ -2,6 +2,7 @@
      class='svy-htmlarea'
      [id]="servoyApi.getMarkupId()" 
      [hidden]='!visible'
+     [svyTooltip]="toolTipText"
      #element>
   <editor #child [init]="ServoyTinyMCESettings" ></editor>
 </div>
