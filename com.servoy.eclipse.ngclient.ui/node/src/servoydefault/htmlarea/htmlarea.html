@@ -1,5 +1,7 @@
 <div style="width:100%; height:100%; overflow:hidden"
      class='svy-htmlarea'
-     [id]="servoyApi.getMarkupId()" #element>
+     [id]="servoyApi.getMarkupId()" 
+     [hidden]='!visible'
+     #element>
   <editor #child [init]="ServoyTinyMCESettings" ></editor>
 </div>

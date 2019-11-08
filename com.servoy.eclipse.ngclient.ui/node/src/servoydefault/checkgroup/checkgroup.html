@@ -1,7 +1,6 @@
 <div class='svy-checkgroup input-sm svy-padding-xs'
-     sablo-tabseq='tabSeq'
      [id]="servoyApi.getMarkupId()" 
-     [hidden]=!visible
+     [hidden]='!visible'
      #element>
   <label class='svy-check-radio' *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;">
     <input type="checkbox" 

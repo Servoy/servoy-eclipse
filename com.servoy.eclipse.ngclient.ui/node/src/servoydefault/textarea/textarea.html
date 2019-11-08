@@ -3,8 +3,9 @@
 	   [id]="servoyApi.getMarkupId()"
 	   [value]="findmode ? dataProviderID : dataProviderID | formatFilter:format?.display:format?.type:format" 
 	   (change)="update($event.target.value)"
-	   sablo-tabseq='model.tabSeq'
 	   [svyFormat]="format"
 	   [svyStartEdit]="'dataProviderID'"
+	   [hidden]='!visible'
+	   [disabled]="!enabled"
 	   #element>
 </textarea>	    

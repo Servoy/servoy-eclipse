@@ -2,7 +2,9 @@
 <div class="svy-combobox ui-select-bootstrap dropdown ng-empty ng-valid"
 			[ngStyle]="styles"
 			[class.open]="isOpen"
-			appendTo="body" #element>
+			appendTo="body" 
+			[hidden]='!visible'
+			#element>
 	<span class="ui-select-match ng-scope"
 				[ngStyle]="styles"
 				[class.btn-default-focus]="isElementFocused(selectLabel)"
