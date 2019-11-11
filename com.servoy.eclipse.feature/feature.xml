@@ -87,24 +87,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          version="0.0.0"/>
 
    <includes
-         id="com.servoy.jre.linux.x86_64.feature"
-         version="12.0.0"
-         os="linux"
-         arch="x86_64"/>
-
-   <includes
-         id="com.servoy.jre.macosx.x86_64.feature"
-         version="12.0.0"
-         os="macosx"
-         arch="x86_64"/>
-
-   <includes
-         id="com.servoy.jre.win32.x86_64.feature"
-         version="12.0.0"
-         os="win32"
-         arch="x86_64"/>
-
-   <includes
          id="org.eclipse.egit"
          version="0.0.0"/>
 
@@ -572,5 +554,29 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          install-size="0"
          version="2019.12.0.3540_rc"
          unpack="false"/>
+
+   <plugin
+         id="com.servoy.jre.linux.x86_64"
+         os="linux"
+         arch="x86_64"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="com.servoy.jre.macosx.x86_64"
+         os="macosx"
+         arch="x86_64"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="com.servoy.jre.win32.x86_64"
+         os="win32"
+         arch="x86_64"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
