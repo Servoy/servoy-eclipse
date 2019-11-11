@@ -3,8 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Ngclient Developer Package
 Bundle-SymbolicName: com.servoy.eclipse.ngclient;singleton:=true
 Bundle-Version: 2019.12.0.3540_rc
-Export-Package: com.servoy.eclipse.ngclient.developer,
- com.servoy.eclipse.ngclient.startup,
+Export-Package:  com.servoy.eclipse.ngclient.startup,
  com.servoy.eclipse.ngclient.startup.resourceprovider
 Require-Bundle: sablo,
  servoy_shared,
