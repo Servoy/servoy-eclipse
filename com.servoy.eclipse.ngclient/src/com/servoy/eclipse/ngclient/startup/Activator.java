@@ -20,8 +20,6 @@ package com.servoy.eclipse.ngclient.startup;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -33,15 +31,12 @@ import org.sablo.websocket.IWebsocketSessionFactory;
 import org.sablo.websocket.WebsocketSessionKey;
 import org.sablo.websocket.WebsocketSessionManager;
 
-import com.servoy.eclipse.ngclient.developer.IDeveloperClientHandler;
 import com.servoy.j2db.IDebugClientHandler;
-import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.NGClient;
 import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.ngclient.eventthread.NGEventDispatcher;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.Debug;
 
 /**
  * @author jcompagner
@@ -80,12 +75,13 @@ public class Activator implements BundleActivator
 						{
 							if (getClient() == null)
 							{
-								NGClient ngClient = getNGClient(this, requestParams);
-								if (ngClient != null)
-								{
-									setClient(ngClient);
-								}
-								else if (requestParams.containsKey("nodebug"))
+//								NGClient ngClient = getNGClient(this, requestParams);
+//								if (ngClient != null)
+//								{
+//									setClient(ngClient);
+//								}
+//								else 
+								if (requestParams.containsKey("nodebug"))
 								{
 									setClient(new NGClient(this));
 								}
@@ -133,30 +129,30 @@ public class Activator implements BundleActivator
 		}
 	}
 
-	public NGClient getNGClient(INGClientWebsocketSession session, Map<String, List<String>> requestParams)
-	{
-
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(NGCLIENT_DEVELOPER_ID);
-		try
-		{
-			for (IConfigurationElement e : config)
-			{
-				System.out.println("Evaluating extension");
-				final Object o = e.createExecutableExtension("class");
-				if (o instanceof IDeveloperClientHandler)
-				{
-					NGClient ngClient = ((IDeveloperClientHandler)o).getNGClient(session, requestParams);
-					if (ngClient != null) return ngClient;
-
-				}
-			}
-		}
-		catch (CoreException ex)
-		{
-			Debug.error(ex);
-		}
-		return null;
-	}
+//	public NGClient getNGClient(INGClientWebsocketSession session, Map<String, List<String>> requestParams)
+//	{
+//
+//		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(NGCLIENT_DEVELOPER_ID);
+//		try
+//		{
+//			for (IConfigurationElement e : config)
+//			{
+//				System.out.println("Evaluating extension");
+//				final Object o = e.createExecutableExtension("class");
+//				if (o instanceof IDeveloperClientHandler)
+//				{
+//					NGClient ngClient = ((IDeveloperClientHandler)o).getNGClient(session, requestParams);
+//					if (ngClient != null) return ngClient;
+//
+//				}
+//			}
+//		}
+//		catch (CoreException ex)
+//		{
+//			Debug.error(ex);
+//		}
+//		return null;
+//	}
 
 	@Override
 	public void stop(BundleContext ctx) throws Exception
