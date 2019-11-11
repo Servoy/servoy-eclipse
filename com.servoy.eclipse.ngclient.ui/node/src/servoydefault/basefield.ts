@@ -67,7 +67,7 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
                     else  this.renderer.removeAttribute(this.getNativeElement(),  'placeholder' );
                     break;
                 case "selectOnEnter":
-                    if ( change.currentValue ) PropertyUtils.addSelectOnEnter( this.elementRef.nativeElement, this.renderer );
+                    if ( change.currentValue ) PropertyUtils.addSelectOnEnter( this.getFocusElement(), this.renderer );
                     break;
 
             }
