@@ -55,7 +55,6 @@ import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.crypto.Cipher;
@@ -107,6 +106,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
+import com.servoy.eclipse.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -121,7 +121,6 @@ import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -146,7 +145,6 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
  */
 public class WarExporter
 {
-	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
 	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
@@ -750,62 +748,8 @@ public class WarExporter
 		}
 		for (File file : pluginFiles)
 		{
-			if (file.getName().contains("servoy_ngclient"))
-			{
-				copyNGClientJar(file, targetLibDir);
-			}
-			else
-			{
-				copyFile(file, new File(targetLibDir, file.getName()));
-			}
+			copyFile(file, new File(targetLibDir, file.getName()));
 		}
-	}
-
-	/**
-	 * Copy the servoy_ngclient jar to the libs folder in the .war.
-	 * Exclude folders defined in EXCLUDE_FROM_NG_JAR.
-	 * @param file
-	 * @param targetLibDir
-	 * @throws IOException
-	 */
-	private void copyNGClientJar(File file, File targetLibDir) throws IOException
-	{
-		File dest = new File(targetLibDir, file.getName());
-		ZipInputStream zin = new ZipInputStream(new FileInputStream(file));
-		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(dest));
-		byte[] buf = new byte[1024];
-
-		ZipEntry entry = zin.getNextEntry();
-		while (entry != null)
-		{
-			String name = entry.getName();
-			boolean toBeDeleted = false;
-			for (String f : EXCLUDE_FROM_NG_JAR)
-			{
-				if (name.startsWith(f))
-				{
-					toBeDeleted = true;
-					break;
-				}
-			}
-			if (!toBeDeleted)
-			{
-				// Add ZIP entry to output stream.
-				zout.putNextEntry(new ZipEntry(name));
-				// Transfer bytes from the ZIP file to the output file
-				int len;
-				while ((len = zin.read(buf)) > 0)
-				{
-					zout.write(buf, 0, len);
-				}
-			}
-			entry = zin.getNextEntry();
-		}
-		// Close the streams
-		zin.close();
-		// Compress the files
-		// Complete the ZIP file
-		zout.close();
 	}
 
 	/**

@@ -281,6 +281,7 @@
 				<module>com.servoy.eclipse.model.exporter.mobile</module>
 				<module>com.servoy.eclipse.core</module>
 				<module>com.servoy.eclipse.ui</module>
+				<module>com.servoy.eclipse.ngclient</module>
 				<module>com.servoy.eclipse.debug</module>
 				<module>com.servoy.eclipse.designer</module>
 				<module>com.servoy.eclipse.designer.rfb</module>
