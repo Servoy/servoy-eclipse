@@ -79,6 +79,20 @@ export class PropertyUtils {
         };
     }
     
+    public static setVisible( element: any, renderer: Renderer2, newVal ) {
+        let correctElement = element;
+        if (renderer.parentNode(renderer.parentNode(element)) == element.closest('.svy-wrapper'))
+        {
+            correctElement = renderer.parentNode(renderer.parentNode(element));
+        }    
+        if ( newVal == true ) {
+            // can we improve this ?
+            renderer.removeStyle( correctElement, 'display' );
+        } else if (newVal == false) {
+            renderer.setStyle( correctElement, 'display' , 'none' );
+        }   
+    }
+    
     public static addSelectOnEnter( element: any, renderer: Renderer2 ) {
         renderer.listen( element, "focus", () => {
             setTimeout(() => {

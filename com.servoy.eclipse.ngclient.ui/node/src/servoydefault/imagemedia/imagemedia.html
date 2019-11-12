@@ -1,7 +1,6 @@
 <div style='width:100%; height:100%; overflow: auto; text-align: center;'
 	 class='svy-mediafield'
      [id]='servoyApi.getMarkupId()' 
-     [hidden]='!visible'
      [svyTooltip]="toolTipText"
      #element>
 	<img [src]='(dataProviderID == null ? "/servoydefault/imagemedia/res/images/empty.gif" : (dataProviderID.url ? dataProviderID.url : dataProviderID) )' style='position:absolute;top:0;left:0;max-width:100%; max-height:100%;'/>

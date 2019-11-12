@@ -63,11 +63,6 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
                 case "fontType":
                     PropertyUtils.setFont( this.getNativeElement(),this.renderer ,change.currentValue);
                     break;
-                case "format":
-//                    if ( formatState )
-//                        formatState( value );
-//                    else formatState = $formatterUtils.createFormatState( $element, $scope, ngModel, true, value );
-                    break;
                 case "horizontalAlignment":
                     PropertyUtils.setHorizontalAlignment(  this.getNativeChild(),this.renderer ,change.currentValue);
                     break;
@@ -92,6 +87,9 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
                         this.renderer.removeClass(this.getNativeElement(),change.previousValue );
                     if ( change.currentValue)
                         this.renderer.addClass( this.getNativeElement(), change.currentValue );
+                    break;
+                case "visible":
+                    PropertyUtils.setVisible( this.getNativeElement(),this.renderer ,change.currentValue);
                     break;
             }
         }

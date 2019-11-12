@@ -1,6 +1,5 @@
 <div class='svy-checkgroup input-sm svy-padding-xs'
      [id]="servoyApi.getMarkupId()" 
-     [hidden]='!visible'
      [svyTooltip]="toolTipText"
      #element>
   <label class='svy-check-radio' *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;">

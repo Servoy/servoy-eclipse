@@ -12,7 +12,7 @@ import { ServoyApi } from '../servoy_api'
     selector: 'svy-form',
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()"> <!-- main div -->
-          <div *ngFor="let item of formCache.items" [config]="item" class="svy_wrapper" style="position:absolute"> <!-- wrapper div -->
+          <div *ngFor="let item of formCache.items" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
           </div>
       </div>

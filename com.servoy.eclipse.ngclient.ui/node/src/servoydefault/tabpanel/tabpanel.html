@@ -1,4 +1,4 @@
-<ngb-tabset  #tabset  [hidden]='!visible' [activeId]="getSelectedTabId()" (tabChange)="onTabChange($event)"  [class]='(styleClass ? styleClass : "")  + " svy-tabpanel"'  [id]="servoyApi.getMarkupId()">
+<ngb-tabset  #tabset  [activeId]="getSelectedTabId()" (tabChange)="onTabChange($event)"  [class]='(styleClass ? styleClass : "")  + " svy-tabpanel"'  [id]="servoyApi.getMarkupId()">
     <ngb-tab *ngFor="let tab of tabs" [disabled]="tab.disabled || !enabled || !tab.containsFormId" [id]="tab._id">
       <ng-template  svy-mnemonic='tab.mnemonic' ngbTabTitle>
       	<img ng-hide="tab.imageMediaID == ''"  ng-src='tab.imageMediaID'/>
