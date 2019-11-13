@@ -6,7 +6,6 @@
     <input type="checkbox" 
     		[(ngModel)]="selection[i]"
             [value]="item.realValue"
-            [disabled]="!enabled || !editable"
             #input />
     <span [innerHtml]="item.displayValue"></span>
   </label>

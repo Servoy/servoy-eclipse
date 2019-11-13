@@ -6,7 +6,8 @@ export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements 
   
   selection: any[] = [];
   allowNullinc = 0;
-
+  @ViewChild( 'input' ,{static: true} ) inputElementRef: ElementRef;
+  
   constructor(renderer: Renderer2, formattingService: FormattingService){
     super(renderer, formattingService);
     PropertyUtils.getScrollbarsStyleObj(this.scrollbars);
@@ -88,5 +89,9 @@ export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements 
       .map((item,index) =>  {
         if(item === true) return this.valuelistID[index+this.allowNullinc].realValue;})
       .filter(item => item !== null)
+  }
+  
+  getFocusElement() : any{
+      return this.inputElementRef.nativeElement;
   }
 }

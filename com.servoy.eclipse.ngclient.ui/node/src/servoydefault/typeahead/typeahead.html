@@ -14,7 +14,6 @@
         (keydown)="onInputKeyDown($event)"
         (keyup)="onInputKeyup($event)"
         (focus)="onInputFocus()"
-        [disabled]="!enabled"
         #input>
   <ul class="ui-select-choices ui-select-choices-content ui-select-dropdown dropdown-menu ng-scope"
       *ngIf="isOpen">

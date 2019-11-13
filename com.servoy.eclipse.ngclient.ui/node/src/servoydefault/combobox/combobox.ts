@@ -96,4 +96,8 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseCombo implements OnI
   closeDropdown() {
     this.isInputFocused.next(false);
   };
+  
+  getFocusElement() : any{
+      return this.inputElement.nativeElement;
+  }
 }

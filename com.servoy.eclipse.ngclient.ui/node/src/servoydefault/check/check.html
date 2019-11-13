@@ -5,8 +5,7 @@
 		 sablo-tabseq="tabSeq"
          [(ngModel)]="selected"
          [svyTooltip]="toolTipText"
-         [disabled]="!enabled || !editable"
-    	 	 [id]="servoyApi.getMarkupId()"
+    	 [id]="servoyApi.getMarkupId()"
          #input />
 	 <span [innerHtml]="isInPortal() ? '' : text"></span>
 </label>

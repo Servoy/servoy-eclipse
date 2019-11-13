@@ -8,7 +8,6 @@
     <input type="radio"
            [checked]="value == item.realValue"
            [value]="item.realValue"
-           [disabled]="!enabled || !editable"
            #input/>
     <span [innerHtml]="item.displayValue"></span>
   </label>

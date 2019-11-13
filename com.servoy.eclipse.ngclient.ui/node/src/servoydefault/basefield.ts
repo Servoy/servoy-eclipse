@@ -69,6 +69,12 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
                 case "selectOnEnter":
                     if ( change.currentValue ) PropertyUtils.addSelectOnEnter( this.getFocusElement(), this.renderer );
                     break;
+                case "enabled":
+                    if ( change.currentValue )
+                        this.renderer.removeAttribute(this.getFocusElement(),  "disabled" );
+                    else
+                        this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" );
+                    break;
 
             }
         }

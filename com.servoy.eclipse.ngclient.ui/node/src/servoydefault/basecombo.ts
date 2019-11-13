@@ -108,4 +108,9 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
 
   closeDropdown() {};
   
+  getFocusElement() : any{
+      if(this.inputElement)
+          return this.inputElement.nativeElement;
+      return this.getNativeElement();
+  }
 }
