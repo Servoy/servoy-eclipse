@@ -1038,6 +1038,15 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	        						$scope.glasspaneStyle.height = (contentDivRendered.offsetHeight + 20) + 'px';
 					            }, 200);
 					        }
+							else {
+								var maincontainer =  $($scope.contentDocument).find('*[data-maincontainer="true"]')[0];
+								if (maincontainer) {
+									$scope.glasspaneStyle['min-height'] = (maincontainer.offsetHeight + 20) + 'px';
+									$scope.glasspaneStyle.width = (maincontainer.offsetWidth +20) + 'px';
+									$element.find('.content')[0].style['min-height'] = maincontainer.offsetHeight+'px';
+									$element.find('.contentframe')[0].style.height = maincontainer.offsetHeight+'px';
+								}
+							}
 					}
 				}
 			}
