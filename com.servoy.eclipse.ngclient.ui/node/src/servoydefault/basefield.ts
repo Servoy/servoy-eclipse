@@ -58,9 +58,9 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
             switch ( property ) {
                 case "editable":
                     if ( change.currentValue )
-                        this.renderer.removeAttribute(this.elementRef.nativeElement,  "readonly" );
+                        this.renderer.removeAttribute(this.getFocusElement(),  "readonly" );
                     else
-                        this.renderer.setAttribute(this.elementRef.nativeElement,  "readonly", "readonly" );
+                        this.renderer.setAttribute(this.getFocusElement(),  "readonly", "readonly" );
                     break;
                 case "placeholderText":
                     if ( change.currentValue ) this.renderer.setAttribute(this.getNativeElement(),   'placeholder', change.currentValue );

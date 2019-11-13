@@ -1,4 +1,4 @@
-import {AfterViewInit, ElementRef, OnInit, Renderer2, ViewChild} from "@angular/core";
+import {AfterViewInit, ElementRef, OnInit, Renderer2, ViewChild, SimpleChanges} from "@angular/core";
 import {FormattingService, PropertyUtils} from "../ngclient/servoy_public";
 import {ServoyDefaultBaseField} from "./basefield";
 
@@ -21,6 +21,43 @@ export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements 
 
   ngAfterViewInit(){
       this.setHandlersAndTabIndex();
+  }
+  
+  ngOnChanges( changes: SimpleChanges ) {
+      for ( let property in changes ) {
+          let change = changes[property];
+          switch ( property ) {
+              case "editable":
+                  if ( change.currentValue ){
+                      if (this.enabled){
+                          this.renderer.removeAttribute(this.getFocusElement(),  "disabled" );
+                      }
+                      else {
+                          this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" ); 
+                      }    
+                  }
+                  else
+                      this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" );
+                  break;
+              case "enabled":
+                  if ( change.currentValue ){
+                      if (this.editable){
+                          this.renderer.removeAttribute(this.getFocusElement(),  "disabled" );
+                      }
+                      else{
+                          this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" );
+                          // prevent super from removing the attribute
+                          change.currentValue = false;
+                      }
+                          
+                  }
+                  else
+                      this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" );
+                  break;    
+
+          }
+      }
+      super.ngOnChanges(changes);
   }
   
   setHandlersAndTabIndex(){
