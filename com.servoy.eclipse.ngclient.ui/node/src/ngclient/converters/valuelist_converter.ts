@@ -113,10 +113,11 @@ class ValuelistState implements IDeferedState {
 export class Valuelist extends Array<Object> implements IValuelist {
    
     constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, public state: ValuelistState, values?: Array<Object>) {
-        super(...values);
+        super();
+        if (values) this.push(...values);
         //see https://blog.simontest.net/extend-array-with-typescript-965cc1134b3
         //set prototype, since adding a create method is not really working if we have the values
-        Object.setPrototypeOf(this, Object.create(Valuelist.prototype));
+        Object.setPrototypeOf(this, Object.create(Valuelist.prototype)); 
     }
     
     filterList(filterString: string) :  Promise<any> {
