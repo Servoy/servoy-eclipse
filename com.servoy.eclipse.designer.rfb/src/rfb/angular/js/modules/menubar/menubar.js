@@ -87,7 +87,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService, $root
                     },
                     execute: function(e)
                     {
-                       addAdter(e);
+                       addAfter(e);
                     }
                 },
                 {
