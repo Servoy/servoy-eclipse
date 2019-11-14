@@ -1,6 +1,6 @@
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import { ServoyDefaultHtmlarea  } from './htmlarea';
-import {FormattingService, ServoyApi} from "../../ngclient/servoy_public";
+import {FormattingService, ServoyApi, TooltipDirective, TooltipService} from "../../ngclient/servoy_public";
 import {SabloModule} from "../../sablo/sablo.module";
 import {FormsModule} from "@angular/forms";
 import {EditorComponent} from "@tinymce/tinymce-angular";
@@ -16,9 +16,9 @@ describe('HtmlareaComponent', () => {
     servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","isInDesigner"]);
 
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultHtmlarea, EditorComponent],
+      declarations: [ ServoyDefaultHtmlarea, EditorComponent,TooltipDirective],
       imports: [SabloModule, FormsModule],
-      providers: [FormattingService]
+      providers: [FormattingService,TooltipService]
     })
     .compileComponents();
   }));

@@ -2,8 +2,10 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {SabloModule} from '../../sablo/sablo.module'
 
-import { ServoyDefaultListBox } from './textfield';
-import {FormatFilterPipe,SvyFormat, FormattingService, StartEditDirective} from '../../ngclient/servoy_public'
+import { ServoyDefaultListBox } from './listbox';
+import {FormatFilterPipe,SvyFormat, FormattingService, StartEditDirective, TooltipDirective, TooltipService} from '../../ngclient/servoy_public'
+
+import { FormsModule } from '@angular/forms';
 
 
 describe("ServoyDefaultTextField", () => {
@@ -12,9 +14,9 @@ describe("ServoyDefaultTextField", () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultListBox, FormatFilterPipe, SvyFormat, StartEditDirective],
-      imports: [SabloModule],
-      providers: [FormatFilterPipe,FormattingService]
+      declarations: [ ServoyDefaultListBox, FormatFilterPipe, SvyFormat, StartEditDirective,TooltipDirective],
+      imports: [SabloModule,FormsModule],
+      providers: [FormatFilterPipe,FormattingService,TooltipService]
     })
     .compileComponents();
   }));

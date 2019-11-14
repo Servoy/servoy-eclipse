@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ServoyDefaultRectangle } from './rectangle';
 import {SabloModule} from "../../sablo/sablo.module";
 import {FormsModule} from "@angular/forms";
-import {ServoyApi,TooltipService,TooltipDirective} from "../../ngclient/servoy_public";
+import {ServoyApi,TooltipService,TooltipDirective,FormattingService} from "../../ngclient/servoy_public";
 describe('PasswordComponent', () => {
   let component: ServoyDefaultRectangle;
   let fixture: ComponentFixture<ServoyDefaultRectangle>;

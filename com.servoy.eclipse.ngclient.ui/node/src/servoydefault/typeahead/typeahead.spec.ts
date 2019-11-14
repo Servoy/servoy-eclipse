@@ -3,7 +3,7 @@ import { ElementRef } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Item } from '../basecombo';
 import { ServoyDefaultTypeahead } from './typeahead';
-import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';
+import { FormattingService, TooltipDirective,TooltipService, ServoyApi } from '../../ngclient/servoy_public';
 
 const eventEnter: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'Enter'});
 const eventC: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'c'});
@@ -59,8 +59,8 @@ describe('TypeaheadComponent', () => {
     servoyApi = jasmine.createSpyObj( "ServoyApi", ["getMarkupId", "trustAsHtml"]);
 
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultTypeahead ],
-      providers: [ FormattingService ]
+      declarations: [ ServoyDefaultTypeahead,TooltipDirective ],
+      providers: [ FormattingService , TooltipService]
     })
     .compileComponents();
   }));

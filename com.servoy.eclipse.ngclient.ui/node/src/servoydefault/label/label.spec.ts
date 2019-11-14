@@ -4,7 +4,7 @@ import { By }              from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
 
-import {FormatFilterPipe,MnemonicletterFilterPipe} from '../../ngclient/servoy_public'
+import {FormatFilterPipe,MnemonicletterFilterPipe,TooltipService,TooltipDirective} from '../../ngclient/servoy_public'
 
 import { SabloModule } from '../../sablo/sablo.module'
 
@@ -15,7 +15,8 @@ describe( 'SvLabel', () => {
 
     beforeEach( async(() => {
         TestBed.configureTestingModule( {
-            declarations: [ServoyDefaultLabel ,FormatFilterPipe,MnemonicletterFilterPipe],
+            declarations: [ServoyDefaultLabel ,FormatFilterPipe,MnemonicletterFilterPipe,TooltipDirective],
+            providers: [TooltipService],
             imports: [
                 SabloModule],
         } )
