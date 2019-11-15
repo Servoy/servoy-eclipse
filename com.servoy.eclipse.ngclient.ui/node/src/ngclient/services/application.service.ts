@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 import {ServoyService} from '../servoy.service'
 
@@ -20,6 +21,7 @@ export class ApplicationService {
                             private sessionStorageService:SessionStorageService,
                             private windowRefService:WindowRefService,
                             private sabloService:SabloService,
+                            @Inject(DOCUMENT) private doc,
                             private modalService:NgbModal) {
     }
     
@@ -28,7 +30,15 @@ export class ApplicationService {
     }
 
     public setStyleSheets(paths) {
-        this.servoyService.getSolutionSettings().styleSheetPaths = paths;
+       if (paths)
+       {
+           for (let path of paths) {
+               let link: HTMLLinkElement = this.doc.createElement('link');
+               link.setAttribute('rel', 'stylesheet');
+               this.doc.head.appendChild(link);
+               link.setAttribute('href', path);
+           }
+       }    
     }
     
     public getUserProperty(key) {

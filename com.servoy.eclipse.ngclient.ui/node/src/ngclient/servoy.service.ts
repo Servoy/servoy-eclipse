@@ -268,7 +268,6 @@ class SolutionSettings {
     public ltrOrientation: boolean = true;
     public mainForm: FormSettings;
     public navigatorForm: FormSettings;
-    public styleSheetPaths = [];
 }
 
 class AnchorConstants {
