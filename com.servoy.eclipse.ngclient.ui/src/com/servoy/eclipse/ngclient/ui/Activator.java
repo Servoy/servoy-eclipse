@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
 import com.servoy.eclipse.ngclient.ui.utils.ZipUtils;
 
 public class Activator extends Plugin
@@ -131,7 +132,7 @@ public class Activator extends Plugin
 	public void executeNPMInstall()
 	{
 		waitFormNodeExtraction();
-		RunNPMCommand installCommand = new RunNPMCommand(nodePath, npmPath, projectFolder, "install");
+		RunNPMCommand installCommand = new RunNPMCommand(nodePath, npmPath, projectFolder, NGClientConstants.NPM_INSTALL);
 		installCommand.setUser(false);
 		createBuildCommand();
 		installCommand.setNextJob(buildCommand);
@@ -152,7 +153,7 @@ public class Activator extends Plugin
 	 */
 	private void createBuildCommand()
 	{
-		buildCommand = new RunNPMCommand(nodePath, npmPath, projectFolder, "run-script build_debug");
+		buildCommand = new RunNPMCommand(NGClientConstants.NPM_BUILD_JOB, nodePath, npmPath, projectFolder, NGClientConstants.NG_BUILD_COMMAND);
 		buildCommand.setUser(false);
 		buildCommand.setSystem(true);
 	}

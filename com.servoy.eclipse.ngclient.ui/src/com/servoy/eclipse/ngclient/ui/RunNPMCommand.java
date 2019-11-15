@@ -30,6 +30,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
+import com.servoy.eclipse.ngclient.ui.utils.NGClientConstants;
+
 /**
  * @author jcompagner
  *
@@ -42,10 +44,36 @@ public class RunNPMCommand extends WorkspaceJob
 	private final File nodePath;
 	private final File npmPath;
 	private Job nextJob;
+	private String familyJob;
 	private Process process;
+	private static boolean ngBuildRunning;
 
 	/**
-	 * @param name
+	 * RunNPMCommand constructor
+	 *
+	 * @param familyJob
+	 * @param nodePath
+	 * @param npmPath
+	 * @param projectFolder
+	 * @param commands
+	 */
+	public RunNPMCommand(String familyJob, File nodePath, File npmPath, File projectFolder, String... commands)
+	{
+		super("Execute NPM command: " + Arrays.toString(commands));
+		this.familyJob = familyJob;
+		this.commands = commands;
+		this.nodePath = nodePath;
+		this.npmPath = npmPath;
+		this.projectFolder = projectFolder;
+	}
+
+	/**
+	 * RunNPMCommand constructor
+	 *
+	 * @param nodePath
+	 * @param npmPath
+	 * @param projectFolder
+	 * @param commands
 	 */
 	public RunNPMCommand(File nodePath, File npmPath, File projectFolder, String... commands)
 	{
@@ -66,6 +94,10 @@ public class RunNPMCommand extends WorkspaceJob
 			builder.redirectErrorStream(true);
 			for (String command : commands)
 			{
+				if (command.equals(NGClientConstants.NG_BUILD_COMMAND)) // the command that runs the NG build
+				{
+					ngBuildRunning = true;
+				}
 				List<String> lst = new ArrayList<>();
 				lst.add(nodePath.getCanonicalPath());
 				lst.add(npmPath.getCanonicalPath());
@@ -82,6 +114,12 @@ public class RunNPMCommand extends WorkspaceJob
 					str = str.replaceAll(".*?m", "");
 					str = str.replaceAll("\b", "");
 					System.err.println(str.trim());
+					// The date, hash and time represents the last output line of the NG build process.
+					// The NG build is finished when this conditions is met.
+					if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+					{
+						ngBuildRunning = false;
+					}
 					read = inputStream.read(bytes);
 				}
 				inputStream.close();
@@ -110,5 +148,21 @@ public class RunNPMCommand extends WorkspaceJob
 		if (process != null) process.destroy();
 	}
 
+	/**
+	 * @param family the job family
+	 */
+	@Override
+	public boolean belongsTo(Object family)
+	{
+		return this.familyJob.equals(family);
+	}
 
+	/**
+	 * This method checks if the NG build is running or not.
+	 * @return true if the NG build is running, otherwise false
+	 */
+	public static boolean isNGBuildRunning()
+	{
+		return ngBuildRunning;
+	}
 }

@@ -27,6 +27,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
+import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -39,7 +40,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * @author jcompagner
  *
  */
-public class StartNGClientHandler extends StartWebClientHandler
+public class StartNGClientHandler extends StartWebClientHandler implements NGClientStarter
 {
 	/*
 	 * (non-Javadoc)
@@ -59,6 +60,15 @@ public class StartNGClientHandler extends StartWebClientHandler
 	 */
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+	{
+		runProgressBarAndNGClient(monitor);
+	}
+
+	/**
+	 * @param monitor
+	 */
+	@Override
+	public void startNGClient(IProgressMonitor monitor)
 	{
 		StartClientHandler.setLastCommand(StartClientHandler.START_NG_CLIENT);
 		monitor.beginTask(getStartTitle(), 5);

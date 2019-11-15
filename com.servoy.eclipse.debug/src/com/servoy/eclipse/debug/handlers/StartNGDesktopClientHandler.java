@@ -56,6 +56,7 @@ import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
+import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -69,7 +70,7 @@ import com.servoy.j2db.util.Utils;
  * @author costinchiulan
  * @since 2019.06
  */
-public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
+public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener, NGClientStarter
 {
 
 	static final String NGDESKTOP_MAJOR_VERSION = Integer.toString(ClientVersion.getMajorVersion());
@@ -263,6 +264,23 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
+		runProgressBarAndNGClient(monitor);
+	}
+
+	@Override
+	protected IDebuggerStartListener getDebuggerAboutToStartListener()
+	{
+		return this;
+	}
+
+	public void aboutToStartDebugClient()
+	{
+
+	}
+
+	@Override
+	public void startNGClient(IProgressMonitor monitor)
+	{
 		StartClientHandler.setLastCommand(StartClientHandler.START_NG_DESKTOP_CLIENT);
 		monitor.beginTask(getStartTitle(), 5);
 		monitor.worked(1);
@@ -330,17 +348,6 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			}
 		}
 		monitor.done();
-	}
-
-	@Override
-	protected IDebuggerStartListener getDebuggerAboutToStartListener()
-	{
-		return this;
-	}
-
-	public void aboutToStartDebugClient()
-	{
-
 	}
 
 }
