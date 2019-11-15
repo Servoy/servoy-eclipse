@@ -266,7 +266,6 @@ class SolutionSettings {
     public windowName: string;
     public enableAnchoring: boolean = true;
     public ltrOrientation: boolean = true;
-    public solutionTitle = "";
     public mainForm: FormSettings;
     public navigatorForm: FormSettings;
     public styleSheetPaths = [];

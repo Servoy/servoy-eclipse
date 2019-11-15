@@ -1,4 +1,5 @@
 import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service'
@@ -22,6 +23,7 @@ export class WindowService {
         private _applicationRef: ApplicationRef,
         private _injector: Injector,
         public localStorageService: LocalStorageService,
+        private titleService: Title,
         public sabloService: SabloService
         ) {
             this.bsWindowManager = new BSWindowManager();
@@ -154,7 +156,7 @@ export class WindowService {
         if ( this.instances[name] && this.instances[name].type != WINDOW_TYPE_WINDOW ) {
             this.instances[name].title = title;
         } else {
-            this.servoyService.getSolutionSettings().solutionTitle = title;
+            this.titleService.setTitle(title);
         }
     }
 
