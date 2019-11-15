@@ -102,9 +102,9 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	    			editor = editorScope;
 	    			$scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
 	    			$scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
-			    	$scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
 //			    	$scope.show_data = $toolbar.getButtons(TOOLBAR_CATEGORIES.SHOW_DATA);
 	    			if(editor.isAbsoluteFormLayout()) {
+	    			  $scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
 	    			  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
 			    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
 			    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
