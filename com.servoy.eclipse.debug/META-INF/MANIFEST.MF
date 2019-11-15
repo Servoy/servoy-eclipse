@@ -43,5 +43,7 @@ Export-Package: com.servoy.eclipse.debug,
  com.servoy.eclipse.debug.actions,
  com.servoy.eclipse.debug.handlers
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: org.eclipse.ui.internal.browser
+Import-Package: com.servoy.eclipse.ngclient.ui,
+ com.servoy.eclipse.ngclient.ui.utils,
+ org.eclipse.ui.internal.browser
 Automatic-Module-Name: com.servoy.eclipse.debug
