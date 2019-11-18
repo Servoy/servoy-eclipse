@@ -24,7 +24,8 @@ Require-Bundle: servoy_shared,
  j2db_server,
  org.apache.commons.codec,
  org.apache.commons.io;bundle-version="2.6.0",
- org.apache.commons.commons-collections4
+ org.apache.commons.commons-collections4,
+ sablo
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
