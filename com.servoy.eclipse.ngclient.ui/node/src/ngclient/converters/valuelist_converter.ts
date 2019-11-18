@@ -44,7 +44,7 @@ export class ValuelistConverter implements IConverter {
                 state.realToDisplayCache = (currentClientValue && currentClientValue[ConverterService.INTERNAL_IMPL]) ?
                 currentClientValue[ConverterService.INTERNAL_IMPL].realToDisplayCache : {};
                 state.valuelistid = serverJSONValue.valuelistid;
-                
+                state.hasRealValues = serverJSONValue.hasRealValues;
                 newValue = new Valuelist(this.sabloService, this.sabloDeferHelper, state, serverJSONValue.values);
             }
                 
@@ -90,6 +90,7 @@ class ValuelistState implements IDeferedState {
     public valuelistid: string;
     public filterStringReq: Object;
     public changeNotifier: Function;
+    public hasRealValues: boolean;
     
     deferred: Object;
     currentMsgId: number;
@@ -129,6 +130,10 @@ export class Valuelist extends Array<Object> implements IValuelist {
         if (this.state.changeNotifier) this.state.changeNotifier();
         return promise;
     } 
+    
+    hasRealValues() : boolean{
+        return this.state.hasRealValues;
+    }
     
     getDisplayValue(realValue:any): Promise<any> {
         if (realValue != null && realValue != undefined) {

@@ -172,4 +172,11 @@ describe('ValuelistConverter', () => {
       tick(1);
       expect(isFiltered).toBe(false, "filter promise should be rejected.");      
   }));
+  
+  it( 'should have real values', () => {
+      let vl = createDefaultValuelist();
+      vl['hasRealValues'] = true;
+      let val: IValuelist = converterService.convertFromServerToClient(vl , "valuelist" )
+      expect( val.hasRealValues() ).toBe(true, "valuelist should have real values");
+  });
 });

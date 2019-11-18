@@ -89,6 +89,7 @@ export interface ICustomArray<T> extends Array<T>, IChangeAwareValue {
 export interface IValuelist extends Array<any>  {
     filterList(filterString:string): Promise<any>;
     getDisplayValue(realValue:any): Promise<any>;
+    hasRealValues(): boolean;
 }
 
 export class BaseCustomObject implements ICustomObject {
