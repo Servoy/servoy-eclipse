@@ -44,7 +44,7 @@ public class RunNPMCommand extends WorkspaceJob
 	private final File nodePath;
 	private final File npmPath;
 	private Job nextJob;
-	private String familyJob;
+	private final String familyJob;
 	private Process process;
 	private static boolean ngBuildRunning;
 
@@ -82,6 +82,7 @@ public class RunNPMCommand extends WorkspaceJob
 		this.nodePath = nodePath;
 		this.npmPath = npmPath;
 		this.projectFolder = projectFolder;
+		this.familyJob = "";
 	}
 
 	@Override
