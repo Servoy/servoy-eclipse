@@ -1558,6 +1558,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							if (selection.length == ids.length) break;
 						}
 					}
+					if (selection.length !== prevSelection.length)
+						changed = true;
 				} else if (prevSelection.length > 0) {
 					changed = true;
 				}
