@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -83,6 +85,8 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -339,8 +343,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					{
 						if (sm.getServoyProject(name) == null)
 						{
-							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
-							importSolution(is, name, newSolutionName, monitor, true);
+							importSolution(NewSolutionWizardDefaultPackages.getInstance().getPackage(name), name, newSolutionName, monitor, true);
 							monitor.worked(1);
 						}
 					}
@@ -393,7 +396,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 						for (String name : packs)
 						{
-							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name).getRight();
 							IFile eclipseFile = folder.getFile(name + ".zip");
 							try
 							{
@@ -544,8 +547,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
 	}
 
-	private void importSolution(InputStream is, final String name, final String targetSolution, IProgressMonitor monitor, boolean reportImportFail)
-		throws IOException
+	private void importSolution(Pair<String, InputStream> packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
+		boolean reportImportFail) throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -555,7 +558,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
 		{
-			Utils.streamCopy(is, fos);
+			Utils.streamCopy(packageInfo.getRight(), fos);
 		}
 
 
@@ -572,6 +575,27 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);
+		// write the wpm version into the new solution project
+		String solutionVersion = packageInfo.getLeft();
+		if (solutionVersion.length() > 0)
+		{
+			ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
+
+			Properties wpmProperties = new Properties();
+			wpmProperties.put("version", solutionVersion);
+
+			try (ByteArrayOutputStream wpmbos = new ByteArrayOutputStream())
+			{
+				wpmProperties.store(wpmbos, "");
+				byte[] wpmPropertiesBytes = wpmbos.toByteArray();
+				WorkspaceFileAccess importedProjectFA = new WorkspaceFileAccess(solutionProject.getProject().getWorkspace());
+				importedProjectFA.setContents(solutionProject.getProject().getFullPath().append("wpm.properties").toOSString(), wpmPropertiesBytes);
+			}
+			catch (Exception ex)
+			{
+				Debug.log(ex);
+			}
+		}
 		cleanUPImportSolution(importSolutionFile);
 	}
 
