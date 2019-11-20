@@ -1939,6 +1939,10 @@ public class SolutionExplorerView extends ViewPart
 							{
 								// ignore the refresh for the tree, this is not displayed
 							}
+							else if (persist.getParent().getChild(persist.getUUID()) == null)
+							{
+								parents.put(persist.getParent(), null);
+							}
 							else
 							{
 								parents.put(persist, null);
