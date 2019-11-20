@@ -42,6 +42,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.EditorUtil.SaveDirtyEditorsOutputEnum;
 
 /**
  * @author jcompagner
@@ -148,7 +149,8 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 		if (!save.equals(MessageDialogWithToggle.NEVER))
 		{
 			IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
-			if ((workbenchWindows.length > 0) && EditorUtil.saveDirtyEditors(workbenchWindows[0].getShell(), save.equals(MessageDialogWithToggle.PROMPT)))
+			if ((workbenchWindows.length > 0) &&
+				SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(workbenchWindows[0].getShell(), save.equals(MessageDialogWithToggle.PROMPT)))
 			{
 				// there where dirty editors and the user canceled it.
 				return false;

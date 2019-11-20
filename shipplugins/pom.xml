@@ -445,5 +445,16 @@
 			<artifactId>jlessc</artifactId>
 			<version>1.8.0.201903221450</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.ua-parser</groupId>
+			<artifactId>uap-java</artifactId>
+			<version>1.4.4-SERVOY</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+		<dependency>
+		    <groupId>org.yaml</groupId>
+		    <artifactId>snakeyaml</artifactId>
+		    <version>1.25</version>
+		</dependency>
 	</dependencies>
 </project>

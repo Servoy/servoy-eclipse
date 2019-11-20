@@ -11,7 +11,7 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 
 public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage
 {

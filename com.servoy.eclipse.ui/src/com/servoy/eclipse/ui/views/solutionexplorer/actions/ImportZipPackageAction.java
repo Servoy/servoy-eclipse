@@ -28,9 +28,9 @@ import org.eclipse.swt.widgets.FileDialog;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 
 /**
  * @author gboros

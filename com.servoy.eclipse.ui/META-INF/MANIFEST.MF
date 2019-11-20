@@ -76,7 +76,8 @@ Require-Bundle: org.eclipse.ui,
  org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
  com.servoy.eclipse.ui.tweaks,
  org.apache.commons.codec,
- org.eclipse.help
+ org.eclipse.help,
+ com.servoy.eclipse.ngclient
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

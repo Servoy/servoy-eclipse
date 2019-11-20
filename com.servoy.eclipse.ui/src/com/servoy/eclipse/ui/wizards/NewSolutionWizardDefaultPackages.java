@@ -42,6 +42,7 @@ import org.w3c.dom.Document;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -149,7 +150,12 @@ public class NewSolutionWizardDefaultPackages
 		}
 	}
 
-	public InputStream getPackage(String name)
+	/**
+	 * Get web or solution package
+	 * @param name the name of the package
+	 * @return a pair containing the version and the package input stream
+	 */
+	public Pair<String, InputStream> getPackage(String name)
 	{
 		try
 		{
@@ -159,7 +165,7 @@ public class NewSolutionWizardDefaultPackages
 				File packageFile = new File(packagesFolder, name + "_" + downloadedPackages.get(name));
 				if (packageFile.exists())
 				{
-					return new FileInputStream(packageFile);
+					return new Pair<String, InputStream>(downloadedPackages.get(name), new FileInputStream(packageFile));
 				}
 			}
 		}
@@ -170,11 +176,11 @@ public class NewSolutionWizardDefaultPackages
 
 		if (Arrays.asList(PACKAGES).indexOf(name) != -1)
 		{
-			return NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip");
+			return new Pair<String, InputStream>("", NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip"));
 		}
 		else if (Arrays.asList(SOLUTIONS).indexOf(name) != -1)
 		{
-			return NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy");
+			return new Pair<String, InputStream>("", NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy"));
 		}
 
 		return null;

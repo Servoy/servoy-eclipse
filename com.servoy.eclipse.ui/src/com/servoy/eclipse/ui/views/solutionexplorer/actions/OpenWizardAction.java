@@ -39,6 +39,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.EditorUtil.SaveDirtyEditorsOutputEnum;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 
@@ -76,7 +77,7 @@ public class OpenWizardAction extends Action
 	{
 		try
 		{
-			if (EditorUtil.saveDirtyEditors(Display.getCurrent().getActiveShell(), true)) return;
+			if (SaveDirtyEditorsOutputEnum.CANCELED == EditorUtil.saveDirtyEditors(Display.getCurrent().getActiveShell(), true)) return;
 			final IWorkbenchWizard wizard = wizardClass.newInstance();
 
 			IStructuredSelection selection = StructuredSelection.EMPTY;

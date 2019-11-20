@@ -10,8 +10,8 @@
 		<version>2019.12.0.3540_rc</version>
 	</parent>
 
-	<artifactId>com.servoy.jre.macosx.x86_64.feature</artifactId>
-	<packaging>eclipse-feature</packaging>
+	<artifactId>com.servoy.jre.macosx.x86_64</artifactId>
+	<packaging>eclipse-plugin</packaging>
 	<version>12.0.0</version>
 	
 	<properties>
@@ -31,34 +31,6 @@
 						</fileset>
 					</filesets>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.google.code.maven-replacer-plugin</groupId>
-				<artifactId>replacer</artifactId>
-				<version>1.5.3</version>
-				<executions>
-					<execution>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>replace</goal>
-						</goals>
-						<configuration>
-							<file>${basedir}/p2.inf.template</file>
-							<outputFile>${basedir}/p2.inf</outputFile>
-							<regex>false</regex>
-							<replacements>
-								<replacement>
-									<token>project.artifactId</token>
-									<value>${project.artifactId}</value>
-								</replacement>
-								<replacement>
-									<token>version</token>
-									<value>${qualifiedVersion}</value>
-								</replacement>
-							</replacements>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>

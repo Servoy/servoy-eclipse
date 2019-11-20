@@ -20,7 +20,8 @@ Require-Bundle: servoy_shared,
  sablo,
  org.apache.commons.io;bundle-version="2.6.0",
  org.eclipse.swt,
- org.eclipse.jface
+ org.eclipse.jface,
+ com.servoy.eclipse.ngclient
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
  com.servoy.eclipse.model.export,

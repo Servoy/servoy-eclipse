@@ -380,7 +380,6 @@ html, body
 }
 
 .moreMenuItem {
-	background: transparent  url('../images/more.png') no-repeat center;
     cursor: pointer;
     height: 18px;
     width: 20px;
@@ -392,6 +391,16 @@ html, body
 	display: none;
 }
 
+.dropdownMenu  > i {
+	display: inline-block;
+	color: black;
+	vertical-align: middle;
+}
+
+.dropdownMenu:hover  > i {
+	display: none;
+}
+
 .dropdownMenu:hover > ul {
 	display: block;
 	background: #FFFFFF;
@@ -400,6 +409,8 @@ html, body
   	border-radius: 4px;
 	width: 100px;
 	line-height: 20px;
+	margin-top: -10px;
+	margin-left: -5px;
 }
 
 .dropdownMenu > ul > li:hover {

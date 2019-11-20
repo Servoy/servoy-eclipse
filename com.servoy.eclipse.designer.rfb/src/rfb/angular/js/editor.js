@@ -755,6 +755,13 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 			}
 			
+			$scope.setMainContainerSize = function() {
+				var maincontainer = $($scope.contentDocument).find('*[data-maincontainer="true"]');
+				if(maincontainer) {
+					maincontainer.css('min-height', $element.find('.contentframe').css('min-height'));
+					maincontainer.css('min-width', $element.find('.contentframe').css('min-width'));
+				}
+			}
 			$scope.setContentSize = function(width, height,fixedSize) {
 				$scope.contentStyle.width = width;
 				$scope.contentStyle.height = height;
@@ -774,6 +781,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				if (!$scope.isAbsoluteFormLayout()) {
 					$($scope.contentDocument).find('.svy-form').css('width', width);
 					$($scope.contentDocument).find('.svy-form').css('height', height);
+					$scope.setMainContainerSize();
 					$element.find('.content')[0].style.height = height;
 		       		$element.find('.contentframe')[0].style.height = height;
 				}
@@ -1030,6 +1038,15 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	        						$scope.glasspaneStyle.height = (contentDivRendered.offsetHeight + 20) + 'px';
 					            }, 200);
 					        }
+							else {
+								var maincontainer =  $($scope.contentDocument).find('*[data-maincontainer="true"]')[0];
+								if (maincontainer) {
+									$scope.glasspaneStyle['min-height'] = (maincontainer.offsetHeight + 20) + 'px';
+									$scope.glasspaneStyle.width = (maincontainer.offsetWidth +20) + 'px';
+									$element.find('.content')[0].style['min-height'] = maincontainer.offsetHeight+'px';
+									$element.find('.contentframe')[0].style.height = maincontainer.offsetHeight+'px';
+								}
+							}
 					}
 				}
 			}
@@ -1541,6 +1558,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							if (selection.length == ids.length) break;
 						}
 					}
+					if (selection.length !== prevSelection.length)
+						changed = true;
 				} else if (prevSelection.length > 0) {
 					changed = true;
 				}
@@ -1660,6 +1679,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		adjustSizes: function() {
 			editorScope.adjustIFrameSize();
 			editorScope.adjustGlassPaneSize();
+			editorScope.setMainContainerSize();
 			editorScope.redrawDecorators();
 		},
 		
@@ -1679,8 +1699,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			return wsSession.callService('formeditor', 'setZoomLevel', {
 				"zoomLevel": value
 			}, false)
-		}		
-
+		}
 		// add more service methods here
 	}
 }).factory("loadingIndicator", function() {

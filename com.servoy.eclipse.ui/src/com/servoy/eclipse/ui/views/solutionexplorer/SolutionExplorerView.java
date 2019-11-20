@@ -1939,6 +1939,10 @@ public class SolutionExplorerView extends ViewPart
 							{
 								// ignore the refresh for the tree, this is not displayed
 							}
+							else if (persist.getParent().getChild(persist.getUUID()) == null)
+							{
+								parents.put(persist.getParent(), null);
+							}
 							else
 							{
 								parents.put(persist, null);
@@ -3590,7 +3594,7 @@ public class SolutionExplorerView extends ViewPart
 				// state);
 				// this is why we need to use the selection given by the event
 				// instead of the selection given by the tree
-				boolean isForm = (doubleClickedItem.getType() == UserNodeType.FORM); // form open action was moved to the designer plugin, so we must make a special case for it (it is no longer part of openActionInTree)
+				final boolean isForm = (doubleClickedItem.getType() == UserNodeType.FORM); // form open action was moved to the designer plugin, so we must make a special case for it (it is no longer part of openActionInTree)
 				openActionInTree.selectionChanged(new SelectionChangedEvent(tree, new StructuredSelection(doubleClickedItem)));
 
 				IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
@@ -3603,7 +3607,8 @@ public class SolutionExplorerView extends ViewPart
 				boolean globalsDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(globalsDblClickOption));
 				if (isForm && (ctrlPressed || formDblClickOptionDefined))
 				{
-					if (ctrlPressed || SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
+					final boolean isFormComponent = ((Form)doubleClickedItem.getRealObject()).isFormComponent().booleanValue();
+					if (isFormComponent || ctrlPressed || SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
 					{
 						EditorUtil.openFormDesignEditor((Form)doubleClickedItem.getRealObject());
 					}

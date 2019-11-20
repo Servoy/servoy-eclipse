@@ -17,7 +17,8 @@ Require-Bundle: org.apache.tomcat,
  org.eclipse.core.runtime,
  org.apache.httpcomponents.httpcore,
  org.apache.httpcomponents.httpclient,
- org.apache.commons.io;bundle-version="2.6.0"
+ org.apache.commons.io;bundle-version="2.6.0",
+ com.servoy.eclipse.ngclient
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.servlet,

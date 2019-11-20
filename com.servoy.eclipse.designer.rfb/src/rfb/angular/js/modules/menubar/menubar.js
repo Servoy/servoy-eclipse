@@ -87,7 +87,7 @@ angular.module("menubar",[]).directive("menubar", function($editorService, $root
                     },
                     execute: function(e)
                     {
-                       addAdter(e);
+                       addAfter(e);
                     }
                 },
                 {
@@ -208,7 +208,8 @@ angular.module("menubar",[]).directive("menubar", function($editorService, $root
                     },
                     execute: function(e)
                     {
-                       	zoomIn(e);
+                       	e.stopPropagation();
+						$editorService.keyPressed({"keyCode":46});
                     }
                 }
 			];
