@@ -18,7 +18,7 @@ export class JSONArrayConverter implements IConverter {
     constructor( private converterService: ConverterService, private specTypesService: SpecTypesService, private iterableDiffers: IterableDiffers ) {
     }
 
-    fromServerToClient( serverJSONValue, currentClientValue?: ICustomArray<any>) {
+    fromServerToClient( serverJSONValue, currentClientValue?: ICustomArray<any>, propertyContext?:(propertyName: string)=>any) {
         let newValue = currentClientValue;
         let state: ArrayState = null;
 
@@ -41,7 +41,7 @@ export class JSONArrayConverter implements IConverter {
 
                         if ( conversionInfo ) {
                             state.conversionInfo[c] = conversionInfo;
-                            newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined);
+                            newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined, propertyContext);
                         }
 
                         if ( instanceOfChangeAwareValue( elem ) ) {
@@ -84,7 +84,7 @@ export class JSONArrayConverter implements IConverter {
 
                             if ( conversionInfo ) {
                                 state.conversionInfo[idx] = conversionInfo;
-                                val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[idx]);
+                                val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[idx], propertyContext);
                             }
                             currentClientValue.splice( idx, 0, val );
 
@@ -111,7 +111,7 @@ export class JSONArrayConverter implements IConverter {
 
                             if ( conversionInfo ) {
                                 state.conversionInfo[idx] = conversionInfo;
-                                currentClientValue[idx] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[idx]);
+                                currentClientValue[idx] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[idx], propertyContext);
                             } else currentClientValue[idx] = val;
 
                             if ( instanceOfChangeAwareValue( val ) ) {

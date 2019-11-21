@@ -43,7 +43,7 @@ export class ServicesService {
                         if ( conversionInfo && conversionInfo[servicename] && conversionInfo[servicename][key] ) {
                             // convert property, remember type for when a client-server conversion will be needed
                             if ( !this.serviceScopesConversionInfo[servicename] ) this.serviceScopesConversionInfo[servicename] = {};
-                            serviceData[key] = this.converterService.convertFromServerToClient( serviceData[key], conversionInfo[servicename][key], service[key])
+                            serviceData[key] = this.converterService.convertFromServerToClient( serviceData[key], conversionInfo[servicename][key], service[key], undefined )
                             this.serviceScopesConversionInfo[servicename][key] = conversionInfo[servicename][key];
                         } else if ( this.serviceScopesConversionInfo[servicename] && this.serviceScopesConversionInfo[servicename][key] ) {
                             delete this.serviceScopesConversionInfo[servicename][key];

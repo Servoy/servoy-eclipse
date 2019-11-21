@@ -17,13 +17,14 @@ export class JSONObjectConverter implements IConverter {
     constructor( private converterService: ConverterService, private specTypesService: SpecTypesService ) {
     }
 
-    fromServerToClient( serverJSONValue, currentClientValue?: BaseCustomObject) {
+    fromServerToClient( serverJSONValue, currentClientValue?: BaseCustomObject, propertyContext?:(propertyName: string)=>any) {
         let newValue = currentClientValue;
         // remove old watches (and, at the end create new ones) to avoid old watches getting triggered by server side change
         // TODO  removeAllWatches(currentClientValue);
         if ( serverJSONValue && serverJSONValue[JSONObjectConverter.VALUE] ) {
             // full contents
             newValue = serverJSONValue[JSONObjectConverter.VALUE];
+            let customObjectPropertyContext = this.getCustomObjectPropertyContext(newValue, propertyContext);
             const clientObject = this.specTypesService.createType( serverJSONValue[JSONObjectConverter.REAL_TYPE] );
             const internalState = clientObject.getStateHolder();
             internalState.ignoreChanges = true;
@@ -39,7 +40,7 @@ export class JSONObjectConverter implements IConverter {
 
                 if ( conversionInfo ) {
                     internalState.conversionInfo[c] = conversionInfo;
-                    newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined);
+                    newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined, customObjectPropertyContext);
                 }
                 clientObject[c] = elem;
             }
@@ -50,6 +51,7 @@ export class JSONObjectConverter implements IConverter {
             // granular updates received;
 
             const internalState = currentClientValue.getStateHolder();
+            let customObjectPropertyContext = this.getCustomObjectPropertyContext(currentClientValue, propertyContext);
 
             // this can happen when an object value was set completely in browser and the child values need to instrument their browser values as well in which case the server sends 'initialize' updates for both this array and 'smart' child values
             if ( serverJSONValue[JSONObjectConverter.INITIALIZE] ) internalState[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
@@ -73,7 +75,7 @@ export class JSONObjectConverter implements IConverter {
 
                     if ( conversionInfo ) {
                         internalState.conversionInfo[key] = conversionInfo;
-                        currentClientValue[key] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[key] );
+                        currentClientValue[key] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[key], customObjectPropertyContext );
                     } else currentClientValue[key] = val;
                 }
                 internalState.ignoreChanges = false;
@@ -169,5 +171,13 @@ export class JSONObjectConverter implements IConverter {
         // it would probably work if it's some JSON who's structure matches what is expected by server but most of the time this happens due to unintended ERRORS
         return newClientData;
 
+    }
+    
+    getCustomObjectPropertyContext(currentClientValue: BaseCustomObject, parentPropertyContext:(propertyName: string)=>any) : any {
+        // property context that we pass here should search first in the current custom object value and only fallback to "parentPropertyContext" if needed
+        return propertyName => {
+            if (currentClientValue.hasOwnProperty(propertyName)) return currentClientValue[propertyName]; // can even be null or undefined as long as it is set on this object
+            else return parentPropertyContext ? parentPropertyContext(propertyName) : undefined; // fall back to parent object nesting context
+        }
     }
 }

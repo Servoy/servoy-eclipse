@@ -398,7 +398,7 @@ export class WebsocketSession {
             if ( obj.services ) {
                 // services call, first process the once with the flag 'apply_first'
                 if ( obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].services ) {
-                    obj.services = this.converterService.convertFromServerToClient( obj.services, obj[ConverterService.TYPES_KEY].services, undefined )
+                    obj.services = this.converterService.convertFromServerToClient( obj.services, obj[ConverterService.TYPES_KEY].services, undefined, undefined )
                 }
                 for ( var index in obj.services ) {
                     var service = obj.services[index];
@@ -423,12 +423,12 @@ export class WebsocketSession {
                     if ( obj.exception ) {
                         // something went wrong
                         if ( obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].exception ) {
-                            obj.exception = this.converterService.convertFromServerToClient( obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined)
+                            obj.exception = this.converterService.convertFromServerToClient( obj.exception, obj[ConverterService.TYPES_KEY].exception, undefined, undefined)
                         }
                         deferredEvent.reject( obj.exception );
                     } else {
                         if ( obj[ConverterService.TYPES_KEY] && obj[ConverterService.TYPES_KEY].ret ) {
-                            obj.ret = this.converterService.convertFromServerToClient( obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined )
+                            obj.ret = this.converterService.convertFromServerToClient( obj.ret, obj[ConverterService.TYPES_KEY].ret, undefined, undefined )
                         }
                         deferredEvent.resolve( obj.ret );
                     }

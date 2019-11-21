@@ -48,7 +48,7 @@ export class SabloService {
         this.wsSession.onMessageObject(( msg, conversionInfo ) => {
             // data got back from the server
 
-            if ( conversionInfo && conversionInfo.call ) msg.call = this.converterService.convertFromServerToClient( msg.call, conversionInfo.call, undefined );
+            if ( conversionInfo && conversionInfo.call ) msg.call = this.converterService.convertFromServerToClient( msg.call, conversionInfo.call, undefined, undefined );
 
             if ( msg.clientnr ) {
                 this.sessionStorage.set( "clientnr", msg.clientnr );

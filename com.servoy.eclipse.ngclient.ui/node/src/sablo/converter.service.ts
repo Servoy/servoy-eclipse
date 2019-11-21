@@ -17,22 +17,22 @@ export class ConverterService {
         this.log = logFactory.getLogger("ConverterService");
     }
 
-    public convertFromServerToClient( serverSentData, conversionInfo, currentClientData?) {
+    public convertFromServerToClient( serverSentData, conversionInfo, currentClientData?, propertyContext?:(propertyName: string)=>any) {
         if ( typeof conversionInfo === 'string' || typeof conversionInfo === 'number' ) {
             var customConverter = this.customPropertyConverters[conversionInfo];
-            if ( customConverter ) serverSentData = customConverter.fromServerToClient( serverSentData, currentClientData);
+            if ( customConverter ) serverSentData = customConverter.fromServerToClient( serverSentData, currentClientData, propertyContext);
             else { //converter not found - will not convert
                 this.log.error(this.log.buildMessage(() => ("cannot find type converter (s->c) for: '" + conversionInfo + "'.")));
             }
         } else if ( conversionInfo ) {
             for ( var conKey in conversionInfo ) {
-                serverSentData[conKey] = this.convertFromServerToClient( serverSentData[conKey], conversionInfo[conKey], currentClientData ? currentClientData[conKey] : undefined ); 
+                serverSentData[conKey] = this.convertFromServerToClient( serverSentData[conKey], conversionInfo[conKey], currentClientData ? currentClientData[conKey] : undefined, propertyContext ); 
             }
         }
         return serverSentData;
     }
 
-    public convertFromClientToServer( newClientData, conversionInfo, oldClientData?) {
+    public convertFromClientToServer( newClientData, conversionInfo, oldClientData?, propertyContext?) {
         if ( typeof conversionInfo === 'string' || typeof conversionInfo === 'number' ) {
             var customConverter = this.customPropertyConverters[conversionInfo];
             if ( customConverter ) return customConverter.fromClientToServer( newClientData, oldClientData );
@@ -43,7 +43,7 @@ export class ConverterService {
         } else if ( conversionInfo ) {
             var retVal = Array.isArray( newClientData ) ? [] : {};// was: (Array.isArray ? Array.isArray(newClientData) : $.isArray(newClientData)) ? [] : {};
             for ( var conKey in conversionInfo ) {
-                retVal[conKey] = this.convertFromClientToServer( newClientData[conKey], conversionInfo[conKey], oldClientData ? oldClientData[conKey] : undefined );
+                retVal[conKey] = this.convertFromClientToServer( newClientData[conKey], conversionInfo[conKey], oldClientData ? oldClientData[conKey] : undefined, propertyContext );
             }
             return retVal;
         } else {
@@ -220,7 +220,7 @@ export class ConverterService {
 }
 
 export interface IConverter {
-    fromServerToClient( serverSentData: Object, currentClientData: Object ): Object;
+    fromServerToClient( serverSentData: Object, currentClientData: Object, propertyContext:(propertyName: string)=>any ): Object;
     fromClientToServer( newClientData: Object, oldClientData: Object ): Object;
 }
 
