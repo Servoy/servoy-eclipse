@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -46,11 +49,19 @@ public class ExportPage extends WizardPage
 	public static String WINDOWS_PLATFORM = "win";
 	public static String MACOS_PLATFORM = "mac";
 	public static String LINUX_PLATFORM = "linux";
+	
+	private static String initialPath = getInitialImportPath();
 
 	private Text applicationURLText;
 	private Text saveDir;
 	private Group platformGroup;
 	public Label tempLabelStatus;
+	
+	public Text iconPath;
+	private Button browseIconButton;
+	public Text imgPath;
+	private Button browseImgButton;
+	public Text copyrightText;
 
 	private List<String> selectedPlatforms = new ArrayList<String>();
 	private ExportNGDesktopWizard exportElectronWizard;
@@ -143,6 +154,84 @@ public class ExportPage extends WizardPage
 
 		if (System.getProperty("ngclient.rebranding.data", null) != null)
 		{
+			
+			Label iconLabel = new Label(composite, SWT.NONE);
+			iconLabel.setText("Icon path:");
+			iconLabel.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum size: 1 MB");
+			
+			iconPath = new Text(composite, SWT.BORDER);
+			iconPath.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum file size: 1 MB");
+			iconPath.setEditable(true);
+			iconPath.setVisible(true);
+			gd = new GridData(GridData.FILL_HORIZONTAL);
+			gd.horizontalSpan = 1;
+			iconPath.setLayoutData(gd);
+			
+
+			browseIconButton = new Button(composite, SWT.NONE);
+			browseIconButton.setText("Browse");
+			browseIconButton.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
+					dlg.setFilterExtensions(new String[] { "*.png" });
+					if (initialPath != null) dlg.setFilterPath(initialPath);
+					if (dlg.open() != null)
+					{
+						initialPath = dlg.getFilterPath();
+						iconPath.setText(dlg.getFilterPath() + File.separator + dlg.getFileName());
+					}
+				}
+			});
+			
+			Label imgLabel = new Label(composite, SWT.NONE);
+			imgLabel.setText("Image path:");
+			imgLabel.setToolTipText("Bitmap image used in the installer. For Windows installer the recommended size is 164 px width, 314 px height.\nMaximum file size: 5 MB");
+			
+			imgPath = new Text(composite, SWT.BORDER);
+			imgPath.setToolTipText("The maximum allowed size for the logo is 5 MB");
+			imgPath.setEditable(true);
+			imgPath.setVisible(true);
+			gd = new GridData(GridData.FILL_HORIZONTAL);
+			gd.horizontalSpan = 1;
+			imgPath.setLayoutData(gd);
+			
+
+			browseImgButton = new Button(composite, SWT.NONE);
+			browseImgButton.setText("Browse");
+			browseImgButton.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
+					dlg.setFilterExtensions(new String[] { "*.bmp" });
+					if (initialPath != null) dlg.setFilterPath(initialPath);
+					if (dlg.open() != null)
+					{
+						initialPath = dlg.getFilterPath();
+						imgPath.setText(dlg.getFilterPath() + File.separator + dlg.getFileName());
+					}
+				}
+			});
+			
+			Label copyrightLabel = new Label(composite, SWT.NONE);
+			copyrightLabel.setText("Copyright:");
+			copyrightLabel.setToolTipText("The maximum allowed length is 128 chars");
+			
+			copyrightText = new Text(composite, SWT.BORDER);
+			copyrightText.setToolTipText("The maximum allowed length is 128 chars");
+			copyrightText.setEditable(true);
+			copyrightText.setVisible(true);
+			gd = new GridData(GridData.FILL_HORIZONTAL);
+			gd.horizontalSpan = 2;
+			copyrightText.setLayoutData(gd);
+			
+			Label sizeLabel = new Label(composite, SWT.NONE);
+			sizeLabel.setText("Size (width / height):");
+			
 			tempLabelStatus = new Label(composite, SWT.NONE);
 			tempLabelStatus.setText("Status (test mode): ");
 			gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -151,6 +240,25 @@ public class ExportPage extends WizardPage
 			tempLabelStatus.setVisible(true);
 		}
 		setControl(composite);
+	}
+	
+	public String getIconPath() {
+		return iconPath.getText();
+	}
+	
+	public String getImgPath() {
+		return imgPath.getText();
+	}
+	
+	public String getCopyright() {
+		return copyrightText.getText();
+	}
+	
+	private static String getInitialImportPath()
+	{
+		String as_dir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory().replace("\\", "/").replace("//", "/");
+		if (!as_dir.endsWith("/")) as_dir += "/";
+		return Paths.get(as_dir).getParent().toString();
 	}
 
 	private String getInitialApplicationURL()
