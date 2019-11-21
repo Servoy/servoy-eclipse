@@ -33,15 +33,16 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FileUtils;
 
 import com.servoy.j2db.util.MimeTypes;
+import com.servoy.j2db.util.Settings;
 
 /**
  * @author jcomp
  *
  */
-@WebFilter(urlPatterns = { "/solution/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD })
+@WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD })
 public class IndexPageFilter implements Filter
 {
-	public static final String SOLUTIONS_PATH = "/solution/";
+	public static final String SOLUTIONS_PATH = "/";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException
@@ -63,7 +64,8 @@ public class IndexPageFilter implements Filter
 			{
 				File file = new File(distFolder, "index.html");
 				String indexHtml = FileUtils.readFileToString(file, "UTF-8");
-				indexHtml = indexHtml.replace("<base href=\"/\">", "<base href=\"/solution/\">");
+				final String path = Settings.getInstance().getProperty("servoy.context.path", request.getContextPath() + '/');
+				indexHtml = indexHtml.replace("<base href=\"/\">", "<base href=\"" + path + "\">");
 				servletResponse.setCharacterEncoding("UTF-8");
 				servletResponse.setContentType("text/html");
 				servletResponse.setContentLengthLong(indexHtml.length());
