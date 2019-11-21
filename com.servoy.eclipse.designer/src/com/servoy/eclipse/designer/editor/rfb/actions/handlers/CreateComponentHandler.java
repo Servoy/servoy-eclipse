@@ -276,6 +276,7 @@ public class CreateComponentHandler implements IServerService
 					if (next instanceof ISupportChilds)
 					{
 						ISupportChilds iSupportChilds = (ISupportChilds)next;
+						iSupportChilds = (ISupportChilds)ElementUtil.getOverridePersist(PersistContext.create(iSupportChilds, editorPart.getForm()));
 						Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
 						String tabName = "tab_" + id.incrementAndGet();
 						while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
@@ -316,8 +317,8 @@ public class CreateComponentHandler implements IServerService
 					}
 				}
 			}
-			if (editorPart.getForm().isResponsiveLayout() &&
-				!CSSPositionUtils.isCSSPositionContainer(parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
+			if (editorPart.getForm().isResponsiveLayout() && !CSSPositionUtils.isCSSPositionContainer(
+				parentSupportingElements instanceof LayoutContainer ? (LayoutContainer)parentSupportingElements : null))
 			{
 				List<IPersist> children = new ArrayList<IPersist>();
 				Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
