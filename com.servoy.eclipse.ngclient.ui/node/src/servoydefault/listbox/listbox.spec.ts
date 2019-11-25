@@ -8,7 +8,7 @@ import {FormatFilterPipe,SvyFormat, FormattingService, StartEditDirective, Toolt
 import { FormsModule } from '@angular/forms';
 
 
-describe("ServoyDefaultTextField", () => {
+describe("ServoyDefaultListBox", () => {
   let component: ServoyDefaultListBox;
   let fixture: ComponentFixture<ServoyDefaultListBox>;
 
