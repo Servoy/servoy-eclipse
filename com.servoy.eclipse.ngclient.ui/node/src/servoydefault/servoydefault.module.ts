@@ -35,9 +35,8 @@ import { OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
 import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-datetime-moment';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {EditorModule} from "@tinymce/tinymce-angular";
 import {ServoyDefaultSpinner} from "./spinner/spinner";
-
+import { AngularEditorModule } from '@kolkov/angular-editor';
 
 @NgModule({
   declarations: [
@@ -74,12 +73,12 @@ import {ServoyDefaultSpinner} from "./spinner/spinner";
   imports:[
     FormsModule,
     CommonModule,
-    EditorModule,
     NgbModule,
     SabloModule,
     BrowserAnimationsModule,
     OwlDateTimeModule,
-    OwlMomentDateTimeModule
+    OwlMomentDateTimeModule,
+    AngularEditorModule
   ],
   exports: [
             ServoyDefaultTextField,

@@ -24,10 +24,6 @@
               "src/styles.css"
             ],
             "scripts": [
-              "src/servoydefault/htmlarea/tinymce/tinymce.min.js",
-              "src/servoydefault/htmlarea/tinymce/themes/modern/theme.js",
-              "src/servoydefault/htmlarea/tinymce/plugins/tabindex/plugin.js",
-              "src/servoydefault/htmlarea/tinymce/plugins/resizetocontainer/plugin.js",
               "node_modules/jquery/dist/jquery.min.js" 
             ]
           },
@@ -75,12 +71,6 @@
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
-            "scripts": [
-              "src/servoydefault/htmlarea/tinymce/tinymce.min.js",
-              "src/servoydefault/htmlarea/tinymce/themes/modern/theme.js",
-              "src/servoydefault/htmlarea/tinymce/plugins/tabindex/plugin.js",
-              "src/servoydefault/htmlarea/tinymce/plugins/resizetocontainer/plugin.js"
-            ],
             "styles": [
               "src/styles.css"
             ],

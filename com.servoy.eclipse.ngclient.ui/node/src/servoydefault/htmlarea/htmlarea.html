@@ -3,5 +3,5 @@
      [id]="servoyApi.getMarkupId()" 
      [svyTooltip]="toolTipText"
      #element>
-  <editor #child [init]="ServoyTinyMCESettings" ></editor>
+  <angular-editor [(ngModel)]="dataProviderID" (ngModelChange)="update($event)" [config]="config" #child></angular-editor>
 </div>
