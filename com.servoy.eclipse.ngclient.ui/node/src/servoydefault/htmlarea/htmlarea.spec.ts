@@ -3,8 +3,9 @@ import { ServoyDefaultHtmlarea  } from './htmlarea';
 import {FormattingService, ServoyApi, TooltipDirective, TooltipService} from "../../ngclient/servoy_public";
 import {SabloModule} from "../../sablo/sablo.module";
 import {FormsModule} from "@angular/forms";
-import {EditorComponent} from "@tinymce/tinymce-angular";
 import {By} from "@angular/platform-browser";
+import { AngularEditorModule } from '@kolkov/angular-editor';
+import {HttpClientModule} from '@angular/common/http';
 
 describe('HtmlareaComponent', () => {
   let component: ServoyDefaultHtmlarea;
@@ -16,8 +17,8 @@ describe('HtmlareaComponent', () => {
     servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","isInDesigner"]);
 
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultHtmlarea, EditorComponent,TooltipDirective],
-      imports: [SabloModule, FormsModule],
+      declarations: [ ServoyDefaultHtmlarea,TooltipDirective],
+      imports: [SabloModule, FormsModule,AngularEditorModule,HttpClientModule],
       providers: [FormattingService,TooltipService]
     })
     .compileComponents();
