@@ -12,7 +12,7 @@ describe("ServoyDefaultTextField", () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultTex tField, FormatFilterPipe, SvyFormat,DecimalkeyconverterDirective, StartEditDirective,TooltipDirective],
+      declarations: [ ServoyDefaultTextField, FormatFilterPipe, SvyFormat,DecimalkeyconverterDirective, StartEditDirective,TooltipDirective],
       imports: [SabloModule],
       providers: [FormatFilterPipe,FormattingService,TooltipService]
     })
@@ -27,6 +27,6 @@ describe("ServoyDefaultTextField", () => {
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(component).toBeFalsy();
   });
 });
