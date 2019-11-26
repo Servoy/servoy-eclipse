@@ -12,7 +12,7 @@ describe("ServoyDefaultTextField", () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultTextField, FormatFilterPipe, SvyFormat,DecimalkeyconverterDirective, StartEditDirective,TooltipDirective],
+      declarations: [ ServoyDefaultTex tField, FormatFilterPipe, SvyFormat,DecimalkeyconverterDirective, StartEditDirective,TooltipDirective],
       imports: [SabloModule],
       providers: [FormatFilterPipe,FormattingService,TooltipService]
     })
