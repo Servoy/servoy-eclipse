@@ -96,7 +96,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	      transclude: true,
 	      scope: {
 	      },
-	      controller: function($scope, $element, $attrs, $toolbar) {
+	      controller: function($scope, $element, $attrs, $toolbar, $editorService) {
 	    	  var editor;
 	    	  $pluginRegistry.registerPlugin(function(editorScope) {
 	    			editor = editorScope;
@@ -114,11 +114,13 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	    			}
 	    			else {
 	    				$scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
-						$scope.zoom = $toolbar.getButtons(TOOLBAR_CATEGORIES.ZOOM);
 						$scope.zoom_level = $toolbar.getButtons(TOOLBAR_CATEGORIES.ZOOM_LEVEL);
 	    				$scope.design_mode = $toolbar.getButtons(TOOLBAR_CATEGORIES.DESIGN_MODE);
 	    				$scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
 	    			}
+					if (!editor.isAbsoluteFormLayout() || $editorService.isShowingContainer()) {
+							$scope.zoom = $toolbar.getButtons(TOOLBAR_CATEGORIES.ZOOM);
+					}
 	    			$scope.standard_actions = $toolbar.getButtons(TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 	    	  });
 	    	  

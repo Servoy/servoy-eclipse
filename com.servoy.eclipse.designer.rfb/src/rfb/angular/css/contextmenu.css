@@ -58,6 +58,11 @@
 .dropdown-menu .disabled a
 {
 	opacity: 0.5;
+	pointer-events: none;
+}
+
+.dropdown-menu .disabled {
+	cursor: not-allowed;
 }
 
 .dropdown-menu .invisible

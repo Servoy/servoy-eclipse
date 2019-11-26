@@ -57,6 +57,9 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 {
 	private ExportPage exportPage;
 	private static int POLLING_INTERVAL = 1000;
+	private static int LOGO_SIZE = 1024; //KB;
+	private static int IMG_SIZE = 5120;  //KB;
+	private static int COPYRIGHT_LENGTH = 128; //chars
 
 	public static final String NGDESKTOP_SERVICE_PROTOCOL = "http://";
 
@@ -207,15 +210,19 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 		boolean downloadInstallers = false;
 
-		//TODO: refactoring after getting data through exportPage
+		if (!validateRebranding()) {			
+			errorMsg.append("Invalid data for rebranding ...");
+		}
+		
 		//need declarations here - cause they will be reassigned to final vars for lamba processing below
 		Map rebrandingData = null;
-		String rebrIconPath = null;
-		String rebrImagePath = null;
-		String rebrCopyrightStr = null;
+		String rebrIconPath = exportPage.getIconPath();
+		String rebrImagePath = exportPage.getImgPath();
+		String rebrCopyrightStr = exportPage.getCopyright();
 		InetAddress serviceAddress = null;
 		int servicePort = 0;
 
+		//TODO: refactoring when host address (and port) will be known in the cloud
 		String rebrandingPath = System.getProperty("ngclient.rebranding.data", null);
 		if (rebrandingPath != null)
 		{
@@ -224,9 +231,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			try
 			{
 				rebrandingData = getRebrandingData(rebrandingPath);
-				rebrIconPath = (String)rebrandingData.get("iconPath");
-				rebrImagePath = (String)rebrandingData.get("imagePath");
-				rebrCopyrightStr = (String)rebrandingData.get("copyrightStr");
 				serviceAddress = InetAddress.getByName(((String)rebrandingData.get("serviceAddress")).trim());
 				servicePort = Integer.parseInt((String)rebrandingData.get("servicePort"));
 			}
@@ -352,6 +356,26 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			return true;
 		}
 
+	}
+	
+	private boolean validateRebranding() {
+		String rebrIconPath = exportPage.getIconPath();
+		String rebrImagePath = exportPage.getImgPath();
+		String rebrCopyrightStr = exportPage.getCopyright();
+		if (rebrIconPath.trim().length() == 0 || 
+			rebrImagePath.trim().length() == 0 || 
+			rebrCopyrightStr.trim().length() == 0) {
+			
+			return false;
+		}
+		File logoFile = new File(rebrIconPath);
+		File imgFile = new File(rebrImagePath);		
+		//if file does not exist - the returned value is 0, else the size in bytes is returned (so convert to KB before comparison)
+		if (logoFile.length() > 0 && (logoFile.length() / 1024) > LOGO_SIZE) return false;
+		if (imgFile.length() > 0 && (imgFile.length() / 1024) > IMG_SIZE) return false;
+		if (rebrCopyrightStr.toCharArray().length > COPYRIGHT_LENGTH) return false;
+		
+		return true;
 	}
 
 	@Override
