@@ -156,12 +156,10 @@ export class ServoyService {
                 try {
                     numeral.localeData((country + '-' + country).toLowerCase());
                     numeral.locale((country + '-' + country).toLowerCase());
-                    if (!initializing) webStorage.session.set("locale", (country + '-' + country).toLowerCase());
                 } catch(e3) {
                     try {
                         numeral.localeData(country.toLowerCase());
                         numeral.locale(country.toLowerCase());
-                        if (!initializing) webStorage.session.set("locale", country.toLowerCase());
                     } catch(e4) {
                         try {
                             //try it with just the language part
