@@ -154,36 +154,48 @@ export class ServoyService {
                 numeral.locale(language + '-' + country);
             } catch(e2) {
                 try {
-                    //try it with just the language part
-                    numeral.localeData(language);
-                    numeral.locale(language);
+                    numeral.localeData((country + '-' + country).toLowerCase());
+                    numeral.locale((country + '-' + country).toLowerCase());
+                    if (!initializing) webStorage.session.set("locale", (country + '-' + country).toLowerCase());
                 } catch(e3) {
                     try {
-                        //try it with just the language part but lowercase
-                        numeral.localeData(language.toLowerCase());
-                        numeral.locale(language.toLowerCase());
+                        numeral.localeData(country.toLowerCase());
+                        numeral.locale(country.toLowerCase());
+                        if (!initializing) webStorage.session.set("locale", country.toLowerCase());
                     } catch(e4) {
                         try {
-                            //try to duplicate the language in case it's only defined like that
-                            numeral.localeData(language.toLowerCase() + "-" + language.toLowerCase()); // nl-nl for example is defined but browser only says 'nl' (this won't work for all languages for example "en-en" I don't think even exists)
-                            numeral.locale(language.toLowerCase() + "-" + language.toLowerCase()); 
+                            //try it with just the language part
+                            numeral.localeData(language);
+                            numeral.locale(language);
                         } catch(e5) {
-                            // we can't find a suitable locale defined in locales.js; get the needed things from server (Java knows more locales)
-                            // and create the locate info from that
-                            var promise = this.sabloService.callService("i18nService", "generateLocaleForNumeralJS", country ? {'language' : language, 'country' : country} : {'language' : language}, false);
-                            // TODO should we always do this (get stuff from server side java) instead of trying first to rely on numeral.js and locales.js provided langs?
-                            var numeralLanguage = language + (country ? '-' + country : "");
-                            promise.then(numeralLocaleInfo => {
-                              this.log.debug(this.log.buildMessage(() => ("Locale '" + numeralLanguage + "' not found in client js lib, but it was constructed based on server Java locale-specific information: " + JSON.stringify(numeralLocaleInfo))));
-                                numeralLocaleInfo.ordinal = function (number) {
-                                    return ".";
-                                };
-                                numeral.register('locale',numeralLanguage,numeralLocaleInfo);
-                                numeral.locale(numeralLanguage);
-                                moment.locale( numeral.locale() )
-                            }, (reason) => {
-                                this.log.warn(this.log.buildMessage(() => ("Cannot properly handle locale '" + numeralLanguage + "'. It is not available in js libs and it could not be loaded from server...")));
-                            });
+                            try {
+                                //try it with just the language part but lowercase
+                                numeral.localeData(language.toLowerCase());
+                                numeral.locale(language.toLowerCase());
+                            } catch(e6) {
+                                try {
+                                    //try to duplicate the language in case it's only defined like that
+                                    numeral.localeData(language.toLowerCase() + "-" + language.toLowerCase()); // nl-nl for example is defined but browser only says 'nl' (this won't work for all languages for example "en-en" I don't think even exists)
+                                    numeral.locale(language.toLowerCase() + "-" + language.toLowerCase()); 
+                                } catch(e7) {
+                                    // we can't find a suitable locale defined in locales.js; get the needed things from server (Java knows more locales)
+                                    // and create the locate info from that
+                                    var promise = this.sabloService.callService("i18nService", "generateLocaleForNumeralJS", country ? {'language' : language, 'country' : country} : {'language' : language}, false);
+                                    // TODO should we always do this (get stuff from server side java) instead of trying first to rely on numeral.js and locales.js provided langs?
+                                    var numeralLanguage = language + (country ? '-' + country : "");
+                                    promise.then(numeralLocaleInfo => {
+                                        this.log.debug(this.log.buildMessage(() => ("Locale '" + numeralLanguage + "' not found in client js lib, but it was constructed based on server Java locale-specific information: " + JSON.stringify(numeralLocaleInfo))));
+                                        numeralLocaleInfo.ordinal = function (number) {
+                                            return ".";
+                                        };
+                                        numeral.register('locale',numeralLanguage,numeralLocaleInfo);
+                                        numeral.locale(numeralLanguage);
+                                        moment.locale( numeral.locale() )
+                                    }, (reason) => {
+                                        this.log.warn(this.log.buildMessage(() => ("Cannot properly handle locale '" + numeralLanguage + "'. It is not available in js libs and it could not be loaded from server...")));
+                                    });
+                                }
+                            }
                         }
                     }
                 }
