@@ -7,7 +7,7 @@ import {FormatFilterPipe,SvyFormat, FormattingService,DecimalkeyconverterDirecti
 
 
 describe("ServoyDefaultTextField", () => {
-  let component: ServoyDefaultTextField;
+  let component: ServoyDefault TextField;
   let fixture: ComponentFixture<ServoyDefaultTextField>;
 
   beforeEach(async(() => {
@@ -27,6 +27,6 @@ describe("ServoyDefaultTextField", () => {
   });
 
   it('should create', () => {
-    expect(component).toBeFalsy();
+    expect(component).toBeTruthy();
   });
 });
