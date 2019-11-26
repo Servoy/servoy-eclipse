@@ -60,7 +60,7 @@
 					<!-- 4. Run karma tests -->
 					<execution>
 						<id>angular karma test</id>
-						<phase>compile</phase>	
+						<phase>test</phase>	
 						<goals>
 							<goal>npm</goal>
 						</goals>
