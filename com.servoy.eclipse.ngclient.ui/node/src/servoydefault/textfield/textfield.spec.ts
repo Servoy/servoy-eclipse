@@ -7,7 +7,7 @@ import {FormatFilterPipe,SvyFormat, FormattingService,DecimalkeyconverterDirecti
 
 
 describe("ServoyDefaultTextField", () => {
-  let component: ServoyDefault TextField;
+  let component: ServoyDefaultTextField;
   let fixture: ComponentFixture<ServoyDefaultTextField>;
 
   beforeEach(async(() => {
