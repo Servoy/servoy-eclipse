@@ -6,8 +6,6 @@ import {ServoyDefaultBaseComponent} from './basecomponent'
 
 export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
 
-    @Input() onDoubleClickMethodID;
-    
     @Input() hideText;
     @Input() imageMediaID;
     @Input() mediaOptions;

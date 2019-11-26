@@ -7,7 +7,8 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
 
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
-
+    @Input() onDoubleClickMethodID;
+    
     @Input() background;
     @Input() borderType;
     @Input() dataProviderID;
@@ -27,7 +28,9 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
     @Input() transparent;
     @Input() visible;
     @Input() scrollbars;
-
+    
+    timeoutID:number;
+    
     constructor(protected readonly renderer: Renderer2) { 
         super(renderer);
     }
@@ -39,10 +42,27 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
 
     protected attachHandlers(){
       if ( this.onActionMethodID ) {
-        this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
+          if (this.onDoubleClickMethodID){
+              let innerThis : ServoyDefaultBaseComponent = this;
+              this.renderer.listen( this.getNativeElement(), 'click', e => {
+                  if(innerThis.timeoutID){
+                      clearTimeout(innerThis.timeoutID);
+                      innerThis.timeoutID=null;
+                      //double click, do nothing
+                  }
+                  else{
+                      innerThis.timeoutID=setTimeout(function(){
+                          innerThis.timeoutID=null;
+                          innerThis.onActionMethodID( e );
+                      },250)}
+               });
+          }
+          else {
+              this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
+          }    
       }
       if ( this.onRightClickMethodID ) {
-        this.renderer.listen( this.getNativeElement(), 'contextmenu', e => this.onRightClickMethodID( e ));
+        this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { this.onRightClickMethodID( e ); return false; });
       }
     }
     
