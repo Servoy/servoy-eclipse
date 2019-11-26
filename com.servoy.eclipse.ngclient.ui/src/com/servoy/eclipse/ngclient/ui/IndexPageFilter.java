@@ -42,7 +42,7 @@ import com.servoy.j2db.util.Settings;
 @WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.FORWARD })
 public class IndexPageFilter implements Filter
 {
-	public static final String SOLUTIONS_PATH = "/";
+	public static final String SOLUTIONS_PATH = "solution/";
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException
@@ -74,11 +74,10 @@ public class IndexPageFilter implements Filter
 			}
 			else
 			{
-				String filename = requestURI.substring(SOLUTIONS_PATH.length());
-				File file = new File(distFolder, filename);
+				File file = new File(distFolder, requestURI);
 				if (file.exists())
 				{
-					String contentType = MimeTypes.guessContentTypeFromName(filename);
+					String contentType = MimeTypes.guessContentTypeFromName(requestURI);
 					if (contentType != null) servletResponse.setContentType(contentType);
 					FileUtils.copyFile(file, servletResponse.getOutputStream());
 					return;
