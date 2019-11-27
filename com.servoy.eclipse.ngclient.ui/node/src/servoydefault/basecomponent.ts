@@ -46,12 +46,12 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
               let innerThis : ServoyDefaultBaseComponent = this;
               this.renderer.listen( this.getNativeElement(), 'click', e => {
                   if(innerThis.timeoutID){
-                      clearTimeout(innerThis.timeoutID);
+                      window.clearTimeout(innerThis.timeoutID);
                       innerThis.timeoutID=null;
                       //double click, do nothing
                   }
                   else{
-                      innerThis.timeoutID=setTimeout(function(){
+                      innerThis.timeoutID=window.setTimeout(function(){
                           innerThis.timeoutID=null;
                           innerThis.onActionMethodID( e );
                       },250)}
