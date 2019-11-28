@@ -27,11 +27,15 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -53,15 +57,21 @@ public class ExportPage extends WizardPage
 	private static String initialPath = getInitialImportPath();
 
 	private Text applicationURLText;
-	private Text saveDir;
+	private Text saveDirPath;
+	private Button browseDirButton;
 	private Group platformGroup;
-	public Label tempLabelStatus;
 	
-	public Text iconPath;
+	
+	private Text iconPath;
 	private Button browseIconButton;
-	public Text imgPath;
+	private Text imgPath;
 	private Button browseImgButton;
-	public Text copyrightText;
+	private Text copyrightText;
+	private Group sizeGroup;
+	private Text widthText;
+	private Text heightText;
+	
+	public Label statusLabel; //this is just temporary while tweaking the service
 
 	private List<String> selectedPlatforms = new ArrayList<String>();
 	private ExportNGDesktopWizard exportElectronWizard;
@@ -75,8 +85,11 @@ public class ExportPage extends WizardPage
 
 	public void createControl(Composite parent)
 	{
+		Composite rootComposite = new Composite(parent, SWT.NONE);
+		rootComposite.setLayout(new FormLayout());
+		
 		GridLayout gridLayout = new GridLayout(3, false);
-		Composite composite = new Composite(parent, SWT.NONE);
+		Composite composite = new Composite(rootComposite, SWT.NONE);
 		composite.setLayout(gridLayout);
 
 		Label applicationURLLabel = new Label(composite, SWT.NONE);
@@ -146,23 +159,39 @@ public class ExportPage extends WizardPage
 		Label outputDirLabel = new Label(composite, SWT.NONE);
 		outputDirLabel.setText("Save directory");
 
-		saveDir = new Text(composite, SWT.BORDER);
-		saveDir.setText(getInitialSaveDir());
+		saveDirPath = new Text(composite, SWT.BORDER);
+		saveDirPath.setText(getInitialSaveDir());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 2;
-		saveDir.setLayoutData(gd);
-
-		if (System.getProperty("ngclient.rebranding.data", null) != null)
+		gd.horizontalSpan = 1;
+		saveDirPath.setLayoutData(gd);
+		
+		
+		browseDirButton = new Button(composite, SWT.NONE);
+		browseDirButton.setText("Browse");
+		browseDirButton.addSelectionListener(new SelectionAdapter()
 		{
-			
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.NONE);
+				if (initialPath != null) dlg.setFilterPath(initialPath);
+				if (dlg.open() != null)
+				{
+					saveDirPath.setText(dlg.getFilterPath());
+				}
+			}
+		});
+
 			Label iconLabel = new Label(composite, SWT.NONE);
 			iconLabel.setText("Icon path:");
-			iconLabel.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum size: 1 MB");
+			iconLabel.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum size (KB): " + ExportNGDesktopWizard.LOGO_SIZE);
 			
 			iconPath = new Text(composite, SWT.BORDER);
-			iconPath.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum file size: 1 MB");
+			iconPath.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum file size (KB): " + ExportNGDesktopWizard.LOGO_SIZE);
 			iconPath.setEditable(true);
 			iconPath.setVisible(true);
+			String value = exportElectronWizard.getDialogSettings().get("icon_path");
+			iconPath.setText(value != null ? value : "");
 			gd = new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan = 1;
 			iconPath.setLayoutData(gd);
@@ -188,12 +217,14 @@ public class ExportPage extends WizardPage
 			
 			Label imgLabel = new Label(composite, SWT.NONE);
 			imgLabel.setText("Image path:");
-			imgLabel.setToolTipText("Bitmap image used in the installer. For Windows installer the recommended size is 164 px width, 314 px height.\nMaximum file size: 5 MB");
+			imgLabel.setToolTipText("Bitmap image used in the installer. For Windows installer the recommended size is 164 px width, 314 px height.\nMaximum file size (KB): " + ExportNGDesktopWizard.IMG_SIZE);
 			
 			imgPath = new Text(composite, SWT.BORDER);
-			imgPath.setToolTipText("The maximum allowed size for the logo is 5 MB");
+			imgPath.setToolTipText("Bitmap image used in the installer. For Windows installer the recommended size is 164 px width, 314 px height.\nMaximum file size (KB): " + ExportNGDesktopWizard.IMG_SIZE);
 			imgPath.setEditable(true);
 			imgPath.setVisible(true);
+			value = exportElectronWizard.getDialogSettings().get("image_path");
+			imgPath.setText(value != null ? value : "");
 			gd = new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan = 1;
 			imgPath.setLayoutData(gd);
@@ -219,26 +250,55 @@ public class ExportPage extends WizardPage
 			
 			Label copyrightLabel = new Label(composite, SWT.NONE);
 			copyrightLabel.setText("Copyright:");
-			copyrightLabel.setToolTipText("The maximum allowed length is 128 chars");
+			copyrightLabel.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
 			
 			copyrightText = new Text(composite, SWT.BORDER);
-			copyrightText.setToolTipText("The maximum allowed length is 128 chars");
+			copyrightText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
 			copyrightText.setEditable(true);
 			copyrightText.setVisible(true);
+			value = exportElectronWizard.getDialogSettings().get("copyright");
+			copyrightText.setText(value != null ? value : "");
 			gd = new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan = 2;
 			copyrightText.setLayoutData(gd);
-			
+						
 			Label sizeLabel = new Label(composite, SWT.NONE);
-			sizeLabel.setText("Size (width / height):");
+			sizeLabel.setText("NG Desktop size:");
+			sizeGroup = new Group(composite, SWT.NONE);
+			sizeGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 			
-			tempLabelStatus = new Label(composite, SWT.NONE);
-			tempLabelStatus.setText("Status (test mode): ");
+			widthText = new Text(sizeGroup, SWT.BORDER);
+			Label widthLabel = new Label(sizeGroup, SWT.NONE);
+			widthLabel.setText("Width  ");
+			value = exportElectronWizard.getDialogSettings().get("ngdesktop_width");
+			widthText.setText(value != null ? value : "");
+			heightText = new Text(sizeGroup, SWT.BORDER);
+			Label heightLabel = new Label(sizeGroup, SWT.NONE);
+			heightLabel.setText("Height");
+			value = exportElectronWizard.getDialogSettings().get("ngdesktop_height");
+			heightText.setText(value != null ? value : "");
+			
 			gd = new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan = 2;
-			tempLabelStatus.setLayoutData(gd);
-			tempLabelStatus.setVisible(true);
-		}
+			sizeGroup.setLayoutData(gd);		
+						
+			statusLabel = new Label(composite, SWT.NONE);
+			statusLabel.setEnabled(false); //set to gray
+			statusLabel.setText("Status (beta): ");
+			gd = new GridData( SWT.FILL, SWT.FILL, true, true );
+			gd.verticalAlignment = GridData.VERTICAL_ALIGN_END;
+			gd.horizontalSpan = 3;
+			statusLabel.setLayoutData(gd);
+			statusLabel.setVisible(true);
+			
+			Label noteLabel =  new Label(rootComposite, SWT.BOTTOM);
+			noteLabel.setText("*For now we only support generating Windows branded installers");
+			FormData fd = new FormData();
+			fd.bottom = new FormAttachment(100);
+			fd.left = new FormAttachment(0);
+			noteLabel.setLayoutData(fd);
+			noteLabel.setEnabled(false);
+		
 		setControl(composite);
 	}
 	
@@ -272,21 +332,14 @@ public class ExportPage extends WizardPage
 		return applicationURL;
 	}
 
-	public String getApplicationURL()
-	{
-		return applicationURLText.getText();
-	}
-
 	private String getInitialSaveDir()
 	{
 		String saveDir = exportElectronWizard.getDialogSettings().get("save_dir");
 		if (saveDir != null) return saveDir;
-		return System.getProperty("user.home");
-	}
-
-	public String getSaveDir()
-	{
-		return saveDir.getText();
+		saveDir = System.getProperty("user.home");
+		if (saveDir != null) return saveDir;
+		//still here? then return something ... :D
+		return initialPath;
 	}
 
 	private Object platformSelectionChangeListener(String selectedPlatform)
@@ -301,13 +354,29 @@ public class ExportPage extends WizardPage
 		return selectedPlatforms;
 	}
 
+	private int getIntValue(String value) {
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+	
 	public void saveState()
 	{
+		//invalid values are not saved; that's easier for later validation;
 		IDialogSettings settings = exportElectronWizard.getDialogSettings();
 		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
 		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);
-		settings.put("save_dir", getSaveDir());
-		settings.put("application_url", getApplicationURL());
+		settings.put("save_dir", saveDirPath.getText().trim().length() > 0 ? saveDirPath.getText() : null);
+		settings.put("app_url", applicationURLText.getText().trim().length() > 0 ? applicationURLText.getText() : null);
+		settings.put("icon_path", iconPath.getText().trim().length() > 0 ? iconPath.getText() : null);
+		settings.put("image_path", imgPath.getText().trim().length() > 0 ? imgPath.getText() : null);
+		settings.put("copyright", copyrightText.getText().trim().length() > 0 ? copyrightText.getText() : null);
+		int value = getIntValue(widthText.getText().trim());
+		settings.put("ngdesktop_width", value > 0 ? widthText.getText().trim() : null);
+		value = getIntValue(heightText.getText().trim());
+		settings.put("ngdesktop_height", value > 0 ? heightText.getText().trim() : null);
 	}
 }
