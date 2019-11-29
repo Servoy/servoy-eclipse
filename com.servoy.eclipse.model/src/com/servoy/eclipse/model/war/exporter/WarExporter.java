@@ -456,7 +456,8 @@ public class WarExporter
 			if (exportModel.getExportedComponents() != null) exportedWebObjects.addAll(exportModel.getExportedComponents());
 			if (exportModel.getExportedServices() != null) exportedWebObjects.addAll(exportModel.getExportedServices());
 		}
-		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
+		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, exportModel.getExportedPackages(), Boolean.TRUE,
+			NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
 		attr = doc.createAttribute("name");
@@ -575,10 +576,6 @@ public class WarExporter
 	{
 		Set<String> exportedComponents = exportModel.getExportedComponents();
 		Set<String> exportedServices = exportModel.getExportedServices();
-		if (exportModel.getExcludedComponentPackages() != null && exportModel.getExcludedComponentPackages().size() > 0)
-		{
-			m.subTask("Excluding component packages: " + Arrays.toString(exportModel.getExcludedComponentPackages().toArray(new String[0])));
-		}
 		if (exportedComponents != null)
 		{
 			m.subTask("Exporting components: " + Arrays.toString(exportedComponents.toArray(new String[0])));
@@ -596,10 +593,6 @@ public class WarExporter
 			webObjects.append(component + ",");
 		}
 
-		if (exportModel.getExcludedServicePackages() != null && exportModel.getExcludedServicePackages().size() > 0)
-		{
-			m.subTask("Excluding service packages: " + Arrays.toString(exportModel.getExcludedServicePackages().toArray(new String[0])));
-		}
 		if (exportedServices != null)
 		{
 			m.subTask("Exporting services: " + Arrays.toString(exportedServices.toArray(new String[0])));
@@ -637,12 +630,11 @@ public class WarExporter
 			StringBuilder servicesLocations = new StringBuilder();
 
 			Map<String, File> allTemplates = new HashMap<String, File>();
-			List<String> excludedComponentPackages = exportModel.getExcludedComponentPackages();
-			List<String> excludedServicePackages = exportModel.getExcludedServicePackages();
-			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, excludedComponentPackages, excludedServicePackages, allTemplates);
+			Set<String> exportedPackages = exportModel.getExportedPackages();
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates);
 
-			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(excludedComponentPackages));
-			servicesLocations.append(ComponentResourcesExporter.getDefaultServicesDirectoryNames(excludedServicePackages));
+			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(exportedPackages));
+			servicesLocations.append(ComponentResourcesExporter.getDefaultServicesDirectoryNames(exportedPackages));
 
 			monitor.worked(1);
 			BaseNGPackageManager packageManager = ServoyModelFinder.getServoyModel().getNGPackageManager();
@@ -655,21 +647,18 @@ public class WarExporter
 				{
 					boolean copy = false;
 					String name = packageReader.getPackageName();
-					if (IPackageReader.WEB_COMPONENT.equals(packageReader.getPackageType()))
+					if ((IPackageReader.WEB_COMPONENT.equals(packageReader.getPackageType()) ||
+						IPackageReader.WEB_SERVICE.equals(packageReader.getPackageType())) && exportedPackages.contains(name))
 					{
-						if (excludedComponentPackages == null || !excludedComponentPackages.contains(name))
+						if (IPackageReader.WEB_COMPONENT.equals(packageReader.getPackageType()))
 						{
 							componentLocations.append("/" + name + "/;");
-							copy = true;
 						}
-					}
-					else if (IPackageReader.WEB_SERVICE.equals(packageReader.getPackageType()))
-					{
-						if (excludedServicePackages == null || !excludedServicePackages.contains(name))
+						else
 						{
 							servicesLocations.append("/" + name + "/;");
-							copy = true;
 						}
+						copy = true;
 					}
 					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()))
 					{

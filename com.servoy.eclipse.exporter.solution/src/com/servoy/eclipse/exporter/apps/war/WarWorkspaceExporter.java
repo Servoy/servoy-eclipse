@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -57,6 +59,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	private final class CommandLineWarExportModel extends AbstractWarExportModel
 	{
 		private final WarArgumentChest configuration;
+		private Set<String> exportedPackages;
 
 		private CommandLineWarExportModel(WarArgumentChest configuration, boolean isNGExport)
 		{
@@ -247,62 +250,83 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		@Override
 		public Set<String> getExportedComponents()
 		{
-			if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? getUsedComponents() : null;
-			if (configuration.getSelectedComponents().equals("")) return getUsedComponents();
-
-			Set<String> set = new HashSet<String>();
-			if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
+			if (configuration.getExcludedComponentPackages() != null)
 			{
-				for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebComponentSpecifications())
-				{
-					set.add(spec.getName());
-				}
+				List<String> excludedPackages = Arrays.asList(configuration.getExcludedComponentPackages().split(" "));
+				return Arrays.stream(componentsSpecProviderState.getAllWebComponentSpecifications()) //
+					.filter(spec -> !excludedPackages.contains(spec.getPackageName())) //
+					.map(spec -> spec.getName()) //
+					.collect(Collectors.toSet());
 			}
 			else
 			{
-				set.addAll(Arrays.asList(configuration.getSelectedComponents().split(" ")));
-				for (String componentName : set)
+				if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? getUsedComponents() : null;
+				if (configuration.getSelectedComponents().equals("")) return getUsedComponents();
+
+				Set<String> set = new HashSet<String>();
+				if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
 				{
-					if (componentsSpecProviderState.getWebComponentSpecification(componentName) == null)
+					for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebComponentSpecifications())
 					{
-						// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
-						output("'" + componentName + "' is not a valid component name or it could not be found. Ignoring.");
-						set.remove(componentName);
+						set.add(spec.getName());
 					}
 				}
-				set.addAll(getUsedComponents());
+				else
+				{
+					set.addAll(Arrays.asList(configuration.getSelectedComponents().split(" ")));
+					for (String componentName : set)
+					{
+						if (componentsSpecProviderState.getWebComponentSpecification(componentName) == null)
+						{
+							// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
+							output("'" + componentName + "' is not a valid component name or it could not be found. Ignoring.");
+							set.remove(componentName);
+						}
+					}
+					set.addAll(getUsedComponents());
+				}
+				return set;
 			}
-			return set;
 		}
 
 		@Override
 		public Set<String> getExportedServices()
 		{
-			if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? getUsedServices() : null;
-			if (configuration.getSelectedServices().equals("")) return getUsedServices();
-			Set<String> set = new HashSet<String>();
-			if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
+			if (configuration.getExcludedServicePackages() != null)
 			{
-				for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
-				{
-					set.add(spec.getName());
-				}
+				List<String> excludedPackages = Arrays.asList(configuration.getExcludedServicePackages().split(" "));
+				return Arrays.stream(servicesSpecProviderState.getAllWebComponentSpecifications()) //
+					.filter(spec -> !excludedPackages.contains(spec.getPackageName())) //
+					.map(spec -> spec.getName()).collect(Collectors.toSet());
 			}
 			else
 			{
-				set.addAll(Arrays.asList(configuration.getSelectedServices().split(" ")));
-				for (String serviceName : set)
+				if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? getUsedServices() : null;
+				if (configuration.getSelectedServices().equals("")) return getUsedServices();
+				Set<String> set = new HashSet<String>();
+				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
 				{
-					if (servicesSpecProviderState.getWebComponentSpecification(serviceName) == null)
+					for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
 					{
-						// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
-						output("'" + serviceName + "' is not a valid service name or it could not be found. Ignoring.");
-						set.remove(serviceName);
+						set.add(spec.getName());
 					}
 				}
-				set.addAll(getUsedServices());
+				else
+				{
+					set.addAll(Arrays.asList(configuration.getSelectedServices().split(" ")));
+					for (String serviceName : set)
+					{
+						if (servicesSpecProviderState.getWebComponentSpecification(serviceName) == null)
+						{
+							// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
+							output("'" + serviceName + "' is not a valid service name or it could not be found. Ignoring.");
+							set.remove(serviceName);
+						}
+					}
+					set.addAll(getUsedServices());
+				}
+				return set;
 			}
-			return set;
 		}
 
 		@Override
@@ -454,18 +478,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public List<String> getExcludedComponentPackages()
-		{
-			return configuration.getExcludedComponentPackages() == null ? null : Arrays.asList(configuration.getExcludedComponentPackages().split(" "));
-		}
-
-		@Override
-		public List<String> getExcludedServicePackages()
-		{
-			return configuration.getExcludedServicePackages() == null ? null : Arrays.asList(configuration.getExcludedServicePackages().split(" "));
-		}
-
-		@Override
 		public String getDefaultAdminUser()
 		{
 			return configuration.getDefaultAdminUser();
@@ -517,6 +529,23 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		public boolean isSkipDatabaseViewsUpdate()
 		{
 			return configuration.skipDatabaseViewsUpdate();
+		}
+
+		@Override
+		public Set<String> getExportedPackages()
+		{
+			if (exportedPackages == null)
+			{
+				exportedPackages = Stream.of(getExportedComponents().stream() //
+					.map(comp -> componentsSpecProviderState.getWebComponentSpecification(comp).getPackageName()) //
+					.collect(Collectors.toSet()), //
+					getExportedServices().stream() //
+						.map(comp -> servicesSpecProviderState.getWebComponentSpecification(comp).getPackageName()) //
+						.collect(Collectors.toSet())) //
+					.flatMap(Set::stream) //
+					.collect(Collectors.toSet());
+			}
+			return exportedPackages;
 		}
 	}
 

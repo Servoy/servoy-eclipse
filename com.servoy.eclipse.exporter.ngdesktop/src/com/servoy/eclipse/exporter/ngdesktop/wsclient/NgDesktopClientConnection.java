@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
@@ -20,15 +20,15 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.wicket.validation.validator.UrlValidator;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 
 public class NgDesktopClientConnection
 {
-	private String protocol = null;
-	private InetAddress serverAddress = null;
-	private int serverPort = 0;
+	private String service_url = "https://ngdesktop-builder.servoy.com";
 	private String statusMessage = null;
 
 	HttpClientBuilder httpBuilder = null;
@@ -36,10 +36,11 @@ public class NgDesktopClientConnection
 
 	private static final int BUFFER_SIZE = 8192;
 
-	private static String BUILD_ENDPOINT = "/ngdesktopws/build";
-	private static String STATUS_ENDPOINT = "/ngdesktopws/status/";
-	private static String DOWNLOAD_ENDPOINT = "/ngdesktopws/download/";
-	private static String BINARY_NAME_ENDPOINT = "/ngdesktopws/binary/";
+	private static String BUILD_ENDPOINT = "/build/start";
+	private static String STATUS_ENDPOINT = "/build/status/";
+	private static String DOWNLOAD_ENDPOINT = "/build/download/";
+	private static String BINARY_NAME_ENDPOINT = "/build/name/"; 
+	private static String CANCEL_ENDPOINT = "/build/cancel/";//TODO: add cancel support
 
 	//START sync - this block need to be identical with the similar error codes from the NgDesktopMonitor in ngdesktop-service project
 	public final static int REQUESTS_FULL = 2;
@@ -53,11 +54,17 @@ public class NgDesktopClientConnection
 	public final static int ALREADY_STARTED = 10;
 	//END sync
 
-	public NgDesktopClientConnection(String protocol, InetAddress serverAddress, int serverPort)
+	public NgDesktopClientConnection() throws MalformedURLException
 	{
-		this.serverAddress = serverAddress;
-		this.serverPort = serverPort;
-		this.protocol = protocol;
+		
+		String srvAddress = System.getProperty("ngclient.service.address");//if no port specified here (address:port) - defaulting to 443
+		if (srvAddress != null) {//validate format
+			UrlValidator urlValidator = new UrlValidator();
+			if (!urlValidator.isValid(srvAddress)) throw new MalformedURLException(srvAddress);
+			service_url = srvAddress;
+		}
+		
+		
 		httpBuilder = HttpClientBuilder.create();
 		httpClient = httpBuilder.build();
 	}
@@ -90,23 +97,25 @@ public class NgDesktopClientConnection
 	 * @return tokenId - string id to be used in future queries
 	 * @throws IOException
 	 */
-	public String startBuild(String platform, String iconPath, String imagePath, String copyright, String appUrl) throws IOException
+	public String startBuild(String platform, IDialogSettings settings) throws IOException
 	{
 		try
 		{
-			HttpPost postRequest = new HttpPost(protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + BUILD_ENDPOINT);
+			HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
 			JSONObject jsonObj = new JSONObject();
 			if (platform != null) jsonObj.put("platform", platform);
-			if (iconPath != null) jsonObj.put("icon", getEncodedData(iconPath));
-			if (imagePath != null) jsonObj.put("image", getEncodedData(imagePath));
-			if (copyright != null) jsonObj.put("copyright", copyright);
-			if (appUrl != null) jsonObj.put("url", appUrl);
+			if (settings.get("icon_path") != null) jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
+			if (settings.get("image_path") != null) jsonObj.put("image", getEncodedData(settings.get("image_path")));
+			if (settings.get("copyright") != null) jsonObj.put("copyright", settings.get("copyright"));
+			if (settings.get("app_url") != null) jsonObj.put("url", settings.get("app_url"));
+			if (settings.get("ngdesktop_width") != null) jsonObj.put("width", settings.get("ngdesktop_width"));
+			if (settings.get("ngdesktop_height") != null) jsonObj.put("height", settings.get("ngdesktop_height"));
 
 			StringEntity input = new StringEntity(jsonObj.toString());
 			input.setContentType("application/json");
 			postRequest.setEntity(input);
 
-			ServoyLog.logInfo("Build request for " + protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + BUILD_ENDPOINT);
+			ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
 
 			HttpResponse httpResponse = httpClient.execute(postRequest);
 
@@ -147,7 +156,7 @@ public class NgDesktopClientConnection
 	 */
 	public int getStatus(String tokenId) throws IOException
 	{
-		HttpGet getRequest = new HttpGet(protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + STATUS_ENDPOINT + tokenId);
+		HttpGet getRequest = new HttpGet(service_url + STATUS_ENDPOINT + tokenId);
 		HttpResponse httpResponse = httpClient.execute(getRequest);
 
 		BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
@@ -168,7 +177,7 @@ public class NgDesktopClientConnection
 
 	public String getBinaryName(String tokenId) throws IOException
 	{
-		HttpGet getRequest = new HttpGet(protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + BINARY_NAME_ENDPOINT + tokenId);
+		HttpGet getRequest = new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId);
 		HttpResponse httpResponse = httpClient.execute(getRequest);
 
 		BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
@@ -184,15 +193,15 @@ public class NgDesktopClientConnection
 	public void download(String tokenId, String savePath) throws IOException //expect absolutePath
 	{
 		String binaryName = getBinaryName(tokenId);
-		HttpGet getRequest = new HttpGet(protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + DOWNLOAD_ENDPOINT + tokenId);
+		HttpGet getRequest = new HttpGet(service_url + DOWNLOAD_ENDPOINT + tokenId);
 
-		ServoyLog.logInfo("Download request: " + protocol + serverAddress.getHostAddress() + ":" + Integer.toString(serverPort) + DOWNLOAD_ENDPOINT + tokenId);
+		ServoyLog.logInfo(service_url + DOWNLOAD_ENDPOINT + tokenId);
 
 		HttpResponse httpResponse = httpClient.execute(getRequest);
 
 		InputStream is = httpResponse.getEntity().getContent();
 		byte[] inputFile = new byte[BUFFER_SIZE];
-		FileOutputStream fos = new FileOutputStream(savePath + "/" + binaryName);
+		FileOutputStream fos = new FileOutputStream(savePath + binaryName);
 		int n = is.read(inputFile, 0, BUFFER_SIZE);
 		int amount = 0;
 		while (n != -1)

@@ -57,11 +57,9 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 {
 	private ExportPage exportPage;
 	private static int POLLING_INTERVAL = 1000;
-	private static int LOGO_SIZE = 1024; //KB;
-	private static int IMG_SIZE = 5120;  //KB;
-	private static int COPYRIGHT_LENGTH = 128; //chars
-
-	public static final String NGDESKTOP_SERVICE_PROTOCOL = "http://";
+	public final static int LOGO_SIZE = 256; //KB;
+	public final static int IMG_SIZE = 512;  //KB;
+	public final static int COPYRIGHT_LENGTH = 128; //chars
 
 	public ExportNGDesktopWizard()
 	{
@@ -172,87 +170,88 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 	}
 
-
-	private Map getRebrandingData(String filePath) throws Exception
-	{
-		String line;
-		String inputPath = Paths.get(filePath).normalize().toString();
-		File rebrandingFile = new File(inputPath);
-		if (!rebrandingFile.exists())
-		{
-			throw new Exception("File does not exists:" + filePath);
+	
+	private StringBuilder validate(IDialogSettings settings) {
+		//at least one platform must be selected
+		//save path must to be specified
+		//files and copyright (if specified) and exists - must not exceed the limits
+		//the other unspecified setting will remain to ngdesktop service defaults
+		StringBuilder errorMsg = new StringBuilder();
+		boolean winPlatform = settings.getBoolean("win_export");
+		boolean osxPlatform = settings.getBoolean("osx_export");
+		boolean linuxPlatform = settings.getBoolean("linux_export");
+		if (!(winPlatform || osxPlatform || linuxPlatform)) {
+			errorMsg.append ("At least one platform must be selected");
 		}
-		Map<String, String> result = new HashMap<String, String>();
-		BufferedReader reader = new BufferedReader(new FileReader(rebrandingFile));
-		while ((line = reader.readLine()) != null)
-		{
-			if (line.startsWith("#") || line.trim().length() == 0) continue;
-			String[] parts = line.split("=");
-			if (parts.length != 2) throw new Exception("Invalid data format: " + filePath);
-			String key = parts[0];
-			String value = parts[1];
-			result.put(key, value);
+		String value = settings.get("save_dir");
+		if (value == null) {
+			errorMsg.append ("Export path must to be specified");
+			return errorMsg;
 		}
-		reader.close();
-		return result;
+		
+		File myFile = null;
+		value = settings.get("icon_path");
+		if (value != null) {
+			myFile = new File(value);
+			if (myFile.exists() && myFile.length() > LOGO_SIZE * 1024) {
+				errorMsg.append ("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
+				return errorMsg;
+			}
+		}
+		
+		value = settings.get("image_path");
+		if (value != null) {
+			myFile = new File(value);
+			if (myFile.exists() && myFile.length() > LOGO_SIZE * 1024) {
+				errorMsg.append ("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
+				return errorMsg;
+			}
+		}
+		
+		value = settings.get("copyright");
+		if (value != null && value.toCharArray().length > COPYRIGHT_LENGTH) {
+			errorMsg.append ("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + value.toCharArray().length);
+			return errorMsg;
+		} 
+		
+		try {
+			int intValue;
+			value = settings.get("ngdesktop_width");
+			if (value.length() > 0) {
+				intValue = Integer.parseInt(value);
+				if (intValue <= 0) {
+					errorMsg.append("Invalid width size: " + value);
+					return errorMsg;
+				}
+			}
+			value = settings.get("ngdesktop_height");
+			if (value.length() > 0) {
+				intValue = Integer.parseInt(value);
+				if (intValue <= 0) {
+					errorMsg.append("Invalid height size: " + value);
+					return errorMsg;
+				}
+			}
+		} catch (NumberFormatException e) {
+			errorMsg.append("NumberFormatException: " + e.getMessage());
+		}
+		return errorMsg;
 	}
 
 	@Override
 	public boolean performFinish()
 	{
 		exportPage.saveState();
-		List<String> selectedPlatforms = exportPage.getSelectedPlatforms();
-		final String saveDir = exportPage.getSaveDir().endsWith(File.separator) ? exportPage.getSaveDir() : exportPage.getSaveDir() + File.separator;
-		final String appUrl = exportPage.getApplicationURL();
-
-		final StringBuilder errorMsg = new StringBuilder();
-
-
-		boolean downloadInstallers = false;
-
-		if (!validateRebranding()) {			
-			errorMsg.append("Invalid data for rebranding ...");
+		IDialogSettings ngdesktopSettings = this.getDialogSettings();
+		final StringBuilder errorMsg = validate(ngdesktopSettings);
+		if (errorMsg.length() > 0) {
+			MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
+			return false;
 		}
 		
-		//need declarations here - cause they will be reassigned to final vars for lamba processing below
-		Map rebrandingData = null;
-		String rebrIconPath = exportPage.getIconPath();
-		String rebrImagePath = exportPage.getImgPath();
-		String rebrCopyrightStr = exportPage.getCopyright();
-		InetAddress serviceAddress = null;
-		int servicePort = 0;
 
-		//TODO: refactoring when host address (and port) will be known in the cloud
-		String rebrandingPath = System.getProperty("ngclient.rebranding.data", null);
-		if (rebrandingPath != null)
-		{
-			rebrandingPath = rebrandingPath.replaceAll("\\\\", "/");
-			downloadInstallers = true;
-			try
-			{
-				rebrandingData = getRebrandingData(rebrandingPath);
-				serviceAddress = InetAddress.getByName(((String)rebrandingData.get("serviceAddress")).trim());
-				servicePort = Integer.parseInt((String)rebrandingData.get("servicePort"));
-			}
-			catch (Exception e)
-			{
-				errorMsg.append(e.getMessage());
-			}
-
-		}
-		else
-		{
-			errorMsg.append("No rebranding data found");
-		}
-
-		//need final variables to be used in below interface implementation
-		final String iconPath = rebrIconPath != null ? Paths.get(rebrIconPath).normalize().toString() : null;
-		final String imagePath = rebrImagePath != null ? Paths.get(rebrImagePath).normalize().toString() : null;
-		final String copyrightInfo = rebrCopyrightStr != null ? rebrCopyrightStr : null;
-		final boolean downloadNgDesktopInstaller = downloadInstallers;
-		final InetAddress ngDesktopService = serviceAddress;
-		final int ngDesktopPort = servicePort;
-
+		final IDialogSettings serviceSettings = ngdesktopSettings;
+		
 		//TODO END refactoring
 
 		IRunnableWithProgress job = new IRunnableWithProgress()
@@ -260,14 +259,17 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				if (errorMsg.length() > 0) return;
-				selectedPlatforms.forEach((platform) -> {
+				String tmpDir = serviceSettings.get("save_dir").replaceAll("\\\\", "/");
+				final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
+				String appUrl = serviceSettings.get("app_url");
+				exportPage.getSelectedPlatforms().forEach((platform) -> {
 
-					if (downloadNgDesktopInstaller && platform.equals(ExportPage.WINDOWS_PLATFORM)) //skip mac for now
+					if (platform.equals(ExportPage.WINDOWS_PLATFORM)) //skip mac and linux for now
 					{
 						try
 						{
-							NgDesktopClientConnection serviceConn = new NgDesktopClientConnection(NGDESKTOP_SERVICE_PROTOCOL, ngDesktopService, ngDesktopPort);
-							String tokenId = serviceConn.startBuild(platform, iconPath, imagePath, copyrightInfo, appUrl);
+							NgDesktopClientConnection serviceConn = new NgDesktopClientConnection();
+							String tokenId = serviceConn.startBuild(platform, serviceSettings);
 							int status = serviceConn.getStatus(tokenId);
 							while (NgDesktopClientConnection.READY != status)
 							{//TODO: handling waiting times due to unresponsive server
@@ -275,7 +277,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 								status = serviceConn.getStatus(tokenId);
 
 								//TODO: progress bar
-								setInstallerStatus(serviceConn.getStatusMessage());
+								setInstallerStatus(serviceConn.getStatusMessage(), true);
 								//end TODO
 
 								if (NgDesktopClientConnection.WAITING == status || NgDesktopClientConnection.PROCESSING == status) continue;
@@ -283,22 +285,21 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 								{
 									String errorMessage = serviceConn.getStatusMessage();
 									errorMsg.append(errorMessage);
-									setInstallerStatus(status + ": " + errorMessage);
+									setInstallerStatus(status + ": " + errorMessage, false);
 									break;
 								}
 								if (NgDesktopClientConnection.NOT_FOUND == status)
 								{
 									errorMsg.append("Build does not exist: " + tokenId);
-									setInstallerStatus("Build does not exist: " + tokenId);
+									setInstallerStatus("Build does not exist: " + tokenId, false);
 									break;
 								}
 							}
 							if (NgDesktopClientConnection.READY == status)
 							{
 								String binaryName = serviceConn.getBinaryName(tokenId);
-								setInstallerStatus("downloading " + binaryName);
+								setInstallerStatus("Exporting " + binaryName, true);
 								serviceConn.download(tokenId, saveDir);
-								setInstallerStatus("Done: " + saveDir + File.pathSeparator + binaryName);
 							}
 						}
 						catch (IOException | InterruptedException e)
@@ -318,6 +319,9 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						{
 							if (archiveFile.exists()) archiveFile.delete();
 							URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveName + ".tar.gz");
+							
+							setInstallerStatus("Exporting: " + archiveName + " ...", false);
+							
 							if (platform.contentEquals(ExportPage.WINDOWS_PLATFORM))
 							{
 								createZip(fileUrl.openStream(), archiveFile, archiveName, appUrl);
@@ -333,6 +337,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 						}
 					}
 				});
+				setInstallerStatus("Done...", false);
 				monitor.worked(1);
 			}
 		};
@@ -358,26 +363,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 	}
 	
-	private boolean validateRebranding() {
-		String rebrIconPath = exportPage.getIconPath();
-		String rebrImagePath = exportPage.getImgPath();
-		String rebrCopyrightStr = exportPage.getCopyright();
-		if (rebrIconPath.trim().length() == 0 || 
-			rebrImagePath.trim().length() == 0 || 
-			rebrCopyrightStr.trim().length() == 0) {
-			
-			return false;
-		}
-		File logoFile = new File(rebrIconPath);
-		File imgFile = new File(rebrImagePath);		
-		//if file does not exist - the returned value is 0, else the size in bytes is returned (so convert to KB before comparison)
-		if (logoFile.length() > 0 && (logoFile.length() / 1024) > LOGO_SIZE) return false;
-		if (imgFile.length() > 0 && (imgFile.length() / 1024) > IMG_SIZE) return false;
-		if (rebrCopyrightStr.toCharArray().length > COPYRIGHT_LENGTH) return false;
-		
-		return true;
-	}
-
 	@Override
 	public void addPages()
 	{
@@ -385,17 +370,21 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		addPage(exportPage);
 	}
 
-	/* Temporary hack to display a status. This will be delete after a progress bar will be implemented (IProgressMonitor) */
-	public void setInstallerStatus(String status)
+	/* TODO: delete after a progress bar will be in place */
+	public void setInstallerStatus(String status, boolean displayTime)
 	{
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
 			{
-				Date myDate = new Date(System.currentTimeMillis());
-				int sec = myDate.getSeconds();
-				String strSec = sec < 10 ? "0" + sec : Integer.toString(sec);
-				exportPage.tempLabelStatus.setText("Status (debug mode): " + status + " - " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + strSec);
+				String timeStr = "";
+				if (displayTime) {
+					Date myDate = new Date(System.currentTimeMillis());
+					int sec = myDate.getSeconds();
+					String strSec = sec < 10 ? "0" + sec : Integer.toString(sec);
+					timeStr = " - " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + strSec;
+				}
+				exportPage.statusLabel.setText("Status (beta): " + status + timeStr);
 			}
 		});
 	}

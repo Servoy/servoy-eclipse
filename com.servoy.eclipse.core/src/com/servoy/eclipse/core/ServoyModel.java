@@ -264,6 +264,8 @@ public class ServoyModel extends AbstractServoyModel
 	private final List<IResourceChangeListener> postChangeResourceChangeListeners = new ArrayList<>(); // post-change-listeners that will be triggered only after ServoyModel has had a chance to handle these changes
 	private final List<IResourceChangeEvent> outstandingPostChangeEvents = new ArrayList<>();
 
+	private Boolean skipModuleChanged = null;
+
 	protected ServoyModel()
 	{
 		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
@@ -1812,6 +1814,12 @@ public class ServoyModel extends AbstractServoyModel
 
 	private void modulesChangedForActiveSolution()
 	{
+		// if this Boolean is set just skip everythign for now, will be done at once after everything.
+		if (skipModuleChanged != null)
+		{
+			skipModuleChanged = Boolean.FALSE;
+			return;
+		}
 		resetActiveEditingFlattenedSolutions();
 		updateFlattenedSolution();
 		getUserManager().reloadAllSecurityInformation();
@@ -2398,6 +2406,8 @@ public class ServoyModel extends AbstractServoyModel
 			}
 			changes.add(delta);
 		}
+		// Skip the module change code for the next loop.
+		skipModuleChanged = Boolean.TRUE;
 		for (Entry<IProject, List<IResourceDelta>> entry : projectChanges.entrySet())
 		{
 			IProject project = entry.getKey();
@@ -2411,6 +2421,14 @@ public class ServoyModel extends AbstractServoyModel
 				ServoyLog.logError("Could not handle changed files in project " + project.getName(), e);
 			}
 		}
+		// if the boolean is set to false then the module changed code was called and needs to be called once.
+		if (skipModuleChanged.booleanValue() == false)
+		{
+			// it is called
+			skipModuleChanged = null;
+			modulesChangedForActiveSolution();
+		}
+		skipModuleChanged = null;
 	}
 
 	/**

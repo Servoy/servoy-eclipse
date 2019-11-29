@@ -58,10 +58,6 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public Set<String> getUsedServices();
 
-	public List<String> getExcludedComponentPackages();
-
-	public List<String> getExcludedServicePackages();
-
 	public boolean isOverwriteGroups();
 
 	public boolean isAllowSQLKeywords();
@@ -139,4 +135,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	public boolean isSkipDatabaseViewsUpdate();
 
 	public void setSkipDatabaseViewsUpdate(boolean skip);
+
+	public Set<String> getExportedPackages();
 }

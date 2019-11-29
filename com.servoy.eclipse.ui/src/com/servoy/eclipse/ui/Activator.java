@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -97,6 +98,8 @@ public class Activator extends AbstractUIPlugin
 	public static final String ICONS_PATH = "$nl$/icons";
 	public static final String DARK_ICONS_PATH = "$nl$/darkicons";
 	public static final String DARK_ICONS_FOLDER = "/darkicons/";
+
+	private final static Map<String, ImageDescriptor> imageDescriptorCache = new ConcurrentHashMap<>();
 
 	private final Map<String, Image> imageCacheOld = new HashMap<String, Image>();
 
@@ -457,7 +460,14 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public static ImageDescriptor loadImageDescriptorFromBundle(String name)
 	{
-		return getImageDescriptor((IconPreferences.getInstance().getUseDarkThemeIcons() && darkIconExists(name) ? DARK_ICONS_PATH : ICONS_PATH) + "/" + name);
+		ImageDescriptor imageDescriptor = imageDescriptorCache.get(name);
+		if (imageDescriptor == null)
+		{
+			imageDescriptor = getImageDescriptor(
+				(IconPreferences.getInstance().getUseDarkThemeIcons() && darkIconExists(name) ? DARK_ICONS_PATH : ICONS_PATH) + "/" + name);
+			if (imageDescriptor != null) imageDescriptorCache.put(name, imageDescriptor);
+		}
+		return imageDescriptor;
 	}
 
 

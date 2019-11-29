@@ -65,6 +65,7 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 		Set<String> availableComponents = new TreeSet<String>();
 		for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebComponentSpecifications())
 		{
+			if (exportModel.getExcludedComponentPackages().contains(spec.getPackageName())) continue;
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}
 		return availableComponents;
