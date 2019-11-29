@@ -186,6 +186,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		String value = settings.get("save_dir");
 		if (value == null) {
 			errorMsg.append ("Export path must to be specified");
+			return errorMsg;
 		}
 		
 		File myFile = null;
@@ -194,6 +195,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			myFile = new File(value);
 			if (myFile.exists() && myFile.length() > LOGO_SIZE * 1024) {
 				errorMsg.append ("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
+				return errorMsg;
 			}
 		}
 		
@@ -202,13 +204,37 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			myFile = new File(value);
 			if (myFile.exists() && myFile.length() > LOGO_SIZE * 1024) {
 				errorMsg.append ("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
+				return errorMsg;
 			}
 		}
 		
 		value = settings.get("copyright");
 		if (value != null && value.toCharArray().length > COPYRIGHT_LENGTH) {
 			errorMsg.append ("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + value.toCharArray().length);
+			return errorMsg;
 		} 
+		
+		try {
+			int intValue;
+			value = settings.get("ngdesktop_width");
+			if (value.length() > 0) {
+				intValue = Integer.parseInt(value);
+				if (intValue <= 0) {
+					errorMsg.append("Invalid width size: " + value);
+					return errorMsg;
+				}
+			}
+			value = settings.get("ngdesktop_height");
+			if (value.length() > 0) {
+				intValue = Integer.parseInt(value);
+				if (intValue <= 0) {
+					errorMsg.append("Invalid height size: " + value);
+					return errorMsg;
+				}
+			}
+		} catch (NumberFormatException e) {
+			errorMsg.append("NumberFormatException: " + e.getMessage());
+		}
 		return errorMsg;
 	}
 
@@ -272,7 +298,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 							if (NgDesktopClientConnection.READY == status)
 							{
 								String binaryName = serviceConn.getBinaryName(tokenId);
-								setInstallerStatus("downloading " + binaryName, true);
+								setInstallerStatus("Exporting " + binaryName, true);
 								serviceConn.download(tokenId, saveDir);
 							}
 						}
@@ -294,7 +320,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 							if (archiveFile.exists()) archiveFile.delete();
 							URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveName + ".tar.gz");
 							
-							setInstallerStatus("Downloading: " + archiveName + " ...", false);
+							setInstallerStatus("Exporting: " + archiveName + " ...", false);
 							
 							if (platform.contentEquals(ExportPage.WINDOWS_PLATFORM))
 							{

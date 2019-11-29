@@ -54,8 +54,6 @@ public class ExportPage extends WizardPage
 	public static String MACOS_PLATFORM = "mac";
 	public static String LINUX_PLATFORM = "linux";
 	
-	private static String initialPath = getInitialImportPath();
-
 	private Text applicationURLText;
 	private Text saveDirPath;
 	private Button browseDirButton;
@@ -160,7 +158,7 @@ public class ExportPage extends WizardPage
 		outputDirLabel.setText("Save directory");
 
 		saveDirPath = new Text(composite, SWT.BORDER);
-		saveDirPath.setText(getInitialSaveDir());
+		saveDirPath.setText(exportElectronWizard.getDialogSettings().get("save_dir"));
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 1;
 		saveDirPath.setLayoutData(gd);
@@ -174,10 +172,11 @@ public class ExportPage extends WizardPage
 			public void widgetSelected(SelectionEvent e)
 			{
 				DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.NONE);
-				if (initialPath != null) dlg.setFilterPath(initialPath);
-				if (dlg.open() != null)
+				dlg.setFilterPath(getDlgInitPath(saveDirPath.getText()));
+				String path = dlg.open();
+				if (path != null)
 				{
-					saveDirPath.setText(dlg.getFilterPath());
+					saveDirPath.setText(path);
 				}
 			}
 		});
@@ -206,11 +205,16 @@ public class ExportPage extends WizardPage
 				{
 					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
 					dlg.setFilterExtensions(new String[] { "*.png" });
-					if (initialPath != null) dlg.setFilterPath(initialPath);
-					if (dlg.open() != null)
+					File myFile = new File(getDlgInitPath(iconPath.getText())); //make sure we have a usable path
+					if (myFile.isDirectory()) {
+						dlg.setFilterPath(myFile.getAbsolutePath());
+					} else {
+						dlg.setFilterPath(myFile.getParent());
+					}
+					String path = dlg.open();
+					if (path != null)
 					{
-						initialPath = dlg.getFilterPath();
-						iconPath.setText(dlg.getFilterPath() + File.separator + dlg.getFileName());
+						iconPath.setText(path + File.separator + dlg.getFileName());
 					}
 				}
 			});
@@ -239,11 +243,16 @@ public class ExportPage extends WizardPage
 				{
 					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
 					dlg.setFilterExtensions(new String[] { "*.bmp" });
-					if (initialPath != null) dlg.setFilterPath(initialPath);
-					if (dlg.open() != null)
+					File myFile = new File(getDlgInitPath(imgPath.getText())); //make sure we have a usable path
+					if (myFile.isDirectory()) {
+						dlg.setFilterPath(myFile.getAbsolutePath());
+					} else {
+						dlg.setFilterPath(myFile.getParent());
+					}
+					String path = dlg.open();
+					if (path != null)
 					{
-						initialPath = dlg.getFilterPath();
-						imgPath.setText(dlg.getFilterPath() + File.separator + dlg.getFileName());
+						imgPath.setText(path + File.separator + dlg.getFileName());
 					}
 				}
 			});
@@ -265,18 +274,22 @@ public class ExportPage extends WizardPage
 			Label sizeLabel = new Label(composite, SWT.NONE);
 			sizeLabel.setText("NG Desktop size:");
 			sizeGroup = new Group(composite, SWT.NONE);
-			sizeGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
+			RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
+			rowLayout.fill = true;
+			sizeGroup.setLayout(rowLayout);
 			
 			widthText = new Text(sizeGroup, SWT.BORDER);
-			Label widthLabel = new Label(sizeGroup, SWT.NONE);
-			widthLabel.setText("Width  ");
 			value = exportElectronWizard.getDialogSettings().get("ngdesktop_width");
 			widthText.setText(value != null ? value : "");
+			Label widthLabel = new Label(sizeGroup, SWT.NONE);
+			widthLabel.setText("Width  ");
+			
 			heightText = new Text(sizeGroup, SWT.BORDER);
-			Label heightLabel = new Label(sizeGroup, SWT.NONE);
-			heightLabel.setText("Height");
 			value = exportElectronWizard.getDialogSettings().get("ngdesktop_height");
 			heightText.setText(value != null ? value : "");
+			Label heightLabel = new Label(sizeGroup, SWT.NONE);
+			heightLabel.setText("Height");
+			
 			
 			gd = new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan = 2;
@@ -332,14 +345,15 @@ public class ExportPage extends WizardPage
 		return applicationURL;
 	}
 
-	private String getInitialSaveDir()
+	private String getDlgInitPath(String value)
 	{
-		String saveDir = exportElectronWizard.getDialogSettings().get("save_dir");
-		if (saveDir != null) return saveDir;
-		saveDir = System.getProperty("user.home");
-		if (saveDir != null) return saveDir;
+		if (value != null && value.trim().length() > 0 && (new File(value)).exists()) {
+			return value;
+		}
+		String newValue = System.getProperty("user.home");
+		if (newValue != null) return newValue;
 		//still here? then return something ... :D
-		return initialPath;
+		return getInitialImportPath();
 	}
 
 	private Object platformSelectionChangeListener(String selectedPlatform)
@@ -353,14 +367,6 @@ public class ExportPage extends WizardPage
 	{
 		return selectedPlatforms;
 	}
-
-	private int getIntValue(String value) {
-		try {
-			return Integer.parseInt(value);
-		} catch (NumberFormatException e) {
-			return -1;
-		}
-	}
 	
 	public void saveState()
 	{
@@ -369,14 +375,12 @@ public class ExportPage extends WizardPage
 		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
 		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);
-		settings.put("save_dir", saveDirPath.getText().trim().length() > 0 ? saveDirPath.getText() : null);
-		settings.put("app_url", applicationURLText.getText().trim().length() > 0 ? applicationURLText.getText() : null);
-		settings.put("icon_path", iconPath.getText().trim().length() > 0 ? iconPath.getText() : null);
-		settings.put("image_path", imgPath.getText().trim().length() > 0 ? imgPath.getText() : null);
-		settings.put("copyright", copyrightText.getText().trim().length() > 0 ? copyrightText.getText() : null);
-		int value = getIntValue(widthText.getText().trim());
-		settings.put("ngdesktop_width", value > 0 ? widthText.getText().trim() : null);
-		value = getIntValue(heightText.getText().trim());
-		settings.put("ngdesktop_height", value > 0 ? heightText.getText().trim() : null);
+		settings.put("save_dir", saveDirPath.getText().trim());
+		settings.put("app_url", applicationURLText.getText().trim());
+		settings.put("icon_path", iconPath.getText().trim());
+		settings.put("image_path", imgPath.getText().trim());
+		settings.put("copyright", copyrightText.getText());
+		settings.put("ngdesktop_width", widthText.getText().trim());
+		settings.put("ngdesktop_height", heightText.getText().trim());
 	}
 }
