@@ -37,6 +37,7 @@ import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-da
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {ServoyDefaultSpinner} from "./spinner/spinner";
 import { AngularEditorModule } from '@kolkov/angular-editor';
+import { UploadDirective } from "../ngclient/utils/upload.directive";
 
 @NgModule({
   declarations: [
@@ -68,7 +69,8 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
     StartEditDirective,
     TooltipDirective,
     BGSplitter,
-    BGPane
+    BGPane,
+    UploadDirective
   ],
   imports:[
     FormsModule,

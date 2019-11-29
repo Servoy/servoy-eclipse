@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
+import { SabloService } from "../../sablo/sablo.service";
 
 @Injectable()
 export class SvyUtilsService {
+    
+    constructor(private sabloService: SabloService) {}
+    
     public createJSEvent(event:KeyboardEvent, eventType:string, contextFilter?:string, contextFilterElement?:any) {
         let targetEl = event.srcElement as Element
 // TODO check        if (event.target)
@@ -54,5 +58,12 @@ export class SvyUtilsService {
             }
         }
         return jsEvent;
+    }
+    
+    public generateUploadUrl (formname, componentName, propertyName) {
+        return "resources/upload/" + this.sabloService.getClientnr() + 
+            (formname ? "/" + formname : "") + 
+            (componentName ? "/" + componentName : "") + 
+            (propertyName ? "/" + propertyName : "");
     }
 }
