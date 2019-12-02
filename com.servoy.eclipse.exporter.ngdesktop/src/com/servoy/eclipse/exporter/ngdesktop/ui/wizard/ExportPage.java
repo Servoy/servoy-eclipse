@@ -158,7 +158,8 @@ public class ExportPage extends WizardPage
 		outputDirLabel.setText("Save directory");
 
 		saveDirPath = new Text(composite, SWT.BORDER);
-		saveDirPath.setText(exportElectronWizard.getDialogSettings().get("save_dir"));
+		String saveDir = exportElectronWizard.getDialogSettings().get("save_dir");
+		saveDirPath.setText(saveDir != null ? saveDir : "");
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 1;
 		saveDirPath.setLayoutData(gd);
