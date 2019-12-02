@@ -29,7 +29,6 @@ public class NgDesktopClientConnection
 	private String service_url = "https://ngdesktop-builder.servoy.com";
 	private String statusMessage = null;
 
-	HttpClientBuilder httpBuilder = null;
 	private CloseableHttpClient httpClient = null;
 
 	private static final int BUFFER_SIZE = 8192;
@@ -39,7 +38,7 @@ public class NgDesktopClientConnection
 	private static String DOWNLOAD_ENDPOINT = "/build/download/";
 	private static String BINARY_NAME_ENDPOINT = "/build/name/"; 
 	private static String CANCEL_ENDPOINT = "/build/cancel/";//TODO: add cancel support
-
+	
 	//START sync - this block need to be identical with the similar error codes from the NgDesktopMonitor in ngdesktop-service project
 	public final static int REQUESTS_FULL = 2;
 	public final static int BUILDS_FULL = 3;
@@ -63,7 +62,7 @@ public class NgDesktopClientConnection
 		}
 		
 		
-		httpBuilder = HttpClientBuilder.create();
+		HttpClientBuilder httpBuilder = HttpClientBuilder.create();
 		httpClient = httpBuilder.build();
 	}
 
@@ -83,7 +82,6 @@ public class NgDesktopClientConnection
 			httpClient.close();
 			httpClient = null;
 		}
-		httpBuilder = null;
 	}
 
 	/**
