@@ -57,7 +57,7 @@ public interface NGClientStarter
 						@Override
 						public void run(IProgressMonitor monitorNpmBuild) throws InvocationTargetException, InterruptedException
 						{
-							monitorNpmBuild.beginTask(NGClientConstants.NPM_CONFIGURATION_TITLE_PROGRESS_BAR, 10);
+							monitorNpmBuild.beginTask(NGClientConstants.NPM_CONFIGURATION_TITLE_PROGRESS_BAR, IProgressMonitor.UNKNOWN);
 							while (Job.getJobManager().find(NGClientConstants.NPM_BUILD_JOB).length == 0 || RunNPMCommand.isNGBuildRunning())
 							{
 								// verify the NG build job at every second
