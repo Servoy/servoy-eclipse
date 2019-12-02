@@ -184,7 +184,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			errorMsg.append ("At least one platform must be selected");
 		}
 		String value = settings.get("save_dir");
-		if (value == null) {
+		if (value == null || value.trim().length() == 0) {
 			errorMsg.append ("Export path must to be specified");
 			return errorMsg;
 		}

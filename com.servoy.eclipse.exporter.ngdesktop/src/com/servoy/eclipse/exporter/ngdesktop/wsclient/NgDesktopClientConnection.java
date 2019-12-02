@@ -7,13 +7,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -99,57 +97,44 @@ public class NgDesktopClientConnection
 	 */
 	public String startBuild(String platform, IDialogSettings settings) throws IOException
 	{
-		try
-		{
-			HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
-			JSONObject jsonObj = new JSONObject();
-			if (platform != null) jsonObj.put("platform", platform);
-			if (settings.get("icon_path") != null && settings.get("icon_path").trim().length() > 0) jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
-			if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0) jsonObj.put("image", getEncodedData(settings.get("image_path")));
-			if (settings.get("copyright") != null && settings.get("image_path").trim().length() > 0) jsonObj.put("copyright", settings.get("copyright"));
-			if (settings.get("app_url") != null && settings.get("app_url").trim().length() > 0) jsonObj.put("url", settings.get("app_url"));
-			if (settings.get("ngdesktop_width") != null && settings.get("ngdesktop_width").trim().length() > 0) jsonObj.put("width", settings.get("ngdesktop_width"));
-			if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0) jsonObj.put("height", settings.get("ngdesktop_height"));
+		HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
+		JSONObject jsonObj = new JSONObject();
+		if (platform != null) jsonObj.put("platform", platform);
+		if (settings.get("icon_path") != null && settings.get("icon_path").trim().length() > 0) jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
+		if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0) jsonObj.put("image", getEncodedData(settings.get("image_path")));
+		if (settings.get("copyright") != null && settings.get("image_path").trim().length() > 0) jsonObj.put("copyright", settings.get("copyright"));
+		if (settings.get("app_url") != null && settings.get("app_url").trim().length() > 0) jsonObj.put("url", settings.get("app_url"));
+		if (settings.get("ngdesktop_width") != null && settings.get("ngdesktop_width").trim().length() > 0) jsonObj.put("width", settings.get("ngdesktop_width"));
+		if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0) jsonObj.put("height", settings.get("ngdesktop_height"));
 
-			StringEntity input = new StringEntity(jsonObj.toString());
-			input.setContentType("application/json");
-			postRequest.setEntity(input);
+		StringEntity input = new StringEntity(jsonObj.toString());
+		input.setContentType("application/json");
+		postRequest.setEntity(input);
 
-			ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
-
-			CloseableHttpResponse httpResponse = httpClient.execute(postRequest);
-
+		ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
+		
+		try (CloseableHttpResponse httpResponse = httpClient.execute(postRequest);
+			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())))) {
+			
 			//verify status code
 			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
 				throw new IOException("Http error: " + httpResponse.getStatusLine().getStatusCode() + ": " + httpResponse.getStatusLine().getReasonPhrase());
 			}
-			BufferedReader br = null;
-			try {
-				br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-	
-				String output;
-				StringBuffer sb = new StringBuffer();
-				while ((output = br.readLine()) != null)
-					sb.append(output);
-	
-				jsonObj = new JSONObject(sb.toString());
-				if (jsonObj.getInt("statusCode") != WAITING)
-				{ //this is the first status set on the service on a normal processing
-					throw new IOException(jsonObj.getString("statusMessage"));
-				}
-			} finally {
-				if (br != null) br.close();
-				postRequest.reset();
-				httpResponse.close();
+			
+			String output;
+			StringBuffer sb = new StringBuffer();
+			while ((output = br.readLine()) != null)
+				sb.append(output);
+
+			jsonObj = new JSONObject(sb.toString());
+			if (jsonObj.getInt("statusCode") != WAITING)
+			{ //this is the first status set on the service on a normal processing
+				throw new IOException(jsonObj.getString("statusMessage"));
 			}
-			return (String)jsonObj.get("tokenId");
-		}
-		catch (UnsupportedEncodingException | ClientProtocolException e)
-		{
-			// not the case
-		}
-		return null;
+			postRequest.reset();
+		} 
+		return (String)jsonObj.get("tokenId");
 	}
 
 	/**
@@ -164,10 +149,9 @@ public class NgDesktopClientConnection
 	public int getStatus(String tokenId) throws IOException
 	{
 		HttpGet getRequest = new HttpGet(service_url + STATUS_ENDPOINT + tokenId);
-		CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
+		try (CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
+			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())))) {
+			
 			String output;
 			StringBuffer sb = new StringBuffer();
 			while ((output = br.readLine()) != null)
@@ -175,12 +159,9 @@ public class NgDesktopClientConnection
 			JSONObject jsonObj = new JSONObject(sb.toString());
 			int statusCode = jsonObj.getInt("statusCode");
 			statusMessage = (String)jsonObj.get("statusMessage");
-			return statusCode;
-		} finally {
-			if (br != null) br.close();
 			getRequest.reset();
-			httpResponse.close();
-		}
+			return statusCode;
+		} 
 	}
 
 	public String getStatusMessage() {
@@ -190,22 +171,17 @@ public class NgDesktopClientConnection
 	public String getBinaryName(String tokenId) throws IOException
 	{
 		HttpGet getRequest = new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId);
-		CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
+		try (CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
+			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())))) {
 			String output;
 			StringBuffer sb = new StringBuffer();
 			while ((output = br.readLine()) != null)
 				sb.append(output);
 	
 			JSONObject jsonObj = new JSONObject(sb.toString());
-			return (String)jsonObj.get("binaryName");
-		} finally {
-			if (br != null) br.close();
 			getRequest.reset();
-			httpResponse.close();
-		}
+			return (String)jsonObj.get("binaryName");
+		} 
 	}
 
 	public void download(String tokenId, String savePath) throws IOException //expect absolutePath
@@ -215,15 +191,13 @@ public class NgDesktopClientConnection
 
 		ServoyLog.logInfo(service_url + DOWNLOAD_ENDPOINT + tokenId);
 
-		CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
-		
-		InputStream is = null;
-		FileOutputStream fos = null;
 		int amount = 0;
-		try { 
-			is = httpResponse.getEntity().getContent();
+		try (CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
+			InputStream is = httpResponse.getEntity().getContent();
+			FileOutputStream fos = new FileOutputStream(savePath + binaryName)) { 
+			
 			byte[] inputFile = new byte[BUFFER_SIZE];
-			fos = new FileOutputStream(savePath + binaryName);
+			
 			int n = is.read(inputFile, 0, BUFFER_SIZE);
 			
 			while (n != -1)
@@ -235,16 +209,8 @@ public class NgDesktopClientConnection
 				}
 				n = is.read(inputFile, 0, BUFFER_SIZE);
 			}
-		} finally {
-			if (fos != null) {
-				fos.flush();
-				fos.close();
-			}
-			if (is != null) is.close();
 			getRequest.reset();
-			httpResponse.close();
-			
-		}
+		} 
 		ServoyLog.logInfo("Downloaded bytes: " + amount);
 	}
 }
