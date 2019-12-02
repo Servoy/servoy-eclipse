@@ -132,8 +132,9 @@ public class NgDesktopClientConnection
 			{ //this is the first status set on the service on a normal processing
 				throw new IOException(jsonObj.getString("statusMessage"));
 			}
+		} finally {
 			postRequest.reset();
-		} 
+		}
 		return (String)jsonObj.get("tokenId");
 	}
 
@@ -159,9 +160,10 @@ public class NgDesktopClientConnection
 			JSONObject jsonObj = new JSONObject(sb.toString());
 			int statusCode = jsonObj.getInt("statusCode");
 			statusMessage = (String)jsonObj.get("statusMessage");
-			getRequest.reset();
 			return statusCode;
-		} 
+		} finally {
+			getRequest.reset();
+		}
 	}
 
 	public String getStatusMessage() {
@@ -179,9 +181,10 @@ public class NgDesktopClientConnection
 				sb.append(output);
 	
 			JSONObject jsonObj = new JSONObject(sb.toString());
-			getRequest.reset();
 			return (String)jsonObj.get("binaryName");
-		} 
+		} finally {
+			getRequest.reset();
+		}
 	}
 
 	public void download(String tokenId, String savePath) throws IOException //expect absolutePath
@@ -209,8 +212,9 @@ public class NgDesktopClientConnection
 				}
 				n = is.read(inputFile, 0, BUFFER_SIZE);
 			}
+		} finally {
 			getRequest.reset();
-		} 
+		}
 		ServoyLog.logInfo("Downloaded bytes: " + amount);
 	}
 }
