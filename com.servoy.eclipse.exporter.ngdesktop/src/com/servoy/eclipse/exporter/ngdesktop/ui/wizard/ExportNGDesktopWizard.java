@@ -266,9 +266,10 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 					if (platform.equals(ExportPage.WINDOWS_PLATFORM)) //skip mac and linux for now
 					{
+						NgDesktopClientConnection serviceConn = null;
 						try
 						{
-							NgDesktopClientConnection serviceConn = new NgDesktopClientConnection();
+							serviceConn = new NgDesktopClientConnection();
 							String tokenId = serviceConn.startBuild(platform, serviceSettings);
 							int status = serviceConn.getStatus(tokenId);
 							while (NgDesktopClientConnection.READY != status)
@@ -302,9 +303,17 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 								serviceConn.download(tokenId, saveDir);
 							}
 						}
-						catch (IOException | InterruptedException e)
-						{
+						catch (IOException | InterruptedException e) {
 							errorMsg.append(e.getMessage());
+						} 
+						finally {
+							if (serviceConn != null) {
+								try { //(try to) close the connection
+									serviceConn.closeConnection();
+								} catch (IOException e) {
+									errorMsg.append(e.getMessage());
+								}
+							}
 						}
 					}
 					else

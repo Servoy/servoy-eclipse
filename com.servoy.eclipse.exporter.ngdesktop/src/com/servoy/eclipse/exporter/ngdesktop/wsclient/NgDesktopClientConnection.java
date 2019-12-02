@@ -12,9 +12,9 @@ import java.net.MalformedURLException;
 import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -33,6 +33,11 @@ public class NgDesktopClientConnection
 
 	HttpClientBuilder httpBuilder = null;
 	private CloseableHttpClient httpClient = null;
+	
+	HttpPost postRequest = null;
+	CloseableHttpResponse httpResponse = null;
+	BufferedReader br = null;
+	HttpGet getRequest = null;
 
 	private static final int BUFFER_SIZE = 8192;
 
@@ -80,6 +85,7 @@ public class NgDesktopClientConnection
 
 	public void closeConnection() throws IOException
 	{
+		doCleanup();
 		if (httpClient != null)
 		{
 			httpClient.close();
@@ -99,17 +105,19 @@ public class NgDesktopClientConnection
 	 */
 	public String startBuild(String platform, IDialogSettings settings) throws IOException
 	{
+		String output;
+		StringBuffer sb = new StringBuffer();
 		try
 		{
-			HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
+			postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
 			JSONObject jsonObj = new JSONObject();
 			if (platform != null) jsonObj.put("platform", platform);
 			if (settings.get("icon_path") != null) jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
-			if (settings.get("image_path") != null) jsonObj.put("image", getEncodedData(settings.get("image_path")));
-			if (settings.get("copyright") != null) jsonObj.put("copyright", settings.get("copyright"));
-			if (settings.get("app_url") != null) jsonObj.put("url", settings.get("app_url"));
-			if (settings.get("ngdesktop_width") != null) jsonObj.put("width", settings.get("ngdesktop_width"));
-			if (settings.get("ngdesktop_height") != null) jsonObj.put("height", settings.get("ngdesktop_height"));
+			if (settings.get("image_path") != null && settings.get("image_path").trim().length() > 0) jsonObj.put("image", getEncodedData(settings.get("image_path")));
+			if (settings.get("copyright") != null && settings.get("image_path").trim().length() > 0) jsonObj.put("copyright", settings.get("copyright"));
+			if (settings.get("app_url") != null && settings.get("app_url").trim().length() > 0) jsonObj.put("url", settings.get("app_url"));
+			if (settings.get("ngdesktop_width") != null && settings.get("ngdesktop_width").trim().length() > 0) jsonObj.put("width", settings.get("ngdesktop_width"));
+			if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0) jsonObj.put("height", settings.get("ngdesktop_height"));
 
 			StringEntity input = new StringEntity(jsonObj.toString());
 			input.setContentType("application/json");
@@ -117,20 +125,17 @@ public class NgDesktopClientConnection
 
 			ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
 
-			HttpResponse httpResponse = httpClient.execute(postRequest);
+			httpResponse = httpClient.execute(postRequest);
 
 			//verify status code
 			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
 			{
 				throw new IOException("Http error: " + httpResponse.getStatusLine().getStatusCode() + ": " + httpResponse.getStatusLine().getReasonPhrase());
 			}
-			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-
-			String output;
-			StringBuffer sb = new StringBuffer();
+			br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));		
 			while ((output = br.readLine()) != null)
 				sb.append(output);
-
+	
 			jsonObj = new JSONObject(sb.toString());
 			if (jsonObj.getInt("statusCode") != WAITING)
 			{ //this is the first status set on the service on a normal processing
@@ -141,6 +146,9 @@ public class NgDesktopClientConnection
 		catch (UnsupportedEncodingException | ClientProtocolException e)
 		{
 			// not the case
+		}
+		finally {
+			doCleanup();
 		}
 		return null;
 	}
@@ -156,14 +164,18 @@ public class NgDesktopClientConnection
 	 */
 	public int getStatus(String tokenId) throws IOException
 	{
-		HttpGet getRequest = new HttpGet(service_url + STATUS_ENDPOINT + tokenId);
-		HttpResponse httpResponse = httpClient.execute(getRequest);
-
-		BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
 		String output;
 		StringBuffer sb = new StringBuffer();
-		while ((output = br.readLine()) != null)
-			sb.append(output);
+		try {
+			getRequest = new HttpGet(service_url + STATUS_ENDPOINT + tokenId);
+			httpResponse = httpClient.execute(getRequest);
+			br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
+			
+			while ((output = br.readLine()) != null)
+				sb.append(output);
+		} finally {
+			doCleanup();
+		}
 
 		JSONObject jsonObj = new JSONObject(sb.toString());
 		int statusCode = jsonObj.getInt("statusCode");
@@ -177,14 +189,18 @@ public class NgDesktopClientConnection
 
 	public String getBinaryName(String tokenId) throws IOException
 	{
-		HttpGet getRequest = new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId);
-		HttpResponse httpResponse = httpClient.execute(getRequest);
-
-		BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
-		String output;
+		String output = null;
 		StringBuffer sb = new StringBuffer();
-		while ((output = br.readLine()) != null)
-			sb.append(output);
+		try {
+			getRequest = new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId);
+			httpResponse = httpClient.execute(getRequest);				
+			br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())));
+			while ((output = br.readLine()) != null)
+				sb.append(output);
+		} finally {
+			doCleanup();
+		}
+			
 
 		JSONObject jsonObj = new JSONObject(sb.toString());
 		return (String)jsonObj.get("binaryName");
@@ -193,30 +209,49 @@ public class NgDesktopClientConnection
 	public void download(String tokenId, String savePath) throws IOException //expect absolutePath
 	{
 		String binaryName = getBinaryName(tokenId);
-		HttpGet getRequest = new HttpGet(service_url + DOWNLOAD_ENDPOINT + tokenId);
+		getRequest = new HttpGet(service_url + DOWNLOAD_ENDPOINT + tokenId);
 
 		ServoyLog.logInfo(service_url + DOWNLOAD_ENDPOINT + tokenId);
 
-		HttpResponse httpResponse = httpClient.execute(getRequest);
-
-		InputStream is = httpResponse.getEntity().getContent();
+		CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
+		
 		byte[] inputFile = new byte[BUFFER_SIZE];
-		FileOutputStream fos = new FileOutputStream(savePath + binaryName);
-		int n = is.read(inputFile, 0, BUFFER_SIZE);
 		int amount = 0;
-		while (n != -1)
-		{
-			if (n > 0)
+		InputStream is = null;
+		FileOutputStream fos = null;
+		
+		try {
+			is = httpResponse.getEntity().getContent();
+			fos = new FileOutputStream(savePath + binaryName);
+			int n = is.read(inputFile, 0, BUFFER_SIZE);
+			while (n != -1)
 			{
-				fos.write(inputFile, 0, n);
-				amount += n;
+				if (n > 0)
+				{
+					fos.write(inputFile, 0, n);
+					amount += n;
+				}
+				n = is.read(inputFile, 0, BUFFER_SIZE);
 			}
-			n = is.read(inputFile, 0, BUFFER_SIZE);
+			fos.flush();
+			
+		} finally {
+			if (is != null) is.close();
+			if (fos != null) fos.close();
+			doCleanup();
 		}
-		fos.flush();
-		is.close();
-		fos.close();
 
 		ServoyLog.logInfo("Downloaded bytes: " + amount);
+	}
+	
+	private void doCleanup() throws IOException {
+		if (br != null) br.close();
+		if (getRequest != null) getRequest.reset();
+		if (postRequest != null) postRequest.reset();
+		if (httpResponse != null) httpResponse.close();
+		br = null;
+		getRequest = null;
+		postRequest = null;
+		httpResponse = null;
 	}
 }
