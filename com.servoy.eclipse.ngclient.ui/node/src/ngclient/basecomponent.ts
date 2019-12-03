@@ -41,4 +41,20 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
     protected getNativeChild():any {
         return this.elementRef.nativeElement;
     }
+    
+    public getWidth() : number{
+        return this.getNativeElement().parentNode.parentNode.offsetWidth;
+    }
+    
+    public getHeight() : number{
+        return this.getNativeElement().parentNode.parentNode.offsetHeight;
+    }
+    
+    public getLocationX() : number{
+        return this.getNativeElement().parentNode.parentNode.offsetLeft;
+    }
+    
+    public getLocationY() : number{
+        return this.getNativeElement().parentNode.parentNode.offsetTop;
+    }
 }

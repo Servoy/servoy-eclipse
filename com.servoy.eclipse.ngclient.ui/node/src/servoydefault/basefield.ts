@@ -49,9 +49,6 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
             } ); 
     }
 
-    getFocusElement() : any{
-        return this.getNativeElement();
-    }
     ngOnChanges( changes: SimpleChanges ) {
         for ( let property in changes ) {
             let change = changes[property];
@@ -93,5 +90,37 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
         }
         else this.dataProviderID = val;
         this.dataProviderIDChange.emit( this.dataProviderID );
+    }
+    
+    public selectAll() {
+        this.getNativeElement().select();
+    }
+    
+    public getSelectedText() : string{
+        return window.getSelection().toString();
+    }
+    
+    public replaceSelectedText(text: string){
+        let elem = this.getNativeElement();
+        var startPos =  elem.selectionStart;
+        var endPos = elem.selectionEnd;
+        
+        var beginning = elem.value.substring(0, startPos);
+        var end = elem.value.substring(endPos);
+        elem.value = beginning + text + end;
+        elem.selectionStart = startPos;
+        elem.selectionEnd = startPos + text.length;
+        
+        var evt = document.createEvent("HTMLEvents");
+        evt.initEvent("change", false, true);
+        elem.dispatchEvent(evt);
+    }
+    
+    public getAsPlainText() : string {
+        if (this.dataProviderID)
+        {
+            return this.dataProviderID.replace(/<[^>]*>/g, ''); 
+        }    
+        return this.dataProviderID;
     }
 }

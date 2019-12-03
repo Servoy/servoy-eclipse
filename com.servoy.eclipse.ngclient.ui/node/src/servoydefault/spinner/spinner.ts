@@ -99,23 +99,6 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
     this.update(this.dataProviderID);
   };
 
-  /**
-   * Request the focus to this spinner.
-   * @example %%prefix%%%%elementName%%.requestFocus();
-   * @param mustExecuteOnFocusGainedMethod (optional) if false will not execute the onFocusGained method; the default value is true
-   */
-  requestFocus(mustExecuteOnFocusGainedMethod) {
-    if (mustExecuteOnFocusGainedMethod === false && this.onFocusGainedMethodID) {
-
-      this.getNativeChild().removeEventListener('focus', this.onFocusGainedMethodID);
-      this.getNativeChild().focus();
-      this.renderer.listen(this.getNativeChild(),'focus', this.onFocusGainedMethodID);
-
-    } else {
-      this.getNativeChild().focus();
-    }
-  }
-
   getSelectionFromDataprovider() {
     if (!this.dataProviderID) {
       this.counter = 0;

@@ -12,8 +12,4 @@ export class ServoyDefaultTextArea extends ServoyDefaultBaseField {
     constructor(renderer: Renderer2, formattingService : FormattingService) { 
         super(renderer,formattingService);
     }
-    
-    public selectAll() {
-        this.getNativeElement().select();
-    }
 }

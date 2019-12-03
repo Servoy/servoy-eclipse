@@ -66,6 +66,28 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
       }
     }
     
+    getFocusElement() : any{
+        return this.getNativeElement();
+    }
+    
+    public requestFocus() {
+        this.getFocusElement().focus();
+    }
+    
+    public getScrollX() : number{
+        return this.getNativeElement().scrollLeft;
+    }
+    
+    public getScrollY() : number{
+        return this.getNativeElement().scrollTop;
+    }
+    
+    public setScroll(x : number, y: number)
+    {
+        this.getNativeElement().scrollLeft = x;
+        this.getNativeElement().scrollTop = y;
+    }
+    
     ngOnChanges( changes: SimpleChanges ) {
         for ( let property in changes ) {
             let change = changes[property];

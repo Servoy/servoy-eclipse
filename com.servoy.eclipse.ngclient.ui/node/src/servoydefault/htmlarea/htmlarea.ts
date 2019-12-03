@@ -29,5 +29,4 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField implements OnI
   ngOnChanges(changes: SimpleChanges){
     super.ngOnChanges(changes);
   }
-
 }
