@@ -4,15 +4,15 @@
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-<parent>
+	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
 		<version>2019.12.0.3540_rc</version>
 	</parent>
-
-	<artifactId>com.servoy.jre.macosx.x86_64</artifactId>
+	
+	<artifactId>com.servoy.eclipse.jre.linux.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>12.0.0</version>
+	<version>13.0.1</version>
 	
 	<properties>
 		<jre.version>jdk-13.0.1+9-jre</jre.version>
@@ -43,8 +43,9 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.1%2B9_openj9-0.17.0/OpenJDK13U-jre_x64_mac_openj9_13.0.1_9_openj9-0.17.0.tar.gz</url>
+							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.1%2B9_openj9-0.17.0/OpenJDK13U-jre_x64_linux_openj9_13.0.1_9_openj9-0.17.0.tar.gz</url>
 							<outputFileName>${jre.version}.tar.gz</outputFileName>
+							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
 						</configuration>
 					</execution>
 				</executions>
@@ -59,8 +60,7 @@
             <phase>generate-resources</phase>  
             <configuration>  
                 <tasks>  
-		    		<untar src="${project.build.directory}/${jre.version}.tar.gz" compression="gzip" dest="${project.build.directory}"/>
-		    		<copy file="${project.build.directory}/${jre.version}/Contents/Home/lib/libjli.dylib" tofile="${project.build.directory}/${jre.version}/Contents/MacOS/libjli.dylib"/>
+		    <untar src="${project.build.directory}/${jre.version}.tar.gz" compression="gzip" dest="${project.build.directory}"/>
                 </tasks>  
             </configuration>  
             <goals>  
@@ -84,6 +84,8 @@
 							<resources>
 								<resource>
 									<directory>${project.build.directory}/${jre.version}/</directory>
+									<!-- Workaround https://github.com/eclipse/openj9/issues/2239 -->
+									<exclude>lib/libfreetype.so.6</exclude>
 								</resource>
 							</resources>
 						</configuration>
