@@ -183,7 +183,12 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         var position = {position:"absolute"};
         if(this.formCache.getComponent('svy_default_navigator') != null) {
             position['left'] = "70px";
+        } 
+        else if (this.formCache.navigatorForm &&  this.formCache.navigatorForm.name && this.formCache.navigatorForm.name.lastIndexOf("default_navigator_container.html") == -1)
+        {
+            position['left'] = this.formCache.navigatorForm.size.width + "px";
         }
+        
         return position;
     }
 

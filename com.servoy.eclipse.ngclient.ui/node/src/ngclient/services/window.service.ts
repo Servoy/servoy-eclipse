@@ -274,12 +274,12 @@ export class WindowService {
             if (this.servoyService.getSolutionSettings().windowName == name) { // main window form switch
                     this.servoyService.getSolutionSettings().mainForm = form;
                     this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
-    //            var formparam = 'f=' + form.name;
-    //            if (($location.url().indexOf(formparam+'&') === -1) && ($location.url().indexOf(formparam,$location.url().length - formparam.length) === -1))
-    //                $location.url($location.path() + '?f=' + form.name);
-    //            else
-    //                $location.url($location.url());
             }
+            let formCache = this.formService.getFormCacheByName(form.name);
+            if (formCache)
+            {
+                formCache.navigatorForm = navigatorForm; 
+            }    
         });
     }
 

@@ -23,9 +23,13 @@ import { SvyWindow } from '../window.service';
     }
 
     getNavigatorFormName(): string {
-      return this.window.navigatorForm ? this.window.navigatorForm.name : null;
+      return (this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf("default_navigator_container.html") == -1) ? this.window.navigatorForm.name : null;
     }
 
+    hasDefaultNavigator() : boolean{
+        return this.window.navigatorForm && this.window.navigatorForm.name && this.window.navigatorForm.name.lastIndexOf("default_navigator_container.html") >= 0;
+    }
+    
     isUndecorated(): boolean {
       return this.window.undecorated || ( this.window.opacity < 1 )
     }

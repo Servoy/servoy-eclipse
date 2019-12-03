@@ -9,7 +9,7 @@ import { FormComponent } from './form/form_component.component'
 import { ConverterService } from '../sablo/converter.service'
 import { LoggerService, LoggerFactory} from '../sablo/logger.service'
 
-import { ServoyService } from './servoy.service'
+import { ServoyService, FormSettings } from './servoy.service'
 
 @Injectable()
 export class FormService {
@@ -261,7 +261,7 @@ export class FormCache {
     private _mainStructure: StructureCache;
 
     private _items: Array<ComponentCache>;
-
+    public navigatorForm: FormSettings;
     private conversionInfo = {};
 
     constructor() {

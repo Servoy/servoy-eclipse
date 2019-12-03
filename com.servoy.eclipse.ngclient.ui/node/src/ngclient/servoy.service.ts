@@ -287,7 +287,7 @@ class AnchorConstants {
     public static readonly WEST = 8;
 }
 
-class FormSettings {
+export class FormSettings {
     public name: String;
     public size: { width: number, height: number };
 }

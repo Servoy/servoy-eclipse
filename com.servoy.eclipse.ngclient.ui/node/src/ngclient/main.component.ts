@@ -22,7 +22,14 @@ export class MainComponent {
         return null;
     }
 
+    public get navigatorForm() {
+        const navigatorForm = this.servoyService.getSolutionSettings().navigatorForm;
+        if ( navigatorForm && navigatorForm.name && navigatorForm.name.lastIndexOf("default_navigator_container.html") == -1) return navigatorForm.name;
+        return null;
+    }
+    
     hasDefaultNavigator():boolean {
         return this.mainForm && this.formservice.getFormCacheByName( this.mainForm.toString() ).getComponent('svy_default_navigator') != null;
     }
+    
 }
