@@ -1044,8 +1044,6 @@ public class Activator extends Plugin
 		}.schedule();
 
 		new Thread(() -> {
-			long time = System.currentTimeMillis();
-			System.err.println("Start" + time);
 			XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
 			MethodTemplatesLoader.loadMethodTemplatesFromXML();
 
@@ -1074,7 +1072,6 @@ public class Activator extends Plugin
 					processMethodTemplates(((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance()));
 				}
 			}
-			System.err.println("end" + (System.currentTimeMillis() - time));
 		}).start();
 	}
 
