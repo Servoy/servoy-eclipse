@@ -106,6 +106,24 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.jgit.ssh.apache"
          version="0.0.0"/>
 
+   <includes
+         id="com.servoy.jre.linux.x86_64.feature"
+         version="12.0.0"
+         os="linux"
+         arch="x86_64"/>
+
+   <includes
+         id="com.servoy.jre.macosx.x86_64.feature"
+         version="12.0.0"
+         os="macosx"
+         arch="x86_64"/>
+
+   <includes
+         id="com.servoy.jre.win32.x86_64.feature"
+         version="12.0.0"
+         os="win32"
+         arch="x86_64"/>
+
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
@@ -564,18 +582,24 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="com.servoy.eclipse.jre.linux.x86_64"
+         os="linux"
+         arch="x86_64"
          download-size="0"
          install-size="0"
          version="13.0.1"/>
 
    <plugin
          id="com.servoy.eclipse.jre.win32.x86_64"
+         os="win32"
+         arch="x86_64"
          download-size="0"
          install-size="0"
          version="13.0.1"/>
 
    <plugin
          id="com.servoy.eclipse.jre.macosx.x86_64"
+         os="macosx"
+         arch="x86_64"
          download-size="0"
          install-size="0"
          version="13.0.1"/>

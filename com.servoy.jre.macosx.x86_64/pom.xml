@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+<parent>
+		<groupId>com.servoy</groupId>
+		<artifactId>servoy-eclipse</artifactId>
+		<version>2019.12.0.3540_rc</version>
+	</parent>
+
+	<artifactId>com.servoy.jre.macosx.x86_64.feature</artifactId>
+	<packaging>eclipse-feature</packaging>
+	<version>12.0.0</version>
+
+</project>
