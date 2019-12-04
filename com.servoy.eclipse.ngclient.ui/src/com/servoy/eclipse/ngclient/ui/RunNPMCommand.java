@@ -17,8 +17,10 @@
 
 package com.servoy.eclipse.ngclient.ui;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -107,11 +109,10 @@ public class RunNPMCommand extends WorkspaceJob
 				builder.command(lst);
 				process = builder.start();
 				InputStream inputStream = process.getInputStream();
-				byte[] bytes = new byte[512];
-				int read = inputStream.read(bytes);
-				while (read != -1)
+				BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				String str = null;
+				while ((str = br.readLine()) != null)
 				{
-					String str = new String(bytes, 0, read);
 					str = str.replaceAll(".*?m", "");
 					str = str.replaceAll("\b", "");
 					System.err.println(str.trim());
@@ -121,7 +122,6 @@ public class RunNPMCommand extends WorkspaceJob
 					{
 						ngBuildRunning = false;
 					}
-					read = inputStream.read(bytes);
 				}
 				inputStream.close();
 				process.waitFor();
