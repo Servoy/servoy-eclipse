@@ -260,7 +260,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			}
 			else
 			{
-				if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? getUsedComponents() : null;
+				if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? getUsedComponents() : new HashSet<>();
 				if (configuration.getSelectedComponents().equals("")) return getUsedComponents();
 
 				Set<String> set = new HashSet<String>();
@@ -301,7 +301,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			}
 			else
 			{
-				if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? getUsedServices() : null;
+				if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? getUsedServices() : new HashSet<>();
 				if (configuration.getSelectedServices().equals("")) return getUsedServices();
 				Set<String> set = new HashSet<String>();
 				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
