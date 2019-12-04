@@ -19,7 +19,6 @@ package com.servoy.eclipse.ngclient.ui;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -108,22 +107,22 @@ public class RunNPMCommand extends WorkspaceJob
 				lst.add("--scripts-prepend-node-path");
 				builder.command(lst);
 				process = builder.start();
-				InputStream inputStream = process.getInputStream();
-				BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				String str = null;
-				while ((str = br.readLine()) != null)
+				try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream())))
 				{
-					str = str.replaceAll(".*?m", "");
-					str = str.replaceAll("\b", "");
-					System.err.println(str.trim());
-					// The date, hash and time represents the last output line of the NG build process.
-					// The NG build is finished when this conditions is met.
-					if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+					String str = null;
+					while ((str = br.readLine()) != null)
 					{
-						ngBuildRunning = false;
+						str = str.replaceAll(".*?m", "");
+						str = str.replaceAll("\b", "");
+						System.err.println(str.trim());
+						// The date, hash and time represents the last output line of the NG build process.
+						// The NG build is finished when this conditions is met.
+						if (str.trim().contains("Date:") && str.trim().contains("Hash:") && str.trim().contains("Time:"))
+						{
+							ngBuildRunning = false;
+						}
 					}
 				}
-				inputStream.close();
 				process.waitFor();
 			}
 			if (nextJob != null) nextJob.schedule();
