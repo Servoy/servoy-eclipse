@@ -104,7 +104,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			((TarArchiveOutputStream)os).setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
 			ArchiveEntry entry = tarIS.getNextTarEntry();
-			System.out.println(entry.getName());
 			while (entry != null)
 			{
 				if (entry.getName().endsWith("/servoy.json")) {
