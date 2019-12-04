@@ -1043,7 +1043,7 @@ public class Activator extends Plugin
 			}
 		}.schedule();
 
-		new Thread(() -> {
+		Runnable loadDocs = () -> {
 			XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
 			MethodTemplatesLoader.loadMethodTemplatesFromXML();
 
@@ -1072,7 +1072,13 @@ public class Activator extends Plugin
 					processMethodTemplates(((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance()));
 				}
 			}
-		}).start();
+		};
+		// apple can't load this on back ground because all kind swing classes are created to get the docs then we could get into a deadlock
+		if (Utils.isAppleMacOS())
+		{
+			loadDocs.run();
+		}
+		else new Thread(loadDocs).start();
 	}
 
 	private void processMethodTemplates(Map<String, IMethodTemplate> templs)
