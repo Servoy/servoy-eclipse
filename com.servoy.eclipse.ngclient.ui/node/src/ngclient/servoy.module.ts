@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms'
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -48,6 +48,9 @@ import { ComponentContributor } from './component_contributor.service';
     ],
     providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe, ComponentContributor],
     bootstrap: [MainComponent],
-    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent]
+    entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent],
+    schemas: [
+              CUSTOM_ELEMENTS_SCHEMA
+    ]
 } )
 export class ServoyModule { }
