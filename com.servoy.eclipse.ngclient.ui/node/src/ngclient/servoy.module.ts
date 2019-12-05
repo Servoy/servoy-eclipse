@@ -24,6 +24,8 @@ import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/com
 import { I18NProvider } from './services/i18n_provider.service'
 import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
 import { ErrorBean } from '../servoycore/error-bean/error-bean';
+import { ServoyCoreSlider } from '../servoycore/slider/slider';
+
 import { ComponentContributor } from './component_contributor.service';
 
 @NgModule( {
@@ -34,8 +36,9 @@ import { ComponentContributor } from './component_contributor.service';
         DefaultLoginWindowComponent,
         FileUploadWindowComponent,
         DefaultNavigator,
-        DialogWindowComponent,
 		ErrorBean
+        ServoyCoreSlider,
+        DialogWindowComponent
     ],
     imports: [
         BrowserModule,

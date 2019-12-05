@@ -115,6 +115,7 @@ import { ServoyApi } from '../servoy_api'
       <ng-template #servoydefaultImagemedia let-state="state"><servoydefault-imagemedia  [borderType]="state.model.borderType" [text]="state.model.text" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [editable]="state.model.editable" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [visible]="state.model.visible" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name"  [scrollbars]="state.model.scrollbars" [toolTipText]="state.model.toolTipText" [tabSeq]="state.model.tabSeq" [onActionMethodID]="getHandler(state,'onActionMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [dataProviderID]="state.model.dataProviderID" #cmp></servoydefault-imagemedia></ng-template>
       
       <ng-template #servoycoreErrorbean let-state="state"><servoycore-errorbean [error]="state.model.error" [servoyApi]="getServoyApi(state)" #cmp></servoycore-errorbean></ng-template>
+      <ng-template #servoycoreSlider let-state="state"><servoycore-slider  [styleClass]="state.model.styleClass" [min]="state.model.min" [max]="state.model.max" [orientation]="state.model.orientation" [step]="state.model.step" [enabled]="state.model.enabled" [toolTipText]="state.model.toolTipText" [visible]="state.model.visible" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [tabSeq]="state.model.tabSeq" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [onCreateMethodID]="getHandler(state,'onCreateMethodID')" [onSlideMethodID]="getHandler(state,'onSlideMethodID')" [onStartMethodID]="getHandler(state,'onStartMethodID')" [onStopMethodID]="getHandler(state,'onStopMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoycore-slider></ng-template>
       <!-- component template generate end -->
    `
 } )
@@ -143,6 +144,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild( 'servoydefaultHtmlview',{static: true} ) readonly servoydefaultHtmlview: TemplateRef<any>;
     @ViewChild( 'servoydefaultListbox' ,{static: true}) readonly servoydefaultListbox: TemplateRef<any>;
     @ViewChild( 'servoydefaultImagemedia' ,{static: true}) readonly servoydefaultImagemedia: TemplateRef<any>;
+    @ViewChild( 'servoycoreSlider' ,{static: true}) readonly servoycoreSlider: TemplateRef<any>;
     
     @ViewChild( 'servoycoreErrorbean' ,{static: true}) readonly servoycoreErrorbean: TemplateRef<any>;
     
