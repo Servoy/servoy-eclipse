@@ -5,6 +5,7 @@ import { FormService, FormCache, StructureCache, ComponentCache } from '../form.
 import { ServoyService } from '../servoy.service'
 
 import { SabloService } from '../../sablo/sablo.service'
+import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
 
 import { ServoyApi } from '../servoy_api'
 
@@ -112,6 +113,8 @@ import { ServoyApi } from '../servoy_api'
                                    [valuelistID]="state.model.valuelistID"#cmp></servoydefault-listbox>
       </ng-template>
       <ng-template #servoydefaultImagemedia let-state="state"><servoydefault-imagemedia  [borderType]="state.model.borderType" [text]="state.model.text" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [editable]="state.model.editable" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [visible]="state.model.visible" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name"  [scrollbars]="state.model.scrollbars" [toolTipText]="state.model.toolTipText" [tabSeq]="state.model.tabSeq" [onActionMethodID]="getHandler(state,'onActionMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [dataProviderID]="state.model.dataProviderID" #cmp></servoydefault-imagemedia></ng-template>
+      
+      <ng-template #servoycoreErrorbean let-state="state"><servoycore-errorbean [error]="state.model.error" [servoyApi]="getServoyApi(state)" #cmp></servoycore-errorbean></ng-template>
       <!-- component template generate end -->
    `
 } )
@@ -141,6 +144,8 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild( 'servoydefaultListbox' ,{static: true}) readonly servoydefaultListbox: TemplateRef<any>;
     @ViewChild( 'servoydefaultImagemedia' ,{static: true}) readonly servoydefaultImagemedia: TemplateRef<any>;
     
+    @ViewChild( 'servoycoreErrorbean' ,{static: true}) readonly servoycoreErrorbean: TemplateRef<any>;
+    
   // component template generate end
 
     @ViewChildren( 'cmp' ) readonly components: QueryList<Component>;
@@ -151,8 +156,10 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
 
     private handlerCache: { [property: string]: { [property: string]: ( e ) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
+    private log: LoggerService;
 
-    constructor( private formservice: FormService, private sabloService: SabloService, private servoyService: ServoyService ) {
+    constructor( private formservice: FormService, private sabloService: SabloService, private servoyService: ServoyService, private logFactory : LoggerFactory ) {
+        this.log = logFactory.getLogger("FormComponent");
     }
     
     ngOnChanges( changes: SimpleChanges ) {
@@ -164,6 +171,9 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
             return this.svyResponsiveDiv;
         }
         else {
+            if (this[item.type] === undefined && item.type !== undefined) {
+                this.log.error(this.log.buildMessage(() => ("Template for "+item.type+" was not found, please check form_component template.")));
+            }
             return this[item.type]
         }
     }
