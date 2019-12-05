@@ -1,11 +1,9 @@
 package com.servoy.eclipse.ui.tweaks;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
-import com.servoy.eclipse.model.util.ModelUtils;
-
-public class Activator extends AbstractUIPlugin
+public class Activator extends Plugin
 {
 
 	/**
@@ -19,8 +17,6 @@ public class Activator extends AbstractUIPlugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
-		ModelUtils.assertUINotDisabled(PLUGIN_ID);
-
 		super.start(context);
 		plugin = this;
 	}

@@ -13,7 +13,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.wiring.BundleWiring;
 
-import com.servoy.eclipse.ui.tweaks.bytecode.weave.ImageDescriptorWeaver;
+import com.servoy.eclipse.ui.tweaks.weaver.ImageDescriptorWeaver;
 
 public class WeaveClassWithASMCode
 {

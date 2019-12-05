@@ -32,8 +32,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.ui.tweaks.bytecode.weave.ImageDescriptorWeaver;
-import com.servoy.j2db.util.Pair;
+import com.servoy.eclipse.ui.tweaks.weaver.ImageDescriptorWeaver;
 
 /**
  * This class contains the mappings between old images locations and new image locations that are used to replace icons in non Servoy plug-ins.

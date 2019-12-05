@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.jface,
  org.objectweb.asm.tree
 Bundle-ClassPath: .
 Import-Package: com.servoy.eclipse.ui.tweaks,
- com.servoy.eclipse.ui.tweaks.bytecode.weave,
+ com.servoy.eclipse.ui.tweaks.weaver,
  org.eclipse.osgi.service.runnable;version="1.1.0",
  org.osgi.framework
 Automatic-Module-Name: com.servoy.eclipse.ui.asm.utils
