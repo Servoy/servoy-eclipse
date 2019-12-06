@@ -28,8 +28,9 @@ import { ServoyDefaultListBox } from './listbox/listbox';
 import { ServoyDefaultImageMedia } from './imagemedia/imagemedia';
 
 import { SabloModule } from '../sablo/sablo.module'
+import { ServoyPublicModule } from '../ngclient/servoy_public.module'
 
-import { FormatFilterPipe, NotNullOrEmptyPipe, MnemonicletterFilterPipe, SvyFormat, FormattingService, I18NProvider, DecimalkeyconverterDirective, StartEditDirective, TooltipDirective, TooltipService} from '../ngclient/servoy_public'
+import { FormatFilterPipe, NotNullOrEmptyPipe, MnemonicletterFilterPipe, SvyFormat, FormattingService, I18NProvider, DecimalkeyconverterDirective, StartEditDirective} from '../ngclient/servoy_public'
 
 import { OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
 import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-datetime-moment';
@@ -67,7 +68,6 @@ import { UploadDirective } from "../ngclient/utils/upload.directive";
     SvyFormat,
     DecimalkeyconverterDirective,
     StartEditDirective,
-    TooltipDirective,
     BGSplitter,
     BGPane,
     UploadDirective
@@ -80,7 +80,8 @@ import { UploadDirective } from "../ngclient/utils/upload.directive";
     BrowserAnimationsModule,
     OwlDateTimeModule,
     OwlMomentDateTimeModule,
-    AngularEditorModule
+    AngularEditorModule,
+	ServoyPublicModule
   ],
   exports: [
             ServoyDefaultTextField,
@@ -108,7 +109,6 @@ import { UploadDirective } from "../ngclient/utils/upload.directive";
   providers: [
               FormattingService,
               I18NProvider,
-              TooltipService,
               {provide: OWL_DATE_TIME_FORMATS, useValue: OWL_MOMENT_DATE_TIME_FORMATS}
                      ],
   schemas: [

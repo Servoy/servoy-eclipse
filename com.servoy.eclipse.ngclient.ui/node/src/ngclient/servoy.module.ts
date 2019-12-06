@@ -27,6 +27,7 @@ import { ErrorBean } from '../servoycore/error-bean/error-bean';
 import { ServoyCoreSlider } from '../servoycore/slider/slider';
 
 import { ComponentContributor } from './component_contributor.service';
+import { ServoyPublicModule } from './servoy_public.module';
 
 @NgModule( {
     declarations: [
@@ -47,7 +48,8 @@ import { ComponentContributor } from './component_contributor.service';
         SabloModule,
 		AllComponentsModule,
         AllServicesModules,
-        HttpClientModule
+        HttpClientModule,
+        ServoyPublicModule
     ],
     providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, FormatFilterPipe, ComponentContributor],
     bootstrap: [MainComponent],

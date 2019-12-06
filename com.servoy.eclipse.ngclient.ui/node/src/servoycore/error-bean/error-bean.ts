@@ -9,6 +9,7 @@ export class ErrorBean {
     
     @Input() error;
     @Input() servoyApi;
+    @Input() toolTipText: string;
     
     @ViewChild('element', {static: false}) elementRef:ElementRef;
     
