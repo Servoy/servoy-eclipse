@@ -25,8 +25,7 @@ describe('FormComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ FormComponent,AddAttributeDirective ],
       imports: [
-                ServoyDefaultComponentsModule,
-                ServoyCoreSlider
+                ServoyDefaultComponentsModule
        ],
        providers:    [ {provide: FormService, useValue:  formService },
                                {provide: SabloService, useValue:  sabloService },
