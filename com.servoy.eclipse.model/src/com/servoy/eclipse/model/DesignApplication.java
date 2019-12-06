@@ -133,6 +133,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().blockGUI(reason);
 	}
 
+	@Override
+	public void blockGUII18NMessage(String key, Object... args)
+	{
+		getClient().blockGUII18NMessage(key, args);
+	}
+
 
 	public void updateUI(int time)
 	{
