@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 import { FormComponent,AddAttributeDirective } from './form_component.component';
 
@@ -6,6 +7,7 @@ import {FormService} from '../form.service';
 import {ServoyService} from '../servoy.service';
 import {SabloService} from '../../sablo/sablo.service';
 
+import { ErrorBean } from '../../servoycore/error-bean/error-bean';
 import { ServoyDefaultComponentsModule } from '../../servoydefault/servoydefault.module';
 
 describe('FormComponent', () => {
@@ -22,12 +24,15 @@ describe('FormComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ FormComponent,AddAttributeDirective ],
       imports: [
-                ServoyDefaultComponentsModule,
+                ServoyDefaultComponentsModule
        ],
        providers:    [ {provide: FormService, useValue:  formService },
                                {provide: SabloService, useValue:  sabloService },
                                {provide: ServoyService, useValue:  servoyService }
-                             ]
+                             ],
+       schemas: [
+              CUSTOM_ELEMENTS_SCHEMA
+       ]
     })
     .compileComponents();
   }));
