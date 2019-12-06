@@ -36,7 +36,7 @@ import { ComponentContributor } from './component_contributor.service';
         DefaultLoginWindowComponent,
         FileUploadWindowComponent,
         DefaultNavigator,
-		ErrorBean
+		ErrorBean,
         ServoyCoreSlider,
         DialogWindowComponent
     ],
