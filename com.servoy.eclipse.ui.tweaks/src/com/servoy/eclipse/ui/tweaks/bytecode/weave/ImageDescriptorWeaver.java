@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.ui.tweaks.weaver;
+package com.servoy.eclipse.ui.tweaks.bytecode.weave;
 
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -26,6 +26,8 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.osgi.framework.hooks.weaving.WovenClass;
+
+import com.servoy.eclipse.ui.tweaks.Activator;
 
 /**
  * The weaver that transforms the byte-code of the jface ImageDescriptor class in order to hijack source image URLs/paths,
@@ -39,8 +41,7 @@ public class ImageDescriptorWeaver extends BasicWeaver implements Opcodes
 	@Override
 	public void weaveClass(WovenClass wovenClass)
 	{
-		// this is a bit of a hack, point to the com.servoy.eclipse.ui.tweaks plugin for getting stuff (like the ImageReplacementMapper)
-		wovenClass.getDynamicImports().add("com.servoy.eclipse.ui.tweaks");
+		wovenClass.getDynamicImports().add(Activator.PLUGIN_ID);
 		super.weaveClass(wovenClass);
 	}
 

@@ -1,4 +1,4 @@
-package com.servoy.eclipse.ui.tweaks.weaver;
+package com.servoy.eclipse.ui.tweaks.bytecode.weave;
 
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClass;
