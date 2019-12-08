@@ -12,19 +12,56 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>eclipse.platform.ui</artifactId>
-    <groupId>eclipse.platform.ui</groupId>
-    <version>4.12.0-SNAPSHOT</version>
-    <relativePath>../../</relativePath>
-  </parent>
-  <groupId>org.eclipse.jface</groupId>
+ 	<parent>
+		<groupId>com.servoy</groupId>
+		<artifactId>servoy-eclipse</artifactId>
+		<version>2019.12.0.3540_rc</version>
+	</parent>
+  <groupId>com.servoy</groupId>
   <artifactId>org.eclipse.jface</artifactId>
-  <version>3.16.0-SNAPSHOT</version>
+  <version>3.16.0.v20190528-0922</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
     <code.ignoredWarnings>-warn:-deprecation,raw,unchecked</code.ignoredWarnings>
   </properties>
-
+  	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<id>adjust the p2 osgi area to overwrite the eclipse plugin</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.servoy</groupId>
+									<artifactId>org.eclipse.jface</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${settings.localRepository}/p2/osgi/bundle/org.eclipse.jface/${project.version}/</outputDirectory>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.servoy</groupId>
+									<artifactId>org.eclipse.jface</artifactId>
+									<version>${project.version}</version>
+									<type>xml</type>
+									<classifier>p2artifacts</classifier>
+									<overWrite>true</overWrite>
+									<outputDirectory>${settings.localRepository}/p2/osgi/bundle/org.eclipse.jface/${project.version}/</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

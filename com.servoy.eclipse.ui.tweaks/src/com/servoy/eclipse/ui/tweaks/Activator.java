@@ -1,6 +1,10 @@
 package com.servoy.eclipse.ui.tweaks;
 
+import java.net.URL;
+
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageDescriptorRelay;
 import org.osgi.framework.BundleContext;
 
 public class Activator extends Plugin
@@ -19,6 +23,36 @@ public class Activator extends Plugin
 	{
 		super.start(context);
 		plugin = this;
+		ImageDescriptor.loaderRelay = new ImageDescriptorRelay()
+		{
+			@Override
+			public ImageDescriptor createFromURL(URL url)
+			{
+				try
+				{
+					return ImageReplacementMapper.getUrlBasedImageReplacement(url, null, null);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				return null;
+			}
+
+			@Override
+			public ImageDescriptor createFromFile(Class< ? > location, String filename)
+			{
+				try
+				{
+					return ImageReplacementMapper.getFileBasedImageReplacement(location, filename, null, null);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				return null;
+			}
+		};
 	}
 
 	@Override

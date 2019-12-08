@@ -30,9 +30,8 @@ import java.util.Set;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.URLImageDescriptor;
 import org.eclipse.ui.PlatformUI;
-
-import com.servoy.eclipse.ui.tweaks.weaver.ImageDescriptorWeaver;
 
 /**
  * This class contains the mappings between old images locations and new image locations that are used to replace icons in non Servoy plug-ins.
@@ -57,8 +56,7 @@ public class ImageReplacementMapper
 
 	private static interface AlternateImageLocation
 	{
-		ImageDescriptor createAlternateImage(Method urlCreatorMethod, Method classAndFileNameCreatorMethod)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+		ImageDescriptor createAlternateImage();
 	}
 
 	private static class AlternateURLImageLocation implements AlternateImageLocation
@@ -72,31 +70,9 @@ public class ImageReplacementMapper
 		}
 
 		@Override
-		public ImageDescriptor createAlternateImage(Method urlCreatorMethod, Method classAndFileNameCreatorMethod)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+		public ImageDescriptor createAlternateImage()
 		{
-			return (ImageDescriptor)urlCreatorMethod.invoke(null, url);
-		}
-
-	}
-
-	private static class AlternateClassAndFileNameImageLocation implements AlternateImageLocation
-	{
-
-		private final Class< ? > relativeToClass;
-		private final String fileName;
-
-		public AlternateClassAndFileNameImageLocation(Class< ? > relativeToClass, String fileName)
-		{
-			this.relativeToClass = relativeToClass;
-			this.fileName = fileName;
-		}
-
-		@Override
-		public ImageDescriptor createAlternateImage(Method urlCreatorMethod, Method classAndFileNameCreatorMethod)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-		{
-			return (ImageDescriptor)classAndFileNameCreatorMethod.invoke(null, relativeToClass, fileName);
+			return new URLImageDescriptor(url);
 		}
 
 	}
@@ -766,12 +742,13 @@ public class ImageReplacementMapper
 				}
 			}
 
-			if (replacement != null) return replacement.createAlternateImage(originalCreateFromURL, originalCreateFromFile);
+			if (replacement != null) return replacement.createAlternateImage();
 		}
 		else if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 		{
 			System.out.println("skipped the url " + fileName + " because workbench is not running yet");
 		}
+		if (originalCreateFromFile == null) return null;
 		return (ImageDescriptor)originalCreateFromFile.invoke(null, new Object[] { classLocation, fileName });
 	}
 
@@ -813,12 +790,13 @@ public class ImageReplacementMapper
 				}
 			}
 
-			if (replacement != null) return replacement.createAlternateImage(originalCreateFromURL, originalCreateFromFile);
+			if (replacement != null) return replacement.createAlternateImage();
 		}
 		else if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 		{
 			System.out.println("skipped the url " + url + " because workbench is not running yet");
 		}
+		if (originalCreateFromURL == null) return null;
 		return (ImageDescriptor)originalCreateFromURL.invoke(null, new Object[] { url });
 	}
 

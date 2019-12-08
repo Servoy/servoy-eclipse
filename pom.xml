@@ -299,8 +299,8 @@
 				<module>com.servoy.eclipse.profiler</module>
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
-				<module>com.servoy.eclipse.ui.tweaks.weaver</module>
 				<module>org.eclipse.help.ui</module>
+				<module>org.eclipse.jface</module>
 				<module>j2db_documentation</module>
 			</modules>
 		</profile>

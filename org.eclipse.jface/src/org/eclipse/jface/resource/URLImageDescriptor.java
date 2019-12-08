@@ -39,7 +39,7 @@ import org.eclipse.swt.graphics.ImageFileNameProvider;
  * public API. Use ImageDescriptor#createFromURL to create a descriptor that
  * uses a URL.
  */
-class URLImageDescriptor extends ImageDescriptor {
+public class URLImageDescriptor extends ImageDescriptor {
 
 	private static class URLImageFileNameProvider implements ImageFileNameProvider {
 		private String url;
@@ -95,7 +95,7 @@ class URLImageDescriptor extends ImageDescriptor {
 	 * @param url
 	 *            The URL to load the image from. Must be non-null.
 	 */
-	URLImageDescriptor(URL url) {
+	public URLImageDescriptor(URL url) {
 		this.url = url.toExternalForm();
 	}
 
