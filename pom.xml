@@ -267,6 +267,9 @@
 				<module>com.servoy.jre.linux.x86_64</module>
 				<module>com.servoy.jre.macosx.x86_64</module>
 				<module>com.servoy.jre.win32.x86_64</module>
+				<module>com.servoy.eclipse.jre.linux.x86_64</module>
+				<module>com.servoy.eclipse.jre.macosx.x86_64</module>
+				<module>com.servoy.eclipse.jre.win32.x86_64</module>
 				<module>com.servoy.eclipse.feature</module>
 				<module>com.servoy.eclipse.product</module>
 			</modules>

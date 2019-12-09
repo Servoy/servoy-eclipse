@@ -10,87 +10,8 @@
 		<version>2020.3.0.3560_rc</version>
 	</parent>
 
-	<artifactId>com.servoy.jre.macosx.x86_64</artifactId>
-	<packaging>eclipse-plugin</packaging>
+	<artifactId>com.servoy.jre.macosx.x86_64.feature</artifactId>
+	<packaging>eclipse-feature</packaging>
 	<version>12.0.0</version>
-	
-	<properties>
-		<jre.version>jdk-13.0.1+9-jre</jre.version>
-	</properties>
-	
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>${basedir}/jre</directory>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.googlecode.maven-download-plugin</groupId>
-				<artifactId>download-maven-plugin</artifactId>
-				<version>1.4.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>wget</goal>
-						</goals>
-						<phase>generate-resources</phase>
-						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.1%2B9_openj9-0.17.0/OpenJDK13U-jre_x64_mac_openj9_13.0.1_9_openj9-0.17.0.tar.gz</url>
-							<outputFileName>${jre.version}.tar.gz</outputFileName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>  
-    <artifactId>maven-antrun-plugin</artifactId>  
-    <version>1.8</version>  
-    <executions>  
-        <execution>  
-            <id>prepare</id>  
-            <phase>generate-resources</phase>  
-            <configuration>  
-                <tasks>  
-		    		<untar src="${project.build.directory}/${jre.version}.tar.gz" compression="gzip" dest="${project.build.directory}"/>
-		    		<copy file="${project.build.directory}/${jre.version}/Contents/Home/lib/libjli.dylib" tofile="${project.build.directory}/${jre.version}/Contents/MacOS/libjli.dylib"/>
-                </tasks>  
-            </configuration>  
-            <goals>  
-                <goal>run</goal>  
-            </goals>  
-        </execution>  
-    </executions>  
-</plugin> 
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
-				<executions>
-					<execution>
-						<id>copy-jre</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/jre</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.build.directory}/${jre.version}/</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>

@@ -18,7 +18,7 @@
 	</parent>
   <groupId>com.servoy</groupId>
   <artifactId>org.eclipse.help.ui</artifactId>
-  <version>4.1.400.v20190218-1039</version>
+  <version>4.1.500.v20190519-2119</version>
   <packaging>eclipse-plugin</packaging>
   	<build>
 		<plugins>

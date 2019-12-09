@@ -10,69 +10,7 @@
 		<version>2020.3.0.3560_rc</version>
 	</parent>
 
-	<artifactId>com.servoy.jre.win32.x86_64</artifactId>
-	<packaging>eclipse-plugin</packaging>
+	<artifactId>com.servoy.jre.win32.x86_64.feature</artifactId>
+	<packaging>eclipse-feature</packaging>
 	<version>12.0.0</version>
-	
-	<properties>
-		<jre.version>jdk-13.0.1+9-jre</jre.version>
-	</properties>
-	
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>${basedir}/jre</directory>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.googlecode.maven-download-plugin</groupId>
-				<artifactId>download-maven-plugin</artifactId>
-				<version>1.4.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>wget</goal>
-						</goals>
-						<phase>generate-resources</phase>
-						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.1%2B9_openj9-0.17.0/OpenJDK13U-jre_x64_windows_openj9_13.0.1_9_openj9-0.17.0.zip</url>
-							<outputFileName>${jre.version}.zip</outputFileName>
-							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
-							<unpack>true</unpack>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
-				<executions>
-					<execution>
-						<id>copy-jre</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/jre</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${project.build.directory}/${jre.version}/</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
 </project>
