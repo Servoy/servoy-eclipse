@@ -23,7 +23,7 @@ describe('FormComponent', () => {
       formService = jasmine.createSpyObj("FormService", {getFormCache:{absolute:true,getComponent:()=>null}, destroy:()=>null});
       servoyService = jasmine.createSpyObj("ServoyService", ["connect"]);
     TestBed.configureTestingModule({
-      declarations: [ FormComponent,AddAttributeDirective,ServoyCoreSlider ],
+      declarations: [ FormComponent,AddAttributeDirective,ServoyCoreSlider,ErrorBean ],
       imports: [
                 ServoyDefaultComponentsModule
        ],
