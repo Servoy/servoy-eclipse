@@ -249,6 +249,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 								String binaryName = serviceConn.getBinaryName(tokenId);
 								setInstallerStatus("Exporting " + binaryName, true);
 								serviceConn.download(tokenId, saveDir);
+								serviceConn.delete(tokenId);
 							}
 						}
 						catch (IOException | InterruptedException e) {

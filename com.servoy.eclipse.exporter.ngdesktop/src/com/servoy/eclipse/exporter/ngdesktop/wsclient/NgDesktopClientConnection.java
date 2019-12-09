@@ -13,6 +13,7 @@ import java.util.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -37,6 +38,7 @@ public class NgDesktopClientConnection
 	private static String STATUS_ENDPOINT = "/build/status/";
 	private static String DOWNLOAD_ENDPOINT = "/build/download/";
 	private static String BINARY_NAME_ENDPOINT = "/build/name/"; 
+	private static String DELETE_ENDPOINT = "/build/delete/";
 	private static String CANCEL_ENDPOINT = "/build/cancel/";//TODO: add cancel support
 	
 	//START sync - this block need to be identical with the similar error codes from the NgDesktopMonitor in ngdesktop-service project
@@ -49,6 +51,7 @@ public class NgDesktopClientConnection
 	public final static int CANCELED = 8; // the build has been cancelled
 	public final static int NOT_FOUND = 9;
 	public final static int ALREADY_STARTED = 10;
+	public final static int OK = 11; //no error
 	//END sync
 
 	public NgDesktopClientConnection() throws MalformedURLException
@@ -156,9 +159,8 @@ public class NgDesktopClientConnection
 			while ((output = br.readLine()) != null)
 				sb.append(output);
 			JSONObject jsonObj = new JSONObject(sb.toString());
-			int statusCode = jsonObj.getInt("statusCode");
 			statusMessage = (String)jsonObj.get("statusMessage");
-			return statusCode;
+			return jsonObj.getInt("statusCode");
 		} finally {
 			getRequest.reset();
 		}
@@ -214,5 +216,24 @@ public class NgDesktopClientConnection
 			getRequest.reset();
 		}
 		ServoyLog.logInfo("Downloaded bytes: " + amount);
+	}
+	
+	public void delete(String tokenId) throws IOException {
+		HttpDelete deleteRequest = new HttpDelete(service_url + DELETE_ENDPOINT + tokenId);
+		try (CloseableHttpResponse httpResponse = httpClient.execute(deleteRequest); 
+			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())))) {
+			String output;
+			StringBuffer sb = new StringBuffer();
+			while ((output = br.readLine()) != null)
+				sb.append(output);
+	
+			JSONObject jsonObj = new JSONObject(sb.toString());
+			if (jsonObj.getInt("statusCode") != OK) {
+				statusMessage = (String)jsonObj.get("statusMessage");
+				ServoyLog.logWarning("Error deleting build on service: " + tokenId, new Exception(statusMessage));
+			}
+		} finally {
+			deleteRequest.reset();
+		}
 	}
 }
