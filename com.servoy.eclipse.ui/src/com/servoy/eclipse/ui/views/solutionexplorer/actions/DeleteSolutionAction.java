@@ -88,7 +88,8 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 		if (foundProject) // only save the dirty editors if the selected projects that will be deleted contain the active project
 		{
 			final IEditorPart activeEditor = EditorUtil.getActivePage().getActiveEditor();
-			if (!SaveDirtyEditorsOutputEnum.ALL_SAVED.equals(EditorUtil.saveDirtyEditors(activeEditor.getEditorSite().getShell(), true)))
+			if (activeEditor != null && activeEditor.getEditorSite() != null &&
+				!SaveDirtyEditorsOutputEnum.ALL_SAVED.equals(EditorUtil.saveDirtyEditors(activeEditor.getEditorSite().getShell(), true)))
 			{
 				MessageDialog.openWarning(activeEditor.getEditorSite().getShell(), "Cannot delete",
 					"There are unsaved open editors that would be affected by this delete.\nPlease save or discard changes in these editors first.");
