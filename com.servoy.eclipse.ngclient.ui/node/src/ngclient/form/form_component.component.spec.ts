@@ -10,7 +10,9 @@ import {SabloService} from '../../sablo/sablo.service';
 import { ErrorBean } from '../../servoycore/error-bean/error-bean';
 import { ServoyDefaultComponentsModule } from '../../servoydefault/servoydefault.module';
 import {ServoyCoreSlider} from '../../servoycore/slider/slider';
-import {TooltipDirective} from '../servoy_public'
+
+import { ServoyPublicModule } from '../servoy_public.module'
+
 
 describe('FormComponent', () => {
   let component: FormComponent;
@@ -24,9 +26,9 @@ describe('FormComponent', () => {
       formService = jasmine.createSpyObj("FormService", {getFormCache:{absolute:true,getComponent:()=>null}, destroy:()=>null});
       servoyService = jasmine.createSpyObj("ServoyService", ["connect"]);
     TestBed.configureTestingModule({
-      declarations: [ FormComponent,AddAttributeDirective,ServoyCoreSlider,ErrorBean,TooltipDirective ],
+      declarations: [ FormComponent,AddAttributeDirective,ServoyCoreSlider,ErrorBean ],
       imports: [
-                ServoyDefaultComponentsModule
+                ServoyDefaultComponentsModule,ServoyPublicModule
        ],
        providers:    [ {provide: FormService, useValue:  formService },
                                {provide: SabloService, useValue:  sabloService },
