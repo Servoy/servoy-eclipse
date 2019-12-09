@@ -103,8 +103,9 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	private static final String SECURITY = "security";
 	private static final String UTILS = "utils";
 	private static final String SEARCH = "search";
+	private static final String NAVIGATION = "navigation";
 
-	private static String[] toImport = new String[] { SECURITY, UTILS, SEARCH };
+	private static String[] toImport = new String[] { SECURITY, UTILS, SEARCH, NAVIGATION };
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	protected GenerateSolutionWizardPage(String pageName)
@@ -351,7 +352,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			if (isChecked(SECURITY)) result.add("svySecurity");
 			if (isChecked(UTILS)) result.add("svyUtils");
 			if (isChecked(SEARCH)) result.add("svySearch");
-			result.add("svyUtils$NGClient");
+			if (isChecked(NAVIGATION)) result.add("svyNavigationUX");
 		}
 		return result;
 	}
@@ -360,7 +361,15 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	{
 		if (solutionType == SolutionMetaData.NG_CLIENT_ONLY)
 		{
-			return Arrays.asList(NewSolutionWizardDefaultPackages.PACKAGES);
+			if (isChecked(NAVIGATION))
+			{
+				return Arrays.asList(NewSolutionWizardDefaultPackages.PACKAGES);
+			}
+			else
+			{
+				return Arrays.stream(NewSolutionWizardDefaultPackages.PACKAGES).filter(pack -> !"bootstrapextracomponents".equals(pack)).collect(
+					Collectors.toList());
+			}
 		}
 		return null;
 	}

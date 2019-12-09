@@ -1,30 +1,20 @@
 package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.net.InetAddress;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Paths;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
@@ -87,56 +77,24 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 	}
 
-	private byte[] getReplacement(TarArchiveInputStream tarIS, ArchiveEntry entry, String url)
-	{
-		if (entry != null && entry.getName().endsWith("/servoy.json"))
-		{
-			String jsonFile = Utils.getTXTFileContent(tarIS, Charset.forName("UTF-8"), false);
-			JSONObject configFile = new JSONObject(jsonFile);
-			JSONObject options = (JSONObject)configFile.get("options");
-			//put url and other options in servoy.json(we can put image also here, check servoy.json to see available options.
-			options.put("url", url);
-			configFile.put("options", options);
-			return configFile.toString().getBytes(Charset.forName("UTF-8"));
-		}
-		return null;
+	private byte[] updateSettings(TarArchiveInputStream tarIS, IDialogSettings exportSettings)
+	{	//this is just for /servoy.son file
+		//the exportSettings is already validated at this point;
+		String url = exportSettings.get("app_url");
+		String width = exportSettings.get("ngdesktop_width");
+		String height = exportSettings.get("ngdesktop_height");
+		String jsonFile = Utils.getTXTFileContent(tarIS, Charset.forName("UTF-8"), false);
+		JSONObject configFile = new JSONObject(jsonFile);
+		JSONObject options = (JSONObject)configFile.get("options");
+		//put url and other options
+		options.put("url", url);
+		if (width.length() > 0) options.put("width", width);
+		if (height.length() > 0) options.put("height", height);
+		configFile.put("options", options);
+		return configFile.toString().getBytes(Charset.forName("UTF-8"));
 	}
 
-	private void createZip(InputStream is, File destination, String archiveName, String url)
-	{
-		try (TarArchiveInputStream tarIS = new TarArchiveInputStream(new GzipCompressorInputStream(is));
-			OutputStream fileOutputStream = new FileOutputStream(destination);
-			ArchiveOutputStream os = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, fileOutputStream);)
-		{
-			ArchiveEntry entry = tarIS.getNextTarEntry();
-			while (entry != null)
-			{
-				// for windows need to use zip entries and not tar entries
-				entry = tarIS.available() > 0 ? new ZipArchiveEntry(entry.getName().substring(entry.getName().indexOf(archiveName))) : null; // use relative path for entry
-				if (entry != null)
-				{
-					os.putArchiveEntry(entry);
-					byte[] bytes = getReplacement(tarIS, entry, url);
-					if (bytes != null)
-					{
-						os.write(bytes, 0, bytes.length);
-					}
-					else
-					{
-						IOUtils.copy(tarIS, os);
-					}
-					os.closeArchiveEntry();
-				}
-				entry = tarIS.getNextTarEntry();
-			}
-		}
-		catch (IOException | ArchiveException e)
-		{
-			ServoyLog.logError(e);
-		}
-	}
-
-	private void createTar(InputStream is, File destination, String url)
+	private void createTar(InputStream is, File destination, IDialogSettings exportSettings)
 	{
 		try (TarArchiveInputStream tarIS = new TarArchiveInputStream(new GzipCompressorInputStream(is));
 			OutputStream fileOutputStream = new FileOutputStream(destination);
@@ -148,15 +106,12 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			ArchiveEntry entry = tarIS.getNextTarEntry();
 			while (entry != null)
 			{
-				byte[] bytes = getReplacement(tarIS, entry, url);
-				if (bytes != null)
-				{
+				if (entry.getName().endsWith("/servoy.json")) {
+					byte[] bytes = updateSettings(tarIS, exportSettings);
 					((TarArchiveEntry)entry).setSize(bytes.length);
 					os.putArchiveEntry(entry);
 					os.write(bytes, 0, bytes.length);
-				}
-				else
-				{
+				} else {
 					os.putArchiveEntry(entry);
 					IOUtils.copy(tarIS, os);
 				}
@@ -172,6 +127,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 	
 	private StringBuilder validate(IDialogSettings settings) {
+		//at this point there is no null value; not specified means we are receiving empty strings;
 		//at least one platform must be selected
 		//save path must to be specified
 		//files and copyright (if specified) and exists - must not exceed the limits
@@ -184,32 +140,25 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			errorMsg.append ("At least one platform must be selected");
 		}
 		String value = settings.get("save_dir");
-		if (value == null) {
+		if (value.length() == 0) {
 			errorMsg.append ("Export path must to be specified");
 			return errorMsg;
 		}
 		
-		File myFile = null;
-		value = settings.get("icon_path");
-		if (value != null) {
-			myFile = new File(value);
-			if (myFile.exists() && myFile.length() > LOGO_SIZE * 1024) {
-				errorMsg.append ("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
-				return errorMsg;
-			}
+		File myFile = new File(settings.get("icon_path"));
+		if (myFile.exists() && myFile.isFile() && myFile.length() > LOGO_SIZE * 1024) {
+			errorMsg.append ("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
+			return errorMsg;
 		}
 		
-		value = settings.get("image_path");
-		if (value != null) {
-			myFile = new File(value);
-			if (myFile.exists() && myFile.length() > LOGO_SIZE * 1024) {
-				errorMsg.append ("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
-				return errorMsg;
-			}
+		myFile = new File(settings.get("image_path"));
+		if (myFile.exists() && myFile.isFile() && myFile.length() > LOGO_SIZE * 1024) {
+			errorMsg.append ("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
+			return errorMsg;
 		}
 		
 		value = settings.get("copyright");
-		if (value != null && value.toCharArray().length > COPYRIGHT_LENGTH) {
+		if (value.toCharArray().length > COPYRIGHT_LENGTH) {
 			errorMsg.append ("Copyright string exceeds the maximum allowed limit (" + COPYRIGHT_LENGTH + " chars): " + value.toCharArray().length);
 			return errorMsg;
 		} 
@@ -250,7 +199,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 		
 
-		final IDialogSettings serviceSettings = ngdesktopSettings;
+		final IDialogSettings exportSettings = ngdesktopSettings;
 		
 		//TODO END refactoring
 
@@ -259,17 +208,17 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
 				if (errorMsg.length() > 0) return;
-				String tmpDir = serviceSettings.get("save_dir").replaceAll("\\\\", "/");
-				final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
-				String appUrl = serviceSettings.get("app_url");
+				String tmpDir = exportSettings.get("save_dir").replaceAll("\\\\", "/");
+				final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";				
 				exportPage.getSelectedPlatforms().forEach((platform) -> {
 
 					if (platform.equals(ExportPage.WINDOWS_PLATFORM)) //skip mac and linux for now
 					{
+						NgDesktopClientConnection serviceConn = null;
 						try
 						{
-							NgDesktopClientConnection serviceConn = new NgDesktopClientConnection();
-							String tokenId = serviceConn.startBuild(platform, serviceSettings);
+							serviceConn = new NgDesktopClientConnection();
+							String tokenId = serviceConn.startBuild(platform, exportSettings);
 							int status = serviceConn.getStatus(tokenId);
 							while (NgDesktopClientConnection.READY != status)
 							{//TODO: handling waiting times due to unresponsive server
@@ -300,11 +249,20 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 								String binaryName = serviceConn.getBinaryName(tokenId);
 								setInstallerStatus("Exporting " + binaryName, true);
 								serviceConn.download(tokenId, saveDir);
+								serviceConn.delete(tokenId);
 							}
 						}
-						catch (IOException | InterruptedException e)
-						{
+						catch (IOException | InterruptedException e) {
 							errorMsg.append(e.getMessage());
+						} 
+						finally {
+							if (serviceConn != null) {
+								try { //(try to) close the connection
+									serviceConn.closeConnection();
+								} catch (IOException e) {
+									errorMsg.append(e.getMessage());
+								}
+							}
 						}
 					}
 					else
@@ -312,24 +270,17 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 						String archiveName = StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
 							platform;
-						String extension = ((platform.equals(ExportPage.WINDOWS_PLATFORM)) ? ".zip" : ".tar.gz");
+						String extension = ".tar.gz"; //for windows we have a binary installer
 						File archiveFile = new File(saveDir + archiveName + extension);
 						archiveFile.getParentFile().mkdirs();
 						try
 						{
 							if (archiveFile.exists()) archiveFile.delete();
-							URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveName + ".tar.gz");
+							URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveName + extension);
 							
-							setInstallerStatus("Exporting: " + archiveName + " ...", false);
+							setInstallerStatus("Exporting: " + archiveName + extension + " ...", false);
 							
-							if (platform.contentEquals(ExportPage.WINDOWS_PLATFORM))
-							{
-								createZip(fileUrl.openStream(), archiveFile, archiveName, appUrl);
-							}
-							else
-							{
-								createTar(fileUrl.openStream(), archiveFile, appUrl);
-							}
+							createTar(fileUrl.openStream(), archiveFile, exportSettings);
 						}
 						catch (IOException e)
 						{
@@ -375,6 +326,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	{
 		Display.getDefault().asyncExec(new Runnable()
 		{
+			@SuppressWarnings("deprecation")
 			public void run()
 			{
 				String timeStr = "";

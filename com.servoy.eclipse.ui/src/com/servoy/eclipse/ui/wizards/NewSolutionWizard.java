@@ -449,11 +449,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				try
 				{
 					Document doc = NewSolutionWizardDefaultPackages.getInstance().getDatabaseInfo(name);
-					if (doc == null)
-					{
-						ServoyLog.logWarning("No database info found for solution " + name, new Exception("No database info found for solution " + name));
-						continue;
-					}
+					if (doc == null) continue;
 
 					NodeList connections = doc.getElementsByTagName("connection");
 					for (int i = 0; i < connections.getLength(); i++)

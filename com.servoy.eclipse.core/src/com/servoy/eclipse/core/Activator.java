@@ -843,9 +843,6 @@ public class Activator extends Plugin
 	{
 		defaultAccessed = true;
 
-		XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
-		MethodTemplatesLoader.loadMethodTemplatesFromXML();
-
 		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
 		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle
 		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)
@@ -1046,31 +1043,42 @@ public class Activator extends Plugin
 			}
 		}.schedule();
 
-		// Try to load documentation XML from plugin and bean jars.
-		PluginManager pluginManager = (PluginManager)getDesignClient().getPluginManager();
-		IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
-		if (documentationManagerProvider != null)
-		{
-			XMLScriptObjectAdapterLoader.loadDocumentationForPlugins(pluginManager, documentationManagerProvider);
-			IBeanManager beanManager = getDesignClient().getBeanManager();
-			if (beanManager instanceof IBeanManagerInternal)
-			{
-				XMLScriptObjectAdapterLoader.loadDocumentationForBeans((IBeanManagerInternal)beanManager, documentationManagerProvider);
-			}
-		}
+		Runnable loadDocs = () -> {
+			XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
+			MethodTemplatesLoader.loadMethodTemplatesFromXML();
 
-		// Visit all column validators/converters and let them add any method templates to
-		// MethodTemplate.
-		for (Object conv : new CompositeIterable<Object>(//
-			pluginManager.getColumnConverterManager().getConverters().values(), //
-			pluginManager.getUIConverterManager().getConverters().values(), //
-			pluginManager.getColumnValidatorManager().getValidators().values()))
-		{
-			if (conv instanceof IMethodTemplatesProvider)
+			// Try to load documentation XML from plugin and bean jars.
+			PluginManager pluginManager = (PluginManager)getDesignClient().getPluginManager();
+			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
+			if (documentationManagerProvider != null)
 			{
-				processMethodTemplates(((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance()));
+				XMLScriptObjectAdapterLoader.loadDocumentationForPlugins(pluginManager, documentationManagerProvider);
+				IBeanManager beanManager = getDesignClient().getBeanManager();
+				if (beanManager instanceof IBeanManagerInternal)
+				{
+					XMLScriptObjectAdapterLoader.loadDocumentationForBeans((IBeanManagerInternal)beanManager, documentationManagerProvider);
+				}
 			}
+
+			// Visit all column validators/converters and let them add any method templates to
+			// MethodTemplate.
+			for (Object conv : new CompositeIterable<Object>(//
+				pluginManager.getColumnConverterManager().getConverters().values(), //
+				pluginManager.getUIConverterManager().getConverters().values(), //
+				pluginManager.getColumnValidatorManager().getValidators().values()))
+			{
+				if (conv instanceof IMethodTemplatesProvider)
+				{
+					processMethodTemplates(((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance()));
+				}
+			}
+		};
+		// apple can't load this on back ground because all kind swing classes are created to get the docs then we could get into a deadlock
+		if (Utils.isAppleMacOS())
+		{
+			loadDocs.run();
 		}
+		else new Thread(loadDocs).start();
 	}
 
 	private void processMethodTemplates(Map<String, IMethodTemplate> templs)
