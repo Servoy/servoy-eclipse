@@ -4,8 +4,9 @@
      #element>
   <label class='svy-check-radio' *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;">
     <input type="checkbox" 
-    		[(ngModel)]="selection[i]"
+    		[checked]="selection[i]"
             [value]="item.realValue"
+            [disabled]="!enabled || !editable"
             #input />
     <span [innerHtml]="item.displayValue"></span>
   </label>

@@ -1,12 +1,11 @@
-import {AfterViewInit, ElementRef, OnInit, Renderer2, ViewChild, SimpleChanges} from "@angular/core";
+import {AfterViewInit, OnInit, Renderer2, SimpleChanges} from "@angular/core";
 import {FormattingService, PropertyUtils} from "../ngclient/servoy_public";
 import {ServoyDefaultBaseField} from "./basefield";
 
-export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements OnInit, AfterViewInit{
+export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements OnInit, AfterViewInit{
   
   selection: any[] = [];
   allowNullinc = 0;
-  @ViewChild( 'input' ,{static: true} ) inputElementRef: ElementRef;
   
   constructor(renderer: Renderer2, formattingService: FormattingService){
     super(renderer, formattingService);
@@ -16,44 +15,21 @@ export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements 
 
   ngOnInit(){
     this.onValuelistChange();
-    this.setInitialStyles();
   }
 
   ngAfterViewInit(){
       this.setHandlersAndTabIndex();
   }
   
+  abstract setSelectionFromDataprovider();
+  
   ngOnChanges( changes: SimpleChanges ) {
       for ( let property in changes ) {
           let change = changes[property];
           switch ( property ) {
-              case "editable":
-                  if ( change.currentValue ){
-                      if (this.enabled){
-                          this.renderer.removeAttribute(this.getFocusElement(),  "disabled" );
-                      }
-                      else {
-                          this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" ); 
-                      }    
-                  }
-                  else
-                      this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" );
+              case "dataProviderID":
+                  this.setSelectionFromDataprovider()
                   break;
-              case "enabled":
-                  if ( change.currentValue ){
-                      if (this.editable){
-                          this.renderer.removeAttribute(this.getFocusElement(),  "disabled" );
-                      }
-                      else{
-                          this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" );
-                          // prevent super from removing the attribute
-                          change.currentValue = false;
-                      }
-                          
-                  }
-                  else
-                      this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" );
-                  break;    
 
           }
       }
@@ -64,15 +40,13 @@ export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements 
       for(let i = 0; i < this.getNativeElement().children.length; i++){
           let elm:HTMLLabelElement = this.getNativeElement().children[i];
           this.attachEventHandlers(elm.children[0],i);
-          this.tabIndexChanged(elm.children[0], this.tabSeq);
         }     
   }
   
   onValuelistChange(){
       if(this.valuelistID)
           if(this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0])) this.allowNullinc=1;
-        this.tabIndexChanged(this.getNativeElement(), this.tabSeq);
-        this.setHandlersAndTabIndex();
+      this.setHandlersAndTabIndex();
   };
  
   baseItemClicked(event, changed, dp){
@@ -99,18 +73,6 @@ export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements 
     });
   }
 
-  setInitialStyles(): void {
-      if(this.size){      
-          Object.keys(this.size).forEach(key => {
-              this.getNativeElement().style[key] = this.size[key]+'px';
-          });
-      }
-  } 
-
-   tabIndexChanged(element, tabindex) {
-       element.setAttribute("tabindex",tabindex);
-   }
-
   isValueListNull = function(item) {
     return (item.realValue == null || item.realValue == '') && item.displayValue == '';
   };
@@ -128,7 +90,4 @@ export class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements 
       .filter(item => item !== null)
   }
   
-  getFocusElement() : any{
-      return this.inputElementRef.nativeElement;
-  }
 }

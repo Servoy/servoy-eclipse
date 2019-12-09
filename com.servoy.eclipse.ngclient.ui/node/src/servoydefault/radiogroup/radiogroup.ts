@@ -7,16 +7,11 @@ import {FormattingService, PropertyUtils} from "../../ngclient/servoy_public";
   templateUrl: './radiogroup.html',
   styleUrls: ['./radiogroup.css']
 })
-export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice implements OnInit {
+export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice{
 
   value: any;
   constructor(renderer: Renderer2, formattingService: FormattingService) {
     super(renderer, formattingService);
-  }
-
-  ngOnInit(){
-    this.setSelectionFromDataprovider();
-    super.ngOnInit();
   }
 
   setSelectionFromDataprovider(){
@@ -45,7 +40,7 @@ export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice implements 
   attachEventHandlers(element, index){
     this.renderer.listen( element, 'click', ( e ) => {
       this.itemClicked(e,index);
-      this.onActionMethodID( e );
+      if (this.onActionMethodID) this.onActionMethodID( e );
     });
     super.attachEventHandlers(element,index);
   }

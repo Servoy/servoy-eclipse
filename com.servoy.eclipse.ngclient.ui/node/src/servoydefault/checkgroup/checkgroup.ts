@@ -7,16 +7,12 @@ import {ServoyDefaultBaseChoice} from "../basechoice";
   templateUrl: './checkgroup.html',
   styleUrls: ['./checkgroup.css']
 })
-export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice implements OnInit{
+export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice{
 
   constructor(renderer: Renderer2, formattingService: FormattingService) {
     super(renderer, formattingService);
   }
-  ngOnInit(){
-    this.setSelectionFromDataprovider();
-    super.ngOnInit();
-  }
-
+  
   getDataproviderFromSelection() {
     let allowMultiselect = !this.format || this.format.type == "TEXT";
     let ret = allowMultiselect ? "" : null;
@@ -60,7 +56,7 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice implements 
   attachEventHandlers(element, index){
     this.renderer.listen( element, 'click', ( event ) => {
       this.itemClicked(event,index);
-      this.onActionMethodID( event );
+      if (this.onActionMethodID) this.onActionMethodID( event );
     });
     super.attachEventHandlers(element,index);
   }

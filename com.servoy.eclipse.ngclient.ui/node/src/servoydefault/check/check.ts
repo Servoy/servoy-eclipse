@@ -7,16 +7,11 @@ import {ServoyDefaultBaseChoice} from "../basechoice";
   templateUrl: './check.html',
   styleUrls: ['./check.css']
 })
-export class ServoyDefaultCheck extends ServoyDefaultBaseChoice implements OnInit, AfterViewInit{
+export class ServoyDefaultCheck extends ServoyDefaultBaseChoice{
 
   selected:boolean = false;
   constructor(renderer: Renderer2, formattingService: FormattingService) {
     super(renderer, formattingService);
-  }
-
-  ngOnInit() {
-      this.selected = this.getSelectionFromDataprovider();
-      this.setInitialStyles();
   }
 
   ngAfterViewInit(){
@@ -57,9 +52,8 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice implements OnIni
       }
   }
   
-  //TODO refactor after tableview impl
-  isInPortal() {
-      return false;
-    //return !!this.element.nativeElement.closest('.svy-portal') && !this.element.nativeElement.closest('.svy-listviewwrapper');
-   }
+  setSelectionFromDataprovider(){
+      this.selected = this.getSelectionFromDataprovider();
+  }
+  
 }

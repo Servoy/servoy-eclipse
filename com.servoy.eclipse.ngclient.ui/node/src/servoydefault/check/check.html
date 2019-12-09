@@ -3,9 +3,10 @@
 	 #element>
 	<input type="checkbox"
 		 sablo-tabseq="tabSeq"
-         [(ngModel)]="selected"
+         [checked]="selected"
          [svyTooltip]="toolTipText"
     	 [id]="servoyApi.getMarkupId()"
+    	 [disabled]="!enabled || !editable"
          #input />
-	 <span [innerHtml]="isInPortal() ? '' : text"></span>
+	 <span [innerHtml]="text"></span>
 </label>
