@@ -9,7 +9,6 @@ export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField im
   
   constructor(renderer: Renderer2, formattingService: FormattingService){
     super(renderer, formattingService);
-    PropertyUtils.getScrollbarsStyleObj(this.scrollbars);
     super.attachHandlers();
   }
 

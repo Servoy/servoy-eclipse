@@ -56,4 +56,7 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice{
       this.selected = this.getSelectionFromDataprovider();
   }
   
+  needsScrollbarInformation():boolean{
+      return false;
+  }
 }

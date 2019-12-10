@@ -88,6 +88,10 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
         this.getNativeElement().scrollTop = y;
     }
     
+    needsScrollbarInformation() : boolean{
+        return true;
+    }
+    
     ngOnChanges( changes: SimpleChanges ) {
         for ( let property in changes ) {
             let change = changes[property];
@@ -109,7 +113,7 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
                     PropertyUtils.setHorizontalAlignment(  this.getNativeChild(),this.renderer ,change.currentValue);
                     break;
                 case "scrollbars":
-                    PropertyUtils.setScrollbars(this.getNativeChild(), change.currentValue);
+                    if (this.needsScrollbarInformation()) PropertyUtils.setScrollbars(this.getNativeChild(), change.currentValue);
                     break;
                 case "enabled":
                     if ( change.currentValue )
