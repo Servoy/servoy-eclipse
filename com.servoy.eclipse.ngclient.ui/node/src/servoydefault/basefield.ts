@@ -27,7 +27,7 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
 
     valueBeforeChange: any;
 
-    constructor(renderer: Renderer2, private formattingService : FormattingService) {
+    constructor(renderer: Renderer2, public formattingService : FormattingService) {
         super(renderer);
     }
 
