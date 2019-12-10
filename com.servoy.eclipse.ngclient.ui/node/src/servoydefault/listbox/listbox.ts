@@ -1,6 +1,6 @@
 import {Component, Renderer2, ViewChild, Input, ElementRef, ChangeDetectorRef, AfterViewInit, SimpleChanges} from '@angular/core';
 
-import {FormattingService, StartEditDirective} from '../../ngclient/servoy_public'
+import {FormattingService} from '../../ngclient/servoy_public'
 
 import {ServoyDefaultBaseField} from '../basefield'
 

@@ -1,14 +1,12 @@
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 
-import {ServoyDefaultSpinner} from './spinner';
-import {SabloModule} from "../../sablo/sablo.module";
-import {
-  FormattingService, StartEditDirective, ServoyApi,
-  SvyFormat, TooltipDirective, TooltipService
-} from "../../ngclient/servoy_public";
-import {FormsModule} from "@angular/forms";
-import {By} from "@angular/platform-browser";
-import {DebugElement} from "@angular/core";
+import { ServoyDefaultSpinner } from './spinner';
+import { SabloModule } from "../../sablo/sablo.module";
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { FormattingService, ServoyApi, TooltipService } from "../../ngclient/servoy_public";
+import { FormsModule } from "@angular/forms";
+import { By } from "@angular/platform-browser";
+import { DebugElement } from "@angular/core";
 
 const mockData = [
   {
@@ -35,8 +33,8 @@ describe('ServoyDefaultCheckGroup', () => {
     servoyApi = jasmine.createSpyObj("ServoyApi", ["getMarkupId"]);
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultSpinner, SvyFormat, TooltipDirective],
-      imports: [SabloModule, FormsModule],
+      declarations: [ServoyDefaultSpinner],
+      imports: [SabloModule, FormsModule, ServoyPublicModule],
       providers: [FormattingService, TooltipService]
     }).compileComponents();
   }));

@@ -1,10 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {SabloModule} from '../../sablo/sablo.module'
+import { SabloModule } from '../../sablo/sablo.module'
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 
 import { ServoyDefaultImageMedia } from './imagemedia';
 
-import {FormatFilterPipe,SvyFormat, FormattingService,TooltipDirective,TooltipService} from '../../ngclient/servoy_public'
+import { FormattingService,TooltipService} from '../../ngclient/servoy_public'
 import { UploadDirective } from "../../ngclient/utils/upload.directive";
 
 describe("ServoyDefaultImageMedia", () => {
@@ -13,9 +14,9 @@ describe("ServoyDefaultImageMedia", () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultImageMedia,TooltipDirective, UploadDirective],
-      imports: [SabloModule],
-      providers: [FormatFilterPipe,FormattingService,TooltipService]
+      declarations: [ ServoyDefaultImageMedia, UploadDirective],
+      imports: [SabloModule, ServoyPublicModule],
+      providers: [FormattingService,TooltipService]
     })
     .compileComponents();
   }));

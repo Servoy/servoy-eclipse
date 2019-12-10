@@ -30,7 +30,7 @@ import { ServoyDefaultImageMedia } from './imagemedia/imagemedia';
 import { SabloModule } from '../sablo/sablo.module'
 import { ServoyPublicModule } from '../ngclient/servoy_public.module'
 
-import { FormatFilterPipe, NotNullOrEmptyPipe, MnemonicletterFilterPipe, SvyFormat, FormattingService, I18NProvider, DecimalkeyconverterDirective, StartEditDirective} from '../ngclient/servoy_public'
+import { FormattingService, I18NProvider} from '../ngclient/servoy_public'
 
 import { OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
 import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-datetime-moment';
@@ -62,12 +62,6 @@ import { UploadDirective } from "../ngclient/utils/upload.directive";
     ServoyDefaultHTMLView,
     ServoyDefaultListBox,
     ServoyDefaultImageMedia,
-    FormatFilterPipe,
-    MnemonicletterFilterPipe,
-    NotNullOrEmptyPipe,
-    SvyFormat,
-    DecimalkeyconverterDirective,
-    StartEditDirective,
     BGSplitter,
     BGPane,
     UploadDirective

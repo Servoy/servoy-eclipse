@@ -2,7 +2,8 @@ import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/t
 import { By }              from '@angular/platform-browser';
 import { ServoyDefaultCheck } from './check';
 import {SabloModule} from "../../sablo/sablo.module";
-import { FormattingService, ServoyApi, TooltipDirective, TooltipService} from "../../ngclient/servoy_public";
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { FormattingService, ServoyApi, TooltipService} from "../../ngclient/servoy_public";
 import {FormsModule} from "@angular/forms";
 
 describe('CheckComponent', () => {
@@ -13,8 +14,8 @@ describe('CheckComponent', () => {
   beforeEach(async(() => {
   servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultCheck,TooltipDirective ],
-      imports: [SabloModule, FormsModule],
+      declarations: [ ServoyDefaultCheck ],
+      imports: [SabloModule, FormsModule, ServoyPublicModule],
       providers: [FormattingService, TooltipService]
     })
     .compileComponents();

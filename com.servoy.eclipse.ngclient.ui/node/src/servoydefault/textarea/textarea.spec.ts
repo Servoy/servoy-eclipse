@@ -1,9 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {SabloModule} from '../../sablo/sablo.module'
+import { SabloModule } from '../../sablo/sablo.module'
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 
 import { ServoyDefaultTextArea } from './textarea';
-import {FormatFilterPipe,SvyFormat, FormattingService,DecimalkeyconverterDirective, StartEditDirective, TooltipDirective, TooltipService} from '../../ngclient/servoy_public'
+import { FormattingService, TooltipService} from '../../ngclient/servoy_public'
 
 
 describe("ServoyDefaultTextArea", () => {
@@ -12,9 +13,9 @@ describe("ServoyDefaultTextArea", () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultTextArea, FormatFilterPipe, SvyFormat,StartEditDirective,TooltipDirective],
-      imports: [SabloModule],
-      providers: [FormatFilterPipe,FormattingService,TooltipService]
+      declarations: [ ServoyDefaultTextArea],
+      imports: [SabloModule, ServoyPublicModule],
+      providers: [FormattingService,TooltipService]
     })
     .compileComponents();
   }));

@@ -1,6 +1,6 @@
 import { Component, Renderer2} from '@angular/core';
 
-import {FormattingService, DecimalkeyconverterDirective, StartEditDirective} from '../../ngclient/servoy_public'
+import {FormattingService} from '../../ngclient/servoy_public'
 
 import {ServoyDefaultBaseField} from '../basefield'
 

@@ -1,11 +1,9 @@
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 
-import {ServoyDefaultCheckGroup} from './checkgroup';
-import {SabloModule} from "../../sablo/sablo.module";
-import {
-  FormattingService, StartEditDirective, ServoyApi,
-  SvyFormat, TooltipDirective, TooltipService
-} from "../../ngclient/servoy_public";
+import { ServoyDefaultCheckGroup } from './checkgroup';
+import { SabloModule } from "../../sablo/sablo.module";
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { FormattingService, ServoyApi, TooltipService } from "../../ngclient/servoy_public";
 import {FormsModule} from "@angular/forms";
 import {NotNullOrEmptyPipe} from "../../ngclient/pipes/pipes";
 import {By} from "@angular/platform-browser";
@@ -34,8 +32,8 @@ describe('ServoyDefaultCheckGroup', () => {
     servoyApi = jasmine.createSpyObj("ServoyApi", ["getMarkupId", "trustAsHtml"]);
 
     TestBed.configureTestingModule({
-      declarations: [ServoyDefaultCheckGroup, NotNullOrEmptyPipe, SvyFormat, StartEditDirective, TooltipDirective],
-      imports: [SabloModule, FormsModule],
+      declarations: [ServoyDefaultCheckGroup],
+      imports: [SabloModule, FormsModule, ServoyPublicModule],
       providers: [NotNullOrEmptyPipe, FormattingService, TooltipService]
     })
       .compileComponents();

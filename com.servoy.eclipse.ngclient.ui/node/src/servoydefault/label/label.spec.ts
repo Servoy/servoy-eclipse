@@ -3,9 +3,8 @@ import {SimpleChange} from '@angular/core';
 import { By }              from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
-
-import {FormatFilterPipe,MnemonicletterFilterPipe,TooltipService,TooltipDirective} from '../../ngclient/servoy_public'
-
+import { TooltipService,} from '../../ngclient/servoy_public'
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 import { SabloModule } from '../../sablo/sablo.module'
 
 describe( 'SvLabel', () => {
@@ -15,10 +14,10 @@ describe( 'SvLabel', () => {
 
     beforeEach( async(() => {
         TestBed.configureTestingModule( {
-            declarations: [ServoyDefaultLabel ,FormatFilterPipe,MnemonicletterFilterPipe,TooltipDirective],
+            declarations: [ServoyDefaultLabel],
             providers: [TooltipService],
             imports: [
-                SabloModule],
+                SabloModule, ServoyPublicModule],
         } )
             .compileComponents();
     } ) );

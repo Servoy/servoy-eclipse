@@ -1,9 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServoyDefaultPassword } from './password';
-import {SabloModule} from "../../sablo/sablo.module";
-import {FormsModule} from "@angular/forms";
-import {FormattingService, ServoyApi,TooltipService,TooltipDirective} from "../../ngclient/servoy_public";
+import { SabloModule } from "../../sablo/sablo.module";
+import { FormsModule } from "@angular/forms";
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { FormattingService, ServoyApi, TooltipService} from "../../ngclient/servoy_public";
+
 describe('PasswordComponent', () => {
   let component: ServoyDefaultPassword;
   let fixture: ComponentFixture<ServoyDefaultPassword>;
@@ -12,8 +14,8 @@ describe('PasswordComponent', () => {
   beforeEach(async(() => {
       servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
       TestBed.configureTestingModule({
-        declarations: [ ServoyDefaultPassword, TooltipDirective ],
-        imports: [SabloModule, FormsModule],
+        declarations: [ServoyDefaultPassword],
+        imports: [SabloModule, FormsModule, ServoyPublicModule],
         providers: [FormattingService, TooltipService]
       })
       .compileComponents();

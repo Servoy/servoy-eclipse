@@ -1,10 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {SabloModule} from '../../sablo/sablo.module'
+import { SabloModule } from '../../sablo/sablo.module'
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 
 import { ServoyDefaultHTMLView } from './htmlview';
 
-import {FormatFilterPipe,SvyFormat, FormattingService, TooltipDirective, TooltipService} from '../../ngclient/servoy_public'
+import { FormattingService, TooltipService } from '../../ngclient/servoy_public'
 
 describe("ServoyDefaultHTMLView", () => {
   let component: ServoyDefaultHTMLView;
@@ -12,9 +13,9 @@ describe("ServoyDefaultHTMLView", () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultHTMLView,TooltipDirective],
-      imports: [SabloModule],
-      providers: [FormatFilterPipe,FormattingService,TooltipService]
+      declarations: [ ServoyDefaultHTMLView],
+      imports: [SabloModule, ServoyPublicModule ],
+      providers: [FormattingService,TooltipService]
     })
     .compileComponents();
   }));

@@ -3,7 +3,8 @@ import { ElementRef } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Item } from '../basecombo';
 import { ServoyDefaultCombobox } from './combobox';
-import { FormattingService, ServoyApi,TooltipDirective, TooltipService } from '../../ngclient/servoy_public';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
 const eventEnter: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'Enter'});
 const eventC: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'c'});
 const eventInput: Event = new Event('input');
@@ -60,8 +61,9 @@ describe('ComboboxComponent', () => {
     servoyApi = jasmine.createSpyObj( "ServoyApi", ["getMarkupId", "trustAsHtml"]);
 
     TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultCombobox,TooltipDirective ],
-      providers: [ FormattingService,TooltipService]
+      declarations: [ ServoyDefaultCombobox],
+      providers: [ FormattingService,TooltipService],
+      imports: [ServoyPublicModule]
     })
     .compileComponents();
   }));
