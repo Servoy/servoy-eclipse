@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -76,13 +77,18 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 		deleteAction.selectionChanged(new StructuredSelection(selectedProjects));
 		boolean foundProject = false;
 		// checks if the selected projects that will be deleted contain the active project
-		for (IProject selectedProject : selectedProjects)
+		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+		if (activeProject != null)
 		{
-			final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			if (servoyModel.getActiveProject().getProject().equals(selectedProject))
+			try
 			{
-				foundProject = true;
-				break;
+				List<IProject> solutionAndModuleReferencedProjects = activeProject.getSolutionAndModuleReferencedProjects();
+				foundProject = solutionAndModuleReferencedProjects.stream().anyMatch(Arrays.asList(selectedProjects)::contains);
+			}
+			catch (CoreException e)
+			{
+				// ignore.
 			}
 		}
 		if (foundProject) // only save the dirty editors if the selected projects that will be deleted contain the active project
