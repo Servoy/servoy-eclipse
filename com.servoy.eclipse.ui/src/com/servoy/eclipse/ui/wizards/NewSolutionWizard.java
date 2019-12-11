@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -346,9 +347,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					String newSolutionName = configPage.getNewSolutionName();
 					for (String name : solutions)
 					{
-						if (sm.getServoyProject(name) == null)
+						boolean shouldAskOverwrite = sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name);
+						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
-							importSolution(NewSolutionWizardDefaultPackages.getInstance().getPackage(name), name, newSolutionName, monitor, true);
+							importSolution(NewSolutionWizardDefaultPackages.getInstance().getPackage(name), name, newSolutionName, monitor, true,
+								shouldAskOverwrite);
 							monitor.worked(1);
 						}
 					}
@@ -360,7 +363,40 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				monitor.done();
 			}
 
-
+			private boolean shouldOverwrite(ServoyModel sm, String name)
+			{
+				ServoyProject solutionProject = sm.getServoyProject(name);
+				if (solutionProject != null)
+				{
+					File wpmPropertiesFile = new File(solutionProject.getProject().getLocation().toFile(), "wpm.properties");
+					if (wpmPropertiesFile.exists())
+					{
+						Properties wpmProperties = new Properties();
+						try (FileInputStream wpmfis = new FileInputStream(wpmPropertiesFile))
+						{
+							wpmProperties.load(wpmfis);
+							String version = wpmProperties.getProperty("version");
+							if (version != null)
+							{
+								Pair<String, InputStream> pack = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+								if (pack != null)
+								{
+									return !pack.getLeft().equals(version);
+								}
+							}
+							else
+							{
+								return true;
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				return true;
+			}
 		};
 
 		IRunnableWithProgress importPackagesRunnable = null;
@@ -549,7 +585,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	}
 
 	private void importSolution(Pair<String, InputStream> packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
-		boolean reportImportFail) throws IOException
+		boolean reportImportFail, boolean shouldAskOverwrite) throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -570,7 +606,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setActivateSolution(false);
 		importSolutionWizard.init(PlatformUI.getWorkbench(), null);
 		importSolutionWizard.setReportImportFail(reportImportFail);
-		importSolutionWizard.setSkipModulesImport(true);
+		importSolutionWizard.setSkipModulesImport(!shouldAskOverwrite);
 		importSolutionWizard.setAllowDataModelChanges(true);
 		importSolutionWizard.setImportSampleData(true);
 
