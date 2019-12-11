@@ -390,7 +390,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						}
 					}
 				}
-				return false;
+				return true;
 			}
 		};
 
