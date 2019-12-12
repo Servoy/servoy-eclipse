@@ -1,6 +1,9 @@
 package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import com.servoy.eclipse.exporter.ngdesktop.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
@@ -18,7 +21,7 @@ public class NGDesktopExporterProvider implements IExportSolutionWizardProvider
 		if (activeProject != null && (activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SOLUTION ||
 			activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY))
 		{
-			return new OpenWizardAction(ExportNGDesktopWizard.class, null /*AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "$nl$/icons/war_export.png")*/,
+			return new OpenWizardAction(ExportNGDesktopWizard.class, AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "$nl$/icons/ng_export.png"),
 				"NG Desktop Export");
 		}
 		return null;
