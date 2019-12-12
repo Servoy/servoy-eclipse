@@ -57,12 +57,10 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateException;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.debug.DebugStarter;
 import com.servoy.eclipse.debug.script.ValueCollectionProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.IDebugClient;
-import com.servoy.j2db.persistence.IRootObject;
-import com.servoy.j2db.util.Pair;
 
 /**
  * @author jcompagner
@@ -118,13 +116,12 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 
 			String solutionName = selectedClient.getSolutionName();
 			IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(solutionName);
-			Pair<String, IRootObject> scopePair = ScriptConsole.getGlobalScope();
-			if (scopePair != null)
+			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
+			if (servoyProject != null)
 			{
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(scopePair.getRight().getName());
-				if (servoyProject != null)
+				final IFile file = DebugStarter.getJavascriptFile(servoyProject);
+				if (file != null)
 				{
-					final IFile file = servoyProject.getProject().getFile(scopePair.getLeft() + SolutionSerializer.JS_FILE_EXTENSION);
 					final IModelElement modelElement = DLTKCore.create(file);
 
 					IModuleSource source = new IModuleSource()
@@ -182,7 +179,7 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 						{
 							/*
 							 * (non-Javadoc)
-							 * 
+							 *
 							 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContextType#createContext(org.eclipse.jface.text.IDocument, int, int,
 							 * org.eclipse.dltk.core.ISourceModule)
 							 */
@@ -193,7 +190,7 @@ final class ContentAssistProcessor implements IContentAssistProcessor
 								{
 									/*
 									 * (non-Javadoc)
-									 * 
+									 *
 									 * @see org.eclipse.dltk.ui.templates.ScriptTemplateContext#evaluate(org.eclipse.jface.text.templates.Template)
 									 */
 									@Override
