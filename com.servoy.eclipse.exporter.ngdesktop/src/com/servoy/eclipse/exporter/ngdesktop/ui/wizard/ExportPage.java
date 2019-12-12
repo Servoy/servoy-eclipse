@@ -207,15 +207,11 @@ public class ExportPage extends WizardPage
 					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
 					dlg.setFilterExtensions(new String[] { "*.png" });
 					File myFile = new File(getDlgInitPath(iconPath.getText())); //make sure we have a usable path
-					if (myFile.isDirectory()) {
-						dlg.setFilterPath(myFile.getAbsolutePath());
-					} else {
-						dlg.setFilterPath(myFile.getParent());
-					}
+					dlg.setFilterPath(myFile.isDirectory() ? myFile.getAbsolutePath() : myFile.getParent());
 					String path = dlg.open();
 					if (path != null)
 					{
-						iconPath.setText(path + File.separator + dlg.getFileName());
+						iconPath.setText(path);
 					}
 				}
 			});
@@ -245,15 +241,11 @@ public class ExportPage extends WizardPage
 					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
 					dlg.setFilterExtensions(new String[] { "*.bmp" });
 					File myFile = new File(getDlgInitPath(imgPath.getText())); //make sure we have a usable path
-					if (myFile.isDirectory()) {
-						dlg.setFilterPath(myFile.getAbsolutePath());
-					} else {
-						dlg.setFilterPath(myFile.getParent());
-					}
+					dlg.setFilterPath(myFile.isDirectory() ? myFile.getAbsolutePath() : myFile.getParent());
 					String path = dlg.open();
 					if (path != null)
 					{
-						imgPath.setText(path + File.separator + dlg.getFileName());
+						imgPath.setText(path);
 					}
 				}
 			});
