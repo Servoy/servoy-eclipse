@@ -955,13 +955,14 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#getIndexDropString(java.sql.Connection, com.servoy.j2db.persistence.Table, java.lang.String)
-	 */
+
+/*
+ * (non-Javadoc)
+ *
+ * @see com.servoy.j2db.persistence.IServerInternal#getIndexDropString(com.servoy.j2db.persistence.ITable, java.lang.String)
+ */
 	@Override
-	public String getIndexDropString(Connection connection, Table t, String indexName) throws SQLException
+	public String getIndexDropString(ITable t, String indexName) throws SQLException, RepositoryException
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -970,14 +971,25 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#getIndexCreateString(java.sql.Connection, com.servoy.j2db.persistence.Table, java.lang.String,
+	 * @see com.servoy.j2db.persistence.IServerInternal#getIndexCreateString(com.servoy.j2db.persistence.ITable, java.lang.String,
 	 * com.servoy.j2db.persistence.Column[], boolean)
 	 */
 	@Override
-	public String getIndexCreateString(Connection connection, Table t, String indexName, Column[] indexColumns, boolean unique) throws SQLException
+	public String getIndexCreateString(ITable t, String indexName, Column[] indexColumns, boolean unique) throws SQLException, RepositoryException
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.persistence.IServerInternal#createIndex(com.servoy.j2db.persistence.ITable, java.lang.String, com.servoy.j2db.persistence.Column[],
+	 * boolean)
+	 */
+	@Override
+	public void createIndex(ITable table, String indexName, Column[] indexColumns, boolean unique) throws RepositoryException
+	{
 	}
 
 	/*
