@@ -264,6 +264,7 @@ import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * This view is meant to be similar to the old designer's tree (in editor) in looks and in functionality. It will show a logical presentation of the eclipse
@@ -1583,7 +1584,8 @@ public class SolutionExplorerView extends ViewPart
 				ServoyLog.logInfo("Could not convert tooltip text to HTML: " + text);
 			}
 			Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
-			int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / 72f);
+			float systemDPI = Utils.isAppleMacOS() ? 72f : 96f; //
+			int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
 			browser.setText("<html><body style='background-color:#ffffcc;font-type:" + f.getFontData()[0].getName() + ";font-size:" + pxHeight +
 				"px;font-weight:500'>" + text + "</body></html>");
 			GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n")) ? new GridData(600, 150) : new GridData(450, 50);
