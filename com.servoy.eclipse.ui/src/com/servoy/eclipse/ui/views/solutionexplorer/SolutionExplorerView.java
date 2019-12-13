@@ -1584,7 +1584,7 @@ public class SolutionExplorerView extends ViewPart
 				ServoyLog.logInfo("Could not convert tooltip text to HTML: " + text);
 			}
 			Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
-			float systemDPI = Utils.isAppleMacOS() ? 72f : 96f; //
+			float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
 			int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
 			browser.setText("<html><body style='background-color:#ffffcc;font-type:" + f.getFontData()[0].getName() + ";font-size:" + pxHeight +
 				"px;font-weight:500'>" + text + "</body></html>");

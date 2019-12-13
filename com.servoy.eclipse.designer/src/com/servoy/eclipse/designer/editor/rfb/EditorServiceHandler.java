@@ -132,7 +132,7 @@ public class EditorServiceHandler implements IServerService
 				Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
 				JSONObject result = new JSONObject();
 				result.put("font", f.getFontData()[0].getName());
-				float systemDPI = Utils.isAppleMacOS() ? 72f : 96f; //
+				float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
 				int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
 				result.put("size", pxHeight);
 				return result;
