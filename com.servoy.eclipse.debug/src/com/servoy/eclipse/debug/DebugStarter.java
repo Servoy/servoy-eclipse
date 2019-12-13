@@ -157,7 +157,7 @@ public class DebugStarter implements IDebuggerStarter
 
 	/**
 	 * Locate a configuration to relaunch for the given type. If one cannot be found, create one.
-	 * 
+	 *
 	 * @return a re-useable config or <code>null</code> if none
 	 */
 	private static ILaunchConfiguration findLaunchConfiguration(IResource script, ILaunchConfigurationType configType)
@@ -170,7 +170,8 @@ public class DebugStarter implements IDebuggerStarter
 			for (ILaunchConfiguration config : configs)
 			{
 				if (config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME, "").equals(script.getProjectRelativePath().toString()) &&
-					config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(script.getProject().getName())) {
+					config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, "").equals(script.getProject().getName()))
+				{
 					candidateConfigs.add(config);
 				}
 			}
@@ -208,10 +209,10 @@ public class DebugStarter implements IDebuggerStarter
 			wc = configType.newInstance(null, getLaunchManager().generateUniqueLaunchConfigurationNameFrom(script.getName()));
 			wc.setAttribute(ScriptLaunchConfigurationConstants.ATTR_SCRIPT_NATURE, JavaScriptNature.NATURE_ID);
 			wc.setAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, script.getProject().getName());
-			wc.setAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME, script.getProjectRelativePath().toPortableString()/*
-																																		 * script.getFullPath().
-																																		 * toPortableString ()
-																																		 */);
+			wc.setAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
+				script.getProjectRelativePath().toPortableString()/*
+																	 * script.getFullPath(). toPortableString ()
+																	 */);
 			wc.setAttribute(IDebugUIConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
 
 			wc.setAttribute(ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT, 100000);
@@ -235,7 +236,7 @@ public class DebugStarter implements IDebuggerStarter
 		return DebugPlugin.getDefault().getLaunchManager();
 	}
 
-	private static IFile getJavascriptFile(ServoyProject project)
+	public static IFile getJavascriptFile(ServoyProject project)
 	{
 		IFile script = project.getProject().getFile(SolutionSerializer.GLOBALS_FILE);
 		if (script.exists())

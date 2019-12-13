@@ -41,6 +41,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -98,7 +99,7 @@ public class ChangeParentCommand extends Command
 				}
 
 				// adding an element into its own child is not allowed
-				if (isChildOf(possibleNewParent, initialParent))
+				if (child instanceof LayoutContainer && isChildOf(possibleNewParent, initialParent))
 				{
 					return false;
 				}
