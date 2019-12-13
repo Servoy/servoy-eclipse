@@ -11,22 +11,23 @@ import java.net.MalformedURLException;
 import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.wicket.validation.validator.UrlValidator;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 
 public class NgDesktopClientConnection
-{
+{	
 	private String service_url = "https://ngdesktop-builder.servoy.com";
 	private String statusMessage = null;
 
@@ -60,7 +61,7 @@ public class NgDesktopClientConnection
 		String srvAddress = System.getProperty("ngclient.service.address");//if no port specified here (address:port) - defaulting to 443
 		if (srvAddress != null) {//validate format
 			UrlValidator urlValidator = new UrlValidator();
-			if (!urlValidator.isValid(srvAddress)) throw new MalformedURLException(srvAddress);
+			if (!urlValidator.isValid(srvAddress)) throw new MalformedURLException("URI is not valid: " + srvAddress);
 			service_url = srvAddress;
 		}
 		
@@ -98,7 +99,7 @@ public class NgDesktopClientConnection
 	 */
 	public String startBuild(String platform, IDialogSettings settings) throws IOException
 	{
-		HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
+		
 		JSONObject jsonObj = new JSONObject();
 		if (platform != null) jsonObj.put("platform", platform);
 		if (settings.get("icon_path") != null && settings.get("icon_path").trim().length() > 0) jsonObj.put("icon", getEncodedData(settings.get("icon_path")));
@@ -110,33 +111,12 @@ public class NgDesktopClientConnection
 
 		StringEntity input = new StringEntity(jsonObj.toString());
 		input.setContentType("application/json");
+		
+		HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
 		postRequest.setEntity(input);
-
 		ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
 		
-		try (CloseableHttpResponse httpResponse = httpClient.execute(postRequest);
-			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())))) {
-			
-			//verify status code
-			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
-			{
-				throw new IOException("Http error: " + httpResponse.getStatusLine().getStatusCode() + ": " + httpResponse.getStatusLine().getReasonPhrase());
-			}
-			
-			String output;
-			StringBuffer sb = new StringBuffer();
-			while ((output = br.readLine()) != null)
-				sb.append(output);
-
-			jsonObj = new JSONObject(sb.toString());
-			if (jsonObj.getInt("statusCode") != WAITING)
-			{ //this is the first status set on the service on a normal processing
-				throw new IOException(jsonObj.getString("statusMessage"));
-			}
-		} finally {
-			postRequest.reset();
-		}
-		return (String)jsonObj.get("tokenId");
+		return processRequest(postRequest, "Build start error: ", null, "tokenId");
 	}
 
 	/**
@@ -144,26 +124,13 @@ public class NgDesktopClientConnection
 	 * @param tokenId
 	 * @return
 	 * 			running - the build is currently running
-	 * 			error - build run into an error; use getErrorDetails(tokenId) for get error details
+	 * 			error - build has ended with errors;
 	 * 			ready - build is ready to download
 	 * @throws IOException
 	 */
 	public int getStatus(String tokenId) throws IOException
 	{
-		HttpGet getRequest = new HttpGet(service_url + STATUS_ENDPOINT + tokenId);
-		try (CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
-			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())))) {
-			
-			String output;
-			StringBuffer sb = new StringBuffer();
-			while ((output = br.readLine()) != null)
-				sb.append(output);
-			JSONObject jsonObj = new JSONObject(sb.toString());
-			statusMessage = (String)jsonObj.get("statusMessage");
-			return jsonObj.getInt("statusCode");
-		} finally {
-			getRequest.reset();
-		}
+		return Integer.parseInt(processRequest(new HttpGet(service_url + STATUS_ENDPOINT + tokenId), "Status", tokenId, null));
 	}
 
 	public String getStatusMessage() {
@@ -172,22 +139,10 @@ public class NgDesktopClientConnection
 
 	public String getBinaryName(String tokenId) throws IOException
 	{
-		HttpGet getRequest = new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId);
-		try (CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
-			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())))) {
-			String output;
-			StringBuffer sb = new StringBuffer();
-			while ((output = br.readLine()) != null)
-				sb.append(output);
-	
-			JSONObject jsonObj = new JSONObject(sb.toString());
-			return (String)jsonObj.get("binaryName");
-		} finally {
-			getRequest.reset();
-		}
+		return processRequest(new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId), "Binary name", tokenId, "binaryName");
 	}
 
-	public void download(String tokenId, String savePath) throws IOException //expect absolutePath
+	public void download(String tokenId, String savePath, IProgressMonitor monitor, boolean[] cancel) throws IOException //expect absolutePath
 	{
 		String binaryName = getBinaryName(tokenId);
 		HttpGet getRequest = new HttpGet(service_url + DOWNLOAD_ENDPOINT + tokenId);
@@ -205,6 +160,12 @@ public class NgDesktopClientConnection
 			
 			while (n != -1)
 			{
+				if (monitor.isCanceled()) {
+					is.close();
+					fos.close();
+					(new File(savePath)).delete();
+					cancel[0] = true;
+				}
 				if (n > 0)
 				{
 					fos.write(inputFile, 0, n);
@@ -219,21 +180,31 @@ public class NgDesktopClientConnection
 	}
 	
 	public void delete(String tokenId) throws IOException {
-		HttpDelete deleteRequest = new HttpDelete(service_url + DELETE_ENDPOINT + tokenId);
-		try (CloseableHttpResponse httpResponse = httpClient.execute(deleteRequest); 
+		processRequest(new HttpDelete(service_url + DELETE_ENDPOINT + tokenId), "Delete", tokenId, null);
+	}
+	
+	public void cancel(String tokenId) throws IOException {
+		processRequest(new HttpPost(service_url + CANCEL_ENDPOINT + tokenId), "Cancel", tokenId, null);
+	}
+	
+	private String processRequest(HttpRequestBase request, String prefixMessage, String tokenId, String returnKey) throws IOException {
+		try (CloseableHttpResponse httpResponse = httpClient.execute(request); 
 			BufferedReader br = new BufferedReader(new InputStreamReader((httpResponse.getEntity().getContent())))) {
 			String output;
 			StringBuffer sb = new StringBuffer();
 			while ((output = br.readLine()) != null)
 				sb.append(output);
-	
 			JSONObject jsonObj = new JSONObject(sb.toString());
-			if (jsonObj.getInt("statusCode") != OK) {
-				statusMessage = (String)jsonObj.get("statusMessage");
-				ServoyLog.logWarning("Error deleting build on service: " + tokenId, new Exception(statusMessage));
+			int statusCode = jsonObj.optInt("statusCode", OK);
+			statusMessage = jsonObj.optString("statusMessage", "");
+			if (statusCode == ERROR) {
+				String errMessage = prefixMessage + (tokenId != null ? " error for token " + tokenId + ":" : "") +  (String)jsonObj.get("statusMessage");
+				ServoyLog.logInfo(errMessage);
 			}
+			String retValue = (returnKey != null ? jsonObj.optString(returnKey, "") : Integer.toString(statusCode));
+			return retValue;  
 		} finally {
-			deleteRequest.reset();
+			request.reset();
 		}
 	}
 }

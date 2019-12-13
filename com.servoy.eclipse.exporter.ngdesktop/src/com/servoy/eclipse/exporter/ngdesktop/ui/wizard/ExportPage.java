@@ -27,8 +27,6 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -68,8 +66,6 @@ public class ExportPage extends WizardPage
 	private Group sizeGroup;
 	private Text widthText;
 	private Text heightText;
-	
-	public Label statusLabel; //this is just temporary while tweaking the service
 
 	private List<String> selectedPlatforms = new ArrayList<String>();
 	private ExportNGDesktopWizard exportElectronWizard;
@@ -288,22 +284,14 @@ public class ExportPage extends WizardPage
 			gd.horizontalSpan = 2;
 			sizeGroup.setLayoutData(gd);		
 						
-			statusLabel = new Label(composite, SWT.NONE);
-			statusLabel.setEnabled(false); //set to gray
-			statusLabel.setText("Status (beta): ");
+			Label noteLabel = new Label(composite, SWT.NONE);
+			noteLabel.setText("*For now we only support generating Windows branded installers");
+			noteLabel.setEnabled(false); //set to gray
 			gd = new GridData( SWT.FILL, SWT.FILL, true, true );
 			gd.verticalAlignment = GridData.VERTICAL_ALIGN_END;
 			gd.horizontalSpan = 3;
-			statusLabel.setLayoutData(gd);
-			statusLabel.setVisible(true);
-			
-			Label noteLabel =  new Label(rootComposite, SWT.BOTTOM);
-			noteLabel.setText("*For now we only support generating Windows branded installers");
-			FormData fd = new FormData();
-			fd.bottom = new FormAttachment(100);
-			fd.left = new FormAttachment(0);
-			noteLabel.setLayoutData(fd);
-			noteLabel.setEnabled(false);
+			noteLabel.setLayoutData(gd);
+			noteLabel.setVisible(true);	
 		
 		setControl(composite);
 	}
