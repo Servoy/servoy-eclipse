@@ -107,14 +107,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
-			try
-			{
-				return ((EclipseRepository)repository).isSolutionLoaded(project.getName());
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
+			return ((EclipseRepository)repository).isSolutionLoaded(project.getName());
 		}
 		return false;
 	}
