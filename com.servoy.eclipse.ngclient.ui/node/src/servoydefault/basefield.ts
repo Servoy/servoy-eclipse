@@ -34,6 +34,9 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
     ngOnInit() {
       super.ngOnInit();
       this.attachFocusListeners(this.getFocusElement());
+      if (this.dataProviderID == undefined) {
+          this.dataProviderID = "";
+      }
     }
     
     attachFocusListeners(nativeElement : any){
