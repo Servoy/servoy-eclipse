@@ -438,7 +438,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 				flattenedSolution.close(null);
 				if (activeProject != null && activeProject.getSolution() != null)
 				{
-					flattenedSolution.setSolution(activeProject.getSolution().getSolutionMetaData(), true, true, getActiveSolutionHandler());
+					flattenedSolution.setSolution(activeProject.getSolution().getSolutionMetaData(), false, true, getActiveSolutionHandler());
 				}
 			}
 			catch (Exception e)
