@@ -1164,96 +1164,7 @@ public class ServoyModel extends AbstractServoyModel
 					Display.getDefault().syncExec(uiRunnable);
 					if (((Boolean)uiRunnable.getReturnValue()).booleanValue())
 					{
-						progressMonitor.subTask("Closing active editors...");
 
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
-								for (IWorkbenchWindow workbenchWindow : workbenchWindows)
-								{
-									if (workbenchWindow.getActivePage() == null) continue;
-
-									List<IProject> allActivatedSolutionProjects = new ArrayList<>(1);
-									if (project != null)
-									{
-										try
-										{
-											allActivatedSolutionProjects = project.getSolutionAndModuleReferencedProjects();
-										}
-										catch (CoreException e1)
-										{
-											ServoyLog.logError(e1);
-											allActivatedSolutionProjects.add(project.getProject());
-										}
-									}
-									IEditorReference[] openEditors = workbenchWindow.getActivePage().getEditorReferences();
-
-									ArrayList<IEditorReference> editorsToClose = new ArrayList<IEditorReference>();
-									for (IEditorReference editorReference : openEditors)
-									{
-										try
-										{
-											if (editorReference.getEditorInput() != null && editorReference.getEditorInput().getPersistable() == null)
-											{
-												continue;
-											}
-											else
-											{
-												IEditorInput ei = editorReference.getEditorInput();
-												IFile file = null;
-												String solutionName = null;
-												if (ei instanceof PersistEditorInput)
-												{
-													file = ((PersistEditorInput)ei).getFile();
-													if (file == null)
-													{
-														solutionName = ((PersistEditorInput)ei).getSolutionName();
-													}
-												}
-												else if (ei instanceof FileEditorInput)
-												{
-													file = ((FileEditorInput)editorReference.getEditorInput()).getFile();
-												}
-												else
-												{
-													ServoyLog.logInfo("Cannot determine if editor '" + editorReference.getPartName() + "' with input '" + ei +
-														"' should be closed or not when changing active solution. Defaulting to 'should close'.");
-												}
-
-												if (file != null || solutionName != null)
-												{
-													boolean matchFound = false;
-													for (IProject projectToCheck : allActivatedSolutionProjects)
-													{
-														if ((file != null && projectToCheck.equals(file.getProject())) ||
-															projectToCheck.getName().equals(solutionName))
-														{
-															matchFound = true;
-															break;
-														}
-													}
-
-													if (matchFound)
-													{
-														continue;
-													}
-												}
-											}
-											editorsToClose.add(editorReference);
-										}
-										catch (PartInitException e)
-										{
-											ServoyLog.logError(e);
-										}
-									}
-									workbenchWindow.getActivePage().closeEditors(editorsToClose.toArray(new IEditorReference[editorsToClose.size()]), true);
-								}
-							}
-						});
-
-						progressMonitor.worked(1);
 
 						nameValidator = null;
 						if (project != null) // active project was deleted
@@ -1347,6 +1258,97 @@ public class ServoyModel extends AbstractServoyModel
 						PersistIndexCache.flush();
 						resetActiveEditingFlattenedSolutions();
 						updateFlattenedSolution();
+
+						progressMonitor.worked(1);
+
+						progressMonitor.subTask("Closing active editors...");
+
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
+								for (IWorkbenchWindow workbenchWindow : workbenchWindows)
+								{
+									if (workbenchWindow.getActivePage() == null) continue;
+
+									List<IProject> allActivatedSolutionProjects = new ArrayList<>(1);
+									if (project != null)
+									{
+										try
+										{
+											allActivatedSolutionProjects = project.getSolutionAndModuleReferencedProjects();
+										}
+										catch (CoreException e1)
+										{
+											ServoyLog.logError(e1);
+											allActivatedSolutionProjects.add(project.getProject());
+										}
+									}
+									IEditorReference[] openEditors = workbenchWindow.getActivePage().getEditorReferences();
+
+									ArrayList<IEditorReference> editorsToClose = new ArrayList<IEditorReference>();
+									for (IEditorReference editorReference : openEditors)
+									{
+										try
+										{
+											if (editorReference.getEditorInput() != null && editorReference.getEditorInput().getPersistable() == null)
+											{
+												continue;
+											}
+											else
+											{
+												IEditorInput ei = editorReference.getEditorInput();
+												IFile file = null;
+												String solutionName = null;
+												if (ei instanceof PersistEditorInput)
+												{
+													file = ((PersistEditorInput)ei).getFile();
+													if (file == null)
+													{
+														solutionName = ((PersistEditorInput)ei).getSolutionName();
+													}
+												}
+												else if (ei instanceof FileEditorInput)
+												{
+													file = ((FileEditorInput)editorReference.getEditorInput()).getFile();
+												}
+												else
+												{
+													ServoyLog.logInfo("Cannot determine if editor '" + editorReference.getPartName() + "' with input '" + ei +
+														"' should be closed or not when changing active solution. Defaulting to 'should close'.");
+												}
+
+												if (file != null || solutionName != null)
+												{
+													boolean matchFound = false;
+													for (IProject projectToCheck : allActivatedSolutionProjects)
+													{
+														if ((file != null && projectToCheck.equals(file.getProject())) ||
+															projectToCheck.getName().equals(solutionName))
+														{
+															matchFound = true;
+															break;
+														}
+													}
+
+													if (matchFound)
+													{
+														continue;
+													}
+												}
+											}
+											editorsToClose.add(editorReference);
+										}
+										catch (PartInitException e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+									workbenchWindow.getActivePage().closeEditors(editorsToClose.toArray(new IEditorReference[editorsToClose.size()]), true);
+								}
+							}
+						});
 
 						progressMonitor.worked(1);
 					}
