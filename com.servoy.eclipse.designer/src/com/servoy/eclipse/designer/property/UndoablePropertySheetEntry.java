@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.eclipse.ui.util.ISupportDefaultValueEditor;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
@@ -204,6 +205,10 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 						break;
 					}
 				}
+			}
+			if (child.editor instanceof ISupportDefaultValueEditor && ((ISupportDefaultValueEditor)child.editor).isDefaultValue(entryValue))
+			{
+				entryValue = SetValueCommand.DEFAULT_VALUE;
 			}
 			cc.add(SetValueCommand.createSetvalueCommand(child.getDisplayName(), target, child.getDescriptor().getId(), entryValue));
 		}

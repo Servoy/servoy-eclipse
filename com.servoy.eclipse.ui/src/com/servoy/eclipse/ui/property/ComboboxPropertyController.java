@@ -81,7 +81,7 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ModifiedComboBoxCellEditor editor = new ModifiedComboBoxCellEditor(parent, EMPTY_STRING_ARRAY, SWT.READ_ONLY)
+		ModifiedComboBoxCellEditor editor = new ModifiedComboBoxCellEditor(parent, EMPTY_STRING_ARRAY, SWT.READ_ONLY, model.getDefaultValueIndex() == 0)
 		{
 			private Button editorButton;
 
@@ -189,7 +189,8 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 		public Integer convertProperty(Object id, T value)
 		{
 			Object[] real = model.getRealValues();
-			for (int i = 0; i < real.length; i++)
+			// go backwards, in case value is in default value as well, show the real value instead of DEFAULT
+			for (int i = real.length - 1; i >= 0; i--)
 			{
 				if (real[i] == value || real[i] != null && i != model.getDefaultValueIndex() && real[i].equals(value))
 				{
