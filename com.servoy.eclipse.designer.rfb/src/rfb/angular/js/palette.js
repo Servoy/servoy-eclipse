@@ -144,6 +144,10 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								left: ev.pageX
 							};
 							dragClone.css(css);
+							if (angularElement == null) 
+							{
+								angularElement = addDraggedElement(type, componentTagName, tagName, model, ev);
+							}
 							if (angularElement) {
 								var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
 								var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
@@ -163,29 +167,48 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 
 							if (canDrop.dropAllowed && canDrop.beforeChild && !canDrop.dropTarget) canDrop.dropTarget = $(".contentframe").contents().find("#svyDesignForm").get(0);
 							
-							if (canDrop.dropTarget && !$scope.isAbsoluteFormLayout() && angularElement) {
-								if ($scope.glasspane.style.cursor == "pointer") {
+							if (!$scope.isAbsoluteFormLayout()) {
+								if (angularElement == null)
+								{
+									angularElement = addDraggedElement(type, componentTagName, tagName, model, event);
+								}
+								if (angularElement) {
+									if ($scope.glasspane.style.cursor == "pointer") {
 
-									if (t) clearTimeout(t);
-									t = setTimeout(function() {
+										if (t) clearTimeout(t);
+										t = setTimeout(function() {
 										
-										if (canDrop.beforeChild) {
-											if (insertedClone == null) insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
-											canDrop.dropTarget.insertBefore(insertedClone, canDrop.beforeChild);
-											angularElement.css('opacity', '1');
-											insertedCloneParent = canDrop.dropTarget;
-										} else if (angularElement.parent()[0] && angularElement.parent()[0] != canDrop.dropTarget || canDrop.append) {
-											if (insertedClone == null) insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
-											angular.element(canDrop.dropTarget).append(insertedClone);
-											angularElement.css('opacity', '1');
-											insertedCloneParent = canDrop.dropTarget;
-										}
-										editorScope.refreshEditorContent();
-									}, 200);
+											if(canDrop.dropAllowed)
+											{
+												if (insertedClone == null) insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
+												var inserted = false;
+												
+												if (canDrop.beforeChild) 
+												{
+													inserted = canDrop.dropTarget.insertBefore(insertedClone, canDrop.beforeChild);
+												}
+												else if (angularElement.parent()[0] && angularElement.parent()[0] != canDrop.dropTarget || canDrop.append) 
+												{
+													if (!canDrop.dropTarget)
+													{
+														if (insertedCloneParent) insertedCloneParent.removeChild(insertedClone);
+														canDrop.dropTarget = $(".contentframe").contents().find("#svyDesignForm").get(0);
+													}
+													
+													inserted = angular.element(canDrop.dropTarget).append(insertedClone);
+												}
+											
+												if (inserted) {
+													angularElement.css('opacity', '1');
+													insertedCloneParent = canDrop.dropTarget;
+												}
+											}
+											editorScope.refreshEditorContent();
+										}, 200);
 
-								} else {
-									angularElement.css('opacity', '0');
-									$scope.getEditorContentRootScope().getDesignFormElement()[0].removeChild(angularElement[0]);
+									} else {
+										angularElement.css('opacity', '0');
+									}
 								}
 							}
 						} else {
@@ -202,33 +225,9 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								'list-style-type': 'none'
 							})
 							$document[0].body.appendChild(dragClone[0]);
-							if (type == 'component' || type == "layout" || type == "template") {
-								if (type == 'component') {
-									if ($scope.isAbsoluteFormLayout())
-									    angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><'+ (componentTagName ? componentTagName : tagName) +' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-servoyApi=\'svy_servoyApi\' svy-autoapply-disabled=\'true\'/></div>', model);
-									else 
-									    angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>', model);
-								}
-								else {
-									// tagname is the full element
-									angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>');
-								}
-								var elWidth = model.size ? model.size.width : 200;
-								var elHeight = model.size ? model.size.height : 100;
-								css = $scope.convertToContentPoint({
-									position: 'absolute',
-									top: event.pageY,
-									left: event.pageX,
-									width: (elWidth + 'px'),
-									'z-index': 4,
-									opacity: 0,
-									transition: 'opacity .5s ease-in-out 0'
-								});
-								if ($scope.isAbsoluteFormLayout()){
-								    css.height = elHeight + 'px';
-								    css.outline = '1px dotted black';
-								}
-								angularElement.css(css);
+							if (angularElement == null)
+							{
+								angularElement = addDraggedElement(type, componentTagName, tagName, model, event);
 							}
 						}
 					});
@@ -323,7 +322,10 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 									canDrop.beforeChild = angularElement[0].nextElementSibling;
 								}
 								if (t) clearTimeout(t);
-								$scope.getEditorContentRootScope().getDesignFormElement()[0].removeChild(angularElement[0]);
+								if ($scope.getEditorContentRootScope().getDesignFormElement()[0].contains(angularElement[0]))
+								{
+									$scope.getEditorContentRootScope().getDesignFormElement()[0].removeChild(angularElement[0]);
+								}
 								//the next element can be the dummy one that was inserted just to see how it would look
 								//so get the next one because that one should be a real element with a real svy-id
 								if (canDrop.beforeChild && canDrop.beforeChild.getAttribute("svy-id") === "null")
@@ -396,6 +398,43 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					// prevent the drag of anchors from browser; this code was in mousemove, was preventing cursor to change in IE
 					event.preventDefault();
 				}
+				
+				function addDraggedElement(type, componentTagName, tagName, model, event) {
+					var position = utils.getMousePosition(event);
+					if (position.top < 0 || position.left < 0 ) return null;
+					
+    				if (type == 'component' || type == "layout" || type == "template") {
+        				if (type == 'component') {
+            				if ($scope.isAbsoluteFormLayout())
+                				angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><' + (componentTagName ? componentTagName : tagName) + ' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-servoyApi=\'svy_servoyApi\' svy-autoapply-disabled=\'true\'/></div>', model);
+            				else
+                				angularElement = $scope.getEditorContentRootScope().createComponent('<div>' + tagName + '</div>', model);
+        					}
+        				else {
+            				// tagname is the full element
+            				angularElement = $scope.getEditorContentRootScope().createComponent('<div>' + tagName + '</div>');
+        				}
+						
+       					var elWidth = model.size ? model.size.width : 200;
+        				var elHeight = model.size ? model.size.height : 100;
+       					var css = $scope.convertToContentPoint({
+            				position: 'absolute',
+            				top: position.top,
+            				left: position.left,
+            				width: (elWidth + 'px'),
+            				'z-index': 4,
+            				opacity: 0,
+            				transition: 'opacity .5s ease-in-out 0'
+        				});
+        				if ($scope.isAbsoluteFormLayout()) {
+            				css.height = elHeight + 'px';
+            				css.outline = '1px dotted black';
+        				}
+        				angularElement.css(css);
+    				}
+    				return angularElement;
+				}
+			
 			},
 			templateUrl: 'templates/palette.html',
 			replace: true

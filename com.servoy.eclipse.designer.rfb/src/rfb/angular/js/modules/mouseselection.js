@@ -456,7 +456,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						xMouseDown = event.clientX;
 						yMouseDown = event.clientY;
 					}
-					if (lassoStarted || hasClass(event.target, "contentframe-overlay") || hasClass(event.target, "decorator") || hasClass(event.target, "ghostcontainer")
+					if (lassoStarted || hasClass(event.target, "contentframe-overlay") || hasClass(event.target, "palette-heading") || hasClass(event.target, "decorator") || hasClass(event.target, "ghostcontainer")
 							|| hasClass(event.target, "ghostContainerPropName") || hasClass(event.target, "ghost") || hasClass(event.target, "knob") || event.target.id == "highlight") {
 						xMouseDown -= editorScope.glasspane.parentElement.offsetLeft;
 						yMouseDown -= editorScope.glasspane.parentElement.offsetTop;
