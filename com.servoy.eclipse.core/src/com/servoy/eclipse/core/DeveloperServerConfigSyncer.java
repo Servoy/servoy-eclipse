@@ -21,12 +21,11 @@ import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
-import com.servoy.j2db.server.main.ServerConfigSyncer;
 
 /**
  * Manage server configuration changes in developer, make sure that the servers are updated accordingly.
  *
- * @see ServerConfigSyncer will be used in ApplicationServer
+ * @see Server Config Syncer will be used in ApplicationServer
  *
  * @author rgansevles
  *
