@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -294,7 +295,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		}
 	}
 
-	private static final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+	private static final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 	private static final String SHOW_FORMS = "ShowForms";
 	private static final String SHOW_METHODS = "ShowMethods";

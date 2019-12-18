@@ -38,6 +38,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 import org.eclipse.ltk.ui.refactoring.resource.DeleteResourcesWizard;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -271,7 +272,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		}
 
 		//retrieve the servoy model
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		//retrieve all the forms;
 		Iterator<Form> it = servoyModel.getFlattenedSolution().getForms(false);
@@ -319,7 +320,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		Iterator<Integer> keyEnumeration = map.keySet().iterator();
 
 		//retrieve the servoy model
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		while (keyEnumeration.hasNext())
 		{
@@ -374,7 +375,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 */
 	private boolean allFormsAreInTheSameSet(List<IPersist> formsToDelete)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		Iterator<Form> it = servoyModel.getFlattenedSolution().getForms(false);
 
 		while (it.hasNext())

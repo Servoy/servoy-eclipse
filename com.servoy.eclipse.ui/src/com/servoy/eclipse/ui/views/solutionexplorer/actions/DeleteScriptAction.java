@@ -33,6 +33,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -79,7 +80,7 @@ public class DeleteScriptAction extends DeletePersistAction
 
 	/**
 	 * Checks to see whether any of the given scripts is being edited by and of the given editors or not.
-	 * 
+	 *
 	 * @param scripts the scripts.
 	 * @param editors the editors.
 	 * @return true if any of the given scripts is being edited by and of the given editors; false otherwise.
@@ -113,7 +114,7 @@ public class DeleteScriptAction extends DeletePersistAction
 	@Override
 	protected void performDeletion(List<IPersist> selectedPersists)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		for (IPersist persist : selectedPersists)
 		{
 			String relativePath = SolutionSerializer.getScriptPath(persist, false);
@@ -135,7 +136,7 @@ public class DeleteScriptAction extends DeletePersistAction
 				}
 				if (txt == null || txt.length() == 0) continue;
 
-				// filtering out "\r" 
+				// filtering out "\r"
 				StringBuilder sbfileContent = null;
 				int lastIndex = 0;
 				for (int i = 0; i < txt.length(); i++)

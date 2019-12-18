@@ -36,6 +36,7 @@ import org.eclipse.ui.IWorkbench;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
@@ -314,7 +315,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			ftv = new FilteredTreeViewer(container, true, false, contentProvider, labelProvider, null, treeStyle,
 				new TreePatternFilter(TreePatternFilter.FILTER_PARENTS), new LeafnodesSelectionFilter(contentProvider));
 
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 			List<String> availableSolutions = new ArrayList<String>();
 			try

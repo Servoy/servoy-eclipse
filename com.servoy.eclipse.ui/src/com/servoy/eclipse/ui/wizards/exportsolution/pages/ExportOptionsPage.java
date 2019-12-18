@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
@@ -70,7 +70,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		setDescription("Specify the options for your export");
 		this.exportSolutionWizard = exportSolutionWizard;
 
-		ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
 		resourcesProjectProblemsType = model.getActiveResourcesProject() != null
 			? BuilderUtils.getMarkers(new String[] { model.getActiveResourcesProject().getProject().getName() }) : 0;
 

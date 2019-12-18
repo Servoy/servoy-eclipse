@@ -22,7 +22,7 @@ import java.util.Iterator;
 
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
@@ -82,7 +82,7 @@ public abstract class BaseGroupGraphicalEditPart extends BaseGraphicalEditPart i
 	public void activate()
 	{
 		// listen to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.addPersistChangeListener(false, this);
 
 		super.activate();
@@ -92,7 +92,7 @@ public abstract class BaseGroupGraphicalEditPart extends BaseGraphicalEditPart i
 	public void deactivate()
 	{
 		// stop listening to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removePersistChangeListener(false, this);
 
 		super.deactivate();

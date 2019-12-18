@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -230,12 +231,12 @@ public class PersistCloner
 				else
 				{
 					clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false //
-						, false /* elements of original form should remain override, not a flattened element */);
+					, false /* elements of original form should remain override, not a flattened element */);
 				}
 				if (clone instanceof ISupportUpdateableName)
 				{
 					((ISupportUpdateableName)clone).updateName(nameValidator, newPersistName);
-					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+					IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 					FlattenedSolution fs = servoyModel.getActiveProject().getEditingFlattenedSolution();
 					fs.flushAllCachedData(); //make sure the name caches are flushed from the active solution and modules
 					for (Solution mod : fs.getModules())

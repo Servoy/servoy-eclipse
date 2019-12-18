@@ -41,16 +41,13 @@ import com.servoy.j2db.util.Debug;
  */
 public class BackgroundTableLoader implements IActiveProjectListener
 {
-
-	private final IServerManagerInternal serverManager;
 	private boolean running = false;
 	private boolean paused = false;
 	private boolean tableListsLoaded = false;
 	private ServoyProject[] modules = null;
 
-	public BackgroundTableLoader(IServerManagerInternal serverManager)
+	public BackgroundTableLoader()
 	{
-		this.serverManager = serverManager;
 	}
 
 	public synchronized void startLoadingOfServers()
@@ -93,6 +90,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 	{
 		try
 		{
+			IServerManagerInternal serverManager = ServoyModel.getServerManager();
 			boolean buildAlreadyRun = false;
 			if (!tableListsLoaded)
 			{

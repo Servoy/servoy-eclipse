@@ -30,7 +30,7 @@ import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -105,7 +105,7 @@ public class FormatCellEditor extends TextDialogCellEditor
 			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(webComponentClassName);
 			if (spec != null)
 			{
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 				FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
 				for (String propertyName : formatForPropertyNames)
 				{

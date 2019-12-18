@@ -695,7 +695,7 @@ public class EditorUtil
 
 	public static Form getForm(IEditorPart editorPart)
 	{
-		if (editorPart == null)
+		if (editorPart == null || ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
 		{
 			return null;
 		}

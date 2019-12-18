@@ -21,28 +21,27 @@ import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.server.main.ServerConfigSyncer;
 
 /**
  * Manage server configuration changes in developer, make sure that the servers are updated accordingly.
- * 
+ *
  * @see ServerConfigSyncer will be used in ApplicationServer
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class DeveloperServerConfigSyncer implements IServerConfigListener
 {
-	private final IServerManagerInternal serverManager;
-
-	public DeveloperServerConfigSyncer(IServerManagerInternal serverManager)
+	public DeveloperServerConfigSyncer()
 	{
-		this.serverManager = serverManager;
 	}
 
 	public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 	{
 		int oldState = -1;
 		boolean wasValid = false;
+		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 		if (oldServerConfig != null)
 		{
 			// server was deleted or changed

@@ -78,6 +78,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
@@ -1266,7 +1267,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		serverNameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
 		driverField.removeAll();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		for (String name : ServoyModel.getServerManager().getKnownDriverClassNames())
 		{
 			driverField.add(name);

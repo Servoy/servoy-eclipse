@@ -20,12 +20,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
+import com.servoy.base.persistence.IBaseColumn;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -81,7 +82,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 		IColumn c;
 		try
 		{
-			ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 			DataModelManager dmm = sm.getDataModelManager();
 			if (dmm != null)
 			{
@@ -113,7 +114,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 					};
 					// create the new column in memory
 					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
-					c.setDatabasePK((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != 0);
+					c.setDatabasePK((difference.getDbiFileDefinition().flags & IBaseColumn.PK_COLUMN) != 0);
 					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
 					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)
 					{

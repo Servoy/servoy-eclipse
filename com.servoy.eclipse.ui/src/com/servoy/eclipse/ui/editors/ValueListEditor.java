@@ -58,6 +58,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 
 import com.servoy.base.persistence.constants.IValueListConstants;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
@@ -170,6 +171,7 @@ public class ValueListEditor extends PersistEditor
 	private Combo displayType, realType;
 	private Label displayTypeLabel, realTypeLabel;
 	private Group typeDefinitionGroup;
+	private Composite parent;
 
 	@Override
 	protected boolean validatePersist(IPersist persist)
@@ -187,6 +189,16 @@ public class ValueListEditor extends PersistEditor
 	 */
 	@Override
 	public void createPartControl(Composite parent)
+	{
+		this.parent = parent;
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
+		{
+			init();
+		}
+	}
+
+	@Override
+	protected void init()
 	{
 		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 
@@ -595,7 +607,7 @@ public class ValueListEditor extends PersistEditor
 		String message = checkValidState();
 		if (message == null)
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			List<Problem> problems = ServoyBuilder.checkValuelist(getValueList(), servoyModel.getFlattenedSolution(), ServoyModel.getServerManager(), false);
 			for (Problem problem : problems)
 			{
@@ -619,7 +631,7 @@ public class ValueListEditor extends PersistEditor
 		{
 			handleCustomValuesButtonSelected();
 		}
-
+		parent.requestLayout();
 		doRefresh();
 	}
 
@@ -661,7 +673,7 @@ public class ValueListEditor extends PersistEditor
 	@Override
 	protected void doRefresh()
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		boolean activeSolutionIsMobile = servoyModel.isActiveSolutionMobile();
 
 		removeListeners();
@@ -1083,7 +1095,7 @@ public class ValueListEditor extends PersistEditor
 			getValueList().setDataSource(tableWrapper.getDataSource());
 			try
 			{
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 				if (servoyModel.getDataModelManager() != null)
 				{
 					servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(tableWrapper.getDataSource()));
@@ -1123,7 +1135,7 @@ public class ValueListEditor extends PersistEditor
 	{
 		if (isDirty())
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			IValidateName validator = servoyModel.getNameValidator();
 			try
 			{

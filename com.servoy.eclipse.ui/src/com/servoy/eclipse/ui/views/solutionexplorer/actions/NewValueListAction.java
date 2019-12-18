@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.base.persistence.constants.IValueListConstants;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -153,7 +153,7 @@ public class NewValueListAction extends Action implements ISelectionChangedListe
 	{
 		try
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ValueList vl = editingSolution.getValueList(valueListName);
 			if (vl == null)
 			{

@@ -37,6 +37,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.base.util.ITagResolver;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
@@ -52,7 +53,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner,jblok
- * 
+ *
  */
 public class StartSmartClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
@@ -78,7 +79,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
@@ -118,7 +119,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 		monitor.worked(1);
 		try
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyProject activeProject = servoyModel.getActiveProject();
 			if (activeProject != null && activeProject.getSolution() != null)
 			{
@@ -178,7 +179,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.debug.actions.StartDebugAction#getDebuggerAboutToStartListener()
 	 */
 	@Override

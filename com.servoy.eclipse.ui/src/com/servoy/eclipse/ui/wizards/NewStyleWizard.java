@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
@@ -173,7 +174,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 	@Override
 	public boolean performFinish()
 	{
-		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 		if (activeProject != null)
 		{

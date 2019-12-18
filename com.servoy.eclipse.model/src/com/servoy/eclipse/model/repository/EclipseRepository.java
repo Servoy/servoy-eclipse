@@ -272,7 +272,8 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 					{
 						ServoyLog.logError("Could not read solution " + romd.getName(), null);
 					}
-					ServoyLog.logInfo("Time taken to read in the solution " + romd.getName() + ": " + (System.currentTimeMillis() - time));
+					ServoyLog.logInfo("Time taken to read in the solution " + romd.getName() + ": " + (System.currentTimeMillis() - time) + ", thread: " +
+						Thread.currentThread().getName());
 					break;
 			}
 		}

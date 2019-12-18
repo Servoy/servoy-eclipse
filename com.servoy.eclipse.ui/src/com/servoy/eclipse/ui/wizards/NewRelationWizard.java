@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -60,7 +60,7 @@ public class NewRelationWizard extends Wizard implements INewWizard
 	private RelationNameSolutionPage relationPage;
 	private WizardPage errorPage;
 	private final String activeSolutionName;
-	private final ServoyModel servoyModel;
+	private final IDeveloperServoyModel servoyModel;
 
 
 	public NewRelationWizard(String activeSolutionName)
@@ -173,7 +173,7 @@ public class NewRelationWizard extends Wizard implements INewWizard
 		}
 
 		/**
-		 * 
+		 *
 		 * @return a string[] with the selected combo items
 		 */
 		public String[] getSelectedItems()

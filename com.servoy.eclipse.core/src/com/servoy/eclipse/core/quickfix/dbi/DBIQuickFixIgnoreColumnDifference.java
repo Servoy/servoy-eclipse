@@ -16,7 +16,7 @@
  */
 package com.servoy.eclipse.core.quickfix.dbi;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
@@ -25,10 +25,10 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Debug;
 
 /**
- * Quick fix for differences between column info in the dbi file and columns in the DB. It save in the prefs to no longer complain about this difference. 
- * 
+ * Quick fix for differences between column info in the dbi file and columns in the DB. It save in the prefs to no longer complain about this difference.
+ *
  * @author rgansevles
- * 
+ *
  * @since 6.1
  */
 public class DBIQuickFixIgnoreColumnDifference extends TableDifferenceQuickFix
@@ -64,7 +64,7 @@ public class DBIQuickFixIgnoreColumnDifference extends TableDifferenceQuickFix
 	@Override
 	public void run(TableDifference difference)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		DataModelManager dmm = servoyModel.getDataModelManager();
 		if (dmm != null)
 		{

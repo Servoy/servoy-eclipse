@@ -81,6 +81,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -630,7 +631,7 @@ public class SolutionExplorerTreeContentProvider
 		// the set of solutions a user can work with at a given time is determined
 		// by the active solution and active editor (in case of a calculation
 		// being edited);
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
 		Collection<Solution> modulesForCalculation = null;
 		if (solutionOfCalculation != null)

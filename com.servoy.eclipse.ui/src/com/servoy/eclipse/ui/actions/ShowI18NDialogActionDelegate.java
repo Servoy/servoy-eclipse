@@ -43,6 +43,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.I18NMessagesUtil;
@@ -100,7 +101,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 	{
 		final Shell shell = (workbenchWindow == null ? new Shell() : workbenchWindow.getShell());
 
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 
 		if (activeProject == null)
@@ -253,14 +254,14 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 
 	public void selectionChanged(IAction action, ISelection selection)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 		action.setEnabled(activeProject != null && activeProject.getSolution() != null);
 	}
 
 	private static String[] hasI18NTable(boolean checkForDefaults)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject activeProject = servoyModel.getActiveProject();
 		if (activeProject == null) return null;
 		Solution activeSolution = activeProject.getEditingSolution();

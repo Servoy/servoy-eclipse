@@ -212,7 +212,7 @@ import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
  *
  * @author jblok
  */
-public class ServoyModel extends AbstractServoyModel
+public class ServoyModel extends AbstractServoyModel implements IDeveloperServoyModel
 {
 
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
@@ -268,10 +268,6 @@ public class ServoyModel extends AbstractServoyModel
 
 	protected ServoyModel()
 	{
-		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
-		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
-		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
-
 		activeProjectListeners = new ArrayList<IActiveProjectListener>();
 		realPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		editingPersistChangeListeners = new ArrayList<IPersistChangeListener>();
@@ -279,6 +275,21 @@ public class ServoyModel extends AbstractServoyModel
 		i18nChangeListeners = new ArrayList<I18NChangeListener>();
 		formComponentListeners = new ArrayList<>();
 		fireRealPersistchangesJob = createFireRealPersistchangesJob();
+		initRepAsTeamProvider = Boolean.valueOf(Utils.getAsBoolean(
+			Settings.getInstance().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT))));
+
+		// load in background all servers and all tables needed by current solution
+		backgroundTableLoader = new BackgroundTableLoader();
+		serverConfigSyncer = new DeveloperServerConfigSyncer();
+		initNGPackageManager();
+	}
+
+	private void init()
+	{
+		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
+		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
+		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
+
 		realOutstandingChanges = new ArrayList<IPersist>();
 
 		startAppServer();
@@ -289,16 +300,9 @@ public class ServoyModel extends AbstractServoyModel
 		Settings settings = getSettings();
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
-		initRepAsTeamProvider = Boolean.valueOf(
-			Utils.getAsBoolean(settings.getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT))));
-
-		// load in background all servers and all tables needed by current solution
-		backgroundTableLoader = new BackgroundTableLoader(getServerManager());
-		addActiveProjectListener(backgroundTableLoader);
-		backgroundTableLoader.startLoadingOfServers();
 
 		// when server configurations change we want to update the servers in Serclipse.
-		getServerManager().addServerConfigListener(serverConfigSyncer = new DeveloperServerConfigSyncer(getServerManager()));
+		getServerManager().addServerConfigListener(serverConfigSyncer);
 
 		// project update listener
 		addActiveProjectListener(new IActiveProjectListener()
@@ -620,7 +624,7 @@ public class ServoyModel extends AbstractServoyModel
 											{
 												EclipseMessages.writeProjectI18NFiles(toProject, false, false);
 											}
-											ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(toProject, true);
+											setActiveProject(toProject, true);
 										}
 										catch (Exception ex)
 										{
@@ -738,6 +742,9 @@ public class ServoyModel extends AbstractServoyModel
 		};
 		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(workingSetChangeListener);
 		installServerTableColumnListener();
+
+		addActiveProjectListener(backgroundTableLoader);
+		backgroundTableLoader.startLoadingOfServers();
 	}
 
 	/**
@@ -844,7 +851,8 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				// flush flattened form caches and clear cached tables
 				getFlattenedSolution().flushFlattenedFormCache();
-				for (ServoyProject project : getModulesOfActiveProject())
+				// this goes through the model manager on purpose, because if the flattened solution is not fully loaded yet this shouldn't do a thing.
+				for (ServoyProject project : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 				{
 					project.getEditingFlattenedSolution().flushFlattenedFormCache();
 				}
@@ -979,7 +987,6 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	public IRootObject getActiveRootObject(String name, int objectTypeId)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
 		if (repository != null)
 		{
@@ -1008,7 +1015,6 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	public IRootObject getActiveRootObject(int rootObjectId)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
 		if (repository != null)
 		{
@@ -1036,7 +1042,6 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	public List<IRootObject> getActiveRootObjects(int type)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
 		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
 		if (repository != null)
 		{
@@ -2630,7 +2635,7 @@ public class ServoyModel extends AbstractServoyModel
 		ignoreOnceFiles.clear();
 		if (changedFiles.size() > 0)
 		{
-			final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
+			final ServoyProject servoyProject = getServoyProject(solution.getName());
 			final IContainer workspace = project.getParent();
 
 			SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
@@ -2894,7 +2899,7 @@ public class ServoyModel extends AbstractServoyModel
 					// if there is a media in the modules with the same name, but no file on in the ws, then ignore it, because
 					// it is deleting
 					int skip_media_id = 0;
-					Media moduleMedia = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getMedia(name);
+					Media moduleMedia = getFlattenedSolution().getMedia(name);
 					if (moduleMedia != null)
 					{
 						Pair<String, String> filePath = SolutionSerializer.getFilePath(moduleMedia, false);
@@ -2902,7 +2907,7 @@ public class ServoyModel extends AbstractServoyModel
 							skip_media_id = moduleMedia.getID();
 					}
 
-					media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name, skip_media_id);
+					media = editingSolution.createNewMedia(getNameValidator(), name, skip_media_id);
 					media.setMimeType(eclipseRepository.getContentType(name));
 				}
 				if (media != null) eclipseRepository.updateNodesInWorkspace(new IPersist[] { media }, false, false);
@@ -3397,10 +3402,9 @@ public class ServoyModel extends AbstractServoyModel
 	/**
 	 * Initializes the ServoyModel's initial state.
 	 */
-	@Override
-	public void initialize()
+	void initialize()
 	{
-		super.initialize();
+		init();
 
 		getNGPackageManager().addAvailableNGPackageProjectsListener(new IAvailableNGPackageProjectsListener()
 		{
@@ -4014,7 +4018,7 @@ public class ServoyModel extends AbstractServoyModel
 	@Override
 	protected BaseNGPackageManager createNGPackageManager()
 	{
-		return new NGPackageManager();
+		return new NGPackageManager(this);
 	}
 
 	@Override

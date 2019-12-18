@@ -70,6 +70,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.TypesRegistry;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
@@ -239,7 +240,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		{
 			return null;
 		}
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		boolean override = false;
 		MethodArgument[] superArguments = null;

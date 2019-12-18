@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
@@ -200,7 +200,7 @@ public class DatasourceSelectComposite extends Composite
 					relationEditor.unregisterListeners();
 					IDataSourceWrapper tableWrapper = ((IDataSourceWrapper)selection.getFirstElement());
 					relationEditor.getRelation().setPrimaryDataSource(tableWrapper.getDataSource());
-					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+					IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 					if (servoyModel.getDataModelManager() != null)
 					{
 						servoyModel.getDataModelManager().testTableAndCreateDBIFile(
@@ -226,7 +226,7 @@ public class DatasourceSelectComposite extends Composite
 					String oldServerName = relation.getForeignServerName();
 					String oldTableName = relation.getForeignTableName();
 					relationEditor.getRelation().setForeignDataSource(tableWrapper.getDataSource());
-					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+					IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 					if (servoyModel.getDataModelManager() != null)
 					{
 						servoyModel.getDataModelManager().testTableAndCreateDBIFile(

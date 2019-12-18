@@ -61,6 +61,7 @@ import org.eclipse.ui.progress.IProgressService;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
@@ -128,7 +129,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	{
 		saveAllSettings();
 
-		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
@@ -338,7 +339,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				{
 					createMissingDbServers(missingServerNames, monitor);
 
-					ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+					IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 					String newSolutionName = configPage.getNewSolutionName();
 					for (String name : solutions)
 					{
@@ -358,7 +359,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				monitor.done();
 			}
 
-			private boolean shouldOverwrite(ServoyModel sm, String name)
+			private boolean shouldOverwrite(IDeveloperServoyModel sm, String name)
 			{
 				ServoyProject solutionProject = sm.getServoyProject(name);
 				if (solutionProject != null)
@@ -470,7 +471,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected HashMap<String, List<String>> searchMissingServers(final List<String> solutions)
 	{
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 		IServerManagerInternal serverHandler = ServoyModel.getServerManager();
 		HashMap<String, List<String>> missingServerNames = new HashMap<>();
 		for (String name : solutions)

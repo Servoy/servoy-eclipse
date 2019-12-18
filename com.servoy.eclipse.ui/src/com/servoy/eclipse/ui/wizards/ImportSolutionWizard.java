@@ -45,6 +45,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
@@ -299,7 +300,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 			}
 		};
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		try
 		{
 			servoyModel.setSolutionImportInProgressFlag(true); // suspended many of Solex's listeners to avoid unwanted flickers and unneded code running

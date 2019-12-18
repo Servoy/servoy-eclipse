@@ -30,7 +30,7 @@ import org.eclipse.ui.internal.browser.BrowserManager;
 import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 import org.eclipse.ui.internal.browser.Messages;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.action.StartMobileClientHandler;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
@@ -395,7 +395,7 @@ public class MobileLaunchConfigurationTab extends AbstractLaunchConfigurationTab
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 
 		configuration.setAttribute(IMobileLaunchConstants.SOLUTION_NAME, activeProject.getSolution().getName());

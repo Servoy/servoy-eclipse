@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -94,7 +94,7 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 
 	private ServoyProject askUserForParentProject()
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProject();
 		ArrayList<ServoyProject> activeParentModules = new ArrayList<ServoyProject>();
 		// see which ones are parents of the selected module
@@ -166,7 +166,7 @@ public class RemoveModuleAction extends Action implements ISelectionChangedListe
 
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		selectedProject = null;
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();

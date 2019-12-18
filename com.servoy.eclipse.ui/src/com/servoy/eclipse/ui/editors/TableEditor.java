@@ -45,6 +45,7 @@ import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.TableEditorInput;
@@ -293,7 +294,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			}
 			try
 			{
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 				ServoyProject servoyProject = servoyModel.getActiveProject();
 				if (servoyProject != null)
 				{
@@ -790,7 +791,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					}
 				}
 
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 				servoyModel.flushDataProvidersForTable(table);
 
 //				IColumnInfoManager cim = servoyModel.getDeveloperRepository().getColumnInfoManager();
@@ -892,7 +893,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		if (checkChanges)
 		{
 
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			DataModelManager dmm = servoyModel.getDataModelManager();
 			if (dmm != null)
 			{

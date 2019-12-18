@@ -54,7 +54,7 @@ import org.json.JSONObject;
 import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -135,7 +135,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			throw new PartInitException(getClass().getName() + " does not support input " + input.getClass() + " of " + input);
 		}
 
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.addActiveProjectListener(this);
 		super.init(site, input);
 
@@ -161,30 +161,36 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	protected void setInput(IEditorInput input)
 	{
 		PersistEditorInput formInput = (PersistEditorInput)input;
-
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		servoyProject = servoyModel.getServoyProject(formInput.getSolutionName());
-		if (servoyProject == null)
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 		{
-			ServoyLog.logWarning("Trying to open editor for an unexisting Servoy project: " + formInput.getSolutionName() + ". The editor will be closed.",
-				null);
-			close(false);
-			return;
+
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			servoyProject = servoyModel.getServoyProject(formInput.getSolutionName());
+			if (servoyProject == null)
+			{
+				ServoyLog.logWarning("Trying to open editor for an unexisting Servoy project: " + formInput.getSolutionName() + ". The editor will be closed.",
+					null);
+				close(false);
+				return;
+			}
+			// force loading the flattend solution so this and the modules are loaded..
+			servoyProject.getEditingFlattenedSolution();
+
+			form = (Form)servoyProject.getEditingPersist(formInput.getUuid());
+			if (form == null)
+			{
+				throw new RuntimeException("Could not find form " + formInput.getName() + " in solution " + formInput.getSolutionName());
+			}
+			setPartName(form.getName());
+			servoyModel.addPersistChangeListener(false, this);
+
+			// make sure we have a file resource
+			if (formInput.getFile() == null)
+			{
+				formInput = PersistEditorInput.createFormEditorInput(form);
+			}
 		}
 
-		form = (Form)servoyProject.getEditingPersist(formInput.getUuid());
-		if (form == null)
-		{
-			throw new RuntimeException("Could not find form " + formInput.getName() + " in solution " + formInput.getSolutionName());
-		}
-		setPartName(form.getName());
-		servoyModel.addPersistChangeListener(false, this);
-
-		// make sure we have a file resource
-		if (formInput.getFile() == null)
-		{
-			formInput = PersistEditorInput.createFormEditorInput(form);
-		}
 
 		super.setInput(formInput);
 	}
@@ -195,7 +201,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		// stop listening
 		commandStack.removeCommandStackEventListener(commandStackEventListener);
 		commandStack.removeCommandStackListener(commandStackListener);
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removeActiveProjectListener(this);
 		servoyModel.removePersistChangeListener(false, this);
 		revert(false);
@@ -649,6 +655,14 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		{
 			refresh(null);
 		}
+		else if (servoyProject == null && getPageCount() == 1)
+		{
+			// place hoder, replace it and create the normal pages
+			setInput(getEditorInput());
+			removePage(0);
+			createPages();
+			setActivePage(0);
+		}
 		else
 		{
 			close(true);
@@ -685,7 +699,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				form = null;
 			}
 		}
-		if (form == null)
+		if (form == null && activeProject != null)
 		{
 			close(false);
 		}

@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -69,7 +70,7 @@ class WorkspaceImporterActivateSolutionJob extends Job
 		try
 		{
 			// activate dummy
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyProject dummyServoyProject = servoyModel.getServoyProject(solutionProjectToActivate.getName());
 			servoyModel.setActiveProject(dummyServoyProject, false);
 

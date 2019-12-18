@@ -34,7 +34,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 import org.sablo.specification.Package.IPackageReader;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
@@ -110,7 +110,7 @@ public class RemovePackageProjectReferenceAction extends Action implements ISele
 
 	private ServoyProject askUserForParentProject()
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		HashSet<ServoyProject> activeSolutionProjects = new HashSet<>(Arrays.asList(servoyModel.getModulesOfActiveProject()));
 		IProject[] referencingProjects = selectedProject.getProject().getReferencingProjects();
 
@@ -174,7 +174,7 @@ public class RemovePackageProjectReferenceAction extends Action implements ISele
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		selectedProject = null;
 		parentSolutionProject = null;
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();

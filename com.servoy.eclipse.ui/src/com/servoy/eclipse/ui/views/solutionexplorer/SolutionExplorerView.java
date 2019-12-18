@@ -181,6 +181,7 @@ import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ISolutionImportListener;
 import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -1805,7 +1806,7 @@ public class SolutionExplorerView extends ViewPart
 	private void initTreeViewer()
 	{
 		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).flushCachedData();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] roots = servoyModel.getServoyProjects();
 
 		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
@@ -4070,7 +4071,7 @@ public class SolutionExplorerView extends ViewPart
 
 		if (segments != null && segments.length == 0) return null;
 
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject selectedProject = sm.getServoyProject(segments[0]);
 		ServoyResourcesProject resourcesProject = sm.getActiveResourcesProject();
 

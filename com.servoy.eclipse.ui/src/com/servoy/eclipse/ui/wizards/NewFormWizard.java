@@ -69,6 +69,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IFormConstants;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -304,7 +305,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		Template template = newFormWizardPage.getTemplate();
 		settings.put("templatename", template == null ? null : template.getName());
 
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject activeProject = servoyModel.getActiveProject();
 		if (activeProject == null)
 		{

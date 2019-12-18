@@ -46,7 +46,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 
 	public void initialize(String solutionName)
 	{
-		if (getNGPackageManager() == null) super.initialize(); // if super is not already initialized by a previous call do it now
+		if (getNGPackageManager() == null) initNGPackageManager();
 
 		setActiveProjectReferenceInternal(getServoyProject(solutionName));
 		updateFlattenedSolution();
@@ -113,7 +113,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 	@Override
 	protected BaseNGPackageManager createNGPackageManager()
 	{
-		return new ExportNGPackageManager();
+		return new ExportNGPackageManager(this);
 	}
 
 	@Override

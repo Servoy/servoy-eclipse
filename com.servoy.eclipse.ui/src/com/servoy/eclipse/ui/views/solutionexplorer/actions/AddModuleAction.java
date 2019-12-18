@@ -33,6 +33,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -77,7 +78,7 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 	@Override
 	public void run()
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		List<String> availableSolutions = new ArrayList<String>();
 		try
 		{
@@ -161,7 +162,7 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		boolean state = (sel.size() > 0) && (servoyModel.getActiveProject() != null);
 		if (state)

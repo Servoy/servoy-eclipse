@@ -93,7 +93,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 		Messages.customMessageLoader = messagesManager;
 	}
 
-	public void initialize()
+	protected void initNGPackageManager()
 	{
 		ngPackageManager = createNGPackageManager();
 	}
@@ -446,6 +446,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 				ServoyLog.logError(e);
 			}
 		}
+	}
+
+	public boolean isFlattenedSolutionLoaded()
+	{
+		return flattenedSolution != null && flattenedSolution.isMainSolutionLoaded();
 	}
 
 	public BaseNGPackageManager getNGPackageManager()

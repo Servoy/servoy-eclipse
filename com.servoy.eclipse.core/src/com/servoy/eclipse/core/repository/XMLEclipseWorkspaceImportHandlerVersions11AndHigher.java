@@ -47,6 +47,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
@@ -143,7 +144,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		final String projectLocation, final boolean reportImportFail) throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		try
 		{
 			m.beginTask("Importing...", 5);

@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ListDialog;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
@@ -371,7 +371,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 
 	private ServoyProject getServoyProject(boolean duplicateDefinitionFound, final List<String> solutions)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		if (duplicateDefinitionFound)
 		{
 			final ArrayList<String> servoyProject = new ArrayList<>();

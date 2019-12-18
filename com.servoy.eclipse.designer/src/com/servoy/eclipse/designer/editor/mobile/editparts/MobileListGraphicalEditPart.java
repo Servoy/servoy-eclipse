@@ -28,7 +28,7 @@ import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -162,7 +162,7 @@ public class MobileListGraphicalEditPart extends BaseGraphicalEditPart implement
 	public void activate()
 	{
 		// listen to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.addPersistChangeListener(false, this);
 
 		super.activate();
@@ -172,7 +172,7 @@ public class MobileListGraphicalEditPart extends BaseGraphicalEditPart implement
 	public void deactivate()
 	{
 		// stop listening to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removePersistChangeListener(false, this);
 
 		super.deactivate();

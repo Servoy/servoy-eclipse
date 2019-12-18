@@ -18,7 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
@@ -45,7 +45,7 @@ public class EditSecurityAction extends Action
 	@Override
 	public void run()
 	{
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyResourcesProject srp = sm.getActiveResourcesProject();
 		if (srp != null)
 		{
