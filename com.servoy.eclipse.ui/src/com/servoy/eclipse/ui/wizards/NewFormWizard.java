@@ -120,6 +120,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -969,7 +970,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				{
 					try
 					{
-						List<Style> styles = ServoyModel.getDeveloperRepository().getActiveRootObjects(IRepository.STYLES);
+						List<Style> styles = ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObjects(IRepository.STYLES);
 						for (Style s : styles)
 						{
 							if (s.getName().equals(styleName))
@@ -1012,7 +1013,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			List<Object> styles = new ArrayList<Object>();
 			try
 			{
-				styles = ServoyModel.getDeveloperRepository().getActiveRootObjects(IRepository.STYLES);
+				styles = ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObjects(IRepository.STYLES);
 			}
 			catch (RepositoryException e)
 			{
@@ -1211,7 +1212,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				JSONObject json = new ServoyJSONObject(template.getContent(), false);
 				if (json.has(Template.PROP_FORM))
 				{
-					IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+					IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 
 					JSONObject formObject = json.getJSONObject(Template.PROP_FORM);
 

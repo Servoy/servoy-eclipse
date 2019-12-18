@@ -25,7 +25,6 @@ import java.util.List;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.AbstractMemServerWrapper;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
@@ -37,6 +36,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
@@ -69,7 +69,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			String[] serverNames;
 			if (options.serverName == null)
 			{
-				serverNames = ServoyModel.getServerManager().getServerNames(true, false, true, false);
+				serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, false, true, false);
 			}
 			else
 			{
@@ -157,7 +157,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 	{
 		List<TableWrapper> lst = new ArrayList<TableWrapper>();
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(serverName, true, true);
+		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
 		if (server != null)
 		{
 			try

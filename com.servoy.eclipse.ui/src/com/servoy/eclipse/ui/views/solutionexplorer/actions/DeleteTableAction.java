@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -61,6 +60,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Creates a new delete table action. It can be used to delete the table given by the selected SimpleUserNode.
@@ -110,7 +110,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 							try
 							{
 								IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-								IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+								IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 
 								final IServer server = repository.getServer(selectedTable.getServerName());
 								final ITable table = server == null ? null : server.getTable(selectedTable.getTableName());

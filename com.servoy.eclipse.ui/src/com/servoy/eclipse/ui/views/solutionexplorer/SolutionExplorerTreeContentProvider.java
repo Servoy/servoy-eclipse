@@ -157,6 +157,7 @@ import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -1617,7 +1618,7 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else if (un.getType() == UserNodeType.SERVERS)
 				{
-					return ServoyModel.getServerManager().getServerNames(false, false, true, true).length > 0;
+					return ApplicationServerRegistry.get().getServerManager().getServerNames(false, false, true, true).length > 0;
 				}
 				else if (un.getType() == UserNodeType.SERVER)
 				{
@@ -1929,7 +1930,7 @@ public class SolutionExplorerTreeContentProvider
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
 	{
 		List<PlatformSimpleUserNode> serverNodes = new ArrayList<PlatformSimpleUserNode>();
-		IServerManagerInternal handler = ServoyModel.getServerManager();
+		IServerManagerInternal handler = ApplicationServerRegistry.get().getServerManager();
 		String[] array = handler.getServerNames(false, false, true, true);
 		for (String server_name : array)
 		{
@@ -2588,7 +2589,7 @@ public class SolutionExplorerTreeContentProvider
 				if (MessageDialog.openConfirm(view.getSite().getShell(), "Disable server",
 					"Cannot connect to server " + serverName + ". Do you want to disable it?"))
 				{
-					IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(serverName, true, false);
+					IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, false);
 					if (server != null)
 					{
 						EnableServerAction.setServerEnabled(view.getSite().getShell(), server, false);

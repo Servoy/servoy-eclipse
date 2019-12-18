@@ -26,7 +26,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -34,6 +33,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class DeleteServerAction extends Action implements ISelectionChangedListener
 {
@@ -60,7 +60,7 @@ public class DeleteServerAction extends Action implements ISelectionChangedListe
 			Iterator<SimpleUserNode> it = selection.iterator();
 			try
 			{
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				while (it.hasNext())
 				{
 					IServerInternal server = (IServerInternal)it.next().getRealObject();

@@ -876,7 +876,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				{
 					serverName = connectionMap.get(serverName);
 				}
-				IServer server = ServoyModel.getServerManager().getServer(serverName);
+				IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 				if (server == null)
 				{
 					throw new RepositoryException("Error importing meta data table, Cannot find server '" + serverName + "'.");

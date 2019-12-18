@@ -95,7 +95,7 @@ final public class ExportSolutionJob extends WorkspaceJob
 		if (exportModel.getModulesToExport() != null) totalDuration = (int)(1.42 * exportModel.getModulesToExport().length); // make the main export be 70% of the time, leave the rest for sample data
 		monitor.beginTask("Exporting solution", totalDuration);
 
-		AbstractRepository rep = (AbstractRepository)ServoyModel.getDeveloperRepository();
+		AbstractRepository rep = (AbstractRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 
 		final IApplicationServerSingleton as = ApplicationServerRegistry.get();
 		IUserManager sm = as.getUserManager();

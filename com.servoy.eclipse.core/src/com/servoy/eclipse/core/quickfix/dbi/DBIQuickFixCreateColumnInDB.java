@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Display;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
@@ -34,6 +33,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.query.ColumnType;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Quick fix for missing columns in DB (although they are present in the dbi files). It will create a column.
@@ -92,7 +92,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 				dmm.setWritesEnabled(false);
 				try
 				{
-					IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(difference.getServerName());
+					IServerInternal s = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(difference.getServerName());
 
 					IValidateName validator = new IValidateName()
 					{

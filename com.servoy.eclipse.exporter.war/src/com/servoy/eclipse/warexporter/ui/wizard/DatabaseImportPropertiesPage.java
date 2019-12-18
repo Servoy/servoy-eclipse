@@ -33,8 +33,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * @author emera
@@ -93,7 +93,7 @@ public class DatabaseImportPropertiesPage extends WizardPage implements IRestore
 		Table table = new Table(composite, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
 		allowDataModelServers = new CheckboxTableViewer(table);
 		allowDataModelServers.setContentProvider(ArrayContentProvider.getInstance());
-		allowDataModelServers.setInput(ServoyModel.getServerManager().getServerNames(true, false, true, true));
+		allowDataModelServers.setInput(ApplicationServerRegistry.get().getServerManager().getServerNames(true, false, true, true));
 		if ("true".equals(exportModel.getAllowDataModelChanges()))
 		{
 			allowDataModelServers.setAllChecked(true);

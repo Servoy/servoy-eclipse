@@ -37,7 +37,6 @@ import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
@@ -57,6 +56,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsWebPackageActio
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewResourcesComponentsOrServicesPackageAction;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
 public class NewPackageProjectWizard extends Wizard implements INewWizard
@@ -320,7 +320,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			List<String> availableSolutions = new ArrayList<String>();
 			try
 			{
-				for (RootObjectMetaData rootObject : ServoyModel.getDeveloperRepository().getRootObjectMetaDatas())
+				for (RootObjectMetaData rootObject : ApplicationServerRegistry.get().getDeveloperRepository().getRootObjectMetaDatas())
 				{
 					if (rootObject.getObjectTypeId() == IRepository.SOLUTIONS)
 					{

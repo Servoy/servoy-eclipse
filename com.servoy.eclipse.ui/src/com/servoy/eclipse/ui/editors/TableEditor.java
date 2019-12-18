@@ -370,7 +370,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 		if (serverListener != null)
 		{
-			ServoyModel.getServerManager().removeServerListener(serverListener);
+			ApplicationServerRegistry.get().getServerManager().removeServerListener(serverListener);
 			serverListener = null;
 		}
 
@@ -575,7 +575,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		}
 		isModified = isModified || !table.getExistInDB() || (table instanceof AbstractMemTable && ((AbstractMemTable)table).isChanged());
 
-		IServerManagerInternal serverManager = ServoyModel.getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 
 		server = (IServerInternal)serverManager.getServer(table.getServerName(), true, true);
 		if (server == null)
@@ -794,7 +794,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 				servoyModel.flushDataProvidersForTable(table);
 
-//				IColumnInfoManager cim = servoyModel.getDeveloperRepository().getColumnInfoManager();
+//				IColumnInfoManager cim = ApplicationServerRegistry.get().getDeveloperRepository().getColumnInfoManager();
 				server.syncTableObjWithDB(table, false, true);
 				if (securityComposite != null) securityComposite.saveValues();
 				ServoyProject servoyProject = servoyModel.getActiveProject();

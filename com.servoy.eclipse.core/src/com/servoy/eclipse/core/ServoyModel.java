@@ -40,9 +40,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.wicket.Request;
-import org.apache.wicket.Response;
-import org.apache.wicket.Session;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
@@ -135,7 +132,6 @@ import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
-import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -152,9 +148,6 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.dataprocessing.IDataServer;
-import com.servoy.j2db.debug.DebugClientHandler;
-import com.servoy.j2db.debug.DebugWebClientSession;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
@@ -196,9 +189,6 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IUserManager;
-import com.servoy.j2db.server.shared.IUserManagerFactory;
-import com.servoy.j2db.server.shared.IWebClientSessionFactory;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
@@ -292,17 +282,15 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		realOutstandingChanges = new ArrayList<IPersist>();
 
-		startAppServer();
-
 		// the in-process repository is only meant to work by itself - so all servoy related projects in the workspace should
 		// either not be attached to team or attached to the in-process repository (because database information
 		// and sequence provider are the standard table based ones - using the in-process repository - not the resources project)
-		Settings settings = getSettings();
+		Settings settings = Settings.getInstance();
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
 
 		// when server configurations change we want to update the servers in Serclipse.
-		getServerManager().addServerConfigListener(serverConfigSyncer);
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(serverConfigSyncer);
 
 		// project update listener
 		addActiveProjectListener(new IActiveProjectListener()
@@ -859,7 +847,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			}
 		};
 
-		IServerManagerInternal serverManager = getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 
 		// add listeners to initial server list
 		String[] array = serverManager.getServerNames(false, false, true, true);
@@ -896,76 +884,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		return teamShareMonitor;
 	}
 
-	public static void startAppServer()
-	{
-		PreInitializeTaskHandler.runTasksIfNeeded();
-
-		if (ApplicationServerRegistry.get() != null)
-		{
-			if (!ApplicationServerRegistry.waitForApplicationServerStarted())
-			{
-				ServoyLog.logError("App server didnt fully get started", new RuntimeException());
-			}
-			return;
-		}
-		try
-		{
-			Activator.getDefault().startAppServer(new EclipseRepositoryFactory(), new DebugClientHandler(), new IWebClientSessionFactory()
-			{
-				public Session newSession(Request request, Response response)
-				{
-					return new DebugWebClientSession(request);
-				}
-			}, new IUserManagerFactory()
-			{
-				public IUserManager createUserManager(IDataServer dataServer)
-				{
-					return new SwitchableEclipseUserManager();
-				}
-			});
-			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
-			// our team plugin can use it in popupMenu enablement
-			System.setProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
-				ServoyModel.getSettings().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT)));
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError("Failed to start the appserver", ex);
-		}
-	}
-
 	/**
 	 * Returns the user manager reflecting the state of the workspace. When running unit tests, the ApplicationServer.getUserManager() delegates to
 	 * and alternate user manager, not to this one.
 	 */
 	public EclipseUserManager getUserManager()
 	{
-		startAppServer();
 		return ((SwitchableEclipseUserManager)ApplicationServerRegistry.get().getUserManager()).getEclipseUserManager();
-	}
-
-	public static IServerManagerInternal getServerManager()
-	{
-		startAppServer();
-		return ApplicationServerRegistry.get().getServerManager();
-	}
-
-	public static IDeveloperRepository getDeveloperRepository()
-	{
-		startAppServer();
-		return ApplicationServerRegistry.get().getDeveloperRepository();
-	}
-
-	public static IDataServer getDataServer()
-	{
-		startAppServer();
-		return ApplicationServerRegistry.get().getDataServer();
-	}
-
-	public static Settings getSettings()
-	{
-		startAppServer();
-		return Settings.getInstance();
 	}
 
 	public static boolean isClientRepositoryAccessAllowed(String server_name)
@@ -975,8 +900,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	public static boolean isClientRepositoryAccessAllowed()
 	{
-		return Utils.getAsBoolean(
-			getSettings().getProperty(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING, String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT)));
+		return Utils.getAsBoolean(Settings.getInstance().getProperty(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
+			String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT)));
 	}
 
 	/**
@@ -987,7 +912,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	 */
 	public IRootObject getActiveRootObject(String name, int objectTypeId)
 	{
-		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
@@ -1015,7 +940,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	 */
 	public IRootObject getActiveRootObject(int rootObjectId)
 	{
-		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
@@ -1042,7 +967,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	 */
 	public List<IRootObject> getActiveRootObjects(int type)
 	{
-		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
@@ -1196,7 +1121,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 								}
 							}
 						};
-						IDeveloperRepository rep = getDeveloperRepository();
+						IDeveloperRepository rep = ApplicationServerRegistry.get().getDeveloperRepository();
 						if (rep instanceof EclipseRepository)
 						{
 							((EclipseRepository)rep).addActivityMonitor(moduleMonitor);
@@ -1491,7 +1416,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					if (old != activeResourcesProject)
 					{
 						String projectName = null;
-						IServerManagerInternal serverManager = getServerManager();
+						IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 						ISequenceProvider sequenceProvider;
 						DataModelManager oldDmm = dataModelManager;
 						if (dataModelManager != null)
@@ -1589,10 +1514,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						monitor.worked(1);
 
 						monitor.subTask("Loading styles from resources project");
-						((EclipseRepository)getDeveloperRepository()).registerResourceMetaDatas(projectName, IRepository.STYLES);
+						((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).registerResourceMetaDatas(projectName,
+							IRepository.STYLES);
 						monitor.worked(1);
 						monitor.subTask("Loading templates from resources project");
-						((EclipseRepository)getDeveloperRepository()).registerResourceMetaDatas(projectName, IRepository.TEMPLATES);
+						((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).registerResourceMetaDatas(projectName,
+							IRepository.TEMPLATES);
 						monitor.worked(1);
 						monitor.subTask("Announcing resources project change");
 						Display.getDefault().syncExec(new Runnable()
@@ -2181,7 +2108,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	private void resourcesPostChanged(IResourceChangeEvent event)
 	{
-		if (getDeveloperRepository() == null)
+		if (ApplicationServerRegistry.get().getDeveloperRepository() == null)
 		{
 			// change notification at startup, Activator has not finished yet
 			return;
@@ -2200,7 +2127,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				if (resource instanceof IProject && ((!((IProject)resource).isOpen()) || (!((IProject)resource).hasNature(ServoyUpdatingProject.NATURE_ID))))
 				{
 					final IProject project = (IProject)resource;
-					EclipseRepository eclipseRepository = (EclipseRepository)getDeveloperRepository();
+					EclipseRepository eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 
 					// DO STUFF RELATED TO SOLUTION PROJECTS
 					if (element.getKind() != IResourceDelta.REMOVED && project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
@@ -2414,7 +2341,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			IProject project = entry.getKey();
 			try
 			{
-				Solution solution = (Solution)getDeveloperRepository().getActiveRootObject(project.getName(), IRepository.SOLUTIONS);
+				Solution solution = (Solution)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObject(project.getName(),
+					IRepository.SOLUTIONS);
 				handleChangedFilesInSolutionProject(project, solution, entry.getValue());
 			}
 			catch (Exception e)
@@ -2483,7 +2411,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	private void modifyDBIFilesToAllClones(final IResourceDelta element)
 	{
 		List<IResourceDelta> al = findChangedFiles(element, new ArrayList<IResourceDelta>());
-		IServerManagerInternal serverManager = getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		if (serverManager != null && dataModelManager != null)
 		{
 			for (IResourceDelta fileRd : al)
@@ -2638,7 +2566,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			final ServoyProject servoyProject = getServoyProject(solution.getName());
 			final IContainer workspace = project.getParent();
 
-			SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
+			SolutionDeserializer sd = new SolutionDeserializer(ApplicationServerRegistry.get().getDeveloperRepository(), servoyProject);
 			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, sd);
 			// Regenerate script files for parents that have changed script elements.
 			if (changedScriptElements.size() > 0)
@@ -2861,7 +2789,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				String solutionName = solution.getName();
 				// this means that the meta-data has changed on disk for a solution that already had it's meta-data loaded; refresh
 				// repository in case the change came as a result of a resource change only (team update, ...) - so not because of an in-memory change + serialisation to disk
-				EclipseRepository eclipseRepository = (EclipseRepository)getDeveloperRepository();
+				EclipseRepository eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 				eclipseRepository.registerSolutionMetaData(solutionName);
 
 				boolean isPartOfActiveFlattenedSolution = isSolutionActive(solutionName);
@@ -3136,7 +3064,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					serverContainer.getParent().getParent() instanceof IProject)
 				{
 					String serverName = serverContainer.getName();
-					IServerManagerInternal sm = getServerManager();
+					IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 					if (sm != null)
 					{
 						IServer s = sm.getServer(serverName);
@@ -3180,7 +3108,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		// the use of TableBasedColumnInfoProvider fail because the column info would be changed / id's messed up and so on)
 		// As TableBasedColumnInfoProvider and ColumnInfoBasedSequenceProvider are used when running in-process repository
 		// we use the sequence provider to identify the case
-		IServerManagerInternal serverManager = getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		if (serverManager == null || serverManager.getGlobalSequenceProvider() instanceof IColumnInfoBasedSequenceProvider || dataModelManager == null)
 		{
 			return false;
@@ -3270,7 +3198,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				{
 					try
 					{
-						final EclipseRepository repository = (EclipseRepository)getDeveloperRepository();
+						final EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 						// see if this style already has metadata and only needs loading into the repository
 						IResource metaDataFile = file.getParent().findMember(name + SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION);
 						RootObjectMetaData md = null;
@@ -3336,7 +3264,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				filesAddedOrRemoved = true;
 				if (resource != null)
 				{
-					EclipseRepository repository = (EclipseRepository)getDeveloperRepository();
+					EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 					try
 					{
 						modifiedResourcesList.add(resource);
@@ -3463,7 +3391,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		});
 		if (dataModelManager != null)
 		{
-			IServerManagerInternal serverManager = getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 
 			// add listeners to initial server list
 			String[] array = serverManager.getServerNames(true, true, true, true);
@@ -3600,17 +3528,18 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	@Override
 	public void dispose()
 	{
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		// TODO add more cleanup to this method
 		removeActiveProjectListener(backgroundTableLoader);
-		getServerManager().removeServerConfigListener(serverConfigSyncer);
+		serverManager.removeServerConfigListener(serverConfigSyncer);
 		getWorkspace().removeResourceChangeListener(preChangeListener);
 		getWorkspace().removeResourceChangeListener(postChangeListener);
 
-		for (String server_name : getServerManager().getServerNames(false, false, true, true))
+		for (String server_name : serverManager.getServerNames(false, false, true, true))
 		{
-			((IServerInternal)getServerManager().getServer(server_name, false, false)).removeTableListener(tableListener);
+			((IServerInternal)serverManager.getServer(server_name, false, false)).removeTableListener(tableListener);
 		}
-		getServerManager().removeServerListener(serverTableListener);
+		serverManager.removeServerListener(serverTableListener);
 
 		super.dispose();
 	}
@@ -3785,7 +3714,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					String comment = null;
 					try
 					{
-						comment = SolutionSerializer.getComment(persist, userTemplate, getDeveloperRepository());
+						comment = SolutionSerializer.getComment(persist, userTemplate, ApplicationServerRegistry.get().getDeveloperRepository());
 					}
 					catch (RuntimeException e)
 					{

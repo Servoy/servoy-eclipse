@@ -247,16 +247,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				IApplicationServerSingleton as = ApplicationServerRegistry.get();
 				try
 				{
-					IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file), (EclipseRepository)ServoyModel.getDeveloperRepository(),
+					IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file), (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(),
 						as.getDataServer(), as.getClientId(), userChannel);
 
 					IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
-						as.getClientId(), userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository());
+						as.getClientId(), userChannel, (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository());
 
 					x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
 
 					IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
-						(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
+						(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
 						isCleanImport, projectLocation, reportImportFail);
 					if (rootObjects != null)
 					{

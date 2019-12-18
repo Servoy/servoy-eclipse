@@ -67,6 +67,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Settings;
 
@@ -282,7 +283,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 
 	private static ITable getI18nTable(String serverName, String tableName)
 	{
-		IServer server = ServoyModel.getServerManager().getServer(serverName);
+		IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 		if (server == null)
 		{
 			return null;

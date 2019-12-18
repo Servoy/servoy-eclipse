@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -50,6 +49,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class CopyTableAction extends Action implements ISelectionChangedListener
@@ -90,7 +90,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 	public void run()
 	{
 		int index = 0;
-		String serverNames[] = ServoyModel.getServerManager().getServerNames(true, true, true, false);
+		String serverNames[] = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 		for (int i = 0; i < serverNames.length; i++)
 		{
 			if (serverNames[i].equals(selectedServerName))
@@ -118,7 +118,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 			ITable selectedTable = null;
 			try
 			{
-				IServerInternal selectedServer = (IServerInternal)ServoyModel.getServerManager().getServer(selectedServerName);
+				IServerInternal selectedServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(selectedServerName);
 				selectedTable = selectedServer.getTable(selectedTableName);
 				copyTable(targetServerName, tableName, copyColumnInfo, selectedTable);
 			}
@@ -131,7 +131,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 
 	private void copyTable(String targetServerName, String tableName, boolean copyColumnInfo, ITable selectedTable)
 	{
-		IServerInternal targetServer = (IServerInternal)ServoyModel.getServerManager().getServer(targetServerName);
+		IServerInternal targetServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(targetServerName);
 		if (tableName != null && targetServerName != null)
 		{
 			try
@@ -148,7 +148,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 
 				if (copyColumnInfo)
 				{
-					DataModelManager dmm = DataModelManager.getColumnInfoManager(ServoyModel.getServerManager(), targetServer.getName());
+					DataModelManager dmm = DataModelManager.getColumnInfoManager(ApplicationServerRegistry.get().getServerManager(), targetServer.getName());
 					if (dmm != null)
 					{
 						for (Column c : newTable.getColumns())

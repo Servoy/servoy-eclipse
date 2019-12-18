@@ -40,6 +40,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class CreateLoginSolutionQuickFix implements IMarkerResolution
 {
@@ -71,7 +72,7 @@ public class CreateLoginSolutionQuickFix implements IMarkerResolution
 					{
 						// request login solution name
 						InputDialog loginSolutionNameDlg = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), DIALOG_TITLE,
-							"Please enter a name for the login solution", "login", null); 
+							"Please enter a name for the login solution", "login", null);
 
 						if (loginSolutionNameDlg.open() == Window.OK)
 						{
@@ -87,7 +88,7 @@ public class CreateLoginSolutionQuickFix implements IMarkerResolution
 									return;
 								}
 
-								EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+								EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 								Solution loginSolution = (Solution)repository.createNewRootObject(loginSolutionName, IRepository.SOLUTIONS);
 								if (loginSolution != null)
 								{

@@ -60,6 +60,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StringResource;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Action to delete IPersist objects from a solution or string resources. The selected IPersist objects must be either all resources, or all descendants of the
@@ -219,7 +220,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 				if (!formsToDelete.isEmpty())
 				{
-					EclipseRepository rep = (EclipseRepository)ServoyModel.getDeveloperRepository();
+					EclipseRepository rep = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 					HashMap<IPersist, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
 
 					Set<IPersist> keys = persists.keySet();

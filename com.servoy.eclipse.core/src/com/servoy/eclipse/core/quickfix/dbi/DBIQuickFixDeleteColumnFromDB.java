@@ -17,13 +17,13 @@
 package com.servoy.eclipse.core.quickfix.dbi;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Quick fix for missing column info in the dbi file (although they are present in the DB). It will delete the DB column.
@@ -77,7 +77,7 @@ public class DBIQuickFixDeleteColumnFromDB extends TableDifferenceQuickFix
 				dmm.setWritesEnabled(false);
 				try
 				{
-					IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(difference.getServerName());
+					IServerInternal s = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(difference.getServerName());
 
 					// delete column from memory obj.
 					difference.getTable().removeColumn(difference.getColumnName());

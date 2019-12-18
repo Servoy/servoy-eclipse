@@ -76,11 +76,11 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.StringInCodeSerializer;
 import com.servoy.j2db.util.Utils;
@@ -240,7 +240,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
 			String userTemplate = JSDocScriptTemplates.getTemplates(servoyProject.getProject(), true).getVariableTemplate();
 
-			String code = SolutionSerializer.serializePersist(var, true, ServoyModel.getDeveloperRepository(), userTemplate).toString();
+			String code = SolutionSerializer.serializePersist(var, true, ApplicationServerRegistry.get().getDeveloperRepository(), userTemplate).toString();
 
 			String scriptPath = SolutionSerializer.getScriptPath(var, false);
 			IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));

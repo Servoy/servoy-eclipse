@@ -28,7 +28,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -37,6 +36,7 @@ import com.servoy.j2db.i18n.I18NMessagesTable;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManager;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.Utils;
 
@@ -97,7 +97,7 @@ public class I18NServerTableDialog extends Dialog
 		// Initialize server names list.
 		String currentServerName = selectedServerName;
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		IServerManager sm = ServoyModel.getServerManager();
+		IServerManager sm = ApplicationServerRegistry.get().getServerManager();
 		String[] serverNames = sm.getServerNames(true, true, true, false);
 		defaultI18NServer.removeAll();
 		defaultI18NServer.add(SELECTION_NONE);
@@ -160,7 +160,7 @@ public class I18NServerTableDialog extends Dialog
 				ITransactionConnection connection = null;
 				try
 				{
-					IServerInternal srv = (IServerInternal)ServoyModel.getServerManager().getServer(serverName);
+					IServerInternal srv = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 					connection = srv.getConnection();
 					if (srv.checkIfTableExistsInDatabase(connection, adjustedTableName))
 					{
@@ -185,7 +185,7 @@ public class I18NServerTableDialog extends Dialog
 
 			try
 			{
-				IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(serverName);
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 				if (server.getTable(adjustedTableName) != null)
 				{
 					MessageBox msg = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);

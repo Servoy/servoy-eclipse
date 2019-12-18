@@ -136,6 +136,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 public class I18NExternalizeDialog extends HelpDialog
@@ -278,7 +279,7 @@ public class I18NExternalizeDialog extends HelpDialog
 
 		try
 		{
-			IServerManagerInternal sm = ServoyModel.getServerManager();
+			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 
 			IServer server;
 			for (String serverName : solutionServers)
@@ -341,7 +342,8 @@ public class I18NExternalizeDialog extends HelpDialog
 		{
 			Solution editingSolution = project.getEditingSolution();
 			I18NMessagesModel i18nMessagesModel = new I18NMessagesModel(editingSolution != null ? editingSolution.getI18nDataSource() : null,
-				ApplicationServerRegistry.get().getClientId(), ServoyModel.getSettings(), ServoyModel.getDataServer(), ServoyModel.getDeveloperRepository());
+				ApplicationServerRegistry.get().getClientId(), Settings.getInstance(), ApplicationServerRegistry.get().getDataServer(),
+				ApplicationServerRegistry.get().getDeveloperRepository());
 			i18nMessagesModel.setLanguage(Locale.getDefault());
 
 			defaultMessages = new HashMap<String, String>();
@@ -1576,7 +1578,7 @@ public class I18NExternalizeDialog extends HelpDialog
 					}
 
 
-					IServerManagerInternal serverManager = ServoyModel.getServerManager();
+					IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 					for (Table table : changedTables)
 					{
 						((IServerInternal)serverManager.getServer(table.getServerName())).updateAllColumnInfo(table);

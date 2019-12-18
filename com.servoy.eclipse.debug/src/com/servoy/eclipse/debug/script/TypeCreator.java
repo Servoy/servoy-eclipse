@@ -253,6 +253,7 @@ import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.ServoyApiObject;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
 import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
@@ -886,7 +887,7 @@ public class TypeCreator extends TypeCache
 
 				});
 
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				ITableListener tableListener = new ITableListener.TableListener()
 				{
 					@Override
@@ -3538,7 +3539,7 @@ public class TypeCreator extends TypeCache
 			type.setKind(TypeKind.JAVA);
 			type.setSuperType(createArrayLookupType(context, serverClass));
 
-			IServerManagerInternal servermanager = ServoyModel.getServerManager();
+			IServerManagerInternal servermanager = ApplicationServerRegistry.get().getServerManager();
 			for (String serverName : servermanager.getServerNames(false, false, true, true))
 			{
 				IServerInternal server = (IServerInternal)servermanager.getServer(serverName, false, false);
@@ -3668,7 +3669,7 @@ public class TypeCreator extends TypeCache
 				EList<Member> members = type.getMembers();
 				String config = fullTypeName.substring(configStart + 1, fullTypeName.length() - 1);
 				String serverName = DataSourceUtils.getDataSourceServerName(config);
-				IServerManagerInternal servermanager = ServoyModel.getServerManager();
+				IServerManagerInternal servermanager = ApplicationServerRegistry.get().getServerManager();
 				IServer server = servermanager.getServer(serverName);
 				if (server != null)
 				{
@@ -3810,7 +3811,7 @@ public class TypeCreator extends TypeCache
 				String[] stn = DataSourceUtils.getDBServernameTablename(fullTypeName.substring(index + 1, fullTypeName.length() - 1));
 				if (stn != null)
 				{
-					IServer server = ServoyModel.getServerManager().getServer(stn[0]);
+					IServer server = ApplicationServerRegistry.get().getServerManager().getServer(stn[0]);
 					if (server != null)
 					{
 						try

@@ -87,6 +87,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -140,7 +141,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				monitor.beginTask("Creating solution and writing files to disk", 4);
 				// create Solution object
-				EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+				EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 				try
 				{
 					Solution solution = (Solution)repository.createNewRootObject(configPage.getNewSolutionName(), IRepository.SOLUTIONS);
@@ -472,7 +473,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	protected HashMap<String, List<String>> searchMissingServers(final List<String> solutions)
 	{
 		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-		IServerManagerInternal serverHandler = ServoyModel.getServerManager();
+		IServerManagerInternal serverHandler = ApplicationServerRegistry.get().getServerManager();
 		HashMap<String, List<String>> missingServerNames = new HashMap<>();
 		for (String name : solutions)
 		{
@@ -517,12 +518,12 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected boolean canCreateMissingServers()
 	{
-		return Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).anyMatch(s -> s.isPostgresDriver() && s.isEnabled());
+		return Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs()).anyMatch(s -> s.isPostgresDriver() && s.isEnabled());
 	}
 
 	protected void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
 	{
-		ServerConfig origConfig = Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).filter(
+		ServerConfig origConfig = Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs()).filter(
 			s -> s.isPostgresDriver() && s.isEnabled()).findAny().orElse(null);
 		if (origConfig == null)
 		{
@@ -530,7 +531,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			return;
 		}
 
-		IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(origConfig.getServerName());
+		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(origConfig.getServerName());
 		if (server == null || !server.isValid())
 		{
 			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find a valid Postgres server."));
@@ -548,8 +549,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass());
 			try
 			{
-				ServoyModel.getServerManager().testServerConfigConnection(serverConfig, 0);
-				ServoyModel.getServerManager().saveServerConfig(null, serverConfig);
+				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
+				ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
 			}
 			catch (Exception ex)
 			{
@@ -756,9 +757,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected ServerConfig getValidServerConfig()
 	{
-		return Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).filter(
-			s -> s.isEnabled() && ServoyModel.getServerManager().getServer(s.getServerName()) != null &&
-				((IServerInternal)ServoyModel.getServerManager().getServer(s.getServerName())).isValid()).findAny().orElse(null);
+		return Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs()).filter(
+			s -> s.isEnabled() && ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
+				((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName())).isValid()).findAny().orElse(null);
 	}
 
 }

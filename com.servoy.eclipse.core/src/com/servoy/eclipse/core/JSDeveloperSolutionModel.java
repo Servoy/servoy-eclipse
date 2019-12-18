@@ -73,6 +73,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.scripting.solutionmodel.JSMedia;
 import com.servoy.j2db.scripting.solutionmodel.JSRelation;
 import com.servoy.j2db.scripting.solutionmodel.JSValueList;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -157,12 +158,12 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 
 						}
 					}
-					eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+					eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 					eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(solutionCopy));
 					for (IPersist persist : objectsToSave)
 					{
 						checkParent(persist);
-						SolutionSerializer.writePersist(persist, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+						SolutionSerializer.writePersist(persist, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), true, false, true);
 						if (persist instanceof AbstractBase)
 						{
 							((AbstractBase)persist).setParent(solutionCopy);
@@ -267,7 +268,7 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 				{
 					final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 					Solution solutionCopy = null;
-					EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+					EclipseRepository eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 					try
 					{
 						AbstractBase saveObj = null;
@@ -409,7 +410,8 @@ public class JSDeveloperSolutionModel implements IJSDeveloperSolutionModel
 						checkParent(saveObj);
 
 						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(saveObj));
-						SolutionSerializer.writePersist(saveObj, wfa, ServoyModel.getDeveloperRepository(), !(saveObj instanceof Media), false, true);
+						SolutionSerializer.writePersist(saveObj, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), !(saveObj instanceof Media),
+							false, true);
 					}
 					catch (RepositoryException | SQLException e)
 					{

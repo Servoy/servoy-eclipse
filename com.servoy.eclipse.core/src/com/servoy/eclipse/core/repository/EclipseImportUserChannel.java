@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.OptionDialog;
@@ -46,6 +45,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ILogLevel;
 import com.servoy.j2db.util.ITransactionConnection;
@@ -266,7 +266,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	public String askServerForImportUserData(String importServerName)
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
+		String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 		int selectedServerIdx = 0;
 		for (int i = 0; i < serverNames.length; i++)
 		{
@@ -302,7 +302,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			{
 				int[] selectedOption = new int[1];
 				ServoyModelManager.getServoyModelManager().getServoyModel();
-				String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
+				String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
@@ -379,24 +379,24 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			else
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
-				String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
+				String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 				ServerConfig serverConfig = null;
 				IServerInternal serverPrototype = null;
-				ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
+				ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
 				for (ServerConfig sc : serverConfigs)
 				{
 					if (sc.isEnabled() && sc.isPostgresDriver())
 					{
-						serverPrototype = (IServerInternal)ServoyModel.getServerManager().getServer(sc.getServerName());
+						serverPrototype = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(sc.getServerName());
 						if (serverPrototype != null && serverPrototype.isValid())
 						{
-							if (ServoyModel.getServerManager().getServerConfig(name) == null)
+							if (ApplicationServerRegistry.get().getServerManager().getServerConfig(name) == null)
 							{
 								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
 									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
 									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
 									sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass());
-								if (ServoyModel.getServerManager().validateServerConfig(null, serverConfig) != null)
+								if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
 								{
 									// something is wrong
 									serverConfig = null;
@@ -446,8 +446,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 
 					try
 					{
-						ServoyModel.getServerManager().testServerConfigConnection(serverConfig, 0);
-						ServoyModel.getServerManager().saveServerConfig(null, serverConfig);
+						ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
+						ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
 					}
 					catch (Exception ex)
 					{

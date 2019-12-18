@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Display;
 
 import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
@@ -33,6 +32,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.query.ColumnType;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the DB column to match the column information.
@@ -84,7 +84,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 				dmm.setWritesEnabled(false);
 				try
 				{
-					IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(difference.getServerName());
+					IServerInternal s = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(difference.getServerName());
 
 					// delete column from memory obj.
 					difference.getTable().removeColumn(difference.getColumnName());

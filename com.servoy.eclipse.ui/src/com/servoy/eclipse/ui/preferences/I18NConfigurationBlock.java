@@ -52,6 +52,7 @@ import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Settings;
 
@@ -87,7 +88,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 	public I18NConfigurationBlock(OverlayPreferenceStore store, PreferencePage mainPreferencePage)
 	{
 		super(store, mainPreferencePage);
-		settings = ServoyModel.getSettings();
+		settings = Settings.getInstance();
 	}
 
 	public Control createControl(Composite parent)
@@ -235,9 +236,9 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		// which can be invoked several times.
 		ArrayList<Locale> al = new ArrayList<Locale>();
 		locales = Locale.getAvailableLocales();
-		for (int i = 0; i < locales.length; i++)
+		for (Locale locale : locales)
 		{
-			if (locales[i].getCountry() != null && !locales[i].getCountry().equals("")) al.add(locales[i]);
+			if (locale.getCountry() != null && !locale.getCountry().equals("")) al.add(locale);
 		}
 		locales = new Locale[al.size()];
 		locales = al.toArray(locales);
@@ -296,7 +297,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 
 		// Initialize server names list.
 		String currentServerName = settings.getProperty(DEFAULT_MESSAGES_SERVER);
-		IServerManagerInternal sm = ServoyModel.getServerManager();
+		IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 		String[] serverNames = sm.getServerNames(true, true, true, false);
 		defaultI18NServer.removeAll();
 		defaultI18NServer.add(SELECTION_NONE);
@@ -340,7 +341,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 			{
 				if (firstTime) tableName = settings.getProperty(DEFAULT_MESSAGES_TABLE);
 				else tableName = oldText;
-				IServerManagerInternal sm = ServoyModel.getServerManager();
+				IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 				IServer server = sm.getServer(serverName);
 				List<String> tableNames = server.getTableAndViewNames(true);
 				Collections.sort(tableNames);

@@ -259,6 +259,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ImageLoader;
@@ -931,7 +932,7 @@ public class SolutionExplorerView extends ViewPart
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(servoyProject != null);
 
 				// expand the servers node if we have invalid (but enabled) servers (expansion will occur after startup)
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				String[] array = serverManager.getServerNames(true, false, true, true);
 				for (String server_name : array)
 				{
@@ -2284,7 +2285,7 @@ public class SolutionExplorerView extends ViewPart
 	{
 		boolean wasNull = false;
 
-		IServerManagerInternal serverManager = ServoyModel.getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		if (tableListener == null && serverListener == null)
 		{
 			wasNull = true;
@@ -3100,10 +3101,10 @@ public class SolutionExplorerView extends ViewPart
 		IAction newVariable = new NewVariableAction(this);
 		IAction newValueList = new NewValueListAction(this);
 		newPostgresqlDatabase = new NewPostgresDbAction(this);
-		newPostgresqlDatabase.setEnabledStatus();
+//		newPostgresqlDatabase.setEnabledStatus();
 		newSybaseDatabase = new NewSybaseDbAction(this);
-		newSybaseDatabase.setEnabledStatus();
-		ServoyModel.getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
+//		newSybaseDatabase.setEnabledStatus();
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(shell);
 		flagTenantColumn = new FlagTenantColumnAction(this);
@@ -3784,13 +3785,13 @@ public class SolutionExplorerView extends ViewPart
 
 		if (serverListener != null)
 		{
-			ServoyModel.getServerManager().removeServerListener(serverListener);
+			ApplicationServerRegistry.get().getServerManager().removeServerListener(serverListener);
 			if (discardListenerReferences) serverListener = null;
 		}
 
 		if (tableListener != null)
 		{
-			IServerManagerInternal serverManager = ServoyModel.getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			// add listeners to initial server list
 			String[] array = serverManager.getServerNames(false, false, true, true);
 			for (String server_name : array)
