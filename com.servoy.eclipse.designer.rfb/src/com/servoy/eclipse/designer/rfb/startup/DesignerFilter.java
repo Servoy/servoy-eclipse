@@ -299,7 +299,7 @@ public class DesignerFilter implements Filter
 								}
 								else
 								{
-									layoutJson.put("tagName", createLayoutDiv(config, new StringBuilder(), spec).toString());
+									layoutJson.put("tagName", createLayoutDiv(config, new StringBuilder(), spec, false).toString());
 								}
 
 								Map<String, Object> model = new HashMap<String, Object>();
@@ -541,7 +541,7 @@ public class DesignerFilter implements Filter
 	 * @param specifications
 	 * @throws JSONException
 	 */
-	protected StringBuilder createLayoutDiv(JSONObject config, StringBuilder sb, WebLayoutSpecification spec) throws JSONException
+	protected StringBuilder createLayoutDiv(JSONObject config, StringBuilder sb, WebLayoutSpecification spec, boolean isChild) throws JSONException
 	{
 		String tagName = (String)(spec.getProperty(StaticContentSpecLoader.PROPERTY_TAGTYPE.getPropertyName()) != null
 			? spec.getProperty(StaticContentSpecLoader.PROPERTY_TAGTYPE.getPropertyName()).getDefaultValue() : "div");
@@ -556,7 +556,13 @@ public class DesignerFilter implements Filter
 			sb.append("='");
 
 			sb.append(value);
-			if (key.equals("class")) sb.append(" " + spec.getDesignStyleClass());
+			if (key.equals("class"))
+			{
+				sb.append(" " + spec.getDesignStyleClass());
+				sb.append("' ");
+				sb.append("svy-title='" + (value.startsWith("col-") && !isChild ? "md-*" : value));
+			}
+
 			sb.append("' ");
 		}
 		sb.append(">");
@@ -569,7 +575,7 @@ public class DesignerFilter implements Filter
 				JSONObject childModel = jsonObject.optJSONObject("model");
 				if (childModel != null)
 				{
-					createLayoutDiv(childModel, sb, spec);
+					createLayoutDiv(childModel, sb, spec, true);
 				}
 			}
 		}
