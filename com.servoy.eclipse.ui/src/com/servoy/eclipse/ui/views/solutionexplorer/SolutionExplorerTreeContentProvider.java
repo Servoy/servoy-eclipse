@@ -2227,7 +2227,6 @@ public class SolutionExplorerTreeContentProvider
 
 	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss)
 	{
-		long time = System.currentTimeMillis();
 		if (clss != null)
 		{
 			List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
@@ -2314,7 +2313,6 @@ public class SolutionExplorerTreeContentProvider
 			}
 			node.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 		}
-		System.err.println("add return types: " + (System.currentTimeMillis() - time) + "  " + Thread.currentThread().getName());
 	}
 
 	private void addSolutionNodeChildren(PlatformSimpleUserNode projectNode)
