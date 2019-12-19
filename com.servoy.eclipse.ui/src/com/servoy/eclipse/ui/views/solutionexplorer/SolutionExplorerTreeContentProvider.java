@@ -287,7 +287,7 @@ public class SolutionExplorerTreeContentProvider
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
-		addReturnTypeNodes(application, Utils.arrayJoin(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes(),
+		addReturnTypeNodesPlaceHolder(application, Utils.arrayJoin(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes(),
 			new ServoyException(0).getAllReturnedTypes()));
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
@@ -336,7 +336,7 @@ public class SolutionExplorerTreeContentProvider
 		allWebPackagesNode.parent = invisibleRootNode;
 
 		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
-		addReturnTypeNodes(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
+		addReturnTypeNodesPlaceHolder(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
 		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, invisibleRootNode);
 
@@ -344,15 +344,15 @@ public class SolutionExplorerTreeContentProvider
 
 		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, invisibleRootNode);
 
-		addReturnTypeNodes(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
+		addReturnTypeNodesPlaceHolder(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
 		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, invisibleRootNode);
 
 		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, invisibleRootNode);
-		addReturnTypeNodes(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
+		addReturnTypeNodesPlaceHolder(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
 		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, invisibleRootNode);
-		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
+		addReturnTypeNodesPlaceHolder(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.png"));
 		servers.parent = resources;
@@ -1147,6 +1147,10 @@ public class SolutionExplorerTreeContentProvider
 				{
 					ServoyLog.logWarning("Cannot create the children of node " + un.getName(), e);
 				}
+			}
+			else if (un.children.length == 1 && un.children[0].getType() == UserNodeType.RETURNTYPEPLACEHOLDER)
+			{
+				addReturnTypeNodes(un, (Class< ? >[])un.children[0].getRealObject());
 			}
 			return un.children;
 		}
@@ -2108,7 +2112,7 @@ public class SolutionExplorerTreeContentProvider
 							if (scriptObject instanceof IReturnedTypesProvider)
 							{
 								Class< ? >[] clss = ((IReturnedTypesProvider)scriptObject).getAllReturnedTypes();
-								addReturnTypeNodes(node, clss);
+								addReturnTypeNodesPlaceHolder(node, clss);
 							}
 						}
 					}
@@ -2213,8 +2217,17 @@ public class SolutionExplorerTreeContentProvider
 		return icon;
 	}
 
+	private void addReturnTypeNodesPlaceHolder(PlatformSimpleUserNode node, Class< ? >[] clss)
+	{
+		if (clss != null)
+		{
+			node.children = new SimpleUserNode[] { new SimpleUserNode("placeholder", UserNodeType.RETURNTYPEPLACEHOLDER, clss, null) };
+		}
+	}
+
 	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss)
 	{
+		long time = System.currentTimeMillis();
 		if (clss != null)
 		{
 			List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
@@ -2301,6 +2314,7 @@ public class SolutionExplorerTreeContentProvider
 			}
 			node.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 		}
+		System.err.println("add return types: " + (System.currentTimeMillis() - time) + "  " + Thread.currentThread().getName());
 	}
 
 	private void addSolutionNodeChildren(PlatformSimpleUserNode projectNode)
@@ -2877,7 +2891,7 @@ public class SolutionExplorerTreeContentProvider
 			}
 			if (scriptObject != null)
 			{
-				addReturnTypeNodes(node, scriptObject.getAllReturnedTypes());
+				addReturnTypeNodesPlaceHolder(node, scriptObject.getAllReturnedTypes());
 			}
 		}
 		catch (Throwable e)
