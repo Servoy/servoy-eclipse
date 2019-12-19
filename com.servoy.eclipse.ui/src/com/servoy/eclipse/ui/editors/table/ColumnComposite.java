@@ -531,7 +531,7 @@ public class ColumnComposite extends Composite
 		allowNullColumn.setText("Allow Null");
 		TableViewerColumn allowNullViewerColumn = new TableViewerColumn(tableViewer, allowNullColumn);
 		allowNullViewerColumn.setEditingSupport(new ColumnAllowNullEditingSupport(tableViewer));
-
+		allowNullColumn.setToolTipText("Modifying allow null after table is created in database may break existing tables at deployment.");
 
 		seqType = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_SEQUENCE_TYPE);
 		seqType.setText("Sequence Type");

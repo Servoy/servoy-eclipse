@@ -293,6 +293,13 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		return serverConfig;
 	}
 
+	@Override
+	public boolean dropTable(Table t) throws SQLException, RepositoryException
+	{
+		return false;
+	}
+
+
 	public String[] removeTable(ITable t) throws SQLException, RepositoryException
 	{
 		return removeTable(t, null);
