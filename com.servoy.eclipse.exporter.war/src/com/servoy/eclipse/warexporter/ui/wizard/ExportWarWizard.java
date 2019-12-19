@@ -250,9 +250,9 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 							String missingJarName = exporter.searchExportedPlugins();
 							while (missingJarName != null)
 							{
-								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
-								dialog.setMessage(
+								MessageDialog.openWarning(getShell(), "Warning",
 									"Please select the directory where " + missingJarName + " is located (usually your servoy developer/plugins directory)");
+								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
 								String chosenDirName = dialog.open();
 								if (chosenDirName != null)
 								{

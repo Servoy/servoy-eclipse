@@ -202,6 +202,10 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 		Label label = new Label(composite, SWT.NONE);
 		label.setText("User home directory ");
 		userHomeText = new Text(composite, SWT.BORDER);
+		if (exportModel.getUserHome() != null)
+		{
+			userHomeText.setText(exportModel.getUserHome());
+		}
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		userHomeText.setLayoutData(gd);
