@@ -24,7 +24,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.debug.NGClientStarter;
@@ -75,7 +75,7 @@ public class StartNGClientHandler extends StartWebClientHandler implements NGCli
 		monitor.worked(1);
 		try
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyProject activeProject = servoyModel.getActiveProject();
 			if (activeProject != null && activeProject.getSolution() != null)
 			{

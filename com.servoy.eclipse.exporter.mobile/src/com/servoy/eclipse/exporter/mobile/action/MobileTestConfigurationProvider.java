@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.jsunit.launch.ITestLaunchConfigurationProvider;
@@ -41,15 +41,15 @@ public class MobileTestConfigurationProvider implements ITestLaunchConfiguration
 	{
 		ILaunchConfiguration found = null;
 
-		ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
 		String solutionName = ((oldLaunch != null) ? oldLaunch.getLaunchConfiguration().getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "") : null);
 		ServoyProject sp = model.getActiveProject();
 		if (solutionName == null || solutionName.equals(sp.getProject().getName()))
 		{
 			boolean nodebug = ((oldLaunch != null)
 				? Boolean.valueOf(oldLaunch.getLaunchConfiguration().getAttribute(IMobileLaunchConstants.NODEBUG, "true")).booleanValue() : true);
-			found = nodebug ? new RunMobileTestsHandler().findLaunchConfiguration(target, sp) : new DebugMobileTestsHandler().findLaunchConfiguration(target,
-				sp);
+			found = nodebug ? new RunMobileTestsHandler().findLaunchConfiguration(target, sp)
+				: new DebugMobileTestsHandler().findLaunchConfiguration(target, sp);
 		} // otherwise we can't run tests on non-active solution
 		return found;
 	}

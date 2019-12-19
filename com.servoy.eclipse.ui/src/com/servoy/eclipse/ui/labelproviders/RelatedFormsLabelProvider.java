@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.labelproviders;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -34,6 +33,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 
 /**
@@ -118,7 +118,7 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 				image = Activator.getDefault().loadImageFromBundle("portal.png");
 				try
 				{
-					IServer server = ServoyModel.getServerManager().getServer(((Table)element).getServerName());
+					IServer server = ApplicationServerRegistry.get().getServerManager().getServer(((Table)element).getServerName());
 					if (server != null)
 					{
 						int tableType = server.getTableType(((Table)element).getName());

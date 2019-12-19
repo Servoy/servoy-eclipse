@@ -70,6 +70,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.TypesRegistry;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
@@ -109,6 +110,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -239,7 +241,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		{
 			return null;
 		}
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		boolean override = false;
 		MethodArgument[] superArguments = null;
@@ -397,7 +399,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						{
 							// js file does not exist yet, table node may have been created in memory in editing solution, make sure the table node is saved,
 							// otherwise the same table node (but with different uuid) will be created in the real solution when the js file is read.
-							((EclipseRepository)ServoyModel.getDeveloperRepository()).updateNode(met.getParent(), false);
+							((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).updateNode(met.getParent(), false);
 						}
 
 						// file doesn't exist, create the file and its parent directories
@@ -415,7 +417,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 					met.setDeclaration(declaration);
 
-					String code = SolutionSerializer.serializePersist(met, true, ServoyModel.getDeveloperRepository(), null).toString();
+					String code = SolutionSerializer.serializePersist(met, true, ApplicationServerRegistry.get().getDeveloperRepository(), null).toString();
 					final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(
 						FileEditorInputFactory.createFileEditorInput(file));
 					if (openEditor instanceof ScriptEditor)

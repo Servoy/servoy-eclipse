@@ -22,7 +22,7 @@ import java.util.Iterator;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -47,6 +47,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebObjectImpl;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -128,7 +129,7 @@ public class PersistCloner
 					else
 					{
 						ServoyModelManager.getServoyModelManager().getServoyModel();
-						EclipseRepository er = (EclipseRepository)ServoyModel.getDeveloperRepository();
+						EclipseRepository er = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 						Iterator<ContentSpec.Element> iterator = er.getContentSpec().getPropertiesForObjectType(o.getTypeID());
 
 						while (iterator.hasNext())
@@ -230,12 +231,12 @@ public class PersistCloner
 				else
 				{
 					clone = (AbstractBase)((AbstractBase)persist).cloneObj(destinationEditingSolution, true, nameValidator, true, false //
-						, false /* elements of original form should remain override, not a flattened element */);
+					, false /* elements of original form should remain override, not a flattened element */);
 				}
 				if (clone instanceof ISupportUpdateableName)
 				{
 					((ISupportUpdateableName)clone).updateName(nameValidator, newPersistName);
-					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+					IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 					FlattenedSolution fs = servoyModel.getActiveProject().getEditingFlattenedSolution();
 					fs.flushAllCachedData(); //make sure the name caches are flushed from the active solution and modules
 					for (Solution mod : fs.getModules())

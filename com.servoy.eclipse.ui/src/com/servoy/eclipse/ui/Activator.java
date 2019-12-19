@@ -289,7 +289,6 @@ public class Activator extends AbstractUIPlugin
 	private void doExtensionRelatedChecks()
 	{
 		// see if installed extensions are not out of sync with Servoy version
-		ServoyModel.startAppServer(); // this will probably do nothing as core Activator initialise probably did it
 		IApplicationServerSingleton applicationServer = ApplicationServerRegistry.get();
 
 		// if incompatible extensions were found or we need to automatically check for extension updates at startup (if this is the preference of the user)

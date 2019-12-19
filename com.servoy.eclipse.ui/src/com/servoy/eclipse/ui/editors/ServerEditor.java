@@ -78,6 +78,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
@@ -355,7 +356,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 								FileUtils.copyFileToDirectory(new File(fileOpenDlg.getFilterPath(), f), driversDir);
 							}
 
-							ServoyModel.getServerManager().loadInstalledDrivers();
+							ApplicationServerRegistry.get().getServerManager().loadInstalledDrivers();
 							ServerEditor.this.getEditorSite().getPage().closeEditor(ServerEditor.this, false);
 							EditorUtil.openServerEditor(serverConfigObservable.getObject(), true);
 						}
@@ -596,7 +597,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		});
 
-		ServoyModel.getServerManager().addServerConfigListener(logServerListener = new LogServerListener());
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(logServerListener = new LogServerListener());
 
 		Composite buttonsComposite = new Composite(advancedSettingsComposite, SWT.NONE);
 
@@ -613,28 +614,28 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				IServerInternal logServer = (IServerInternal)ServoyModel.getServerManager().getLogServer();
+				IServerInternal logServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getLogServer();
 				if (logServer == null)
 				{
 					MessageDialog.openError(getDisplay(parent).getActiveShell(), "Log server not found",
-						"Required server '" + ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached.");
+						"Required server '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "' not found or cannot be reached.");
 					return;
 				}
 
 				try
 				{
-					ServoyModel.getServerManager().setLogTableName(logTableName.getText());
+					ApplicationServerRegistry.get().getServerManager().setLogTableName(logTableName.getText());
 					Table logTable = logServer.getLogTable();
 					if (logTable == null)
 					{
 						logTable = logServer.createLogTable();
 						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table log created",
-							"Table log successfully created in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
+							"Table log successfully created in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
 					}
 					else
 					{
 						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table already exists",
-							"Log table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
+							"Log table already exists in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
 					}
 					createLogTableButton.setEnabled(logTable == null);
 				}
@@ -659,11 +660,11 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				IServerInternal logServer = (IServerInternal)ServoyModel.getServerManager().getLogServer();
+				IServerInternal logServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getLogServer();
 				if (logServer == null)
 				{
 					MessageDialog.openError(getDisplay(parent).getActiveShell(), "Log server not found",
-						"Required server '" + ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached.");
+						"Required server '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "' not found or cannot be reached.");
 					return;
 				}
 
@@ -674,12 +675,12 @@ public class ServerEditor extends EditorPart implements IShowInSource
 					{
 						statsTable = logServer.createClientStatsTable();
 						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table client_stats created",
-							"Table client_stats successfully created in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
+							"Table client_stats successfully created in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
 					}
 					else
 					{
 						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table already exists",
-							"Client statistics table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
+							"Client statistics table already exists in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
 					}
 					createClientstatsTableButton.setEnabled(statsTable != null);
 				}
@@ -1054,7 +1055,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		super.dispose();
 		m_bindingContext.dispose();
-		ServoyModel.getServerManager().removeServerConfigListener(logServerListener);
+		ApplicationServerRegistry.get().getServerManager().removeServerConfigListener(logServerListener);
 	}
 
 	/**
@@ -1128,7 +1129,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		{
 			try
 			{
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				serverManager.testServerConfigConnection(serverConfig, 0); //test if we connect
 				MessageDialog.openInformation(getSite().getShell(), "Connection successful", "Test connection to DB server was established successfully.");
 			}
@@ -1144,7 +1145,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		try
 		{
-			IServerManagerInternal serverManager = ServoyModel.getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			ServerConfig serverConfig = serverConfigObservable.getObject();
 			String currentServerName = serverConfig.getServerName();
 			String dataModelCloneFrom = null;
@@ -1266,8 +1267,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		serverNameField.addVerifyListener(DocumentValidatorVerifyListener.IDENT_SERVOY_VERIFIER);
 		driverField.removeAll();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		for (String name : ServoyModel.getServerManager().getKnownDriverClassNames())
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		for (String name : ApplicationServerRegistry.get().getServerManager().getKnownDriverClassNames())
 		{
 			driverField.add(name);
 		}
@@ -1297,7 +1298,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		dataModel_cloneFromField.add(ServerConfig.NONE);
 		String serverName = serverConfigObservable.getObject().getServerName();
 		String cloneServerName;
-		for (ServerConfig sc : ServoyModel.getServerManager().getServerConfigs())
+		for (ServerConfig sc : ApplicationServerRegistry.get().getServerManager().getServerConfigs())
 		{
 			cloneServerName = sc.getServerName();
 			if (cloneServerName != null && !cloneServerName.equals(serverName)) dataModel_cloneFromField.add(cloneServerName);
@@ -1474,9 +1475,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		});
 		validationQueryField.setEnabled(serverConfigObservable.getObject().getConnectionValidationType() == ServerConfig.CONNECTION_QUERY_VALIDATION);
 
-		logServerButton.setSelection(serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName()));
+		logServerButton.setSelection(serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()));
 
-		logTableName.setText(ServoyModel.getServerManager().getLogTableName());
+		logTableName.setText(ApplicationServerRegistry.get().getServerManager().getLogTableName());
 
 		updateTestConnectionButton();
 	}
@@ -1540,7 +1541,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private boolean isExistingDriver(String driver)
 	{
 		boolean existing = false;
-		for (String name : ServoyModel.getServerManager().getAllDriverClassNames())
+		for (String name : ApplicationServerRegistry.get().getServerManager().getAllDriverClassNames())
 		{
 			if (name.equals(driver))
 			{
@@ -1576,14 +1577,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	private void enableButtons()
 	{
 
-		if (serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName()))
+		if (serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()))
 		{
 			logTableName.setEnabled(true);
-			if (ServoyModel.getServerManager().logTableExists())
+			if (ApplicationServerRegistry.get().getServerManager().logTableExists())
 			{
 				createLogTableButton.setEnabled(false);
 				// FIXME: show tooltips for disabled button
-				createLogTableButton.setToolTipText("Log table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
+				createLogTableButton.setToolTipText("Log table already exists in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
 			}
 			else
 			{
@@ -1592,12 +1593,12 @@ public class ServerEditor extends EditorPart implements IShowInSource
 					"Create a log table for tracking; " + "the creation of such a table is possible only if the current database server is the log server " +
 						"and if it does not already contain a log table.");
 			}
-			if (ServoyModel.getServerManager().clientStatsTableExists())
+			if (ApplicationServerRegistry.get().getServerManager().clientStatsTableExists())
 			{
 				createClientstatsTableButton.setEnabled(false);
 				// FIXME: show tooltips for disabled button
 				createClientstatsTableButton.setToolTipText(
-					"Client statistics table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
+					"Client statistics table already exists in '" + ApplicationServerRegistry.get().getServerManager().getLogServerName() + "'.");
 			}
 			else
 			{
@@ -1619,7 +1620,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 		{
-			if (serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName()))
+			if (serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()))
 			{
 				logServerButton.setSelection(true);
 			}

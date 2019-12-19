@@ -38,6 +38,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 import org.eclipse.ltk.ui.refactoring.resource.DeleteResourcesWizard;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -59,6 +60,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StringResource;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Action to delete IPersist objects from a solution or string resources. The selected IPersist objects must be either all resources, or all descendants of the
@@ -218,7 +220,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 				if (!formsToDelete.isEmpty())
 				{
-					EclipseRepository rep = (EclipseRepository)ServoyModel.getDeveloperRepository();
+					EclipseRepository rep = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 					HashMap<IPersist, List<String>> persists = rep.getAllFilesForPersists(formsToDelete);
 
 					Set<IPersist> keys = persists.keySet();
@@ -271,7 +273,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		}
 
 		//retrieve the servoy model
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		//retrieve all the forms;
 		Iterator<Form> it = servoyModel.getFlattenedSolution().getForms(false);
@@ -319,7 +321,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 		Iterator<Integer> keyEnumeration = map.keySet().iterator();
 
 		//retrieve the servoy model
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		while (keyEnumeration.hasNext())
 		{
@@ -374,7 +376,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	 */
 	private boolean allFormsAreInTheSameSet(List<IPersist> formsToDelete)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		Iterator<Form> it = servoyModel.getFlattenedSolution().getForms(false);
 
 		while (it.hasNext())

@@ -17,13 +17,20 @@
 
 package com.servoy.eclipse.exporter.apps.common;
 
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener.CHANGE_REASON;
 
 /**
  * @author acostescu
  */
 public class ExportNGPackageManager extends BaseNGPackageManager
 {
+	public ExportNGPackageManager(IServoyModel model)
+	{
+		super(model);
+		if (model.getActiveProject() != null) reloadAllNGPackages(CHANGE_REASON.RELOAD, null); // initial load
+	}
 
 	@Override
 	protected boolean isDefaultPackageEnabled(String packageName)

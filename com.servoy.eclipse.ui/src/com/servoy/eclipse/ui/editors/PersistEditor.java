@@ -38,6 +38,8 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
+import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -62,6 +64,7 @@ public abstract class PersistEditor extends EditorPart implements IPersistChange
 	private IPersist persist;
 	private boolean disposed = false;
 	private boolean refreshing = false;
+	private IActiveProjectListener activeProjectListener;
 
 	/**
 	 * @return the persist
@@ -111,32 +114,70 @@ public abstract class PersistEditor extends EditorPart implements IPersistChange
 
 		super.setInput(input);
 
-		if (input instanceof PersistEditorInput)
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		if (servoyModel.getActiveProject() != null)
 		{
-			PersistEditorInput persistInput = (PersistEditorInput)input;
-
-			servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persistInput.getSolutionName());
-			if (servoyProject == null)
+			if (input instanceof PersistEditorInput)
 			{
-				throw new IllegalArgumentException("Cannot open solution " + persistInput.getSolutionName());
+				PersistEditorInput persistInput = (PersistEditorInput)input;
+
+				servoyProject = servoyModel.getServoyProject(persistInput.getSolutionName());
+				if (servoyProject == null)
+				{
+					throw new IllegalArgumentException("Cannot open solution " + persistInput.getSolutionName());
+				}
+				persist = servoyProject.getEditingPersist(persistInput.getUuid());
 			}
-			persist = servoyProject.getEditingPersist(persistInput.getUuid());
-		}
-		else
-		{
-			throw new IllegalArgumentException("This editor does not support input " + input.getClass());
-		}
+			else
+			{
+				throw new IllegalArgumentException("This editor does not support input " + input.getClass());
+			}
 
-		if (persist == null)
-		{
-			throw new IllegalArgumentException("Could not find element for input " + input);
-		}
+			if (persist == null)
+			{
+				throw new IllegalArgumentException("Could not find element for input " + input);
+			}
 
-		if (!validatePersist(persist))
-		{
-			throw new IllegalArgumentException("This editor does not support type " + persist.getClass());
+			if (!validatePersist(persist))
+			{
+				throw new IllegalArgumentException("This editor does not support type " + persist.getClass());
+			}
+			updateTitle();
 		}
-		updateTitle();
+		else if (activeProjectListener == null)
+		{
+			activeProjectListener = new IActiveProjectListener()
+			{
+				@Override
+				public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+				{
+					return true;
+				}
+
+				@Override
+				public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+				{
+				}
+
+				@Override
+				public void activeProjectChanged(ServoyProject activeProject)
+				{
+					servoyModel.removeActiveProjectListener(activeProjectListener);
+					activeProjectListener = null;
+					setInput(input);
+					init();
+					refresh();
+				}
+			};
+			servoyModel.addActiveProjectListener(activeProjectListener);
+		}
+	}
+
+	/**
+	 * called when the active project is changed and the persist is initialized
+	 */
+	protected void init()
+	{
 	}
 
 	protected final void refresh()

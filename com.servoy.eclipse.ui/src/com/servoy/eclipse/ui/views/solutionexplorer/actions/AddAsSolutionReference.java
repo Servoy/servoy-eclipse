@@ -27,7 +27,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -55,7 +55,7 @@ public abstract class AddAsSolutionReference extends Action implements ISelectio
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		selectedProjects.clear();
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		boolean state = (sel.size() > 0) && (servoyModel.getActiveProject() != null);
@@ -80,7 +80,7 @@ public abstract class AddAsSolutionReference extends Action implements ISelectio
 
 	protected ServoyProject askUserForActiveModuleToUse()
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProject();
 		if (activeModules.length == 1)
 		{

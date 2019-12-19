@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -384,7 +384,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 
 		protected String methodExists(String methodName, String solutionName, String formName)
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyProject servoyProject = servoyModel.getServoyProject(solutionName);
 			if (formName.trim().length() == 0)
 			{

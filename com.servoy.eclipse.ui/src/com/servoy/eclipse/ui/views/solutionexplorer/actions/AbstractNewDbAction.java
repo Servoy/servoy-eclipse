@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -74,7 +75,8 @@ public abstract class AbstractNewDbAction extends Action
 		String dbSelection = getDbServerSelection(serverMap);
 		if (dbSelection == null) return;
 
-		final IServerInternal serverPrototype = (IServerInternal)ServoyModel.getServerManager().getServer(serverMap.get(dbSelection).getServerName());
+		final IServerInternal serverPrototype = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(
+			serverMap.get(dbSelection).getServerName());
 		if (serverPrototype == null)
 		{
 			UIUtils.reportError("Create new database",
@@ -136,7 +138,7 @@ public abstract class AbstractNewDbAction extends Action
 	public boolean setEnabledStatus()
 	{
 		boolean state = false;
-		ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
+		ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
 		for (ServerConfig sc : serverConfigs)
 		{
 			if (sc.isEnabled() && isDbTypeDriver(sc))
@@ -153,7 +155,7 @@ public abstract class AbstractNewDbAction extends Action
 
 	private HashMap<String, ServerConfig> getServerMap()
 	{
-		ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
+		ServerConfig[] serverConfigs = ApplicationServerRegistry.get().getServerManager().getServerConfigs();
 		HashMap<String, ServerConfig> serverMap = new HashMap<String, ServerConfig>();
 		for (ServerConfig sc : serverConfigs)
 		{

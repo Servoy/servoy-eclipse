@@ -258,7 +258,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		if (initialFileName == null)
 		{
 			ServoyModelManager.getServoyModelManager().getServoyModel();
-			String dir = ServoyModel.getSettings().getProperty(J2DBGlobals.SERVOY_APPLICATION_SERVER_DIRECTORY_KEY);
+			String dir = Settings.getInstance().getProperty(J2DBGlobals.SERVOY_APPLICATION_SERVER_DIRECTORY_KEY);
 			initialFileName = new File(dir, "solutions/" + activeSolution.getName() + ".servoy").getAbsolutePath();
 		}
 		else

@@ -41,7 +41,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -63,6 +62,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 
 public class ReplaceServerAction extends Action implements ISelectionChangedListener
@@ -288,7 +288,7 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 					sourceServersCombo.setItems(DataSourceUtils.getServerNames(datasourceCollector.getDataSources()).toArray(new String[] { }));
 					sourceServersCombo.add(ReplaceTableWizard.ALL_SOLUTION_SERVERS, 0);
 					sourceServersCombo.select(0);
-					IServerManagerInternal serverManager = ServoyModel.getServerManager();
+					IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 					targetServersCombo.setItems(serverManager.getServerNames(false, false, true, true));
 					targetServersCombo.add(ReplaceTableWizard.ALL_SERVERS, 0);
 					targetServersCombo.select(0);
@@ -298,7 +298,8 @@ public class ReplaceServerAction extends Action implements ISelectionChangedList
 
 				public boolean validatePage()
 				{
-					if (sourceServer == null || sourceServersCombo == null || ReplaceTableWizard.ALL_SOLUTION_SERVERS.equals(sourceServersCombo.getText())) return false;
+					if (sourceServer == null || sourceServersCombo == null || ReplaceTableWizard.ALL_SOLUTION_SERVERS.equals(sourceServersCombo.getText()))
+						return false;
 					if (targetServer == null || targetServersCombo == null || ReplaceTableWizard.ALL_SERVERS.equals(targetServersCombo.getText())) return false;
 					return true;
 				}

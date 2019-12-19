@@ -167,7 +167,7 @@ public class EditorContentFilter implements Filter
 					try
 					{
 						IPersist container = flattenedForm.findChild(
-							((EclipseRepository)ServoyModel.getDeveloperRepository()).getUUIDForElementId(id, id, -1, -1, null));
+							((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getUUIDForElementId(id, id, -1, -1, null));
 						if (container instanceof LayoutContainer)
 						{
 							FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);

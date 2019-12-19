@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.ICheckBoxView;
@@ -374,7 +374,7 @@ public class FormElementDeleteCommand extends Command
 		return overriding;
 	}
 
-	private static List<Form> getAllSubforms(ServoyModel servoyModel, Form form)
+	private static List<Form> getAllSubforms(IDeveloperServoyModel servoyModel, Form form)
 	{
 		List<Form> subforms = new ArrayList<>();
 		List<Form> inheriting = servoyModel.getEditingFlattenedSolution(form).getDirectlyInheritingForms(form);

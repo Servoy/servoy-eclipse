@@ -29,7 +29,7 @@ import org.eclipse.gef.SnapToHelper;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.base.persistence.PersistUtils;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseFormGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -132,7 +132,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 	public void activate()
 	{
 		// listen to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.addPersistChangeListener(false, this);
 
 		super.activate();
@@ -142,7 +142,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 	public void deactivate()
 	{
 		// stop listening to changes to the elements
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removePersistChangeListener(false, this);
 
 		super.deactivate();

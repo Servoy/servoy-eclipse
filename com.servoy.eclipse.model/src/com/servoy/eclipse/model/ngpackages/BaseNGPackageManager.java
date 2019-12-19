@@ -61,6 +61,7 @@ import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -93,12 +94,10 @@ public abstract class BaseNGPackageManager
 	private final List<IAvailableNGPackageProjectsListener> availableNGPackageProjectsListeners = Collections.synchronizedList(
 		new ArrayList<IAvailableNGPackageProjectsListener>());
 
-	public BaseNGPackageManager()
+	public BaseNGPackageManager(IServoyModel model)
 	{
-		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(CHANGE_REASON.RELOAD, null); // initial load
-
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
-		ServoyModelFinder.getServoyModel().addResourceChangeListener(resourceChangeListener,
+		model.addResourceChangeListener(resourceChangeListener,
 			IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE); // give a chance to ServoyModel to process post-change resource events before we start working so that any changes in ServoyProject references is already handled by ServoyModel
 		setRemovedPackages();
 	}

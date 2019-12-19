@@ -86,7 +86,7 @@ public class I18NWriteToDBAction extends Action
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				IRepository repository = ServoyModel.getDeveloperRepository();
+				IRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 				IDataServer dataServer = ApplicationServerRegistry.get().getDataServer();
 				String clientID = ApplicationServerRegistry.get().getClientId();
 				IFileAccess workspace = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());

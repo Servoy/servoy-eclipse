@@ -39,6 +39,9 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.wicket.Request;
+import org.apache.wicket.Response;
+import org.apache.wicket.Session;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -99,12 +102,14 @@ import org.sablo.websocket.GetHttpSessionConfigurator;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
+import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
@@ -122,7 +127,10 @@ import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.dataprocessing.ClientInfo;
+import com.servoy.j2db.dataprocessing.IDataServer;
+import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugUtils;
+import com.servoy.j2db.debug.DebugWebClientSession;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -130,7 +138,6 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
-import com.servoy.j2db.persistence.IRepositoryFactory;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.MethodTemplate;
@@ -144,6 +151,7 @@ import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
+import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.shared.IWebClientSessionFactory;
 import com.servoy.j2db.server.starter.IServerStarter;
@@ -205,7 +213,7 @@ public class Activator extends Plugin
 		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor)
 		{
-			IServerManagerInternal serverManager = ServoyModel.getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 
 			String[] serverNames = serverManager.getServerNames(true, true, false, false);
 			AliasManager aliasManager = SQLExplorerPlugin.getDefault().getAliasManager();
@@ -228,7 +236,7 @@ public class Activator extends Plugin
 						@Override
 						public net.sourceforge.sqlexplorer.dbproduct.SQLConnection getConnection(User user) throws java.sql.SQLException
 						{
-							IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(getId());
+							IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(getId());
 							try
 							{
 								return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this,
@@ -295,7 +303,8 @@ public class Activator extends Plugin
 		{
 			throw new IllegalStateException("Could not load application server plugin");
 		}
-		ss.nativeStartup();
+		// now start the app server in the back ground.
+		new Thread(() -> startAppServer()).start();
 
 		IExtensionRegistry reg = Platform.getExtensionRegistry();
 		IExtensionPoint ep = reg.getExtensionPoint(IPluginBaseClassLoaderProvider.EXTENSION_ID);
@@ -425,7 +434,7 @@ public class Activator extends Plugin
 					}
 				});
 
-				if (!ApplicationServerRegistry.get().hasDeveloperLicense() ||
+				if (!ss.getApplicationServer().hasDeveloperLicense() ||
 					Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 				{
 					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
@@ -639,7 +648,7 @@ public class Activator extends Plugin
 			appServer.doNativeShutdown();
 			J2DBGlobals.setSingletonServiceProvider(null); // avoid a null pointer exception that can happen when DLTK stops the debugger after appserver singleton gets cleared (due to a Context.enter() call)
 			J2DBGlobals.setServiceProvider(null);
-			ApplicationServerRegistry.clear();
+			ApplicationServerRegistry.destroy();
 		}
 		super.stop(context);
 
@@ -851,7 +860,7 @@ public class Activator extends Plugin
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
-				final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 				IActiveProjectListener apl = new IActiveProjectListener()
 				{
@@ -1216,27 +1225,45 @@ public class Activator extends Plugin
 		});
 	}
 
-	public synchronized void startAppServer(IRepositoryFactory repositoryFactory, IDebugClientHandler debugClientHandler,
-		IWebClientSessionFactory webClientSessionFactory, IUserManagerFactory userManagerFactory) throws Exception
+	private void startAppServer()
 	{
-		if (ApplicationServerRegistry.get() != null)
+		try
 		{
-			// already started
-			return;
+			ss.nativeStartup();
+			GetHttpSessionConfigurator.setOriginCheck(GetHttpSessionConfigurator.DISABLE_ORIGIN_CHECK); // securityFiter is not configured in Developer
+			ss.setDeveloperStartup(true);
+			ss.init();
+			ss.setRepositoryFactory(new EclipseRepositoryFactory());
+			ss.setDebugClientHandler(new DebugClientHandler());
+			ss.setUserManagerFactory(new IUserManagerFactory()
+			{
+				public IUserManager createUserManager(IDataServer dataServer)
+				{
+					return new SwitchableEclipseUserManager();
+				}
+			});
+			ss.setWebClientSessionFactory(new IWebClientSessionFactory()
+			{
+				public Session newSession(Request request, Response response)
+				{
+					return new DebugWebClientSession(request);
+				}
+			});
+			ss.start();
+			ss.startWebServer();
+
+			checkApplicationServerVersion(ss.getApplicationServer());
+			checkDefaultPostgressInstall(ss.getApplicationServer());
+
+			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
+			// our team plugin can use it in popupMenu enablement
+			System.setProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
+				Settings.getInstance().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT)));
 		}
-
-		GetHttpSessionConfigurator.setOriginCheck(GetHttpSessionConfigurator.DISABLE_ORIGIN_CHECK); // securityFiter is not configured in Developer
-		ss.setDeveloperStartup(true);
-		ss.init();
-		ss.setRepositoryFactory(repositoryFactory);
-		ss.setDebugClientHandler(debugClientHandler);
-		ss.setUserManagerFactory(userManagerFactory);
-		ss.setWebClientSessionFactory(webClientSessionFactory);
-		ss.start();
-		ss.startWebServer();
-
-		checkApplicationServerVersion(ApplicationServerRegistry.get());
-		checkDefaultPostgressInstall(ApplicationServerRegistry.get());
+		catch (Exception ex)
+		{
+			ServoyLog.logError("Failed to start the appserver", ex);
+		}
 	}
 
 	/**

@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -69,6 +69,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -294,7 +295,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		}
 	}
 
-	private static final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+	private static final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 	private static final String SHOW_FORMS = "ShowForms";
 	private static final String SHOW_METHODS = "ShowMethods";
@@ -363,7 +364,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 						String[] snt = DataSourceUtils.getDBServernameTablename(dataSource);
 						if (snt != null)
 						{
-							IServer server = ServoyModel.getServerManager().getServer(snt[0], true, true);
+							IServer server = ApplicationServerRegistry.get().getServerManager().getServer(snt[0], true, true);
 							try
 							{
 								if (server != null && server.getTableType(snt[1]) != ITable.UNKNOWN) // server.getTable() Initializes table (fetches columns)
@@ -659,12 +660,13 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		}
 
 		//add tables
-		String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, false, false);
+		String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, false, false);
 		for (String serverName : serverNames)
 		{
 			try
 			{
-				List<String> tableNames = ((IServerInternal)ServoyModel.getServerManager().getServer(serverName)).getTableAndViewNames(true, true);
+				List<String> tableNames = ((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName)).getTableAndViewNames(true,
+					true);
 				for (String tableName : tableNames)
 				{
 					contentProvider.add(new Table(DataSourceUtils.createDBTableDataSource(serverName, tableName)), itemsFilter);

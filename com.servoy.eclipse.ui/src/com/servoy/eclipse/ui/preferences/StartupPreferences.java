@@ -150,7 +150,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	protected void initializeFields()
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		Settings settings = ServoyModel.getSettings();
+		Settings settings = Settings.getInstance();
 		startupLauncherText.setText(settings.getProperty(STARTUP_LAUNCHER_SETTING, ""));
 		shutdownLauncherText.setText(settings.getProperty(SHUTDOWN_LAUNCHER_SETTING, ""));
 		retriesSpinner.setSelection(Utils.getAsInteger(settings.getProperty(RETRIES_SETTING, String.valueOf(RETRIES_DEFAULT))));
@@ -173,7 +173,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	public boolean performOk()
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		Settings settings = ServoyModel.getSettings();
+		Settings settings = Settings.getInstance();
 		settings.setProperty(STARTUP_LAUNCHER_SETTING, startupLauncherText.getText());
 		settings.setProperty(SHUTDOWN_LAUNCHER_SETTING, shutdownLauncherText.getText());
 		settings.setProperty(RETRIES_SETTING, String.valueOf(retriesSpinner.getSelection()));
@@ -205,7 +205,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	protected void performDefaults()
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		Settings settings = ServoyModel.getSettings();
+		Settings settings = Settings.getInstance();
 		startupLauncherText.setText(settings.getProperty(STARTUP_LAUNCHER_SETTING, ""));
 		shutdownLauncherText.setText(settings.getProperty(SHUTDOWN_LAUNCHER_SETTING, ""));
 		settingsFileText.setText("servoy.properties");

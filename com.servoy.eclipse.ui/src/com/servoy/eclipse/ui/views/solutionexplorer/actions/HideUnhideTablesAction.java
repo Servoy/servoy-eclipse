@@ -26,7 +26,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -39,6 +38,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Action used for toggling the hiddenInDeveloper flag of tables. Changes text to match situation based on selection.
@@ -111,7 +111,7 @@ public class HideUnhideTablesAction extends Action implements ISelectionChangedL
 	public void run()
 	{
 		if (selection == null) return;
-		IServerManagerInternal sm = ServoyModel.getServerManager();
+		IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 
 		Iterator<SimpleUserNode> it = selection.iterator();

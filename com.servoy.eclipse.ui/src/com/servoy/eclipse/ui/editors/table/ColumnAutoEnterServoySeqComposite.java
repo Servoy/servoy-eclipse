@@ -37,6 +37,7 @@ import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
 public class ColumnAutoEnterServoySeqComposite extends Composite implements SelectionListener
@@ -54,7 +55,7 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -129,10 +130,10 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 			try
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
-				server = ServoyModel.getDeveloperRepository().getServer(column.getTable().getServerName());
+				server = ApplicationServerRegistry.get().getDeveloperRepository().getServer(column.getTable().getServerName());
 				if (server != null)
 				{
-					ISequenceProvider sp = ServoyModel.getServerManager().getSequenceProvider(server.getName());
+					ISequenceProvider sp = ApplicationServerRegistry.get().getServerManager().getSequenceProvider(server.getName());
 					Object sq = null;
 					if (sp != null && column.getExistInDB())
 					{
@@ -213,7 +214,7 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 
 					}
 					columnInfo.setSequenceStepSize(step);
-					ISequenceProvider sp = ServoyModel.getServerManager().getSequenceProvider(IServer.REPOSITORY_SERVER);
+					ISequenceProvider sp = ApplicationServerRegistry.get().getServerManager().getSequenceProvider(IServer.REPOSITORY_SERVER);
 					if (sp instanceof IColumnInfoBasedSequenceProvider)
 					{
 						((IColumnInfoBasedSequenceProvider)sp).setNextSequence(columnInfo);
@@ -232,7 +233,8 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 			{
 				try
 				{
-					nextValueText.setText(ServoyModel.getServerManager().getSequenceProvider(IServer.REPOSITORY_SERVER).syncSequence(column).toString());
+					nextValueText.setText(
+						ApplicationServerRegistry.get().getServerManager().getSequenceProvider(IServer.REPOSITORY_SERVER).syncSequence(column).toString());
 				}
 				catch (Exception ex)
 				{
@@ -247,7 +249,7 @@ public class ColumnAutoEnterServoySeqComposite extends Composite implements Sele
 				try
 				{
 					ServoyModelManager.getServoyModelManager().getServoyModel();
-					Object seq = ((IServerInternal)ServoyModel.getDeveloperRepository().getServer(column.getTable().getServerName())).getNextSequence(
+					Object seq = ((IServerInternal)ApplicationServerRegistry.get().getDeveloperRepository().getServer(column.getTable().getServerName())).getNextSequence(
 						column.getTable().getName(), column.getName());
 					nextValueText.setText(seq.toString());
 				}

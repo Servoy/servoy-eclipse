@@ -43,7 +43,6 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -56,6 +55,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ReplaceTableVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 
 public class ReplaceTableWizard extends Wizard implements INewWizard
@@ -144,7 +144,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 
 		/**
 		 * Creates a Replace Table wizard page.
-		 * 
+		 *
 		 * @param pageName the name of the page
 		 * @param selection the current resource selection
 		 */
@@ -156,7 +156,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 			setDialogSettings(Activator.getDefault().getDialogSettings());
 
 			ServoyModelManager.getServoyModelManager().getServoyModel();
-			repository = ServoyModel.getDeveloperRepository();
+			repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		}
 
 		public boolean getReplaceCalculationsAndAggregations()
@@ -222,7 +222,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 
 		/**
 		 * When a given server is selected, all the tables are updated in the sourceTablesCombo
-		 * 
+		 *
 		 * @param serverName
 		 */
 		private void updateSourceTablesCombo(String serverName)
@@ -245,7 +245,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 
 		/**
 		 * When a given server is selected all the tables are updated in the targetTablesCombo
-		 * 
+		 *
 		 * @param serverName
 		 */
 		private void updateTargetTablesCombo(String serverName)
@@ -291,7 +291,7 @@ public class ReplaceTableWizard extends Wizard implements INewWizard
 		}
 
 		/**
-		 * 
+		 *
 		 * @return a string[] with the selected combo items
 		 */
 		public String[] getSelectedItems()

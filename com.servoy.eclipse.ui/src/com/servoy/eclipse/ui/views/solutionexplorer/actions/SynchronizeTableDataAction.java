@@ -197,7 +197,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 			if (stn != null)
 			{
-				IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(stn[0], true, true);
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(stn[0], true, true);
 				if (server != null)
 				{
 					try

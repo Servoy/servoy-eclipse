@@ -27,7 +27,7 @@ import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -133,7 +133,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 			try
 			{
 				Solution solution = (Solution)parent;
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 				IValidateName nameValidator = servoyModel.getNameValidator();
 				ScriptCalculation calc = solution.createNewScriptCalculation(nameValidator, table, calcName, null);

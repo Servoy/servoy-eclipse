@@ -20,17 +20,17 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 
 /**
- * Content provider for solution names. 
- *  
+ * Content provider for solution names.
+ *
  * @author rgansevles
  *
  */
@@ -54,7 +54,7 @@ public class SolutionContentProvider extends FlatTreeContentProvider
 			RootObjectMetaData[] solutionMetaDatas;
 			try
 			{
-				solutionMetaDatas = ServoyModel.getDeveloperRepository().getRootObjectMetaDatasForType(IRepository.SOLUTIONS);
+				solutionMetaDatas = ApplicationServerRegistry.get().getDeveloperRepository().getRootObjectMetaDatasForType(IRepository.SOLUTIONS);
 				for (RootObjectMetaData element : solutionMetaDatas)
 				{
 					if ((((SolutionMetaData)element).getSolutionType() & options.solutionTypeFilter) != 0)

@@ -51,7 +51,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -74,6 +73,7 @@ import com.servoy.j2db.persistence.ScriptNameValidator;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * @author emera
@@ -211,7 +211,7 @@ public class SolutionStylePropertyController extends MediaIDPropertyController
 		Media defaultTheme = solution.createNewMedia(new ScriptNameValidator(), fileName);
 		defaultTheme.setMimeType("text/css");
 		defaultTheme.setPermMediaData(content);
-		EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+		EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 		repository.updateRootObject(solution);
 		return defaultTheme;
 	}

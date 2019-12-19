@@ -27,14 +27,14 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.persistence.Solution;
 
 /**
- * Base persist search implementation of {@link ISearchQuery} 
- * 
+ * Base persist search implementation of {@link ISearchQuery}
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -45,7 +45,7 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	private final boolean updateSearchResults;
 
 	/**
-	 * 
+	 *
 	 */
 	public AbstractPersistSearch()
 	{
@@ -81,13 +81,13 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 	/**
 	 * Returns a list of the Projects of a solution that has the given solution as a module.
 	 * Only the Projects that have the given solution as a module will be included.
-	 * 
+	 *
 	 * @param sol
 	 */
 	protected IResource[] getScopes(Solution sol)
 	{
 		List<IResource> scopes = new ArrayList<IResource>();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		// get the active solution and then all its modules (this is already flattened)
 		// this should include the start search project/solution itself.
@@ -114,12 +114,12 @@ public abstract class AbstractPersistSearch implements ISearchQuery
 
 	/**
 	 * Returns a list of all the Projects of the active solution, including all its modules.
-	 * 
+	 *
 	 */
 	protected IResource[] getAllScopes()
 	{
 		List<IResource> scopes = new ArrayList<IResource>();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		ServoyProject currentProject = servoyModel.getActiveProject();
 		Solution[] allSolutions = currentProject.getModules();

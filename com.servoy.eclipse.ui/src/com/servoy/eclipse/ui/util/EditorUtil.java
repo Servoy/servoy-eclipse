@@ -121,6 +121,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -695,7 +696,7 @@ public class EditorUtil
 
 	public static Form getForm(IEditorPart editorPart)
 	{
-		if (editorPart == null)
+		if (editorPart == null || ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
 		{
 			return null;
 		}
@@ -925,7 +926,7 @@ public class EditorUtil
 		boolean isView = false;
 		try
 		{
-			IServer s = ServoyModel.getServerManager().getServer(serverName);
+			IServer s = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 			if (s != null) isView = (s.getTableType(tableName) == ITable.VIEW);
 		}
 		catch (RepositoryException repEx)

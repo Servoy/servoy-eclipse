@@ -38,6 +38,7 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.FileTextSearchScope;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -121,7 +122,7 @@ public class ScriptVariableSearch extends DLTKSearchEngineSearch
 			if (formScopeOnly)
 			{
 				Form form = (Form)variable.getParent();
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 				ServoyProject servoyProject = servoyModel.getServoyProject(form.getSolution().getName());
 				IFile frmFile = servoyProject.getProject().getFile("forms/" + form.getName() + ".frm");
 				scopes = new IResource[] { frmFile };

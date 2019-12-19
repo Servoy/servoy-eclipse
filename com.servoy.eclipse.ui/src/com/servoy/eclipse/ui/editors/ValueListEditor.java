@@ -58,7 +58,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 
 import com.servoy.base.persistence.constants.IValueListConstants;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
@@ -109,6 +109,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 
@@ -170,6 +171,7 @@ public class ValueListEditor extends PersistEditor
 	private Combo displayType, realType;
 	private Label displayTypeLabel, realTypeLabel;
 	private Group typeDefinitionGroup;
+	private Composite parent;
 
 	@Override
 	protected boolean validatePersist(IPersist persist)
@@ -187,6 +189,16 @@ public class ValueListEditor extends PersistEditor
 	 */
 	@Override
 	public void createPartControl(Composite parent)
+	{
+		this.parent = parent;
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
+		{
+			init();
+		}
+	}
+
+	@Override
+	protected void init()
 	{
 		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(getPersist());
 
@@ -595,8 +607,9 @@ public class ValueListEditor extends PersistEditor
 		String message = checkValidState();
 		if (message == null)
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-			List<Problem> problems = ServoyBuilder.checkValuelist(getValueList(), servoyModel.getFlattenedSolution(), ServoyModel.getServerManager(), false);
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			List<Problem> problems = ServoyBuilder.checkValuelist(getValueList(), servoyModel.getFlattenedSolution(),
+				ApplicationServerRegistry.get().getServerManager(), false);
 			for (Problem problem : problems)
 			{
 				if (problem.fix != null)
@@ -619,7 +632,7 @@ public class ValueListEditor extends PersistEditor
 		{
 			handleCustomValuesButtonSelected();
 		}
-
+		parent.requestLayout();
 		doRefresh();
 	}
 
@@ -661,7 +674,7 @@ public class ValueListEditor extends PersistEditor
 	@Override
 	protected void doRefresh()
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		boolean activeSolutionIsMobile = servoyModel.isActiveSolutionMobile();
 
 		removeListeners();
@@ -1083,7 +1096,7 @@ public class ValueListEditor extends PersistEditor
 			getValueList().setDataSource(tableWrapper.getDataSource());
 			try
 			{
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 				if (servoyModel.getDataModelManager() != null)
 				{
 					servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(tableWrapper.getDataSource()));
@@ -1123,7 +1136,7 @@ public class ValueListEditor extends PersistEditor
 	{
 		if (isDirty())
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			IValidateName validator = servoyModel.getNameValidator();
 			try
 			{
@@ -1156,7 +1169,8 @@ public class ValueListEditor extends PersistEditor
 			else
 			{
 				// if valuelist still has invalid data in it, try to correct it automatically and tell the user what was changed
-				List<Problem> problems = ServoyBuilder.checkValuelist(getValueList(), servoyModel.getFlattenedSolution(), ServoyModel.getServerManager(), true);
+				List<Problem> problems = ServoyBuilder.checkValuelist(getValueList(), servoyModel.getFlattenedSolution(),
+					ApplicationServerRegistry.get().getServerManager(), true);
 				StringBuilder paf = new StringBuilder("Some problems with the contents of this valuelist were noticed and corrected:\n");
 				boolean autoFixes = false;
 				for (Problem problem : problems)

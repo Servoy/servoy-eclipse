@@ -20,9 +20,14 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.model.inmemory.AbstractMemTable;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class ColumnAllowNullEditingSupport extends EditingSupport
 {
@@ -39,11 +44,38 @@ public class ColumnAllowNullEditingSupport extends EditingSupport
 	{
 		if (element instanceof Column)
 		{
-			Column pi = (Column)element;
+			Column column = (Column)element;
 			Boolean allowNull = Boolean.parseBoolean(value.toString());
-			pi.setAllowNull(allowNull);
-			getViewer().update(element, null);
-			pi.getTable().fireIColumnChanged(pi);
+			boolean canChange = true;
+			if ((column.getTable() instanceof Table) && column.getTable().getExistInDB())
+			{
+				if (org.eclipse.jface.dialogs.MessageDialog.openConfirm(new Shell(), "Allow null modification",
+					"In order to change allow null for columns in existing table we have to drop and recreate the table. " +
+						"All data in table will be lost. This could be a problem if this table is already in production and it has data, then we are not able to update that column. " +
+						"Can we drop the existing table ? (save action will recreate it)"))
+				{
+					IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+					IServerInternal server = (IServerInternal)serverManager.getServer(column.getTable().getServerName(), true, true);
+					try
+					{
+						server.dropTable((Table)column.getTable());
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+				else
+				{
+					canChange = false;
+				}
+			}
+			if (canChange)
+			{
+				column.setAllowNull(allowNull);
+				getViewer().update(element, null);
+				column.getTable().fireIColumnChanged(column);
+			}
 		}
 	}
 
@@ -67,30 +99,6 @@ public class ColumnAllowNullEditingSupport extends EditingSupport
 	@Override
 	protected boolean canEdit(Object element)
 	{
-		if (element instanceof Column && editor != null)
-		{
-			Column c = (Column)element;
-			if (c.getTable() instanceof AbstractMemTable)
-			{
-				//always allow edit
-				return true;
-			}
-			if (c.getExistInDB())
-			{
-				return false;
-			}
-			else
-			{
-				if (c.getTable().getExistInDB())
-				{
-					return false; // how whould you fill the not null column for all existing rows?
-				}
-				else
-				{
-					return true;
-				}
-			}
-		}
-		return false;
+		return true;
 	}
 }

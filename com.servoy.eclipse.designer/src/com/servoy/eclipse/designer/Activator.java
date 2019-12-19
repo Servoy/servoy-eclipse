@@ -36,7 +36,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.core.I18NChangeListener;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -83,7 +83,7 @@ public class Activator extends AbstractUIPlugin
 		super.start(context);
 		plugin = this;
 
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.addI18NChangeListener(i18nChangeListener = new I18NChangeListener()
 		{
 			public void i18nChanged()

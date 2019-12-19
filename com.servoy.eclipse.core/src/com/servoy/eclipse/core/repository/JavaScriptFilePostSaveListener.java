@@ -48,6 +48,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class JavaScriptFilePostSaveListener implements IPostSaveListener
 {
@@ -58,7 +59,7 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#getName()
 	 */
 	public String getName()
@@ -68,7 +69,7 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#getId()
 	 */
 	public String getId()
@@ -78,7 +79,7 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#isEnabled(org.eclipse.dltk.core.ISourceModule)
 	 */
 	public boolean isEnabled(ISourceModule compilationUnit)
@@ -88,7 +89,7 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#needsChangedRegions(org.eclipse.dltk.core.ISourceModule)
 	 */
 	public boolean needsChangedRegions(ISourceModule compilationUnit) throws CoreException
@@ -98,7 +99,7 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.ui.editor.saveparticipant.IPostSaveListener#saved(org.eclipse.dltk.core.ISourceModule, org.eclipse.jface.text.IRegion[],
 	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
@@ -109,14 +110,16 @@ public class JavaScriptFilePostSaveListener implements IPostSaveListener
 			final File file = compilationUnit.getResource().getLocation().toFile();
 			final IProject project = compilationUnit.getScriptProject().getProject();
 			final ServoyModel servoyModel = (ServoyModel)ServoyModelFinder.getServoyModel();
-			final Solution solution = (Solution)ServoyModel.getDeveloperRepository().getActiveRootObject(project.getName(), IRepository.SOLUTIONS);
+			final Solution solution = (Solution)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObject(project.getName(),
+				IRepository.SOLUTIONS);
 			if (solution == null)
 			{
 				// a project that is not a servoy solution project
 				return;
 			}
 			final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
-			final SolutionDeserializer sd = new SolutionDeserializer(ServoyModel.getDeveloperRepository(), servoyProject, file, compilationUnit.getSource());
+			final SolutionDeserializer sd = new SolutionDeserializer(ApplicationServerRegistry.get().getDeveloperRepository(), servoyProject, file,
+				compilationUnit.getSource());
 			final IContainer workspace = project.getParent();
 			Set<IPersist> changedScriptElements = servoyModel.handleChangedFiles(project, solution, Collections.singletonList(file), servoyProject, sd);
 			// add this file to the ignore once list, so that the real save will not parse it again.

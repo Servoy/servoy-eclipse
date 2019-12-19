@@ -183,6 +183,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.ui.runtime.HasRuntimeClientProperty;
 import com.servoy.j2db.ui.runtime.HasRuntimeDesignTimeProperty;
 import com.servoy.j2db.ui.runtime.HasRuntimeElementType;
@@ -635,7 +636,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				ITable table = null;
 				try
 				{
-					table = ServoyModel.getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName()).getTable(
+					table = ApplicationServerRegistry.get().getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName()).getTable(
 						((TableWrapper)un.getRealObject()).getTableName());
 				}
 				catch (RemoteException e)

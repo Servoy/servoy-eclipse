@@ -51,7 +51,6 @@ import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.query.IJoinConstants;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -109,6 +108,7 @@ import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
@@ -668,7 +668,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			List<String> styleNames = new ArrayList<String>();
 			try
 			{
-				for (Style style : (List<Style>)ServoyModel.getDeveloperRepository().getActiveRootObjects(IRepository.STYLES))
+				for (Style style : (List<Style>)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObjects(IRepository.STYLES))
 				{
 					styleNames.add(style.getName());
 				}
@@ -895,7 +895,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				RootObjectMetaData[] solutionMetaDatas;
 				try
 				{
-					solutionMetaDatas = ServoyModel.getDeveloperRepository().getRootObjectMetaDatasForType(IRepository.SOLUTIONS);
+					solutionMetaDatas = ApplicationServerRegistry.get().getDeveloperRepository().getRootObjectMetaDatasForType(IRepository.SOLUTIONS);
 					for (RootObjectMetaData element : solutionMetaDatas)
 					{
 						if (!element.getName().equals(solName))

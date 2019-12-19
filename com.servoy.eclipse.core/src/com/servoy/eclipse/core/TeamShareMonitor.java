@@ -152,7 +152,7 @@ public class TeamShareMonitor
 		ignoreSetExtensionCheck = true;
 
 		// in case multiple projects have just been checked out and the user chose to modify the setting, don't ask him again
-		boolean initRepAsTeamProvider = Utils.getAsBoolean(ServoyModel.getSettings().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
+		boolean initRepAsTeamProvider = Utils.getAsBoolean(Settings.getInstance().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
 			String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT)));
 		if (initRepAsTeamProvider)
 		{
@@ -187,10 +187,10 @@ public class TeamShareMonitor
 							}
 							if (opt == 0)
 							{
-								ServoyModel.getSettings().setProperty(Settings.START_AS_TEAMPROVIDER_SETTING, "false");
+								Settings.getInstance().setProperty(Settings.START_AS_TEAMPROVIDER_SETTING, "false");
 								try
 								{
-									ServoyModel.getSettings().save();
+									Settings.getInstance().save();
 
 									// run later as we could be during startup - and some things are not initialized properly in this case
 									// and could cause restart to fail

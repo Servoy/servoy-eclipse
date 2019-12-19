@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -159,7 +159,7 @@ public class AddFieldAction extends DesignerToolbarAction
 		else
 		{
 			form = (Form)getContext(editPart, IRepository.FORMS);
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			flattenedSolution = servoyModel.getEditingFlattenedSolution(form);
 			table = servoyModel.getDataSourceManager().getDataSource(flattenedSolution.getFlattenedForm(form).getDataSource());
 			input = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, true, true, true, table != null, true,

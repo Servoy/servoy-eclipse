@@ -181,6 +181,7 @@ import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ISolutionImportListener;
 import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -258,12 +259,14 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * This view is meant to be similar to the old designer's tree (in editor) in looks and in functionality. It will show a logical presentation of the eclipse
@@ -929,7 +932,7 @@ public class SolutionExplorerView extends ViewPart
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(servoyProject != null);
 
 				// expand the servers node if we have invalid (but enabled) servers (expansion will occur after startup)
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				String[] array = serverManager.getServerNames(true, false, true, true);
 				for (String server_name : array)
 				{
@@ -1583,7 +1586,8 @@ public class SolutionExplorerView extends ViewPart
 				ServoyLog.logInfo("Could not convert tooltip text to HTML: " + text);
 			}
 			Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
-			int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / 72f);
+			float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
+			int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
 			browser.setText("<html><body style='background-color:#ffffcc;font-type:" + f.getFontData()[0].getName() + ";font-size:" + pxHeight +
 				"px;font-weight:500'>" + text + "</body></html>");
 			GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n")) ? new GridData(600, 150) : new GridData(450, 50);
@@ -1803,7 +1807,7 @@ public class SolutionExplorerView extends ViewPart
 	private void initTreeViewer()
 	{
 		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).flushCachedData();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] roots = servoyModel.getServoyProjects();
 
 		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
@@ -2281,7 +2285,7 @@ public class SolutionExplorerView extends ViewPart
 	{
 		boolean wasNull = false;
 
-		IServerManagerInternal serverManager = ServoyModel.getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		if (tableListener == null && serverListener == null)
 		{
 			wasNull = true;
@@ -3097,10 +3101,10 @@ public class SolutionExplorerView extends ViewPart
 		IAction newVariable = new NewVariableAction(this);
 		IAction newValueList = new NewValueListAction(this);
 		newPostgresqlDatabase = new NewPostgresDbAction(this);
-		newPostgresqlDatabase.setEnabledStatus();
+//		newPostgresqlDatabase.setEnabledStatus();
 		newSybaseDatabase = new NewSybaseDbAction(this);
-		newSybaseDatabase.setEnabledStatus();
-		ServoyModel.getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
+//		newSybaseDatabase.setEnabledStatus();
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(shell);
 		flagTenantColumn = new FlagTenantColumnAction(this);
@@ -3781,13 +3785,13 @@ public class SolutionExplorerView extends ViewPart
 
 		if (serverListener != null)
 		{
-			ServoyModel.getServerManager().removeServerListener(serverListener);
+			ApplicationServerRegistry.get().getServerManager().removeServerListener(serverListener);
 			if (discardListenerReferences) serverListener = null;
 		}
 
 		if (tableListener != null)
 		{
-			IServerManagerInternal serverManager = ServoyModel.getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			// add listeners to initial server list
 			String[] array = serverManager.getServerNames(false, false, true, true);
 			for (String server_name : array)
@@ -4068,7 +4072,7 @@ public class SolutionExplorerView extends ViewPart
 
 		if (segments != null && segments.length == 0) return null;
 
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject selectedProject = sm.getServoyProject(segments[0]);
 		ServoyResourcesProject resourcesProject = sm.getActiveResourcesProject();
 

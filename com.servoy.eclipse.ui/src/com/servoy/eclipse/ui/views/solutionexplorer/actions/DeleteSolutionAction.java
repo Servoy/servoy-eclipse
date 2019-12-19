@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.DeleteResourceAction;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -77,7 +77,7 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 		deleteAction.selectionChanged(new StructuredSelection(selectedProjects));
 		boolean foundProject = false;
 		// checks if the selected projects that will be deleted contain the active project
-		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject activeProject = servoyModel.getActiveProject();
 		if (activeProject != null)
 		{

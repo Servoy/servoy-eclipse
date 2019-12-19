@@ -19,7 +19,6 @@ package com.servoy.eclipse.core.quickfix;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -30,6 +29,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.UUID;
 
 public class AddTemplateArgumentsQuickFix implements IMarkerResolution
@@ -86,12 +86,13 @@ public class AddTemplateArgumentsQuickFix implements IMarkerResolution
 							String source = method.getSource();
 							if (source.startsWith("\t")) source = source.substring(1);
 							MethodTemplate template = MethodTemplate.getTemplate(method.getClass(), eventName);
-							MethodTemplate mixedTemplate = new MethodTemplate(template.getDescription(), new MethodArgument(method.getName(),
-								template.getSignature().getType(), template.getSignature().getDescription()), template.getArguments(), source, false);
+							MethodTemplate mixedTemplate = new MethodTemplate(template.getDescription(),
+								new MethodArgument(method.getName(), template.getSignature().getType(), template.getSignature().getDescription()),
+								template.getArguments(), source, false);
 							ServoyProject solutionServoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
 							JSDocScriptTemplates prefs = JSDocScriptTemplates.getTemplates(solutionServoyProject.getProject(), true);
 							String userTemplate = prefs.getMethodTemplate();
-							String comment = SolutionSerializer.getComment(method, null, ServoyModel.getDeveloperRepository());
+							String comment = SolutionSerializer.getComment(method, null, ApplicationServerRegistry.get().getDeveloperRepository());
 							String methodDeclaration = mixedTemplate.getMethodDeclaration(null, null, userTemplate);
 							if (comment != null && comment.indexOf(SolutionSerializer.PROPERTIESKEY) != -1)
 							{

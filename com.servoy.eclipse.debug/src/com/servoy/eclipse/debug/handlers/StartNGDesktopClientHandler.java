@@ -53,7 +53,7 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 
 import com.servoy.base.util.ITagResolver;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.NGClientStarter;
@@ -285,7 +285,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		monitor.beginTask(getStartTitle(), 5);
 		monitor.worked(1);
 
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject activeProject = servoyModel.getActiveProject();
 
 		if (activeProject != null && activeProject.getSolution() != null)

@@ -73,6 +73,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Handle requests from the rfb html editor.
@@ -131,7 +132,8 @@ public class EditorServiceHandler implements IServerService
 				Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
 				JSONObject result = new JSONObject();
 				result.put("font", f.getFontData()[0].getName());
-				int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / 72f);
+				float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
+				int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
 				result.put("size", pxHeight);
 				return result;
 			}

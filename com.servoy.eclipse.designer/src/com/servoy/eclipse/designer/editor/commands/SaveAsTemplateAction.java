@@ -56,6 +56,7 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -246,7 +247,7 @@ public class SaveAsTemplateAction extends SelectionAction
 		List<IPersist> sel = selected.stream().filter(p -> !isNested.test(unflattenedSelection, PersistHelper.getRealParent(p))).collect(Collectors.toList());
 
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+		EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 		try
 		{
 			StringResource template;

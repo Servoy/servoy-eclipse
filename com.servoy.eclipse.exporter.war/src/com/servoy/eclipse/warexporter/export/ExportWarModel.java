@@ -84,6 +84,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean usingDbiFileInfoOnly;
 	private boolean allRows;
 	private String warFileName;
+	private String userHome;
 	private String allowDataModelChanges = "true";
 	private boolean allowSQLKeywords;
 	private boolean updateSequences;
@@ -161,6 +162,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 
 		warFileName = settings.get("export.warfilename");
+		userHome = settings.get("export.userHome");
 		webXMLFileName = settings.get("export.webxmlfilename");
 		log4jConfigurationFile = settings.get("export.log4jConfigurationFile");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
@@ -360,6 +362,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 
 		settings.put("export.warfilename", warFileName);
+		settings.put("export.userHome", userHome);
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
 		settings.put("export.exportActiveSolution", exportActiveSolution);
@@ -1037,5 +1040,23 @@ public class ExportWarModel extends AbstractWarExportModel
 		return Stream.of(exportedComponentPackages, exportedServicePackages) //
 			.flatMap(Set::stream) //
 			.collect(Collectors.toSet());
+	}
+
+	/**
+	 * @return the userHome
+	 */
+	@Override
+	public String getUserHome()
+	{
+		return userHome;
+	}
+
+	/**
+	 * @param userHome the userHome to set
+	 */
+	@Override
+	public void setUserHome(String userHome)
+	{
+		this.userHome = userHome;
 	}
 }

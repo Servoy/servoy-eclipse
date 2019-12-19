@@ -102,6 +102,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedList;
@@ -138,7 +139,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 		servers.clear();
 		dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-		IServerManagerInternal sm = ServoyModel.getServerManager();
+		IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 		if (dmm == null)
 		{
 			errorPage = new WizardPage("No database information files found")
@@ -207,7 +208,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					}
 					else if (un.getType() == UserNodeType.TABLE || un.getType() == UserNodeType.VIEW)
 					{
-						IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName());
+						IServerInternal s = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(
+							((TableWrapper)un.getRealObject()).getServerName());
 						if (s.getConfig().isEnabled() || s.isValid()) servers.add(s);
 					}
 					else

@@ -45,7 +45,7 @@ import org.eclipse.ui.internal.browser.Messages;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.FlattenedSolutionDebugListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -123,7 +123,7 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 		monitor.worked(1);
 		try
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyProject activeProject = servoyModel.getActiveProject();
 			if (activeProject != null && activeProject.getSolution() != null)
 			{

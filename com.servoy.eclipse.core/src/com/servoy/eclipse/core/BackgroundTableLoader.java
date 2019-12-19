@@ -30,6 +30,7 @@ import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 
@@ -41,16 +42,13 @@ import com.servoy.j2db.util.Debug;
  */
 public class BackgroundTableLoader implements IActiveProjectListener
 {
-
-	private final IServerManagerInternal serverManager;
 	private boolean running = false;
 	private boolean paused = false;
 	private boolean tableListsLoaded = false;
 	private ServoyProject[] modules = null;
 
-	public BackgroundTableLoader(IServerManagerInternal serverManager)
+	public BackgroundTableLoader()
 	{
-		this.serverManager = serverManager;
 	}
 
 	public synchronized void startLoadingOfServers()
@@ -93,6 +91,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 	{
 		try
 		{
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			boolean buildAlreadyRun = false;
 			if (!tableListsLoaded)
 			{
