@@ -349,8 +349,12 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 		List<String> result = new ArrayList<>();
 		if (solutionType == SolutionMetaData.NG_CLIENT_ONLY && checkboxTableViewer.getCheckedElements().length > 0)
 		{
-			if (isChecked(SECURITY)) result.add("svySecurity");
-			if (isChecked(UTILS) || isChecked(SEARCH) || isChecked(NAVIGATION)) result.add("svyUtils");
+			if (isChecked(SECURITY))
+			{
+				result.add("svyProperties");
+				result.add("svySecurity");
+			}
+			if (isChecked(UTILS) || isChecked(SEARCH) || isChecked(NAVIGATION) || isChecked(SECURITY)) result.add("svyUtils");
 			if (isChecked(SEARCH)) result.add("svySearch");
 			if (isChecked(NAVIGATION))
 			{

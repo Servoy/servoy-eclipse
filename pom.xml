@@ -16,7 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.12/</eclipse.url>
+		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.14/</eclipse.url>
 		<git.url>http://download.eclipse.org/egit/updates</git.url>
 		<orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository</orbit.url>
 		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.12/</dltk.url>
