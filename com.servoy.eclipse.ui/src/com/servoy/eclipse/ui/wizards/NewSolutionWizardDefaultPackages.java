@@ -55,7 +55,7 @@ public class NewSolutionWizardDefaultPackages
 {
 	public static final String PACKAGES[] = { "12grid", "aggrid", "bootstrapcomponents", "servoyextra", "fontawesome", "bootstrapextracomponents" };
 
-	public static final String SOLUTIONS[] = { "svySearch", "svySecurity", "svyUtils", "svyNavigation", "svyNavigationUX" };
+	public static final String SOLUTIONS[] = { "svySearch", "svyProperties", "svySecurity", "svyUtils", "svyNavigation", "svyNavigationUX" };
 
 	private static NewSolutionWizardDefaultPackages INSTANCE;
 
