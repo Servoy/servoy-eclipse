@@ -44,7 +44,6 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.util.HTTPUtils;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -142,7 +141,7 @@ public class EditorContentFilter implements Filter
 					}
 				}
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest, css, formScripts, null, variableSubstitution, w,
-					null, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER, false);
+					null, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER, null);
 				w.flush();
 				return;
 			}
