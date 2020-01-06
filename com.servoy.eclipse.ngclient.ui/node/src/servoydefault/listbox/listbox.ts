@@ -49,6 +49,7 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField implements Afte
                 let change = changes[property];
                 switch ( property ) {
                     case "dataProviderID":
+                        this.dataProviderID += '';
                         this.selectedValues = this.dataProviderID.split('\n');
                         break;
 
