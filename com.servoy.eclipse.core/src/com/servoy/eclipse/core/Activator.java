@@ -229,46 +229,7 @@ public class Activator extends Plugin
 
 			for (String serverName : serverNames)
 			{
-				Alias alias = new Alias(serverName)
-				{
-					ManagedDriver driver = new ManagedDriver(getName())
-					{
-						@Override
-						public net.sourceforge.sqlexplorer.dbproduct.SQLConnection getConnection(User user) throws java.sql.SQLException
-						{
-							IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(getId());
-							try
-							{
-								return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this,
-									"Servoy server: " + getId());
-							}
-							catch (RepositoryException e)
-							{
-								throw new SQLException(e.getMessage());
-							}
-						}
-					};
-
-					/**
-					 * @see net.sourceforge.sqlexplorer.dbproduct.Alias#getDriver()
-					 */
-					@Override
-					public ManagedDriver getDriver()
-					{
-						return driver;
-					}
-				};
-				alias.setAutoLogon(true);
-				alias.setConnectAtStartup(false);
-				alias.setHasNoUserName(true);
-				try
-				{
-					aliasManager.addAlias(alias);
-				}
-				catch (ExplorerException e)
-				{
-					ServoyLog.logError(e);
-				}
+				generateSQLExplorerAlias(serverName);
 			}
 			try
 			{
@@ -526,6 +487,51 @@ public class Activator extends Plugin
 			}
 		}
 		return sqlExplorerLoaded.booleanValue();
+	}
+
+	public static Alias generateSQLExplorerAlias(String serverName)
+	{
+		AliasManager aliasManager = SQLExplorerPlugin.getDefault().getAliasManager();
+		Alias alias = new Alias(serverName)
+		{
+			ManagedDriver driver = new ManagedDriver(getName())
+			{
+				@Override
+				public net.sourceforge.sqlexplorer.dbproduct.SQLConnection getConnection(User user) throws java.sql.SQLException
+				{
+					IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(getId());
+					try
+					{
+						return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this, "Servoy server: " + getId());
+					}
+					catch (RepositoryException e)
+					{
+						throw new SQLException(e.getMessage());
+					}
+				}
+			};
+
+			/**
+			 * @see net.sourceforge.sqlexplorer.dbproduct.Alias#getDriver()
+			 */
+			@Override
+			public ManagedDriver getDriver()
+			{
+				return driver;
+			}
+		};
+		alias.setAutoLogon(true);
+		alias.setConnectAtStartup(false);
+		alias.setHasNoUserName(true);
+		try
+		{
+			aliasManager.addAlias(alias);
+		}
+		catch (ExplorerException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return alias;
 	}
 
 	/**

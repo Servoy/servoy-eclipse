@@ -145,6 +145,10 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 			}
 			SQLEditorInput input = new SQLEditorInput("SQL Editor " + serverName + ".sql");
 			Alias alias = SQLExplorerPlugin.getDefault().getAliasManager().getAlias(serverName);
+			if (alias == null)
+			{
+				alias = com.servoy.eclipse.core.Activator.generateSQLExplorerAlias(serverName);
+			}
 			input.setUser(alias.getDefaultUser());
 			try
 			{

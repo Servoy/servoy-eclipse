@@ -2365,6 +2365,8 @@ public class SolutionExplorerView extends ViewPart
 				{
 					Display.getDefault().asyncExec(() -> {
 						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
+						// just in case server was edited, so not really new, because of async, we may have lost the update call, make sure list is updated
+						((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(s.getName());
 						s.addTableListener(tableListener);
 					});
 				}
