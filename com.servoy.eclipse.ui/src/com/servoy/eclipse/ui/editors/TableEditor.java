@@ -46,7 +46,7 @@ import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.SQLExplorerLoader;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -261,7 +261,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private void createDataPage()
 	{
-		if (com.servoy.eclipse.core.Activator.getDefault().isSqlExplorerLoaded() && DataSourceUtils.getDBServernameTablename(table.getDataSource()) != null)
+		if (SQLExplorerLoader.isSqlExplorerLoaded() && DataSourceUtils.getDBServernameTablename(table.getDataSource()) != null)
 		{
 			addPage(800, dataComposite = new DataComposite(getContainer(), table), "Data");
 		}

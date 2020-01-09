@@ -328,6 +328,7 @@
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>org.eclipse.help.ui</module>
+				<module>org.eclipse.jface</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
 				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>

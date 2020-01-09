@@ -32,6 +32,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.SQLExplorerAliasCreatorJob;
+import com.servoy.eclipse.core.SQLExplorerLoader;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
@@ -69,7 +71,7 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sql_editor.png"));
 		setText("Open SQL Editor");
 		setToolTipText("Open the SQL Editor for this server");
-		sqlExplorerLoaded = com.servoy.eclipse.core.Activator.getDefault().isSqlExplorerLoaded();
+		sqlExplorerLoaded = SQLExplorerLoader.isSqlExplorerLoaded();
 		if (!sqlExplorerLoaded) setEnabled(false);
 	}
 
@@ -147,7 +149,7 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 			Alias alias = SQLExplorerPlugin.getDefault().getAliasManager().getAlias(serverName);
 			if (alias == null)
 			{
-				alias = com.servoy.eclipse.core.Activator.generateSQLExplorerAlias(serverName);
+				alias = SQLExplorerAliasCreatorJob.generateSQLExplorerAlias(serverName);
 			}
 			input.setUser(alias.getDefaultUser());
 			try

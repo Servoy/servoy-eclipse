@@ -98,7 +98,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </plugins>
 
    <features>
-      <feature id="com.servoy.eclipse.feature" version="8.5.0.3600_b1"/>
+      <feature id="com.servoy.eclipse.feature" version="2020.3.0.3560_rc"/>
       <feature id="org.eclipse.emf.common"/>
       <feature id="org.eclipse.emf.common.ui"/>
       <feature id="org.eclipse.emf.ecore"/>
@@ -117,6 +117,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </features>
 
    <configurations>
+      <plugin id="com.servoy.eclipse.ui.tweaks" autoStart="true" startLevel="3" />
       <plugin id="j2db_log4j" autoStart="true" startLevel="0" />
       <plugin id="org.apache.aries.spifly.dynamic.bundle" autoStart="true" startLevel="0" />
       <plugin id="org.apache.aries.util" autoStart="true" startLevel="0" />
