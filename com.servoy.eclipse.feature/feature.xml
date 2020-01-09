@@ -430,7 +430,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.equinox.concurrent"
          download-size="0"
          install-size="0"
-         version="1.1.400.v20190621-0852"
+         version="1.1.300.v20190514-1046"
          unpack="false"/>
 
    <plugin
@@ -466,20 +466,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          download-size="0"
          install-size="0"
          version="2020.3.0.3560_rc"
-         unpack="false"/>
-
-   <plugin
-         id="org.objectweb.asm"
-         download-size="0"
-         install-size="0"
-         version="7.2.0.v20191010-1910"
-         unpack="false"/>
-
-   <plugin
-         id="org.objectweb.asm.tree"
-         download-size="0"
-         install-size="0"
-         version="7.2.0.v20191010-1910"
          unpack="false"/>
 
    <plugin

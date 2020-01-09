@@ -19,7 +19,6 @@ package com.servoy.eclipse.ui.tweaks;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -31,9 +30,6 @@ import java.util.Set;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PlatformUI;
-
-import com.servoy.eclipse.ui.tweaks.bytecode.weave.ImageDescriptorWeaver;
-import com.servoy.j2db.util.Pair;
 
 /**
  * This class contains the mappings between old images locations and new image locations that are used to replace icons in non Servoy plug-ins.
@@ -47,60 +43,14 @@ public class ImageReplacementMapper
 	public static final String DARK_ICONS_PATH = "darkicons";
 
 	// just logging interceptable images stuff
-	private static boolean LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS = false;
+	private static final boolean LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS = false;
 
 	private static Set<String> interceptableUrls = null;
 	private static Set<Pair<Class< ? >, String>> interceptableFiles = null;
 
 	// replacements loaded from extension points
-	private final static Map<URL, AlternateImageLocation> urlReplacements = new HashMap<>();
-	private final static Map<Pair<String, String>, AlternateImageLocation> classAndFileNameReplacements = new HashMap<>();
-
-	private static interface AlternateImageLocation
-	{
-		ImageDescriptor createAlternateImage(Method urlCreatorMethod, Method classAndFileNameCreatorMethod)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException;
-	}
-
-	private static class AlternateURLImageLocation implements AlternateImageLocation
-	{
-
-		private final URL url;
-
-		public AlternateURLImageLocation(URL url)
-		{
-			this.url = url;
-		}
-
-		@Override
-		public ImageDescriptor createAlternateImage(Method urlCreatorMethod, Method classAndFileNameCreatorMethod)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-		{
-			return (ImageDescriptor)urlCreatorMethod.invoke(null, url);
-		}
-
-	}
-
-	private static class AlternateClassAndFileNameImageLocation implements AlternateImageLocation
-	{
-
-		private final Class< ? > relativeToClass;
-		private final String fileName;
-
-		public AlternateClassAndFileNameImageLocation(Class< ? > relativeToClass, String fileName)
-		{
-			this.relativeToClass = relativeToClass;
-			this.fileName = fileName;
-		}
-
-		@Override
-		public ImageDescriptor createAlternateImage(Method urlCreatorMethod, Method classAndFileNameCreatorMethod)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-		{
-			return (ImageDescriptor)classAndFileNameCreatorMethod.invoke(null, relativeToClass, fileName);
-		}
-
-	}
+	private final static Map<URL, URL> urlReplacements = new HashMap<>();
+	private final static Map<Pair<String, String>, URL> classAndFileNameReplacements = new HashMap<>();
 
 	private static void fill()
 	{
@@ -733,9 +683,9 @@ public class ImageReplacementMapper
 		}
 	}
 
-	private static AlternateURLImageLocation formatUrl(String alternateURL) throws MalformedURLException
+	private static URL formatUrl(String alternateURL) throws MalformedURLException
 	{
-		return new AlternateURLImageLocation(new URL(MessageFormat.format(alternateURL, new Object[] { getIconsPath() })));
+		return new URL(MessageFormat.format(alternateURL, new Object[] { getIconsPath() }));
 	}
 
 	/**
@@ -750,30 +700,28 @@ public class ImageReplacementMapper
 	 *
 	 * @return see description above.
 	 */
-	public static ImageDescriptor getFileBasedImageReplacement(Class< ? > classLocation, String fileName, final Method originalCreateFromURL,
-		final Method originalCreateFromFile) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	public static URL getReplacementFromFile(Class< ? > location, String filename)
 	{
 		if (PlatformUI.isWorkbenchRunning())
 		{
 			if (urlReplacements.size() == 0) fill();
-			AlternateImageLocation replacement = classAndFileNameReplacements.get(new Pair<>(classLocation.getName(), fileName));
+			URL replacement = classAndFileNameReplacements.get(new Pair<>(location.getName(), filename));
 
 			if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 			{
-				if (interceptableFiles.add(new Pair<Class< ? >, String>(classLocation, fileName)))
+				if (interceptableFiles.add(new Pair<Class< ? >, String>(location, filename)))
 				{
-					System.out.println(
-						(replacement == null ? "(ORIGINAL)" : "(REPLACED)") + " FileBasedImageReplacer: (" + classLocation + ", " + fileName + ")");
+					System.out.println((replacement == null ? "(ORIGINAL)" : "(REPLACED)") + " FileBasedImageReplacer: (" + location + ", " + filename + ")");
 				}
 			}
 
-			if (replacement != null) return replacement.createAlternateImage(originalCreateFromURL, originalCreateFromFile);
+			if (replacement != null) return replacement;
 		}
 		else if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 		{
-			System.out.println("skipped the url " + fileName + " because workbench is not running yet");
+			System.out.println("skipped the url " + filename + " because workbench is not running yet");
 		}
-		return (ImageDescriptor)originalCreateFromFile.invoke(null, new Object[] { classLocation, fileName });
+		return null;
 	}
 
 	/**
@@ -789,8 +737,7 @@ public class ImageReplacementMapper
 	 * @return see description above.
 	 * @throws IOException
 	 */
-	public static ImageDescriptor getUrlBasedImageReplacement(URL url, final Method originalCreateFromURL, final Method originalCreateFromFile)
-		throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException
+	public static URL getReplacementFromURL(URL url)
 	{
 		if (PlatformUI.isWorkbenchRunning())
 		{
@@ -801,10 +748,18 @@ public class ImageReplacementMapper
 				URI uri = URI.createURI(String.valueOf(url));
 				long bundleId = Long.parseLong(uri.host().split("\\.")[0]);//the first number after bundleentry:// is the bundle id
 				String name = Activator.getDefault().getBundle().getBundleContext().getBundle(bundleId).getSymbolicName();
-				if (name != null) stableUrl = new URL(URI.createPlatformPluginURI(name + uri.path(), true).toString());
+				if (name != null) try
+				{
+					stableUrl = new URL(URI.createPlatformPluginURI(name + uri.path(), true).toString());
+				}
+				catch (MalformedURLException e)
+				{
+					System.err.print("couldn't create url from bundle entry " + url);
+					return null;
+				}
 			}
 
-			AlternateImageLocation replacement = urlReplacements.get(stableUrl);
+			URL replacement = urlReplacements.get(stableUrl);
 
 			if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 			{
@@ -814,13 +769,13 @@ public class ImageReplacementMapper
 				}
 			}
 
-			if (replacement != null) return replacement.createAlternateImage(originalCreateFromURL, originalCreateFromFile);
+			if (replacement != null) return replacement;
 		}
 		else if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 		{
 			System.out.println("skipped the url " + url + " because workbench is not running yet");
 		}
-		return (ImageDescriptor)originalCreateFromURL.invoke(null, new Object[] { url });
+		return null;
 	}
 
 

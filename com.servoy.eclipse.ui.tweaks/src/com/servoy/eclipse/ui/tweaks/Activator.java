@@ -1,11 +1,13 @@
 package com.servoy.eclipse.ui.tweaks;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import java.net.URL;
+
+import org.eclipse.core.runtime.Plugin;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageDescriptorRelay;
 import org.osgi.framework.BundleContext;
 
-import com.servoy.eclipse.model.util.ModelUtils;
-
-public class Activator extends AbstractUIPlugin
+public class Activator extends Plugin
 {
 
 	/**
@@ -19,10 +21,38 @@ public class Activator extends AbstractUIPlugin
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
-		ModelUtils.assertUINotDisabled(PLUGIN_ID);
-
 		super.start(context);
 		plugin = this;
+		ImageDescriptor.loaderRelay = new ImageDescriptorRelay()
+		{
+			@Override
+			public URL getReplacementFromURL(URL url)
+			{
+				try
+				{
+					return ImageReplacementMapper.getReplacementFromURL(url);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				return null;
+			}
+
+			@Override
+			public URL getReplacementFromFile(Class< ? > location, String filename)
+			{
+				try
+				{
+					return ImageReplacementMapper.getReplacementFromFile(location, filename);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				return null;
+			}
+		};
 	}
 
 	@Override

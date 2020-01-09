@@ -2,26 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in For Various Look and Feel Tweaks (like changing any icon in developer)
 Bundle-SymbolicName: com.servoy.eclipse.ui.tweaks;singleton:=true
-Bundle-Version: 2020.3.0.3560_rc
+Bundle-Version:  2020.3.0.3560_rc
 Bundle-Activator: com.servoy.eclipse.ui.tweaks.Activator
 Bundle-Vendor: Servoy
 Bundle-ActivationPolicy: lazy
-Export-Package: com.servoy.eclipse.ui.tweaks,
- com.servoy.eclipse.ui.tweaks.bytecode.weave
+Export-Package: com.servoy.eclipse.ui.tweaks
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Service-Component: OSGI-INF/component.xml
-Import-Package: com.servoy.eclipse.model.util,
- com.servoy.j2db.util,
- org.eclipse.core.runtime;version="3.5.0",
+Import-Package: org.eclipse.core.runtime,
+ org.eclipse.core.runtime.preferences,
+ org.eclipse.emf.common.util,
  org.eclipse.jface.resource,
- org.eclipse.osgi.service.runnable;version="1.1.0",
- org.eclipse.ui.plugin,
- org.objectweb.asm;version="5.0.1",
- org.objectweb.asm.tree;version="5.0.1",
- org.osgi.framework;version="1.8.0",
- org.osgi.framework.hooks.weaving
-Require-Bundle: org.eclipse.emf.ecore,
- org.eclipse.core.runtime,
- org.eclipse.ui.workbench
+ org.eclipse.ui,
+ org.osgi.framework,
+ org.osgi.service.prefs
 Automatic-Module-Name: com.servoy.eclipse.ui.tweaks
