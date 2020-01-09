@@ -24,7 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,7 +41,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
 import org.apache.wicket.Session;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -88,7 +86,6 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.cheatsheets.ICheatSheetResource;
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
 import org.eclipse.ui.internal.registry.IActionSetDescriptor;
-import org.eclipse.ui.progress.WorkbenchJob;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
@@ -138,11 +135,8 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
-import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
@@ -160,13 +154,6 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IDeveloperURLStreamHandler;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
-
-import net.sourceforge.sqlexplorer.ExplorerException;
-import net.sourceforge.sqlexplorer.dbproduct.Alias;
-import net.sourceforge.sqlexplorer.dbproduct.AliasManager;
-import net.sourceforge.sqlexplorer.dbproduct.ManagedDriver;
-import net.sourceforge.sqlexplorer.dbproduct.User;
-import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 
 
 /**
@@ -196,52 +183,7 @@ public class Activator extends Plugin
 
 	private volatile boolean defaultAccessed = false;
 
-	private Boolean sqlExplorerLoaded = null;
-
 	private IDesignerCallback designerCallback;
-
-	/**
-	 * @author jcompagner
-	 */
-	private static final class SQLExplorerAliasCreatorJob extends WorkbenchJob
-	{
-		private SQLExplorerAliasCreatorJob(String name)
-		{
-			super(name);
-		}
-
-		@Override
-		public IStatus runInUIThread(IProgressMonitor monitor)
-		{
-			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
-
-			String[] serverNames = serverManager.getServerNames(true, true, false, false);
-			AliasManager aliasManager = SQLExplorerPlugin.getDefault().getAliasManager();
-
-			try
-			{
-				aliasManager.loadAliases();
-			}
-			catch (ExplorerException e1)
-			{
-				ServoyLog.logError(e1);
-			}
-
-			for (String serverName : serverNames)
-			{
-				generateSQLExplorerAlias(serverName);
-			}
-			try
-			{
-				aliasManager.saveAliases();
-			}
-			catch (ExplorerException e)
-			{
-				ServoyLog.logError(e);
-			}
-			return Status.OK_STATUS;
-		}
-	}
 
 
 	@Override
@@ -468,82 +410,6 @@ public class Activator extends Plugin
 		{
 			ServoyLog.logError("Failed to persist changes.", e);
 		}
-	}
-
-	public boolean isSqlExplorerLoaded()
-	{
-		if (sqlExplorerLoaded == null)
-		{
-			sqlExplorerLoaded = Boolean.FALSE;
-			try
-			{
-				Class.forName("net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin", false, getClass().getClassLoader());
-				sqlExplorerLoaded = Boolean.TRUE;
-				generateSQLExplorerAliasses();
-			}
-			catch (Exception e)
-			{
-				// ignore
-			}
-		}
-		return sqlExplorerLoaded.booleanValue();
-	}
-
-	public static Alias generateSQLExplorerAlias(String serverName)
-	{
-		AliasManager aliasManager = SQLExplorerPlugin.getDefault().getAliasManager();
-		Alias alias = new Alias(serverName)
-		{
-			ManagedDriver driver = new ManagedDriver(getName())
-			{
-				@Override
-				public net.sourceforge.sqlexplorer.dbproduct.SQLConnection getConnection(User user) throws java.sql.SQLException
-				{
-					IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(getId());
-					try
-					{
-						return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this, "Servoy server: " + getId());
-					}
-					catch (RepositoryException e)
-					{
-						throw new SQLException(e.getMessage());
-					}
-				}
-			};
-
-			/**
-			 * @see net.sourceforge.sqlexplorer.dbproduct.Alias#getDriver()
-			 */
-			@Override
-			public ManagedDriver getDriver()
-			{
-				return driver;
-			}
-		};
-		alias.setAutoLogon(true);
-		alias.setConnectAtStartup(false);
-		alias.setHasNoUserName(true);
-		try
-		{
-			aliasManager.addAlias(alias);
-		}
-		catch (ExplorerException e)
-		{
-			ServoyLog.logError(e);
-		}
-		return alias;
-	}
-
-	/**
-	 *
-	 */
-	private void generateSQLExplorerAliasses()
-	{
-		WorkbenchJob job = new SQLExplorerAliasCreatorJob("creating db aliasses");
-		job.setSystem(true);
-		job.setUser(false);
-		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		job.schedule();
 	}
 
 	@Override
