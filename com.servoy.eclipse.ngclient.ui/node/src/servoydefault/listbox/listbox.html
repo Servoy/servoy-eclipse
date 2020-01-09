@@ -4,7 +4,7 @@
 		style="width:100%; height:100%;"
 		[id]="servoyApi.getMarkupId()"
 		[hidden]=!visible 
-		(change)="multiUpdate(true)"
+		(change)="multiUpdate()"
 		[svyTooltip]="toolTipText"
 		[(ngModel)]="selectedValues"
 		multiple
@@ -19,7 +19,7 @@
 		[id]="servoyApi.getMarkupId()"
 		[value]="dataProviderID"
 		[hidden]=!visible 
-		(change)="multiUpdate(false)"
+		(change)="multiUpdate()"
 		[svyTooltip]="toolTipText"
 		[(ngModel)]="selectedValues"
     	#element>
