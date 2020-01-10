@@ -78,8 +78,10 @@ import com.servoy.j2db.server.ngclient.property.types.CSSPositionPropertyType;
 public class BasePropertyHandler implements IPropertyHandler
 {
 	// null type: use property controller internally
-	public static final PropertyDescription ANCHORS_DESCRIPTION = new PropertyDescriptionBuilder().withName("anchors").withConfig(
-		new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class))).build();
+	public static final PropertyDescription ANCHORS_DESCRIPTION = new PropertyDescriptionBuilder().withName("anchors")
+		.withConfig(
+			new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class)))
+		.build();
 
 	protected final PropertyDescriptor propertyDescriptor;
 
@@ -139,8 +141,11 @@ public class BasePropertyHandler implements IPropertyHandler
 
 		if (clazz == java.awt.Font.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(FontPropertyType.TYPE_NAME)).withConfig(
-				Boolean.FALSE).build();
+			return new PropertyDescriptionBuilder().withName(name)
+				.withType(TypesRegistry.getType(FontPropertyType.TYPE_NAME))
+				.withConfig(
+					Boolean.FALSE)
+				.build();
 		}
 
 		if (clazz == Border.class)
@@ -211,8 +216,9 @@ public class BasePropertyHandler implements IPropertyHandler
 	@Override
 	public boolean hasSupportForClientType(Object obj, ClientSupport csp)
 	{
-		return AnnotationManagerReflection.getInstance().hasSupportForClientType(propertyDescriptor.getReadMethod(), obj.getClass(), csp,
-			ClientSupport.Default);
+		return AnnotationManagerReflection.getInstance()
+			.hasSupportForClientType(propertyDescriptor.getReadMethod(), obj.getClass(), csp,
+				ClientSupport.Default);
 	}
 
 	@Override
@@ -237,7 +243,8 @@ public class BasePropertyHandler implements IPropertyHandler
 			if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
 				!(persistContext.getPersist() instanceof Tab) &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist())))
+					CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist())) ||
+				CSSPositionUtils.useCSSPosition(persistContext.getPersist()))
 			{
 				// for tab we always use location
 				CSSPositionUtils.setLocation((ISupportBounds)obj, ((Point)value).x, ((Point)value).y);
