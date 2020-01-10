@@ -47,7 +47,7 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
         super.ngOnChanges(changes);
     }
     
-    protected getNativeChild() {
+    public getNativeChild() {
         return this.child.nativeElement;
     }
 }

@@ -21,6 +21,7 @@ export class ServoyDefaultLabel extends ServoyDefaultBaseLabel implements AfterV
     }
     
     ngAfterViewInit() {
+        super.ngAfterViewInit();
         this.ngOnChanges( this.changes );
     }
 

@@ -7,6 +7,7 @@ import { SvyFormat } from './format/format.directive'
 import { DecimalkeyconverterDirective } from './utils/decimalkeyconverter.directive'
 import { FormatFilterPipe } from './format/format.pipe'
 import { StartEditDirective } from './utils/startedit.directive'
+import { ImageMediaIdDirective } from './utils/imagemediaid.directive';
 
 @NgModule({
     declarations: [ TooltipDirective,
@@ -15,7 +16,9 @@ import { StartEditDirective } from './utils/startedit.directive'
                     SvyFormat,
                     DecimalkeyconverterDirective,
                     FormatFilterPipe,
-                    StartEditDirective ],
+                    StartEditDirective,
+                    ImageMediaIdDirective
+                  ],
     imports: [],
     exports: [TooltipDirective,
               MnemonicletterFilterPipe,
@@ -23,7 +26,9 @@ import { StartEditDirective } from './utils/startedit.directive'
               SvyFormat,
               DecimalkeyconverterDirective,
               FormatFilterPipe,
-              StartEditDirective ],
+              StartEditDirective,
+              ImageMediaIdDirective
+             ],
     providers: [ TooltipService ]
   })
 

@@ -1,11 +1,12 @@
 import { Injectable, Renderer2 } from '@angular/core';
+import { ServoyBaseComponent } from './servoy_public';
 
 @Injectable()
 export class ComponentContributor {    
     private static listeners: Set<IComponentContributorListener> = new Set();
     
-    public componentCreated(nativeElement: any, renderer: Renderer2) {
-        ComponentContributor.listeners.forEach(listener => listener.componentCreated(nativeElement, renderer));
+    public componentCreated(component: ServoyBaseComponent) {
+        ComponentContributor.listeners.forEach(listener => listener.componentCreated(component));
     }
     
     public addComponentListener(listener:IComponentContributorListener) {
@@ -15,6 +16,6 @@ export class ComponentContributor {
 
 export interface IComponentContributorListener {
     
-    componentCreated(nativeElement: any, renderer: Renderer2);
+    componentCreated(component: ServoyBaseComponent);
     
 }

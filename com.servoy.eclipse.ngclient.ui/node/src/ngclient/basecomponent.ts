@@ -19,7 +19,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
     }
     
     ngAfterViewInit() {
-        this.componentContributor.componentCreated(this.getNativeChild(), this.renderer);
+        this.componentContributor.componentCreated(this);
      }
     
     protected addAttributes() {
@@ -30,7 +30,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
     /**
      * this should return the main native element (like the first div) 
      */
-    protected getNativeElement():any {
+    public getNativeElement():any {
         return this.elementRef.nativeElement;
     }
 
@@ -38,10 +38,14 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
     * sub classes can return a different native child then the default main element.
     * used currently only for horizontal aligment
     */
-    protected getNativeChild():any {
+    public getNativeChild():any {
         return this.elementRef.nativeElement;
     }
     
+    public getRenderer(): Renderer2 {
+        return this.renderer;
+    }
+
     public getWidth() : number{
         return this.getNativeElement().parentNode.parentNode.offsetWidth;
     }

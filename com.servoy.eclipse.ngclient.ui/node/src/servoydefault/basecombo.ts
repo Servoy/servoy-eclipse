@@ -101,7 +101,7 @@ export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
       this.closeDropdown();
     }
   }
-  protected getNativeChild():any {
+  public getNativeChild():any {
     if(this.inputElement)
       return this.inputElement.nativeElement;
   }

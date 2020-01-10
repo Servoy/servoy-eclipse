@@ -1,6 +1,6 @@
 import { Injectable, Renderer2 } from '@angular/core';
 
-import { SvyUtilsService, ComponentContributor, IComponentContributorListener } from '../ngclient/servoy_public';
+import { SvyUtilsService, ComponentContributor, IComponentContributorListener, ServoyBaseComponent } from '../ngclient/servoy_public';
 import {ServiceChangeHandler} from '../sablo/util/servicechangehandler'
 import { ServoyService } from '../ngclient/servoy.service'
 
@@ -20,7 +20,9 @@ export class KeyListener implements IComponentContributorListener {
         this._callbacks = callbacks;
     } 
     
-    public componentCreated(element:any, renderer:Renderer2) {
+    public componentCreated(component: ServoyBaseComponent) {
+        let element = component.getNativeChild();
+        let renderer = component.getRenderer();
         let attribute = element.getAttribute('keylistener');
         if (attribute)
         {
