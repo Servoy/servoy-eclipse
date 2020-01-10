@@ -194,7 +194,15 @@
 								<version>${project.version}</version>
 							</restrictTo>
 						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>com.servoy.eclipse.ui.tweaks</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
 					</filters>
+					
 				</configuration>
 			</plugin>
 			<plugin>
