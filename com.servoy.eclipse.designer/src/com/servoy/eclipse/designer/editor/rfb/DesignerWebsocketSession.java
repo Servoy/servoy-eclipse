@@ -224,9 +224,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
 							boolean isInCSSPositionContainer = false;
-							if (baseComponent.getParent() instanceof LayoutContainer)
+							if (PersistHelper.getRealParent(baseComponent) instanceof LayoutContainer)
 							{
-								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)baseComponent.getParent());
+								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)PersistHelper.getRealParent(baseComponent));
 							}
 							if (!responsive || isInCSSPositionContainer)
 								FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
@@ -608,8 +608,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						WebLayoutSpecification spec = null;
 						if (container.getPackageName() != null)
 						{
-							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-								container.getPackageName());
+							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState()
+								.getLayoutSpecifications()
+								.get(
+									container.getPackageName());
 							if (pkg != null)
 							{
 								spec = pkg.getSpecification(container.getSpecName());
@@ -622,8 +624,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						writer.value(value);
 
 						writer.key("svy-solution-layout-class");
-						value = Arrays.stream(container.getCssClasses().split(" ")).filter(cls -> !containerStyleClasses.contains(cls)).collect(
-							Collectors.joining(" "));
+						value = Arrays.stream(container.getCssClasses().split(" "))
+							.filter(cls -> !containerStyleClasses.contains(cls))
+							.collect(
+								Collectors.joining(" "));
 						writer.value(value);
 
 						writer.key("svy-title");
