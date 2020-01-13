@@ -3,7 +3,7 @@ import {SimpleChange} from '@angular/core';
 import { By }              from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
-import { TooltipService,} from '../../ngclient/servoy_public'
+import { TooltipService, ComponentContributor,} from '../../ngclient/servoy_public'
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 import { SabloModule } from '../../sablo/sablo.module'
 
@@ -15,7 +15,7 @@ describe( 'SvLabel', () => {
     beforeEach( async(() => {
         TestBed.configureTestingModule( {
             declarations: [ServoyDefaultLabel],
-            providers: [TooltipService],
+            providers: [TooltipService, ComponentContributor],
             imports: [
                 SabloModule, ServoyPublicModule],
         } )

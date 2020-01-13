@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ServoyDefaultButton } from './button';
 
 import { SabloModule } from '../../sablo/sablo.module'
-import { TooltipService} from '../../ngclient/servoy_public'
+import { TooltipService, ComponentContributor} from '../../ngclient/servoy_public'
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 
 describe('SvyButton', () => {
@@ -13,7 +13,7 @@ describe('SvyButton', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultButton],
-      providers: [ TooltipService],
+      providers: [ TooltipService, ComponentContributor],
       imports:[
                SabloModule, ServoyPublicModule],
     })
