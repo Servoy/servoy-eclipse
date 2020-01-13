@@ -4,11 +4,13 @@ import { Title } from '@angular/platform-browser';
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service'
 import { DialogWindowComponent } from './dialog-window/dialog-window.component';
-import { BSWindowManager } from '../bootstrap-window/window_manager';
+import { BSWindowManager } from '../bootstrap-window/window_manager'; 
 import { BSWindow } from '../bootstrap-window/window';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LocalStorageService } from 'angular-web-storage';
 import { SabloService } from '../../sablo/sablo.service';
+import { PlatformLocation } from '@angular/common';
+import { ApplicationService } from "./application.service";
 
 @Injectable()
 export class WindowService {
@@ -24,9 +26,13 @@ export class WindowService {
         private _injector: Injector,
         public localStorageService: LocalStorageService,
         private titleService: Title,
-        public sabloService: SabloService
-        ) {
+        public sabloService: SabloService, 
+        private platformLocation: PlatformLocation, 
+        private appService: ApplicationService) {
             this.bsWindowManager = new BSWindowManager();
+            this.platformLocation.onPopState((event) => {
+                    this.formService.goToForm(this.windowRefService.nativeWindow.location.hash.replace('#', ''));
+            });
     }
     
     public updateController(formName,formStructure) {
@@ -274,6 +280,10 @@ export class WindowService {
             if (this.servoyService.getSolutionSettings().windowName == name) { // main window form switch
                     this.servoyService.getSolutionSettings().mainForm = form;
                     this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
+                    if (this.appService.getUIProperty("servoy.ngclient.formbased_browser_history") !== false) {
+                        this.windowRefService.nativeWindow.location.hash = form.name;
+                        this.formService.goToForm(form.name);
+                    }
             }
             let formCache = this.formService.getFormCacheByName(form.name);
             if (formCache)

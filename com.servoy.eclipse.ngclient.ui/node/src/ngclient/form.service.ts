@@ -254,6 +254,10 @@ export class FormService {
 
         this.sabloService.callService("formService", "startEdit", messageForServer, true);
     }
+    
+    public goToForm(formname) {
+        this.sabloService.callService("formService", "gotoform", {formname: formname});
+    }
 }
 
 export class FormCache {

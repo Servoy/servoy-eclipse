@@ -25,7 +25,8 @@ describe('NGUtilsService', () => {
      windowRef =  {};
      servoyServiceRef =  {};
      windowRef.nativeWindow = {};
-     platformLocation = jasmine.createSpyObj("PlatformLocation", ["pushState", "onPopState"]);
+     windowRef.nativeWindow.location = {};
+     platformLocation = jasmine.createSpyObj("PlatformLocation", ["onPopState"]);
      // we use a useFactory because when using useValue that will be cloned, so you can adjust windowRef later on.
     TestBed.configureTestingModule({
       providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef }, 
@@ -47,8 +48,6 @@ describe('NGUtilsService', () => {
   
   it('it should call the setBackActionCallback method', inject([NGUtilsService], (service: NGUtilsService) => {
       service.backActionCB = "";
-      expect(platformLocation.pushState).toHaveBeenCalledWith('captureBack', null, null);
-      expect(platformLocation.pushState).not.toHaveBeenCalledWith('wrongArgument', null, null);
       expect(platformLocation.onPopState).toHaveBeenCalled();
   }));
 });

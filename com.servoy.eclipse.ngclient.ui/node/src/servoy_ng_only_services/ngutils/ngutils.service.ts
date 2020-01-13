@@ -6,7 +6,7 @@ import { ServiceChangeHandler } from '../../sablo/util/servicechangehandler'
 import { ServoyService } from "../../ngclient/servoy.service";
 
 @Injectable()
-export class NGUtilsService{
+export class NGUtilsService {
     private _tags:Tag[];
     private _styleclasses:Object;
     private _backActionCB: any;
@@ -15,7 +15,8 @@ export class NGUtilsService{
     constructor(private windowRef:WindowRefService,
             private changeHandler : ServiceChangeHandler,
             private servoyService : ServoyService,
-            private platformLocation : PlatformLocation) {
+            private platformLocation: PlatformLocation) {
+        this.windowRef.nativeWindow.location.hash = '';
     }
     
     get contributedTags():Tag[] {
@@ -198,7 +199,7 @@ export class NGUtilsService{
      */
     public removeFormStyleClass(formname,styleclass)
     {
-        // implemented in ngutils_server.js
+        // implemented in ngutils_server.js 
     }
     
     public setServiceChangeHandler(changeHandler : ServiceChangeHandler)
@@ -207,18 +208,23 @@ export class NGUtilsService{
     }
     
     /**
-     * Cancel the default back button action from browser and do a callback when clicking on it. 
+     * This will register a callback that will be triggered on all history/window popstate events (back,forward but also next main form).
+     * If this is registered then we will try to block the application from going out of the application.
+     * The callback gets 1 argument and that is the hash of the url, that represents at this time the form where the back button would go to.
+     * If this hash argument is an empty string then that means the backbutton was hit to the first loaded page and we force a forward again.
+     * @param {function} callback
      */
     public setBackActionCallback() {
-        this.platformLocation.pushState('captureBack', null, null);
-        this.platformLocation.onPopState((event: any) => {
-            if (event.state && event.state == 'captureBack') {
-                event.stopPropagation();
-                event.preventDefault();
-                this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script,[]);
-                this.platformLocation.pushState('captureBack', null, null);
+        this.platformLocation.onPopState((event) => {
+            if (this._backActionCB) {
+                let windowLocation = this.windowRef.nativeWindow.location;
+                if (windowLocation.hash) {
+                    this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script,[windowLocation.hash]);
+                } else if (windowLocation.pathname.endsWith("/index.html")) {
+                    this.platformLocation.forward(); // if the back button is registered then don't allow to move back, go to the first page again.
+                }
             }
-        })
+        });
     }
 }
 
