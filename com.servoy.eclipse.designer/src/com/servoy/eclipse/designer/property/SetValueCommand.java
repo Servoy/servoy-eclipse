@@ -129,14 +129,7 @@ public class SetValueCommand extends Command
 			BaseRestorableCommand.getRestorer(((IModelSavePropertySource)target).getSaveModel()) != null)
 		{
 			// save the state before applying the property
-			return new BaseRestorableCommand(label)
-			{
-				@Override
-				public void execute()
-				{
-					setPropertyValue((IModelSavePropertySource)target, propertyId, propertyValue);
-				}
-			};
+			return new RestorableSetValueCommand(label, (IModelSavePropertySource)target, propertyId, propertyValue);
 		}
 
 		// state cannot be saved, use the old style set-value-command

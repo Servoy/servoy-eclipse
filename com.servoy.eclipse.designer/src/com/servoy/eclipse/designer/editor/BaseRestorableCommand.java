@@ -30,7 +30,7 @@ import com.servoy.eclipse.ui.property.IRestorer;
 
 /**
  * Base command to save state of objects and restore from state in undo().
- * 
+ *
  * @author rgansevles
  *
  */
@@ -49,7 +49,7 @@ public abstract class BaseRestorableCommand extends Command
 		{
 			return null;
 		}
-		return (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+		return Platform.getAdapterManager().getAdapter(object, IRestorer.class);
 	}
 
 	public static Object getState(Object object)
@@ -58,7 +58,7 @@ public abstract class BaseRestorableCommand extends Command
 		{
 			return null;
 		}
-		IRestorer restorer = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+		IRestorer restorer = Platform.getAdapterManager().getAdapter(object, IRestorer.class);
 		if (restorer == null)
 		{
 			return null;
@@ -72,7 +72,7 @@ public abstract class BaseRestorableCommand extends Command
 		{
 			return null;
 		}
-		IRestorer restorer = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+		IRestorer restorer = Platform.getAdapterManager().getAdapter(object, IRestorer.class);
 		if (restorer == null)
 		{
 			return null;
@@ -84,7 +84,7 @@ public abstract class BaseRestorableCommand extends Command
 	{
 		if (states != null && states.containsKey(object))
 		{
-			// already saved 
+			// already saved
 			return;
 		}
 		save(object, getState(object));
@@ -94,7 +94,7 @@ public abstract class BaseRestorableCommand extends Command
 	{
 		if (states != null && states.containsKey(object))
 		{
-			// already saved 
+			// already saved
 			return;
 		}
 
@@ -111,7 +111,7 @@ public abstract class BaseRestorableCommand extends Command
 	/**
 	 * Set a property in the propertySource.
 	 * Save state for undo().
-	 *  
+	 *
 	 * @param propertySource
 	 * @param propertyName
 	 * @param location
@@ -128,7 +128,7 @@ public abstract class BaseRestorableCommand extends Command
 		}
 		else
 		{
-			// model of propertySource changed during setPropertyValue, 
+			// model of propertySource changed during setPropertyValue,
 			save(modelAfter, getRemovedState(modelAfter));
 		}
 	}
@@ -141,7 +141,7 @@ public abstract class BaseRestorableCommand extends Command
 			for (Entry<Object, Object> entry : states.entrySet())
 			{
 				Object object = entry.getKey();
-				IRestorer restorable = (IRestorer)Platform.getAdapterManager().getAdapter(object, IRestorer.class);
+				IRestorer restorable = Platform.getAdapterManager().getAdapter(object, IRestorer.class);
 				restorable.restoreState(object, entry.getValue());
 
 				// fire persist change recursively
