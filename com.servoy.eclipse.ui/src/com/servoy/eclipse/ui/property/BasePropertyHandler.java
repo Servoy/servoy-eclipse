@@ -243,8 +243,8 @@ public class BasePropertyHandler implements IPropertyHandler
 			if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
 				!(persistContext.getPersist() instanceof Tab) &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist())) ||
-				CSSPositionUtils.useCSSPosition(persistContext.getPersist()))
+					CSSPositionUtils.useCSSPosition(persistContext.getPersist())) ||
+				CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist()))
 			{
 				// for tab we always use location
 				CSSPositionUtils.setLocation((ISupportBounds)obj, ((Point)value).x, ((Point)value).y);
