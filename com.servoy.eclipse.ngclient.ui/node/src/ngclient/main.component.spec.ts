@@ -10,7 +10,7 @@ describe('MainComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        MainComponent,MockFormComponent,MockDefaultNavigator
+        MainComponent,MockFormComponent,MockDefaultNavigator,MockSessionView
       ],
       providers:    [ {provide: ServoyService, useValue: servicesService },
         { provide:AllServiceService, useValue: {} },
@@ -39,4 +39,9 @@ describe('MainComponent', () => {
   class MockDefaultNavigator{
     @Input('name')
     public name: string;
+  }
+@Directive({
+    selector: 'session-view'
+  })
+  class MockSessionView{
   }
