@@ -19,13 +19,13 @@ package com.servoy.eclipse.model.repository;
 import java.util.Properties;
 
 import com.servoy.j2db.persistence.IDeveloperRepository;
-import com.servoy.j2db.persistence.IRemoteRepository;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRepositoryFactory;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public class EclipseRepositoryFactory implements IRepositoryFactory
 {
@@ -51,7 +51,7 @@ public class EclipseRepositoryFactory implements IRepositoryFactory
 	/**
 	 * @see com.servoy.j2db.server.IRepositoryFactory#getRemoteRepository(com.servoy.j2db.persistence.IServerManagerInternal, com.servoy.j2db.util.Settings)
 	 */
-	public IRemoteRepository getRemoteRepository(IServerManagerInternal serverManager, Properties settings)
+	public IRepository getRemoteRepository(IServerManagerInternal serverManager, Properties settings)
 	{
 		init(serverManager, settings);
 		return repository;
