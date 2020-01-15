@@ -31,7 +31,7 @@ export class WindowService {
         private appService: ApplicationService) {
             this.bsWindowManager = new BSWindowManager();
             this.platformLocation.onPopState((event) => {
-                    this.formService.goToForm(this.windowRefService.nativeWindow.location.hash.replace('#', ''));
+                    this.formService.goToForm(this.platformLocation.hash.replace('#', ''));
             });
     }
     

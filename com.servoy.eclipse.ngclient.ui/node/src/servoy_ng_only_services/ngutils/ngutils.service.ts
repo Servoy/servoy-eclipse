@@ -217,10 +217,9 @@ export class NGUtilsService {
     public setBackActionCallback() {
         this.platformLocation.onPopState((event) => {
             if (this._backActionCB) {
-                let windowLocation = this.windowRef.nativeWindow.location;
-                if (windowLocation.hash) {
-                    this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script,[windowLocation.hash]);
-                } else if (windowLocation.pathname.endsWith("/index.html")) {
+                if (this.platformLocation.hash) {
+                    this.servoyService.executeInlineScript(this._backActionCB.formname, this._backActionCB.script,[this.platformLocation.hash]);
+                } else if (this.platformLocation.href.endsWith("/index.html")) {
                     this.platformLocation.forward(); // if the back button is registered then don't allow to move back, go to the first page again.
                 }
             }
