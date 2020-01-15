@@ -58,6 +58,11 @@ export class ApplicationService {
     
     public setUIProperty(key,value) {
         this.servoyService.getUIProperties().setUIProperty(key, value);
+        if(key == ClientPropertyConstants.WINDOW_BRANDING_ICON_32) {
+            this.setIcon(value, "32x32");
+        } else if (key == ClientPropertyConstants.WINDOW_BRANDING_ICON_192) {
+            this.setIcon(value, "192x192");
+        }
     }
     
     public getUserPropertyNames() {
@@ -194,5 +199,17 @@ export class ApplicationService {
         var context = this.windowRefService.nativeWindow.document.getElementsByTagName ("base")[0].getAttribute("href");
         return this.windowRefService.nativeWindow.location.protocol + '//'+ this.windowRefService.nativeWindow.location.host + context;
     }
-
+    
+    private setIcon(favicon, size) {
+        let link:any = document.querySelector("link[rel*='icon'][sizes='" + size + "']");
+        if(link && link.href != favicon) {
+            link.href = favicon;
+            document.getElementsByTagName('head')[0].appendChild(link);
+        }
+    }
 }
+
+class ClientPropertyConstants {
+    public static WINDOW_BRANDING_ICON_32='window.branding.icon.32';
+    public static WINDOW_BRANDING_ICON_192='window.branding.icon.192';
+ }
