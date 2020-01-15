@@ -24,6 +24,7 @@ import { I18NProvider } from './services/i18n_provider.service'
 import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
 import { ErrorBean } from '../servoycore/error-bean/error-bean';
 import { ServoyCoreSlider } from '../servoycore/slider/slider';
+import { SessionView } from '../servoycore/session-view/session-view';
 
 import { ComponentContributor } from './component_contributor.service';
 import { ServoyPublicModule } from './servoy_public.module';
@@ -36,6 +37,7 @@ import { ServoyPublicModule } from './servoy_public.module';
         DefaultLoginWindowComponent,
         FileUploadWindowComponent,
         DefaultNavigator,
+        SessionView,
 		ErrorBean,
         ServoyCoreSlider,
         DialogWindowComponent

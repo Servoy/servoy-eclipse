@@ -17,12 +17,14 @@ export class MainComponent {
     }
 
     public get mainForm() {
+        if (this.sessionProblem) return null;
         const mainForm = this.servoyService.getSolutionSettings().mainForm;
         if ( mainForm && mainForm.name ) return mainForm.name;
         return null;
     }
 
     public get navigatorForm() {
+        if (this.sessionProblem) return null;
         const navigatorForm = this.servoyService.getSolutionSettings().navigatorForm;
         if ( navigatorForm && navigatorForm.name && navigatorForm.name.lastIndexOf("default_navigator_container.html") == -1) return navigatorForm.name;
         return null;
@@ -32,4 +34,7 @@ export class MainComponent {
         return this.mainForm && this.formservice.getFormCacheByName( this.mainForm.toString() ).getComponent('svy_default_navigator') != null;
     }
     
+    public get sessionProblem(){
+       return this.servoyService.getSolutionSettings().sessionProblem; 
+    }
 }

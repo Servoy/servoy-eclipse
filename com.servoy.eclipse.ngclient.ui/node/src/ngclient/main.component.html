@@ -2,3 +2,4 @@
 <svy-default-navigator [name]="mainForm" *ngIf="hasDefaultNavigator()"></svy-default-navigator>
 <svy-form [name]="navigatorForm" *ngIf="navigatorForm != null"></svy-form>
 <svy-form [name]="mainForm" *ngIf="mainForm != null"></svy-form>
+<session-view *ngIf="sessionProblem != null"></session-view>

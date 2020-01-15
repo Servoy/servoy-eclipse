@@ -278,6 +278,7 @@ class SolutionSettings {
     public ltrOrientation: boolean = true;
     public mainForm: FormSettings;
     public navigatorForm: FormSettings;
+    public sessionProblem: SessionProblem;
 }
 
 class AnchorConstants {
@@ -291,3 +292,12 @@ export class FormSettings {
     public name: String;
     public size: { width: number, height: number };
 }
+
+export class SessionProblem {
+    public viewUrl: string;
+    public redirectUrl?: string;
+    public redirectTimeout?: number;
+    public stack?: string;
+}
+
+

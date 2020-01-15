@@ -6,6 +6,7 @@ import { ServicesService, ServiceProvider } from '../sablo/services.service';
 
 import { ApplicationService } from './services/application.service'
 import { WindowService } from './services/window.service'
+import { SessionService } from './services/session.service'
 
 import { KeyListener } from '../keylistener/keylistener.service';
 import { ComponentContributor } from './component_contributor.service';
@@ -27,6 +28,7 @@ export class AllServiceService implements ServiceProvider {
     constructor( private services: ServicesService,
         private $applicationService: ApplicationService,
         private $windowService: WindowService,
+        private $sessionService: SessionService,
         // generated services start
         private ngclientutils: NGUtilsService,
         private servoydefaultTypesRegisterService: TypesRegisterService,
@@ -41,7 +43,7 @@ export class AllServiceService implements ServiceProvider {
 }
 
 @NgModule( {
-    providers: [AllServiceService, ApplicationService, WindowService,SvyUtilsService,
+    providers: [AllServiceService, ApplicationService, WindowService,SvyUtilsService,SessionService,
                 KeyListener,
                 // generated services start
                 NGUtilsService, 
