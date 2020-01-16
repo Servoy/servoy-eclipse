@@ -24,6 +24,23 @@ export class PropertyUtils {
             }
         }
     }
+    
+    public static setRotation(element: any, renderer: Renderer2, rotation, size) {
+        var r = 'rotate(' + rotation + 'deg)';
+        renderer.setStyle( element, '-moz-transform',  r );
+        renderer.setStyle( element, '-webkit-transform', r );
+        renderer.setStyle( element, '-o-transform', r );
+        renderer.setStyle( element, '-ms-transform', r );
+        renderer.setStyle( element, 'transform', r );
+        renderer.setStyle( element, 'position', 'absolute' );
+        if (rotation == 90 || rotation == 270)
+        {
+            renderer.setStyle( element.getParent(), 'width', size.height+'px' );
+            renderer.setStyle( element.getParent(), 'height', size.width+'px' );
+            renderer.setStyle( element.getParent(), 'left', (size.width -size.height)/2 +'px' );
+            renderer.setStyle( element.getParent(), 'top', (size.height -size.width)/2 +'px' );
+        } 
+    }
 
     public static setBorder( element: any, renderer: Renderer2, newVal ) {
         if ( typeof newVal !== 'object' || newVal == null ) { renderer.removeStyle( element, 'border' ); return; }

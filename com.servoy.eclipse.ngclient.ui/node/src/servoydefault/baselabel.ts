@@ -42,6 +42,9 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
                     if ( change.currentValue ) this.renderer.setAttribute(this.elementRef.nativeElement,   'accesskey', change.currentValue );
                     else  this.renderer.removeAttribute(this.elementRef.nativeElement,  'accesskey' );
                     break;
+                case "textRotation":
+                    if (change.currentValue) PropertyUtils.setRotation(this.getNativeElement(), this.renderer, change.currentValue, this.size);
+                    break;
             }
         }
         super.ngOnChanges(changes);
