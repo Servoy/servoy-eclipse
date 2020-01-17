@@ -3259,19 +3259,24 @@ public class TypeCreator extends TypeCache
 		@Override
 		public Type createType(String context, String typeName)
 		{
-			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
-			if (fs == null) return null;
-			String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
-			Form form = fs.getForm(config);
-			if (form == null || !form.isResponsiveLayout()) return null;
-
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 			type.setAttribute(IMAGE_DESCRIPTOR, CONTAINERS);
-			EList<Member> members = type.getMembers();
 
-			for (String name : ContainersScope.getAllLayoutNames(fs.getFlattenedForm(form)))
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			if (fs == null) return type;
+			String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+			Form form = fs.getForm(config);
+			if (form == null) return type;
+			Form ff = fs.getFlattenedForm(form);
+			if (ff == null || !ff.isResponsiveLayout())
+			{
+				return type;
+			}
+
+			EList<Member> members = type.getMembers();
+			for (String name : ContainersScope.getAllLayoutNames(ff))
 			{
 				members.add(createProperty(name, true, getTypeRef(context, "RuntimeContainer"), "runtime container", CONTAINERS));
 			}
