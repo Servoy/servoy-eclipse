@@ -49,21 +49,10 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField implements Afte
                 let change = changes[property];
                 switch ( property ) {
                     case "dataProviderID":
-                        if ( this.selectedValues ) {
-                            if ( this.selectedValues.length > 1 ) {
-                                for ( var i = 0; i < this.selectedValues.length; i += 1 ) {
-                                    this.selectedValues[i] = '' + this.selectedValues[i];
-                                }
-                            } else {
-                            }
-                            break;
+                        this.selectedValues = [];
+                        if (this.multiselectListbox && this.dataProviderID) {
+                            this.selectedValues = (''+this.dataProviderID).split( '\n' );
                         }
-                        this.dataProviderID += '';
-                        if ( this.multiselectListbox == false ) {
-                            this.selectedValues = this.dataProviderID;
-                            break;
-                        }
-                        this.selectedValues = this.dataProviderID.split( '\n' );
                         break;
 
                 }
@@ -73,15 +62,9 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField implements Afte
     }
 
     multiUpdate() {
-
-        if ( this.selectedValues.length > 1 ) {
-            for ( var i = 0; i < this.selectedValues.length; i += 1 ) {
-                this.selectedValues[i] = '' + this.selectedValues[i];
-            }
-            this.update( this.selectedValues.join( '\n' ) );
-        } else {
-            this.update( this.selectedValues + '' );
+        for ( var i = 0; i < this.selectedValues.length; i += 1 ) {
+            this.selectedValues[i] = '' + this.selectedValues[i];
         }
-
+        this.update( this.selectedValues.join( '\n' ) );
     }
 }

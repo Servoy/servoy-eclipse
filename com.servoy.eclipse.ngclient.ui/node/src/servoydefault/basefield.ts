@@ -25,8 +25,6 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
     @Input() selectOnEnter;
     @Input() valuelistID;
 
-    valueBeforeChange: any;
-
     constructor(renderer: Renderer2, public formattingService : FormattingService) {
         super(renderer);
     }
@@ -43,12 +41,10 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
         if(this.onFocusGainedMethodID)
             this.renderer.listen( nativeElement, 'focus', ( e ) => {
                 this.onFocusGainedMethodID(e);
-                this.valueBeforeChange = nativeElement.value;
             } );
         if(this.onFocusLostMethodID)
             this.renderer.listen( nativeElement, 'blur', ( e ) => {
                 this.onFocusLostMethodID(e);
-                this.valueBeforeChange = nativeElement.value;
             } ); 
     }
 
@@ -83,13 +79,7 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
 
     update( val: string ) {
         if(!this.findmode && this.format) {
-            var newDataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
-            if(this.dataProviderID == newDataProviderID) {
-                this.getNativeElement().value = this.valueBeforeChange;
-            }
-            else {
-                this.dataProviderID = newDataProviderID;
-            }
+            this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
         }
         else this.dataProviderID = val;
         this.dataProviderIDChange.emit( this.dataProviderID );

@@ -64,7 +64,6 @@ export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField im
 
     this.renderer.listen( element, 'blur', ( event ) => {
       if(this.onFocusLostMethodID) this.onFocusLostMethodID(event);
-      this.valueBeforeChange = this.getNativeElement().value;
     });
 
     this.renderer.listen( element, 'contextmenu', ( e ) => {
