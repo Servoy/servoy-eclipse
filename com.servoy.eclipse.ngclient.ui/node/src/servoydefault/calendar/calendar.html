@@ -1,6 +1,7 @@
 <div class='input-group date'
 	[style]="(!readOnly && enabled && !findmode) ? { 'position':'relative'} : {'display':'inline', 'position':'relative'}"
 	[svyStartEdit]="'dataProviderID'"
+	[svyTooltip]="toolTipText"
     #element>
 	<input type="text" 
 	   class='svy-calendar form-control form-control-sm input-sm svy-padding-xs svy-line-height-normal'

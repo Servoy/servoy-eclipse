@@ -20,7 +20,7 @@ export class TooltipDirective implements OnDestroy {
         this.tooltipService.showTooltip(event, this.tooltipText, 750, 5000);
   }
 
-  @HostListener('mouseout')
+  @HostListener('mouseleave')
   onMouseLeave(): void {
     this.tooltipService.hideTooltip();
   }
