@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges,SimpleChanges, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule } from '@angular/core';
 
-import { FormService, FormCache, StructureCache, ComponentCache } from '../form.service';
+import { FormService, FormCache, StructureCache, FormComponentCache, ComponentCache } from '../form.service';
 
 import { ServoyService } from '../servoy.service'
 
@@ -16,12 +16,20 @@ import { ServoyApi } from '../servoy_api'
           <div *ngFor="let item of formCache.items" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
           </div>
+          <div *ngFor="let formComponent of formCache.formComponents" [config]="formComponent" style="position:absolute" [config]="formComponent"> <!-- main container div -->
+            <ng-template *ngFor="let item of formComponent.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
+          </div>
       </div>
       <div *ngIf="!formCache.absolute" [config]="formCache.mainStructure"> <!-- main container div -->
             <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component or responsive div  -->
       </div>
           
       <ng-template  #svyResponsiveDiv  let-state="state" >
+          <div [config]="state">
+                     <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
+          </div>
+      </ng-template>
+      <ng-template  #formComponentDiv  let-state="state" >
           <div [config]="state">
                      <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
           </div>
@@ -122,6 +130,7 @@ import { ServoyApi } from '../servoy_api'
 
 export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild( 'svyResponsiveDiv' ,{static: true}) readonly svyResponsiveDiv: TemplateRef<any>;
+    @ViewChild( 'formComponentDiv' ,{static: true}) readonly formComponentDiv: TemplateRef<any>;
     // component template generate start
     @ViewChild( 'servoydefaultTextfield' ,{static: true}) readonly servoydefaultTextfield: TemplateRef<any>;
     @ViewChild( 'servoydefaultTextarea' ,{static: true}) readonly servoydefaultTextarea: TemplateRef<any>;
@@ -167,9 +176,11 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         this.ngOnInit();
     }
     
-    getTemplate( item: StructureCache | ComponentCache ): TemplateRef<any> {
+    getTemplate( item: StructureCache | ComponentCache | FormComponentCache ): TemplateRef<any> {
         if ( item instanceof StructureCache ) {
             return this.svyResponsiveDiv;
+        } else if ( item instanceof FormComponentCache ) {
+            return this.formComponentDiv;
         }
         else {
             if (this[item.type] === undefined && item.type !== undefined) {

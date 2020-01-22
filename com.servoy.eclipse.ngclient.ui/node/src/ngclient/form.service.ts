@@ -126,7 +126,7 @@ export class FormService {
 //        delete this.touchedForms[formName];
     }
 
-    private walkOverChildren( children, formCache: FormCache, parent?: StructureCache ) {
+    private walkOverChildren( children, formCache: FormCache, parent?: StructureCache | FormComponentCache ) {
         children.forEach(( elem ) => {
             if ( elem.layout == true ) {
                 const structure = new StructureCache( elem.styleclass );
@@ -137,7 +137,17 @@ export class FormService {
                 else {
                     parent.addChild(structure);
                 }
-            }
+            } else
+                if ( elem.formComponent == true ) {
+                    const structure = new FormComponentCache();
+                    this.walkOverChildren(elem.children, formCache, structure);
+                    if (parent == null) {
+                        formCache.addFormComponent(structure);
+                    }
+                    else {
+                        parent.addChild(structure);
+                    }
+                }    
             else {
                 if ( elem.model[ConverterService.TYPES_KEY] != null ) {
                     this.converterService.convertFromServerToClient( elem.model, elem.model[ConverterService.TYPES_KEY], null, (property: string) => { return elem.model ? elem.model[property] : elem.model } );
@@ -264,6 +274,7 @@ export class FormCache {
     private componentCache: Map<String, ComponentCache>;
     private _mainStructure: StructureCache;
 
+    private _formComponents : Array<FormComponentCache>;
     private _items: Array<ComponentCache>;
     public navigatorForm: FormSettings;
     private conversionInfo = {};
@@ -271,6 +282,7 @@ export class FormCache {
     constructor() {
         this.componentCache = new Map();
         this._items = [];
+        this._formComponents = [];
     }
     public add( comp: ComponentCache ) {
         this.componentCache.set( comp.name, comp );
@@ -285,6 +297,10 @@ export class FormCache {
         return this._mainStructure;
     }
 
+    get formComponents(): Array<FormComponentCache> {
+        return this._formComponents;
+    }
+    
     get absolute(): boolean {
         return this._mainStructure == null;
     }
@@ -292,6 +308,10 @@ export class FormCache {
         return this._items;
     }
 
+    public addFormComponent(formComponent : FormComponentCache){
+        this._formComponents.push( formComponent ); 
+    }
+    
     public getComponent( name: string ): ComponentCache {
         return this.componentCache.get( name );
     }
@@ -309,9 +329,9 @@ export class FormCache {
         }
     }
 
-    private findComponents( structure: StructureCache ) {
+    private findComponents( structure: StructureCache | FormComponentCache ) {
         structure.items.forEach( item => {
-            if ( item instanceof StructureCache ) {
+            if ( item instanceof StructureCache || item instanceof FormComponentCache ) {
                 this.findComponents( item );
             }
             else {
@@ -332,14 +352,27 @@ export class ComponentCache {
 
 export class StructureCache {
     constructor( public readonly classes: Array<string>,
-        public readonly items?: Array<StructureCache | ComponentCache> ) {
+        public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
         if ( !this.items ) this.items = [];
     }
 
-    addChild( child: StructureCache | ComponentCache ): StructureCache {
+    addChild( child: StructureCache | ComponentCache | FormComponentCache ): StructureCache {
         this.items.push( child );
         if ( child instanceof StructureCache )
             return child as StructureCache;
         return null;
     }
+}
+
+export class FormComponentCache{
+    constructor( public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
+            if ( !this.items ) this.items = [];
+        }
+
+        addChild( child: StructureCache | ComponentCache | FormComponentCache): FormComponentCache {
+            this.items.push( child );
+            if ( child instanceof FormComponentCache )
+                return child as FormComponentCache;
+            return null;
+        }
 }
