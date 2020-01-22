@@ -128,7 +128,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						//we need to ask for component spec
 						List<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
-						WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+						WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 						for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
 						{
 							if (webComponentSpec.isDeprecated()) continue;
@@ -457,7 +457,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex)
 	{
 		int index = arrayIndex;
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(parentBean.getTypeName());
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentBean.getTypeName());
 		boolean isArray = spec.isArrayReturnType(propertyName);
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());

@@ -247,7 +247,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 										if (componentName.startsWith("\"") || componentName.startsWith("'"))
 										{
 											componentName = componentName.replaceAll("'|\"", "");
-											if (WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentName) != null)
+											if (WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentName) != null)
 											{
 												usedComponents.add(componentName);
 											}

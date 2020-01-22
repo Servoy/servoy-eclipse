@@ -164,7 +164,7 @@ public class ModelUtils
 		WebObjectSpecification spec = null;
 		if (persist instanceof IFormElement)
 		{
-			spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+			spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 				FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
 		}
 		else if (persist instanceof LayoutContainer)

@@ -3276,7 +3276,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			WebComponent parentComponent = (WebComponent)persistContext.getPersist().getAncestor(IRepository.WEBCOMPONENTS);
 			if (parentComponent != null)
 			{
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(parentComponent.getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(parentComponent.getTypeName());
 				Collection<PropertyDescription> formComponentProperties = spec.getProperties(FormComponentPropertyType.INSTANCE);
 				if (!formComponentProperties.isEmpty())
 				{

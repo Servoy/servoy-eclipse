@@ -55,7 +55,7 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 		for (String component : exportModel.getExportedComponents())
 		{
 			//make sure that the component exported the last time was not removed
-			if (componentsSpecProviderState.getWebComponentSpecification(component) != null) selectedComponents.add(component);
+			if (componentsSpecProviderState.getWebObjectSpecification(component) != null) selectedComponents.add(component);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	protected Set<String> getAvailableItems()
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebComponentSpecifications())
+		for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebObjectSpecifications())
 		{
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}

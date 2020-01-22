@@ -729,7 +729,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static PaletteEntry createComponentsEntry(String beanClassName, SpecProviderState componentsSpecProviderState)
 	{
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(beanClassName);
-		WebObjectSpecification webComponentDescription = componentsSpecProviderState.getWebComponentSpecification(webComponentClassName);
+		WebObjectSpecification webComponentDescription = componentsSpecProviderState.getWebObjectSpecification(webComponentClassName);
 		Dimension dimension = getDimensionFromSpec(webComponentDescription);
 		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("ng_component.png");
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_COMPONENT, dimension);

@@ -53,7 +53,7 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 			exportModel.getExportedServices().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedServices())) return;
 		for (String service : exportModel.getExportedServices())
 		{
-			if (servicesSpecProviderState.getWebComponentSpecification(service) != null) selectedComponents.add(service);
+			if (servicesSpecProviderState.getWebObjectSpecification(service) != null) selectedComponents.add(service);
 		}
 	}
 

@@ -129,7 +129,7 @@ public class DeprecatedSpecQuickFix extends WorkbenchMarkerResolution
 				{
 					message = "The package with name '" + packageName + "' cannot be found. You might need to install it manually.";
 				}
-				else if (WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(replacement) == null)
+				else if (WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(replacement) == null)
 				{
 					message = "The component with name '" + packLayoutNames[1] + "' does not exist in package '" + packageName + "'";
 				}

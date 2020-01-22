@@ -2248,7 +2248,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(webcomponent);
 
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(webComponentClassName);
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
 		if (spec != null)
 		{
 			extractApiDocs(spec);

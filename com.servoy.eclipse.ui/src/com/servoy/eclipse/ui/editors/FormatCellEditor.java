@@ -102,7 +102,7 @@ public class FormatCellEditor extends TextDialogCellEditor
 			{
 				webComponentClassName = ((IBasicWebObject)persist).getTypeName();
 			}
-			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(webComponentClassName);
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(webComponentClassName);
 			if (spec != null)
 			{
 				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();

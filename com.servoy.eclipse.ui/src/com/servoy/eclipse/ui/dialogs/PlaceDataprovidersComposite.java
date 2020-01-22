@@ -1024,7 +1024,7 @@ public class PlaceDataprovidersComposite extends Composite
 				String typeName = object.optString(IContentSpecConstants.PROPERTY_TYPENAME);
 				if (typeName != null)
 				{
-					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(typeName);
+					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(typeName);
 					return spec != null && !spec.getProperties(DataproviderPropertyType.INSTANCE).isEmpty();
 				}
 			}

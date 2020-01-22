@@ -35,7 +35,7 @@ public class IsContainerPropertyTester extends PropertyTester
 			PersistContext persistContext = (PersistContext)receiver;
 			if (persistContext.getPersist() instanceof WebComponent)
 			{
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)persistContext.getPersist()).getTypeName());
 				Map<String, PropertyDescription> properties = spec.getProperties();
 				for (PropertyDescription propertyDescription : properties.values())
 				{

@@ -111,7 +111,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof WebComponent)
 		{
-			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((WebComponent)persist).getTypeName());
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)persist).getTypeName());
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			for (PropertyDescription propertyDescription : properties.values())
 			{

@@ -318,7 +318,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					{
 						if (persist instanceof IBasicWebObject)
 						{
-							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 								((IBasicWebObject)persist).getTypeName());
 							if (spec != null && spec.getHandler(methodKey) != null)
 							{

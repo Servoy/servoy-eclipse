@@ -363,7 +363,7 @@ public class ElementFactory
 	public static WebComponent createWebComponent(Form parent, String name, Point location) throws RepositoryException
 	{
 		WebComponent webComponent = null;
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(name);
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(name);
 		if (spec != null)
 		{
 			String compName = null;
@@ -668,7 +668,7 @@ public class ElementFactory
 						}
 						else if (label instanceof WebComponent)
 						{
-							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 								((WebComponent)label).getTypeName());
 							Collection<PropertyDescription> labelForProperties = spec.getProperties(LabelForPropertyType.INSTANCE);
 							for (PropertyDescription pd : labelForProperties)
@@ -726,7 +726,7 @@ public class ElementFactory
 						bc = (BaseComponent)templateComp[0];
 						if (bc instanceof WebComponent)
 						{
-							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 								((WebComponent)bc).getTypeName());
 							Collection<PropertyDescription> properties = spec.getProperties(DataproviderPropertyType.INSTANCE);
 							for (PropertyDescription pd : properties)
@@ -1981,7 +1981,7 @@ public class ElementFactory
 		}
 		else if (formElement instanceof WebComponent)
 		{
-			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 				((WebComponent)formElement).getTypeName());
 			Collection<PropertyDescription> labelForProperties = spec.getProperties(TagStringPropertyType.INSTANCE);
 			for (PropertyDescription pd : labelForProperties)

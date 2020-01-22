@@ -594,7 +594,7 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
-					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(name);
+					WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(name);
 					if (spec != null)
 					{
 						String compName = null;
@@ -815,7 +815,7 @@ public class CreateComponentHandler implements IServerService
 	protected ChildWebComponent createNestedWebComponent(WebComponent parentWebComponent, PropertyDescription pd, String componentSpecName, String propertyName,
 		int indexIfInArray, int x, int y, int width, int height)
 	{
-		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentSpecName);
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentSpecName);
 		if (spec != null)
 		{
 			String compName = null;
@@ -893,7 +893,7 @@ public class CreateComponentHandler implements IServerService
 							String compName = "component_" + id.incrementAndGet();
 							WebComponent component = container.createNewWebComponent(compName, jsonObject.getString("componentName"));
 							newPersists.add(component);
-							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 								jsonObject.getString("componentName"));
 							if (spec != null)
 							{

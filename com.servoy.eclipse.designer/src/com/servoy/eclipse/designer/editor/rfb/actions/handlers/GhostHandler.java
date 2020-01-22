@@ -129,11 +129,11 @@ public class GhostHandler implements IServerService
 				if (FormTemplateGenerator.isWebcomponentBean(basicWebComponent))
 				{
 					SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-					WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(basicWebComponent.getTypeName());
+					WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(basicWebComponent.getTypeName());
 					if (spec == null)
 					{
 						//error bean
-						spec = componentsSpecProviderState.getWebComponentSpecification(FormElement.ERROR_BEAN);
+						spec = componentsSpecProviderState.getWebObjectSpecification(FormElement.ERROR_BEAN);
 					}
 					Map<String, PropertyDescription> properties = spec.getProperties();
 					if (basicWebComponent instanceof WebComponent && !FormElement.ERROR_BEAN.equals(spec.getName())) // could be legacy Bean (was used in alphas/betas) - that is unlikely though
@@ -533,7 +533,7 @@ public class GhostHandler implements IServerService
 					writeGhostsForWebcomponentBeans((IBasicWebComponent)o, parentID, parentFormComponentPath);
 
 					String componentType = FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)o);
-					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentType);
+					WebObjectSpecification specification = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(componentType);
 					if (specification != null)
 					{
 						Collection<PropertyDescription> properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
@@ -734,7 +734,7 @@ public class GhostHandler implements IServerService
 			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
 			{
 				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((WebComponent)fe).getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)fe).getTypeName());
 				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
 				{
 					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();

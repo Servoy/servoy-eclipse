@@ -607,7 +607,7 @@ public class DesignerUtil
 				if (spec != null)
 				{
 					if (allowedChildren.contains(spec) || allowedChildren.contains(packAndSpec) ||
-						allowedChildren.contains("component") && WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(spec) != null)
+						allowedChildren.contains("component") && WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(spec) != null)
 					{
 						return true;
 					}

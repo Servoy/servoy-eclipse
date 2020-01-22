@@ -933,7 +933,7 @@ public class SolutionExplorerTreeContentProvider
 					else if (type == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || type == UserNodeType.LAYOUT_NONPROJECT_PACKAGE)
 					{
 						String packageName = getPackageName(un);
-						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getComponentsInPackage(packageName));
+						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getWebObjectsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
 						{
@@ -943,7 +943,7 @@ public class SolutionExplorerTreeContentProvider
 							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
-								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
+								WebObjectSpecification spec = getComponentsSpecProviderState().getWebObjectSpecification(component);
 								Image img = getIconFromSpec(spec, false);
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
@@ -975,7 +975,7 @@ public class SolutionExplorerTreeContentProvider
 					{
 						String packageName = getPackageName(un);
 						Set<String> folderNames = new HashSet<String>();
-						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getComponentsInPackage(packageName));
+						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getWebObjectsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
 						{
@@ -1055,7 +1055,7 @@ public class SolutionExplorerTreeContentProvider
 								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
 								for (String component : services)
 								{
-									WebObjectSpecification spec = provider.getWebComponentSpecification(component);
+									WebObjectSpecification spec = provider.getWebObjectSpecification(component);
 									Image img = getIconFromSpec(spec, true);
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 										img != null ? img : serviceDefaultIcon);
@@ -1152,7 +1152,7 @@ public class SolutionExplorerTreeContentProvider
 	{
 		for (String component : services)
 		{
-			WebObjectSpecification spec = provider.getWebComponentSpecification(component);
+			WebObjectSpecification spec = provider.getWebObjectSpecification(component);
 			String folderName = getFolderNameFromSpec(spec);
 			try
 			{
@@ -1741,7 +1741,7 @@ public class SolutionExplorerTreeContentProvider
 				else if (un.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_NONPROJECT_PACKAGE)
 				{
 					return getComponentsSpecProviderState() != null &&
-						(!getComponentsSpecProviderState().getComponentsInPackage(getPackageName(un)).isEmpty() ||
+						(!getComponentsSpecProviderState().getWebObjectsInPackage(getPackageName(un)).isEmpty() ||
 							!getComponentsSpecProviderState().getLayoutsInPackage(getPackageName(un)).isEmpty());
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE)

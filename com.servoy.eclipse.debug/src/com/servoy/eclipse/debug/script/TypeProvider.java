@@ -234,7 +234,7 @@ public class TypeProvider implements ITypeProvider
 			}
 			if (TypeCreator.CUSTOM_TYPE.toLowerCase().startsWith(prefixLower))
 			{
-				WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+				WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 				WebObjectSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
 					WebServiceSpecProvider.getSpecProviderState());
 				Collection<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
@@ -251,7 +251,7 @@ public class TypeProvider implements ITypeProvider
 			}
 			if (TypeCreator.RUNTIME_WEB_COMPONENT.toLowerCase().startsWith(prefixLower))
 			{
-				WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+				WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebObjectSpecifications();
 				for (WebObjectSpecification webComponentSpecification : webComponentSpecifications)
 				{
 					names.add(TypeCreator.RUNTIME_WEB_COMPONENT + '<' + webComponentSpecification.getName() + '>');

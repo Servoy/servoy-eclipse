@@ -4580,10 +4580,10 @@ public class TypeCreator extends TypeCache
 			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			String[] typeNames = wcTypeName.split("\\.");
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeNames[0]);
+			WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(typeNames[0]);
 			if (spec == null)
 			{
-				spec = WebServiceSpecProvider.getSpecProviderState().getWebComponentSpecification(typeNames[0]);
+				spec = WebServiceSpecProvider.getSpecProviderState().getWebObjectSpecification(typeNames[0]);
 			}
 			if (spec != null)
 			{
@@ -4661,7 +4661,7 @@ public class TypeCreator extends TypeCache
 			// test for absolute forms
 			if (wcTypeName.endsWith(_ABS_POSTFIX)) wcTypeName = wcTypeName.substring(0, wcTypeName.length() - _ABS_POSTFIX.length());
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(wcTypeName);
+			WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(wcTypeName);
 			if (spec != null)
 			{
 				return createWebComponentType(context, fullTypeName, spec);

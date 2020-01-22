@@ -953,7 +953,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (o instanceof WebComponent)
 		{
 			String typeName = ((WebComponent)o).getTypeName();
-			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeName);
+			WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(typeName);
 			if (spec == null)
 			{
 				if (typeName != null)
@@ -2731,7 +2731,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						checkCancel();
 						if (o instanceof WebComponent)
 						{
-							WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
+							WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(((WebComponent)o).getTypeName());
 							if (spec != null && spec.getHandlers() != null)
 							{
 								for (String handler : spec.getHandlers().keySet())
@@ -3938,7 +3938,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								if (o instanceof WebComponent)
 								{
-									WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
+									WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(((WebComponent)o).getTypeName());
 									if (spec != null)
 									{
 										Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
@@ -3990,7 +3990,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 							if (o instanceof WebComponent)
 							{
-								WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
+								WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(((WebComponent)o).getTypeName());
 								if (spec != null)
 								{
 									dpProperties.addAll(spec.getProperties().values());
@@ -4000,7 +4000,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								WebCustomType customType = (WebCustomType)o;
 								WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
-								WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(parent.getTypeName());
+								WebObjectSpecification parentSpec = componentsSpecProviderState.getWebObjectSpecification(parent.getTypeName());
 								if (parentSpec != null)
 								{
 									PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
@@ -4192,7 +4192,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 											if (o instanceof WebComponent)
 											{
-												WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(
+												WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(
 													((WebComponent)o).getTypeName());
 												if (spec != null)
 												{
@@ -4203,7 +4203,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												WebCustomType customType = (WebCustomType)o;
 												WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
-												WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(
+												WebObjectSpecification parentSpec = componentsSpecProviderState.getWebObjectSpecification(
 													parent.getTypeName());
 												if (parentSpec != null)
 												{
@@ -4521,7 +4521,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						throws RepositoryException
 					{
 						IDataProvider dataProvider = null;
-						WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(component.getTypeName());
+						WebObjectSpecification spec = componentsSpecProviderState.getWebObjectSpecification(component.getTypeName());
 						if (spec != null)
 						{
 							Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);

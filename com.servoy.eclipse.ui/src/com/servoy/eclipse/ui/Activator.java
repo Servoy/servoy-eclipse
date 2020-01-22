@@ -158,7 +158,7 @@ public class Activator extends AbstractUIPlugin
 										String missingPackage = null;
 										if (o instanceof WebComponent && ((WebComponent)o).getTypeName() != null)
 										{
-											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 												((WebComponent)o).getTypeName());
 											if (spec == null)
 											{

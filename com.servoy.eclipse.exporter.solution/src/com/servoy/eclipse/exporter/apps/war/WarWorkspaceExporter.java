@@ -253,7 +253,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			Set<String> set = new HashSet<String>();
 			if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
 			{
-				for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebComponentSpecifications())
+				for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebObjectSpecifications())
 				{
 					set.add(spec.getName());
 				}
@@ -263,7 +263,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				set.addAll(Arrays.asList(configuration.getSelectedComponents().split(" ")));
 				for (String componentName : set)
 				{
-					if (componentsSpecProviderState.getWebComponentSpecification(componentName) == null)
+					if (componentsSpecProviderState.getWebObjectSpecification(componentName) == null)
 					{
 						// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
 						output("'" + componentName + "' is not a valid component name or it could not be found. Ignoring.");
@@ -293,7 +293,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				set.addAll(Arrays.asList(configuration.getSelectedServices().split(" ")));
 				for (String serviceName : set)
 				{
-					if (servicesSpecProviderState.getWebComponentSpecification(serviceName) == null)
+					if (servicesSpecProviderState.getWebObjectSpecification(serviceName) == null)
 					{
 						// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
 						output("'" + serviceName + "' is not a valid service name or it could not be found. Ignoring.");

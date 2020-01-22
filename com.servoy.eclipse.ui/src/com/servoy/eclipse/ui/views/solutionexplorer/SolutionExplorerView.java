@@ -270,6 +270,7 @@ import com.servoy.j2db.util.UUID;
 public class SolutionExplorerView extends ViewPart
 	implements ISelectionChangedListener, FilteredEntity, IShowInSource, IShowInTarget, IOrientedView, ITreeListView
 {
+
 	private final Color yellow = new Color(null, 255, 255, 0);
 	private final Color light_grey = new Color(null, 120, 120, 120);
 

@@ -350,7 +350,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 										}
 										else if (p instanceof WebComponent)
 										{
-											WebObjectSpecification pSpec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+											WebObjectSpecification pSpec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
 												((WebComponent)p).getTypeName());
 											sourcePackage = pSpec.getPackageName() + ".*";
 											sourceType = pSpec.getPackageName() + "." + ((WebComponent)p).getTypeName();
