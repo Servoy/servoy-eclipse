@@ -65,6 +65,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
+import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
@@ -162,8 +163,9 @@ public class Activator extends AbstractUIPlugin
 										String missingPackage = null;
 										if (o instanceof WebComponent && ((WebComponent)o).getTypeName() != null)
 										{
-											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
-												((WebComponent)o).getTypeName());
+											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+												.getWebComponentSpecification(
+													((WebComponent)o).getTypeName());
 											if (spec == null)
 											{
 												missingPackage = ((WebComponent)o).getTypeName().split("-")[0];
@@ -171,8 +173,10 @@ public class Activator extends AbstractUIPlugin
 										}
 										if (o instanceof LayoutContainer)
 										{
-											PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-												((LayoutContainer)o).getPackageName());
+											PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState()
+												.getLayoutSpecifications()
+												.get(
+													((LayoutContainer)o).getPackageName());
 											if (pkg == null)
 											{
 												missingPackage = ((LayoutContainer)o).getPackageName();
@@ -232,6 +236,7 @@ public class Activator extends AbstractUIPlugin
 					findMissingSpecs.setRule(ServoyModel.getWorkspace().getRoot());
 					findMissingSpecs.schedule();
 				}
+
 			}
 
 			@Override
@@ -241,15 +246,16 @@ public class Activator extends AbstractUIPlugin
 			}
 		});
 
-
 		// show the login dialog first..
 
 
 		// for now show the startup page in a dialog
 
 		Display.getDefault().asyncExec(() -> {
+			//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
+			String loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
 			BrowserDialog dialog = new BrowserDialog(Display.getDefault().getActiveShell(),
-				"https://servoy.github.io/servoy_documentation/201903/welcome_to_servoy.html");
+				"https://servoy.github.io/servoy_documentation/201903/welcome_to_servoy.html?loginToken=" + loginToken);
 			dialog.open();
 		});
 	}
