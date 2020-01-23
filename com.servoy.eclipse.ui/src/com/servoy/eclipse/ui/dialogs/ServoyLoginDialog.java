@@ -20,7 +20,9 @@ package com.servoy.eclipse.ui.dialogs;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -28,6 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -113,16 +116,25 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	@Override
 	protected Control createDialogArea(Composite parent)
 	{
+		parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+
 		GridLayout gridLayout = new GridLayout(2, false);
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		composite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		Label lbl = new Label(composite, SWT.NONE);
-		lbl.setText("Username/Email");
+		lbl.setText("Username");
+		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		FontDescriptor descriptor = FontDescriptor.createFrom(lbl.getFont());
+		descriptor = descriptor.setStyle(SWT.BOLD);
+		lbl.setFont(descriptor.createFont(getShell().getDisplay()));
 		Text usernameTxt = new Text(composite, SWT.BORDER);
 		//usernameTxt.setText(exportSolutionWizard.getDeployUsername());
-		usernameTxt.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gd.horizontalIndent = 10;
+		usernameTxt.setLayoutData(gd);
 		usernameTxt.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -133,13 +145,18 @@ public class ServoyLoginDialog extends TitleAreaDialog
 
 		lbl = new Label(composite, SWT.NONE);
 		lbl.setText("Password");
+		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		lbl.setFont(descriptor.createFont(getShell().getDisplay()));
 		// On MacOS, SWT 3.5 does not send events to listeners on password fields.
 		// See: http://www.eclipse.org/forums/index.php?t=msg&goto=508058&
 		int style = SWT.BORDER;
 		if (!Utils.isAppleMacOS()) style |= SWT.PASSWORD;
 		Text passwordTxt = new Text(composite, style);
 		//passwordTxt.setText(exportSolutionWizard.getDeployPassword());
-		passwordTxt.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gd.verticalIndent = 10;
+		gd.horizontalIndent = 10;
+		passwordTxt.setLayoutData(gd);
 		passwordTxt.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
@@ -150,6 +167,22 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		if (Utils.isAppleMacOS()) passwordTxt.setEchoChar('\u2022');
 
 		return composite;
+	}
+
+	@Override
+	protected void createButtonsForButtonBar(Composite parent)
+	{
+		parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		org.eclipse.swt.widgets.Button okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		okBtn.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+	}
+
+	@Override
+	protected Control createButtonBar(Composite parent)
+	{
+		Control control = super.createButtonBar(parent);
+		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		return control;
 	}
 
 	public void clearSavedInfo()
