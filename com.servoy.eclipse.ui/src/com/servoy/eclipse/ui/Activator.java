@@ -64,6 +64,7 @@ import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
@@ -238,6 +239,18 @@ public class Activator extends AbstractUIPlugin
 			{
 
 			}
+		});
+
+
+		// show the login dialog first..
+
+
+		// for now show the startup page in a dialog
+
+		Display.getDefault().asyncExec(() -> {
+			BrowserDialog dialog = new BrowserDialog(Display.getDefault().getActiveShell(),
+				"https://servoy.github.io/servoy_documentation/201903/welcome_to_servoy.html");
+			dialog.open();
 		});
 	}
 
