@@ -1,0 +1,25 @@
+{
+	"name":"Tiny Tutorial Sample",
+	"steps" : [
+	{
+		"name":"Step 1",
+		"description":"Take your time and breath deeply.",
+		"gifURL":"https://servoy.com/wp-content/themes/servoy/images/logo-servoy.png"
+	},
+	{
+		"name":"Step 2",
+		"description":"Move the mouse around in developer.",
+		"gifURL":"https://servoy.com/wp-content/themes/servoy/images/logo-servoy.png"
+	},
+	{
+		"name":"Step 3",
+		"description":"Do not break anything",
+		"gifURL":"https://servoy.com/wp-content/themes/servoy/images/logo-servoy.png"
+	},
+	{
+		"name":"Last step",
+		"description":"Shutdown your PC",
+		"gifURL":"https://servoy.com/wp-content/themes/servoy/images/logo-servoy.png"
+	}
+	]
+}

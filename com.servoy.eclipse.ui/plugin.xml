@@ -31,6 +31,13 @@
             id="com.servoy.eclipse.ui.views.FavoritesView"
             name="Favorites">
       </view>
+       <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.TutorialView"
+            icon="icons/tutorial/tinytutorial23.png"
+            id="com.servoy.eclipse.ui.views.TutorialView"
+            name="Tutorial step by step">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -56,6 +63,14 @@
             targetID="com.servoy.eclipse.ui.DesignPerspective">
          <view
                id="com.servoy.eclipse.ui.views.FavoritesView"
+               relationship="stack"
+               relative="org.eclipse.ui.views.ContentOutline">
+         </view>
+      </perspectiveExtension>
+       <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <view
+               id="com.servoy.eclipse.ui.views.TutorialView"
                relationship="stack"
                relative="org.eclipse.ui.views.ContentOutline">
          </view>
