@@ -365,8 +365,8 @@ public class Activator extends Plugin
 							}
 							try
 							{
-								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
-									StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
+//								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
+//									StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
 							}
 							catch (Exception e)
 							{

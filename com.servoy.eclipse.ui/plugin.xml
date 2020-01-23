@@ -365,13 +365,13 @@
 	  		icon="icons/marketplace.gif"
 	  		id="com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"
       		name="Servoy Marketplace">
-      </editor>-->
+      </editor>
       <editor
 	  		class="com.servoy.eclipse.core.StartPageBrowserEditor"
 	  		icon="icons/servoy_donut16x16.png"
 	  		id="com.servoy.eclipse.core.StartPageBrowserEditor"
       		name="StartPage">
-      </editor>
+      </editor> -->
       <editor
             class="org.eclipse.wst.sse.ui.StructuredTextEditor"
             default="true"
@@ -620,6 +620,7 @@
             </separator>
          </menu>
       </actionSet>
+<!--
       <actionSet
             id="com.servoy.eclipse.ui.StartPage"
             label="StartPage"
@@ -633,6 +634,7 @@
                tooltip="Open Start Page">
          </action>
       </actionSet>
+-->
       <actionSet
             id="com.servoy.eclipse.ui.ServoyAdmin"
             label="Servoy Admin Page"

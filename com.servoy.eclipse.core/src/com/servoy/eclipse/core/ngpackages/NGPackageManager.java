@@ -167,7 +167,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	public void dispose()
 	{
 		if (activeProjectListenerForRegisteringResources != null)
-			((ServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
+			((IDeveloperServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
 		super.dispose();
 	}
 
