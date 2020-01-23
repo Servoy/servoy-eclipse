@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.ui.dialogs;
 
+import java.awt.Dimension;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -56,6 +58,18 @@ public class BrowserDialog extends Dialog
 
 
 	public Object open()
+	{
+		Rectangle size = getParent().getBounds();
+		Dimension newSize = new Dimension((int)(size.width / 1.5), (int)(size.height / 1.5));
+
+		int locationX, locationY;
+		locationX = (size.width - (int)(size.width / 1.5)) / 2 + size.x;
+		locationY = (size.height - (int)(size.height / 1.5)) / 2 + size.y;
+
+		return this.open(new Point(locationX, locationY), newSize);
+	}
+
+	public Object open(Point location, Dimension size)
 	{
 		Shell parent = getParent();
 		Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -110,15 +124,9 @@ public class BrowserDialog extends Dialog
 			}
 		});
 		browser.setUrl(url);
-		Rectangle size = parent.getBounds();
-		browser.setSize((int)(size.width / 1.5), (int)(size.height / 1.5));
+		browser.setSize(size.width, size.height);
 
-
-		int locationX, locationY;
-		locationX = (size.width - (int)(size.width / 1.5)) / 2 + size.x;
-		locationY = (size.height - (int)(size.height / 1.5)) / 2 + size.y;
-
-		shell.setLocation(new Point(locationX, locationY));
+		shell.setLocation(location);
 		shell.pack();
 		shell.open();
 		Display display = parent.getDisplay();

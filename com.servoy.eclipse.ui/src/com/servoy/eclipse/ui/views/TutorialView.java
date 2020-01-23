@@ -17,14 +17,21 @@
 
 package com.servoy.eclipse.ui.views;
 
+import java.awt.Dimension;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -34,6 +41,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -146,6 +154,34 @@ public class TutorialView extends ViewPart
 			descriptor = FontDescriptor.createFrom(gifURL.getFont());
 			descriptor = descriptor.setHeight(10);
 			gifURL.setFont(descriptor.createFont(parent.getDisplay()));
+			gifURL.addMouseListener(new MouseAdapter()
+			{
+				@Override
+				public void mouseUp(MouseEvent e)
+				{
+					Dimension size = null;
+					try
+					{
+						ImageDescriptor descriptor = ImageDescriptor.createFromURL(new URL(rowData.optString("gifURL")));
+						ImageData imgData = descriptor.getImageData(100);
+						size = new Dimension(imgData.width + 30, imgData.height + 30);
+					}
+					catch (MalformedURLException e1)
+					{
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					if (size == null)
+					{
+						size = new Dimension(300, 300);
+					}
+					Point cursorLocation = Display.getCurrent().getCursorLocation();
+					Point location = new Point(cursorLocation.x - size.width - 5, cursorLocation.y + 5);
+					BrowserDialog dialog = new BrowserDialog(parent.getShell(),
+						rowData.optString("gifURL"));
+					dialog.open(location, size);
+				}
+			});
 		}
 	}
 
