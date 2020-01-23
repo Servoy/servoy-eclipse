@@ -254,9 +254,12 @@ public class Activator extends AbstractUIPlugin
 		Display.getDefault().asyncExec(() -> {
 			//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
 			String loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-			BrowserDialog dialog = new BrowserDialog(Display.getDefault().getActiveShell(),
-				"https://servoy.github.io/servoy_documentation/201903/welcome_to_servoy.html?loginToken=" + loginToken);
-			dialog.open();
+			if (loginToken != null)
+			{
+				BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+					"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken);
+				dialog.open();
+			}
 		});
 	}
 
