@@ -50,9 +50,9 @@ public class BrowserDialog extends Dialog
 	/**
 	 * @param parentShell
 	 */
-	public BrowserDialog(Shell parentShell, String url)
+	public BrowserDialog(Shell parentShell, String url, boolean modal)
 	{
-		super(parentShell, SWT.APPLICATION_MODAL);
+		super(parentShell, modal ? SWT.APPLICATION_MODAL : SWT.MODELESS);
 		this.url = url;
 	}
 
@@ -72,7 +72,7 @@ public class BrowserDialog extends Dialog
 	public Object open(Point location, Dimension size)
 	{
 		Shell parent = getParent();
-		Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+		Shell shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());
 
 		shell.setLayout(new FillLayout());
 		//load html file in textReader

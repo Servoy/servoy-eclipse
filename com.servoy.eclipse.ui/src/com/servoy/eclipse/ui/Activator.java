@@ -257,7 +257,7 @@ public class Activator extends AbstractUIPlugin
 			if (loginToken != null)
 			{
 				BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-					"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken);
+					"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true);
 				dialog.open();
 			}
 		});
