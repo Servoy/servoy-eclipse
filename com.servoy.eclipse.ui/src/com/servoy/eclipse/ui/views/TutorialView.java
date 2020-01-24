@@ -165,7 +165,10 @@ public class TutorialView extends ViewPart
 					{
 						ImageDescriptor desc = ImageDescriptor.createFromURL(new URL(rowData.optString("gifURL")));
 						ImageData imgData = desc.getImageData(100);
-						size = new Dimension(imgData.width, imgData.height);
+						if (imgData != null)
+						{
+							size = new Dimension(imgData.width + 20, imgData.height + 20);
+						}
 					}
 					catch (MalformedURLException e1)
 					{

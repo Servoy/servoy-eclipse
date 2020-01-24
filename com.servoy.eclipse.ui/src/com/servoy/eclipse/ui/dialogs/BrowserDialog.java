@@ -101,7 +101,7 @@ public class BrowserDialog extends Dialog
 			shell.setLayout(new FillLayout());
 		}
 		//load html file in textReader
-		Browser browser = new Browser(shell, SWT.NONE);
+		browser = new Browser(shell, SWT.NONE);
 		browser.addLocationListener(new LocationListener()
 		{
 			@Override
