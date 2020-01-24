@@ -165,6 +165,19 @@ public class BrowserDialog extends Dialog
 							shell.close();
 						}
 					}
+					if (introURL.getParameter("maximize") != null)
+					{
+						shell.setBounds(parent.getBounds());
+						return;
+					}
+
+					if (introURL.getParameter("normalize") != null)
+					{
+						Rectangle size = getParent().getBounds();
+						shell.setBounds(new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
+							(size.height - (int)(size.height / 1.5)) / 2 + size.y, (int)(size.width / 1.5), (int)(size.height / 1.5)));
+						return;
+					}
 
 					introURL.execute();
 				}
