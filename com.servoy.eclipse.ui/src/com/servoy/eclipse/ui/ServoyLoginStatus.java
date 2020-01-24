@@ -17,15 +17,24 @@
 
 package com.servoy.eclipse.ui;
 
+import java.net.URL;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 
 /**
@@ -60,7 +69,7 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 				}
 				else
 				{
-					//showPopUp(e, PlatformUI.getWorkbench().getDisplay().getActiveShell());
+					showPopUp();
 				}
 			}
 		});
@@ -75,17 +84,37 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 		return true;
 	}
 
-//	private void showPopUp(MouseEvent e, Shell shell)
-//	{
-//		Shell popup = new Shell(shell.getDisplay(), SWT.NO_TRIM | SWT.ON_TOP | SWT.MODELESS);
-//		popup.setLayout(new FillLayout());
-//		new Label(popup, SWT.NONE).setText("Go to Servoy forum");
-//		popup.pack();
-//		popup.open();
-//		shell.forceFocus();
-//
-//		popup.setLocation(shell.getLocation().x + e.x, shell.getLocation().y + e.y);
-//	}
+	private void showPopUp()
+	{
+		Menu menu = new Menu(statusBtn);
+		statusBtn.setMenu(menu);
+		MenuItem cloudMenu = new MenuItem(menu, SWT.NONE);
+		cloudMenu.setText("Go to ServoyCloud");
+		cloudMenu.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				try
+				{
+					PlatformUI.getWorkbench()
+						.getBrowserSupport()
+						.getExternalBrowser()
+						.openURL(new URL(
+							"https://admin-dev.servoy-cloud.eu/solutions/svyCloud/index.html#svyCloudLogin?loginToken=" + ServoyLoginDialog.getLoginToken()));
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		});
+
+		Rectangle bounds = statusBtn.getBounds();
+		Point point = statusBtn.getParent().toDisplay(bounds.x, bounds.y + bounds.height);
+		menu.setLocation(point);
+		menu.setVisible(true);
+	}
 
 	/*
 	 * @see com.servoy.eclipse.ui.IServoyLoginListener#onLogin(java.lang.String)
