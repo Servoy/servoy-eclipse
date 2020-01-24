@@ -85,7 +85,6 @@ public class BrowserDialog extends Dialog
 				String loc = event.location;
 				if (loc == null) return;
 				if (loc.equals(url)) return;
-				event.doit = false;
 
 				IntroURLParser parser = new IntroURLParser(loc);
 				if (parser.hasIntroUrl())
