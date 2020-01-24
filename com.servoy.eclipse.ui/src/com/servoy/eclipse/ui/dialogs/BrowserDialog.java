@@ -24,9 +24,13 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -35,6 +39,10 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 
 import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.ui.preferences.StartupPreferences;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -47,15 +55,16 @@ public class BrowserDialog extends Dialog
 	private String url;
 	private Browser browser;
 	private Shell shell;
-
+	private boolean showSkipNextTime;
 
 	/**
 	 * @param parentShell
 	 */
-	public BrowserDialog(Shell parentShell, String url, boolean modal)
+	public BrowserDialog(Shell parentShell, String url, boolean modal, boolean showSkipNextTime)
 	{
 		super(parentShell, modal ? SWT.APPLICATION_MODAL : SWT.MODELESS);
 		this.url = url;
+		this.showSkipNextTime = showSkipNextTime;
 	}
 
 
@@ -76,8 +85,23 @@ public class BrowserDialog extends Dialog
 		Shell parent = getParent();
 		shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());
 
-		shell.setLayout(new FillLayout());
-		browser = new Browser(shell, SWT.NONE);
+		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
+		{
+			this.showSkipNextTime = false;
+		}
+
+		if (showSkipNextTime)
+		{
+			GridLayout gridLayout = new GridLayout();
+			gridLayout.numColumns = 1;
+			shell.setLayout(gridLayout);
+		}
+		else
+		{
+			shell.setLayout(new FillLayout());
+		}
+		//load html file in textReader
+		Browser browser = new Browser(shell, SWT.NONE);
 		browser.addLocationListener(new LocationListener()
 		{
 			@Override
@@ -126,6 +150,20 @@ public class BrowserDialog extends Dialog
 		browser.setUrl(url);
 		browser.setSize(size.width, size.height);
 
+		if (showSkipNextTime)
+		{
+			Button showNextTime = new Button(shell, SWT.CHECK);
+			showNextTime.setText("Do not show this dialog anymore");
+			showNextTime.setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")));
+			showNextTime.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, new Boolean(!showNextTime.getSelection()).toString());
+				}
+			});
+		}
 		shell.setLocation(location);
 		shell.pack();
 		shell.open();

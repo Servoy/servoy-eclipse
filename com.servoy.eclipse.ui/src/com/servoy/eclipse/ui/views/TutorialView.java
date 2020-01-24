@@ -182,7 +182,7 @@ public class TutorialView extends ViewPart
 					if (dialog == null || dialog.isDisposed())
 					{
 						dialog = new BrowserDialog(parent.getShell(),
-							rowData.optString("gifURL"), false);
+							rowData.optString("gifURL"), false, false);
 						dialog.open(location, size);
 					}
 					else
