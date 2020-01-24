@@ -58,6 +58,8 @@ public class TutorialView extends ViewPart
 	private JSONObject dataModel;
 	BrowserDialog dialog = null;
 
+	private Composite rootComposite;
+
 	@Override
 	public void createPartControl(Composite parent)
 	{
@@ -67,7 +69,7 @@ public class TutorialView extends ViewPart
 
 	private void createTutorialView(Composite parent)
 	{
-		Composite rootComposite = new Composite(parent, SWT.NONE);
+		rootComposite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
 		layout.verticalSpacing = 0;
@@ -219,8 +221,10 @@ public class TutorialView extends ViewPart
 		{
 			String jsonText = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
 			dataModel = new JSONObject(jsonText);
-
-			//TODO
+			Composite parent = rootComposite.getParent();
+			rootComposite.dispose();
+			createTutorialView(parent);
+			parent.layout(true, true);
 		}
 		catch (Exception e)
 		{
