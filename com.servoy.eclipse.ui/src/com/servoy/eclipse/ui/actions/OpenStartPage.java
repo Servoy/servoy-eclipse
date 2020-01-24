@@ -60,7 +60,7 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 		if (loginToken != null)
 		{
 			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-				"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true);
+				"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true, false);
 			dialog.open();
 		}
 	}
