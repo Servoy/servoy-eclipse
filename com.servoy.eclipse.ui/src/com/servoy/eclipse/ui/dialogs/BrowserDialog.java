@@ -164,8 +164,8 @@ public class BrowserDialog extends Dialog
 							}
 							shell.close();
 						}
-						return;
 					}
+
 					introURL.execute();
 				}
 			}
