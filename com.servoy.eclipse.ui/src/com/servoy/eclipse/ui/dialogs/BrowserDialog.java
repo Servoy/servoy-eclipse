@@ -151,70 +151,68 @@ public class BrowserDialog extends Dialog
 									((IStartPageAction)actionObject).runAction(introURL);
 								}
 							});
-							shell.close();
+							if (!shell.isDisposed()) shell.close();
 							return;
 						}
 					}
-					if (introURL.getParameter("showTinyTutorial") != null || introURL.getParameter("importSample") != null)
+
+					if (introURL.getParameter("importSample") != null)
 					{
-						if (introURL.getParameter("showTinyTutorial") != null)
-						{
-							try
-							{
-								TutorialView view = (TutorialView)PlatformUI.getWorkbench()
-									.getActiveWorkbenchWindow()
-									.getActivePage()
-									.showView(TutorialView.PART_ID);
-								view.open(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
-									: "https://" + introURL.getParameter("showTinyTutorial"));
-							}
-							catch (PartInitException e)
-							{
-								Debug.error(e);
-							}
-							shell.close();
-						}
-						if (introURL.getParameter("importSample") != null)
-						{
-							shell.close();
+						if (!shell.isDisposed()) shell.close();
 
-							Map<String, InputStream> solutions = new HashMap<>();
-							try (InputStream is = new URL("https://" + introURL.getParameter("importSample")).openStream())
+						Map<String, InputStream> solutions = new HashMap<>();
+						try (InputStream is = new URL("https://" + introURL.getParameter("importSample")).openStream())
+						{
+							String[] urlParts = introURL.getParameter("importSample").split("/");
+							if (urlParts.length >= 1)
 							{
-								String[] urlParts = introURL.getParameter("importSample").split("/");
-								if (urlParts.length >= 1)
+								final String solutionName = urlParts[urlParts.length - 1].replace(".servoy", "");
+								ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
+								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+								if (sp == null)
 								{
-									final String solutionName = urlParts[urlParts.length - 1].replace(".servoy", "");
-									ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
-									IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-									if (sp == null)
-									{
-										solutions.put(solutionName, is);
-										IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null,
-											true);
-										//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-										progressService.run(true, false, importSolutionsRunnable);
-									}
-									progressService.run(true, false, new IRunnableWithProgress()
-									{
-
-										@Override
-										public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-										{
-											ServoyModelManager.getServoyModelManager()
-												.getServoyModel()
-												.setActiveProject(ServoyModelManager.getServoyModelManager()
-													.getServoyModel()
-													.getServoyProject(solutionName), true);
-										}
-									});
+									solutions.put(solutionName, is);
+									IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null,
+										true);
+									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
+									progressService.run(true, false, importSolutionsRunnable);
 								}
-							}
-							catch (Exception e)
-							{
-								Debug.error(e);
+								progressService.run(true, false, new IRunnableWithProgress()
+								{
+
+									@Override
+									public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+									{
+										ServoyModelManager.getServoyModelManager()
+											.getServoyModel()
+											.setActiveProject(ServoyModelManager.getServoyModelManager()
+												.getServoyModel()
+												.getServoyProject(solutionName), true);
+									}
+								});
 							}
 						}
+						catch (Exception e)
+						{
+							Debug.error(e);
+						}
+					}
+					if (introURL.getParameter("showTinyTutorial") != null)
+					{
+						try
+						{
+							TutorialView view = (TutorialView)PlatformUI.getWorkbench()
+								.getActiveWorkbenchWindow()
+								.getActivePage()
+								.showView(TutorialView.PART_ID);
+							view.open(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
+								: "https://" + introURL.getParameter("showTinyTutorial"));
+						}
+						catch (PartInitException e)
+						{
+							Debug.error(e);
+						}
+						if (!shell.isDisposed()) shell.close();
 					}
 					if (introURL.getParameter("maximize") != null)
 					{
