@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,6 +54,7 @@ public class TutorialView extends ViewPart
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.TutorialView";
 
 	private JSONObject dataModel;
+	private Shell gifDialogShell;
 
 	@Override
 	public void createPartControl(Composite parent)
@@ -177,7 +179,12 @@ public class TutorialView extends ViewPart
 					}
 					Point cursorLocation = Display.getCurrent().getCursorLocation();
 					Point location = new Point(cursorLocation.x - size.width - 5, cursorLocation.y + 5);
-					BrowserDialog dialog = new BrowserDialog(parent.getShell(),
+					if (gifDialogShell != null)
+					{
+						gifDialogShell.close();
+					}
+					gifDialogShell = new Shell();
+					BrowserDialog dialog = new BrowserDialog(gifDialogShell,
 						rowData.optString("gifURL"), false);
 					dialog.open(location, size);
 				}

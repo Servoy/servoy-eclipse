@@ -33,7 +33,6 @@ import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
@@ -68,6 +67,10 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	private static String SERVOY_LOGIN_PASSWORD = "PASSWORD";
 	private static String SERVOY_LOGIN_TOKEN = "TOKEN";
 	private static String CROWD_URL = "https://analytics-dev.analytics.servoy-cloud.eu/servoy-service/rest_ws/svyAnalyticsServer/v1/auth";
+
+	private String dlgUsername = "";
+	private String dlgPassword = "";
+	private String errorMessage = null;
 
 	public ServoyLoginDialog(Shell parentShell)
 	{
@@ -124,10 +127,8 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			else if (firstLogin || loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
 			{
 				clearSavedInfo();
-				if (MessageDialog.openQuestion(this.getParentShell(), "Servoy", "Error during Servoy login. Try again?"))
-				{
-					doLogin();
-				}
+				this.errorMessage = "Login failed";
+				doLogin();
 			}
 		}
 
@@ -176,9 +177,6 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		}
 	}
 
-	private String dlgUsername = "";
-	private String dlgPassword = "";
-
 	@Override
 	protected Control createContents(Composite parent)
 	{
@@ -187,6 +185,11 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		getShell().setText("Servoy");
 		setMessage("Welcome, please login to Servoy");
 		setTitleImage(Activator.getDefault().loadImageFromBundle("solution_wizard_description.png"));
+		setErrorMessage(null);
+		if (this.errorMessage != null)
+		{
+			setErrorMessage(this.errorMessage);
+		}
 		return contents;
 	}
 
@@ -209,6 +212,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		lbl.setFont(descriptor.createFont(getShell().getDisplay()));
 		Text usernameTxt = new Text(composite, SWT.BORDER);
 		usernameTxt.setText(dlgUsername);
+		usernameTxt.selectAll();
 		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gd.horizontalIndent = 10;
 		usernameTxt.setLayoutData(gd);
