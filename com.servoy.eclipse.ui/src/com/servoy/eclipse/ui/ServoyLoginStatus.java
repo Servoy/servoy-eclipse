@@ -101,7 +101,8 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 						.getBrowserSupport()
 						.getExternalBrowser()
 						.openURL(new URL(
-							"https://admin-dev.servoy-cloud.eu/solutions/svyCloud/index.html#svyCloudLogin?loginToken=" + ServoyLoginDialog.getLoginToken()));
+							"https://admin-dev.servoy-cloud.eu/solutions/svyCloud/index.html?loginToken=" + ServoyLoginDialog.getLoginToken() +
+								"#svyCloudLogin"));
 				}
 				catch (Exception ex)
 				{
