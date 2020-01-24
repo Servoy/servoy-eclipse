@@ -55,6 +55,7 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.IServoyLoginListener;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -131,7 +132,17 @@ public class ServoyLoginDialog extends TitleAreaDialog
 				doLogin();
 			}
 		}
-
+		if (ServoyLoginDialog.servoyLoginListener != null)
+		{
+			try
+			{
+				ServoyLoginDialog.servoyLoginListener.onLogin(node.get(SERVOY_LOGIN_USERNAME, null), node.get(SERVOY_LOGIN_TOKEN, null));
+			}
+			catch (StorageException ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
 
 		return loginToken;
 	}
@@ -308,6 +319,31 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	public boolean isHelpAvailable()
 	{
 		return false;
+	}
+
+	private static IServoyLoginListener servoyLoginListener;
+
+	public static void addLoginListener(IServoyLoginListener loginListener)
+	{
+		ServoyLoginDialog.servoyLoginListener = loginListener;
+	}
+
+	public static String getLoginToken()
+	{
+		String loginToken = null;
+
+		ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
+
+		ISecurePreferences node = preferences.node(SERVOY_LOGIN_STORE_KEY);
+		try
+		{
+			loginToken = node.get(SERVOY_LOGIN_TOKEN, null);
+		}
+		catch (StorageException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		return loginToken;
 	}
 }
 

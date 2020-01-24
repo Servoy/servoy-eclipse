@@ -1370,4 +1370,15 @@
           class="com.servoy.eclipse.ui.editors.JSExtendsScope">
     </jsExtendsForm>
  </extension>
+ <extension point="org.eclipse.ui.menus">
+     <menuContribution
+           locationURI="toolbar:org.eclipse.ui.trim.status">
+        <toolbar id="com.example.toolbar" label="Test">
+            <control
+                class="com.servoy.eclipse.ui.ServoyLoginStatus"
+                id="com.example.control">
+            </control>
+        </toolbar>
+     </menuContribution>
+  </extension>
 </plugin>
