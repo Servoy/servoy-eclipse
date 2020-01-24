@@ -60,11 +60,12 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 				}
 				else
 				{
-					//TODO
+					//showPopUp(e, PlatformUI.getWorkbench().getDisplay().getActiveShell());
 				}
 			}
 		});
 		statusBtn.setImage(Activator.getDefault().loadImageFromBundle("servoy_design.png"));
+		statusBtn.setToolTipText("Click to connect to Servoy");
 		return statusBtn;
 	}
 
@@ -74,6 +75,18 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 		return true;
 	}
 
+//	private void showPopUp(MouseEvent e, Shell shell)
+//	{
+//		Shell popup = new Shell(shell.getDisplay(), SWT.NO_TRIM | SWT.ON_TOP | SWT.MODELESS);
+//		popup.setLayout(new FillLayout());
+//		new Label(popup, SWT.NONE).setText("Go to Servoy forum");
+//		popup.pack();
+//		popup.open();
+//		shell.forceFocus();
+//
+//		popup.setLocation(shell.getLocation().x + e.x, shell.getLocation().y + e.y);
+//	}
+
 	/*
 	 * @see com.servoy.eclipse.ui.IServoyLoginListener#onLogin(java.lang.String)
 	 */
@@ -82,10 +95,12 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 	{
 		if (username != null)
 		{
+			statusBtn.setImage(Activator.getDefault().loadImageFromBundle("windowicon.png"));
 			statusBtn.setToolTipText("Logged in as " + username);
 		}
 		else
 		{
+			statusBtn.setImage(Activator.getDefault().loadImageFromBundle("servoy_design.png"));
 			statusBtn.setToolTipText("Click to connect to Servoy");
 		}
 	}
