@@ -22,13 +22,13 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
-import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -88,14 +88,7 @@ public class OpenCreateFormTutorialAction extends Action implements ISelectionCh
 	public static void show()
 	{
 		Display.getDefault().asyncExec(() -> {
-			//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
-			String loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-			if (loginToken != null)
-			{
-				BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-					"https://team2-dev.hackaton.servoy-cloud.eu/servoy-service/rest_ws/contentAPI/tutorial/1", true, true);
-				dialog.open();
-			}
+			new BrowserDialog(new Shell(), "https://www.youtube.com/watch?v=L34NGnNGiS0&feature=youtu.be", false, false).open();
 		});
 	}
 
