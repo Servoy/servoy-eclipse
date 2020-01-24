@@ -178,7 +178,7 @@ public class TutorialView extends ViewPart
 					Point cursorLocation = Display.getCurrent().getCursorLocation();
 					Point location = new Point(cursorLocation.x - size.width - 5, cursorLocation.y + 5);
 					BrowserDialog dialog = new BrowserDialog(parent.getShell(),
-						rowData.optString("gifURL"));
+						rowData.optString("gifURL"), false);
 					dialog.open(location, size);
 				}
 			});

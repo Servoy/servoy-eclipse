@@ -19,11 +19,21 @@ package com.servoy.eclipse.ui.dialogs;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
@@ -42,6 +52,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -56,6 +67,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	private static String SERVOY_LOGIN_USERNAME = "USERNAME";
 	private static String SERVOY_LOGIN_PASSWORD = "PASSWORD";
 	private static String SERVOY_LOGIN_TOKEN = "TOKEN";
+	private static String CROWD_URL = "https://analytics-dev.analytics.servoy-cloud.eu/servoy-service/rest_ws/svyAnalyticsServer/v1/auth";
 
 	public ServoyLoginDialog(Shell parentShell)
 	{
@@ -75,22 +87,29 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		{
 			username = node.get(SERVOY_LOGIN_USERNAME, null);
 			password = node.get(SERVOY_LOGIN_PASSWORD, null);
-			loginToken = node.get(SERVOY_LOGIN_TOKEN, null);
 		}
 		catch (StorageException ex)
 		{
 			ServoyLog.logError(ex);
 		}
 
-		if (loginToken == null)
+		boolean firstLogin = false;
+		if (username == null || password == null)
 		{
 			if (open() == OK)
 			{
+				firstLogin = true;
 				username = dlgUsername;
 				password = dlgPassword;
+			}
+		}
 
-				loginToken = "secret";
-
+		if (username != null && password != null)
+		{
+			LoginTokenResponse loginTokenResponse = getLoginToken(username, password);
+			if (loginTokenResponse.status == LoginTokenResponse.Status.OK)
+			{
+				loginToken = loginTokenResponse.response;
 				try
 				{
 					node.put(SERVOY_LOGIN_USERNAME, username, true);
@@ -102,13 +121,63 @@ public class ServoyLoginDialog extends TitleAreaDialog
 					ServoyLog.logError(ex);
 				}
 			}
+			else if (firstLogin || loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
+			{
+				clearSavedInfo();
+				if (MessageDialog.openQuestion(this.getParentShell(), "Servoy", "Error during Servoy login. Try again?"))
+				{
+					doLogin();
+				}
+			}
 		}
+
 
 		return loginToken;
 	}
 
-	private String dlgUsername;
-	private String dlgPassword;
+	private LoginTokenResponse getLoginToken(String username, String password)
+	{
+		String loginToken = null;
+
+		HttpClient httpclient = HttpClients.createDefault();
+		HttpPost httppost = new HttpPost(CROWD_URL);
+
+		String auth = username + ":" + password;
+		byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("ISO-8859-1")));
+		String authHeader = "Basic " + new String(encodedAuth);
+		httppost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+		httppost.addHeader(HttpHeaders.ACCEPT, "application/json");
+
+		// execute the request
+		HttpResponse response;
+		try
+		{
+			response = httpclient.execute(httppost);
+			HttpEntity responseEntity = response.getEntity();
+			String responseString = EntityUtils.toString(responseEntity);
+			if (response.getStatusLine().getStatusCode() == 200)
+			{
+
+				JSONObject loginTokenJSON = new JSONObject(responseString);
+				loginToken = loginTokenJSON.getString("token");
+				return new LoginTokenResponse(LoginTokenResponse.Status.OK, loginToken);
+			}
+			else
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.append("HTTP ERROR : ").append(response.getStatusLine().getStatusCode()).append(' ').append(responseString);
+				return new LoginTokenResponse(LoginTokenResponse.Status.LOGIN_ERROR, sb.toString());
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+			return new LoginTokenResponse(LoginTokenResponse.Status.ERROR, ex.toString());
+		}
+	}
+
+	private String dlgUsername = "";
+	private String dlgPassword = "";
 
 	@Override
 	protected Control createContents(Composite parent)
@@ -133,13 +202,13 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		composite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		Label lbl = new Label(composite, SWT.NONE);
-		lbl.setText("Username");
+		lbl.setText("Email");
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		FontDescriptor descriptor = FontDescriptor.createFrom(lbl.getFont());
 		descriptor = descriptor.setStyle(SWT.BOLD);
 		lbl.setFont(descriptor.createFont(getShell().getDisplay()));
 		Text usernameTxt = new Text(composite, SWT.BORDER);
-		//usernameTxt.setText(exportSolutionWizard.getDeployUsername());
+		usernameTxt.setText(dlgUsername);
 		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gd.horizontalIndent = 10;
 		usernameTxt.setLayoutData(gd);
@@ -160,7 +229,6 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		int style = SWT.BORDER;
 		if (!Utils.isAppleMacOS()) style |= SWT.PASSWORD;
 		Text passwordTxt = new Text(composite, style);
-		//passwordTxt.setText(exportSolutionWizard.getDeployPassword());
 		gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gd.verticalIndent = 10;
 		gd.horizontalIndent = 10;
@@ -226,5 +294,22 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	public boolean isHelpAvailable()
 	{
 		return false;
+	}
+}
+
+class LoginTokenResponse
+{
+	enum Status
+	{
+		OK, LOGIN_ERROR, ERROR
+	}
+
+	Status status;
+	String response;
+
+	LoginTokenResponse(Status status, String response)
+	{
+		this.status = status;
+		this.response = response;
 	}
 }
