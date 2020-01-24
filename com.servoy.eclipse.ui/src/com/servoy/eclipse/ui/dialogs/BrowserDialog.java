@@ -50,6 +50,7 @@ import org.eclipse.ui.progress.IProgressService;
 
 import com.servoy.eclipse.core.IStartPageAction;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
@@ -184,11 +185,16 @@ public class BrowserDialog extends Dialog
 								if (urlParts.length >= 1)
 								{
 									final String solutionName = urlParts[urlParts.length - 1].replace(".servoy", "");
-									solutions.put(solutionName, is);
-									IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null, true);
+									ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
 									IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-									progressService.run(true, false, importSolutionsRunnable);
+									if (sp == null)
+									{
+										solutions.put(solutionName, is);
+										IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null,
+											true);
+										//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
+										progressService.run(true, false, importSolutionsRunnable);
+									}
 									progressService.run(true, false, new IRunnableWithProgress()
 									{
 
