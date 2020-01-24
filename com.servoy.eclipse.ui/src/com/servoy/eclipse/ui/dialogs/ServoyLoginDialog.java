@@ -199,6 +199,9 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		GridLayout gridLayout = new GridLayout(2, false);
+		gridLayout.marginRight = 20;
+		gridLayout.marginLeft = 20;
+		gridLayout.marginTop = 20;
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
@@ -261,6 +264,13 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	protected Control createButtonBar(Composite parent)
 	{
 		Control control = super.createButtonBar(parent);
+		GridLayout layout = new GridLayout();
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		layout.horizontalSpacing = 0;
+		layout.marginLeft = 20;
+		layout.marginRight = 20;
+		((Composite)control).setLayout(layout);
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText("Forgot password?");
 		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
