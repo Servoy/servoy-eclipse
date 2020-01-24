@@ -18,8 +18,10 @@
 package com.servoy.eclipse.ui.views;
 
 import java.awt.Dimension;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -42,6 +44,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -208,5 +211,20 @@ public class TutorialView extends ViewPart
 	public void setFocus()
 	{
 
+	}
+
+	public void open(String url)
+	{
+		try (InputStream is = new URL(url).openStream())
+		{
+			String jsonText = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
+			dataModel = new JSONObject(jsonText);
+
+			//TODO
+		}
+		catch (Exception e)
+		{
+			Debug.error(e);
+		}
 	}
 }

@@ -34,15 +34,20 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.intro.impl.model.loader.ModelLoaderUtil;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 
 import com.servoy.eclipse.core.IStartPageAction;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
+import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
+
 
 /**
  * @author jcompagner
@@ -135,8 +140,31 @@ public class BrowserDialog extends Dialog
 									((IStartPageAction)actionObject).runAction(introURL);
 								}
 							});
+							shell.close();
 							return;
 						}
+					}
+					if (introURL.getParameter("showTinyTutorial") != null || introURL.getParameter("importSample") != null)
+					{
+						//TODO test both
+						if (introURL.getParameter("showTinyTutorial") != null)
+						{
+							try
+							{
+								TutorialView view = (TutorialView)PlatformUI.getWorkbench()
+									.getActiveWorkbenchWindow()
+									.getActivePage()
+									.showView(TutorialView.PART_ID);
+								view.open(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
+									: "https://" + introURL.getParameter("showTinyTutorial"));
+							}
+							catch (PartInitException e)
+							{
+								Debug.error(e);
+							}
+							shell.close();
+						}
+						return;
 					}
 					introURL.execute();
 				}
