@@ -177,11 +177,15 @@ public class BrowserDialog extends Dialog
 							Map<String, InputStream> solutions = new HashMap<>();
 							try (InputStream is = new URL("https://" + introURL.getParameter("importSample")).openStream())
 							{
-								solutions.put("sol1", is);//TODO solution name
-								IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null, true);
-								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-								//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-								progressService.run(true, false, importSolutionsRunnable);
+								String[] urlParts = introURL.getParameter("importSample").split("/");
+								if (urlParts.length >= 1)
+								{
+									solutions.put(urlParts[urlParts.length - 1].replace(".servoy", ""), is);
+									IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null, true);
+									IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
+									progressService.run(true, false, importSolutionsRunnable);
+								}
 							}
 							catch (Exception e)
 							{
