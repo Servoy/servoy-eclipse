@@ -44,7 +44,9 @@ import com.servoy.eclipse.core.IStartPageAction;
 public class BrowserDialog extends Dialog
 {
 
-	private final String url;
+	private String url;
+	private Browser browser;
+	private Shell shell;
 
 
 	/**
@@ -72,11 +74,10 @@ public class BrowserDialog extends Dialog
 	public Object open(Point location, Dimension size)
 	{
 		Shell parent = getParent();
-		Shell shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());
+		shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());
 
 		shell.setLayout(new FillLayout());
-		//load html file in textReader
-		Browser browser = new Browser(shell, SWT.NONE);
+		browser = new Browser(shell, SWT.NONE);
 		browser.addLocationListener(new LocationListener()
 		{
 			@Override
@@ -128,11 +129,29 @@ public class BrowserDialog extends Dialog
 		shell.setLocation(location);
 		shell.pack();
 		shell.open();
-		Display display = parent.getDisplay();
-		while (!shell.isDisposed())
+		if (getStyle() == SWT.APPLICATION_MODAL)
 		{
-			if (!display.readAndDispatch()) display.sleep();
+			Display display = parent.getDisplay();
+			while (!shell.isDisposed())
+			{
+				if (!display.readAndDispatch()) display.sleep();
+			}
 		}
 		return null;
+	}
+
+	public boolean isDisposed()
+	{
+		return shell == null || shell.isDisposed();
+	}
+
+
+	/**
+	 * @param optString
+	 */
+	public void setUrl(String url)
+	{
+		this.url = url;
+		browser.setUrl(url);
 	}
 }

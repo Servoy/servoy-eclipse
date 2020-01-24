@@ -37,7 +37,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,7 +53,7 @@ public class TutorialView extends ViewPart
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.TutorialView";
 
 	private JSONObject dataModel;
-	private Shell gifDialogShell;
+	BrowserDialog dialog = null;
 
 	@Override
 	public void createPartControl(Composite parent)
@@ -164,9 +163,9 @@ public class TutorialView extends ViewPart
 					Dimension size = null;
 					try
 					{
-						ImageDescriptor descriptor = ImageDescriptor.createFromURL(new URL(rowData.optString("gifURL")));
-						ImageData imgData = descriptor.getImageData(100);
-						size = new Dimension(imgData.width + 30, imgData.height + 30);
+						ImageDescriptor desc = ImageDescriptor.createFromURL(new URL(rowData.optString("gifURL")));
+						ImageData imgData = desc.getImageData(100);
+						size = new Dimension(imgData.width, imgData.height);
 					}
 					catch (MalformedURLException e1)
 					{
@@ -178,15 +177,18 @@ public class TutorialView extends ViewPart
 						size = new Dimension(300, 300);
 					}
 					Point cursorLocation = Display.getCurrent().getCursorLocation();
-					Point location = new Point(cursorLocation.x - size.width - 5, cursorLocation.y + 5);
-					if (gifDialogShell != null)
+
+					Point location = new Point(cursorLocation.x - size.width - 50, cursorLocation.y + 5);
+					if (dialog == null || dialog.isDisposed())
 					{
-						gifDialogShell.close();
+						dialog = new BrowserDialog(parent.getShell(),
+							rowData.optString("gifURL"), false);
+						dialog.open(location, size);
 					}
-					gifDialogShell = new Shell();
-					BrowserDialog dialog = new BrowserDialog(gifDialogShell,
-						rowData.optString("gifURL"), false);
-					dialog.open(location, size);
+					else
+					{
+						dialog.setUrl(rowData.optString("gifURL"));
+					}
 				}
 			});
 		}
