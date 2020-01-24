@@ -237,15 +237,21 @@ public class BrowserDialog extends Dialog
 					}
 					if (introURL.getParameter("maximize") != null)
 					{
-						shell.setBounds(parent.getBounds());
+						Rectangle bounds = parent.getBounds();
+						browser.setSize(bounds.width, bounds.height);
+						shell.setBounds(bounds);
+						shell.layout(true, true);
 						return;
 					}
 
 					if (introURL.getParameter("normalize") != null)
 					{
 						Rectangle size = getParent().getBounds();
-						shell.setBounds(new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
-							(size.height - (int)(size.height / 1.5)) / 2 + size.y, (int)(size.width / 1.5), (int)(size.height / 1.5)));
+						Rectangle bounds = new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
+							(size.height - (int)(size.height / 1.5)) / 2 + size.y, (int)(size.width / 1.5), (int)(size.height / 1.5));
+						browser.setSize(bounds.width, bounds.height);
+						shell.setBounds(bounds);
+						shell.layout(true, true);
 						return;
 					}
 
