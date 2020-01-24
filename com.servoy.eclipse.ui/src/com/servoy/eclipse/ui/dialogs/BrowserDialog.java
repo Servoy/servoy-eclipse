@@ -18,7 +18,12 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.awt.Dimension;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -39,10 +44,12 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.intro.impl.model.loader.ModelLoaderUtil;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
+import org.eclipse.ui.progress.IProgressService;
 
 import com.servoy.eclipse.core.IStartPageAction;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.views.TutorialView;
+import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
@@ -146,7 +153,6 @@ public class BrowserDialog extends Dialog
 					}
 					if (introURL.getParameter("showTinyTutorial") != null || introURL.getParameter("importSample") != null)
 					{
-						//TODO test both
 						if (introURL.getParameter("showTinyTutorial") != null)
 						{
 							try
@@ -163,6 +169,24 @@ public class BrowserDialog extends Dialog
 								Debug.error(e);
 							}
 							shell.close();
+						}
+						if (introURL.getParameter("importSample") != null)
+						{
+							shell.close();
+
+							Map<String, InputStream> solutions = new HashMap<>();
+							try (InputStream is = new URL("https://" + introURL.getParameter("importSample")).openStream())
+							{
+								solutions.put("sol1", is);//TODO solution name
+								IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null, true);
+								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+								//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
+								progressService.run(true, false, importSolutionsRunnable);
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
 						}
 					}
 					if (introURL.getParameter("maximize") != null)
