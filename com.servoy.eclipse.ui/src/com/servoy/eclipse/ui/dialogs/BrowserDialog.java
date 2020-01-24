@@ -48,6 +48,7 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.progress.IProgressService;
 
+import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IStartPageAction;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -161,7 +162,8 @@ public class BrowserDialog extends Dialog
 						if (!shell.isDisposed()) shell.close();
 
 						Map<String, InputStream> solutions = new HashMap<>();
-						try (InputStream is = new URL("https://" + introURL.getParameter("importSample")).openStream())
+						try (InputStream is = new URL(introURL.getParameter("importSample").startsWith("https://") ? introURL.getParameter("importSample")
+							: "https://" + introURL.getParameter("importSample")).openStream())
 						{
 							String[] urlParts = introURL.getParameter("importSample").split("/");
 							if (urlParts.length >= 1)
@@ -190,6 +192,37 @@ public class BrowserDialog extends Dialog
 												.getServoyProject(solutionName), true);
 									}
 								});
+								ServoyModelManager.getServoyModelManager()
+									.getServoyModel()
+									.addActiveProjectListener(new IActiveProjectListener()
+									{
+
+										@Override
+										public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+										{
+											return false;
+										}
+
+										@Override
+										public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+										{
+										}
+
+										@Override
+										public void activeProjectChanged(ServoyProject activeProject)
+										{
+											Display.getDefault().asyncExec(() -> {
+												if (introURL.getParameter("showTinyTutorial") != null)
+												{
+													showTinyTutorial(introURL);
+													if (!shell.isDisposed()) shell.close();
+												}
+											});
+											ServoyModelManager.getServoyModelManager()
+												.getServoyModel()
+												.removeActiveProjectListener(this);
+										}
+									});
 							}
 						}
 						catch (Exception e)
@@ -199,19 +232,7 @@ public class BrowserDialog extends Dialog
 					}
 					if (introURL.getParameter("showTinyTutorial") != null)
 					{
-						try
-						{
-							TutorialView view = (TutorialView)PlatformUI.getWorkbench()
-								.getActiveWorkbenchWindow()
-								.getActivePage()
-								.showView(TutorialView.PART_ID);
-							view.open(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
-								: "https://" + introURL.getParameter("showTinyTutorial"));
-						}
-						catch (PartInitException e)
-						{
-							Debug.error(e);
-						}
+						showTinyTutorial(introURL);
 						if (!shell.isDisposed()) shell.close();
 					}
 					if (introURL.getParameter("maximize") != null)
@@ -229,6 +250,23 @@ public class BrowserDialog extends Dialog
 					}
 
 					introURL.execute();
+				}
+			}
+
+			protected void showTinyTutorial(final IntroURL introURL)
+			{
+				try
+				{
+					TutorialView view = (TutorialView)PlatformUI.getWorkbench()
+						.getActiveWorkbenchWindow()
+						.getActivePage()
+						.showView(TutorialView.PART_ID);
+					view.open(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
+						: "https://" + introURL.getParameter("showTinyTutorial"));
+				}
+				catch (PartInitException e)
+				{
+					Debug.error(e);
 				}
 			}
 
