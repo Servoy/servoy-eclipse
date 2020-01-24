@@ -549,7 +549,10 @@ public class Activator extends Plugin
 			{
 				public void showFormInDesigner(Form form)
 				{
-					FlattenedSolution editingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
+					FlattenedSolution editingSolution = ServoyModelManager.getServoyModelManager()
+						.getServoyModel()
+						.getActiveProject()
+						.getEditingFlattenedSolution();
 					final Form testForm = editingSolution.getForm(form.getName());
 					if (testForm == null) return;
 					Display.getDefault().asyncExec(new Runnable()
@@ -558,9 +561,15 @@ public class Activator extends Plugin
 						{
 							try
 							{
-								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-									PersistEditorInput.createFormEditorInput(testForm), PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-										Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
+								PlatformUI.getWorkbench()
+									.getActiveWorkbenchWindow()
+									.getActivePage()
+									.openEditor(
+										PersistEditorInput.createFormEditorInput(testForm), PlatformUI.getWorkbench()
+											.getEditorRegistry()
+											.getDefaultEditor(null,
+												Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID))
+											.getId());
 								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().forceActive();
 
 							}
@@ -1152,8 +1161,9 @@ public class Activator extends Plugin
 				public void run()
 				{
 					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(),
-						"Default PostgreSQL not installed.", "Should a default PostgreSQL database be installed?", SWT.NONE,
-						new String[] { "Yes (include sample)", "Yes (no sample)", "No", "Later" });
+						"Default PostgreSQL database not installed.", "Should a default PostgreSQL database be installed? (Used by tutorials and samples) ",
+						SWT.NONE,
+						new String[] { "Yes (include sample)", "Yes (no sample)", "Never", "Later" });
 					if (open == 0)
 					{
 						// create database with sample
