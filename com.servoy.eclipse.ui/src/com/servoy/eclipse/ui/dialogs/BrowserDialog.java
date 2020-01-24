@@ -19,10 +19,12 @@ package com.servoy.eclipse.ui.dialogs;
 
 import java.awt.Dimension;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -47,6 +49,7 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.progress.IProgressService;
 
 import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
@@ -180,11 +183,25 @@ public class BrowserDialog extends Dialog
 								String[] urlParts = introURL.getParameter("importSample").split("/");
 								if (urlParts.length >= 1)
 								{
-									solutions.put(urlParts[urlParts.length - 1].replace(".servoy", ""), is);
+									final String solutionName = urlParts[urlParts.length - 1].replace(".servoy", "");
+									solutions.put(solutionName, is);
 									IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null, true);
 									IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
 									progressService.run(true, false, importSolutionsRunnable);
+									progressService.run(true, false, new IRunnableWithProgress()
+									{
+
+										@Override
+										public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+										{
+											ServoyModelManager.getServoyModelManager()
+												.getServoyModel()
+												.setActiveProject(ServoyModelManager.getServoyModelManager()
+													.getServoyModel()
+													.getServoyProject(solutionName), true);
+										}
+									});
 								}
 							}
 							catch (Exception e)
