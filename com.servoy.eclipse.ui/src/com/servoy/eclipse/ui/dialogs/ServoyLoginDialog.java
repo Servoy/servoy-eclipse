@@ -308,7 +308,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		return control;
 	}
 
-	public void clearSavedInfo()
+	public static void clearSavedInfo()
 	{
 		ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
 		ISecurePreferences node = preferences.node(SERVOY_LOGIN_STORE_KEY);

@@ -18,12 +18,11 @@
 package com.servoy.eclipse.ui;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 
@@ -35,7 +34,7 @@ import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
  */
 public class ServoyLoginStatus extends WorkbenchWindowControlContribution implements IServoyLoginListener
 {
-	private Button statusBtn;
+	private Label statusBtn;
 
 	public ServoyLoginStatus()
 	{
@@ -48,22 +47,31 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 	@Override
 	protected Control createControl(Composite parent)
 	{
-		Composite result = new Composite(parent, SWT.NONE);
-		result.setLayout(new FillLayout());
-		statusBtn = new Button(result, SWT.NONE);
-		statusBtn.addSelectionListener(new SelectionAdapter()
+		parent.getParent().setRedraw(true);
+		statusBtn = new Label(parent, SWT.NONE);
+		statusBtn.addMouseListener(new MouseAdapter()
 		{
 			@Override
-			public void widgetSelected(SelectionEvent e)
+			public void mouseUp(MouseEvent e)
 			{
 				if (ServoyLoginDialog.getLoginToken() == null)
 				{
 					new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
 				}
+				else
+				{
+					//TODO
+				}
 			}
 		});
 		statusBtn.setImage(Activator.getDefault().loadImageFromBundle("servoy_design.png"));
-		return result;
+		return statusBtn;
+	}
+
+	@Override
+	public boolean isDynamic()
+	{
+		return true;
 	}
 
 	/*
