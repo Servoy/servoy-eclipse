@@ -620,7 +620,6 @@
             </separator>
          </menu>
       </actionSet>
-<!--
       <actionSet
             id="com.servoy.eclipse.ui.StartPage"
             label="StartPage"
@@ -628,13 +627,12 @@
          <action
                class="com.servoy.eclipse.ui.actions.OpenStartPage"
                id="com.servoy.eclipse.ui.openStartPage"
-               label="Servoy Developer Startpage"
+               label="Servoy First Start Guide"
                menubarPath="help/intro"
                style="push"
-               tooltip="Open Start Page">
+               tooltip="Open First Start Guide">
          </action>
       </actionSet>
--->
       <actionSet
             id="com.servoy.eclipse.ui.ServoyAdmin"
             label="Servoy Admin Page"

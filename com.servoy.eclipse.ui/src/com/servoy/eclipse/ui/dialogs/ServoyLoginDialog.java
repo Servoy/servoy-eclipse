@@ -62,11 +62,11 @@ import com.servoy.j2db.util.Utils;
  */
 public class ServoyLoginDialog extends TitleAreaDialog
 {
-	private static String SERVOY_LOGIN_STORE_KEY = "SERVOY_LOGIN_INFO";
-	private static String SERVOY_LOGIN_USERNAME = "USERNAME";
-	private static String SERVOY_LOGIN_PASSWORD = "PASSWORD";
-	private static String SERVOY_LOGIN_TOKEN = "TOKEN";
-	private static String CROWD_URL = "https://analytics-dev.analytics.servoy-cloud.eu/servoy-service/rest_ws/svyAnalyticsServer/v1/auth";
+	public static final String SERVOY_LOGIN_STORE_KEY = "SERVOY_LOGIN_INFO";
+	public static final String SERVOY_LOGIN_USERNAME = "USERNAME";
+	public static final String SERVOY_LOGIN_PASSWORD = "PASSWORD";
+	public static final String SERVOY_LOGIN_TOKEN = "TOKEN";
+	public static final String CROWD_URL = "https://analytics-dev.analytics.servoy-cloud.eu/servoy-service/rest_ws/svyAnalyticsServer/v1/auth";
 
 	private String dlgUsername = "";
 	private String dlgPassword = "";

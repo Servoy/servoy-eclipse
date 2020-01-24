@@ -16,15 +16,16 @@
  */
 package com.servoy.eclipse.ui.actions;
 
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.StartPageBrowserEditor;
-import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.BrowserDialog;
+import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 
 public class OpenStartPage implements IWorkbenchWindowActionDelegate
 {
@@ -38,14 +39,29 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 
 	public void run(IAction action)
 	{
+//		new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
+
+		ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
+		ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
+		String loginToken = null;
+
 		try
 		{
-			IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			activePage.openEditor(StartPageBrowserEditor.INPUT, StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
+			loginToken = node.get(ServoyLoginDialog.SERVOY_LOGIN_TOKEN, null);
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Failed to open StartPage browser.", e);
+		}
+		if (loginToken == null)
+		{
+			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+		}
+
+		if (loginToken != null)
+		{
+			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+				"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true);
+			dialog.open();
 		}
 	}
 

@@ -246,13 +246,8 @@ public class Activator extends AbstractUIPlugin
 			}
 		});
 
-		// show the login dialog first..
-
-
-		// for now show the startup page in a dialog
-
 		Display.getDefault().asyncExec(() -> {
-			new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
+//			new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
 			String loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
 			if (loginToken != null)
 			{
