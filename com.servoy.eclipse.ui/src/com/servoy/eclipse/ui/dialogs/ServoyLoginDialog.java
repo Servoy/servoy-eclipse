@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.ui.dialogs;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -26,6 +29,9 @@ import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -34,6 +40,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -181,6 +189,28 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	protected Control createButtonBar(Composite parent)
 	{
 		Control control = super.createButtonBar(parent);
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText("Forgot password?");
+		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		lbl.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseUp(MouseEvent e)
+			{
+				try
+				{
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://servoy.com/profile/login/"));
+				}
+				catch (PartInitException | MalformedURLException e1)
+				{
+					ServoyLog.logError(e1);
+				}
+			}
+		});
+		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gd.horizontalIndent = 10;
+		lbl.setLayoutData(gd);
+		lbl.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
 		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		return control;
 	}
