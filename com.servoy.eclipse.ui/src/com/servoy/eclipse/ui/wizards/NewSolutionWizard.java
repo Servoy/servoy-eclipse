@@ -623,6 +623,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setSkipModulesImport(!shouldAskOverwrite);
 		importSolutionWizard.setAllowDataModelChanges(true);
 		importSolutionWizard.setImportSampleData(true);
+		importSolutionWizard.shouldAllowSQLKeywords(true);
 
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);
