@@ -27,7 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,6 +40,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -56,7 +60,6 @@ import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
-import com.servoy.eclipse.debug.NGClientStarter;
 import com.servoy.eclipse.debug.actions.IDebuggerStartListener;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -70,7 +73,7 @@ import com.servoy.j2db.util.Utils;
  * @author costinchiulan
  * @since 2019.06
  */
-public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener, NGClientStarter
+public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
 
 	static final String NGDESKTOP_MAJOR_VERSION = Integer.toString(ClientVersion.getMajorVersion());
@@ -153,7 +156,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	 * Here can be also changed icon, url, or used modules.
 	 */
 
-	private void writeElectronJsonFile(Solution solution, File stateLocation, String fileExtension, IProgressMonitor monitor)
+	private void writeElectronJsonFile(Solution solution, String localPath, String fileExtension, IProgressMonitor monitor)
 	{
 
 		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html";
@@ -164,7 +167,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		String fileUrl = osxContent + File.separator + (Utils.isAppleMacOS() ? "Resources" : "resources") + File.separator + "app.asar.unpacked" +
 			File.separator + "config" + File.separator + "servoy.json";
 
-		String fPath = stateLocation.getAbsolutePath();
+		String fPath = localPath;
 		if (Utils.isAppleMacOS()) fPath += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + StartNGDesktopClientHandler.MAC_EXTENSION;
 
 		File f = new File(fPath + File.separator + fileUrl);
@@ -196,15 +199,14 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 			String[] command;
 			if (Utils.isAppleMacOS())
 			{
-				command = new String[] { "/usr/bin/open", stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
+				command = new String[] { "/usr/bin/open", localPath + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
 			}
 			else
 			{//windows || linux
-				command = new String[] { stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
+				command = new String[] { localPath + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
 			}
 			monitor.beginTask("Open NGDesktop", 3);
 			Runtime.getRuntime().exec(command);
-			monitor.worked(2);
 		}
 		catch (IOException e)
 		{
@@ -264,7 +266,102 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
-		runProgressBarAndNGClient(monitor);
+		StartClientHandler.setLastCommand(StartClientHandler.START_NG_DESKTOP_CLIENT);
+		monitor.beginTask(getStartTitle(), 5);
+		monitor.worked(1);
+
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+
+		if (activeProject == null || activeProject.getSolution() == null) return;
+		final Solution solution = activeProject.getSolution();
+		if (isSmartClientType(solution)) return;
+
+		monitor.worked(2);
+		if (testAndStartDebugger())
+		{
+			String extension = Utils.isAppleMacOS() ? MAC_EXTENSION : (Utils.isWindowsOS() ? WINDOWS_EXTENSION : "");
+			String platform = Utils.isAppleMacOS() ? MAC_BUILD_PLATFORM : (Utils.isWindowsOS()) ? WINDOWS_BUILD_PLATFORM : LINUX_BUILD_PLATFORM;
+			String appName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
+			String localPath = Activator.getDefault().getStateLocation().append(appName + "-" + platform).toOSString();
+			String pathToExecutable = localPath + File.separator + NG_DESKTOP_APP_NAME + extension;
+
+			try
+			{
+				URL archiveUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + appName + "-" + platform + ".tar.gz");
+				File executable = new File(pathToExecutable);
+				checkForHigherVersion(executable.getParentFile());
+				boolean downloadCancelled = false;
+				if (!executable.exists())
+				{
+					downloadCancelled = downloadArchive(archiveUrl, localPath);
+				}
+				if (!downloadCancelled)
+				{
+					writeElectronJsonFile(solution, localPath, extension, monitor);
+					monitor.worked(2);
+				}
+			}
+			catch (MalformedURLException e)
+			{
+			}
+		}
+		monitor.done();
+	}
+
+	private boolean isSmartClientType(Solution solution)
+	{
+		if (solution.getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY)
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					org.eclipse.jface.dialogs.MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+						"Cant open this solution type in this client");
+				}
+			});
+			return true;
+		}
+		return false;
+	}
+
+	private boolean downloadArchive(URL url, String localPath)
+	{
+		final boolean[] cancelled = { false };
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+				try
+				{
+					dialog.run(true, true, new DownloadElectron(url, localPath));
+				}
+				catch (InvocationTargetException | InterruptedException e)
+				{
+					System.out.println("Interrupted");
+				}
+				if (dialog.getProgressMonitor().isCanceled())
+				{
+					System.out.println("Cancelled");
+					deleteVersionFile(localPath);
+					cancelled[0] = true;
+				}
+			}
+		});
+		return cancelled[0];
+	}
+
+	private void deleteVersionFile(String localPath)
+	{//this will enforce a new download
+		String parentPath = new File(localPath).getParentFile().getAbsolutePath();
+		File currentVersionFile = new File(parentPath + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
+			StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
+		if (currentVersionFile.exists())
+		{
+			currentVersionFile.delete();
+		}
 	}
 
 	@Override
@@ -278,153 +375,162 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 
 	}
 
-	@Override
-	public void startNGClient(IProgressMonitor monitor)
-	{
-		StartClientHandler.setLastCommand(StartClientHandler.START_NG_DESKTOP_CLIENT);
-		monitor.beginTask(getStartTitle(), 5);
-		monitor.worked(1);
-
-		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject activeProject = servoyModel.getActiveProject();
-
-		if (activeProject != null && activeProject.getSolution() != null)
-		{
-			final Solution solution = activeProject.getSolution();
-
-			if (solution.getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY)
-			{
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						org.eclipse.jface.dialogs.MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
-							"Cant open this solution type in this client");
-					}
-				});
-				return;
-			}
-			monitor.worked(2);
-
-			if (testAndStartDebugger())
-			{
-
-				String extension = Utils.isAppleMacOS() ? MAC_EXTENSION : (Utils.isWindowsOS() ? WINDOWS_EXTENSION : "");
-
-				String folderName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION + "-" +
-					((Utils.isAppleMacOS() ? MAC_BUILD_PLATFORM : (Utils.isWindowsOS()) ? WINDOWS_BUILD_PLATFORM : LINUX_BUILD_PLATFORM));
-
-				File stateLocation = Activator.getDefault().getStateLocation().append(folderName).toFile();
-				String pathToExecutable = stateLocation.getAbsolutePath() + File.separator + NG_DESKTOP_APP_NAME + extension;
-
-				File executable = new File(pathToExecutable);
-				checkForHigherVersion(executable.getParentFile());
-
-				if (executable.exists())
-				{
-					writeElectronJsonFile(solution, stateLocation, extension, monitor);
-				}
-				else
-				{
-					Display.getDefault().asyncExec(new Runnable()
-					{
-						public void run()
-						{
-							ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-							try
-							{
-								dialog.run(true, false, new DownloadElectron());
-								if (executable.exists()) writeElectronJsonFile(solution, stateLocation, extension, monitor);
-							}
-							catch (Exception e)
-							{
-								e.printStackTrace();
-							}
-
-						}
-					});
-				}
-
-			}
-		}
-		monitor.done();
-	}
-
 }
 
 
 class DownloadElectron implements IRunnableWithProgress
 {
-	@Override
-	public void run(IProgressMonitor monitor)
+	private final URL url;
+	private final String localPath;
+
+	public DownloadElectron(URL url, String localPath)
 	{
-		File f = null;
+		super();
+		this.url = url;
+		this.localPath = localPath;
+	}
+
+	@Override
+	public void run(IProgressMonitor monitor) throws InterruptedException
+	{
 		try
 		{
-			monitor.beginTask("Downloading NGDesktop executable", 3);
-
-			String fString = Activator.getDefault().getStateLocation().toOSString();
-
-			if (Utils.isAppleMacOS())
-			{
-				fString += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-					StartNGDesktopClientHandler.MAC_BUILD_PLATFORM;
-			}
-			f = new File(fString);
-			f.mkdirs();
-
-
-			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" +
-				StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-				(Utils.isAppleMacOS() ? StartNGDesktopClientHandler.MAC_BUILD_PLATFORM
-					: (Utils.isWindowsOS() ? StartNGDesktopClientHandler.WINDOWS_BUILD_PLATFORM : StartNGDesktopClientHandler.LINUX_BUILD_PLATFORM)) +
-				".tar.gz");
-
-			extractTarGz(fileUrl.openStream(), f.toPath().toAbsolutePath().normalize());
-			monitor.worked(2);
+			extractTarGz(url, monitor);
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
-			//on download error delete current version file, this will enforce a new download on the next attempt to run the solution
-			File currentVersionFile = new File(f.getAbsolutePath() + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
-				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
-			if (currentVersionFile.exists()) currentVersionFile.delete();
-
 			ServoyLog.logError("Cannot find Electron in download center", e);
+			throw new InterruptedException();
+		}
+
+		monitor.done();
+	}
+
+	class MonitorInputStream extends BufferedInputStream
+	{
+		IProgressMonitor monitor;
+		int bytesCount = 0;
+		int mbCount = 0;
+		int currentStep;
+
+		public MonitorInputStream(InputStream in, int size)
+		{
+			super(in, size);
+		}
+
+		public MonitorInputStream(InputStream in, int size, IProgressMonitor monitor)
+		{
+			super(in, size);
+			this.monitor = monitor;
+		}
+
+		@Override
+		public int read(byte[] b, int off, int len) throws IOException
+		{
+			int n = super.read(b, off, len);
+			bytesCount += n;
+
+			int bytesToMegaBytes = Math.round((float)bytesCount / (1024 * 1024));// bytes => MB
+			if (bytesToMegaBytes > 0)
+			{
+				currentStep += bytesToMegaBytes;
+				monitor.worked(bytesToMegaBytes);
+				bytesCount = 0;
+				if (monitor.isCanceled())
+				{
+					throw new CancellationException();
+				}
+			}
+			return n;
+		}
+
+		@Override
+		public void close() throws IOException
+		{
+			super.close();
+		}
+
+		public int getCurrentStep()
+		{
+			return currentStep;
 		}
 	}
 
-	private void extractTarGz(InputStream is, Path outputPath) throws IOException
+	private Path makeDirs()
 	{
-		TarArchiveInputStream archIS = new TarArchiveInputStream(
-			new GzipCompressorInputStream(new BufferedInputStream(is, StartNGDesktopClientHandler.BUFFER_SIZE)));
-		TarArchiveEntry entry = null;
-		while ((entry = archIS.getNextTarEntry()) != null)
+		String fString = Activator.getDefault().getStateLocation().toOSString();
+		if (Utils.isAppleMacOS())
 		{
-			Path path = outputPath.resolve(entry.getName()).normalize();
-			if (entry.isDirectory())
+			fString += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+				StartNGDesktopClientHandler.MAC_BUILD_PLATFORM;
+		}
+		File f = new File(fString);
+		f.mkdirs();
+		return f.toPath().toAbsolutePath().normalize();
+	}
+
+	private void extractTarGz(URL tarGzUrl, IProgressMonitor monitor) throws IOException, InterruptedException
+	{
+		int fileSize = getUrlSize(tarGzUrl);
+		String fString = Activator.getDefault().getStateLocation().toOSString();
+		if (Utils.isAppleMacOS())
+		{
+			fString += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
+				StartNGDesktopClientHandler.MAC_BUILD_PLATFORM;
+		}
+		File f = new File(fString);
+		f.mkdirs();
+		Path outputPath = makeDirs();
+
+		int mbSize = Math.round((float)fileSize / (1024 * 1024)) * 2; //not sure why but TarArchive methods call stream methods twice
+		monitor.beginTask("Downloading NGDesktop executable", mbSize);
+
+		try
+		{
+
+			MonitorInputStream monInputStream = new MonitorInputStream(tarGzUrl.openStream(), StartNGDesktopClientHandler.BUFFER_SIZE, monitor);
+			TarArchiveInputStream archIS = new TarArchiveInputStream(
+				new GzipCompressorInputStream(monInputStream));
+			TarArchiveEntry entry = null;
+			while ((entry = archIS.getNextTarEntry()) != null)
 			{
-				Files.createDirectories(path);
-			}
-			else if (entry.isSymbolicLink())
-			{
-				Files.createDirectories(path.getParent());
-				String dest = entry.getLinkName();
-				Files.createSymbolicLink(path, Paths.get(dest));
-			}
-			else
-			{
-				Files.createDirectories(path.getParent());
-				try (OutputStream out = Files.newOutputStream(path))
+				Path path = outputPath.resolve(entry.getName()).normalize();
+				if (entry.isDirectory())
 				{
-					IOUtils.copy(archIS, out);//copy current archIS entry
+					Files.createDirectories(path);
+				}
+				else if (entry.isSymbolicLink())
+				{
+					Files.createDirectories(path.getParent());
+					String dest = entry.getLinkName();
+					Files.createSymbolicLink(path, Paths.get(dest));
+				}
+				else
+				{
+					Files.createDirectories(path.getParent());
+					try (OutputStream out = Files.newOutputStream(path))
+					{
+						IOUtils.copy(archIS, out);//copy current archIS entry
+					}
+				}
+				if (!Files.isSymbolicLink(path) && !Utils.isWindowsOS())
+				{
+					Files.setPosixFilePermissions(path, getPosixFilePermissions(entry));
 				}
 			}
-			if (!Files.isSymbolicLink(path) && !Utils.isWindowsOS())
+			if (monInputStream.getCurrentStep() < mbSize)
 			{
-				Files.setPosixFilePermissions(path, getPosixFilePermissions(entry));
+				monitor.worked(mbSize - monInputStream.getCurrentStep());
+				Thread.sleep(500);//let UI some time for UI update
 			}
+			monInputStream.close();
+			monitor.done();
 		}
+		catch (CancellationException e)
+		{
+			throw new InterruptedException();
+		}
+
 	}
 
 	private Set<PosixFilePermission> getPosixFilePermissions(TarArchiveEntry entry)
@@ -468,5 +574,31 @@ class DownloadElectron implements IRunnableWithProgress
 			perms.add(PosixFilePermission.OTHERS_EXECUTE);
 		}
 		return perms;
+	}
+
+	private int getUrlSize(URL fileUrl)
+	{
+		URLConnection conn = null;
+		try
+		{
+			conn = fileUrl.openConnection();
+			if (conn instanceof HttpURLConnection)
+			{
+				((HttpURLConnection)conn).setRequestMethod("HEAD");
+			}
+			conn.getInputStream();
+			return conn.getContentLength();
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			if (conn instanceof HttpURLConnection)
+			{
+				((HttpURLConnection)conn).disconnect();
+			}
+		}
 	}
 }

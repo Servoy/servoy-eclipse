@@ -61,7 +61,6 @@ import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
-import com.servoy.j2db.persistence.IRemoteRepository;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptElement;
@@ -87,7 +86,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * @author jcompagner,jblok
  */
-public class EclipseRepository extends AbstractRepository implements IRemoteRepository
+public class EclipseRepository extends AbstractRepository implements IRepository
 {
 	public static interface ActivityMonitor
 	{

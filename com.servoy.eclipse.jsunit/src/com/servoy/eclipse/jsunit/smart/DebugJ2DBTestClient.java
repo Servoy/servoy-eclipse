@@ -27,7 +27,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.test.SolutionJSUnitSuiteCodeBuilder;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.J2DBGlobals;
-import com.servoy.j2db.dataprocessing.IUserClient;
+import com.servoy.j2db.dataprocessing.IClient;
 import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugJ2DBClient;
 import com.servoy.j2db.debug.DebugUtils;
@@ -71,7 +71,7 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	}
 
 	@Override
-	protected boolean registerClient(IUserClient uc) throws Exception
+	protected boolean registerClient(IClient uc) throws Exception
 	{
 		boolean register = super.registerClient(uc);
 

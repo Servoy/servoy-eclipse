@@ -74,7 +74,7 @@ public class ExportPage extends WizardPage
 	{
 		super("page1");
 		this.exportElectronWizard = exportElectronWizard;
-		setTitle("Export Servoy application in electron");
+		setTitle("Export Servoy application");
 	}
 
 	public void createControl(Composite parent)

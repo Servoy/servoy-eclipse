@@ -31,6 +31,13 @@
             id="com.servoy.eclipse.ui.views.FavoritesView"
             name="Favorites">
       </view>
+       <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.TutorialView"
+            icon="icons/tutorial/tinytutorial23.png"
+            id="com.servoy.eclipse.ui.views.TutorialView"
+            name="Tutorial step by step">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -56,6 +63,14 @@
             targetID="com.servoy.eclipse.ui.DesignPerspective">
          <view
                id="com.servoy.eclipse.ui.views.FavoritesView"
+               relationship="stack"
+               relative="org.eclipse.ui.views.ContentOutline">
+         </view>
+      </perspectiveExtension>
+       <perspectiveExtension
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <view
+               id="com.servoy.eclipse.ui.views.TutorialView"
                relationship="stack"
                relative="org.eclipse.ui.views.ContentOutline">
          </view>
@@ -350,13 +365,13 @@
 	  		icon="icons/marketplace.gif"
 	  		id="com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"
       		name="Servoy Marketplace">
-      </editor>-->
+      </editor>
       <editor
 	  		class="com.servoy.eclipse.core.StartPageBrowserEditor"
 	  		icon="icons/servoy_donut16x16.png"
 	  		id="com.servoy.eclipse.core.StartPageBrowserEditor"
       		name="StartPage">
-      </editor>
+      </editor> -->
       <editor
             class="org.eclipse.wst.sse.ui.StructuredTextEditor"
             default="true"
@@ -612,10 +627,10 @@
          <action
                class="com.servoy.eclipse.ui.actions.OpenStartPage"
                id="com.servoy.eclipse.ui.openStartPage"
-               label="Servoy Developer Startpage"
+               label="Servoy First Start Guide"
                menubarPath="help/intro"
                style="push"
-               tooltip="Open Start Page">
+               tooltip="Open First Start Guide">
          </action>
       </actionSet>
       <actionSet
@@ -1355,4 +1370,15 @@
           class="com.servoy.eclipse.ui.editors.JSExtendsScope">
     </jsExtendsForm>
  </extension>
+ <extension point="org.eclipse.ui.menus">
+     <menuContribution
+           locationURI="toolbar:org.eclipse.ui.trim.status">
+        <toolbar id="com.example.toolbar" label="Test">
+            <control
+                class="com.servoy.eclipse.ui.ServoyLoginStatus"
+                id="com.example.control">
+            </control>
+        </toolbar>
+     </menuContribution>
+  </extension>
 </plugin>

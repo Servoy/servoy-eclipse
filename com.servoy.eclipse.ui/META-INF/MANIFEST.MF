@@ -77,7 +77,8 @@ Require-Bundle: org.eclipse.ui,
  com.servoy.eclipse.ui.tweaks,
  org.apache.commons.codec,
  org.eclipse.help,
- com.servoy.eclipse.ngclient
+ com.servoy.eclipse.ngclient,
+ org.eclipse.equinox.security
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

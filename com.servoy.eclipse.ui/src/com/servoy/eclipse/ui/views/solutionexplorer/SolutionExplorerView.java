@@ -514,6 +514,10 @@ public class SolutionExplorerView extends ViewPart
 
 	private IAction exportActiveSolutionAction;
 
+	private IAction openCreateSolutionTutorialAction;
+	private IAction openCreateFormTutorialAction;
+	private IAction openCreateRelationTutorialAction;
+
 	private IAction importSolutionAction;
 
 	private IAction suggestForeignTypes;
@@ -2013,8 +2017,9 @@ public class SolutionExplorerView extends ViewPart
 					}
 					else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 					{
-						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(
-							getResourcesProjectName(activeProject));
+						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode()
+							.setToolTipText(
+								getResourcesProjectName(activeProject));
 						refreshList();
 					}
 				}
@@ -2240,8 +2245,10 @@ public class SolutionExplorerView extends ViewPart
 					}
 					else if ((event.getType() & IResourceChangeEvent.POST_BUILD) != 0)
 					{
-						ProblemDecorator problemDecorator = (ProblemDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(
-							ProblemDecorator.ID);
+						ProblemDecorator problemDecorator = (ProblemDecorator)PlatformUI.getWorkbench()
+							.getDecoratorManager()
+							.getBaseLabelProvider(
+								ProblemDecorator.ID);
 						if (problemDecorator != null)
 						{
 							IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
@@ -2276,8 +2283,10 @@ public class SolutionExplorerView extends ViewPart
 		}
 		if (wasNull || reregisterExistingListener)
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel().addResourceChangeListener(resourceChangeListener,
-				IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+			ServoyModelManager.getServoyModelManager()
+				.getServoyModel()
+				.addResourceChangeListener(resourceChangeListener,
+					IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
 		}
 	}
 
@@ -2858,6 +2867,17 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(filePropertiesAction);
 		}
 
+		final DesignerPreferences designerPreferences = new DesignerPreferences();
+		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION && openCreateFormTutorialAction.isEnabled() &&
+			openCreateRelationTutorialAction.isEnabled() && openCreateSolutionTutorialAction.isEnabled() && designerPreferences.useContextMenuTutorials() &&
+			selectedTreeNode.getRealObject() != null)
+		{
+			final MenuManager menuManager = new MenuManager("Tutorials");
+			menuManager.add(openCreateSolutionTutorialAction);
+			menuManager.add(openCreateFormTutorialAction);
+			menuManager.add(openCreateRelationTutorialAction);
+			manager.add(menuManager);
+		}
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
@@ -3114,7 +3134,9 @@ public class SolutionExplorerView extends ViewPart
 		convertToCSSPositionForm = new ConvertToCSSPositionFormAction(this);
 		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
 		referenceToRegularFormAction = new ReferenceToRegularFormAction(this);
-
+		openCreateFormTutorialAction = new OpenCreateFormTutorialAction(this);
+		openCreateRelationTutorialAction = new OpenCreateRelationTutorialAction(this);
+		openCreateSolutionTutorialAction = new OpenCreateSolutionTutorialAction(this);
 		replaceActionInTree = new ReplaceTableAction(this);
 		replaceServerAction = new ReplaceServerAction(this);
 		convertFormsToCSSPosition = new ConvertAllFormsToCSSPosition(this);
@@ -3988,8 +4010,9 @@ public class SolutionExplorerView extends ViewPart
 			{
 				if (mediaNode.getType() == MediaNode.TYPE.IMAGE && mediaNodeTypeFilter.contains(MediaNode.TYPE.IMAGE))
 				{
-					IFile imageFile = ws.getRoot().getFile(
-						new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + '/' + SolutionSerializer.MEDIAS_DIR + '/' + mediaNode.getPath()));
+					IFile imageFile = ws.getRoot()
+						.getFile(
+							new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + '/' + SolutionSerializer.MEDIAS_DIR + '/' + mediaNode.getPath()));
 					File javaFile = imageFile.getRawLocation().makeAbsolute().toFile();
 					Image scaledImage = oldFolderCache == null ? null : oldFolderCache.remove(mediaNode.getPath() + javaFile.lastModified());
 					if (scaledImage != null)
