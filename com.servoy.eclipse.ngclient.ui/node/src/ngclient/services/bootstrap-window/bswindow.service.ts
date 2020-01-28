@@ -44,6 +44,34 @@ export class BSWindow {
         this.renderer = rendererFactory.createRenderer(null, null);
     }
 
+    
+    private addClassToBodyChildren(cls:String) {
+        let childNodesBody = this.document.body.childNodes;
+        for(let i = 0; i < childNodesBody.length; i++) {
+            if (childNodesBody[i] instanceof Element) {
+                childNodesBody[i].classList.add(cls);
+            }
+        }
+    }
+    
+    private getInteger(value:any) {
+        if (value) {
+            const parsed = parseInt(value, 10);
+            if (parsed == NaN) return 0;
+            return parsed;
+        }
+        return 0;
+    }
+    
+    private removeClassToBodyChildren(cls) {
+        let childNodesBody = this.document.body.childNodes;
+        for(let i = 0; i < childNodesBody.length; i++) {
+            if (childNodesBody[i] instanceof Element) {
+                childNodesBody[i].classList.add(cls);
+            }
+        }
+    }
+    
     setOptions(options) {
         options = options || {};
         var defaults = {
@@ -111,8 +139,8 @@ export class BSWindow {
             this.centerWindow();        
         } else {
             //user entered options
-            this.renderer.setStyle(this.element, 'left', this.options.location.left);
-            this.renderer.setStyle(this.element, 'top', this.options.location.top);
+            this.renderer.setStyle(this.element, 'left', this.options.location.left +"px");
+            this.renderer.setStyle(this.element, 'top', this.options.location.top + "px");
         }
         if(this.options.size){
             this.setSize(this.options.size);
@@ -156,8 +184,8 @@ export class BSWindow {
         
         // this should be changed
         var winBody = this.element.querySelector(this.options.selectors.body);
-        this.renderer.setStyle(winBody, 'width', size.width - parseInt(this.element.style.marginRight) - parseInt(this.element.style.marginLeft));
-        this.renderer.setStyle(winBody, 'height', size.height);
+        this.renderer.setStyle(winBody, 'width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + "px");
+        this.renderer.setStyle(winBody, 'height', size.height + "px");
     }
 
     centerWindow() {
@@ -175,7 +203,7 @@ export class BSWindow {
         if (top < bodyTop) {
             top = bodyTop;
         }
-        maxHeight = ((this.options.references.window.getBoundingClientRect().height - bodyTop) - (parseInt(this.options.elements.handle.style.height, 10) + parseInt(this.options.elements.footer.style.height, 10))) - 45;
+        maxHeight = ((this.options.references.window.getBoundingClientRect().height - bodyTop) - (this.getInteger(this.options.elements.handle.style.height) + this.getInteger(this.options.elements.footer.style.height))) - 45;
         this.renderer.setStyle(this.options.elements.body, 'maxHeight', maxHeight);
         this.renderer.setStyle(this.element, 'left', left);
         this.renderer.setStyle(this.element, 'top', top);
@@ -282,13 +310,8 @@ export class BSWindow {
                 thisCopy.element.dispatchEvent(focusedEvent);
             }
             
-            if (thisCopy.element.hasClass(lastResizeClass)) {
-                let childNodesBody = this.document.body.childNodes;
-                for(let i = 0; childNodesBody.length; i++) {
-                    if (childNodesBody[i] instanceof Element) {
-                        childNodesBody[i].classList.add('disable-select');
-                    }
-                }
+            if (thisCopy.element.classList.contains(lastResizeClass)) {
+                thisCopy.addClassToBodyChildren('disable-select');
                 thisCopy.resizing = true;
                 thisCopy.offset = {};
                 thisCopy.offset.x = event.pageX - thisCopy.element.offsetLeft;
@@ -329,7 +352,7 @@ export class BSWindow {
         this.renderer.listen(thisCopy.options.references.body, 'mouseup', () => {
             thisCopy.resizing = false;
             thisCopy.moving = false;
-            this.renderer.addClass('body > *', 'disable-select')
+            thisCopy.addClassToBodyChildren('disable-select');
             this.renderer.addClass(thisCopy.element, 'west');
             this.renderer.addClass(thisCopy.element, 'east');
             this.renderer.addClass(thisCopy.element, 'north');
@@ -342,10 +365,10 @@ export class BSWindow {
             // not sure if it's okay, is there a better way to trigger events manually in Angular?
             this.element.dispatchEvent(new CustomEvent('bswin.resize', {detail: {resize: size}}));
         });
-        this.document.removeEventListener('mousedown', this.options.elements, false);
-        this.renderer.listen(thisCopy.options.references.body, 'mousedown', (event) => {
-            var handleHeight = thisCopy.options.elements.handle.outerHeight();
-            var handleWidth = thisCopy.options.elements.handle.outerWidth();
+        this.document.removeEventListener('mousedown', thisCopy.options.elements.handle, false);
+        this.renderer.listen( thisCopy.options.elements.handle, 'mousedown', (event) => {
+            var handleHeight = thisCopy.options.elements.handle.offsetHeight;
+            var handleWidth = thisCopy.options.elements.handle.offsetWidth;
             var offX = event.offsetX;
             var offY = event.offsetY;
             if (!event.offsetX){
@@ -364,33 +387,21 @@ export class BSWindow {
             thisCopy.offset = {};
             thisCopy.offset.x = event.pageX - thisCopy.element.offsetLeft;
             thisCopy.offset.y = event.pageY - thisCopy.element.offsetTop;
-            let childNodesBody = this.document.body.childNodes;
-            for(let i = 0; childNodesBody.length; i++) {
-                if (childNodesBody[i] instanceof Element) {
-                    childNodesBody[i].classList.add('disable-select');
-                }
-            }
+            thisCopy.addClassToBodyChildren('disable-select');
         });
         
         this.renderer.listen(thisCopy.options.elements.handle, 'mouseup', (event) => {
             thisCopy.moving = false;
-            let childNodesBody = this.document.body.childNodes;
-            for(let i = 0; childNodesBody.length; i++) {
-                if (childNodesBody[i] instanceof Element) {
-                    childNodesBody[i].classList.remove('disable-select');
-                }
-            }
-            var pos = thisCopy.element.offset();         
+            thisCopy.removeClassToBodyChildren('disable-select');
+            var pos = {top:thisCopy.element.offsetTop,left:thisCopy.element.offsetLeft};         
 //            thisCopy.element.trigger('bswin.move',pos); // still need to be replaced
             this.element.dispatchEvent(new CustomEvent('bswin.move', {detail: {pos: pos}}));
         });
 
         this.renderer.listen(thisCopy.options.references.body, 'mousemove', (event) => {
             if (thisCopy.moving) {
-                var top = thisCopy.options.elements.handle.offsetTop,
-                    left = thisCopy.options.elements.handle.offsetLeft;
-                this.renderer.setStyle(thisCopy.element, 'top', event.pageY - thisCopy.offset.y);
-                this.renderer.setStyle(thisCopy.element, 'left', event.pageX - thisCopy.offset.x);
+                this.renderer.setStyle(thisCopy.element, 'top', (event.pageY - thisCopy.offset.y) + "px");
+                this.renderer.setStyle(thisCopy.element, 'left', (event.pageX - thisCopy.offset.x) + "px");
             }
             if (thisCopy.options.resizable && thisCopy.resizing) {
                 var winBody = thisCopy.element.querySelector(thisCopy.options.selectors.body);
@@ -403,17 +414,17 @@ export class BSWindow {
                 if(foot){
                     winHeadFootHeight += foot.outerHeight();
                 }
-                if (thisCopy.element.hasClass("east")) {
+                if (thisCopy.element.classList.contains("east")) {
                     this.renderer.setStyle(winBody, 'width', event.pageX - thisCopy.window_info.left);
                 }
-                if (thisCopy.element.hasClass("west")) {
+                if (thisCopy.element.classList.contains("west")) {
                     this.renderer.setStyle(winBody, 'width', thisCopy.window_info.width + (thisCopy.window_info.left  - event.pageX));
                     this.renderer.setStyle(thisCopy.element, 'left', event.pageX);
                 }
-                if (thisCopy.element.hasClass("south")) {
+                if (thisCopy.element.classList.contains("south")) {
                     this.renderer.setStyle(winBody, 'height', event.pageY - thisCopy.window_info.top - winHeadFootHeight);
                 }
-                if (thisCopy.element.hasClass("north")) {
+                if (thisCopy.element.classList.contains("north")) {
                     this.renderer.setStyle(winBody, 'height', thisCopy.window_info.height + (thisCopy.window_info.top  - event.pageY) - winHeadFootHeight);
                     this.renderer.setStyle(thisCopy.element, 'top', event.pageY);
                 }
@@ -421,13 +432,8 @@ export class BSWindow {
         });
 
         this.renderer.listen(thisCopy.options.references.body, 'mouseleave', (event) => {
-                        thisCopy.moving = false;
-            let childNodesBody = this.document.body.childNodes;
-            for(let i = 0; childNodesBody.length; i++) {
-                if (childNodesBody[i] instanceof Element) {
-                    childNodesBody[i].classList.remove('disable-select');
-                }
-            }
+              thisCopy.moving = false;
+              thisCopy.removeClassToBodyChildren('disable-select');
         });
 
         var lastResizeClass = '';
@@ -519,7 +525,7 @@ export class BSWindow {
 
     blink() {
         var _this = this,
-            active = this.element.hasClass('active'),
+            active = this.element.classList.contains('active'),
 
             blinkInterval = setInterval(function () {
             _this.element.toggleClass('active');
