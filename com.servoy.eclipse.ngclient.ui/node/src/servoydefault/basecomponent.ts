@@ -1,9 +1,9 @@
-import {OnInit, Input, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
+import {OnInit, Input, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild, AfterViewInit } from '@angular/core';
 
 import {PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public'
 
 
-export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements OnInit, OnChanges {
+export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements AfterViewInit, OnChanges {
 
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
@@ -35,9 +35,9 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements O
         super(renderer);
     }
 
-    ngOnInit() {
-      super.ngOnInit();
-      this.attachHandlers(); 
+    ngAfterViewInit() {
+		super.ngOnInit();
+        this.attachHandlers(); 
     }
 
     protected attachHandlers(){

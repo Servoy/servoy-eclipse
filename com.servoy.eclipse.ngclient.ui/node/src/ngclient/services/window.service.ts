@@ -1,22 +1,24 @@
-import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef } from '@angular/core';
+import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef, RendererFactory2, Inject, Renderer2 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
 import { ServoyService } from '../servoy.service'
 import { DialogWindowComponent } from './dialog-window/dialog-window.component';
-import { BSWindowManager } from '../bootstrap-window/window_manager'; 
-import { BSWindow } from '../bootstrap-window/window';
+import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
+import { BSWindow } from './bootstrap-window/bswindow.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LocalStorageService } from 'angular-web-storage';
 import { SabloService } from '../../sablo/sablo.service';
-import { PlatformLocation } from '@angular/common';
+import { DOCUMENT, PlatformLocation } from "@angular/common";
 import { ApplicationService } from "./application.service";
+import { Router, NavigationStart } from "@angular/router";
+import { ServoyApi } from "../servoy_api";
 
 @Injectable()
 export class WindowService {
      
     private instances: any = {}
-    private bsWindowManager: BSWindowManager;
+    private renderer: Renderer2;
 
     constructor(private formService:FormService,
         public servoyService:ServoyService,
@@ -26,13 +28,18 @@ export class WindowService {
         private _injector: Injector,
         public localStorageService: LocalStorageService,
         private titleService: Title,
-        public sabloService: SabloService, 
+        public sabloService: SabloService,
+        private bsWindowManager: BSWindowManager, 
+        private rendererFactory: RendererFactory2,
+        private appService: ApplicationService,
         private platformLocation: PlatformLocation, 
-        private appService: ApplicationService) {
-            this.bsWindowManager = new BSWindowManager();
-            this.platformLocation.onPopState((event) => {
-                    this.formService.goToForm(this.platformLocation.hash.replace('#', ''));
-            });
+        @Inject(DOCUMENT) private document: any) {
+        
+        this.renderer = rendererFactory.createRenderer(null, null);
+        this.platformLocation.onPopState((event) => {
+            this.formService.goToForm(this.platformLocation.hash.replace('#', ''));
+        });
+
     }
     
     public updateController(formName,formStructure) {
@@ -127,16 +134,14 @@ export class WindowService {
                 isModal: instance.type == WINDOW_TYPE_MODAL_DIALOG
             };
             instance.bsWindowInstance = this.bsWindowManager.createWindow(opt);
-            instance.bsWindowInstance.$el.on( 'bswin.resize', (event, size) => { instance.onResize(event, size) } )
-            instance.bsWindowInstance.$el.on( 'bswin.move', (event, location) => { instance.onMove(event, location) } )
-            // instance.bsWindowInstance.$el.on( "bswin.active", function( ev, active ) {
-            //     $( ev.currentTarget ).trigger( active ? "enableTabseq" : "disableTabseq" );
-            // } );
-            instance.bsWindowInstance.$el.find( ".window-header" ).focus();
+            
+            instance.bsWindowInstance.element.addEventListener( 'bswin.resize', (event, size) => { instance.onResize(event, size) } );
+            instance.bsWindowInstance.element.addEventListener( 'bswin.move', (event, location) => { instance.onResize(event, location) } );
+            [...this.document.getElementsByClassName('window-header')][0].focus();
             instance.bsWindowInstance.setActive( true );
             // init the size of the dialog
-            let width = instance.bsWindowInstance.$el.width();
-            let height = instance.bsWindowInstance.$el.height();
+            let width = instance.bsWindowInstance.element.getBoundingClientRect().width;
+            let height = instance.bsWindowInstance.element.getBoundingClientRect().height;
             if ( width > 0 && height > 0 ) {
                 var dialogSize = { width: width, height: height };
                 this.sabloService.callService( "$windowService", "resize", { name: instance.name, size: dialogSize }, true );
@@ -344,8 +349,8 @@ export class SvyWindow {
     setLocation( location ) {
         this.location = location;
         if ( this.bsWindowInstance ) {
-            this.bsWindowInstance.$el.css( 'left', this.location.x + 'px' );
-            this.bsWindowInstance.$el.css( 'top', this.location.y + 'px' );
+            this.bsWindowInstance.element.css( 'left', this.location.x + 'px' );
+            this.bsWindowInstance.element.css( 'top', this.location.y + 'px' );
         }
         if ( this.storeBounds ) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.location', this.location );

@@ -15,6 +15,8 @@ import { SvyUtilsService } from './services/utils.service';
 // generated services start
 import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.service';
 import { TypesRegisterService } from '../servoydefault/types_register.service';
+import { BSWindow } from "./services/bootstrap-window/bswindow.service";
+import { BSWindowManager } from "./services/bootstrap-window/bswindow_manager.service";
 // generated services end
 
 
@@ -47,7 +49,9 @@ export class AllServiceService implements ServiceProvider {
                 KeyListener,
                 // generated services start
                 NGUtilsService, 
-                TypesRegisterService
+                TypesRegisterService,
+                BSWindow,
+                BSWindowManager
                 // generated services end
                 ],
 } )

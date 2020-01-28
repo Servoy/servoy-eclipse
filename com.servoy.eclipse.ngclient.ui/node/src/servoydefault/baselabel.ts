@@ -1,10 +1,10 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild, AfterViewInit } from '@angular/core';
 
 import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
 
 import {ServoyDefaultBaseComponent} from './basecomponent'
 
-export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
+export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implements AfterViewInit {
 
     @Input() hideText;
     @Input() imageMediaID;
@@ -22,15 +22,15 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent {
         super(renderer);
     }
 
-    ngOnInit() {
+    ngAfterViewInit() {
+        super.ngAfterViewInit();
         if ( this.onDoubleClickMethodID ) {
             this.renderer.listen( this.elementRef.nativeElement, 'dblclick', ( e ) => {
                 this.onDoubleClickMethodID( e );
             } );
         }
-        super.ngOnInit();
     }
-
+    
     ngOnChanges( changes: SimpleChanges ) {
         for ( let property in changes ) {
             let change = changes[property];
