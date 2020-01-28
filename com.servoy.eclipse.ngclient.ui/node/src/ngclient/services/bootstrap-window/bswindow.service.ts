@@ -40,16 +40,17 @@ export class BSWindow {
     constructor(private windowRefService: WindowRefService,
                 private rendererFactory: RendererFactory2,
                 private utilsService: SvyUtilsService,
-                @Inject(DOCUMENT) private document: any) {
+                @Inject(DOCUMENT) private document: Document) {
         this.renderer = rendererFactory.createRenderer(null, null);
     }
 
     
-    private addClassToBodyChildren(cls:String) {
+    private addClassToBodyChildren(cls:string) {
         let childNodesBody = this.document.body.childNodes;
         for(let i = 0; i < childNodesBody.length; i++) {
             if (childNodesBody[i] instanceof Element) {
-                childNodesBody[i].classList.add(cls);
+                const node =  childNodesBody[i] as Element;
+                node.classList.add(cls);
             }
         }
     }
@@ -63,11 +64,12 @@ export class BSWindow {
         return 0;
     }
     
-    private removeClassToBodyChildren(cls) {
+    private removeClassToBodyChildren(cls:string) {
         let childNodesBody = this.document.body.childNodes;
         for(let i = 0; i < childNodesBody.length; i++) {
             if (childNodesBody[i] instanceof Element) {
-                childNodesBody[i].classList.add(cls);
+                const node = childNodesBody[i] as Element; 
+                node.classList.add(cls);
             }
         }
     }

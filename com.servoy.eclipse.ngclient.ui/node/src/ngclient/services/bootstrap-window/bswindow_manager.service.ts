@@ -13,7 +13,7 @@ export class BSWindowManager {
     
     private renderer: Renderer2;
 
-    constructor(@Inject(DOCUMENT) private document: any,
+    constructor(@Inject(DOCUMENT) private document: Document,
             private rendererFactory: RendererFactory2, 
             private bsWindow : BSWindow,
             private utils: SvyUtilsService) {
@@ -46,17 +46,16 @@ export class BSWindowManager {
     }
 
     resortWindows() {
-        var _this = this;
         var startZIndex = 900;
-        Array.prototype.forEach.call(this.windows, function(window, index) {
-            window.setIndex(startZIndex + index *_this.zIndexIncrement);
+        Array.prototype.forEach.call(this.windows, (window, index) => {
+            window.setIndex(startZIndex + index * this.zIndexIncrement);
         });
         
         if(this.modalStack.length>0){
             //update modal backdrop z-index.
             var lastWindowZindex = parseInt(this.modalStack[this.modalStack.length-1].element.style.zIndex);
-            var backdropModals = [...this.document.getElementsByClassName('.modal-backdrop')];
-            backdropModals.forEach((el, index) => {
+            var backdropModals = this.document.getElementsByClassName('modal-backdrop');
+           Array.from(backdropModals).forEach((el, index) => {
                 this.renderer.setStyle(el, 'z-index', lastWindowZindex - 1);
             });
         }
@@ -164,10 +163,12 @@ export class BSWindowManager {
     addModal(windowObj) {
         /*PRIVATE FUNCTION*/
         if(this.modalStack.length  === 0) {
-            console.log([...this.document.getElementsByTagName('body')][0].innerHTML);
-            [...this.document.getElementsByTagName('body)')][0].innerHTML += windowObj.options.modalBackdrop.cloneNode(true);
-            setTimeout(function(){
-                this.renderer.addClass(this.document.getElementsByClassName('modal-backdrop')[0], 'in');
+            this.document.body.appendChild(windowObj.options.modalBackdrop);
+            setTimeout(() => {
+                const backdrop = this.document.getElementsByClassName('modal-backdrop');
+                Array.from(backdrop).forEach((el, index) => {
+                     this.renderer.addClass(el, "in");
+                 });
             },50);
         }
         this.modalStack.push(windowObj);
@@ -180,10 +181,14 @@ export class BSWindowManager {
                 this.modalStack.splice(i, 1);
                 //also remove from dom with animation
                 if(this.modalStack.length === 0) {
-                    var backdrop = this.document.getElementsByClassName('modal-backdrop')[0];
-                    this.renderer.removeClass(backdrop, 'in');
-                    setTimeout(function(){ 
-                        backdrop.parentNode.removeChild(backdrop);
+                    const backdrop = this.document.getElementsByClassName('modal-backdrop');
+                    Array.from(backdrop).forEach((el, index) => {
+                         this.renderer.removeClass(el, "in");
+                     });
+                    setTimeout(() => { 
+                        Array.from(backdrop).forEach((el, index) => {
+                            el.remove();
+                        });
                     },50);
                 }
             }
