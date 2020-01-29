@@ -5,9 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -51,23 +51,24 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	public final static int COPYRIGHT_LENGTH = 128; // chars
 	private final static int PROCESS_CANCELLED = 1;
 	private final static int PROCESS_FINISHED = 0;
-	private final boolean[] cancel = { false };
+	private final AtomicBoolean cancel = new AtomicBoolean(false);
 
 	public ExportNGDesktopWizard()
 	{
 		super();
 		setWindowTitle("NG Desktop Export");
 		setNeedsProgressMonitor(true);
-		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		final IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
+		final ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		if (activeProject != null)
 		{
-			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "NGDesktopExportWizard:" + activeProject.getSolution().getName());
+			final IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings,
+				"NGDesktopExportWizard:" + activeProject.getSolution().getName());
 			setDialogSettings(section);
 		}
 		else
 		{
-			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "NGDesktopExportWizard");
+			final IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "NGDesktopExportWizard");
 			setDialogSettings(section);
 		}
 
@@ -91,21 +92,13 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 
 
-		IRunnableWithProgress job = new IRunnableWithProgress()
-		{
-			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-			{
-				if (errorMsg.length() > 0) return;
-				final NgDesktopServiceMonitor serviceMonitor = new NgDesktopServiceMonitor(monitor);
-				exportPage.getSelectedPlatforms().forEach((platform) -> {
-					int retCode = processPlatform(platform, exportSettings, serviceMonitor, errorMsg, cancel[0]);
-					if (retCode == PROCESS_CANCELLED)
-					{
-						cancel[0] = true;
-					}
-				});
-			}
-
+		final IRunnableWithProgress job = monitor -> {
+			if (errorMsg.length() > 0) return;
+			final NgDesktopServiceMonitor serviceMonitor = new NgDesktopServiceMonitor(monitor);
+			exportPage.getSelectedPlatforms().forEach((platform) -> {
+				final int retCode = processPlatform(platform, exportSettings, serviceMonitor, errorMsg, cancel.get());
+				if (retCode == PROCESS_CANCELLED) cancel.set(true);
+			});
 		};
 		return runContainer(job, errorMsg);
 	}
@@ -114,45 +107,33 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	{
 		try
 		{
-			cancel[0] = false;
+			cancel.set(false);
 			getContainer().run(true, true, job);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			Debug.error(e);
 			errorMsg.append(e.toString());
 		}
-		if (errorMsg.length() > 0)
-		{
-			MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
-		}
-		else if (!cancel[0])
-		{
-			MessageDialog.openInformation(UIUtils.getActiveShell(), "NG Desktop Export", "Export done successfully!");
-		}
+		if (errorMsg.length() > 0) MessageDialog.openError(UIUtils.getActiveShell(), "NG Desktop Export", errorMsg.toString());
+		else if (!cancel.get()) MessageDialog.openInformation(UIUtils.getActiveShell(), "NG Desktop Export", "Export done successfully!");
 		return true;
 	}
 
 	private int processPlatform(String platform, IDialogSettings settings, NgDesktopServiceMonitor monitor, StringBuilder errorMsg,
 		boolean processAlreadyCancelled)
 	{
-		if (processAlreadyCancelled)
-		{
-			return PROCESS_CANCELLED;
-		}
+		if (processAlreadyCancelled) return PROCESS_CANCELLED;
 		if (platform.equals(ExportPage.MACOS_PLATFORM) || platform.equals(ExportPage.LINUX_PLATFORM))
 		{
-			String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
-			String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
-			String archiveName = StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform +
+			final String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
+			final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
+			final String archiveName = StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform +
 				".tar.gz";
-			File archiveFile = new File(saveDir + archiveName);
+			final File archiveFile = new File(saveDir + archiveName);
 			downloadArchive(archiveFile, monitor, errorMsg);
 		}
-		else
-		{
-			processWindowsPlatform(monitor, settings, errorMsg);
-		}
+		else processWindowsPlatform(monitor, settings, errorMsg);
 		if (monitor.isCanceled())
 		{
 			monitor.done();
@@ -167,15 +148,12 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		try
 		{
 			if (archiveFile.exists()) archiveFile.delete();
-			URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveFile.getName());
+			final URL fileUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + archiveFile.getName());
 			monitor.beginTask("Exporting " + archiveFile.getName() + "...", getRemoteSize(fileUrl));
 			createTar(fileUrl.openStream(), archiveFile, this.getDialogSettings(), monitor);
-			if (monitor.isCanceled())
-			{
-				archiveFile.delete();
-			}
+			if (monitor.isCanceled()) archiveFile.delete();
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			ServoyLog.logError(e);
 			errorMsg.append(e.getMessage());
@@ -186,9 +164,9 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	{
 		try (NgDesktopClientConnection serviceConn = new NgDesktopClientConnection())
 		{
-			String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
-			String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
-			String tokenId = serviceConn.startBuild(ExportPage.WINDOWS_PLATFORM, settings);
+			final String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
+			final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
+			final String tokenId = serviceConn.startBuild(ExportPage.WINDOWS_PLATFORM, settings);
 			int status = NgDesktopClientConnection.OK;
 			monitor.startChase("Waiting...", serviceConn.getNgDesktopBuildRefSize(), serviceConn.getNgDesktopBuildRefDuration());
 			while (!monitor.isCanceled())
@@ -196,9 +174,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				Thread.sleep(POLLING_INTERVAL);
 				status = getStatus(serviceConn, monitor, tokenId, errorMsg);
 				if (status == NgDesktopClientConnection.ERROR || status == NgDesktopClientConnection.NOT_FOUND || status == NgDesktopClientConnection.READY)
-				{
 					break;
-				}
 			}
 			if (monitor.isCanceled())
 			{
@@ -216,12 +192,12 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		{
 			errorMsg.append(e.getMessage());
 		}
-	
+
 	}
 
 	private int getStatus(NgDesktopClientConnection conn, NgDesktopServiceMonitor monitor, String tokenId, StringBuilder errorMsg) throws IOException
 	{
-		int status = conn.getStatus(tokenId);
+		final int status = conn.getStatus(tokenId);
 		switch (status)
 		{
 			case NgDesktopClientConnection.WAITING :
@@ -230,7 +206,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				monitor.setTaskName(conn.getStatusMessage());
 				break;
 			case NgDesktopClientConnection.ERROR :
-				String errorMessage = conn.getStatusMessage();
+				final String errorMessage = conn.getStatusMessage();
 				errorMsg.append(errorMessage);
 				break;
 			case NgDesktopClientConnection.NOT_FOUND :
@@ -250,10 +226,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	{
 		// TODO: this will dissapear when the NGDesktop Service will handle tar.zip / installers for Mac/Linux
 		// for linux / mac; for now just hardcoding the number of tar entries in the remote archive
-		if (url.toString().indexOf("linux") > 0)
-		{
-			return 78;
-		}
+		if (url.toString().indexOf("linux") > 0) return 78;
 		return 334; // Mac tar entries;
 	}
 
@@ -272,7 +245,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				monitor.worked(1);
 				if (entry.getName().endsWith("/servoy.json"))
 				{
-					byte[] bytes = updateSettings(tarIS, exportSettings);
+					final byte[] bytes = updateSettings(tarIS, exportSettings);
 					((TarArchiveEntry)entry).setSize(bytes.length);
 					os.putArchiveEntry(entry);
 					os.write(bytes, 0, bytes.length);
@@ -284,13 +257,10 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				}
 				os.closeArchiveEntry();
 				entry = tarIS.getNextTarEntry();
-				if (monitor.isCanceled())
-				{
-					break;
-				}
+				if (monitor.isCanceled()) break;
 			}
 		}
-		catch (IOException e)
+		catch (final IOException e)
 		{
 			ServoyLog.logError(e);
 		}
@@ -299,12 +269,12 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 	private byte[] updateSettings(TarArchiveInputStream tarIS, IDialogSettings exportSettings)
 	{
 		// the exportSettings is already validated at this point;
-		String url = exportSettings.get("app_url");
-		String width = exportSettings.get("ngdesktop_width");
-		String height = exportSettings.get("ngdesktop_height");
-		String jsonFile = Utils.getTXTFileContent(tarIS, Charset.forName("UTF-8"), false);
-		JSONObject configFile = new JSONObject(jsonFile);
-		JSONObject options = (JSONObject)configFile.get("options");
+		final String url = exportSettings.get("app_url");
+		final String width = exportSettings.get("ngdesktop_width");
+		final String height = exportSettings.get("ngdesktop_height");
+		final String jsonFile = Utils.getTXTFileContent(tarIS, Charset.forName("UTF-8"), false);
+		final JSONObject configFile = new JSONObject(jsonFile);
+		final JSONObject options = (JSONObject)configFile.get("options");
 		options.put("url", url);
 		if (width.length() > 0) options.put("width", width);
 		if (height.length() > 0) options.put("height", height);
@@ -321,14 +291,11 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 	private StringBuilder validate(IDialogSettings settings)
 	{
-		StringBuilder errorMsg = new StringBuilder();
-		boolean winPlatform = settings.getBoolean("win_export");
-		boolean osxPlatform = settings.getBoolean("osx_export");
-		boolean linuxPlatform = settings.getBoolean("linux_export");
-		if (!(winPlatform || osxPlatform || linuxPlatform))
-		{
-			errorMsg.append("At least one platform must be selected");
-		}
+		final StringBuilder errorMsg = new StringBuilder();
+		final boolean winPlatform = settings.getBoolean("win_export");
+		final boolean osxPlatform = settings.getBoolean("osx_export");
+		final boolean linuxPlatform = settings.getBoolean("linux_export");
+		if (!(winPlatform || osxPlatform || linuxPlatform)) errorMsg.append("At least one platform must be selected");
 		String value = settings.get("save_dir");
 		if (value.length() == 0)
 		{
@@ -381,7 +348,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				}
 			}
 		}
-		catch (NumberFormatException e)
+		catch (final NumberFormatException e)
 		{
 			errorMsg.append("NumberFormatException: " + e.getMessage());
 		}
