@@ -95,7 +95,7 @@ export class BSWindowManager {
    initialize(options) {
        this.options = options;
        if (this.options.container) {
-           [...this.document.querySelectorAll(this.options.container)].forEach((element => {
+           Array.from(this.document.querySelectorAll(this.options.container)).forEach((element => {
                this.renderer.addClass(element, 'window-pane');
            }));
        }
