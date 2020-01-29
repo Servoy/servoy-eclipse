@@ -1,6 +1,7 @@
 package com.servoy.eclipse.exporter.ngdesktop.utils;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,7 +28,7 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 
-public class NgDesktopClientConnection
+public class NgDesktopClientConnection implements Closeable
 {
 	private String service_url = "https://ngdesktop-builder.servoy.com";
 	private String statusMessage = null;
@@ -83,12 +84,15 @@ public class NgDesktopClientConnection
 	{// expect absolute path
 		if (resourcePath != null)
 		{
-			return Base64.getEncoder().encodeToString(IOUtils.toByteArray(new FileInputStream(new File(resourcePath))));
+			try (FileInputStream fis = new FileInputStream(new File(resourcePath)))
+			{
+				return Base64.getEncoder().encodeToString(IOUtils.toByteArray(fis));
+			}
 		}
 		return null;
 	}
 
-	public void closeConnection() throws IOException
+	 public void close() throws IOException
 	{
 		if (httpClient != null)
 		{

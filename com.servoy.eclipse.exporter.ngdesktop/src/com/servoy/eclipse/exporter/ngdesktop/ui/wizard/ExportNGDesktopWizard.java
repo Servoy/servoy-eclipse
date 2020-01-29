@@ -184,12 +184,10 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 
 	private void processWindowsPlatform(NgDesktopServiceMonitor monitor, IDialogSettings settings, StringBuilder errorMsg)
 	{
-		NgDesktopClientConnection serviceConn = null;
-		try
+		try (NgDesktopClientConnection serviceConn = new NgDesktopClientConnection())
 		{
 			String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
 			String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
-			serviceConn = new NgDesktopClientConnection();
 			String tokenId = serviceConn.startBuild(ExportPage.WINDOWS_PLATFORM, settings);
 			int status = NgDesktopClientConnection.OK;
 			monitor.startChase("Waiting...", serviceConn.getNgDesktopBuildRefSize(), serviceConn.getNgDesktopBuildRefDuration());
@@ -218,10 +216,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		{
 			errorMsg.append(e.getMessage());
 		}
-		finally
-		{
-			closeConnection(serviceConn);
-		}
+	
 	}
 
 	private int getStatus(NgDesktopClientConnection conn, NgDesktopServiceMonitor monitor, String tokenId, StringBuilder errorMsg) throws IOException
@@ -249,21 +244,6 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 				return -1;// unknown status
 		}
 		return status;
-	}
-
-	private void closeConnection(NgDesktopClientConnection serviceConn)
-	{
-		if (serviceConn != null)
-		{
-			try
-			{
-				serviceConn.closeConnection();
-			}
-			catch (IOException e)
-			{
-				ServoyLog.logError(e);// this was the last attempt to close
-			}
-		}
 	}
 
 	private int getRemoteSize(URL url)
