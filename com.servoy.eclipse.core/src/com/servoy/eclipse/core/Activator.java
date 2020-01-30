@@ -1206,7 +1206,7 @@ public class Activator extends Plugin
 		checkApplicationServerVersion(ApplicationServerRegistry.get());
 	}
 
-	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception
+	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, boolean lts, ActionListener listener) throws Exception
 	{
 		File file = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/../servoy_updater.jar");
 		try (InputStream is = Activator.class.getResourceAsStream("updater/servoy_updater.jar"))
@@ -1216,8 +1216,9 @@ public class Activator extends Plugin
 		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() });
 		Class< ? > versionCheckClass = loader.loadClass("com.servoy.updater.VersionCheck");
 		Method updateAppServerFromSerclipse = versionCheckClass.getMethod("updateAppServerFromSerclipse",
-			new Class[] { java.io.File.class, int.class, int.class, ActionListener.class });
-		return Utils.getAsInteger(updateAppServerFromSerclipse.invoke(null, new Object[] { parentFile, version, releaseNumber, listener }));
+			new Class[] { java.io.File.class, int.class, int.class, boolean.class, ActionListener.class });
+		return Utils.getAsInteger(updateAppServerFromSerclipse.invoke(null,
+			new Object[] { parentFile, Integer.valueOf(version), Integer.valueOf(releaseNumber), Boolean.valueOf(lts), listener }));
 	}
 
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
@@ -1284,7 +1285,7 @@ public class Activator extends Plugin
 												{
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
-														ClientVersion.getReleaseNumber(), new ActionListener()
+														ClientVersion.getReleaseNumber(), ClientVersion.isLts(), new ActionListener()
 														{
 															public void actionPerformed(ActionEvent e)
 															{
