@@ -32,8 +32,8 @@ export class ImageMediaIdDirective implements OnChanges, IComponentContributorLi
 
     componentCreated(component: ServoyBaseComponent) {
         if(component == this.field) {
-            let nativeElement = component.getNativeElement();
-            let renderer = component.getRenderer();
+            const nativeElement = component.getNativeElement();
+            const renderer = component.getRenderer();
             renderer.listen( nativeElement, 'mouseenter', ( e ) => {
                 if(this.rollOverImgStyle) {
                     this.setCSSStyle(this.rollOverImgStyle);
@@ -59,8 +59,8 @@ export class ImageMediaIdDirective implements OnChanges, IComponentContributorLi
 
     private setImageStyle(): void {
         if (this.media && this.media.visible) {
-            var componentSize = this.media.componentSize;
-            var mediaOptions = this.media.mediaOptions;
+            const componentSize = this.media.componentSize;
+            const mediaOptions = this.media.mediaOptions;
             if(this.media.rollOverImg) { 
                 this.rollOverImgStyle = this.parseImageOptions(this.media.rollOverImg, mediaOptions, componentSize);
             } else {
@@ -84,16 +84,16 @@ export class ImageMediaIdDirective implements OnChanges, IComponentContributorLi
         bgstyle.set('display', "inline-block");
         bgstyle.set('vertical-align', "middle"); 
         if(mediaOptions == undefined) mediaOptions = 14; // reduce-enlarge & keep aspect ration
-        var mediaKeepAspectRatio = mediaOptions == 0 || ((mediaOptions & 8) == 8);
+        const mediaKeepAspectRatio = mediaOptions == 0 || ((mediaOptions & 8) == 8);
 
         // default  img size values
-        var imgWidth = 16;
-        var imgHeight = 16;
+        let imgWidth = 16;
+        let imgHeight = 16;
 
         if (image.indexOf('imageWidth=') > 0 && image.indexOf('imageHeight=') > 0)
         {
-            var vars = {};
-            var parts = image.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
+            let vars = {};
+            image.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
                     function(m,key,value) {
                 vars[key] = value;
             });
@@ -101,8 +101,8 @@ export class ImageMediaIdDirective implements OnChanges, IComponentContributorLi
             imgHeight = vars['imageHeight'];
         }
 
-        var widthChange = imgWidth / componentSize.width;
-        var heightChange = imgHeight / componentSize.height;
+        const widthChange = imgWidth / componentSize.width;
+        const heightChange = imgHeight / componentSize.height;
 
         if (widthChange > 1.01 || heightChange > 1.01 || widthChange < 0.99 || heightChange < 0.99) // resize needed
         {
