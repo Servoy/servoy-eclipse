@@ -340,11 +340,10 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				}
 				catch (InvocationTargetException | InterruptedException e)
 				{
-					System.out.println("Interrupted");
+					ServoyLog.logError(e);
 				}
 				if (dialog.getProgressMonitor().isCanceled())
 				{
-					System.out.println("Cancelled");
 					deleteVersionFile(localPath);
 					cancelled[0] = true;
 				}
