@@ -1,60 +1,52 @@
-import { Directive, Input, ViewContainerRef, SimpleChanges, OnChanges, ElementRef, Renderer2, HostListener } from '@angular/core';
-import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
-import { ServoyBaseComponent, IComponentContributorListener, ComponentContributor } from '../servoy_public';
+import { Directive, Input, SimpleChanges, OnChanges, ElementRef, Renderer2 } from '@angular/core';
+import { ServoyBaseComponent } from '../servoy_public';
+import { IViewStateListener } from '../basecomponent';
 
 @Directive({
     selector: '[svyImageMediaId]'
 })
-export class ImageMediaIdDirective implements OnChanges, IComponentContributorListener {
+export class ImageMediaIdDirective implements OnChanges, IViewStateListener {
 
     @Input('svyImageMediaId') media : any;
-    private log: LoggerService;
-    private field: ServoyBaseComponent;
+    @Input('hostComponent') hostComponent: ServoyBaseComponent;
+
     private imgStyle: Map<string, any>;
     private rollOverImgStyle: Map<string, any>;
     private clearStyle: Map<string, any>;
 
-    public constructor(private componentContributor: ComponentContributor, private logFactory:LoggerFactory, private viewContainer: ViewContainerRef, private _elemRef: ElementRef, private _renderer: Renderer2) {
-        this.log = logFactory.getLogger("ImageMediaIdDirective");
-        if(this.viewContainer['_view'] != undefined && this.viewContainer['_view']['component'] != undefined) {
-            this.field = this.viewContainer['_view']['component'];
-            componentContributor.addComponentListener(this);
-        }
-        else {
-            this.log.error("Can't find field for svyImageMediaId");
-        }
-
+    public constructor(private _elemRef: ElementRef, private _renderer: Renderer2) {
         this.clearStyle = new Map();
         this.clearStyle.set('width', '0px');
         this.clearStyle.set('height', '0px');
         this.clearStyle.set('backgroundImage', '');
     }
 
-    componentCreated(component: ServoyBaseComponent) {
-        if(component == this.field) {
-            const nativeElement = component.getNativeElement();
-            const renderer = component.getRenderer();
-            renderer.listen( nativeElement, 'mouseenter', ( e ) => {
-                if(this.rollOverImgStyle) {
-                    this.setCSSStyle(this.rollOverImgStyle);
-                }
-            } );
-
-            renderer.listen( nativeElement, 'mouseleave', ( e ) => {
-                if(this.rollOverImgStyle) {
-                    if(this.imgStyle) {
-                        this.setCSSStyle(this.imgStyle);
-                    }
-                    else {
-                        this.setCSSStyle(this.clearStyle);
-                    } 
-                }
-            } );
+    ngOnChanges(changes: SimpleChanges): void {
+        if(changes['hostComponent']) {
+            this.hostComponent.addViewStateListener(this);
         }
+        this.setImageStyle();
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        this.setImageStyle();
+    afterViewInit() {
+        const nativeElement = this.hostComponent.getNativeElement();
+        const renderer = this.hostComponent.getRenderer();
+        renderer.listen( nativeElement, 'mouseenter', ( e ) => {
+            if(this.rollOverImgStyle) {
+                this.setCSSStyle(this.rollOverImgStyle);
+            }
+        } );
+
+        renderer.listen( nativeElement, 'mouseleave', ( e ) => {
+            if(this.rollOverImgStyle) {
+                if(this.imgStyle) {
+                    this.setCSSStyle(this.imgStyle);
+                }
+                else {
+                    this.setCSSStyle(this.clearStyle);
+                } 
+            }
+        } );
     }
 
     private setImageStyle(): void {

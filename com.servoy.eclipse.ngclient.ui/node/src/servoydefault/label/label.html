@@ -9,7 +9,7 @@
 
 <ng-template #template>
 	<div style="width:100%;overflow:hidden;position:absolute;" class='svy-nowrap' #child>
-	   		<span [svyImageMediaId]='{img: dataProviderID?.url ? dataProviderID.url : imageMediaID, componentSize: size, rollOverImg:rolloverImageMediaID, visible: visible, mediaOptions: mediaOptions}'></span>
+	   		<span [svyImageMediaId]='{img: dataProviderID?.url ? dataProviderID.url : imageMediaID, componentSize: size, rollOverImg:rolloverImageMediaID, visible: visible, mediaOptions: mediaOptions}' [hostComponent]="self"></span>
  	   		<span [innerHTML]='(((dataProviderID == null && !hideText) || dataProviderID?.url) ? text : dataProviderID) | formatFilter:format?.display:format?.type | mnemonicletterFilter:mnemonic | trustAsHtml:servoyApi.trustAsHtml()'></span>
 	</div>
 </ng-template>

@@ -4,7 +4,7 @@
               [svyTooltip]="toolTipText"
               #element>
 <div  style="width:100%; overflow:hidden; position:relative; white-space:nowrap; pointer-events: none;" #child>
-            <span [svyImageMediaId]='{img: dataProviderID?.url ? dataProviderID.url : imageMediaID, componentSize: size, rollOverImg:rolloverImageMediaID, visible: visible, mediaOptions: mediaOptions}'></span>
+            <span [svyImageMediaId]='{img: dataProviderID?.url ? dataProviderID.url : imageMediaID, componentSize: size, rollOverImg:rolloverImageMediaID, visible: visible, mediaOptions: mediaOptions}' [hostComponent]="self"></span>
  	   		<span [innerHTML]='(((dataProviderID == null && !hideText) || dataProviderID?.url) ? text : dataProviderID ) | formatFilter:format?.display:format?.type | mnemonicletterFilter:mnemonic | trustAsHtml:servoyApi.trustAsHtml()'></span>
 </div> 
 </button>

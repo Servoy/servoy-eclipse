@@ -8,9 +8,12 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
     
     @ViewChild('element', {static: true}) elementRef:ElementRef;
     
+    readonly self: ServoyBaseComponent;
+    private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor:ComponentContributor;
 
-    constructor(protected readonly renderer: Renderer2) { 
+    constructor(protected readonly renderer: Renderer2) {
+        this.self = this;
         this.componentContributor = new ComponentContributor();
     }
     
@@ -20,6 +23,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
     
     ngAfterViewInit() {
         this.componentContributor.componentCreated(this);
+        this.viewStateListeners.forEach(listener => listener.afterViewInit());
      }
     
     protected addAttributes() {
@@ -61,4 +65,12 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
     public getLocationY() : number{
         return this.getNativeElement().parentNode.parentNode.offsetTop;
     }
+
+    public addViewStateListener(listener:IViewStateListener) {
+        this.viewStateListeners.add(listener);
+     }
+}
+
+export interface IViewStateListener {
+    afterViewInit();
 }

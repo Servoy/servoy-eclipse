@@ -36,6 +36,7 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements A
     }
 
     ngAfterViewInit() {
+        super.ngAfterViewInit();
 		super.ngOnInit();
         this.attachHandlers(); 
     }
