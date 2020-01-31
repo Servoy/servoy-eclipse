@@ -1,11 +1,11 @@
-import { Directive, Input, SimpleChanges, OnChanges, ElementRef, Renderer2 } from '@angular/core';
+import { Directive, Input, SimpleChanges, OnChanges, ElementRef, Renderer2, OnDestroy } from '@angular/core';
 import { ServoyBaseComponent } from '../servoy_public';
 import { IViewStateListener } from '../basecomponent';
 
 @Directive({
     selector: '[svyImageMediaId]'
 })
-export class ImageMediaIdDirective implements OnChanges, IViewStateListener {
+export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnDestroy {
 
     @Input('svyImageMediaId') media : any;
     @Input('hostComponent') hostComponent: ServoyBaseComponent;
@@ -26,6 +26,12 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener {
             this.hostComponent.addViewStateListener(this);
         }
         this.setImageStyle();
+    }
+
+    ngOnDestroy(): void {
+        if(this.hostComponent) {
+            this.hostComponent.removeViewStateListener(this);
+        }
     }
 
     afterViewInit() {

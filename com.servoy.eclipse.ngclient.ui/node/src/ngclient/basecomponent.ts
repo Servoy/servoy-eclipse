@@ -68,7 +68,11 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
 
     public addViewStateListener(listener:IViewStateListener) {
         this.viewStateListeners.add(listener);
-     }
+    }
+
+    public removeViewStateListener(listener:IViewStateListener) {
+        this.viewStateListeners.delete(listener);
+    }    
 }
 
 export interface IViewStateListener {
