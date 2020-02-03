@@ -210,6 +210,18 @@ public class DelegatingServoyModel implements IDeveloperServoyModel
 		realModel.removeActiveProjectListener(listener);
 	}
 
+	@Override
+	public void addDoneListener(IModelDoneListener listener)
+	{
+		realModel.addDoneListener(listener);
+	}
+
+	@Override
+	public void removeDoneListener(IModelDoneListener listener)
+	{
+		realModel.removeDoneListener(listener);
+	}
+
 	/**
 	 * @param listener
 	 * @see com.servoy.eclipse.core.IDeveloperServoyModel#addI18NChangeListener(com.servoy.eclipse.core.I18NChangeListener)

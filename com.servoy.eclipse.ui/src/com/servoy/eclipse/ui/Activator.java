@@ -59,6 +59,7 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IModelDoneListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
@@ -79,6 +80,7 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -240,7 +242,6 @@ public class Activator extends AbstractUIPlugin
 					findMissingSpecs.setRule(ServoyModel.getWorkspace().getRoot());
 					findMissingSpecs.schedule();
 				}
-
 			}
 
 			@Override
@@ -249,32 +250,82 @@ public class Activator extends AbstractUIPlugin
 
 			}
 		});
-
-		Display.getDefault().asyncExec(() -> {
-			//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
-			String username = null;
-			try
+		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(new IModelDoneListener()
+		{
+			@Override
+			public void modelDone()
 			{
-				username = SecurePreferencesFactory.getDefault()
-					.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
-					.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
-			}
-			catch (StorageException e)
-			{
-				ServoyLog.logError(e);
-			}
-			String loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
-			if (loginToken != null)
-			{
-				// only show if first login or is not disabled from preferences
-				if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
-				{
-					BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-						"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true, true);
-					dialog.open();
-				}
+				ServoyModelManager.getServoyModelManager().getServoyModel().removeDoneListener(this);
+				showLoginAndStart();
 			}
 		});
+	}
+
+	/**
+	 *
+	 */
+	public void showLoginAndStart()
+	{
+		if (com.servoy.eclipse.core.Activator.getDefault().isPostgresChecked(() -> showLoginAndStart()))
+		{
+			Runnable runnable = new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Shell activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+					if (activeShell == null)
+					{
+						Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
+						for (int i = shells.length; --i >= 0;)
+						{
+							Debug.warn(shells[i] + "  +++ " + shells[i].getParent() + " +++" + shells[i].isVisible());
+							if (shells[i].getParent() == null && shells[i].isVisible())
+							{
+								activeShell = shells[i];
+								break;
+							}
+						}
+						if (activeShell == null)
+						{
+							Debug.warn("active shell is null");
+							Display.getDefault().asyncExec(this);
+							return;
+						}
+						Debug.warn("active shell found looping of all shells" + activeShell);
+					}
+					while (activeShell.getParent() instanceof Shell)
+					{
+						activeShell = (Shell)activeShell.getParent();
+					}
+					Debug.warn("active shell FOUND " + activeShell);
+					//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
+					String username = null;
+					try
+					{
+						username = SecurePreferencesFactory.getDefault()
+							.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
+							.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
+					}
+					catch (StorageException e)
+					{
+						ServoyLog.logError(e);
+					}
+					String loginToken = new ServoyLoginDialog(activeShell).doLogin();
+					if (loginToken != null)
+					{
+						// only show if first login or is not disabled from preferences
+						if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
+						{
+							BrowserDialog dialog = new BrowserDialog(activeShell,
+								"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true, true);
+							dialog.open();
+						}
+					}
+				}
+			};
+			Display.getDefault().asyncExec(runnable);
+		}
 	}
 
 	@Override
