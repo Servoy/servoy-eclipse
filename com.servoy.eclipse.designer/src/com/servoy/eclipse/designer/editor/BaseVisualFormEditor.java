@@ -658,10 +658,12 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		else if (servoyProject == null && getPageCount() == 1)
 		{
 			// place hoder, replace it and create the normal pages
-			setInput(getEditorInput());
-			removePage(0);
-			createPages();
-			setActivePage(0);
+			Display.getDefault().asyncExec(() -> {
+				setInput(getEditorInput());
+				removePage(0);
+				createPages();
+				setActivePage(0);
+			});
 		}
 		else
 		{
