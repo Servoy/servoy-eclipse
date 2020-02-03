@@ -332,6 +332,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 									ArgumentType returnType = null;
 									String defaultMethodCode = config.optString("code", "");
 									String returnTypeDescription = "";
+									boolean hasDefaultValue = false;
+									Object defaultValue = null;
 									if (config.has("returns"))
 									{
 										if (config.get("returns") instanceof JSONObject)
@@ -339,20 +341,29 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 											JSONObject returns = config.getJSONObject("returns");
 											returnType = ArgumentType.valueOf(returns.optString("type", ""));
 											returnTypeDescription = returns.optString("description", "");
+											if (returns.has("default"))
+											{
+												hasDefaultValue = true;
+												defaultValue = returns.opt("default");
+											}
 										}
 										else
 										{
 											returnType = ArgumentType.valueOf(config.getString("returns"));
 										}
-										IPropertyType< ? > pt = null;
-										if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
-											(pt = TypesRegistry.getType(returnType.getName())) != null)
+										if (!hasDefaultValue)
 										{
-											Object defaultValue = pt.defaultValue(def);
-											if (defaultValue != null)
+											IPropertyType< ? > pt = null;
+											if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
+												(pt = TypesRegistry.getType(returnType.getName())) != null)
 											{
-												defaultMethodCode = "return " + defaultValue + ";";
+												hasDefaultValue = true;
+												defaultValue = pt.defaultValue(def);
 											}
+										}
+										if (hasDefaultValue)
+										{
+											defaultMethodCode = "return " + defaultValue + ";";
 										}
 									}
 									List<MethodArgument> arguments = new ArrayList<MethodArgument>();
