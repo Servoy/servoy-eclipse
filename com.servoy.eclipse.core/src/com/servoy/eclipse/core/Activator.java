@@ -185,6 +185,10 @@ public class Activator extends Plugin
 
 	private IDesignerCallback designerCallback;
 
+	private volatile boolean isPostgresInstallChecked = false;
+
+	private Runnable postgressCheckedNotify;
+
 
 	@Override
 	public void start(BundleContext context) throws Exception
@@ -1210,11 +1214,39 @@ public class Activator extends Plugin
 						{
 							dumpFile.delete();
 						}
+						setPostgresChecked();
+					}
+					else
+					{
+						setPostgresChecked();
 					}
 					// 3 ask the same again later.
 				}
 			});
 		}
+		else
+		{
+			setPostgresChecked();
+		}
+	}
+
+	void setPostgresChecked()
+	{
+		isPostgresInstallChecked = true;
+		if (this.postgressCheckedNotify != null) this.postgressCheckedNotify.run();
+	}
+
+	/**
+	 * return immediatly true when postgres installation is already checked or created
+	 * if that didn't happen yet it will return false and the runnable will be called when this happens.
+	 * @param toNotify
+	 * @return
+	 */
+	public boolean isPostgresChecked(Runnable toNotify)
+	{
+		if (isPostgresInstallChecked) return true;
+		this.postgressCheckedNotify = toNotify;
+		return false;
 	}
 
 	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, boolean lts, ActionListener listener) throws Exception
