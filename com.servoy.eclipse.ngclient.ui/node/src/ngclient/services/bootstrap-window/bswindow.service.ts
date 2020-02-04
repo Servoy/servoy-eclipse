@@ -168,23 +168,12 @@ export class BSWindow {
     }
 
     show() {
-        /* old 
-         this.$el.css('visibility', 'visible');
-         this.$el.fadeIn(0); 
-         */
-        
-        // new 
         this.renderer.setStyle(this.element, 'visibility', 'visible');
         this.renderer.setStyle(this.element, 'display', 'block');
         this.renderer.setStyle(this.element, 'transition', 'opacity 400ms');
     }
 
     setSize(size) {
-//        var winBody = this.$el.find(this.options.selectors.body);
-//        winBody.css('width', size.width - parseInt(this.$el.css("marginRight")) - parseInt(this.$el.css("marginLeft")) );
-//        winBody.css('height', size.height);
-        
-        // this should be changed
         var winBody = this.element.querySelector(this.options.selectors.body);
         this.renderer.setStyle(winBody, 'width', size.width - this.getInteger(this.element.style.marginRight) - this.getInteger(this.element.style.marginLeft) + "px");
         this.renderer.setStyle(winBody, 'height', size.height + "px");
@@ -289,12 +278,11 @@ export class BSWindow {
     }
 
     initHandlers() {
-        var thisCopy = this;
         this.renderer.listen(this.element.querySelector('[data-dismiss=window]'), 'click', (e) => {
-            if (thisCopy.options.blocker) {
+            if (this.options.blocker) {
                 return;
             }
-            thisCopy.close();
+            this.close();
         })
 
         this.renderer.listen(this.element, 'mousedown', (e) => {
@@ -304,175 +292,181 @@ export class BSWindow {
         
         this.renderer.listen(this.element, 'mousedown', (event) => {
             var focusedEvent = new Event('focused');
-            if (thisCopy.options.blocker) {
-                thisCopy.options.blocker.getElement().dispatchEvent(focusedEvent);
-                thisCopy.options.blocker.blink();
+            if (this.options.blocker) {
+                this.options.blocker.getElement().dispatchEvent(focusedEvent);
+                this.options.blocker.blink();
                 return;
             } else {
-                thisCopy.element.dispatchEvent(focusedEvent);
+                this.element.dispatchEvent(focusedEvent);
             }
             
-            if (thisCopy.element.classList.contains(lastResizeClass)) {
-                thisCopy.addClassToBodyChildren('disable-select');
-                thisCopy.resizing = true;
-                thisCopy.offset = {};
-                thisCopy.offset.x = event.pageX - thisCopy.element.offsetLeft;
-                thisCopy.offset.y = event.pageY - thisCopy.element.offsetTop;
-                thisCopy.window_info = {
-                    top: thisCopy.element.offsetTop,
-                    left: thisCopy.element.offsetLeft,
-                    width: thisCopy.element.getBoundingClientRect().width,
-                    height: thisCopy.element.getBoundingClientRect().height
+            if (this.element.classList.contains(lastResizeClass)) {
+                this.addClassToBodyChildren('disable-select');
+                this.resizing = true;
+                this.offset = {};
+                this.offset.x = event.pageX - this.element.offsetLeft;
+                this.offset.y = event.pageY - this.element.offsetTop;
+                this.window_info = {
+                    top: this.element.offsetTop,
+                    left: this.element.offsetLeft,
+                    width: this.element.getBoundingClientRect().width,
+                    height: this.element.getBoundingClientRect().height
                 };
                 
                 var offX = event.offsetX;
                 var offY = event.offsetY;
-                if (!event.offsetX){
+                if (!event.offsetX && event.offsetX != 0) {
                     // FireFox Fix
                     offX = event.originalEvent.layerX;
                     offY = event.originalEvent.layerY;
                 }
+                
                 let rectTarget = event.target.getBoundingClientRect();
-                var windowOffsetX = (rectTarget.left + this.document.body.scrollLeft) - (this.element.left + this.document.body.scrollLeft);
-                var windowOffsetY = (rectTarget.top + this.document.body.scrollTop) - (this.element.top + this.document.body.scrollTop);
-
+                let rectElement = this.element.getBoundingClientRect();
+                var windowOffsetX = (rectTarget.left + this.document.body.scrollLeft) - (rectElement.left + this.document.body.scrollLeft);
+                var windowOffsetY = (rectTarget.top + this.document.body.scrollTop) - (rectElement.top + this.document.body.scrollTop);
+    
                 if (offY + windowOffsetY < 5) {
-                    this.renderer.addClass(thisCopy.element, 'north');
+                    this.renderer.addClass(this.element, 'north');
                 }
-                if (offY + windowOffsetY > (thisCopy.element.getBoundingClientRect().height - 5)) {
-                    this.renderer.addClass(thisCopy.element, 'south');
+                if (offY + windowOffsetY > (this.element.getBoundingClientRect().height - 5)) {
+                    this.renderer.addClass(this.element, 'south');
                 }
                 if (offX + windowOffsetX < 5) {
-                    this.renderer.addClass(thisCopy.element, 'west');
+                    this.renderer.addClass(this.element, 'west');
                 }
-                if (offX + windowOffsetX > (thisCopy.element.getBoundingClientRect().width - 5)) {
-                    this.renderer.addClass(thisCopy.element, 'east');
+                if (offX + windowOffsetX > (this.element.getBoundingClientRect().width - 5)) {
+                    this.renderer.addClass(this.element, 'east');
                 }
             }
         });
 
-        this.renderer.listen(thisCopy.options.references.body, 'mouseup', () => {
-            thisCopy.resizing = false;
-            thisCopy.moving = false;
-            thisCopy.addClassToBodyChildren('disable-select');
-            this.renderer.addClass(thisCopy.element, 'west');
-            this.renderer.addClass(thisCopy.element, 'east');
-            this.renderer.addClass(thisCopy.element, 'north');
-            this.renderer.addClass(thisCopy.element, 'south');
-            var width = thisCopy.element.getBoundingClientRect().width;
-            var height = thisCopy.element.getBoundingClientRect().height;
+        this.renderer.listen(this.options.references.body, 'mouseup', () => {
+            this.resizing = false;
+            this.moving = false;
+            this.addClassToBodyChildren('disable-select');
+            this.renderer.addClass(this.element, 'west');
+            this.renderer.addClass(this.element, 'east');
+            this.renderer.addClass(this.element, 'north');
+            this.renderer.addClass(this.element, 'south');
+            var width = this.element.getBoundingClientRect().width;
+            var height = this.element.getBoundingClientRect().height;
             
             var size = {width:width,height:height};            
-            // before: thisCopy.element.trigger('bswin.resize',size);  
+            // before: this.element.trigger('bswin.resize',size);  
             // not sure if it's okay, is there a better way to trigger events manually in Angular?
             this.element.dispatchEvent(new CustomEvent('bswin.resize', {detail: {resize: size}}));
         });
-        this.document.removeEventListener('mousedown', thisCopy.options.elements.handle, false);
-        this.renderer.listen( thisCopy.options.elements.handle, 'mousedown', (event) => {
-            var handleHeight = thisCopy.options.elements.handle.offsetHeight;
-            var handleWidth = thisCopy.options.elements.handle.offsetWidth;
+        this.document.removeEventListener('mousedown', this.options.elements.handle, false);
+        this.renderer.listen( this.options.elements.handle, 'mousedown', (event) => {
+            var handleHeight = this.options.elements.handle.offsetHeight;
+            var handleWidth = this.options.elements.handle.offsetWidth;
             var offX = event.offsetX;
             var offY = event.offsetY;
-            if (!event.offsetX){
+            if (!event.offsetX && event.offsetX != 0) {
                 // FireFox Fix
                 offX = event.originalEvent.layerX;
                 offY = event.originalEvent.layerY;
             }
-            if (thisCopy.options.blocker ||
+            if (this.options.blocker ||
                 offY < 5 ||
                 handleHeight - offY < 5 || 
                 offX < 5 ||
                 handleWidth - offX < 5) {
                 return;
             }
-            thisCopy.moving = true;
-            thisCopy.offset = {};
-            thisCopy.offset.x = event.pageX - thisCopy.element.offsetLeft;
-            thisCopy.offset.y = event.pageY - thisCopy.element.offsetTop;
-            thisCopy.addClassToBodyChildren('disable-select');
+            this.moving = true;
+            this.offset = {};
+            this.offset.x = event.pageX - this.element.offsetLeft;
+            this.offset.y = event.pageY - this.element.offsetTop;
+            this.addClassToBodyChildren('disable-select');
         });
         
-        this.renderer.listen(thisCopy.options.elements.handle, 'mouseup', (event) => {
-            thisCopy.moving = false;
-            thisCopy.removeClassToBodyChildren('disable-select');
-            var pos = {top:thisCopy.element.offsetTop,left:thisCopy.element.offsetLeft};         
-//            thisCopy.element.trigger('bswin.move',pos); // still need to be replaced
+        this.renderer.listen(this.options.elements.handle, 'mouseup', (event) => {
+            this.moving = false;
+            this.removeClassToBodyChildren('disable-select');
+            var pos = {top:this.element.offsetTop,left:this.element.offsetLeft};         
             this.element.dispatchEvent(new CustomEvent('bswin.move', {detail: {pos: pos}}));
         });
 
-        this.renderer.listen(thisCopy.options.references.body, 'mousemove', (event) => {
-            if (thisCopy.moving) {
-                this.renderer.setStyle(thisCopy.element, 'top', (event.pageY - thisCopy.offset.y) + "px");
-                this.renderer.setStyle(thisCopy.element, 'left', (event.pageX - thisCopy.offset.x) + "px");
+        this.renderer.listen(this.options.references.body, 'mousemove', (event) => {
+            if (this.moving) {
+                this.renderer.setStyle(this.element, 'top', (event.pageY - this.offset.y) + "px");
+                this.renderer.setStyle(this.element, 'left', (event.pageX - this.offset.x) + "px");
             }
-            if (thisCopy.options.resizable && thisCopy.resizing) {
-                var winBody = thisCopy.element.querySelector(thisCopy.options.selectors.body);
+            if (this.options.resizable && this.resizing) {
+                var winBody = this.element.querySelector(this.options.selectors.body);
                 var winHeadFootHeight = 0;
-                var head = thisCopy.element.querySelector(thisCopy.options.selectors.handle);
+                var head = this.element.querySelector(this.options.selectors.handle);
                 if(head){
-                    winHeadFootHeight += head.outerHeight();
+                    winHeadFootHeight += head.offsetHeight;
                 }
-                var foot = thisCopy.element.querySelector(thisCopy.options.selectors.footer);
+                var foot = this.element.querySelector(this.options.selectors.footer);
                 if(foot){
-                    winHeadFootHeight += foot.outerHeight();
+                    winHeadFootHeight += foot.offsetHeight;
                 }
-                if (thisCopy.element.classList.contains("east")) {
-                    this.renderer.setStyle(winBody, 'width', event.pageX - thisCopy.window_info.left);
+                if (this.element.classList.contains("east")) {
+                    this.renderer.setStyle(winBody, 'width', event.pageX - this.window_info.left);
                 }
-                if (thisCopy.element.classList.contains("west")) {
-                    this.renderer.setStyle(winBody, 'width', thisCopy.window_info.width + (thisCopy.window_info.left  - event.pageX));
-                    this.renderer.setStyle(thisCopy.element, 'left', event.pageX);
+                if (this.element.classList.contains("west")) {
+                    this.renderer.setStyle(winBody, 'width', this.window_info.width + (this.window_info.left  - event.pageX));
+                    this.renderer.setStyle(this.element, 'left', event.pageX);
                 }
-                if (thisCopy.element.classList.contains("south")) {
-                    this.renderer.setStyle(winBody, 'height', event.pageY - thisCopy.window_info.top - winHeadFootHeight);
+                if (this.element.classList.contains("south")) {
+                    this.renderer.setStyle(winBody, 'height', event.pageY - this.window_info.top - winHeadFootHeight);
                 }
-                if (thisCopy.element.classList.contains("north")) {
-                    this.renderer.setStyle(winBody, 'height', thisCopy.window_info.height + (thisCopy.window_info.top  - event.pageY) - winHeadFootHeight);
-                    this.renderer.setStyle(thisCopy.element, 'top', event.pageY);
+                if (this.element.classList.contains("north")) {
+                    this.renderer.setStyle(winBody, 'height', this.window_info.height + (this.window_info.top  - event.pageY) - winHeadFootHeight);
+                    this.renderer.setStyle(this.element, 'top', event.pageY);
                 }
             }
         });
 
-        this.renderer.listen(thisCopy.options.references.body, 'mouseleave', (event) => {
-              thisCopy.moving = false;
-              thisCopy.removeClassToBodyChildren('disable-select');
+        this.renderer.listen(this.options.references.body, 'mouseleave', (event) => {
+              this.moving = false;
+              this.removeClassToBodyChildren('disable-select');
         });
 
         var lastResizeClass = '';
         this.renderer.listen(this.element, 'mousemove', (event) => {
-            if (thisCopy.options.blocker) {
+            if (this.options.blocker) {
                 return;
             }
-            if (thisCopy.options.resizable ) {
+            if (this.options.resizable ) {
                 var resizeClassIdx = 0;
                 //target can be the header or footer, and event.offsetX/Y will be relative to the header/footer .Adjust to '.window';
                 let rectTarget = event.target.getBoundingClientRect();
-                var windowOffsetX = (rectTarget.left + this.document.body.scrollLeft) - (this.element.left + this.document.body.scrollLeft);
-                var windowOffsetY = (rectTarget.top + this.document.body.scrollTop) - (this.element.top + this.document.body.scrollTop);
+                let rectElement = this.element.getBoundingClientRect();
+                var windowOffsetX = (rectTarget.left + this.document.body.scrollLeft) - (rectElement.left + this.document.body.scrollLeft);
+                var windowOffsetY = (rectTarget.top + this.document.body.scrollTop) - (rectElement.top + this.document.body.scrollTop);
                 
                 var offX = event.offsetX;
                 var offY = event.offsetY;
-                if (!event.offsetX){
+                if (!event.offsetX && event.offsetX != 0) {
                     // FireFox Fix
                     offX = event.originalEvent.layerX;
                     offY = event.originalEvent.layerY;
                 }
-                if (offY + windowOffsetY > (thisCopy.element.getBoundingClientRect().height - 5) ) {
+                if (offY + windowOffsetY > (this.element.getBoundingClientRect().height - 5) ) {
                     resizeClassIdx += resizeConstants.SOUTH;
                 }
                 if (offY + windowOffsetY< 5) {
                     resizeClassIdx += resizeConstants.NORTH;
                 }
-                if (offX + windowOffsetX> thisCopy.element.getBoundingClientRect().width - 5) {
+                if (offX + windowOffsetX> this.element.getBoundingClientRect().width - 5) {
                     resizeClassIdx += resizeConstants.EAST;
                 }
                 if (offX + windowOffsetX< 5)
                 {
                     resizeClassIdx += resizeConstants.WEST;
                 }
-                this.renderer.removeClass(thisCopy.element, lastResizeClass);
-                lastResizeClass=thisCopy.resizeAnchorClasses[resizeClassIdx];
-                this.renderer.addClass(thisCopy.element, lastResizeClass);
+                if (lastResizeClass != "" && lastResizeClass != undefined && lastResizeClass != null) {
+                    this.renderer.removeClass(this.element, lastResizeClass);
+                }
+                lastResizeClass=this.resizeAnchorClasses[resizeClassIdx];
+                if (lastResizeClass != "" && lastResizeClass != undefined && lastResizeClass != null) {
+                    this.renderer.addClass(this.element, lastResizeClass);
+                }
             }
         });
     }
