@@ -12,10 +12,10 @@
 
 	<artifactId>com.servoy.eclipse.jre.win32.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>13.0.1</version>
+	<version>13.0.2</version>
 	
 	<properties>
-		<jre.version>jdk-13.0.1+9-jre</jre.version>
+		<jre.version>jdk-13.0.2+8-jre</jre.version>
 	</properties>
 	
 	<build>
@@ -43,7 +43,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.1%2B9_openj9-0.17.0/OpenJDK13U-jre_x64_windows_openj9_13.0.1_9_openj9-0.17.0.zip</url>
+							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.2%2B8_openj9-0.18.0/OpenJDK13U-jre_x64_windows_openj9_13.0.2_8_openj9-0.18.0.zip</url>
 							<outputFileName>${jre.version}.zip</outputFileName>
 							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
 							<unpack>true</unpack>
