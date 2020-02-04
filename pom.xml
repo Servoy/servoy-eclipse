@@ -194,7 +194,17 @@
 							</restrictTo>
 						</filter>
 					</filters>
+					<includePackedArtifacts>true</includePackedArtifacts>
 				</configuration>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<id>default-target-platform</id>
+						<goals>
+							<goal>target-platform</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
