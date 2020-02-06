@@ -1222,6 +1222,7 @@ public class ProfilerView extends ViewPart
 					return;
 				}
 				tree.select(item);
+				sqlDataViewer.setInput(item.getData());
 			}
 		});
 
