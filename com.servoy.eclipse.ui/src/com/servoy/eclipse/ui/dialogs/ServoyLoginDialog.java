@@ -128,7 +128,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			else if (firstLogin || loginTokenResponse.status == LoginTokenResponse.Status.LOGIN_ERROR)
 			{
 				clearSavedInfo();
-				this.errorMessage = "Login failed";
+				this.errorMessage = "Login failed, with: " + loginTokenResponse.response;
 				doLogin();
 			}
 		}
