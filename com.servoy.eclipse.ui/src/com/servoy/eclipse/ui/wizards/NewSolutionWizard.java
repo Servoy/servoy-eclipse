@@ -16,15 +16,20 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -58,6 +63,7 @@ import org.eclipse.ui.progress.IProgressService;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
@@ -83,6 +89,9 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -123,7 +132,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	{
 		saveAllSettings();
 
-		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		final List<String> solutions = configPage.getSolutionsToImport();
 		final boolean mustAuthenticate = configPage.mustAuthenticate();
@@ -134,7 +143,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			{
 				monitor.beginTask("Creating solution and writing files to disk", 4);
 				// create Solution object
-				EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+				EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 				try
 				{
 					Solution solution = (Solution)repository.createNewRootObject(configPage.getNewSolutionName(), IRepository.SOLUTIONS);
@@ -151,7 +160,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						// create a new resource project
 						String resourceProjectName = configPage.getResourceProjectData().getNewResourceProjectName();
 						resourceProject = ServoyModel.getWorkspace().getRoot().getProject(resourceProjectName);
-						resourceProject.create(null);
+						String location = configPage.getProjectLocation();
+						IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(resourceProjectName);
+						if (location != null)
+						{
+							IPath path = new Path(location);
+							path = path.append(resourceProjectName);
+							description.setLocation(path);
+						}
+						resourceProject.create(description, null);
 						resourceProject.open(null);
 
 						// write repositoy UUID into the resource project
@@ -315,37 +332,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
-		Set<String> missingServerNames = searchMissingServers(solutions).keySet();
-		IRunnableWithProgress importSolutionsRunnable = new IRunnableWithProgress()
+		Map<String, Pair<String, InputStream>> toImportSolutions = new HashMap<>();
+		for (String name : solutions)
 		{
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-			{
-				monitor.beginTask(jobName, missingServerNames.size() + solutions.size());
-				try
-				{
-					createMissingDbServers(missingServerNames, monitor);
-
-					ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-					String newSolutionName = configPage.getNewSolutionName();
-					for (String name : solutions)
-					{
-						if (sm.getServoyProject(name) == null)
-						{
-							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
-							importSolution(is, name, newSolutionName, monitor, true);
-							monitor.worked(1);
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError(e);
-				}
-				monitor.done();
-			}
-
-
-		};
+			Pair<String, InputStream> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+			toImportSolutions.put(name, solution);
+		}
+		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false);
 
 		IRunnableWithProgress importPackagesRunnable = null;
 		final List<String> packs = configPage.getWebPackagesToImport();
@@ -385,7 +378,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 						for (String name : packs)
 						{
-							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+							InputStream is = NewSolutionWizardDefaultPackages.getInstance().getPackage(name).getRight();
 							IFile eclipseFile = folder.getFile(name + ".zip");
 							try
 							{
@@ -421,10 +414,80 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	protected HashMap<String, List<String>> searchMissingServers(final List<String> solutions)
+	public static IRunnableWithProgress importSolutions(final Map<String, Pair<String, InputStream>> solutions, final String jobName, String newSolutionName,
+		boolean activateSolution)
 	{
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-		IServerManagerInternal serverHandler = ServoyModel.getServerManager();
+		Set<String> missingServerNames = searchMissingServers(solutions.keySet()).keySet();
+		IRunnableWithProgress importSolutionsRunnable = new IRunnableWithProgress()
+		{
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+			{
+				monitor.beginTask(jobName, missingServerNames.size() + solutions.size());
+				try
+				{
+					createMissingDbServers(missingServerNames, monitor);
+
+					IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+					for (String name : solutions.keySet())
+					{
+						boolean shouldAskOverwrite = sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name);
+						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
+						{
+							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
+								shouldAskOverwrite, activateSolution);
+							monitor.worked(1);
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+				monitor.done();
+			}
+
+			private boolean shouldOverwrite(IDeveloperServoyModel sm, String name)
+			{
+				ServoyProject solutionProject = sm.getServoyProject(name);
+				if (solutionProject != null)
+				{
+					File wpmPropertiesFile = new File(solutionProject.getProject().getLocation().toFile(), "wpm.properties");
+					if (wpmPropertiesFile.exists())
+					{
+						Properties wpmProperties = new Properties();
+						try (FileInputStream wpmfis = new FileInputStream(wpmPropertiesFile))
+						{
+							wpmProperties.load(wpmfis);
+							String version = wpmProperties.getProperty("version");
+							if (version != null)
+							{
+								Pair<String, InputStream> pack = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
+								if (pack != null)
+								{
+									return !pack.getLeft().equals(version);
+								}
+							}
+							else
+							{
+								return true;
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+				return true;
+			}
+		};
+		return importSolutionsRunnable;
+	}
+
+	public static HashMap<String, List<String>> searchMissingServers(final Collection<String> solutions)
+	{
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IServerManagerInternal serverHandler = ApplicationServerRegistry.get().getServerManager();
 		HashMap<String, List<String>> missingServerNames = new HashMap<>();
 		for (String name : solutions)
 		{
@@ -433,11 +496,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				try
 				{
 					Document doc = NewSolutionWizardDefaultPackages.getInstance().getDatabaseInfo(name);
-					if (doc == null)
-					{
-						ServoyLog.logWarning("No database info found for solution " + name, new Exception("No database info found for solution " + name));
-						continue;
-					}
+					if (doc == null) continue;
 
 					NodeList connections = doc.getElementsByTagName("connection");
 					for (int i = 0; i < connections.getLength(); i++)
@@ -473,20 +532,23 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected boolean canCreateMissingServers()
 	{
-		return Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).anyMatch(s -> s.isPostgresDriver() && s.isEnabled());
+		return Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs()).anyMatch(s -> s.isPostgresDriver() && s.isEnabled());
 	}
 
-	protected void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
+	protected static void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
 	{
-		ServerConfig origConfig = Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).filter(
-			s -> s.isPostgresDriver() && s.isEnabled()).findAny().orElse(null);
+		ServerConfig origConfig = Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+			.filter(
+				s -> s.isPostgresDriver() && s.isEnabled())
+			.findAny()
+			.orElse(null);
 		if (origConfig == null)
 		{
 			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find any Postgres server config"));
 			return;
 		}
 
-		IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(origConfig.getServerName());
+		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(origConfig.getServerName());
 		if (server == null || !server.isValid())
 		{
 			ServoyLog.logError(new Exception("Cannot create missing servers. Did not find a valid Postgres server."));
@@ -504,8 +566,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				origConfig.getQueryProcedures(), -1, origConfig.getSelectINValueCountLimit(), origConfig.getDialectClass());
 			try
 			{
-				ServoyModel.getServerManager().testServerConfigConnection(serverConfig, 0);
-				ServoyModel.getServerManager().saveServerConfig(null, serverConfig);
+				ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
+				ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
 			}
 			catch (Exception ex)
 			{
@@ -536,8 +598,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
 	}
 
-	private void importSolution(InputStream is, final String name, final String targetSolution, IProgressMonitor monitor, boolean reportImportFail)
-		throws IOException
+	public static void importSolution(Pair<String, InputStream> packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
+		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution) throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -547,7 +609,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
 		{
-			Utils.streamCopy(is, fos);
+			Utils.streamCopy(packageInfo.getRight(), fos);
 		}
 
 
@@ -555,15 +617,37 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
 		importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
 		importSolutionWizard.setAllowSolutionFilePathSelection(false);
-		importSolutionWizard.setActivateSolution(false);
+		importSolutionWizard.setActivateSolution(activateSolution);
 		importSolutionWizard.init(PlatformUI.getWorkbench(), null);
 		importSolutionWizard.setReportImportFail(reportImportFail);
-		importSolutionWizard.setSkipModulesImport(true);
+		importSolutionWizard.setSkipModulesImport(!shouldAskOverwrite);
 		importSolutionWizard.setAllowDataModelChanges(true);
 		importSolutionWizard.setImportSampleData(true);
+		importSolutionWizard.shouldAllowSQLKeywords(true);
 
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);
+		// write the wpm version into the new solution project
+		String solutionVersion = packageInfo.getLeft();
+		if (solutionVersion.length() > 0)
+		{
+			ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
+
+			Properties wpmProperties = new Properties();
+			wpmProperties.put("version", solutionVersion);
+
+			try (ByteArrayOutputStream wpmbos = new ByteArrayOutputStream())
+			{
+				wpmProperties.store(wpmbos, "");
+				byte[] wpmPropertiesBytes = wpmbos.toByteArray();
+				WorkspaceFileAccess importedProjectFA = new WorkspaceFileAccess(solutionProject.getProject().getWorkspace());
+				importedProjectFA.setContents(solutionProject.getProject().getFullPath().append("wpm.properties").toOSString(), wpmPropertiesBytes);
+			}
+			catch (Exception ex)
+			{
+				Debug.log(ex);
+			}
+		}
 		cleanUPImportSolution(importSolutionFile);
 	}
 
@@ -691,9 +775,12 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 	protected ServerConfig getValidServerConfig()
 	{
-		return Arrays.stream(ServoyModel.getServerManager().getServerConfigs()).filter(
-			s -> s.isEnabled() && ServoyModel.getServerManager().getServer(s.getServerName()) != null &&
-				((IServerInternal)ServoyModel.getServerManager().getServer(s.getServerName())).isValid()).findAny().orElse(null);
+		return Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+			.filter(
+				s -> s.isEnabled() && ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
+					((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName())).isValid())
+			.findAny()
+			.orElse(null);
 	}
 
 }

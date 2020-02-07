@@ -21,7 +21,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -30,6 +29,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class DuplicateServerAction extends Action implements ISelectionChangedListener
 {
@@ -65,7 +65,7 @@ public class DuplicateServerAction extends Action implements ISelectionChangedLi
 			try
 			{
 				final IServerInternal s = (IServerInternal)node.getRealObject();
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				String name;
 				for (int i = 0; true; i++)
 				{

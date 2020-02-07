@@ -9,6 +9,9 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	$http.get("templates/toolbarswitch.html").then(function(result){
 		$templateCache.put("templates/toolbarswitch.html", result.data);
     });	
+	$http.get("templates/toolbaritemspinner.html").then(function(result){
+		$templateCache.put("templates/toolbaritemspinner.html", result.data);
+    });
 }])
 .directive("toolbarSwitch", ['$templateCache','$compile',function($templateCache,$compile){
 	return {
@@ -23,6 +26,49 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	      },
 	      replace: true
 	    };
+}])
+.directive("toolbarSpinner", ['$templateCache','$compile',function($templateCache,$compile){
+	return {
+		restrict: 'E',
+		transclude: true,
+		scope: {
+			model: "=model",
+		},
+		link: function($scope, $element, $attrs) {
+			$element.html($templateCache.get("templates/toolbaritemspinner.html"));
+			$compile($element.contents())($scope);
+			$scope.value = $scope.model.min;
+			$scope.$watch('model.initialValue', function(newValue, oldValue){
+				$scope.value = $scope.model.initialValue;
+			});
+			$scope.$watch('value', function(newValue, oldValue) {
+				if (newValue == undefined || newValue < $scope.model.min || newValue > $scope.model.max) {
+					return;
+				}
+		
+				$scope.value = newValue;
+				$scope.model.onSet(newValue);
+			});
+			$scope.dec = function() {
+				$scope.value--;
+			}
+			$scope.inc = function() {
+				$scope.value++;
+			}
+			$scope.checkInput = function() {
+				if ($scope.value == undefined) {
+					$scope.value = $scope.model.initialValue; 
+				}
+				if ($scope.value < $scope.model.min) {
+					$scope.value = $scope.model.min;
+				}
+				if ($scope.value > $scope.model.max) {
+					$scope.value = $scope.model.max;
+				}
+			}
+		},
+		replace: true
+	};
 }])
 .directive("toolbarItem", ['$templateCache','$compile',function($templateCache,$compile){
 	return {
@@ -50,15 +96,15 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	      transclude: true,
 	      scope: {
 	      },
-	      controller: function($scope, $element, $attrs, $toolbar) {
+	      controller: function($scope, $element, $attrs, $toolbar, $editorService) {
 	    	  var editor;
 	    	  $pluginRegistry.registerPlugin(function(editorScope) {
 	    			editor = editorScope;
 	    			$scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
 	    			$scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
-			    	$scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
 //			    	$scope.show_data = $toolbar.getButtons(TOOLBAR_CATEGORIES.SHOW_DATA);
 	    			if(editor.isAbsoluteFormLayout()) {
+	    			  $scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
 	    			  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
 			    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
 			    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
@@ -68,9 +114,13 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	    			}
 	    			else {
 	    				$scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
+						$scope.zoom_level = $toolbar.getButtons(TOOLBAR_CATEGORIES.ZOOM_LEVEL);
 	    				$scope.design_mode = $toolbar.getButtons(TOOLBAR_CATEGORIES.DESIGN_MODE);
 	    				$scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
 	    			}
+					if (!editor.isAbsoluteFormLayout() || $editorService.isShowingContainer()) {
+							$scope.zoom = $toolbar.getButtons(TOOLBAR_CATEGORIES.ZOOM);
+					}
 	    			$scope.standard_actions = $toolbar.getButtons(TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 	    	  });
 	    	  
@@ -109,6 +159,8 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	DISTRIBUTION: "distribution",
 	SIZING: "sizing",
 	GROUPING: "grouping",
+	ZOOM: "zoom",
+	ZOOM_LEVEL: "zoom_level",
 	FORM: "forms",
 	DISPLAY: "display",
 	EDITOR: "editor",

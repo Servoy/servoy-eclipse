@@ -65,6 +65,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ISupportsIndexedChildren;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
@@ -223,9 +224,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
 							boolean isInCSSPositionContainer = false;
-							if (baseComponent.getParent() instanceof LayoutContainer)
+							if (PersistHelper.getRealParent(baseComponent) instanceof LayoutContainer)
 							{
-								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)baseComponent.getParent());
+								isInCSSPositionContainer = CSSPositionUtils.isCSSPositionContainer((LayoutContainer)PersistHelper.getRealParent(baseComponent));
 							}
 							if (!responsive || isInCSSPositionContainer)
 								FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
@@ -308,7 +309,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	 * Function that check recursively childrens of a LayoutContainer .
 	 * If LayoutContainer childrens contains BaseComponent element, will call parseFormElements and will return it's value.
 	 *
-	 * @param layout
+	 * @param persist
 	 * @param containers
 	 * @param components
 	 * @param compAttributes
@@ -321,29 +322,29 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	 * @param fs
 	 * @return ghost
 	 */
-	private boolean checkLayoutHierarchyRecursively(IPersist layout, List<LayoutContainer> containers, Set<IFormElement> components, Class layoutClass,
+	private boolean checkLayoutHierarchyRecursively(IPersist persist, List<LayoutContainer> containers, Set<IFormElement> components,
 		Set<IFormElement> compAttributes, Set<IFormElement> deletedComponents, boolean formComponentChild, Set<IFormElement> refreshTemplate,
 		Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, boolean renderGhosts, FlattenedSolution fs)
 	{
 		boolean ghost = false;
-		if (layout instanceof LayoutContainer && !containers.contains(layout))
+		if (persist instanceof LayoutContainer && !containers.contains(persist))
 		{
-			containers.add((LayoutContainer)layout);
-			List<IPersist> children = ((LayoutContainer)layout).getAllObjectsAsList();
+			containers.add((LayoutContainer)persist);
+			List<IPersist> children = ((LayoutContainer)persist).getAllObjectsAsList();
 			for (IPersist element : children)
 			{
 				if (element != null)
 				{
-					boolean auxGhost = checkLayoutHierarchyRecursively(element, containers, components, element.getClass(), compAttributes, deletedComponents,
-						formComponentChild, refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
+					boolean auxGhost = checkLayoutHierarchyRecursively(element, containers, components, compAttributes, deletedComponents, formComponentChild,
+						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
 					if (auxGhost) ghost = auxGhost;
 				}
 			}
 			return ghost;
 		}
-		if (layout instanceof IFormElement && !components.contains(layout) && !compAttributes.contains(layout))
+		if (persist instanceof IFormElement && !components.contains(persist) && !compAttributes.contains(persist))
 		{
-			ghost = parseIFormElement((IFormElement)layout, components, compAttributes, deletedComponents, formComponentChild, refreshTemplate,
+			ghost = parseIFormElement((IFormElement)persist, components, compAttributes, deletedComponents, formComponentChild, refreshTemplate,
 				updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
 			return ghost;
 		}
@@ -375,11 +376,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			compAttributes.add(baseComponent);
 		}
 
-		if (persist instanceof ISupportExtendsID)
-		{
-			IPersist superPersist = PersistHelper.getSuperPersist(persist);
-			if (superPersist instanceof IFormElement) deletedComponents.add((IFormElement)superPersist);
-		}
+		IPersist superPersist = PersistHelper.getSuperPersist(persist);
+		if (superPersist instanceof IFormElement) deletedComponents.add((IFormElement)superPersist);
 
 
 		if (formComponentChild || persist.getParent().getChild(persist.getUUID()) != null)
@@ -444,6 +442,11 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 			}
 		}
+		if (persist instanceof ISupportsIndexedChildren)
+		{
+			ISupportsIndexedChildren supportChilds = (ISupportsIndexedChildren)persist;
+			ghost = ghost || supportChilds.getAllObjects().hasNext();
+		}
 		return ghost;
 	}
 
@@ -494,8 +497,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
-					renderGhosts = checkLayoutHierarchyRecursively(persist, containers, baseComponents, persist.getClass(), compAttributes, deletedComponents,
-						formComponentChild, refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
+					renderGhosts = checkLayoutHierarchyRecursively(persist, containers, baseComponents, compAttributes, deletedComponents, formComponentChild,
+						refreshTemplate, updatedFormComponentsDesignId, formComponentsComponents, renderGhosts, fs);
 				}
 				else
 				{
@@ -605,8 +608,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						WebLayoutSpecification spec = null;
 						if (container.getPackageName() != null)
 						{
-							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-								container.getPackageName());
+							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState()
+								.getLayoutSpecifications()
+								.get(
+									container.getPackageName());
 							if (pkg != null)
 							{
 								spec = pkg.getSpecification(container.getSpecName());
@@ -619,8 +624,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						writer.value(value);
 
 						writer.key("svy-solution-layout-class");
-						value = Arrays.stream(container.getCssClasses().split(" ")).filter(cls -> !containerStyleClasses.contains(cls)).collect(
-							Collectors.joining(" "));
+						value = Arrays.stream(container.getCssClasses().split(" "))
+							.filter(cls -> !containerStyleClasses.contains(cls))
+							.collect(
+								Collectors.joining(" "));
 						writer.value(value);
 
 						writer.key("svy-title");

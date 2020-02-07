@@ -55,7 +55,6 @@ import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.crypto.Cipher;
@@ -107,6 +106,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
+import com.servoy.eclipse.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -121,7 +121,6 @@ import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -146,11 +145,11 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
  */
 public class WarExporter
 {
-	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
 	private static final String[] NG_LIBS = new String[] { "org.freemarker*.jar", //
 		"servoy_ngclient_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"sablo_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
-		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", "org.apache.commons.lang3_*.jar", "de.inetsoftware.jlessc_*.jar" };
+		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
+		"org.apache.commons.lang3_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
 
@@ -458,7 +457,8 @@ public class WarExporter
 			if (exportModel.getExportedComponents() != null) exportedWebObjects.addAll(exportModel.getExportedComponents());
 			if (exportModel.getExportedServices() != null) exportedWebObjects.addAll(exportModel.getExportedServices());
 		}
-		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
+		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, exportModel.getExportedPackages(), Boolean.TRUE,
+			NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
 		attr = doc.createAttribute("name");
@@ -577,10 +577,6 @@ public class WarExporter
 	{
 		Set<String> exportedComponents = exportModel.getExportedComponents();
 		Set<String> exportedServices = exportModel.getExportedServices();
-		if (exportModel.getExcludedComponentPackages() != null && exportModel.getExcludedComponentPackages().size() > 0)
-		{
-			m.subTask("Excluding component packages: " + Arrays.toString(exportModel.getExcludedComponentPackages().toArray(new String[0])));
-		}
 		if (exportedComponents != null)
 		{
 			m.subTask("Exporting components: " + Arrays.toString(exportedComponents.toArray(new String[0])));
@@ -598,10 +594,6 @@ public class WarExporter
 			webObjects.append(component + ",");
 		}
 
-		if (exportModel.getExcludedServicePackages() != null && exportModel.getExcludedServicePackages().size() > 0)
-		{
-			m.subTask("Excluding service packages: " + Arrays.toString(exportModel.getExcludedServicePackages().toArray(new String[0])));
-		}
 		if (exportedServices != null)
 		{
 			m.subTask("Exporting services: " + Arrays.toString(exportedServices.toArray(new String[0])));
@@ -639,12 +631,11 @@ public class WarExporter
 			StringBuilder servicesLocations = new StringBuilder();
 
 			Map<String, File> allTemplates = new HashMap<String, File>();
-			List<String> excludedComponentPackages = exportModel.getExcludedComponentPackages();
-			List<String> excludedServicePackages = exportModel.getExcludedServicePackages();
-			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, excludedComponentPackages, excludedServicePackages, allTemplates);
+			Set<String> exportedPackages = exportModel.getExportedPackages();
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportedPackages, allTemplates);
 
-			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(excludedComponentPackages));
-			servicesLocations.append(ComponentResourcesExporter.getDefaultServicesDirectoryNames(excludedServicePackages));
+			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(exportedPackages));
+			servicesLocations.append(ComponentResourcesExporter.getDefaultServicesDirectoryNames(exportedPackages));
 
 			monitor.worked(1);
 			BaseNGPackageManager packageManager = ServoyModelFinder.getServoyModel().getNGPackageManager();
@@ -657,21 +648,18 @@ public class WarExporter
 				{
 					boolean copy = false;
 					String name = packageReader.getPackageName();
-					if (IPackageReader.WEB_COMPONENT.equals(packageReader.getPackageType()))
+					if ((IPackageReader.WEB_COMPONENT.equals(packageReader.getPackageType()) ||
+						IPackageReader.WEB_SERVICE.equals(packageReader.getPackageType())) && exportedPackages.contains(name))
 					{
-						if (excludedComponentPackages == null || !excludedComponentPackages.contains(name))
+						if (IPackageReader.WEB_COMPONENT.equals(packageReader.getPackageType()))
 						{
 							componentLocations.append("/" + name + "/;");
-							copy = true;
 						}
-					}
-					else if (IPackageReader.WEB_SERVICE.equals(packageReader.getPackageType()))
-					{
-						if (excludedServicePackages == null || !excludedServicePackages.contains(name))
+						else
 						{
 							servicesLocations.append("/" + name + "/;");
-							copy = true;
 						}
+						copy = true;
 					}
 					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()))
 					{
@@ -749,62 +737,8 @@ public class WarExporter
 		}
 		for (File file : pluginFiles)
 		{
-			if (file.getName().contains("servoy_ngclient"))
-			{
-				copyNGClientJar(file, targetLibDir);
-			}
-			else
-			{
-				copyFile(file, new File(targetLibDir, file.getName()));
-			}
+			copyFile(file, new File(targetLibDir, file.getName()));
 		}
-	}
-
-	/**
-	 * Copy the servoy_ngclient jar to the libs folder in the .war.
-	 * Exclude folders defined in EXCLUDE_FROM_NG_JAR.
-	 * @param file
-	 * @param targetLibDir
-	 * @throws IOException
-	 */
-	private void copyNGClientJar(File file, File targetLibDir) throws IOException
-	{
-		File dest = new File(targetLibDir, file.getName());
-		ZipInputStream zin = new ZipInputStream(new FileInputStream(file));
-		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(dest));
-		byte[] buf = new byte[1024];
-
-		ZipEntry entry = zin.getNextEntry();
-		while (entry != null)
-		{
-			String name = entry.getName();
-			boolean toBeDeleted = false;
-			for (String f : EXCLUDE_FROM_NG_JAR)
-			{
-				if (name.startsWith(f))
-				{
-					toBeDeleted = true;
-					break;
-				}
-			}
-			if (!toBeDeleted)
-			{
-				// Add ZIP entry to output stream.
-				zout.putNextEntry(new ZipEntry(name));
-				// Transfer bytes from the ZIP file to the output file
-				int len;
-				while ((len = zin.read(buf)) > 0)
-				{
-					zout.write(buf, 0, len);
-				}
-			}
-			entry = zin.getNextEntry();
-		}
-		// Close the streams
-		zin.close();
-		// Compress the files
-		// Complete the ZIP file
-		zout.close();
 	}
 
 	/**

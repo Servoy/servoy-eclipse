@@ -25,3 +25,52 @@
 	opacity: 0.3;
 	border: 2px dashed;
 }
+
+.maxLevelDesign > * {
+	display: none !important;
+}
+
+.maxLevelDesign {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.containerChildren1 {
+	background-image: url("../images/container-with-1-child.png");
+}
+
+.containerChildren2 {
+	background-image: url("../images/container-with-2-children.png");
+}
+
+.containerChildren3 {
+	background-image: url("../images/container-with-3-children.png");
+}
+
+.containerChildren4 {
+	background-image: url("../images/container-with-4-children.png");
+}
+
+.containerChildren5 {
+	background-image: url("../images/container-with-5-children.png");
+}
+
+.containerChildren6 {
+	background-image: url("../images/container-with-6-children.png");
+}
+
+.containerChildren7 {
+	background-image: url("../images/container-with-7-children.png");
+}
+
+.containerChildren8 {
+	background-image: url("../images/container-with-8-children.png");
+}
+
+.containerChildren9 {
+	background-image: url("../images/container-with-9-children.png");
+}
+
+.containerChildren10 {
+	background-image: url("../images/container-with-10-children.png");
+}

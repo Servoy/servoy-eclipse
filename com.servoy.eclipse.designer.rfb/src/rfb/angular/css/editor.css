@@ -352,8 +352,6 @@ html, body
 	pointer-events: auto;
 	cursor: pointer;
 	display:inline;
-	float:right;
-	overflow:hidden;
 	white-space:nowrap;
 	z-index: 10000;
 }
@@ -368,4 +366,57 @@ html, body
 
 .menubar .containerAction {
 	display: inline-block;
+}
+
+.showWireframe.maxLevelDesign {
+	background-repeat: no-repeat;
+	background-position: center;
+	background-color: var(--svyBackgroundColor);
+	background-image: url("../images/zoom_in.png");
+}
+
+.showWireframe.maxLevelDesign::before {
+	width: 80px;
+}
+
+.moreMenuItem {
+    cursor: pointer;
+    height: 18px;
+    width: 20px;
+    position: relative;
+    margin-top: -10px;
+}
+
+.dropdownMenu  > ul {
+	display: none;
+}
+
+.dropdownMenu  > i {
+	display: inline-block;
+	color: black;
+	vertical-align: middle;
+}
+
+.dropdownMenu:hover  > i {
+	display: none;
+}
+
+.dropdownMenu:hover > ul {
+	display: block;
+	background: #FFFFFF;
+	border: 1px solid rgba(0,0,0,.15);
+	box-shadow: 0 6px 12px rgba(0,0,0,.175);
+  	border-radius: 4px;
+	width: 100px;
+	line-height: 20px;
+	margin-top: -10px;
+	margin-left: -5px;
+}
+
+.dropdownMenu > ul > li:hover {
+	background-color: #F5F5F5;
+}
+
+.dropdownMenu > ul > li > a:hover {
+	text-decoration: none;
 }

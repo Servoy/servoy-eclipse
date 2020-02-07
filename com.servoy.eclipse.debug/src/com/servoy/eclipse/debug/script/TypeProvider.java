@@ -35,7 +35,6 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.IPropertyType;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.Record;
@@ -45,6 +44,7 @@ import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.querybuilder.impl.QBSelect;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -214,7 +214,7 @@ public class TypeProvider implements ITypeProvider
 			}
 			if (datasourcePrefix != null && mode == TypeMode.JSDOC)
 			{
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				String[] serverNames = serverManager.getServerNames(true, true, false, false);
 				for (String serverName : serverNames)
 				{

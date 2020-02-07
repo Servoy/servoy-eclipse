@@ -20,8 +20,16 @@
 		<toolbar-item ng-repeat="item in sizing" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
-	<div class="toolbar groping" ng-if="grouping.length > 0">
+	<div class="toolbar grouping" ng-if="grouping.length > 0">
 		<toolbar-item ng-repeat="item in grouping" ng-if="!item.hide" model="item" class="toolbar-action"/>
+	</div>
+	
+	<div class="toolbar zoom" ng-if="zoom.length > 0">
+		<toolbar-item ng-repeat="item in zoom" ng-if="!item.hide" model="item" class="toolbar-action"/>
+	</div>
+	
+	<div class="toolbar zoom_level" ng-if="zoom_level.length > 0" style="border-left-width: 0px;">
+		<toolbar-spinner ng-repeat="item in zoom_level" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
 	<div class="toolbar form" ng-if="form.length > 0">
@@ -30,10 +38,6 @@
 	
 	<div class="toolbar display" ng-if="display.length > 0">
 		<toolbar-item ng-repeat="item in display" ng-if="!item.hide" model="item" class="toolbar-action"/>
-	</div>
-	
-	<div class="toolbar editor">
-		<!-- toolbar-item ng-repeat="item in editor" ng-if="!item.hide" model="item" class="toolbar-action"/ -->
 	</div>
 	
 	<!-- This right aligned toolbar will expand its left margin so that it will be moved as far right as possible, 

@@ -44,7 +44,6 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.util.HTTPUtils;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -141,8 +140,8 @@ public class EditorContentFilter implements Filter
 						formScripts.addAll(entry.getJsDesignLibrary());
 					}
 				}
-				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), css, formScripts, null, variableSubstitution, w, null,
-					NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER, false);
+				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest, css, formScripts, null, variableSubstitution, w,
+					null, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER, null);
 				w.flush();
 				return;
 			}
@@ -167,7 +166,7 @@ public class EditorContentFilter implements Filter
 					try
 					{
 						IPersist container = flattenedForm.findChild(
-							((EclipseRepository)ServoyModel.getDeveloperRepository()).getUUIDForElementId(id, id, -1, -1, null));
+							((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getUUIDForElementId(id, id, -1, -1, null));
 						if (container instanceof LayoutContainer)
 						{
 							FormLayoutGenerator.generateFormStartTag(w, flattenedForm, solutionAndFormName.getRight(), false, true);

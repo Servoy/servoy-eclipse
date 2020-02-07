@@ -242,6 +242,12 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		return input.get(index);
 	}
 
+	@Override
+	protected void init()
+	{
+		if (getPersist() != null) initDataBindings();
+	}
+
 	protected void initDataBindings()
 	{
 		datasourceSelectComposite.initDataBindings(this,
@@ -783,9 +789,8 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 		{
 			throw new RepositoryException("Destination server data not specified.");
 		}
-		for (int row = 0; row < input.size(); row++)
+		for (RelationRow rr : input)
 		{
-			RelationRow rr = input.get(row);
 			if (isEmptySelection(rr.getCIFrom()) && !isEmptySelection(rr.getCITo()))
 			{
 				throw new RepositoryException("Column data not complete.");

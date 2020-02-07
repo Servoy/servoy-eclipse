@@ -1,0 +1,6 @@
+instructions.install = \
+org.eclipse.equinox.p2.touchpoint.eclipse.setJvm(jvm:${artifact.location}/jre/bin/j9vm/jvm.dll);\
+org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Xshareclasses:nonfatal);\
+org.eclipse.equinox.p2.touchpoint.eclipse.addProgramArg(programArg:-clean);
+instructions.uninstall = \
+org.eclipse.equinox.p2.touchpoint.eclipse.setJvm(jvm:null);

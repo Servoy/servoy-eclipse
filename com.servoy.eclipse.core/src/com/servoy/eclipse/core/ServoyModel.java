@@ -40,9 +40,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.wicket.Request;
-import org.apache.wicket.Response;
-import org.apache.wicket.Session;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
@@ -135,7 +132,6 @@ import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
-import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -152,9 +148,6 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.dataprocessing.IDataServer;
-import com.servoy.j2db.debug.DebugClientHandler;
-import com.servoy.j2db.debug.DebugWebClientSession;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
@@ -196,9 +189,6 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IUserManager;
-import com.servoy.j2db.server.shared.IUserManagerFactory;
-import com.servoy.j2db.server.shared.IWebClientSessionFactory;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
@@ -212,7 +202,7 @@ import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
  *
  * @author jblok
  */
-public class ServoyModel extends AbstractServoyModel
+public class ServoyModel extends AbstractServoyModel implements IDeveloperServoyModel
 {
 
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
@@ -221,6 +211,7 @@ public class ServoyModel extends AbstractServoyModel
 
 	private final AtomicBoolean activatingProject = new AtomicBoolean(false);
 	private final List<IActiveProjectListener> activeProjectListeners;
+	private final List<IModelDoneListener> doneListeners;
 	private final List<IPersistChangeListener> realPersistChangeListeners;
 	private final List<IPersistChangeListener> editingPersistChangeListeners;
 	private final List<ISolutionMetaDataChangeListener> solutionMetaDataChangeListener;
@@ -264,39 +255,44 @@ public class ServoyModel extends AbstractServoyModel
 	private final List<IResourceChangeListener> postChangeResourceChangeListeners = new ArrayList<>(); // post-change-listeners that will be triggered only after ServoyModel has had a chance to handle these changes
 	private final List<IResourceChangeEvent> outstandingPostChangeEvents = new ArrayList<>();
 
+	private Boolean skipModuleChanged = null;
+
 	protected ServoyModel()
 	{
-		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
-		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
-		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
-
 		activeProjectListeners = new ArrayList<IActiveProjectListener>();
+		doneListeners = new ArrayList<IModelDoneListener>();
 		realPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		editingPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		solutionMetaDataChangeListener = new ArrayList<ISolutionMetaDataChangeListener>();
 		i18nChangeListeners = new ArrayList<I18NChangeListener>();
 		formComponentListeners = new ArrayList<>();
 		fireRealPersistchangesJob = createFireRealPersistchangesJob();
-		realOutstandingChanges = new ArrayList<IPersist>();
+		initRepAsTeamProvider = Boolean.valueOf(Utils.getAsBoolean(
+			Settings.getInstance().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT))));
 
-		startAppServer();
+		// load in background all servers and all tables needed by current solution
+		backgroundTableLoader = new BackgroundTableLoader();
+		serverConfigSyncer = new DeveloperServerConfigSyncer();
+		initNGPackageManager();
+	}
+
+	private void init()
+	{
+		// hopefully by doing this before problems view has any stored state will allow us to limit visible markers to active solutions;
+		// unfortunately there isn't currently a possibility to limit the scope of a filter to a workingSet via extension point - only the user can do it
+		PlatformUI.getPreferenceStore().setValue(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT, true);
+
+		realOutstandingChanges = new ArrayList<IPersist>();
 
 		// the in-process repository is only meant to work by itself - so all servoy related projects in the workspace should
 		// either not be attached to team or attached to the in-process repository (because database information
 		// and sequence provider are the standard table based ones - using the in-process repository - not the resources project)
-		Settings settings = getSettings();
+		Settings settings = Settings.getInstance();
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
-		initRepAsTeamProvider = Boolean.valueOf(
-			Utils.getAsBoolean(settings.getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT))));
-
-		// load in background all servers and all tables needed by current solution
-		backgroundTableLoader = new BackgroundTableLoader(getServerManager());
-		addActiveProjectListener(backgroundTableLoader);
-		backgroundTableLoader.startLoadingOfServers();
 
 		// when server configurations change we want to update the servers in Serclipse.
-		getServerManager().addServerConfigListener(serverConfigSyncer = new DeveloperServerConfigSyncer(getServerManager()));
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(serverConfigSyncer);
 
 		// project update listener
 		addActiveProjectListener(new IActiveProjectListener()
@@ -618,7 +614,7 @@ public class ServoyModel extends AbstractServoyModel
 											{
 												EclipseMessages.writeProjectI18NFiles(toProject, false, false);
 											}
-											ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(toProject, true);
+											setActiveProject(toProject, true);
 										}
 										catch (Exception ex)
 										{
@@ -736,6 +732,9 @@ public class ServoyModel extends AbstractServoyModel
 		};
 		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(workingSetChangeListener);
 		installServerTableColumnListener();
+
+		addActiveProjectListener(backgroundTableLoader);
+		backgroundTableLoader.startLoadingOfServers();
 	}
 
 	/**
@@ -842,14 +841,15 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				// flush flattened form caches and clear cached tables
 				getFlattenedSolution().flushFlattenedFormCache();
-				for (ServoyProject project : getModulesOfActiveProject())
+				// this goes through the model manager on purpose, because if the flattened solution is not fully loaded yet this shouldn't do a thing.
+				for (ServoyProject project : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 				{
 					project.getEditingFlattenedSolution().flushFlattenedFormCache();
 				}
 			}
 		};
 
-		IServerManagerInternal serverManager = getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 
 		// add listeners to initial server list
 		String[] array = serverManager.getServerNames(false, false, true, true);
@@ -886,76 +886,13 @@ public class ServoyModel extends AbstractServoyModel
 		return teamShareMonitor;
 	}
 
-	public static void startAppServer()
-	{
-		PreInitializeTaskHandler.runTasksIfNeeded();
-
-		if (ApplicationServerRegistry.get() != null)
-		{
-			if (!ApplicationServerRegistry.waitForApplicationServerStarted())
-			{
-				ServoyLog.logError("App server didnt fully get started", new RuntimeException());
-			}
-			return;
-		}
-		try
-		{
-			Activator.getDefault().startAppServer(new EclipseRepositoryFactory(), new DebugClientHandler(), new IWebClientSessionFactory()
-			{
-				public Session newSession(Request request, Response response)
-				{
-					return new DebugWebClientSession(request);
-				}
-			}, new IUserManagerFactory()
-			{
-				public IUserManager createUserManager(IDataServer dataServer)
-				{
-					return new SwitchableEclipseUserManager();
-				}
-			});
-			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
-			// our team plugin can use it in popupMenu enablement
-			System.setProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
-				ServoyModel.getSettings().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT)));
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError("Failed to start the appserver", ex);
-		}
-	}
-
 	/**
 	 * Returns the user manager reflecting the state of the workspace. When running unit tests, the ApplicationServer.getUserManager() delegates to
 	 * and alternate user manager, not to this one.
 	 */
 	public EclipseUserManager getUserManager()
 	{
-		startAppServer();
 		return ((SwitchableEclipseUserManager)ApplicationServerRegistry.get().getUserManager()).getEclipseUserManager();
-	}
-
-	public static IServerManagerInternal getServerManager()
-	{
-		startAppServer();
-		return ApplicationServerRegistry.get().getServerManager();
-	}
-
-	public static IDeveloperRepository getDeveloperRepository()
-	{
-		startAppServer();
-		return ApplicationServerRegistry.get().getDeveloperRepository();
-	}
-
-	public static IDataServer getDataServer()
-	{
-		startAppServer();
-		return ApplicationServerRegistry.get().getDataServer();
-	}
-
-	public static Settings getSettings()
-	{
-		startAppServer();
-		return Settings.getInstance();
 	}
 
 	public static boolean isClientRepositoryAccessAllowed(String server_name)
@@ -965,8 +902,8 @@ public class ServoyModel extends AbstractServoyModel
 
 	public static boolean isClientRepositoryAccessAllowed()
 	{
-		return Utils.getAsBoolean(
-			getSettings().getProperty(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING, String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT)));
+		return Utils.getAsBoolean(Settings.getInstance().getProperty(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
+			String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT)));
 	}
 
 	/**
@@ -977,8 +914,7 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	public IRootObject getActiveRootObject(String name, int objectTypeId)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
-		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
@@ -1006,8 +942,7 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	public IRootObject getActiveRootObject(int rootObjectId)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
-		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
@@ -1034,8 +969,7 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	public List<IRootObject> getActiveRootObjects(int type)
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel();
-		IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 		if (repository != null)
 		{
 			try
@@ -1094,6 +1028,7 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				pluginPreferences.setToDefault(SERVOY_ACTIVE_PROJECT);
 				updateWorkingSet();
+				fireLoadingDone();
 //				ServoyLog.logInfo("Cannot find any valid solution to activate."); // unneeded logging
 			}
 		}
@@ -1162,6 +1097,103 @@ public class ServoyModel extends AbstractServoyModel
 					Display.getDefault().syncExec(uiRunnable);
 					if (((Boolean)uiRunnable.getReturnValue()).booleanValue())
 					{
+
+
+						nameValidator = null;
+						if (project != null) // active project was deleted
+						{
+							resetActiveEditingFlattenedSolutions();
+						}
+						setActiveProjectReferenceInternal(project);
+						activatingProject.set(false);
+
+						progressMonitor.subTask("Loading modules...");
+						EclipseRepository.ActivityMonitor moduleMonitor = new EclipseRepository.ActivityMonitor()
+						{
+							public void loadingRootObject(final RootObjectMetaData rootObject)
+							{
+								if (rootObject.getObjectTypeId() == IRepository.SOLUTIONS)
+								{
+									Display.getDefault().asyncExec(new Runnable()
+									{
+										public void run()
+										{
+											progressMonitor.subTask("Loading modules... Module '" + rootObject.getName() + "'");
+										}
+									});
+								}
+							}
+						};
+						IDeveloperRepository rep = ApplicationServerRegistry.get().getDeveloperRepository();
+						if (rep instanceof EclipseRepository)
+						{
+							((EclipseRepository)rep).addActivityMonitor(moduleMonitor);
+						}
+						try
+						{
+							updateFlattenedSolution();
+						}
+						finally
+						{
+							if (rep instanceof EclipseRepository)
+							{
+								((EclipseRepository)rep).removeActivityMonitor(moduleMonitor);
+							}
+						}
+
+						progressMonitor.worked(1);
+						if (activeProject != null)
+						{
+							// prefetch the editting solution to minimize ui lags
+							progressMonitor.subTask("Preparing solution for editing...");
+							if (Display.getCurrent() != null)
+							{
+								// update the ui if we are the ui thread in this progress dialog
+								while (Display.getCurrent().readAndDispatch())
+								{
+								}
+							}
+							activeProject.getEditingFlattenedSolution();
+							if (Display.getCurrent() != null)
+							{
+								// update the ui if we are the ui thread in this progress dialog
+								while (Display.getCurrent().readAndDispatch())
+								{
+								}
+							}
+						}
+
+						Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
+						if (project != null && pluginPreferences != null)
+						{
+							pluginPreferences.setValue(SERVOY_ACTIVE_PROJECT, project.getProject().getName());
+							Activator.getDefault().savePluginPreferences();
+						}
+						progressMonitor.worked(1);
+
+						updateResources(IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED, new SubProgressMonitor(progressMonitor, 4)); // if the active solution changes, it is possible that the used resources project will change
+
+						progressMonitor.subTask("Announcing activation...");
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								fireActiveProjectChanged();
+							}
+						});
+						progressMonitor.worked(1);
+
+						updateWorkingSet();
+						testBuildPathsAndBuild(project, buildProject);
+
+						// now make sure all FS are recreated because now the custom types
+						// should be there because of the above fireActiveProjectChanged(); that forces load of the packages.
+						PersistIndexCache.flush();
+						resetActiveEditingFlattenedSolutions();
+						updateFlattenedSolution();
+
+						progressMonitor.worked(1);
+
 						progressMonitor.subTask("Closing active editors...");
 
 						Display.getDefault().syncExec(new Runnable()
@@ -1253,100 +1285,7 @@ public class ServoyModel extends AbstractServoyModel
 
 						progressMonitor.worked(1);
 
-						nameValidator = null;
-						if (project != null) // active project was deleted
-						{
-							resetActiveEditingFlattenedSolutions();
-						}
-						setActiveProjectReferenceInternal(project);
-						activatingProject.set(false);
-
-						progressMonitor.subTask("Loading modules...");
-						EclipseRepository.ActivityMonitor moduleMonitor = new EclipseRepository.ActivityMonitor()
-						{
-							public void loadingRootObject(final RootObjectMetaData rootObject)
-							{
-								if (rootObject.getObjectTypeId() == IRepository.SOLUTIONS)
-								{
-									Display.getDefault().asyncExec(new Runnable()
-									{
-										public void run()
-										{
-											progressMonitor.subTask("Loading modules... Module '" + rootObject.getName() + "'");
-										}
-									});
-								}
-							}
-						};
-						IDeveloperRepository rep = getDeveloperRepository();
-						if (rep instanceof EclipseRepository)
-						{
-							((EclipseRepository)rep).addActivityMonitor(moduleMonitor);
-						}
-						try
-						{
-							updateFlattenedSolution();
-						}
-						finally
-						{
-							if (rep instanceof EclipseRepository)
-							{
-								((EclipseRepository)rep).removeActivityMonitor(moduleMonitor);
-							}
-						}
-
-						progressMonitor.worked(1);
-						if (activeProject != null)
-						{
-							// prefetch the editting solution to minimize ui lags
-							progressMonitor.subTask("Preparing solution for editing...");
-							if (Display.getCurrent() != null)
-							{
-								// update the ui if we are the ui thread in this progress dialog
-								while (Display.getCurrent().readAndDispatch())
-								{
-								}
-							}
-							activeProject.getEditingFlattenedSolution();
-							if (Display.getCurrent() != null)
-							{
-								// update the ui if we are the ui thread in this progress dialog
-								while (Display.getCurrent().readAndDispatch())
-								{
-								}
-							}
-						}
-
-						Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
-						if (project != null && pluginPreferences != null)
-						{
-							pluginPreferences.setValue(SERVOY_ACTIVE_PROJECT, project.getProject().getName());
-							Activator.getDefault().savePluginPreferences();
-						}
-						progressMonitor.worked(1);
-
-						updateResources(IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED, new SubProgressMonitor(progressMonitor, 4)); // if the active solution changes, it is possible that the used resources project will change
-
-						progressMonitor.subTask("Announcing activation...");
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								fireActiveProjectChanged();
-							}
-						});
-						progressMonitor.worked(1);
-
-						updateWorkingSet();
-						testBuildPathsAndBuild(project, buildProject);
-
-						// now make sure all FS are recreated because now the custom types
-						// should be there because of the above fireActiveProjectChanged(); that forces load of the packages.
-						PersistIndexCache.flush();
-						resetActiveEditingFlattenedSolutions();
-						updateFlattenedSolution();
-
-						progressMonitor.worked(1);
+						fireLoadingDone();
 					}
 				}
 				finally
@@ -1399,6 +1338,18 @@ public class ServoyModel extends AbstractServoyModel
 
 			});
 		}
+	}
+
+	public void fireLoadingDone()
+	{
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				Arrays.asList(doneListeners.toArray(new IModelDoneListener[doneListeners.size()])).stream().forEach(listener -> listener.modelDone());
+			}
+		});
+
 	}
 
 	@Override
@@ -1482,7 +1433,7 @@ public class ServoyModel extends AbstractServoyModel
 					if (old != activeResourcesProject)
 					{
 						String projectName = null;
-						IServerManagerInternal serverManager = getServerManager();
+						IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 						ISequenceProvider sequenceProvider;
 						DataModelManager oldDmm = dataModelManager;
 						if (dataModelManager != null)
@@ -1580,10 +1531,12 @@ public class ServoyModel extends AbstractServoyModel
 						monitor.worked(1);
 
 						monitor.subTask("Loading styles from resources project");
-						((EclipseRepository)getDeveloperRepository()).registerResourceMetaDatas(projectName, IRepository.STYLES);
+						((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).registerResourceMetaDatas(projectName,
+							IRepository.STYLES);
 						monitor.worked(1);
 						monitor.subTask("Loading templates from resources project");
-						((EclipseRepository)getDeveloperRepository()).registerResourceMetaDatas(projectName, IRepository.TEMPLATES);
+						((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).registerResourceMetaDatas(projectName,
+							IRepository.TEMPLATES);
 						monitor.worked(1);
 						monitor.subTask("Announcing resources project change");
 						Display.getDefault().syncExec(new Runnable()
@@ -1806,6 +1759,12 @@ public class ServoyModel extends AbstractServoyModel
 
 	private void modulesChangedForActiveSolution()
 	{
+		// if this Boolean is set just skip everythign for now, will be done at once after everything.
+		if (skipModuleChanged != null)
+		{
+			skipModuleChanged = Boolean.FALSE;
+			return;
+		}
 		resetActiveEditingFlattenedSolutions();
 		updateFlattenedSolution();
 		getUserManager().reloadAllSecurityInformation();
@@ -1842,6 +1801,17 @@ public class ServoyModel extends AbstractServoyModel
 	{
 		activeProjectListeners.remove(listener);
 	}
+
+	public void addDoneListener(IModelDoneListener listener)
+	{
+		doneListeners.add(listener);
+	}
+
+	public void removeDoneListener(IModelDoneListener listener)
+	{
+		doneListeners.remove(listener);
+	}
+
 
 	/**
 	 * @see firePersistsChanged
@@ -2166,7 +2136,7 @@ public class ServoyModel extends AbstractServoyModel
 
 	private void resourcesPostChanged(IResourceChangeEvent event)
 	{
-		if (getDeveloperRepository() == null)
+		if (ApplicationServerRegistry.get().getDeveloperRepository() == null)
 		{
 			// change notification at startup, Activator has not finished yet
 			return;
@@ -2185,7 +2155,7 @@ public class ServoyModel extends AbstractServoyModel
 				if (resource instanceof IProject && ((!((IProject)resource).isOpen()) || (!((IProject)resource).hasNature(ServoyUpdatingProject.NATURE_ID))))
 				{
 					final IProject project = (IProject)resource;
-					EclipseRepository eclipseRepository = (EclipseRepository)getDeveloperRepository();
+					EclipseRepository eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 
 					// DO STUFF RELATED TO SOLUTION PROJECTS
 					if (element.getKind() != IResourceDelta.REMOVED && project.isOpen() && project.hasNature(ServoyProject.NATURE_ID))
@@ -2392,12 +2362,15 @@ public class ServoyModel extends AbstractServoyModel
 			}
 			changes.add(delta);
 		}
+		// Skip the module change code for the next loop.
+		skipModuleChanged = Boolean.TRUE;
 		for (Entry<IProject, List<IResourceDelta>> entry : projectChanges.entrySet())
 		{
 			IProject project = entry.getKey();
 			try
 			{
-				Solution solution = (Solution)getDeveloperRepository().getActiveRootObject(project.getName(), IRepository.SOLUTIONS);
+				Solution solution = (Solution)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObject(project.getName(),
+					IRepository.SOLUTIONS);
 				handleChangedFilesInSolutionProject(project, solution, entry.getValue());
 			}
 			catch (Exception e)
@@ -2405,6 +2378,14 @@ public class ServoyModel extends AbstractServoyModel
 				ServoyLog.logError("Could not handle changed files in project " + project.getName(), e);
 			}
 		}
+		// if the boolean is set to false then the module changed code was called and needs to be called once.
+		if (skipModuleChanged.booleanValue() == false)
+		{
+			// it is called
+			skipModuleChanged = null;
+			modulesChangedForActiveSolution();
+		}
+		skipModuleChanged = null;
 	}
 
 	/**
@@ -2458,7 +2439,7 @@ public class ServoyModel extends AbstractServoyModel
 	private void modifyDBIFilesToAllClones(final IResourceDelta element)
 	{
 		List<IResourceDelta> al = findChangedFiles(element, new ArrayList<IResourceDelta>());
-		IServerManagerInternal serverManager = getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		if (serverManager != null && dataModelManager != null)
 		{
 			for (IResourceDelta fileRd : al)
@@ -2610,10 +2591,10 @@ public class ServoyModel extends AbstractServoyModel
 		ignoreOnceFiles.clear();
 		if (changedFiles.size() > 0)
 		{
-			final ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName());
+			final ServoyProject servoyProject = getServoyProject(solution.getName());
 			final IContainer workspace = project.getParent();
 
-			SolutionDeserializer sd = new SolutionDeserializer(getDeveloperRepository(), servoyProject);
+			SolutionDeserializer sd = new SolutionDeserializer(ApplicationServerRegistry.get().getDeveloperRepository(), servoyProject);
 			final Set<IPersist> changedScriptElements = handleChangedFiles(project, solution, changedFiles, servoyProject, sd);
 			// Regenerate script files for parents that have changed script elements.
 			if (changedScriptElements.size() > 0)
@@ -2836,7 +2817,7 @@ public class ServoyModel extends AbstractServoyModel
 				String solutionName = solution.getName();
 				// this means that the meta-data has changed on disk for a solution that already had it's meta-data loaded; refresh
 				// repository in case the change came as a result of a resource change only (team update, ...) - so not because of an in-memory change + serialisation to disk
-				EclipseRepository eclipseRepository = (EclipseRepository)getDeveloperRepository();
+				EclipseRepository eclipseRepository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 				eclipseRepository.registerSolutionMetaData(solutionName);
 
 				boolean isPartOfActiveFlattenedSolution = isSolutionActive(solutionName);
@@ -2874,7 +2855,7 @@ public class ServoyModel extends AbstractServoyModel
 					// if there is a media in the modules with the same name, but no file on in the ws, then ignore it, because
 					// it is deleting
 					int skip_media_id = 0;
-					Media moduleMedia = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getMedia(name);
+					Media moduleMedia = getFlattenedSolution().getMedia(name);
 					if (moduleMedia != null)
 					{
 						Pair<String, String> filePath = SolutionSerializer.getFilePath(moduleMedia, false);
@@ -2882,7 +2863,7 @@ public class ServoyModel extends AbstractServoyModel
 							skip_media_id = moduleMedia.getID();
 					}
 
-					media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name, skip_media_id);
+					media = editingSolution.createNewMedia(getNameValidator(), name, skip_media_id);
 					media.setMimeType(eclipseRepository.getContentType(name));
 				}
 				if (media != null) eclipseRepository.updateNodesInWorkspace(new IPersist[] { media }, false, false);
@@ -3111,7 +3092,7 @@ public class ServoyModel extends AbstractServoyModel
 					serverContainer.getParent().getParent() instanceof IProject)
 				{
 					String serverName = serverContainer.getName();
-					IServerManagerInternal sm = getServerManager();
+					IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 					if (sm != null)
 					{
 						IServer s = sm.getServer(serverName);
@@ -3155,7 +3136,7 @@ public class ServoyModel extends AbstractServoyModel
 		// the use of TableBasedColumnInfoProvider fail because the column info would be changed / id's messed up and so on)
 		// As TableBasedColumnInfoProvider and ColumnInfoBasedSequenceProvider are used when running in-process repository
 		// we use the sequence provider to identify the case
-		IServerManagerInternal serverManager = getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		if (serverManager == null || serverManager.getGlobalSequenceProvider() instanceof IColumnInfoBasedSequenceProvider || dataModelManager == null)
 		{
 			return false;
@@ -3245,7 +3226,7 @@ public class ServoyModel extends AbstractServoyModel
 				{
 					try
 					{
-						final EclipseRepository repository = (EclipseRepository)getDeveloperRepository();
+						final EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 						// see if this style already has metadata and only needs loading into the repository
 						IResource metaDataFile = file.getParent().findMember(name + SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION);
 						RootObjectMetaData md = null;
@@ -3311,7 +3292,7 @@ public class ServoyModel extends AbstractServoyModel
 				filesAddedOrRemoved = true;
 				if (resource != null)
 				{
-					EclipseRepository repository = (EclipseRepository)getDeveloperRepository();
+					EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 					try
 					{
 						modifiedResourcesList.add(resource);
@@ -3377,10 +3358,9 @@ public class ServoyModel extends AbstractServoyModel
 	/**
 	 * Initializes the ServoyModel's initial state.
 	 */
-	@Override
-	public void initialize()
+	void initialize()
 	{
-		super.initialize();
+		init();
 
 		getNGPackageManager().addAvailableNGPackageProjectsListener(new IAvailableNGPackageProjectsListener()
 		{
@@ -3439,7 +3419,7 @@ public class ServoyModel extends AbstractServoyModel
 		});
 		if (dataModelManager != null)
 		{
-			IServerManagerInternal serverManager = getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 
 			// add listeners to initial server list
 			String[] array = serverManager.getServerNames(true, true, true, true);
@@ -3576,17 +3556,18 @@ public class ServoyModel extends AbstractServoyModel
 	@Override
 	public void dispose()
 	{
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		// TODO add more cleanup to this method
 		removeActiveProjectListener(backgroundTableLoader);
-		getServerManager().removeServerConfigListener(serverConfigSyncer);
+		serverManager.removeServerConfigListener(serverConfigSyncer);
 		getWorkspace().removeResourceChangeListener(preChangeListener);
 		getWorkspace().removeResourceChangeListener(postChangeListener);
 
-		for (String server_name : getServerManager().getServerNames(false, false, true, true))
+		for (String server_name : serverManager.getServerNames(false, false, true, true))
 		{
-			((IServerInternal)getServerManager().getServer(server_name, false, false)).removeTableListener(tableListener);
+			((IServerInternal)serverManager.getServer(server_name, false, false)).removeTableListener(tableListener);
 		}
-		getServerManager().removeServerListener(serverTableListener);
+		serverManager.removeServerListener(serverTableListener);
 
 		super.dispose();
 	}
@@ -3761,7 +3742,7 @@ public class ServoyModel extends AbstractServoyModel
 					String comment = null;
 					try
 					{
-						comment = SolutionSerializer.getComment(persist, userTemplate, getDeveloperRepository());
+						comment = SolutionSerializer.getComment(persist, userTemplate, ApplicationServerRegistry.get().getDeveloperRepository());
 					}
 					catch (RuntimeException e)
 					{
@@ -3994,7 +3975,7 @@ public class ServoyModel extends AbstractServoyModel
 	@Override
 	protected BaseNGPackageManager createNGPackageManager()
 	{
-		return new NGPackageManager();
+		return new NGPackageManager(this);
 	}
 
 	@Override

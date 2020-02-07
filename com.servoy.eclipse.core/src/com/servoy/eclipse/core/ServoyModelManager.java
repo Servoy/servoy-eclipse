@@ -16,10 +16,13 @@
  */
 package com.servoy.eclipse.core;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.servoy.eclipse.model.util.ServoyLog;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -33,9 +36,10 @@ public class ServoyModelManager
 	 * The singleton manager
 	 */
 	private final static ServoyModelManager MANAGER = new ServoyModelManager();
-	private static boolean initializingModel = false;
+	private final AtomicBoolean initializedCalled = new AtomicBoolean(false);
 
-	private volatile ServoyModel servoyModel = null;
+	private final ServoyModel servoyModel = new ServoyModel();
+	private final DelegatingServoyModel delegating = new DelegatingServoyModel(servoyModel);
 
 	/**
 	 * Constructs a new manager
@@ -52,119 +56,44 @@ public class ServoyModelManager
 		return MANAGER;
 	}
 
-	public ServoyModel getServoyModel()
+	public IDeveloperServoyModel getServoyModel()
 	{
-		if (servoyModel == null)
+		if (initializedCalled.compareAndSet(false, true))
 		{
-			while (true)
+			Job servoyModelCreator = new Job("Creating servoy model")
 			{
-				boolean wait = false;
-				try
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					// first just check if the workbench is running
-					if (!PlatformUI.isWorkbenchRunning())
+					// create servoy model in the display thread.
+//					Runnable run = new Runnable()
+//					{
+//						public void run()
+//						{
+					servoyModel.initialize();
+					// notify the client debug handler that servoy model has been initialized.
+					// on the mac the debug smart client must wait until the swt main thread is not busy,
+					// otherwise the smart client frame will not paint.
+					if (ApplicationServerRegistry.get().getDebugClientHandler() != null)
 					{
-						wait = true;
+						ApplicationServerRegistry.get().getDebugClientHandler().flagModelInitialised();
 					}
-					else
-					{
-						// even if it is running it could be that that parts
-						// are not initialised yet (the WorkbenchPlugin.e4Context)
-						// this will bomb out with a null point exception if not fully initialised
-						PlatformUI.getWorkbench().getWorkingSetManager();
-					}
-				}
-				catch (Exception e)
-				{
-					wait = true;
-				}
-				if (wait)
-				{
-					try
-					{
-						// just wait until it is ready
-						Thread.sleep(500);
-					}
-					catch (InterruptedException e)
-					{
-					}
-				}
-				else
-				{
-					break;
-				}
-			}
-			// create servoy model in the display thread.
-			Runnable run = new Runnable()
-			{
-				public void run()
-				{
-					synchronized (ServoyModelManager.this)
-					{
-						try
-						{
-							if (servoyModel == null)
-							{
-								if (initializingModel) throw new RuntimeException("Error: recursive attempt to create ServoyModel detected!");
-								initializingModel = true; // to avoid multiple creations of ServoyModel (reentrant calls) and fail fast (for example ServoyModel() -> Activator.getDefault() -> ServoyModel())
-								servoyModel = new ServoyModel();
-								initializingModel = false;
-								servoyModel.initialize();
-							}
-						}
-						finally
-						{
-							initializingModel = false;
-							synchronized (MANAGER)
-							{
-								MANAGER.notifyAll();
-							}
-						}
-					}
+//
+//						}
+//					};
+//					Display.getDefault().asyncExec(run);
+					return Status.OK_STATUS;
 				}
 			};
-
-			if (Display.getCurrent() != null)
-			{
-				run.run();
-			}
-			else
-			{
-				Display.getDefault().asyncExec(run);
-
-				try
-				{
-					synchronized (MANAGER)
-					{
-						if (servoyModel == null)
-						{
-							MANAGER.wait();
-						}
-					}
-				}
-				catch (InterruptedException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-
-			// this access to servoyModel is not exactly thread safe, but as servoyModel can only be set to something as opposed to being null - it's a turn for the better
-			if (servoyModel == null) throw new RuntimeException("Error: ServoyModel creation failed!");
-
-			// notify the client debug handler that servoy model has been initialized.
-			// on the mac the debug smart client must wait until the swt main thread is not busy,
-			// otherwise the smart client frame will not paint.
-			if (ApplicationServerRegistry.get().getDebugClientHandler() != null)
-			{
-				ApplicationServerRegistry.get().getDebugClientHandler().flagModelInitialised();
-			}
+			servoyModelCreator.setSystem(false);
+			servoyModelCreator.schedule();
 		}
-		// this access to servoyModel is not exactly thread safe, but as servoyModel can only be set to something as opposed to being null - it's a turn for the better
-		return servoyModel;
+		if (servoyModel.isFlattenedSolutionLoaded()) return servoyModel;
+		return delegating;
 	}
 
-	public synchronized boolean isServoyModelCreated()
+	public boolean isServoyModelCreated()
 	{
-		return servoyModel != null;
+		return initializedCalled.get();
 	}
 }

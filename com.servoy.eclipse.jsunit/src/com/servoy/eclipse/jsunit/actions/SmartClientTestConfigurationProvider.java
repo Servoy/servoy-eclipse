@@ -4,7 +4,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.jsunit.launch.ITestLaunchConfigurationProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -20,7 +20,7 @@ public class SmartClientTestConfigurationProvider implements ITestLaunchConfigur
 	{
 		ILaunchConfiguration found = null;
 
-		ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
 		String solutionName = target != null ? target.getActiveSolution().getName() : null;
 		ServoyProject sp = model.getActiveProject();
 		if (solutionName == null || solutionName.equals(sp.getProject().getName()))

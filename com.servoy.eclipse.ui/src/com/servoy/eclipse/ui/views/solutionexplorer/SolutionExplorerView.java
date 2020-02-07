@@ -181,6 +181,7 @@ import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ISolutionImportListener;
 import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -234,18 +235,21 @@ import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
-import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -255,13 +259,14 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * This view is meant to be similar to the old designer's tree (in editor) in looks and in functionality. It will show a logical presentation of the eclipse
@@ -510,6 +515,10 @@ public class SolutionExplorerView extends ViewPart
 
 	private IAction exportActiveSolutionAction;
 
+	private IAction openCreateSolutionTutorialAction;
+	private IAction openCreateFormTutorialAction;
+	private IAction openCreateRelationTutorialAction;
+
 	private IAction importSolutionAction;
 
 	private IAction suggestForeignTypes;
@@ -550,6 +559,7 @@ public class SolutionExplorerView extends ViewPart
 	private HashMap<String, Image> swtImageCache = new HashMap<String, Image>();
 
 	private IWorkingSetChangedListener workingSetChangedListener;
+	private boolean loadFirstForm = false;
 
 	public SolutionExplorerTreeContentProvider getTreeContentProvider()
 	{
@@ -791,6 +801,7 @@ public class SolutionExplorerView extends ViewPart
 	public SolutionExplorerView()
 	{
 		fDialogSettings = Activator.getDefault().getDialogSettings();
+		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> loadFirstForm = true);
 	}
 
 	public void selectionChanged(SelectionChangedEvent e)
@@ -928,7 +939,7 @@ public class SolutionExplorerView extends ViewPart
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setResourceNodesEnabled(servoyProject != null);
 
 				// expand the servers node if we have invalid (but enabled) servers (expansion will occur after startup)
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				String[] array = serverManager.getServerNames(true, false, true, true);
 				for (String server_name : array)
 				{
@@ -1582,7 +1593,8 @@ public class SolutionExplorerView extends ViewPart
 				ServoyLog.logInfo("Could not convert tooltip text to HTML: " + text);
 			}
 			Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
-			int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / 72f);
+			float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
+			int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
 			browser.setText("<html><body style='background-color:#ffffcc;font-type:" + f.getFontData()[0].getName() + ";font-size:" + pxHeight +
 				"px;font-weight:500'>" + text + "</body></html>");
 			GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n")) ? new GridData(600, 150) : new GridData(450, 50);
@@ -1802,7 +1814,7 @@ public class SolutionExplorerView extends ViewPart
 	private void initTreeViewer()
 	{
 		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).flushCachedData();
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] roots = servoyModel.getServoyProjects();
 
 		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
@@ -1903,40 +1915,48 @@ public class SolutionExplorerView extends ViewPart
 			{
 				public void persistChanges(Collection<IPersist> changes)
 				{
-					Set<IPersist> parents = new HashSet<IPersist>();
+					Map<IPersist, Set<Class< ? extends IPersist>>> parents = new HashMap<>();
 					for (IPersist persist : changes)
 					{
-						if (!(persist instanceof ISupportChilds) && persist.getParent() != null)
-						{
-							parents.add(persist.getParent());
-						}
-					}
-					for (IPersist persist : changes)
-					{
-						if (persist instanceof ISupportChilds && !parents.contains(persist) && persist.getParent() != null)
+						if (!parents.containsKey(persist) && persist.getParent() != null)
 						{
 							if (persist instanceof Relation)
 							{
 								// don't send the solution as refresh object, then would have to refresh everything (forms + relations)
-								parents.add(persist);
+								parents.put(persist, null);
 							}
 							else if (persist instanceof TableNode && DataSourceUtils.getInmemDataSourceName(((TableNode)persist).getDataSource()) != null)
 							{
 								// for an in mem tablenode send just that tablenode so only that one is refreshed
-								parents.add(persist);
+								parents.put(persist, null);
 							}
 							else if (persist instanceof TableNode && DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
 							{
 								// for an view fs tablenode send just that tablenode so only that one is refreshed
-								parents.add(persist);
+								parents.put(persist, null);
 							}
-							else if (persist instanceof WebComponent)
+							else if (persist instanceof LayoutContainer || persist instanceof IFormElement)
 							{
-								parents.add(persist.getAncestor(IRepository.FORMS));
+								IPersist parent = persist.getAncestor(IRepository.FORMS);
+								Set<Class< ? extends IPersist>> persistTypeToRefresh = parents.get(parent);
+								if (persistTypeToRefresh == null && !parents.containsKey(parent))
+								{
+									persistTypeToRefresh = new HashSet<>();
+									parents.put(parent, persistTypeToRefresh);
+								}
+								if (persistTypeToRefresh != null) persistTypeToRefresh.add(persist.getClass());
+							}
+							else if (persist instanceof IScriptProvider || persist instanceof IScriptElement)
+							{
+								// ignore the refresh for the tree, this is not displayed
+							}
+							else if (persist.getParent().getChild(persist.getUUID()) == null)
+							{
+								parents.put(persist.getParent(), null);
 							}
 							else
 							{
-								parents.add(persist.getParent());
+								parents.put(persist, null);
 							}
 						}
 					}
@@ -2000,8 +2020,9 @@ public class SolutionExplorerView extends ViewPart
 					}
 					else if (updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 					{
-						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(
-							getResourcesProjectName(activeProject));
+						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode()
+							.setToolTipText(
+								getResourcesProjectName(activeProject));
 						refreshList();
 					}
 				}
@@ -2013,6 +2034,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private void handleActiveProjectChanged(final ServoyProject activeProject)
 	{
+		boolean showFirstForm = this.loadFirstForm;
 		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(activeProject));
 		refreshTreeCompletely();
 
@@ -2063,7 +2085,7 @@ public class SolutionExplorerView extends ViewPart
 					DesignerPreferences dp = new DesignerPreferences();
 					Form firstForm = null;
 
-					if (dp.getOpenFirstFormDesigner())
+					if (dp.getOpenFirstFormDesigner() && showFirstForm)
 					{
 						Solution activeSolution = activeProject.getSolution();
 						firstForm = activeSolution.getForm(activeSolution.getFirstFormID());
@@ -2227,8 +2249,10 @@ public class SolutionExplorerView extends ViewPart
 					}
 					else if ((event.getType() & IResourceChangeEvent.POST_BUILD) != 0)
 					{
-						ProblemDecorator problemDecorator = (ProblemDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(
-							ProblemDecorator.ID);
+						ProblemDecorator problemDecorator = (ProblemDecorator)PlatformUI.getWorkbench()
+							.getDecoratorManager()
+							.getBaseLabelProvider(
+								ProblemDecorator.ID);
 						if (problemDecorator != null)
 						{
 							IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
@@ -2263,8 +2287,10 @@ public class SolutionExplorerView extends ViewPart
 		}
 		if (wasNull || reregisterExistingListener)
 		{
-			ServoyModelManager.getServoyModelManager().getServoyModel().addResourceChangeListener(resourceChangeListener,
-				IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+			ServoyModelManager.getServoyModelManager()
+				.getServoyModel()
+				.addResourceChangeListener(resourceChangeListener,
+					IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
 		}
 	}
 
@@ -2272,7 +2298,7 @@ public class SolutionExplorerView extends ViewPart
 	{
 		boolean wasNull = false;
 
-		IServerManagerInternal serverManager = ServoyModel.getServerManager();
+		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 		if (tableListener == null && serverListener == null)
 		{
 			wasNull = true;
@@ -2352,6 +2378,8 @@ public class SolutionExplorerView extends ViewPart
 				{
 					Display.getDefault().asyncExec(() -> {
 						((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerList();
+						// just in case server was edited, so not really new, because of async, we may have lost the update call, make sure list is updated
+						((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(s.getName());
 						s.addTableListener(tableListener);
 					});
 				}
@@ -2843,6 +2871,17 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(filePropertiesAction);
 		}
 
+		final DesignerPreferences designerPreferences = new DesignerPreferences();
+		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION && openCreateFormTutorialAction.isEnabled() &&
+			openCreateRelationTutorialAction.isEnabled() && openCreateSolutionTutorialAction.isEnabled() && designerPreferences.useContextMenuTutorials() &&
+			selectedTreeNode.getRealObject() != null)
+		{
+			final MenuManager menuManager = new MenuManager("Tutorials");
+			menuManager.add(openCreateSolutionTutorialAction);
+			menuManager.add(openCreateFormTutorialAction);
+			menuManager.add(openCreateRelationTutorialAction);
+			manager.add(menuManager);
+		}
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
@@ -3088,10 +3127,10 @@ public class SolutionExplorerView extends ViewPart
 		IAction newVariable = new NewVariableAction(this);
 		IAction newValueList = new NewValueListAction(this);
 		newPostgresqlDatabase = new NewPostgresDbAction(this);
-		newPostgresqlDatabase.setEnabledStatus();
+//		newPostgresqlDatabase.setEnabledStatus();
 		newSybaseDatabase = new NewSybaseDbAction(this);
-		newSybaseDatabase.setEnabledStatus();
-		ServoyModel.getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
+//		newSybaseDatabase.setEnabledStatus();
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(new SolutionExplorerServerConfigSync());
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(shell);
 		flagTenantColumn = new FlagTenantColumnAction(this);
@@ -3099,7 +3138,9 @@ public class SolutionExplorerView extends ViewPart
 		convertToCSSPositionForm = new ConvertToCSSPositionFormAction(this);
 		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
 		referenceToRegularFormAction = new ReferenceToRegularFormAction(this);
-
+		openCreateFormTutorialAction = new OpenCreateFormTutorialAction(this);
+		openCreateRelationTutorialAction = new OpenCreateRelationTutorialAction(this);
+		openCreateSolutionTutorialAction = new OpenCreateSolutionTutorialAction(this);
 		replaceActionInTree = new ReplaceTableAction(this);
 		replaceServerAction = new ReplaceServerAction(this);
 		convertFormsToCSSPosition = new ConvertAllFormsToCSSPosition(this);
@@ -3585,7 +3626,7 @@ public class SolutionExplorerView extends ViewPart
 				// state);
 				// this is why we need to use the selection given by the event
 				// instead of the selection given by the tree
-				boolean isForm = (doubleClickedItem.getType() == UserNodeType.FORM); // form open action was moved to the designer plugin, so we must make a special case for it (it is no longer part of openActionInTree)
+				final boolean isForm = (doubleClickedItem.getType() == UserNodeType.FORM); // form open action was moved to the designer plugin, so we must make a special case for it (it is no longer part of openActionInTree)
 				openActionInTree.selectionChanged(new SelectionChangedEvent(tree, new StructuredSelection(doubleClickedItem)));
 
 				IEclipsePreferences store = InstanceScope.INSTANCE.getNode(Activator.getDefault().getBundle().getSymbolicName());
@@ -3598,7 +3639,8 @@ public class SolutionExplorerView extends ViewPart
 				boolean globalsDblClickOptionDefined = (SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_GLOBAL_SCRIPT.equals(globalsDblClickOption));
 				if (isForm && (ctrlPressed || formDblClickOptionDefined))
 				{
-					if (ctrlPressed || SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
+					final boolean isFormComponent = ((Form)doubleClickedItem.getRealObject()).isFormComponent().booleanValue();
+					if (isFormComponent || ctrlPressed || SolutionExplorerPreferences.DOUBLE_CLICK_OPEN_FORM_EDITOR.equals(formDblClickOption))
 					{
 						EditorUtil.openFormDesignEditor((Form)doubleClickedItem.getRealObject());
 					}
@@ -3771,13 +3813,13 @@ public class SolutionExplorerView extends ViewPart
 
 		if (serverListener != null)
 		{
-			ServoyModel.getServerManager().removeServerListener(serverListener);
+			ApplicationServerRegistry.get().getServerManager().removeServerListener(serverListener);
 			if (discardListenerReferences) serverListener = null;
 		}
 
 		if (tableListener != null)
 		{
-			IServerManagerInternal serverManager = ServoyModel.getServerManager();
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			// add listeners to initial server list
 			String[] array = serverManager.getServerNames(false, false, true, true);
 			for (String server_name : array)
@@ -3972,8 +4014,9 @@ public class SolutionExplorerView extends ViewPart
 			{
 				if (mediaNode.getType() == MediaNode.TYPE.IMAGE && mediaNodeTypeFilter.contains(MediaNode.TYPE.IMAGE))
 				{
-					IFile imageFile = ws.getRoot().getFile(
-						new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + '/' + SolutionSerializer.MEDIAS_DIR + '/' + mediaNode.getPath()));
+					IFile imageFile = ws.getRoot()
+						.getFile(
+							new Path(((ISupportName)mediaNode.getMediaProvider()).getName() + '/' + SolutionSerializer.MEDIAS_DIR + '/' + mediaNode.getPath()));
 					File javaFile = imageFile.getRawLocation().makeAbsolute().toFile();
 					Image scaledImage = oldFolderCache == null ? null : oldFolderCache.remove(mediaNode.getPath() + javaFile.lastModified());
 					if (scaledImage != null)
@@ -4058,7 +4101,7 @@ public class SolutionExplorerView extends ViewPart
 
 		if (segments != null && segments.length == 0) return null;
 
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject selectedProject = sm.getServoyProject(segments[0]);
 		ServoyResourcesProject resourcesProject = sm.getActiveResourcesProject();
 

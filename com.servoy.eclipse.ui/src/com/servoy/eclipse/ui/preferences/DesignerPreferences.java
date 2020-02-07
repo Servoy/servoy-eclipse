@@ -109,6 +109,7 @@ public class DesignerPreferences
 	public static final String ENCAPSULATION_TYPE = "encapsulationType";
 	public static final String SKIP_FUNCTION_BODY_PARSING = "skipFunctionBodyParsing";
 	public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
+	public static final String USE_CONTEXT_MENU_TUTORIALS = "useContextMenuTutorials";
 	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
@@ -160,7 +161,7 @@ public class DesignerPreferences
 	public static final boolean SHOW_NAVIGATOR_DEFAULT = false;
 
 	public static final int ENCAPSULATION_PUBLIC_HIDE_ALL = PersistEncapsulation.HIDE_DATAPROVIDERS | PersistEncapsulation.HIDE_ELEMENTS |
-		PersistEncapsulation.HIDE_FOUNDSET;
+		PersistEncapsulation.HIDE_CONTAINERS | PersistEncapsulation.HIDE_FOUNDSET;
 	public static final int ENCAPSULATION_PUBLIC = PersistEncapsulation.DEFAULT;
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
@@ -169,6 +170,8 @@ public class DesignerPreferences
 	public static final boolean SKIP_FUNCTION_BODY_PARSING_DEFAULT = true;
 
 	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = false;
+
+	public static final boolean USE_CONTEXT_MENU_TUTORIALS_DEFAULT = true;
 
 	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_BYTE_ARRAY;
 
@@ -850,6 +853,17 @@ public class DesignerPreferences
 	public void setUseChromiumBrowser(boolean chromium)
 	{
 		setProperty(USE_CHROMIUM_BROWSER, chromium);
+	}
+
+	public boolean useContextMenuTutorials()
+	{
+		return getProperty(USE_CONTEXT_MENU_TUTORIALS, USE_CONTEXT_MENU_TUTORIALS_DEFAULT);
+	}
+
+
+	public void setContextMenuTutorials(boolean contextMenuTutorials)
+	{
+		setProperty(USE_CONTEXT_MENU_TUTORIALS, contextMenuTutorials);
 	}
 
 	/**

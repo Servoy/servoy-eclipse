@@ -16,8 +16,11 @@
  */
 package com.servoy.eclipse.designer.property;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EventObject;
 
+import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.commands.CompoundCommand;
@@ -27,6 +30,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
+import com.servoy.eclipse.designer.editor.IPreExecuteCommand;
+import com.servoy.eclipse.ui.util.ISupportDefaultValueEditor;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
@@ -179,7 +184,48 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 	@Override
 	protected void valueChanged(PropertySheetEntry child)
 	{
-		valueChanged((UndoablePropertySheetEntry)child, new ForwardUndoCompoundCommand());
+		valueChanged((UndoablePropertySheetEntry)child, new ForwardUndoCompoundCommand()
+		{
+			@Override
+			public void execute()
+			{
+				callPreExecute();
+				super.execute();
+			}
+
+			@Override
+			public void redo()
+			{
+				callPreExecute();
+				super.redo();
+			}
+
+			private void callPreExecute()
+			{
+				getFlattenedCommands(this, new ArrayList<>()).stream()
+					.filter(IPreExecuteCommand.class::isInstance)
+					.map(IPreExecuteCommand.class::cast)
+					.forEach(IPreExecuteCommand::preExecute);
+			}
+
+			private Collection<Command> getFlattenedCommands(CompoundCommand cc, Collection<Command> list)
+			{
+
+				for (Command c : (Collection<Command>)cc.getCommands())
+				{
+					if (c instanceof CompoundCommand)
+					{
+						getFlattenedCommands((CompoundCommand)c, list);
+					}
+					else
+					{
+						list.add(c);
+					}
+				}
+				return list;
+			}
+
+		});
 	}
 
 	void valueChanged(UndoablePropertySheetEntry child, CompoundCommand command)
@@ -204,6 +250,10 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 						break;
 					}
 				}
+			}
+			if (child.editor instanceof ISupportDefaultValueEditor && ((ISupportDefaultValueEditor)child.editor).isDefaultValue(entryValue))
+			{
+				entryValue = SetValueCommand.DEFAULT_VALUE;
 			}
 			cc.add(SetValueCommand.createSetvalueCommand(child.getDisplayName(), target, child.getDescriptor().getId(), entryValue));
 		}

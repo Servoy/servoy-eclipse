@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.ui.dialogs;
 
-import java.sql.Types;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -30,20 +28,15 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.servoy.base.persistence.IBaseColumn;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
-import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.DummyValidator;
-import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.i18n.I18NMessagesTable;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManager;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.Utils;
 
@@ -104,7 +97,7 @@ public class I18NServerTableDialog extends Dialog
 		// Initialize server names list.
 		String currentServerName = selectedServerName;
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		IServerManager sm = ServoyModel.getServerManager();
+		IServerManager sm = ApplicationServerRegistry.get().getServerManager();
 		String[] serverNames = sm.getServerNames(true, true, true, false);
 		defaultI18NServer.removeAll();
 		defaultI18NServer.add(SELECTION_NONE);
@@ -167,7 +160,7 @@ public class I18NServerTableDialog extends Dialog
 				ITransactionConnection connection = null;
 				try
 				{
-					IServerInternal srv = (IServerInternal)ServoyModel.getServerManager().getServer(serverName);
+					IServerInternal srv = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName);
 					connection = srv.getConnection();
 					if (srv.checkIfTableExistsInDatabase(connection, adjustedTableName))
 					{
@@ -192,9 +185,8 @@ public class I18NServerTableDialog extends Dialog
 
 			try
 			{
-				IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(serverName);
-				ITable table = server.getTable(adjustedTableName);
-				if (table != null)
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName);
+				if (server.getTable(adjustedTableName) != null)
 				{
 					MessageBox msg = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
 					msg.setText("Table already exists");
@@ -202,39 +194,18 @@ public class I18NServerTableDialog extends Dialog
 					msg.open();
 					return null;
 				}
-				else
-				{
-					// Create the table in the repository.
-					IValidateName validator = DummyValidator.INSTANCE;
-					table = server.createNewTable(validator, adjustedTableName);
-					int defaultFirstColumnSequenceType = new DesignerPreferences().getPrimaryKeySequenceType();
-					if (defaultFirstColumnSequenceType == ColumnInfo.UUID_GENERATOR)
-					{
-						Column column = table.createNewColumn(validator, "message_id", IColumnTypes.TEXT, 36);
-						column.setDatabasePK(true);
-						column.setSequenceType(defaultFirstColumnSequenceType);
-						column.setFlag(IBaseColumn.UUID_COLUMN, true);
-					}
-					else
-					{
-						Column column = table.createNewColumn(validator, "message_id", Types.INTEGER, 0, 0, false, true);
-						column.setSequenceType(defaultFirstColumnSequenceType);
-					}
-					table.createNewColumn(validator, "message_key", Types.VARCHAR, 150, 0, false);
-					table.createNewColumn(validator, "message_language", Types.VARCHAR, 150, 0, true);
-					table.createNewColumn(validator, "message_value", Types.VARCHAR, 2000, 0, true);
-					server.syncTableObjWithDB(table, false, false);
 
-					// Store the I18N server/table names. In case the user later pushes the Cancel button, the server/table name
-					// will remain changed anyway, because the user pushed the Create button.
-					//storeI18NServerAndTable();
-					MessageBox msg = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
-					msg.setText("I18N table successfully created");
-					msg.setMessage("I18N table named '" + adjustedTableName + "' was created on server '" + serverName + "'.");
-					msg.open();
+				ITable table = I18NMessagesTable.createMessagesTable(server, adjustedTableName, new DesignerPreferences().getPrimaryKeySequenceType());
 
-					return table;
-				}
+				// Store the I18N server/table names. In case the user later pushes the Cancel button, the server/table name
+				// will remain changed anyway, because the user pushed the Create button.
+				//storeI18NServerAndTable();
+				MessageBox msg = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
+				msg.setText("I18N table successfully created");
+				msg.setMessage("I18N table named '" + adjustedTableName + "' was created on server '" + serverName + "'.");
+				msg.open();
+
+				return table;
 			}
 			catch (Exception ex)
 			{
@@ -248,4 +219,5 @@ public class I18NServerTableDialog extends Dialog
 			}
 		}
 	}
+
 }

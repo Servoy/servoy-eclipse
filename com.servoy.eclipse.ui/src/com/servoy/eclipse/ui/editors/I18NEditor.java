@@ -87,7 +87,7 @@ public class I18NEditor extends EditorPart
 				String currentLocaleText = I18NEditor.this.localeText.getText();
 				if (currentLocaleText == null) currentLocaleText = "";
 				i18nComposite.setSelectionChangedListener(null);
-				onChange(row.key, currentRefText.trim(), currentLocaleText.trim(), true);
+				onChange(row.key, currentRefText, currentLocaleText, true);
 				i18nComposite.setSelectionChangedListener(i18nCompositeSelectionChangedListener);
 			}
 		}
@@ -260,7 +260,6 @@ public class I18NEditor extends EditorPart
 		String keyTextValue = keyText.getText();
 		if (keyTextValue != null)
 		{
-			keyTextValue = keyTextValue.trim();
 			if (keyTextValue.length() > 0)
 			{
 				onChange(keyTextValue, referenceText.getText(), localeText.getText(), false);

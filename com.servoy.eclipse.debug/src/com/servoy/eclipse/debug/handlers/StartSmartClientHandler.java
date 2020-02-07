@@ -37,7 +37,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.base.util.ITagResolver;
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.debug.Activator.ShortcutDefinition;
@@ -48,11 +48,12 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner,jblok
- * 
+ *
  */
 public class StartSmartClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
@@ -78,7 +79,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
@@ -118,7 +119,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 		monitor.worked(1);
 		try
 		{
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			ServoyProject activeProject = servoyModel.getActiveProject();
 			if (activeProject != null && activeProject.getSolution() != null)
 			{
@@ -178,7 +179,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.debug.actions.StartDebugAction#getDebuggerAboutToStartListener()
 	 */
 	@Override
@@ -191,7 +192,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 	{
 		// add some delay, this seems to fix grey screens in developer on the mac.
 		// If action returns and at the same time the frame is shown, awt/swt events get mixed up?
-		long delay = Utils.getAsLong(ServoyModel.getSettings().getProperty("servoy.developer.startsc.delay", Utils.isAppleMacOS() ? "1000" : "0"));
+		long delay = Utils.getAsLong(Settings.getInstance().getProperty("servoy.developer.startsc.delay", Utils.isAppleMacOS() ? "1000" : "0"));
 		if (delay > 0)
 		{
 			try

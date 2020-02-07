@@ -34,6 +34,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
@@ -57,8 +58,9 @@ public class NGPackageManager extends BaseNGPackageManager
 	private IActiveProjectListener activeProjectListenerForRegisteringResources;
 	private AvoidMultipleExecutionsJob reloadAllNGPackagesJob;
 
-	public NGPackageManager()
+	public NGPackageManager(IDeveloperServoyModel servoyModel)
 	{
+		super(servoyModel);
 		PlatformUI.getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener()
 		{
 
@@ -97,7 +99,7 @@ public class NGPackageManager extends BaseNGPackageManager
 				}
 			};
 			// update this before build runs
-			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
+			servoyModel.addActiveProjectListener(activeProjectListenerForRegisteringResources);
 		}
 
 		WebObjectRegistry.startTracking();
@@ -165,7 +167,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	public void dispose()
 	{
 		if (activeProjectListenerForRegisteringResources != null)
-			((ServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
+			((IDeveloperServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
 		super.dispose();
 	}
 

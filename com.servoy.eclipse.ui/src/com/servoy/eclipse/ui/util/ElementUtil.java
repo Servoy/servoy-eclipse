@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.util;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -56,6 +58,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.IWebComponent;
@@ -334,6 +337,14 @@ public class ElementUtil
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
+			if (CSSPositionUtils.useCSSPosition(persist))
+			{
+				ISupportBounds iSupportBounds = (ISupportBounds)persist;
+				Point location = CSSPositionUtils.getLocation(iSupportBounds);
+				Dimension size = CSSPositionUtils.getSize(iSupportBounds);
+				CSSPositionUtils.setLocation((ISupportBounds)newPersist, location.x, location.y);
+				if (size.width > 0 && size.height > 0) CSSPositionUtils.setSize((ISupportBounds)newPersist, size.width, size.height);
+			}
 
 		}
 		if (webObject != null)

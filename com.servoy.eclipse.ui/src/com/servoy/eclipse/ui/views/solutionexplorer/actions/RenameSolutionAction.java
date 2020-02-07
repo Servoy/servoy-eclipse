@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -118,7 +119,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						{
 							try
 							{
-								ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+								IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 								boolean isActive = servoyModel.isSolutionActive(oldName);
 								ServoyProject activeProject = servoyModel.getActiveProject();
 								if (isActive)
@@ -131,7 +132,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 								description.setName(name);
 								description.setLocation(servoyProject.getProject().getLocation().removeLastSegments(1).append(name));
 								servoyProject.getProject().move(description, false, null);
-								EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+								EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 								String protectionPassword = ApplicationServerRegistry.get().calculateProtectionPassword(editingSolution.getSolutionMetaData(),
 									null);
 								editingSolution.getSolutionMetaData().setProtectionPassword(protectionPassword);

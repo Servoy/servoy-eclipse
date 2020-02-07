@@ -67,6 +67,8 @@ tr.wpm-package-description > td > mat-card-content {
     -webkit-justify-content: center;
     -ms-flex-pack: center;
     justify-content: center;
+    vertical-align: baseline;
+    line-height: 48px;
 }
 
 .table-package td > div.align-right {

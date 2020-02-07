@@ -7,6 +7,7 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.exporter.ngdesktop.ui.wizard.ExportNGDesktopWizard"
             id="com.servoy.eclipse.electronexporter.ExportElectronWizard"
+            icon="icons/ng_export.png"
             name="Export NG Desktop File">
       </wizard>
    </extension>

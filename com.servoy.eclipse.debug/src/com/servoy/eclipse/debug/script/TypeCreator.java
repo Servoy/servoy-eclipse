@@ -159,6 +159,7 @@ import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
 import com.servoy.j2db.documentation.scripting.docs.Globals;
+import com.servoy.j2db.documentation.scripting.docs.RuntimeContainer;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
@@ -248,9 +249,11 @@ import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
 import com.servoy.j2db.server.ngclient.scripting.ConsoleObject;
+import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.ServoyApiObject;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
 import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
@@ -311,6 +314,7 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("properties.png");
 	protected final static ImageDescriptor CONSTANT = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("constant.png");
 	protected final static ImageDescriptor ELEMENTS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("elements.png");
+	protected final static ImageDescriptor CONTAINERS = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("layoutcontainer.png");
 	protected final static ImageDescriptor SPECIAL_PROPERTY = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("special_properties.png");
 
 	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("variable_public.png");
@@ -432,6 +436,8 @@ public class TypeCreator extends TypeCache
 		addScopeType("JSDataSet", new JSDataSetCreator());
 		addScopeType("Form", new FormScopeCreator());
 		addScopeType("RuntimeForm", new FormScopeCreator());
+		addScopeType("RuntimeContainers", new RuntimeContainersScopeCreator());
+		addType("RuntimeContainer", RuntimeContainer.class);
 		addScopeType("Elements", new ElementsScopeCreator());
 		addScopeType("Plugins", new PluginsScopeCreator());
 		addScopeType("Forms", new FormsScopeCreator());
@@ -881,7 +887,7 @@ public class TypeCreator extends TypeCache
 
 				});
 
-				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 				ITableListener tableListener = new ITableListener.TableListener()
 				{
 					@Override
@@ -1629,7 +1635,16 @@ public class TypeCreator extends TypeCache
 									{
 										Class< ? > componentType = paramClass.getComponentType();
 										String jsTypeName = DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(componentType);
-										parameter.setType(TypeUtil.arrayOf(getTypeRef(context, jsTypeName)));
+										if (memberbox[i].method().isVarArgs() && (parameters.size() + 1) == parameterTypes.length)
+										{
+											parameter.setType(getTypeRef(context, jsTypeName));
+											parameter.setKind(ParameterKind.VARARGS);
+										}
+										else
+										{
+											parameter.setType(TypeUtil.arrayOf(getTypeRef(context, jsTypeName)));
+											parameter.setKind(ParameterKind.NORMAL);
+										}
 										int index = jsTypeName.lastIndexOf('.');
 										parameter.setName(index == -1 ? jsTypeName : jsTypeName.substring(index + 1));
 									}
@@ -1639,8 +1654,8 @@ public class TypeCreator extends TypeCache
 										parameter.setType(getTypeRef(context, jsTypeName));
 										int index = jsTypeName.lastIndexOf('.');
 										parameter.setName(index == -1 ? jsTypeName : jsTypeName.substring(index + 1));
+										parameter.setKind(ParameterKind.NORMAL);
 									}
-									parameter.setKind(ParameterKind.NORMAL);
 									parameters.add(parameter);
 								}
 							}
@@ -3205,9 +3220,24 @@ public class TypeCreator extends TypeCache
 			overwrittenMembers.add(clone);
 			clone.setVisible(!PersistEncapsulation.hideElements(formToUse));
 
+			clone = TypeCreator.clone(getMember("containers", baseType), getTypeRef(context, "RuntimeContainers<" + config + '>'));
+			overwrittenMembers.add(clone);
+			if (form.isResponsiveLayout())
+			{
+				clone.setVisible(!PersistEncapsulation.hideContainers(formToUse));
+			}
+			else
+			{
+				clone.setVisible(false);
+			}
+
 			Type type = getCombinedTypeWithRelationsAndDataproviders(fs, context, typeName, ds, overwrittenMembers, superForm,
 				getImageDescriptorForFormEncapsulation(form.getEncapsulation()), !PersistEncapsulation.hideDataproviders(formToUse));
-			if (type != null) type.setAttribute(LAZY_VALUECOLLECTION, form);
+			if (type != null)
+			{
+				type.setAttribute(LAZY_VALUECOLLECTION, form);
+
+			}
 
 			return type;
 		}
@@ -3221,6 +3251,50 @@ public class TypeCreator extends TypeCache
 		public void flush()
 		{
 		}
+	}
+
+	private class RuntimeContainersScopeCreator implements IScopeTypeCreator
+	{
+
+		@Override
+		public Type createType(String context, String typeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(typeName);
+			type.setKind(TypeKind.JAVA);
+			type.setAttribute(IMAGE_DESCRIPTOR, CONTAINERS);
+
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			if (fs == null) return type;
+			String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
+			Form form = fs.getForm(config);
+			if (form == null) return type;
+			Form ff = fs.getFlattenedForm(form);
+			if (ff == null || !ff.isResponsiveLayout())
+			{
+				return type;
+			}
+
+			EList<Member> members = type.getMembers();
+			for (String name : ContainersScope.getAllLayoutNames(ff))
+			{
+				members.add(createProperty(name, true, getTypeRef(context, "RuntimeContainer"), "runtime container", CONTAINERS));
+			}
+			return type;
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng;
+		}
+
+		@Override
+		public void flush()
+		{
+			// TODO Auto-generated method stub
+		}
+
 	}
 
 	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new ConcurrentHashMap<String, Class< ? >>();
@@ -3470,7 +3544,7 @@ public class TypeCreator extends TypeCache
 			type.setKind(TypeKind.JAVA);
 			type.setSuperType(createArrayLookupType(context, serverClass));
 
-			IServerManagerInternal servermanager = ServoyModel.getServerManager();
+			IServerManagerInternal servermanager = ApplicationServerRegistry.get().getServerManager();
 			for (String serverName : servermanager.getServerNames(false, false, true, true))
 			{
 				IServerInternal server = (IServerInternal)servermanager.getServer(serverName, false, false);
@@ -3600,7 +3674,7 @@ public class TypeCreator extends TypeCache
 				EList<Member> members = type.getMembers();
 				String config = fullTypeName.substring(configStart + 1, fullTypeName.length() - 1);
 				String serverName = DataSourceUtils.getDataSourceServerName(config);
-				IServerManagerInternal servermanager = ServoyModel.getServerManager();
+				IServerManagerInternal servermanager = ApplicationServerRegistry.get().getServerManager();
 				IServer server = servermanager.getServer(serverName);
 				if (server != null)
 				{
@@ -3742,7 +3816,7 @@ public class TypeCreator extends TypeCache
 				String[] stn = DataSourceUtils.getDBServernameTablename(fullTypeName.substring(index + 1, fullTypeName.length() - 1));
 				if (stn != null)
 				{
-					IServer server = ServoyModel.getServerManager().getServer(stn[0]);
+					IServer server = ApplicationServerRegistry.get().getServerManager().getServer(stn[0]);
 					if (server != null)
 					{
 						try

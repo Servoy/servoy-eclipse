@@ -21,10 +21,10 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class MissingServerQuickFix implements IMarkerResolution
 {
@@ -45,7 +45,7 @@ public class MissingServerQuickFix implements IMarkerResolution
 		try
 		{
 			boolean isNew = false;
-			ServerConfig serverConfig = ServoyModel.getServerManager().getServerConfig(serverName);
+			ServerConfig serverConfig = ApplicationServerRegistry.get().getServerManager().getServerConfig(serverName);
 			if (serverConfig == null)
 			{
 				serverConfig = ServerConfig.TEMPLATES.get(ServerConfig.POSTGRESQL_TEMPLATE_NAME).getTemplate().getNamedCopy(serverName);

@@ -29,7 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.resources.IFile;
@@ -58,7 +61,6 @@ import com.servoy.j2db.persistence.IColumnInfoManager;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
-import com.servoy.j2db.persistence.IRemoteRepository;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptElement;
@@ -68,6 +70,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectCache;
 import com.servoy.j2db.persistence.RootObjectMetaData;
+import com.servoy.j2db.persistence.RootObjectReference;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -75,13 +78,15 @@ import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner,jblok
  */
-public class EclipseRepository extends AbstractRepository implements IRemoteRepository
+public class EclipseRepository extends AbstractRepository implements IRepository
 {
 	public static interface ActivityMonitor
 	{
@@ -98,6 +103,59 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		super(sm);
 		wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 		this.settings = settings;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.persistence.AbstractRepository#getActiveSolutionModuleMetaDatas(int)
+	 */
+	@Override
+	public List<RootObjectReference> getActiveSolutionModuleMetaDatas(int solutionId) throws RepositoryException
+	{
+		Solution sol = (Solution)getActiveRootObject(solutionId);
+		if (!Utils.getTokenElementsAsList(sol.getModulesNames(), ",", true).stream().allMatch(this::isSolutionLoaded))
+		{
+			ForkJoinPool pool = new ForkJoinPool();
+			ConcurrentMap<String, String> checked = new ConcurrentHashMap<String, String>();
+			checked.put(sol.getName(), sol.getName());
+			pool.execute(() -> loadAllModules(sol, pool, checked));
+			pool.awaitQuiescence(15, TimeUnit.MINUTES);
+			pool.shutdown();
+		}
+		return super.getActiveSolutionModuleMetaDatas(solutionId);
+	}
+
+	/**
+	 * @param sol
+	 * @throws RepositoryException
+	 */
+	private void loadAllModules(Solution sol, ForkJoinPool pool, ConcurrentMap<String, String> checked)
+	{
+		List<String> moduleNames = Utils.getTokenElementsAsList(sol.getModulesNames(), ",", true);
+		for (String name : moduleNames)
+		{
+			if (checked.putIfAbsent(name, name) == null)
+			{
+				try
+				{
+					if (!isSolutionLoaded(name))
+					{
+						RootObjectMetaData rootObjectMetaData = getRootObjectMetaData(name, IRepository.SOLUTIONS);
+						if (rootObjectMetaData != null)
+						{
+							Solution module = (Solution)loadRootObject(rootObjectMetaData, rootObjectMetaData.getActiveRelease());
+							cacheRootObject(module);
+							pool.execute(() -> loadAllModules(module, pool, checked));
+						}
+					}
+				}
+				catch (RepositoryException e)
+				{
+					Debug.error(e);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -213,7 +271,8 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 					{
 						ServoyLog.logError("Could not read solution " + romd.getName(), null);
 					}
-					ServoyLog.logInfo("Time taken to read in the solution " + romd.getName() + ": " + (System.currentTimeMillis() - time));
+					ServoyLog.logInfo("Time taken to read in the solution " + romd.getName() + ": " + (System.currentTimeMillis() - time) + ", thread: " +
+						Thread.currentThread().getName());
 					break;
 			}
 		}

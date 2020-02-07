@@ -22,6 +22,7 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -376,14 +377,31 @@ public class ConfluenceGenerator
 			cg.detailsTable("Methods Details", "function", getMethods(functions), cls);
 
 			cg.close();
+			String output = cg.asString();
+
 
 			File file = new File("D:/temp/doc/generated/" + value.getPublicName() + ".html");
 			file.getParentFile().mkdirs();
-			FileWriter writer = new FileWriter(file);
-			String output = cg.asString();
-			writer.write(output);
-			writer.close();
+			try (FileWriter writer = new FileWriter(file))
+			{
+				writer.write(output);
+			}
 
+			file = new File("D:/temp/doc/generated_old/" + value.getPublicName() + ".html");
+			if (file.exists())
+			{
+				if (file.length() == output.length())
+				{
+					// check if it is still the same if the number of bytes are equal.
+					try (FileReader reader = new FileReader(file))
+					{
+						char[] buf = new char[(int)file.length()];
+						reader.read(buf);
+						String old = new String(buf);
+						if (old.equals(output)) continue;
+					}
+				}
+			}
 			cg.updateContent(value.getPublicName(), output);
 
 		}

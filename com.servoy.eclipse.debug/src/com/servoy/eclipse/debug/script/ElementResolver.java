@@ -104,6 +104,7 @@ public class ElementResolver implements IElementResolver
 		typeNameCreators.put("foundset", new FoundsetTypeNameCreator());
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_PLUGINS, new SimpleNameTypeNameCreator("Plugins"));
 		typeNameCreators.put("elements", new ElementsTypeNameCreator());
+		typeNameCreators.put("containers", new ContainersTypeNameCreator());
 		typeNameCreators.put(IExecutingEnviroment.TOPLEVEL_FORMS, new FormsNameCreator());
 		typeNameCreators.put(ScriptVariable.SCOPES, new ScopesTypeNameCreator());
 		typeNameCreators.put("alldataproviders", new SimpleNameTypeNameCreator("Array"));
@@ -113,6 +114,7 @@ public class ElementResolver implements IElementResolver
 		formOnlyNames.add("alldataproviders");
 		formOnlyNames.add("foundset");
 		formOnlyNames.add("elements");
+		formOnlyNames.add("containers");
 
 		noneFoundsetNames.add("currentcontroller");
 		noneFoundsetNames.add(IExecutingEnviroment.TOPLEVEL_HISTORY);
@@ -171,6 +173,10 @@ public class ElementResolver implements IElementResolver
 				Form form = getForm(context);
 				if (form != null)
 				{
+					if (!form.isResponsiveLayout())
+					{
+						typeNames.remove("containers");
+					}
 					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
 					Form formToUse = form;
 					if (form.getExtendsID() > 0)
@@ -717,6 +723,22 @@ public class ElementResolver implements IElementResolver
 				return "Elements<" + form.getName() + '>';
 			}
 			return "Elements";
+		}
+	}
+
+	private class ContainersTypeNameCreator implements ITypeNameCreator
+	{
+		/**
+		 * @see com.servoy.eclipse.debug.script.ElementResolver.IDynamicTypeCreator#getDynamicType()
+		 */
+		public String getTypeName(ITypeInfoContext context, String fullTypeName)
+		{
+			Form form = getForm(context);
+			if (form != null)
+			{
+				return "RuntimeContainers<" + form.getName() + '>';
+			}
+			return "RuntimeContainers";
 		}
 	}
 

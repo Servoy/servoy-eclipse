@@ -125,6 +125,7 @@ import com.servoy.j2db.documentation.IParameter;
 import com.servoy.j2db.documentation.XMLScriptObjectAdapter;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
+import com.servoy.j2db.documentation.scripting.docs.RuntimeContainer;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
@@ -158,7 +159,6 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
@@ -183,6 +183,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.ui.runtime.HasRuntimeClientProperty;
 import com.servoy.j2db.ui.runtime.HasRuntimeDesignTimeProperty;
 import com.servoy.j2db.ui.runtime.HasRuntimeElementType;
@@ -635,7 +636,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				ITable table = null;
 				try
 				{
-					table = ServoyModel.getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName()).getTable(
+					table = ApplicationServerRegistry.get().getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName()).getTable(
 						((TableWrapper)un.getRealObject()).getTableName());
 				}
 				catch (RemoteException e)
@@ -722,6 +723,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			// Bean b = (Bean)un.getRealObject();
 			// lm = createBean(b);
 			// }
+			else if (type == UserNodeType.FORM_CONTAINERS_ITEM)
+			{
+				lm = TreeBuilder.docToNodes(RuntimeContainer.class, this, UserNodeType.ARRAY, "containers." + un.getName() + ".", null);
+			}
 			else if (type == UserNodeType.CALC_RELATION)
 			{
 				Relation r = (Relation)un.getRealObject();
@@ -1151,8 +1156,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						if (metadataTables == null) metadataTables = new ArrayList<String>();
 						metadataTables.add(tableName);
 					}
-					else if (type.equals(UserNodeType.TABLE) && isTableInvalidInDeveloperBecauseNoPk((Table)tabel) &&
-						!server.isTableMarkedAsHiddenInDeveloper(tableName))
+					else if (isTableInvalidInDeveloperBecauseNoPk(tabel) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (invalidBecauseNoPK == null) invalidBecauseNoPK = new ArrayList<String>();
 						invalidBecauseNoPK.add(tableName);
@@ -1231,7 +1235,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 * @param tabel
 	 * @return
 	 */
-	private static boolean isTableInvalidInDeveloperBecauseNoPk(final Table tabel)
+	private static boolean isTableInvalidInDeveloperBecauseNoPk(final ITable tabel)
 	{
 		if (tabel != null)
 		{

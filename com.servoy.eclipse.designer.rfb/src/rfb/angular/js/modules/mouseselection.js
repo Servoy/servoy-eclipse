@@ -211,9 +211,16 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 				var el = angular.element(selection[0]);
 				var attrDirectEdit = el.attr('directeditpropertyname');
 				if (typeof attrDirectEdit == typeof undefined || attrDirectEdit == false) {
-					var fr = el.closest('.form_reference');
-					if(fr.length) {
-						editorScope.openContainedForm({"uuid" : fr.attr("svy-id")});
+					if (el.hasClass('maxLevelDesign'))
+					{
+						$editorService.executeAction('zoomIn');
+					}
+					else
+					{
+						var fr = el.closest('.form_reference');
+						if(fr.length) {
+							editorScope.openContainedForm({"uuid" : fr.attr("svy-id")});
+						}
 					}
 				}
 			}
@@ -282,8 +289,9 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						dropTarget = this.getNode(event, true, skipNodeId);
 						if (!dropTarget) {
 							var formRect = $(".contentframe").get(0).getBoundingClientRect();
+							//it can be hard to drop on bottom, so just allow it to the end
 							var isForm = event.clientX > formRect.left && event.clientX < formRect.right &&
-							event.clientY > formRect.top && event.clientY < formRect.bottom;
+							event.clientY > formRect.top;
 							// this is on the form, can this layout container be dropped on the form?
 							if (!isForm || !topContainer) {
 								return {
@@ -381,31 +389,6 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 												
 									}	
 								}
-								if (!beforeNode)
-								{
-									// is this really last or we didn't detect it well, try again with new rectangle
-									for (var i=dropTarget.childNodes.length-1;i>=0;i--)
-									{
-										var node = dropTarget.childNodes[i];
-										if (node && node.getAttribute && node.getAttribute('svy-id'))
-										{
-											var clientRec = node.getBoundingClientRect();
-											var absolutePoint = editorScope.convertToAbsolutePoint({
-												x: clientRec.left,
-												y: clientRec.bottom
-											});
-											// if cursor is in rectangle between bottom left corner of component and top right corner of form we consider it to be before that component
-											// can we enhance it ?
-											if (event.pageY < absolutePoint.y && event.pageX > absolutePoint.x)
-											{
-												beforeNode = node;
-											}
-											else
-												break;
-													
-										}	
-									}
-								}	
 								return {
 									dropAllowed: true,
 									dropTarget: dropTarget,
@@ -473,7 +456,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						xMouseDown = event.clientX;
 						yMouseDown = event.clientY;
 					}
-					if (lassoStarted || hasClass(event.target, "contentframe-overlay") || hasClass(event.target, "decorator") || hasClass(event.target, "ghostcontainer")
+					if (lassoStarted || hasClass(event.target, "contentframe-overlay") || hasClass(event.target, "palette-heading") || hasClass(event.target, "decorator") || hasClass(event.target, "ghostcontainer")
 							|| hasClass(event.target, "ghostContainerPropName") || hasClass(event.target, "ghost") || hasClass(event.target, "knob") || event.target.id == "highlight") {
 						xMouseDown -= editorScope.glasspane.parentElement.offsetLeft;
 						yMouseDown -= editorScope.glasspane.parentElement.offsetTop;

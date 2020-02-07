@@ -16,7 +16,7 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 	public static final String SMART_STATE = "com.servoy.eclipse.core.smartClientState";
 	public static final String NGDESKTOP_STATE = "com.servoy.eclipse.core.ngDesktopClientState";
 
-	private ServoyModel sm;
+	private IDeveloperServoyModel sm;
 	private IActiveProjectListener listener;
 
 	public ActiveSolutionProvider()

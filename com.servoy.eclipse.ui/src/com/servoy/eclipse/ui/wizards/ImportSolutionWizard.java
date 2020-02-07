@@ -45,7 +45,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
@@ -119,6 +119,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean shouldSkipModulesImport = false;
 	private boolean allowDataModelChanges = false;
 	private boolean importSampleData = false;
+	private boolean allowSQLKeywords;
 
 	private static String getInitialImportPath()
 	{
@@ -242,20 +243,34 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						}
 						return super.askStyleAlreadyExistsAction(name);
 					}
+
+					@Override
+					public int askAllowSQLKeywords()
+					{
+						if (ImportSolutionWizard.this.askAllowSQLKeywords())
+						{
+							return OK_ACTION;
+						}
+						return super.askAllowSQLKeywords();
+					}
+
+
 				};
 				IApplicationServerSingleton as = ApplicationServerRegistry.get();
 				try
 				{
-					IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file), (EclipseRepository)ServoyModel.getDeveloperRepository(),
+					IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file),
+						(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(),
 						as.getDataServer(), as.getClientId(), userChannel);
 
 					IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(), as.getDataServer(),
-						as.getClientId(), userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository());
+						as.getClientId(), userChannel, (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository());
 
 					x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
 
 					IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
-						(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
+						(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), resourcesProjectName, existingProject, monitor,
+						doActivateSolution,
 						isCleanImport, projectLocation, reportImportFail);
 					if (rootObjects != null)
 					{
@@ -299,7 +314,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 			}
 		};
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		try
 		{
 			servoyModel.setSolutionImportInProgressFlag(true); // suspended many of Solex's listeners to avoid unwanted flickers and unneded code running
@@ -335,6 +350,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		});
 	}
 
+
+	protected boolean askAllowSQLKeywords()
+	{
+		return allowSQLKeywords;
+	}
+
+	protected void shouldAllowSQLKeywords(boolean allow)
+	{
+		this.allowSQLKeywords = allow;
+	}
 
 	protected boolean shouldAllowDataModelChanges()
 	{

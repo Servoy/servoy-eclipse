@@ -70,6 +70,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.TypesRegistry;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.InputAndListDialog;
@@ -109,6 +110,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -239,7 +241,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		{
 			return null;
 		}
-		ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		boolean override = false;
 		MethodArgument[] superArguments = null;
@@ -330,6 +332,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 									ArgumentType returnType = null;
 									String defaultMethodCode = config.optString("code", "");
 									String returnTypeDescription = "";
+									boolean hasDefaultValue = false;
+									Object defaultValue = null;
 									if (config.has("returns"))
 									{
 										if (config.get("returns") instanceof JSONObject)
@@ -337,20 +341,29 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 											JSONObject returns = config.getJSONObject("returns");
 											returnType = ArgumentType.valueOf(returns.optString("type", ""));
 											returnTypeDescription = returns.optString("description", "");
+											if (returns.has("default"))
+											{
+												hasDefaultValue = true;
+												defaultValue = returns.opt("default");
+											}
 										}
 										else
 										{
 											returnType = ArgumentType.valueOf(config.getString("returns"));
 										}
-										IPropertyType< ? > pt = null;
-										if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
-											(pt = TypesRegistry.getType(returnType.getName())) != null)
+										if (!hasDefaultValue)
 										{
-											Object defaultValue = pt.defaultValue(def);
-											if (defaultValue != null)
+											IPropertyType< ? > pt = null;
+											if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
+												(pt = TypesRegistry.getType(returnType.getName())) != null)
 											{
-												defaultMethodCode = "return " + defaultValue + ";";
+												hasDefaultValue = true;
+												defaultValue = pt.defaultValue(def);
 											}
+										}
+										if (hasDefaultValue)
+										{
+											defaultMethodCode = "return " + defaultValue + ";";
 										}
 									}
 									List<MethodArgument> arguments = new ArrayList<MethodArgument>();
@@ -397,7 +410,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						{
 							// js file does not exist yet, table node may have been created in memory in editing solution, make sure the table node is saved,
 							// otherwise the same table node (but with different uuid) will be created in the real solution when the js file is read.
-							((EclipseRepository)ServoyModel.getDeveloperRepository()).updateNode(met.getParent(), false);
+							((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).updateNode(met.getParent(), false);
 						}
 
 						// file doesn't exist, create the file and its parent directories
@@ -415,7 +428,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 					met.setDeclaration(declaration);
 
-					String code = SolutionSerializer.serializePersist(met, true, ServoyModel.getDeveloperRepository(), null).toString();
+					String code = SolutionSerializer.serializePersist(met, true, ApplicationServerRegistry.get().getDeveloperRepository(), null).toString();
 					final IEditorPart openEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(
 						FileEditorInputFactory.createFileEditorInput(file));
 					if (openEditor instanceof ScriptEditor)

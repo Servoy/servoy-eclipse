@@ -73,6 +73,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Handle requests from the rfb html editor.
@@ -131,7 +132,8 @@ public class EditorServiceHandler implements IServerService
 				Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
 				JSONObject result = new JSONObject();
 				result.put("font", f.getFontData()[0].getName());
-				int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / 72f);
+				float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
+				int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
 				result.put("size", pxHeight);
 				return result;
 			}
@@ -448,6 +450,41 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("getZoomLevel", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				if (args != null)
+				{
+					IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+					if (preferenceStore.contains(editorPart.getForm().getUUID() + "_zoomLevel"))
+					{
+						return new Integer(preferenceStore.getInt(editorPart.getForm().getUUID() + "_zoomLevel"));
+					}
+				}
+				return new Integer(3);
+			}
+
+		});
+
+		configuredHandlers.put("setZoomLevel", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				if (args != null)
+				{
+					IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+					if (args.has("zoomLevel"))
+					{
+						preferenceStore.setValue(editorPart.getForm().getUUID() + "_zoomLevel", args.getInt("zoomLevel"));
+					}
+				}
+				return null;
+			}
+
+		});
 	}
 
 	@Override

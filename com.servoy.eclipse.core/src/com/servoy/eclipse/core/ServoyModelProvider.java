@@ -20,6 +20,7 @@ package com.servoy.eclipse.core;
 import com.servoy.eclipse.model.extensions.IServoyEnvironmentProvider;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.j2db.IServiceProvider;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Extension that gives com.servoy.eclipse.model plugin access to the development ServoyModel.
@@ -41,7 +42,7 @@ public class ServoyModelProvider implements IServoyEnvironmentProvider
 	@Override
 	public void startAppServerIfNeeded()
 	{
-		ServoyModel.startAppServer();
+		ApplicationServerRegistry.get();
 	}
 
 }

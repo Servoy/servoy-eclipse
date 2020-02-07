@@ -165,6 +165,10 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									Debug.log(ex);
 								}
 							}
+							else
+							{
+								pack.put("installed", "unknown");
+							}
 						}
 					}
 					else

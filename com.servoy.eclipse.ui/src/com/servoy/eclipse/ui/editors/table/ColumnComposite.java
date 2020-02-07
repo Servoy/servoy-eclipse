@@ -65,7 +65,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
 
 import com.servoy.base.persistence.IBaseColumn;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.inmemory.AbstractMemTable;
@@ -90,6 +89,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
 public class ColumnComposite extends Composite
@@ -531,7 +531,7 @@ public class ColumnComposite extends Composite
 		allowNullColumn.setText("Allow Null");
 		TableViewerColumn allowNullViewerColumn = new TableViewerColumn(tableViewer, allowNullColumn);
 		allowNullViewerColumn.setEditingSupport(new ColumnAllowNullEditingSupport(tableViewer));
-
+		allowNullColumn.setToolTipText("Modifying allow null after table is created in database may break existing tables at deployment.");
 
 		seqType = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_SEQUENCE_TYPE);
 		seqType.setText("Sequence Type");
@@ -768,7 +768,7 @@ public class ColumnComposite extends Composite
 		{
 			List<String> seqType = new ArrayList<String>();
 
-			IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(table.getServerName());
+			IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(table.getServerName());
 			for (int element : ColumnInfo.allDefinedSeqTypes)
 			{
 				boolean validType = true;

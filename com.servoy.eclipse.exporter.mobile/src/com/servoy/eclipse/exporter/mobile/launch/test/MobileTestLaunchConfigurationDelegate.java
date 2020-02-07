@@ -8,7 +8,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.ui.browser.IWebBrowser;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchConfigurationDelegate;
@@ -49,7 +49,7 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 		if (!nodebug)
 		{
 			// re-activate the mobile solution after tests finish their execution if needed
-			ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
 			String solutionName = configuration.getAttribute(IMobileLaunchConstants.SOLUTION_NAME, "");
 			ServoyProject mobileProject = model.getServoyProject(solutionName);
 			if (mobileProject != null && mobileProject != model.getActiveProject())
@@ -88,8 +88,8 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 		password = configuration.getAttribute(IMobileTestLaunchConstants.PASSWORD, IMobileTestLaunchConstants.DEFAULT_PASSWORD);
 		try
 		{
-			clientConnectTimeout = Integer.parseInt(configuration.getAttribute(IMobileTestLaunchConstants.CLIENT_CONNECT_TIMEOUT,
-				IMobileTestLaunchConstants.DEFAULT_CLIENT_CONNECT_TIMEOUT));
+			clientConnectTimeout = Integer.parseInt(
+				configuration.getAttribute(IMobileTestLaunchConstants.CLIENT_CONNECT_TIMEOUT, IMobileTestLaunchConstants.DEFAULT_CLIENT_CONNECT_TIMEOUT));
 		}
 		catch (NumberFormatException ex)
 		{
@@ -129,8 +129,8 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 		}
 		finally
 		{
-			if (Boolean.parseBoolean(configuration.getAttribute(IMobileTestLaunchConstants.CLOSE_BROWSER_WHEN_DONE,
-				IMobileTestLaunchConstants.DEFAULT_CLOSE_BROWSER_WHEN_DONE)))
+			if (Boolean.parseBoolean(
+				configuration.getAttribute(IMobileTestLaunchConstants.CLOSE_BROWSER_WHEN_DONE, IMobileTestLaunchConstants.DEFAULT_CLOSE_BROWSER_WHEN_DONE)))
 			{
 				if (monitor != null) monitor.subTask("test session finished - closing browser");
 				webBrowser.close(); // when tests are done, close the browser

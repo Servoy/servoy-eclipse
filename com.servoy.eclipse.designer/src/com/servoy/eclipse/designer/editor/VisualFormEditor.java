@@ -25,6 +25,8 @@ import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -34,6 +36,7 @@ import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
@@ -112,22 +115,40 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 	};
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditor#setInput(org.eclipse.ui.IEditorInput)
+	 */
+	@Override
+	protected void setInput(IEditorInput input)
+	{
+		super.setInput(input);
+	}
+
 
 	@Override
 	protected void createPages()
 	{
-		super.createPages();
-		if (!isMobile() && !Utils.getAsBoolean(getForm().isFormComponent()))
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 		{
-			if (!isClosing())
+			super.createPages();
+			if (!isMobile() && !Utils.getAsBoolean(getForm().isFormComponent()))
 			{
-				if (!getForm().isResponsiveLayout()) // is absolute layout
+				if (!isClosing())
 				{
-					createPartsPage();
+					if (!getForm().isResponsiveLayout()) // is absolute layout
+					{
+						createPartsPage();
+					}
+					createTabsPage();
 				}
-				createTabsPage();
+				createSecPage(); // MultiPageEditorPart wants at least 1 page
 			}
-			createSecPage(); // MultiPageEditorPart wants at least 1 page
+		}
+		else
+		{
+			setPageText(addPage(new Composite(getContainer(), SWT.NONE)), "Loading Solution");
 		}
 	}
 

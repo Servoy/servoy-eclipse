@@ -63,6 +63,7 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 		Set<String> availableComponents = new TreeSet<String>();
 		for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
 		{
+			if (exportModel.getExcludedServicePackages().contains(spec.getPackageName())) continue;
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}
 		return availableComponents;

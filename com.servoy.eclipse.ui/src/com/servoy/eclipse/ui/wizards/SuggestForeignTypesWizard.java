@@ -98,6 +98,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ScopesUtils;
 
 /**
@@ -245,7 +246,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			serversCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 			ServoyModelManager.getServoyModelManager().getServoyModel();
-			String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
+			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			if (serverNames != null && serverNames.length > 0)
 			{
 				serversCombo.setItems(serverNames);

@@ -47,6 +47,7 @@ import org.eclipse.ui.IWorkbench;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
@@ -249,9 +250,9 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 							String missingJarName = exporter.searchExportedPlugins();
 							while (missingJarName != null)
 							{
-								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
-								dialog.setMessage(
+								MessageDialog.openWarning(getShell(), "Warning",
 									"Please select the directory where " + missingJarName + " is located (usually your servoy developer/plugins directory)");
+								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
 								String chosenDirName = dialog.open();
 								if (chosenDirName != null)
 								{
@@ -373,7 +374,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				getDialogSettings().get("export.plugins") == null, true, "export_war_plugins");
 
 			ArrayList<String> tmp = new ArrayList<>();
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			String activeResourcesProjectName = servoyModel.getActiveResourcesProject().getProject().getName();
 			List<ServoyProject> activeProjects = Arrays.asList(servoyModel.getModulesOfActiveProject());
 

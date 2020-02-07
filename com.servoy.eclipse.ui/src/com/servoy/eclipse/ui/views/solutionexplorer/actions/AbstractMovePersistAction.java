@@ -61,7 +61,7 @@ public abstract class AbstractMovePersistAction extends AbstractPersistSelection
 
 		ServoyProject[] activeModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 		//excluding the active project, so we get the exact number of modules
-		if ((activeModules.length - 1) == 0) setEnabled(false);
+		if ((activeModules.length - 1) <= 0) setEnabled(false);
 	}
 
 	@Override

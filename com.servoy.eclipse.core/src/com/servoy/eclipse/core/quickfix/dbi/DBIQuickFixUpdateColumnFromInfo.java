@@ -19,12 +19,12 @@ package com.servoy.eclipse.core.quickfix.dbi;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.base.persistence.IBaseColumn;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -32,6 +32,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.query.ColumnType;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the DB column to match the column information.
@@ -76,14 +77,14 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 		IColumn c;
 		try
 		{
-			ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+			IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 			DataModelManager dmm = sm.getDataModelManager();
 			if (dmm != null)
 			{
 				dmm.setWritesEnabled(false);
 				try
 				{
-					IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(difference.getServerName());
+					IServerInternal s = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(difference.getServerName());
 
 					// delete column from memory obj.
 					difference.getTable().removeColumn(difference.getColumnName());
@@ -109,7 +110,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 
 					// create a new column with the same name, but using column information
 					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
-					c.setDatabasePK((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != 0);
+					c.setDatabasePK((difference.getDbiFileDefinition().flags & IBaseColumn.PK_COLUMN) != 0);
 					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
 					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)
 					{

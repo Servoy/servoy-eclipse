@@ -50,6 +50,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class ServoyUpdatingProject implements IProjectNature
 {
@@ -159,7 +160,8 @@ public class ServoyUpdatingProject implements IProjectNature
 				{
 					String newExtension = null;
 					IResource parentOfParent = resource.getParent().getParent();
-					if (parentOfParent != null && parentOfParent.getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME)) newExtension = SolutionSerializer.TABLENODE_FILE_EXTENSION;
+					if (parentOfParent != null && parentOfParent.getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME))
+						newExtension = SolutionSerializer.TABLENODE_FILE_EXTENSION;
 					else
 					{
 						String parentName = resource.getParent().getName();
@@ -211,8 +213,8 @@ public class ServoyUpdatingProject implements IProjectNature
 			(valuelistDir != null && hasResourceWithExtension(valuelistDir, SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION)) ||
 			(relationDir != null && hasResourceWithExtension(relationDir, SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION)))
 		{
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-				"Project update error, still obj files under forms/datasources/valuelists/relations"));
+			throw new CoreException(
+				new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Project update error, still obj files under forms/datasources/valuelists/relations"));
 		}
 		else
 		{
@@ -253,7 +255,7 @@ public class ServoyUpdatingProject implements IProjectNature
 		final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 		try
 		{
-			SolutionSerializer.writePersist(updatingSolution, wfa, ServoyModel.getDeveloperRepository(), true, true, true);
+			SolutionSerializer.writePersist(updatingSolution, wfa, ApplicationServerRegistry.get().getDeveloperRepository(), true, true, true);
 			// check if forms and table nodes items were moved
 			checkForChildrenItems(wfa, formsDir, SolutionSerializer.FORM_FILE_EXTENSION, formsWithElements);
 			checkForChildrenItems(wfa, datasourcesDir, SolutionSerializer.TABLENODE_FILE_EXTENSION, tableNodesWithElements);
@@ -285,8 +287,8 @@ public class ServoyUpdatingProject implements IProjectNature
 								String resourceContent = wfa.getUTF8Contents(resource.getFullPath().toOSString());
 								if (resourceContent.indexOf("items:[") == -1)
 								{
-									throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Project update error, '" + resourceName +
-										"' has missing items after project update"));
+									throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+										"Project update error, '" + resourceName + "' has missing items after project update"));
 								}
 							}
 							catch (IOException ex)

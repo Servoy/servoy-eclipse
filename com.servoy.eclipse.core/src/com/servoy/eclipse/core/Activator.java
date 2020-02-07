@@ -24,7 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,7 +38,9 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.apache.wicket.Request;
+import org.apache.wicket.Response;
+import org.apache.wicket.Session;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -85,7 +86,6 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.cheatsheets.ICheatSheetResource;
 import org.eclipse.ui.internal.registry.ActionSetRegistry;
 import org.eclipse.ui.internal.registry.IActionSetDescriptor;
-import org.eclipse.ui.progress.WorkbenchJob;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
@@ -99,14 +99,17 @@ import org.sablo.websocket.GetHttpSessionConfigurator;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
+import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
+import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -121,7 +124,10 @@ import com.servoy.j2db.IDesignerCallback;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.dataprocessing.ClientInfo;
+import com.servoy.j2db.dataprocessing.IDataServer;
+import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.debug.DebugUtils;
+import com.servoy.j2db.debug.DebugWebClientSession;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -129,21 +135,17 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
-import com.servoy.j2db.persistence.IRepositoryFactory;
-import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.MethodTemplatesFactory;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.ngclient.BodyPortal;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
+import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.shared.IWebClientSessionFactory;
 import com.servoy.j2db.server.starter.IServerStarter;
@@ -152,13 +154,6 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IDeveloperURLStreamHandler;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
-
-import net.sourceforge.sqlexplorer.ExplorerException;
-import net.sourceforge.sqlexplorer.dbproduct.Alias;
-import net.sourceforge.sqlexplorer.dbproduct.AliasManager;
-import net.sourceforge.sqlexplorer.dbproduct.ManagedDriver;
-import net.sourceforge.sqlexplorer.dbproduct.User;
-import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 
 
 /**
@@ -188,91 +183,11 @@ public class Activator extends Plugin
 
 	private volatile boolean defaultAccessed = false;
 
-	private Boolean sqlExplorerLoaded = null;
-
 	private IDesignerCallback designerCallback;
 
-	/**
-	 * @author jcompagner
-	 */
-	private static final class SQLExplorerAliasCreatorJob extends WorkbenchJob
-	{
-		private SQLExplorerAliasCreatorJob(String name)
-		{
-			super(name);
-		}
+	private volatile boolean isPostgresInstallChecked = false;
 
-		@Override
-		public IStatus runInUIThread(IProgressMonitor monitor)
-		{
-			IServerManagerInternal serverManager = ServoyModel.getServerManager();
-
-			String[] serverNames = serverManager.getServerNames(true, true, false, false);
-			AliasManager aliasManager = SQLExplorerPlugin.getDefault().getAliasManager();
-
-			try
-			{
-				aliasManager.loadAliases();
-			}
-			catch (ExplorerException e1)
-			{
-				ServoyLog.logError(e1);
-			}
-
-			for (String serverName : serverNames)
-			{
-				Alias alias = new Alias(serverName)
-				{
-					ManagedDriver driver = new ManagedDriver(getName())
-					{
-						@Override
-						public net.sourceforge.sqlexplorer.dbproduct.SQLConnection getConnection(User user) throws java.sql.SQLException
-						{
-							IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(getId());
-							try
-							{
-								return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this,
-									"Servoy server: " + getId());
-							}
-							catch (RepositoryException e)
-							{
-								throw new SQLException(e.getMessage());
-							}
-						}
-					};
-
-					/**
-					 * @see net.sourceforge.sqlexplorer.dbproduct.Alias#getDriver()
-					 */
-					@Override
-					public ManagedDriver getDriver()
-					{
-						return driver;
-					}
-				};
-				alias.setAutoLogon(true);
-				alias.setConnectAtStartup(false);
-				alias.setHasNoUserName(true);
-				try
-				{
-					aliasManager.addAlias(alias);
-				}
-				catch (ExplorerException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-			try
-			{
-				aliasManager.saveAliases();
-			}
-			catch (ExplorerException e)
-			{
-				ServoyLog.logError(e);
-			}
-			return Status.OK_STATUS;
-		}
-	}
+	private Runnable postgressCheckedNotify;
 
 
 	@Override
@@ -295,7 +210,8 @@ public class Activator extends Plugin
 		{
 			throw new IllegalStateException("Could not load application server plugin");
 		}
-		ss.nativeStartup();
+		// now start the app server in the back ground.
+		new Thread(() -> startAppServer()).start();
 
 		IExtensionRegistry reg = Platform.getExtensionRegistry();
 		IExtensionPoint ep = reg.getExtensionPoint(IPluginBaseClassLoaderProvider.EXTENSION_ID);
@@ -425,7 +341,7 @@ public class Activator extends Plugin
 					}
 				});
 
-				if (!ApplicationServerRegistry.get().hasDeveloperLicense() ||
+				if (!ss.getApplicationServer().hasDeveloperLicense() ||
 					Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 				{
 					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
@@ -453,8 +369,8 @@ public class Activator extends Plugin
 							}
 							try
 							{
-								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
-									StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
+//								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
+//									StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
 							}
 							catch (Exception e)
 							{
@@ -498,37 +414,6 @@ public class Activator extends Plugin
 		{
 			ServoyLog.logError("Failed to persist changes.", e);
 		}
-	}
-
-	public boolean isSqlExplorerLoaded()
-	{
-		if (sqlExplorerLoaded == null)
-		{
-			sqlExplorerLoaded = Boolean.FALSE;
-			try
-			{
-				Class.forName("net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin", false, getClass().getClassLoader());
-				sqlExplorerLoaded = Boolean.TRUE;
-				generateSQLExplorerAliasses();
-			}
-			catch (Exception e)
-			{
-				// ignore
-			}
-		}
-		return sqlExplorerLoaded.booleanValue();
-	}
-
-	/**
-	 *
-	 */
-	private void generateSQLExplorerAliasses()
-	{
-		WorkbenchJob job = new SQLExplorerAliasCreatorJob("creating db aliasses");
-		job.setSystem(true);
-		job.setUser(false);
-		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		job.schedule();
 	}
 
 	@Override
@@ -639,7 +524,7 @@ public class Activator extends Plugin
 			appServer.doNativeShutdown();
 			J2DBGlobals.setSingletonServiceProvider(null); // avoid a null pointer exception that can happen when DLTK stops the debugger after appserver singleton gets cleared (due to a Context.enter() call)
 			J2DBGlobals.setServiceProvider(null);
-			ApplicationServerRegistry.clear();
+			ApplicationServerRegistry.destroy();
 		}
 		super.stop(context);
 
@@ -668,7 +553,10 @@ public class Activator extends Plugin
 			{
 				public void showFormInDesigner(Form form)
 				{
-					FlattenedSolution editingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
+					FlattenedSolution editingSolution = ServoyModelManager.getServoyModelManager()
+						.getServoyModel()
+						.getActiveProject()
+						.getEditingFlattenedSolution();
 					final Form testForm = editingSolution.getForm(form.getName());
 					if (testForm == null) return;
 					Display.getDefault().asyncExec(new Runnable()
@@ -677,9 +565,15 @@ public class Activator extends Plugin
 						{
 							try
 							{
-								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-									PersistEditorInput.createFormEditorInput(testForm), PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-										Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
+								PlatformUI.getWorkbench()
+									.getActiveWorkbenchWindow()
+									.getActivePage()
+									.openEditor(
+										PersistEditorInput.createFormEditorInput(testForm), PlatformUI.getWorkbench()
+											.getEditorRegistry()
+											.getDefaultEditor(null,
+												Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID))
+											.getId());
 								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().forceActive();
 
 							}
@@ -843,9 +737,6 @@ public class Activator extends Plugin
 	{
 		defaultAccessed = true;
 
-		XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
-		MethodTemplatesLoader.loadMethodTemplatesFromXML();
-
 		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
 		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle
 		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)
@@ -854,7 +745,7 @@ public class Activator extends Plugin
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
-				final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 				IActiveProjectListener apl = new IActiveProjectListener()
 				{
@@ -1046,31 +937,42 @@ public class Activator extends Plugin
 			}
 		}.schedule();
 
-		// Try to load documentation XML from plugin and bean jars.
-		PluginManager pluginManager = (PluginManager)getDesignClient().getPluginManager();
-		IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
-		if (documentationManagerProvider != null)
-		{
-			XMLScriptObjectAdapterLoader.loadDocumentationForPlugins(pluginManager, documentationManagerProvider);
-			IBeanManager beanManager = getDesignClient().getBeanManager();
-			if (beanManager instanceof IBeanManagerInternal)
-			{
-				XMLScriptObjectAdapterLoader.loadDocumentationForBeans((IBeanManagerInternal)beanManager, documentationManagerProvider);
-			}
-		}
+		Runnable loadDocs = () -> {
+			XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
+			MethodTemplatesLoader.loadMethodTemplatesFromXML();
 
-		// Visit all column validators/converters and let them add any method templates to
-		// MethodTemplate.
-		for (Object conv : new CompositeIterable<Object>(//
-			pluginManager.getColumnConverterManager().getConverters().values(), //
-			pluginManager.getUIConverterManager().getConverters().values(), //
-			pluginManager.getColumnValidatorManager().getValidators().values()))
-		{
-			if (conv instanceof IMethodTemplatesProvider)
+			// Try to load documentation XML from plugin and bean jars.
+			PluginManager pluginManager = (PluginManager)getDesignClient().getPluginManager();
+			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
+			if (documentationManagerProvider != null)
 			{
-				processMethodTemplates(((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance()));
+				XMLScriptObjectAdapterLoader.loadDocumentationForPlugins(pluginManager, documentationManagerProvider);
+				IBeanManager beanManager = getDesignClient().getBeanManager();
+				if (beanManager instanceof IBeanManagerInternal)
+				{
+					XMLScriptObjectAdapterLoader.loadDocumentationForBeans((IBeanManagerInternal)beanManager, documentationManagerProvider);
+				}
 			}
+
+			// Visit all column validators/converters and let them add any method templates to
+			// MethodTemplate.
+			for (Object conv : new CompositeIterable<Object>(//
+				pluginManager.getColumnConverterManager().getConverters().values(), //
+				pluginManager.getUIConverterManager().getConverters().values(), //
+				pluginManager.getColumnValidatorManager().getValidators().values()))
+			{
+				if (conv instanceof IMethodTemplatesProvider)
+				{
+					processMethodTemplates(((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance()));
+				}
+			}
+		};
+		// apple can't load this on back ground because all kind swing classes are created to get the docs then we could get into a deadlock
+		if (Utils.isAppleMacOS())
+		{
+			loadDocs.run();
 		}
+		else new Thread(loadDocs).start();
 	}
 
 	private void processMethodTemplates(Map<String, IMethodTemplate> templs)
@@ -1208,27 +1110,45 @@ public class Activator extends Plugin
 		});
 	}
 
-	public synchronized void startAppServer(IRepositoryFactory repositoryFactory, IDebugClientHandler debugClientHandler,
-		IWebClientSessionFactory webClientSessionFactory, IUserManagerFactory userManagerFactory) throws Exception
+	private void startAppServer()
 	{
-		if (ApplicationServerRegistry.get() != null)
+		try
 		{
-			// already started
-			return;
+			ss.nativeStartup();
+			GetHttpSessionConfigurator.setOriginCheck(GetHttpSessionConfigurator.DISABLE_ORIGIN_CHECK); // securityFiter is not configured in Developer
+			ss.setDeveloperStartup(true);
+			ss.init();
+			ss.setRepositoryFactory(new EclipseRepositoryFactory());
+			ss.setDebugClientHandler(new DebugClientHandler());
+			ss.setUserManagerFactory(new IUserManagerFactory()
+			{
+				public IUserManager createUserManager(IDataServer dataServer)
+				{
+					return new SwitchableEclipseUserManager();
+				}
+			});
+			ss.setWebClientSessionFactory(new IWebClientSessionFactory()
+			{
+				public Session newSession(Request request, Response response)
+				{
+					return new DebugWebClientSession(request);
+				}
+			});
+			ss.start(false);
+			ss.startWebServer();
+
+			checkApplicationServerVersion(ss.getApplicationServer());
+			checkDefaultPostgressInstall(ss.getApplicationServer());
+
+			// set the START_AS_TEAMPROVIDER_SETTING flag as system property, so
+			// our team plugin can use it in popupMenu enablement
+			System.setProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
+				Settings.getInstance().getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT)));
 		}
-
-		GetHttpSessionConfigurator.setOriginCheck(GetHttpSessionConfigurator.DISABLE_ORIGIN_CHECK); // securityFiter is not configured in Developer
-		ss.setDeveloperStartup(true);
-		ss.init();
-		ss.setRepositoryFactory(repositoryFactory);
-		ss.setDebugClientHandler(debugClientHandler);
-		ss.setUserManagerFactory(userManagerFactory);
-		ss.setWebClientSessionFactory(webClientSessionFactory);
-		ss.start();
-		ss.startWebServer();
-
-		checkApplicationServerVersion(ApplicationServerRegistry.get());
-		checkDefaultPostgressInstall(ApplicationServerRegistry.get());
+		catch (Exception ex)
+		{
+			ServoyLog.logError("Failed to start the appserver", ex);
+		}
 	}
 
 	/**
@@ -1245,8 +1165,9 @@ public class Activator extends Plugin
 				public void run()
 				{
 					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(),
-						"Default PostgreSQL not installed.", "Should a default PostgreSQL database be installed?", SWT.NONE,
-						new String[] { "Yes (include sample)", "Yes (no sample)", "No", "Later" });
+						"Default PostgreSQL database not installed.", "Should a default PostgreSQL database be installed? (Used by tutorials and samples) ",
+						SWT.NONE,
+						new String[] { "Yes (include sample)", "Yes (no sample)", "Never", "Later" });
 					if (open == 0)
 					{
 						// create database with sample
@@ -1293,14 +1214,42 @@ public class Activator extends Plugin
 						{
 							dumpFile.delete();
 						}
+						setPostgresChecked();
+					}
+					else
+					{
+						setPostgresChecked();
 					}
 					// 3 ask the same again later.
 				}
 			});
 		}
+		else
+		{
+			setPostgresChecked();
+		}
 	}
 
-	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception
+	void setPostgresChecked()
+	{
+		isPostgresInstallChecked = true;
+		if (this.postgressCheckedNotify != null) this.postgressCheckedNotify.run();
+	}
+
+	/**
+	 * return immediatly true when postgres installation is already checked or created
+	 * if that didn't happen yet it will return false and the runnable will be called when this happens.
+	 * @param toNotify
+	 * @return
+	 */
+	public boolean isPostgresChecked(Runnable toNotify)
+	{
+		if (isPostgresInstallChecked) return true;
+		this.postgressCheckedNotify = toNotify;
+		return false;
+	}
+
+	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, boolean lts, ActionListener listener) throws Exception
 	{
 		File file = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/../servoy_updater.jar");
 		try (InputStream is = Activator.class.getResourceAsStream("updater/servoy_updater.jar"))
@@ -1310,8 +1259,9 @@ public class Activator extends Plugin
 		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() });
 		Class< ? > versionCheckClass = loader.loadClass("com.servoy.updater.VersionCheck");
 		Method updateAppServerFromSerclipse = versionCheckClass.getMethod("updateAppServerFromSerclipse",
-			new Class[] { java.io.File.class, int.class, int.class, ActionListener.class });
-		return Utils.getAsInteger(updateAppServerFromSerclipse.invoke(null, new Object[] { parentFile, version, releaseNumber, listener }));
+			new Class[] { java.io.File.class, int.class, int.class, boolean.class, ActionListener.class });
+		return Utils.getAsInteger(updateAppServerFromSerclipse.invoke(null,
+			new Object[] { parentFile, Integer.valueOf(version), Integer.valueOf(releaseNumber), Boolean.valueOf(lts), listener }));
 	}
 
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
@@ -1378,7 +1328,7 @@ public class Activator extends Plugin
 												{
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
-														ClientVersion.getReleaseNumber(), new ActionListener()
+														ClientVersion.getReleaseNumber(), ClientVersion.isLts(), new ActionListener()
 														{
 															public void actionPerformed(ActionEvent e)
 															{

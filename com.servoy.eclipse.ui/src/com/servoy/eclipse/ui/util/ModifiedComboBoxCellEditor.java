@@ -22,21 +22,30 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import com.servoy.j2db.util.Utils;
+
 /**
  * Extended ComboBoxCellEditor.
  * <p>
  * When a value is selected, the value is applied immediately when the user makes a selection.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
-public class ModifiedComboBoxCellEditor extends FixedComboBoxCellEditor
+public class ModifiedComboBoxCellEditor extends FixedComboBoxCellEditor implements ISupportDefaultValueEditor
 {
 	private CCombo combo;
+	private final boolean hasDefaultValue;
 
 	public ModifiedComboBoxCellEditor(Composite parent, String[] items, int style)
 	{
+		this(parent, items, style, false);
+	}
+
+	public ModifiedComboBoxCellEditor(Composite parent, String[] items, int style, boolean hasDefaultValue)
+	{
 		super(parent, items, style);
+		this.hasDefaultValue = hasDefaultValue;
 	}
 
 	@Override
@@ -54,5 +63,12 @@ public class ModifiedComboBoxCellEditor extends FixedComboBoxCellEditor
 			}
 		});
 		return combo;
+	}
+
+
+	@Override
+	public boolean isDefaultValue(Object value)
+	{
+		return hasDefaultValue && Utils.getAsInteger(value) == 0;
 	}
 }

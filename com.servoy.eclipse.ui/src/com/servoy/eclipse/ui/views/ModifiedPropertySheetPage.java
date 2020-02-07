@@ -57,13 +57,13 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetSorter;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -140,7 +140,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			// on the mac, when selecting an item the cell editor gets created and activated immediately, but the next click within
 			// approx 1 sec goes to the Tree in stead of the CellEditor.
 			// The following is a workaround attempt to send the event to the cell editor.
-			if (Boolean.parseBoolean(ServoyModel.getSettings().getProperty("servoy.developer.slowproperties.workaround", String.valueOf(Utils.isAppleMacOS()))))
+			if (Boolean.parseBoolean(Settings.getInstance().getProperty("servoy.developer.slowproperties.workaround", String.valueOf(Utils.isAppleMacOS()))))
 			{
 				tree.addMouseListener(new MouseAdapter()
 				{

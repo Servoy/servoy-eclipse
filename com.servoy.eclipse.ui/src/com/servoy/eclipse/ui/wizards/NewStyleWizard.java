@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
@@ -68,6 +69,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -173,7 +175,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 	@Override
 	public boolean performFinish()
 	{
-		final ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		final ServoyProject activeProject = servoyModel.getActiveProject();
 		if (activeProject != null)
 		{
@@ -219,7 +221,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 						// ok, now, finally, we can create the style
 						try
 						{
-							EclipseRepository rep = (EclipseRepository)ServoyModel.getDeveloperRepository();
+							EclipseRepository rep = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 							Style s = (Style)rep.createNewRootObject(page1.getNewStyleName(), IRepository.STYLES);
 							s.setCSSText(page2.getInitialStyleContent());
 							rep.updateRootObject(s);

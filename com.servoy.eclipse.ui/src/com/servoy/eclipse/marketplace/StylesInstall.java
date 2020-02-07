@@ -42,6 +42,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -81,7 +82,7 @@ public class StylesInstall implements InstallItem
 						resourcesProject = dialog.getResourceProjectData().getExistingResourceProject().getProject();
 					}
 
-					IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
+					IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
 					if (repository instanceof EclipseRepository)
 					{
 						final EclipseRepository rep = (EclipseRepository)repository;
@@ -108,8 +109,8 @@ public class StylesInstall implements InstallItem
 											// not for the active one
 											UUID uuid = UUID.randomUUID();
 											// the new element ID will not be serialized anyway, so we could even use -1 there...
-											Style style = (Style)rep.createRootObject(rep.createRootObjectMetaData(rep.getNewElementID(uuid), uuid, styleName,
-												IRepository.STYLES, 1, 1));
+											Style style = (Style)rep.createRootObject(
+												rep.createRootObjectMetaData(rep.getNewElementID(uuid), uuid, styleName, IRepository.STYLES, 1, 1));
 											style.setContent(txtContent);
 											StringResourceDeserializer.writeStringResource(style, wfa, resourcesProject.getName());
 										}
@@ -121,8 +122,8 @@ public class StylesInstall implements InstallItem
 
 												public void run()
 												{
-													MessageDialog.openError(UIUtils.getActiveShell(), "Extension install task", "Error installing style: " +
-														styleName + ".\n\n" + ex.getMessage());
+													MessageDialog.openError(UIUtils.getActiveShell(), "Extension install task",
+														"Error installing style: " + styleName + ".\n\n" + ex.getMessage());
 												}
 											}, false);
 										}

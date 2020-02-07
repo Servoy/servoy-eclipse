@@ -18,12 +18,15 @@ package com.servoy.eclipse.warexporter.export;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.crypto.Cipher;
 
@@ -40,9 +43,9 @@ import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
+import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.SecuritySupport;
@@ -110,6 +113,8 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String webXMLFileName;
 	private String log4jConfigurationFile;
 	private boolean exportNoneActiveSolutions;
+	private Set<String> exportedComponentPackages = new HashSet<>();
+	private Set<String> exportedServicePackages = new HashSet<>();
 
 	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
@@ -156,6 +161,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 
 		warFileName = settings.get("export.warfilename");
+		setUserHome(settings.get("export.userHome"));
 		webXMLFileName = settings.get("export.webxmlfilename");
 		log4jConfigurationFile = settings.get("export.log4jConfigurationFile");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
@@ -212,11 +218,11 @@ public class ExportWarModel extends AbstractWarExportModel
 		{
 			if (settings.getArray("export.components") != null)
 			{
-				exportedComponents = new TreeSet<String>(Arrays.asList(settings.getArray("export.components")));
+				setExportedComponents(new TreeSet<String>(Arrays.asList(settings.getArray("export.components"))));
 			}
 			if (settings.getArray("export.services") != null)
 			{
-				exportedServices = new TreeSet<String>(Arrays.asList(settings.getArray("export.services")));
+				setExportedServices(new TreeSet<String>(Arrays.asList(settings.getArray("export.services"))));
 			}
 		}
 		pluginLocations = new ArrayList<String>();
@@ -355,6 +361,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 
 		settings.put("export.warfilename", warFileName);
+		settings.put("export.userHome", getUserHome());
 		settings.put("export.webxmlfilename", webXMLFileName);
 		settings.put("export.log4jConfigurationFile", log4jConfigurationFile);
 		settings.put("export.exportActiveSolution", exportActiveSolution);
@@ -836,11 +843,17 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void setExportedComponents(Set<String> selectedComponents)
 	{
 		this.exportedComponents = selectedComponents;
+		exportedComponentPackages = exportedComponents.stream() //
+			.map(component -> componentsSpecProviderState.getWebComponentSpecification(component).getPackageName()) //
+			.collect(Collectors.toSet());
 	}
 
 	public void setExportedServices(Set<String> selectedServices)
 	{
 		this.exportedServices = selectedServices;
+		exportedServicePackages = exportedServices.stream() //
+			.map(service -> servicesSpecProviderState.getWebComponentSpecification(service).getPackageName()) //
+			.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -916,13 +929,11 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.antiResourceLocking = antiResourceLocking;
 	}
 
-	@Override
 	public List<String> getExcludedComponentPackages()
 	{
 		return excludedPackages;
 	}
 
-	@Override
 	public List<String> getExcludedServicePackages()
 	{
 		return excludedPackages;
@@ -1020,6 +1031,14 @@ public class ExportWarModel extends AbstractWarExportModel
 			return null;
 		}
 		return name;
+	}
+
+	@Override
+	public Set<String> getExportedPackages()
+	{
+		return Stream.of(exportedComponentPackages, exportedServicePackages) //
+			.flatMap(Set::stream) //
+			.collect(Collectors.toSet());
 	}
 
 }

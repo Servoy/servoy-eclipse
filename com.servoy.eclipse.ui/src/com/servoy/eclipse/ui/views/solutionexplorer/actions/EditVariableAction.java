@@ -25,7 +25,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IViewPart;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -45,7 +45,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * An action that is able to edit variables.
- * 
+ *
  * @author acostescu
  */
 public class EditVariableAction extends Action implements ISelectionChangedListener
@@ -56,7 +56,7 @@ public class EditVariableAction extends Action implements ISelectionChangedListe
 
 	/**
 	 * Creates a new edit variable action that will use the given shell to show the edit variable dialog.
-	 * 
+	 *
 	 * @param shell used to show a dialog.
 	 */
 	public EditVariableAction(IViewPart viewPart)
@@ -103,7 +103,7 @@ public class EditVariableAction extends Action implements ISelectionChangedListe
 			else
 			{
 				// show the edit variable dialog
-				ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 				final IValidateName nameValidator = sm.getNameValidator();
 				VariableEditDialog askUserDialog = new VariableEditDialog(viewPart.getSite().getShell(), "Editing variable '" + variable.getName() + "'",
 					new IInputValidator()
@@ -116,27 +116,27 @@ public class EditVariableAction extends Action implements ISelectionChangedListe
 								message = "";
 							}
 							else if (!IdentDocumentValidator.isJavaIdentifier(newText))
-							{
-								message = "Invalid variable name";
-							}
+						{
+							message = "Invalid variable name";
+						}
 							else if (!newText.equals(variable.getName()))
+						{
+							try
 							{
-								try
-								{
-									nameValidator.checkName(newText, -1, new ValidatorSearchContext(variable.getScopeName() != null ? variable.getScopeName()
-										: variable.getParent(), IRepository.SCRIPTVARIABLES), false);
-								}
-								catch (RepositoryException e)
-								{
-									message = e.getMessage();
-								}
+								nameValidator.checkName(newText, -1, new ValidatorSearchContext(
+									variable.getScopeName() != null ? variable.getScopeName() : variable.getParent(), IRepository.SCRIPTVARIABLES), false);
 							}
+							catch (RepositoryException e)
+							{
+								message = e.getMessage();
+							}
+						}
 							return message;
 						}
 					}, variable.getName(), Column.mapToDefaultType(variable.getDataProviderType()), variable.getDefaultValue());
 				askUserDialog.open();
-				if (askUserDialog.getVariableName() != null &&
-					(variable.getName() != askUserDialog.getVariableName() || variable.getDataProviderType() != askUserDialog.getVariableType() || variable.getDefaultValue() != askUserDialog.getVariableDefaultValue()))
+				if (askUserDialog.getVariableName() != null && (variable.getName() != askUserDialog.getVariableName() ||
+					variable.getDataProviderType() != askUserDialog.getVariableType() || variable.getDefaultValue() != askUserDialog.getVariableDefaultValue()))
 				{
 					Solution rootObject = (Solution)variable.getRootObject();
 

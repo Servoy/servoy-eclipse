@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
@@ -80,6 +81,7 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -123,10 +125,12 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -149,9 +153,11 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.scripting.ContainersScope;
 import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -281,7 +287,7 @@ public class SolutionExplorerTreeContentProvider
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
-		addReturnTypeNodes(application, Utils.arrayJoin(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes(),
+		addReturnTypeNodesPlaceHolder(application, Utils.arrayJoin(ScriptObjectRegistry.getScriptObjectForClass(JSApplication.class).getAllReturnedTypes(),
 			new ServoyException(0).getAllReturnedTypes()));
 
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
@@ -330,7 +336,7 @@ public class SolutionExplorerTreeContentProvider
 		allWebPackagesNode.parent = invisibleRootNode;
 
 		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
-		addReturnTypeNodes(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
+		addReturnTypeNodesPlaceHolder(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
 		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, invisibleRootNode);
 
@@ -338,15 +344,15 @@ public class SolutionExplorerTreeContentProvider
 
 		solutionModel = createTypeNode(Messages.TreeStrings_SolutionModel, UserNodeType.SOLUTION_MODEL, JSSolutionModel.class, invisibleRootNode);
 
-		addReturnTypeNodes(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
+		addReturnTypeNodesPlaceHolder(solutionModel, ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class).getAllReturnedTypes());
 
 		history = createTypeNode(Messages.TreeStrings_History, UserNodeType.HISTORY, HistoryProvider.class, invisibleRootNode);
 
 		security = createTypeNode(Messages.TreeStrings_Security, UserNodeType.SECURITY, JSSecurity.class, invisibleRootNode);
-		addReturnTypeNodes(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
+		addReturnTypeNodesPlaceHolder(security, ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class).getAllReturnedTypes());
 
 		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, invisibleRootNode);
-		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
+		addReturnTypeNodesPlaceHolder(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.png"));
 		servers.parent = resources;
@@ -626,7 +632,7 @@ public class SolutionExplorerTreeContentProvider
 		// the set of solutions a user can work with at a given time is determined
 		// by the active solution and active editor (in case of a calculation
 		// being edited);
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
 		Collection<Solution> modulesForCalculation = null;
 		if (solutionOfCalculation != null)
@@ -1142,6 +1148,10 @@ public class SolutionExplorerTreeContentProvider
 					ServoyLog.logWarning("Cannot create the children of node " + un.getName(), e);
 				}
 			}
+			else if (un.children.length == 1 && un.children[0].getType() == UserNodeType.RETURNTYPEPLACEHOLDER)
+			{
+				addReturnTypeNodes(un, (Class< ? >[])un.children[0].getRealObject());
+			}
 			return un.children;
 		}
 		return new Object[0];
@@ -1612,7 +1622,7 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else if (un.getType() == UserNodeType.SERVERS)
 				{
-					return ServoyModel.getServerManager().getServerNames(false, false, true, true).length > 0;
+					return ApplicationServerRegistry.get().getServerManager().getServerNames(false, false, true, true).length > 0;
 				}
 				else if (un.getType() == UserNodeType.SERVER)
 				{
@@ -1924,7 +1934,7 @@ public class SolutionExplorerTreeContentProvider
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
 	{
 		List<PlatformSimpleUserNode> serverNodes = new ArrayList<PlatformSimpleUserNode>();
-		IServerManagerInternal handler = ServoyModel.getServerManager();
+		IServerManagerInternal handler = ApplicationServerRegistry.get().getServerManager();
 		String[] array = handler.getServerNames(false, false, true, true);
 		for (String server_name : array)
 		{
@@ -2102,7 +2112,7 @@ public class SolutionExplorerTreeContentProvider
 							if (scriptObject instanceof IReturnedTypesProvider)
 							{
 								Class< ? >[] clss = ((IReturnedTypesProvider)scriptObject).getAllReturnedTypes();
-								addReturnTypeNodes(node, clss);
+								addReturnTypeNodesPlaceHolder(node, clss);
 							}
 						}
 					}
@@ -2205,6 +2215,14 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 		return icon;
+	}
+
+	private void addReturnTypeNodesPlaceHolder(PlatformSimpleUserNode node, Class< ? >[] clss)
+	{
+		if (clss != null)
+		{
+			node.children = new SimpleUserNode[] { new SimpleUserNode("placeholder", UserNodeType.RETURNTYPEPLACEHOLDER, clss, null) };
+		}
 	}
 
 	private void addReturnTypeNodes(PlatformSimpleUserNode node, Class< ? >[] clss)
@@ -2534,6 +2552,16 @@ public class SolutionExplorerTreeContentProvider
 		node.add(elementsNode);
 		addFormElementsChildren(elementsNode);
 
+		if (f.isResponsiveLayout())
+		{
+			PlatformSimpleUserNode containersNode = new PlatformSimpleUserNode(Messages.TreeStrings_containers, UserNodeType.FORM_CONTAINERS, f,
+				uiActivator.loadImageFromBundle("layoutcontainer.png"));
+			containersNode.parent = formNode;
+			node.add(containersNode);
+			addFormContainersChildren(containersNode);
+		}
+
+
 		if (f.getDataSource() != null)
 		{
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
@@ -2573,7 +2601,7 @@ public class SolutionExplorerTreeContentProvider
 				if (MessageDialog.openConfirm(view.getSite().getShell(), "Disable server",
 					"Cannot connect to server " + serverName + ". Do you want to disable it?"))
 				{
-					IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(serverName, true, false);
+					IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, false);
 					if (server != null)
 					{
 						EnableServerAction.setServerEnabled(view.getSite().getShell(), server, false);
@@ -2595,6 +2623,23 @@ public class SolutionExplorerTreeContentProvider
 			ServoyLog.logError(e);
 		}
 
+	}
+
+	private void addFormContainersChildren(PlatformSimpleUserNode elementsNode)
+	{
+		Form form = (Form)elementsNode.getRealObject();
+		Set<String> allLayoutNames = ContainersScope.getAllLayoutNames(
+			ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getFlattenedForm(form));
+		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
+		for (String name : allLayoutNames)
+		{
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(name, UserNodeType.FORM_CONTAINERS_ITEM, null, null,
+				uiActivator.loadImageFromBundle("layoutcontainer.png"));
+			node.setDeveloperFeedback(new SimpleDeveloperFeedback(name + ".", null, null));
+			elements.add(node);
+			node.parent = elementsNode;
+		}
+		elementsNode.children = elements.toArray(new PlatformSimpleUserNode[elements.size()]);
 	}
 
 	private void addFormElementsChildren(PlatformSimpleUserNode elementsNode)
@@ -2844,7 +2889,7 @@ public class SolutionExplorerTreeContentProvider
 			}
 			if (scriptObject != null)
 			{
-				addReturnTypeNodes(node, scriptObject.getAllReturnedTypes());
+				addReturnTypeNodesPlaceHolder(node, scriptObject.getAllReturnedTypes());
 			}
 		}
 		catch (Throwable e)
@@ -2950,28 +2995,31 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
-	public void refreshContent(Set<IPersist> persists)
+	public void refreshContent(Map<IPersist, Set<Class< ? extends IPersist>>> persists)
 	{
 		// optimize a bit so we don't refresh the same thing multiple times
-		Iterator<IPersist> it = persists.iterator();
+		Iterator<Entry<IPersist, Set<Class< ? extends IPersist>>>> it = persists.entrySet().iterator();
 		List<String> solutionsRefreshedForRelations = new ArrayList<String>();
 		while (it.hasNext())
 		{
-			IPersist persist = it.next();
+			Entry<IPersist, Set<Class< ? extends IPersist>>> entry = it.next();
+			IPersist persist = entry.getKey();
 			IRootObject root = persist.getRootObject();
 			boolean refreshedFormsNode = false;
 
-			if (persist instanceof IFormElement)
+			if (persist instanceof IFormElement || persist instanceof LayoutContainer)
 			{
 				// don't refresh if we also refresh the solution
-				if (persists.contains(root)) continue;
+				if (persists.containsKey(root)) continue;
 
-				IPersist parent = persist.getParent();
+				IPersist parent = persist.getAncestor(IRepository.FORMS);
 				if (parent instanceof Form)
 				{
 					// if the element's form was extended by other forms, the elements of those forms must be refreshed as well...
 					FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
-					refreshElementsForForm(flatSolution, (Form)parent, new HashSet<Form>());
+					HashSet<Class< ? extends IPersist>> set = new HashSet<>();
+					set.add(persist.getClass());
+					refreshElementsForForm(flatSolution, (Form)parent, new HashSet<Form>(), set);
 				}
 			}
 			else
@@ -3052,7 +3100,7 @@ public class SolutionExplorerTreeContentProvider
 						else if (persist instanceof Form)
 						{
 							// don't refresh if we also refresh the solution
-							if (persists.contains(s)) continue;
+							if (persists.containsKey(s)) continue;
 							boolean formAsComponent = ((Form)persist).isFormComponent().booleanValue();
 
 							if (formAsComponent) node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_FormComponents);
@@ -3076,7 +3124,17 @@ public class SolutionExplorerTreeContentProvider
 								else
 								{
 									node = formNode;
-									node.children = null;
+									if (entry.getValue() == null)
+									{
+										node.children = null;
+									}
+									else
+									{
+										// for now this is just layoutcontainers or formelements
+										// if the element's form was extended by other forms, the elements of those forms must be refreshed as well...
+										FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+										refreshElementsForForm(flatSolution, (Form)persist, new HashSet<Form>(), entry.getValue());
+									}
 								}
 								if (node != null)
 								{
@@ -3138,7 +3196,7 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
-	private void refreshElementsForForm(FlattenedSolution flatSolution, Form form, HashSet<Form> alreadyVisitedForms)
+	private void refreshElementsForForm(FlattenedSolution flatSolution, Form form, HashSet<Form> alreadyVisitedForms, Set<Class< ? extends IPersist>> set)
 	{
 		alreadyVisitedForms.add(form);
 		// see children of form
@@ -3148,7 +3206,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				if (!alreadyVisitedForms.contains(childForm))
 				{
-					refreshElementsForForm(flatSolution, childForm, alreadyVisitedForms);
+					refreshElementsForForm(flatSolution, childForm, alreadyVisitedForms, set);
 				}
 				else
 				{
@@ -3172,11 +3230,23 @@ public class SolutionExplorerTreeContentProvider
 					node = (PlatformSimpleUserNode)findChildNode(node, form.getName());
 					if (node != null)
 					{
-						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_elements);
-						if (node != null)
+						if (set.stream().anyMatch(cls -> IFormElement.class.isAssignableFrom(cls)))
 						{
-							addFormElementsChildren(node);
-							view.refreshTreeNodeFromModel(node);
+							PlatformSimpleUserNode elements = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_elements);
+							if (elements != null)
+							{
+								addFormElementsChildren(elements);
+								view.refreshTreeNodeFromModel(elements);
+							}
+						}
+						if (set.contains(LayoutContainer.class))
+						{
+							PlatformSimpleUserNode containers = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_containers);
+							if (containers != null)
+							{
+								addFormContainersChildren(containers);
+								view.refreshTreeNodeFromModel(containers);
+							}
 						}
 					}
 				}

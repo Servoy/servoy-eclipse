@@ -43,7 +43,7 @@ import org.eclipse.gef.tools.DragEditPartsTracker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.internal.MarqueeDragTracker;
@@ -160,7 +160,7 @@ public class FormPartGraphicalEditPart extends BaseGraphicalEditPart implements 
 	public void activate()
 	{
 		// listen to changes to the form
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.addPersistChangeListener(false, this);
 
 		super.activate();
@@ -170,7 +170,7 @@ public class FormPartGraphicalEditPart extends BaseGraphicalEditPart implements 
 	public void deactivate()
 	{
 		// stop listening to changes to the form
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removePersistChangeListener(false, this);
 
 		super.deactivate();

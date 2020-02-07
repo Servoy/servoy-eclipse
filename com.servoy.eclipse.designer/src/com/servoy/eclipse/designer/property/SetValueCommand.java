@@ -49,6 +49,12 @@ public class SetValueCommand extends Command
 		}
 	};
 
+	/**
+	 * Value constant to indicate that the property is to be reset to its
+	 * default value during execute/redo and undo.
+	 */
+	protected static final Object DEFAULT_VALUE = new Object();
+
 	public static final String REQUEST_PROPERTY_PREFIX = "property:";
 
 	private Object propertyValue;
@@ -79,7 +85,14 @@ public class SetValueCommand extends Command
 		undoValue = target.getPropertyValue(propertyId);
 		if (undoValue instanceof IPropertySource) undoValue = ((IPropertySource)undoValue).getEditableValue();
 		if (propertyValue instanceof IPropertySource) propertyValue = ((IPropertySource)propertyValue).getEditableValue();
-		target.setPropertyValue(propertyId, propertyValue);
+		if (propertyValue == DEFAULT_VALUE)
+		{
+			target.resetPropertyValue(propertyId);
+		}
+		else
+		{
+			target.setPropertyValue(propertyId, propertyValue);
+		}
 		if (target instanceof IPropertySource2) resetOnUndo = !wasPropertySet && ((IPropertySource2)target).isPropertyResettable(propertyId);
 		else resetOnUndo = !wasPropertySet && target.isPropertySet(propertyId);
 		if (resetOnUndo) undoValue = null;
@@ -112,17 +125,11 @@ public class SetValueCommand extends Command
 	public static Command createSetvalueCommand(String propLabel, final IPropertySource target, final Object propertyId, final Object propertyValue)
 	{
 		String label = (propLabel != null && propLabel.length() > 0) ? "Set " + propLabel + " Property" : "";
-		if (target instanceof IModelSavePropertySource && BaseRestorableCommand.getRestorer(((IModelSavePropertySource)target).getSaveModel()) != null)
+		if (propertyValue != SetValueCommand.DEFAULT_VALUE && target instanceof IModelSavePropertySource &&
+			BaseRestorableCommand.getRestorer(((IModelSavePropertySource)target).getSaveModel()) != null)
 		{
 			// save the state before applying the property
-			return new BaseRestorableCommand(label)
-			{
-				@Override
-				public void execute()
-				{
-					setPropertyValue((IModelSavePropertySource)target, propertyId, propertyValue);
-				}
-			};
+			return new RestorableSetValueCommand(label, (IModelSavePropertySource)target, propertyId, propertyValue);
 		}
 
 		// state cannot be saved, use the old style set-value-command

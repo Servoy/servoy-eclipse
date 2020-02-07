@@ -27,12 +27,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.Utils;
 
@@ -41,7 +41,7 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 
 	/**
 	 * Creates a new action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public NewSybaseDbAction(SolutionExplorerView sev)
@@ -73,7 +73,7 @@ public class NewSybaseDbAction extends AbstractNewDbAction
 				serverUrl = "jdbc:sybase:Tds:localhost:2638?ServiceName=" + name + "&CHARSET=utf8";
 			}
 
-			final IServerManagerInternal serverManager = ServoyModel.getServerManager();
+			final IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
 			String configName = name;
 			for (int i = 1; serverManager.getServerConfig(configName) != null && i < 100; i++)
 			{

@@ -14,11 +14,11 @@
 	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2019.12.0.3540_rc</version>
+		<version>2020.3.0.3560_rc</version>
 	</parent>
   <groupId>com.servoy</groupId>
   <artifactId>org.eclipse.help.ui</artifactId>
-  <version>4.1.400.v20190218-1039</version>
+  <version>4.1.700.v20191123-0656</version>
   <packaging>eclipse-plugin</packaging>
   	<build>
 		<plugins>

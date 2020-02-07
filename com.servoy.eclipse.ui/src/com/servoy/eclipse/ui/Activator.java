@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -36,6 +37,8 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
@@ -56,6 +59,7 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IModelDoneListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
@@ -63,6 +67,8 @@ import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.BrowserDialog;
+import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
@@ -74,6 +80,9 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -97,6 +106,8 @@ public class Activator extends AbstractUIPlugin
 	public static final String ICONS_PATH = "$nl$/icons";
 	public static final String DARK_ICONS_PATH = "$nl$/darkicons";
 	public static final String DARK_ICONS_FOLDER = "/darkicons/";
+
+	private final static Map<String, ImageDescriptor> imageDescriptorCache = new ConcurrentHashMap<>();
 
 	private final Map<String, Image> imageCacheOld = new HashMap<String, Image>();
 
@@ -158,8 +169,9 @@ public class Activator extends AbstractUIPlugin
 										String missingPackage = null;
 										if (o instanceof WebComponent && ((WebComponent)o).getTypeName() != null)
 										{
-											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(
-												((WebComponent)o).getTypeName());
+											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+												.getWebObjectSpecification(
+													((WebComponent)o).getTypeName());
 											if (spec == null)
 											{
 												missingPackage = ((WebComponent)o).getTypeName().split("-")[0];
@@ -167,8 +179,10 @@ public class Activator extends AbstractUIPlugin
 										}
 										if (o instanceof LayoutContainer)
 										{
-											PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-												((LayoutContainer)o).getPackageName());
+											PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState()
+												.getLayoutSpecifications()
+												.get(
+													((LayoutContainer)o).getPackageName());
 											if (pkg == null)
 											{
 												missingPackage = ((LayoutContainer)o).getPackageName();
@@ -236,6 +250,82 @@ public class Activator extends AbstractUIPlugin
 
 			}
 		});
+		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(new IModelDoneListener()
+		{
+			@Override
+			public void modelDone()
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().removeDoneListener(this);
+				showLoginAndStart();
+			}
+		});
+	}
+
+	/**
+	 *
+	 */
+	public void showLoginAndStart()
+	{
+		if (com.servoy.eclipse.core.Activator.getDefault().isPostgresChecked(() -> showLoginAndStart()))
+		{
+			Runnable runnable = new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Shell activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+					if (activeShell == null)
+					{
+						Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
+						for (int i = shells.length; --i >= 0;)
+						{
+							Debug.warn(shells[i] + "  +++ " + shells[i].getParent() + " +++" + shells[i].isVisible());
+							if (shells[i].getParent() == null && shells[i].isVisible())
+							{
+								activeShell = shells[i];
+								break;
+							}
+						}
+						if (activeShell == null)
+						{
+							Debug.warn("active shell is null");
+							Display.getDefault().asyncExec(this);
+							return;
+						}
+						Debug.warn("active shell found looping of all shells" + activeShell);
+					}
+					while (activeShell.getParent() instanceof Shell)
+					{
+						activeShell = (Shell)activeShell.getParent();
+					}
+					Debug.warn("active shell FOUND " + activeShell);
+					//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
+					String username = null;
+					try
+					{
+						username = SecurePreferencesFactory.getDefault()
+							.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
+							.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
+					}
+					catch (StorageException e)
+					{
+						ServoyLog.logError(e);
+					}
+					String loginToken = new ServoyLoginDialog(activeShell).doLogin();
+					if (loginToken != null)
+					{
+						// only show if first login or is not disabled from preferences
+						if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
+						{
+							BrowserDialog dialog = new BrowserDialog(activeShell,
+								"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true, true);
+							dialog.open();
+						}
+					}
+				}
+			};
+			Display.getDefault().asyncExec(runnable);
+		}
 	}
 
 	@Override
@@ -286,7 +376,6 @@ public class Activator extends AbstractUIPlugin
 	private void doExtensionRelatedChecks()
 	{
 		// see if installed extensions are not out of sync with Servoy version
-		ServoyModel.startAppServer(); // this will probably do nothing as core Activator initialise probably did it
 		IApplicationServerSingleton applicationServer = ApplicationServerRegistry.get();
 
 		// if incompatible extensions were found or we need to automatically check for extension updates at startup (if this is the preference of the user)
@@ -457,7 +546,14 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public static ImageDescriptor loadImageDescriptorFromBundle(String name)
 	{
-		return getImageDescriptor((IconPreferences.getInstance().getUseDarkThemeIcons() && darkIconExists(name) ? DARK_ICONS_PATH : ICONS_PATH) + "/" + name);
+		ImageDescriptor imageDescriptor = imageDescriptorCache.get(name);
+		if (imageDescriptor == null)
+		{
+			imageDescriptor = getImageDescriptor(
+				(IconPreferences.getInstance().getUseDarkThemeIcons() && darkIconExists(name) ? DARK_ICONS_PATH : ICONS_PATH) + "/" + name);
+			if (imageDescriptor != null) imageDescriptorCache.put(name, imageDescriptor);
+		}
+		return imageDescriptor;
 	}
 
 

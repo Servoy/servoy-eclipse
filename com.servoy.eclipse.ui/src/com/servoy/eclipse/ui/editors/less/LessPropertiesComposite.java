@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.CachingChildrenComposite;
 import com.servoy.eclipse.ui.editors.less.LessPropertyEntry.LessPropertyType;
 import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
 
@@ -126,7 +127,7 @@ public class LessPropertiesComposite extends Composite
 		}
 	}
 
-	private Composite area;
+	private CachingChildrenComposite area;
 	private final ScrolledComposite sc;
 	private final PropertiesLessEditor editor;
 
@@ -148,7 +149,7 @@ public class LessPropertiesComposite extends Composite
 	 */
 	private void createArea()
 	{
-		area = new Composite(sc, SWT.TRANSPARENT);
+		area = new CachingChildrenComposite(sc, SWT.TRANSPARENT);
 		sc.setContent(area);
 		GridLayout layout = new GridLayout(3, false);
 		layout.marginRight = 5;
@@ -291,6 +292,7 @@ public class LessPropertiesComposite extends Composite
 			ServoyLog.logError(e);
 		}
 
+		area.cacheChildren(true);
 		sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 

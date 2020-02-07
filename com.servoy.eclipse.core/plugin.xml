@@ -41,6 +41,7 @@
       </product>
    </extension>
 
+<!--
 	<extension point="org.eclipse.ui.intro"> 
 	    <intro
            class="org.eclipse.ui.intro.config.CustomizableIntroPart"
@@ -52,7 +53,6 @@
 	        productId="com.servoy.eclipse.core.ide">
 	    </introProductBinding>
 	</extension> 
-
    <extension   
          id="intro"
          point="org.eclipse.ui.intro.config">
@@ -66,6 +66,7 @@
          </presentation>
       </config>
    </extension>
+-->
    <extension
          point="org.eclipse.ui.commands">
       <command

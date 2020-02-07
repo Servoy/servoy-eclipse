@@ -168,6 +168,7 @@ public class CreatedDatabaseJob implements IRunnableWithProgress
 		{
 			ServoyLog.logError(e);
 		}
+		Activator.getDefault().setPostgresChecked();
 		monitor.worked(1);
 	}
 

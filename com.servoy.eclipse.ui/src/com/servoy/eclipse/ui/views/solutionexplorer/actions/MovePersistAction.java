@@ -51,6 +51,7 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -237,7 +238,8 @@ public class MovePersistAction extends AbstractMovePersistAction
 					try
 					{
 						for (ContentSpec.Element element : Utils.iterate(
-							((EclipseRepository)ServoyModel.getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(o.getTypeID())))
+							((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
+								o.getTypeID())))
 						{
 							// Don't set meta data properties.
 							if (element.isMetaData() || element.isDeprecated()) continue;

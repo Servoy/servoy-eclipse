@@ -42,6 +42,7 @@ import org.w3c.dom.Document;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -52,9 +53,33 @@ import com.servoy.j2db.util.Utils;
  */
 public class NewSolutionWizardDefaultPackages
 {
-	public static final String PACKAGES[] = { "12grid", "aggrid", "bootstrapcomponents", "servoyextra", "fontawesome" };
+	public static final String PACKAGES[] = { "12grid", "aggrid", "bootstrapcomponents", "servoyextra", "fontawesome", "bootstrapextracomponents" };
 
-	public static final String SOLUTIONS[] = { "svySearch", "svySecurity", "svyUtils", "svyNavigation", "svyUtils$NGClient" };
+	private static final String SOLUTIONS[][] = { { "svySearch", "1.2.1" }, { "svyProperties", "1.0.0" }, { "svySecurity", "1.3.0" }, { "svyUtils", "1.4.0" }, { "svyNavigation", "1.0.1" }, { "svyNavigationUX", "1.0.1" } };
+
+	public static ArrayList<String> getSolutionsNames()
+	{
+		ArrayList<String> solutionNames = new ArrayList<String>(SOLUTIONS.length);
+		for (String[] solutionInfo : SOLUTIONS)
+		{
+			solutionNames.add(solutionInfo[0]);
+		}
+		return solutionNames;
+	}
+
+	public static String getSolutionVersion(String solutionName)
+	{
+		String solutionVersion = "";
+		for (String[] solutionInfo : SOLUTIONS)
+		{
+			if (solutionInfo[0].equals(solutionName))
+			{
+				solutionVersion = solutionInfo[1];
+				break;
+			}
+		}
+		return solutionVersion;
+	}
 
 	private static NewSolutionWizardDefaultPackages INSTANCE;
 
@@ -91,7 +116,7 @@ public class NewSolutionWizardDefaultPackages
 
 		ArrayList<String> allPackages = new ArrayList<String>();
 		allPackages.addAll(Arrays.asList(PACKAGES));
-		allPackages.addAll(Arrays.asList(SOLUTIONS));
+		allPackages.addAll(getSolutionsNames());
 		for (JSONObject p : packages)
 		{
 			String name = p.optString("name");
@@ -149,7 +174,12 @@ public class NewSolutionWizardDefaultPackages
 		}
 	}
 
-	public InputStream getPackage(String name)
+	/**
+	 * Get web or solution package
+	 * @param name the name of the package
+	 * @return a pair containing the version and the package input stream
+	 */
+	public Pair<String, InputStream> getPackage(String name)
 	{
 		try
 		{
@@ -159,7 +189,7 @@ public class NewSolutionWizardDefaultPackages
 				File packageFile = new File(packagesFolder, name + "_" + downloadedPackages.get(name));
 				if (packageFile.exists())
 				{
-					return new FileInputStream(packageFile);
+					return new Pair<String, InputStream>(downloadedPackages.get(name), new FileInputStream(packageFile));
 				}
 			}
 		}
@@ -170,11 +200,13 @@ public class NewSolutionWizardDefaultPackages
 
 		if (Arrays.asList(PACKAGES).indexOf(name) != -1)
 		{
-			return NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip");
+			return new Pair<String, InputStream>("", NewServerWizard.class.getResourceAsStream("resources/packages/" + name + ".zip"));
 		}
-		else if (Arrays.asList(SOLUTIONS).indexOf(name) != -1)
+		else if (getSolutionsNames().indexOf(name) != -1)
 		{
-			return NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy");
+			String solutionVersion = getSolutionVersion(name);
+			return new Pair<String, InputStream>(solutionVersion,
+				NewServerWizard.class.getResourceAsStream("resources/solutions/" + name + "_" + solutionVersion + ".servoy"));
 		}
 
 		return null;
@@ -202,9 +234,10 @@ public class NewSolutionWizardDefaultPackages
 					}
 				}
 			}
-			else if (Arrays.asList(SOLUTIONS).indexOf(name) != -1)
+			else if (getSolutionsNames().indexOf(name) != -1)
 			{
-				try (ZipInputStream zis = new ZipInputStream(NewSolutionWizard.class.getResourceAsStream("resources/solutions/" + name + ".servoy")))
+				try (ZipInputStream zis = new ZipInputStream(
+					NewSolutionWizard.class.getResourceAsStream("resources/solutions/" + name + "_" + getSolutionVersion(name) + ".servoy")))
 				{
 					ZipEntry ze;
 					while ((ze = zis.getNextEntry()) != null)

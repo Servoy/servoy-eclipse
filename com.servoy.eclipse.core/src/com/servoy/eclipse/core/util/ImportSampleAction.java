@@ -82,13 +82,13 @@ public class ImportSampleAction implements IIntroAction
 								try
 								{
 									IXMLImportEngine importEngine = as.createXMLImportEngine(sampleSolution,
-										(EclipseRepository)ServoyModel.getDeveloperRepository(), as.getDataServer(), as.getClientId(), userChannel);
+										(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), as.getDataServer(), as.getClientId(), userChannel);
 
 									IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(),
-										as.getDataServer(), as.getClientId(), userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository());
+										as.getDataServer(), as.getClientId(), userChannel, (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository());
 
 									IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler,
-										userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository(), "resources",
+										userChannel, (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), "resources",
 										ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), monitor, true, false);
 									if (rootObjects != null && rootObjects.length > 0)
 									{

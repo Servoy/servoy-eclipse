@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -200,7 +200,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName()));
 
 				UUID id = UUID.fromString(uuid);
-				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 				ServoyProject servoyProject = servoyModel.getServoyProject(solName);
 				try
 				{
