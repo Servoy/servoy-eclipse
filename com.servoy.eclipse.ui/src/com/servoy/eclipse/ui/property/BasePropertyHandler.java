@@ -294,7 +294,8 @@ public class BasePropertyHandler implements IPropertyHandler
 				return false;
 			}
 			if (IContentSpecConstants.PROPERTY_CSS_POSITION.equals(name) && persistContext.getContext() instanceof Form &&
-				!((Form)persistContext.getContext()).getUseCssPosition() && !CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist()))
+				!((Form)persistContext.getContext()).getUseCssPosition() && !CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist()) &&
+				!CSSPositionUtils.useCSSPosition(persistContext.getPersist()))
 			{
 				return false;
 			}
