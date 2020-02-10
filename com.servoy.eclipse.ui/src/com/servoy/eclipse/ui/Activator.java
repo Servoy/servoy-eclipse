@@ -318,7 +318,7 @@ public class Activator extends AbstractUIPlugin
 						if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
 						{
 							BrowserDialog dialog = new BrowserDialog(activeShell,
-								"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true, true);
+								"https://tutorials.servoy.com/solutions/content/index.html?loginToken=" + loginToken, true, true);
 							dialog.open();
 						}
 					}
