@@ -19,7 +19,7 @@ export class ServoyDefaultTabpanel extends BaseTabpanel {
     private tabset: NgbTabset;
     
     // this is a hack so that this element is done none statically (because it is nested in a view that is later visible)
-    @ViewChild('element', {static: false}) elementRef:ElementRef;
+    @ViewChild('element') elementRef:ElementRef;
 
     constructor( windowRefService: WindowRefService, log : LoggerFactory, renderer: Renderer2) {
         super( windowRefService, log, renderer );

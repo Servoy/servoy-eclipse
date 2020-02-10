@@ -13,7 +13,7 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField implements Afte
 
     selectedValues: any[];
 
-    @ViewChild( 'element', { static: false } ) elementRef: ElementRef;
+    @ViewChild('element') elementRef: ElementRef;
 
     private changes: SimpleChanges;
 

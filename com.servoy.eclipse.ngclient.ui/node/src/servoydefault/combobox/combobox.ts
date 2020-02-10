@@ -16,7 +16,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseCombo implements OnI
   isLabelFocused = false;
   
   // this is a hack so that this can be none static access because this references in this component to a conditional template
-  @ViewChild('input', {static: false}) inputElement: ElementRef;
+  @ViewChild('input') inputElement: ElementRef;
 
   constructor(renderer: Renderer2,    
               formattingService : FormattingService) {

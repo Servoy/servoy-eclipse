@@ -11,7 +11,7 @@ export class ErrorBean {
     @Input() servoyApi;
     @Input() toolTipText: string;
     
-    @ViewChild('element', {static: false}) elementRef:ElementRef;
+    @ViewChild('element') elementRef:ElementRef;
     
     constructor(renderer: Renderer2 ) {
     }    
