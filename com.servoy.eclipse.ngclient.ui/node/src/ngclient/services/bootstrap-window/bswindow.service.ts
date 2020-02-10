@@ -406,9 +406,6 @@ export class BSWindow {
                     winHeadFootHeight += foot.offsetHeight;
                 }
                 if (this.element.classList.contains("east")) {
-                    console.log("setting width to " + (event.pageX - this.window_info.left) + "px");
-                    console.log(winBody);
-
                     this.renderer.setStyle(winBody, 'width', (event.pageX - this.window_info.left) + "px");
                 }
                 if (this.element.classList.contains("west")) {
