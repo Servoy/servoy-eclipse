@@ -46,7 +46,8 @@ export class PackagesComponent implements OnInit {
   }
 
   installAvailable(p: Package): boolean {
-    return !p.installed || (p.installedIsWPA && p.selected != p.installed);
+    const installedVersion = p.installed == 'unknown' ? '' : p.installed;
+    return !p.installed || (p.installedIsWPA && p.selected != installedVersion) || (!p.installedIsWPA && p.selected > installedVersion);
   }
 
   canBeRemoved(p: Package): boolean {
@@ -111,7 +112,7 @@ export class PackagesComponent implements OnInit {
 
   getReleaseTooltip(p: Package): string {
     if (p.installed) { 
-      return p.installedIsWPA ? "Version to upgrade to..." : "Released versions";
+      return "Released versions";
     } else {
       return "Version to add to the active solution or modules...";
     }
@@ -119,9 +120,10 @@ export class PackagesComponent implements OnInit {
 
   getInstallTooltip(p: Package): string {
     if (p.installed) { 
+      const installedVersion = p.installed == 'unknown' ? '' : p.installed;
       return p.installing ?
-        (p.selected > p.installed ? "Upgrading the web package..." : "Downgrading the web package...") :
-        (p.selected > p.installed ? "Upgrade the web package to the selected release version." : "Downgrade the web package to the selected release version.");
+        (p.selected > installedVersion ? "Upgrading the web package..." : "Downgrading the web package...") :
+        (p.selected > installedVersion ? "Upgrade the web package to the selected release version." : "Downgrade the web package to the selected release version.");
     } else if(p.installing) {
       return "Adding the web package...";		      
     } else {
