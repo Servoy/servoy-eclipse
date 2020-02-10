@@ -211,6 +211,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	private final AtomicBoolean activatingProject = new AtomicBoolean(false);
 	private final List<IActiveProjectListener> activeProjectListeners;
+	private final List<IModelDoneListener> doneListeners;
 	private final List<IPersistChangeListener> realPersistChangeListeners;
 	private final List<IPersistChangeListener> editingPersistChangeListeners;
 	private final List<ISolutionMetaDataChangeListener> solutionMetaDataChangeListener;
@@ -259,6 +260,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	protected ServoyModel()
 	{
 		activeProjectListeners = new ArrayList<IActiveProjectListener>();
+		doneListeners = new ArrayList<IModelDoneListener>();
 		realPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		editingPersistChangeListeners = new ArrayList<IPersistChangeListener>();
 		solutionMetaDataChangeListener = new ArrayList<ISolutionMetaDataChangeListener>();
@@ -1026,6 +1028,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			{
 				pluginPreferences.setToDefault(SERVOY_ACTIVE_PROJECT);
 				updateWorkingSet();
+				fireLoadingDone();
 //				ServoyLog.logInfo("Cannot find any valid solution to activate."); // unneeded logging
 			}
 		}
@@ -1281,6 +1284,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						});
 
 						progressMonitor.worked(1);
+
+						fireLoadingDone();
 					}
 				}
 				finally
@@ -1333,6 +1338,18 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 			});
 		}
+	}
+
+	public void fireLoadingDone()
+	{
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				Arrays.asList(doneListeners.toArray(new IModelDoneListener[doneListeners.size()])).stream().forEach(listener -> listener.modelDone());
+			}
+		});
+
 	}
 
 	@Override
@@ -1784,6 +1801,17 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	{
 		activeProjectListeners.remove(listener);
 	}
+
+	public void addDoneListener(IModelDoneListener listener)
+	{
+		doneListeners.add(listener);
+	}
+
+	public void removeDoneListener(IModelDoneListener listener)
+	{
+		doneListeners.remove(listener);
+	}
+
 
 	/**
 	 * @see firePersistsChanged

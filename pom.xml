@@ -9,7 +9,6 @@
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
 	<version>8.5.0.3600_b1</version>
-
 	<properties>
 		<tycho.version>1.5.1</tycho.version>
 		<tycho.extra.version>1.5.1</tycho.extra.version>
@@ -202,8 +201,17 @@
 							</restrictTo>
 						</filter>
 					</filters>
-					
+					<includePackedArtifacts>true</includePackedArtifacts>
 				</configuration>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<id>default-target-platform</id>
+						<goals>
+							<goal>target-platform</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>

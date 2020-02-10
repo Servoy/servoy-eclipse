@@ -337,11 +337,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
-		Map<String, InputStream> toImportSolutions = new HashMap<>();
+		Map<String, Pair<String, InputStream>> toImportSolutions = new HashMap<>();
 		for (String name : solutions)
 		{
 			Pair<String, InputStream> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
-			toImportSolutions.put(name, solution.getRight());
+			toImportSolutions.put(name, solution);
 		}
 		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false);
 
@@ -419,7 +419,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	public static IRunnableWithProgress importSolutions(final Map<String, InputStream> solutions, final String jobName, String newSolutionName,
+	public static IRunnableWithProgress importSolutions(final Map<String, Pair<String, InputStream>> solutions, final String jobName, String newSolutionName,
 		boolean activateSolution)
 	{
 		Set<String> missingServerNames = searchMissingServers(solutions.keySet()).keySet();
@@ -438,7 +438,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						boolean shouldAskOverwrite = sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name);
 						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
-							importSolution(new Pair<String, InputStream>(name, solutions.get(name)), name, newSolutionName, monitor, true,
+							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
 								shouldAskOverwrite, activateSolution);
 							monitor.worked(1);
 						}

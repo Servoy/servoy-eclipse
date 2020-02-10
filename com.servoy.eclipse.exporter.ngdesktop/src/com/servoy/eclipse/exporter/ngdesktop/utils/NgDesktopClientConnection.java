@@ -1,6 +1,7 @@
 package com.servoy.eclipse.exporter.ngdesktop.utils;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,14 +21,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.wicket.validation.validator.UrlValidator;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.ui.internal.progress.ProgressRegion;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 
-public class NgDesktopClientConnection
+public class NgDesktopClientConnection implements Closeable
 {
 	private String service_url = "https://ngdesktop-builder.servoy.com";
 	private String statusMessage = null;
@@ -65,30 +64,31 @@ public class NgDesktopClientConnection
 	public NgDesktopClientConnection() throws MalformedURLException
 	{
 
-		String srvAddress = System.getProperty("ngclient.service.address");// if no port specified here (address:port) -
+		final String srvAddress = System.getProperty("ngclient.service.address");// if no port specified here (address:port) -
 		// defaulting to 443
 		if (srvAddress != null)
 		{// validate format
-			UrlValidator urlValidator = new UrlValidator();
+			final UrlValidator urlValidator = new UrlValidator();
 			if (!urlValidator.isValid(srvAddress))
 				throw new MalformedURLException("URI is not valid: " + srvAddress);
 			service_url = srvAddress;
 		}
 
-		HttpClientBuilder httpBuilder = HttpClientBuilder.create();
+		final HttpClientBuilder httpBuilder = HttpClientBuilder.create();
 		httpClient = httpBuilder.build();
 	}
 
 	private String getEncodedData(String resourcePath) throws IOException
 	{// expect absolute path
-		if (resourcePath != null)
+		if (resourcePath != null) try (FileInputStream fis = new FileInputStream(new File(resourcePath)))
 		{
-			return Base64.getEncoder().encodeToString(IOUtils.toByteArray(new FileInputStream(new File(resourcePath))));
+			return Base64.getEncoder().encodeToString(IOUtils.toByteArray(fis));
 		}
 		return null;
 	}
 
-	public void closeConnection() throws IOException
+	@Override
+	public void close() throws IOException
 	{
 		if (httpClient != null)
 		{
@@ -98,7 +98,7 @@ public class NgDesktopClientConnection
 	}
 
 	/**
-	 * 
+	 *
 	 * @param platform
 	 * @param iconPath
 	 * @param imagePath
@@ -125,10 +125,10 @@ public class NgDesktopClientConnection
 		if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0)
 			jsonObj.put("height", settings.get("ngdesktop_height"));
 
-		StringEntity input = new StringEntity(jsonObj.toString());
+		final StringEntity input = new StringEntity(jsonObj.toString());
 		input.setContentType("application/json");
 
-		HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
+		final HttpPost postRequest = new HttpPost(service_url + BUILD_ENDPOINT);
 		postRequest.setEntity(input);
 		ServoyLog.logInfo("Build request for " + service_url + BUILD_ENDPOINT);
 		jsonObj = processRequest(postRequest);
@@ -140,7 +140,7 @@ public class NgDesktopClientConnection
 	}
 
 	/**
-	 * 
+	 *
 	 * @param tokenId
 	 * @return running - the build is currently running error - build has ended with
 	 *         errors; ready - build is ready to download
@@ -148,7 +148,7 @@ public class NgDesktopClientConnection
 	 */
 	public int getStatus(String tokenId) throws IOException
 	{
-		JSONObject jsonObj = processRequest(new HttpGet(service_url + STATUS_ENDPOINT + tokenId));
+		final JSONObject jsonObj = processRequest(new HttpGet(service_url + STATUS_ENDPOINT + tokenId));
 		buildCurrentSize = jsonObj.optInt("buildCurrentSize", 0);
 		statusMessage = jsonObj.getString("statusMessage");
 		return jsonObj.getInt("statusCode");
@@ -162,8 +162,8 @@ public class NgDesktopClientConnection
 	public int download(String tokenId, String savePath, NgDesktopServiceMonitor monitor) throws IOException // expect
 	// absolutePath
 	{
-		HttpGet getRequest = new HttpGet(service_url + DOWNLOAD_ENDPOINT + tokenId);
-		JSONObject jsonObj = processRequest(new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId));
+		final HttpGet getRequest = new HttpGet(service_url + DOWNLOAD_ENDPOINT + tokenId);
+		final JSONObject jsonObj = processRequest(new HttpGet(service_url + BINARY_NAME_ENDPOINT + tokenId));
 		binaryName = jsonObj.getString("binaryName");
 		binarySize = jsonObj.optInt("binarySize", 0); // MB
 
@@ -175,10 +175,10 @@ public class NgDesktopClientConnection
 		int amount = 0;
 		try (CloseableHttpResponse httpResponse = httpClient.execute(getRequest);
 			InputStream is = httpResponse.getEntity().getContent();
-			FileOutputStream fos = new FileOutputStream(savePath + File.pathSeparator + binaryName))
+			FileOutputStream fos = new FileOutputStream(savePath + File.separator + binaryName))
 		{
 
-			byte[] inputFile = new byte[BUFFER_SIZE];
+			final byte[] inputFile = new byte[BUFFER_SIZE];
 
 			int n = is.read(inputFile, 0, BUFFER_SIZE);
 			downloadedBytes = n;
@@ -188,7 +188,7 @@ public class NgDesktopClientConnection
 				{
 					is.close();
 					fos.close();
-					(new File(savePath)).delete();
+					new File(savePath).delete();
 					return 0; // download failed, cancel was pressed
 				}
 				if (n > 0)
@@ -200,7 +200,7 @@ public class NgDesktopClientConnection
 				n = is.read(inputFile, 0, BUFFER_SIZE);
 				downloadedBytes += n;
 
-				int bytesToMegaBytes = Math.round((float)downloadedBytes / (1024 * 1024));// bytes => MB
+				final int bytesToMegaBytes = Math.round((float)downloadedBytes / (1024 * 1024));// bytes => MB
 				if (bytesToMegaBytes > 0)
 				{// if BUFFER_SIZE is 8kb => 1MB at every 128 steps
 					currentSize += bytesToMegaBytes;
@@ -208,10 +208,7 @@ public class NgDesktopClientConnection
 					downloadedBytes = 0;
 				}
 			}
-			if (binarySize > currentSize)
-			{
-				monitor.worked(binarySize - currentSize);
-			}
+			if (binarySize > currentSize) monitor.worked(binarySize - currentSize);
 			monitor.done();
 		}
 		finally
@@ -236,14 +233,14 @@ public class NgDesktopClientConnection
 	{
 		try (CloseableHttpResponse httpResponse = httpClient.execute(request);
 			BufferedReader br = new BufferedReader(
-				new InputStreamReader((httpResponse.getEntity().getContent()))))
+				new InputStreamReader(httpResponse.getEntity().getContent())))
 		{
 			String output;
-			StringBuffer sb = new StringBuffer();
+			final StringBuffer sb = new StringBuffer();
 			while ((output = br.readLine()) != null)
 				sb.append(output);
-			JSONObject jsonObj = new JSONObject(sb.toString());
-			int statusCode = jsonObj.optInt("statusCode", OK);
+			final JSONObject jsonObj = new JSONObject(sb.toString());
+			final int statusCode = jsonObj.optInt("statusCode", OK);
 			if (statusCode == ERROR)
 			{
 				ServoyLog.logInfo("Request: " + request.getRequestLine().toString());

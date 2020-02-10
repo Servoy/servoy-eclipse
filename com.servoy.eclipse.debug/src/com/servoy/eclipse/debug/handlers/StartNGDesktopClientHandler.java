@@ -348,11 +348,10 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 				}
 				catch (InvocationTargetException | InterruptedException e)
 				{
-					System.out.println("Interrupted");
+					ServoyLog.logError(e);
 				}
 				if (dialog.getProgressMonitor().isCanceled())
 				{
-					System.out.println("Cancelled");
 					deleteVersionFile(localPath);
 					cancelled[0] = true;
 				}
@@ -493,12 +492,9 @@ class DownloadElectron implements IRunnableWithProgress
 		int mbSize = Math.round((float)fileSize / (1024 * 1024)) * 2; //not sure why but TarArchive methods call stream methods twice
 		monitor.beginTask("Downloading NGDesktop executable", mbSize);
 
-		try
+		try (MonitorInputStream monInputStream = new MonitorInputStream(tarGzUrl.openStream(), StartNGDesktopClientHandler.BUFFER_SIZE, monitor);
+			TarArchiveInputStream archIS = new TarArchiveInputStream(new GzipCompressorInputStream(monInputStream));)
 		{
-
-			MonitorInputStream monInputStream = new MonitorInputStream(tarGzUrl.openStream(), StartNGDesktopClientHandler.BUFFER_SIZE, monitor);
-			TarArchiveInputStream archIS = new TarArchiveInputStream(
-				new GzipCompressorInputStream(monInputStream));
 			TarArchiveEntry entry = null;
 			while ((entry = archIS.getNextTarEntry()) != null)
 			{
@@ -529,7 +525,7 @@ class DownloadElectron implements IRunnableWithProgress
 			if (monInputStream.getCurrentStep() < mbSize)
 			{
 				monitor.worked(mbSize - monInputStream.getCurrentStep());
-				Thread.sleep(500);//let UI some time for UI update
+				Thread.sleep(500);//give the user enough time to visually observe the completed (100%) progress bar
 			}
 			monInputStream.close();
 			monitor.done();
@@ -594,8 +590,10 @@ class DownloadElectron implements IRunnableWithProgress
 			{
 				((HttpURLConnection)conn).setRequestMethod("HEAD");
 			}
-			conn.getInputStream();
-			return conn.getContentLength();
+			try (InputStream is = conn.getInputStream())
+			{
+				return conn.getContentLength();
+			}
 		}
 		catch (IOException e)
 		{

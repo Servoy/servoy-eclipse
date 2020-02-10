@@ -57,6 +57,7 @@ import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -161,7 +162,7 @@ public class BrowserDialog extends Dialog
 					{
 						if (!shell.isDisposed()) shell.close();
 
-						Map<String, InputStream> solutions = new HashMap<>();
+						Map<String, Pair<String, InputStream>> solutions = new HashMap<>();
 						try (InputStream is = new URL(introURL.getParameter("importSample").startsWith("https://") ? introURL.getParameter("importSample")
 							: "https://" + introURL.getParameter("importSample")).openStream())
 						{
@@ -173,7 +174,7 @@ public class BrowserDialog extends Dialog
 								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 								if (sp == null)
 								{
-									solutions.put(solutionName, is);
+									solutions.put(solutionName, new Pair<String, InputStream>("", is));
 									IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null,
 										true);
 									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);

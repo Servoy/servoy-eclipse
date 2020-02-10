@@ -77,7 +77,10 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -87,6 +90,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -1176,6 +1180,49 @@ public class ProfilerView extends ViewPart
 				{
 					sqlDataViewer.setInput(getViewSite());
 				}
+			}
+		});
+
+		tree.addMouseListener(new MouseListener()
+		{
+			@Override
+			public void mouseDoubleClick(MouseEvent e)
+			{
+				selectItem(e);
+				doubleClickAction.run();
+			}
+
+			@Override
+			public void mouseDown(MouseEvent e)
+			{
+				selectItem(e);
+			}
+
+			@Override
+			public void mouseUp(MouseEvent e)
+			{
+				selectItem(e);
+			}
+
+			/**
+			 * @param e
+			 */
+			private void selectItem(MouseEvent e)
+			{
+				tree.deselectAll();
+				TreeItem item = tree.getItem(new Point(e.x, e.y));
+				int x = 0;
+				while (item == null && x < e.x)
+				{
+					item = tree.getItem(new Point(x, e.y));
+					x += 1;
+				}
+				if (item == null)
+				{
+					return;
+				}
+				tree.select(item);
+				sqlDataViewer.setInput(item.getData());
 			}
 		});
 

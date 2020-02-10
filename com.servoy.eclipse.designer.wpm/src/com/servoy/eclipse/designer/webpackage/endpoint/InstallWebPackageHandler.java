@@ -17,37 +17,25 @@
 
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.Package.DirPackageReader;
@@ -57,15 +45,10 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
+import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.Pair;
 
 /**
  * @author gganea
@@ -73,14 +56,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class InstallWebPackageHandler implements IDeveloperService
 {
-
-	private final IWPMController resourceListenerSwitch;
-
-	public InstallWebPackageHandler(IWPMController resourceListenerSwitch)
-	{
-		this.resourceListenerSwitch = resourceListenerSwitch;
-	}
-
 	@Override
 	public JSONObject executeMethod(JSONObject msg)
 	{
@@ -89,7 +64,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 		if (selected == null) return null;
 		try
 		{
-			importPackage(pck, selected, resourceListenerSwitch);
+			importPackage(pck, selected);
 		}
 		catch (IOException ex)
 		{
@@ -102,16 +77,59 @@ public class InstallWebPackageHandler implements IDeveloperService
 	}
 
 
-	public static void importPackage(JSONObject pck, String selectedVersion, IWPMController resourceListenerSwitch) throws IOException
+	public static void importPackage(JSONObject pck, String selectedVersion) throws IOException
 	{
-		importPackage(pck, selectedVersion, null, resourceListenerSwitch);
+		final String selectedSolution = pck.optString("activeSolution", null) != null ? pck.optString("activeSolution", null)
+			: ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+		Map<String, Pair<String, InputStream>> solutionsWithDependencies = new HashMap<String, Pair<String, InputStream>>();
+		Map<String, Pair<String, InputStream>> webpackagesWithDependencies = new HashMap<String, Pair<String, InputStream>>();
+		Map<String, String> packagesInstalledResources = new HashMap<String, String>();
+		getPackageWithDependencies(pck, selectedVersion, selectedSolution, solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources);
+
+		IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(selectedSolution, SolutionSerializer.NG_PACKAGES_DIR_NAME);
+		for (String packageName : webpackagesWithDependencies.keySet())
+		{
+			String installedResource = packagesInstalledResources.get(packageName);
+			importZipFileComponent(componentsFolder, webpackagesWithDependencies.get(packageName).getRight(), packageName, installedResource);
+		}
+		if (solutionsWithDependencies.size() > 0)
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutionsWithDependencies, "Import solution",
+						selectedSolution,
+						false);
+					try
+					{
+						IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+						progressService.run(true, false, importSolutionsRunnable);
+						for (String packageName : solutionsWithDependencies.keySet())
+						{
+							NewSolutionWizard.addAsModule(packageName, selectedSolution, null);
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			});
+		}
 	}
 
-	private static void importPackage(JSONObject pck, String selectedVersion, String selectedSolution, IWPMController resourceListenerSwitch) throws IOException
+	private static void getPackageWithDependencies(JSONObject pck, String selectedVersion, String selectedSolution,
+		Map<String, Pair<String, InputStream>> solutionsWithDependencies, Map<String, Pair<String, InputStream>> webpackagesWithDependencies,
+		Map<String, String> packagesInstalledResources)
+		throws IOException
 	{
-		String urlString = null;
 		JSONArray jsonArray = pck.getJSONArray("releases");
+		String packageName = pck.getString("name");
+		String packageType = pck.getString("packageType");
+		String urlString = null;
 		String dependency = null;
+		String pckVersion = null;
 		for (int i = 0; i < jsonArray.length(); i++)
 		{
 			JSONObject release = jsonArray.optJSONObject(i);
@@ -119,137 +137,132 @@ public class InstallWebPackageHandler implements IDeveloperService
 			{
 				urlString = release.optString("url");
 				dependency = release.optString("dependency", null);
+				pckVersion = release.optString("version", "");
 				break;
 			}
 		}
 
-		URL url = new URL(urlString);
-		URLConnection conn = url.openConnection();
-
-		String packageName = pck.getString("name");
-		String packageType = pck.getString("packageType");
-		String packageVersion = pck.optString("selected");
-		String solutionName = pck.optString("activeSolution", null);
-		String installedResource = pck.optString("installedResource", null);
-
-		if (solutionName == null)
+		if (urlString != null)
 		{
-			solutionName = selectedSolution != null ? selectedSolution : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
-		}
-
-		try (InputStream in = conn.getInputStream())
-		{
+			URL url = new URL(urlString);
+			URLConnection conn = url.openConnection();
 			if ("Solution".equals(packageType))
 			{
-				importSolution(in, packageName, packageVersion, solutionName, resourceListenerSwitch);
+				solutionsWithDependencies.put(packageName, new Pair<String, InputStream>(pckVersion, conn.getInputStream()));
 			}
 			else
 			{
-				IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
-				importZipFileComponent(componentsFolder, in, packageName, installedResource);
+				webpackagesWithDependencies.put(packageName, new Pair<String, InputStream>(pckVersion, conn.getInputStream()));
 			}
-		}
+			String installedResource = pck.optString("installedResource", null);
+			if (installedResource != null) packagesInstalledResources.put(packageName, installedResource);
 
-		if (dependency != null)
-		{
-			ServoyProject activeSolutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
-			JSONArray allInstalledPackages = null;
-			String[] packages = dependency.split(",");
-			for (String dependendPck : packages)
+			if (dependency != null)
 			{
-				String[] nameAndVersion = dependendPck.split("#");
-
-				// if active solution has an ng-package-project with the same name, skip downloading from WPM
-				boolean hasNGPackageProject = false;
-				for (ServoyNGPackageProject ngProject : activeSolutionProject.getNGPackageProjects())
+				JSONArray allInstalledPackages = null;
+				String[] packages = dependency.split(",");
+				for (String dependendPck : packages)
 				{
-					DirPackageReader dirPackageReader = new DirPackageReader(ngProject.getProject().getLocation().toFile());
-					if (nameAndVersion[0].equals(dirPackageReader.getPackageName()))
+					String[] nameAndVersion = dependendPck.split("#");
+
+					if (!"Solution".equals(pck.getString("packageType")))
 					{
-						hasNGPackageProject = true;
-						break;
-					}
-				}
-				if (hasNGPackageProject)
-				{
-					continue;
-				}
-
-				if (allInstalledPackages == null)
-				{
-					allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages();
-				}
-
-				for (Object pckObj : allInstalledPackages)
-				{
-					if (pckObj instanceof JSONObject)
-					{
-						JSONObject pckObject = (JSONObject)pckObj;
-						if (pckObject.get("name").equals(nameAndVersion[0]))
+						ServoyProject activeSolutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedSolution);
+						// if active solution has an ng-package-project with the same name, skip downloading from WPM
+						boolean hasNGPackageProject = false;
+						for (ServoyNGPackageProject ngProject : activeSolutionProject.getNGPackageProjects())
 						{
-							String installedVersion = pckObject.optString("installed");
-							JSONArray releases = pckObject.getJSONArray("releases");
-							if (nameAndVersion.length > 1)
+							DirPackageReader dirPackageReader = new DirPackageReader(ngProject.getProject().getLocation().toFile());
+							if (nameAndVersion[0].equals(dirPackageReader.getPackageName()))
 							{
-								String version = "";
-								String prefix = "=";
-								if (nameAndVersion[1].startsWith(">="))
-								{
-									prefix = nameAndVersion[1].substring(0, 2);
-									version = nameAndVersion[1].substring(2);
-								}
-								else if (nameAndVersion[1].startsWith(">"))
-								{
-									prefix = nameAndVersion[1].substring(0, 1);
-									version = nameAndVersion[1].substring(1);
-								}
+								hasNGPackageProject = true;
+								break;
+							}
+						}
+						if (hasNGPackageProject)
+						{
+							continue;
+						}
+					}
 
-								// if no compatible version already installed try to install one
-								if (installedVersion.isEmpty() || !versionCheck(installedVersion, version, prefix))
+					if (allInstalledPackages == null)
+					{
+						allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages();
+					}
+
+					for (Object pckObj : allInstalledPackages)
+					{
+						if (pckObj instanceof JSONObject)
+						{
+							JSONObject pckObject = (JSONObject)pckObj;
+							if (pckObject.get("name").equals(nameAndVersion[0]))
+							{
+								String installedVersion = pckObject.optString("installed");
+								JSONArray releases = pckObject.getJSONArray("releases");
+								if (nameAndVersion.length > 1)
 								{
-									for (int j = 0; j < releases.length(); j++)
+									String version = "";
+									String prefix = "=";
+									if (nameAndVersion[1].startsWith(">="))
 									{
-										if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
+										prefix = nameAndVersion[1].substring(0, 2);
+										version = nameAndVersion[1].substring(2);
+									}
+									else if (nameAndVersion[1].startsWith(">"))
+									{
+										prefix = nameAndVersion[1].substring(0, 1);
+										version = nameAndVersion[1].substring(1);
+									}
+
+									// if no compatible version already installed try to install one
+									if (installedVersion.isEmpty() || !versionCheck(installedVersion, version, prefix))
+									{
+										for (int j = 0; j < releases.length(); j++)
 										{
-											String installVersion = releases.getJSONObject(j).optString("version");
-											int[] response = { Window.OK };
-											if (!installedVersion.isEmpty())
+											if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
 											{
-												Display.getDefault().syncExec(new Runnable()
+												String installVersion = releases.getJSONObject(j).optString("version");
+												int[] response = { Window.OK };
+												if (!installedVersion.isEmpty())
 												{
-													public void run()
+													Display.getDefault().syncExec(new Runnable()
 													{
-														response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager", null,
-															"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
-																", but you already have version " + installedVersion +
-																" installed. Do you want to overwrite the installed one?",
-															MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL },
-															0).open();
-													}
-												});
+														public void run()
+														{
+															response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager",
+																null,
+																"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
+																	", but you already have version " + installedVersion +
+																	" installed. Do you want to overwrite the installed one?",
+																MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL },
+																0).open();
+														}
+													});
+												}
+												if (response[0] == Window.OK)
+												{
+													getPackageWithDependencies(pckObject, installVersion, selectedSolution, solutionsWithDependencies,
+														webpackagesWithDependencies, packagesInstalledResources);
+												}
+												break;
 											}
-											if (response[0] == Window.OK)
-											{
-												importPackage(pckObject, installVersion, solutionName, resourceListenerSwitch);
-											}
-											break;
 										}
 									}
 								}
-							}
-							else
-							{
-								// if not installed, install the latest release
-								if (installedVersion.isEmpty())
+								else
 								{
-									importPackage(pckObject, releases.getJSONObject(0).optString("version"), solutionName, resourceListenerSwitch);
+									// if not installed, install the latest release
+									if (installedVersion.isEmpty())
+									{
+										getPackageWithDependencies(pckObject, releases.getJSONObject(0).optString("version"), selectedSolution,
+											solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources);
+									}
 								}
+								break;
 							}
-							break;
 						}
 					}
 				}
-
 			}
 		}
 	}
@@ -311,148 +324,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 		}
 	}
 
-	private static void importSolution(InputStream is, final String name, final String version, final String targetSolution,
-		final IWPMController resourceListenerSwitch) throws IOException
-	{
-		if (name.equals(targetSolution)) return; // import solution and target can't be the same
-		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
-		if (importSolutionFile.exists())
-		{
-			importSolutionFile.delete();
-		}
-		boolean asyncExecWillExecute = false;
-		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
-		{
-			if (resourceListenerSwitch != null)
-			{
-				resourceListenerSwitch.resourceListenersOff();
-			}
-			Utils.streamCopy(is, fos);
-
-			asyncExecWillExecute = true;
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					boolean jobWillExecute = false;
-					try
-					{
-						// import the .servoy solution into workspace
-						ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
-						importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
-						importSolutionWizard.setAllowSolutionFilePathSelection(false);
-						importSolutionWizard.setActivateSolution(false);
-						importSolutionWizard.init(PlatformUI.getWorkbench(), null);
-						WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
-						if (dialog.open() == Window.OK)
-						{
-							final IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
-							final ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-								targetSolution);
-							if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() && importedProject.isOpen())
-							{
-								Job job = new WorkspaceJob("Adding '" + name + "' as module of '" + targetSolution + "'...")
-								{
-									@Override
-									public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-									{
-										try
-										{
-											if (targetServoyProject != null && importedProject != null && targetServoyProject.getProject().isOpen() &&
-												importedProject.isOpen())
-											{
-												Solution editingSolution = targetServoyProject.getEditingSolution();
-												if (editingSolution != null)
-												{
-													String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
-													List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
-													if (!modulesList.contains(name))
-													{
-														modulesList.add(name);
-													}
-													String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
-													editingSolution.setModulesNames(modulesTokenized);
-
-													try
-													{
-														targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
-													}
-													catch (RepositoryException e)
-													{
-														ServoyLog.logError(
-															"Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
-													}
-
-													// save version // TODO if SVY-13102 is implemented then the code below needs to execute even if targetSolution is null!
-													setName("Storing WPM metadata for '" + name + "'...");
-													Properties wpmProperties = new Properties();
-													wpmProperties.put("version", version);
-
-													try (ByteArrayOutputStream wpmbos = new ByteArrayOutputStream())
-													{
-														wpmProperties.store(wpmbos, "");
-														byte[] wpmPropertiesBytes = wpmbos.toByteArray();
-														WorkspaceFileAccess importedProjectFA = new WorkspaceFileAccess(importedProject.getWorkspace());
-														importedProjectFA.setContents(importedProject.getFullPath().append("wpm.properties").toOSString(),
-															wpmPropertiesBytes);
-													}
-													catch (Exception ex)
-													{
-														Debug.log(ex);
-													}
-												}
-											}
-											return Status.OK_STATUS;
-										}
-										finally
-										{
-											cleanUPImportSolution(resourceListenerSwitch, importSolutionFile);
-										}
-									}
-								};
-								job.setUser(true);
-								job.setRule(MultiRule.combine(targetServoyProject.getProject(), importedProject));
-								job.schedule();
-								jobWillExecute = true;
-							}
-						}
-					}
-					finally
-					{
-						if (!jobWillExecute) cleanUPImportSolution(resourceListenerSwitch, importSolutionFile);
-					}
-				}
-			});
-		}
-		finally
-		{
-			if (!asyncExecWillExecute) cleanUPImportSolution(resourceListenerSwitch, importSolutionFile);
-		}
-	}
-
-	private static void cleanUPImportSolution(IWPMController resourceListenerSwitch, File importSolutionFile)
-	{
-		try
-		{
-			if (resourceListenerSwitch != null)
-			{
-				resourceListenerSwitch.resourceListenersOn();
-				resourceListenerSwitch.reloadPackages();
-			}
-			if (importSolutionFile.exists())
-			{
-				importSolutionFile.delete();
-			}
-		}
-		catch (RuntimeException e)
-		{
-			ServoyLog.logError(e);
-		}
-	}
-
 	@Override
 	public void dispose()
 	{
 	}
-
 }

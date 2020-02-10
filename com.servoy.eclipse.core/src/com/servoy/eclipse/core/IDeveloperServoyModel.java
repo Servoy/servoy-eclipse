@@ -66,6 +66,10 @@ public interface IDeveloperServoyModel extends IServoyModel
 
 	public void removeActiveProjectListener(IActiveProjectListener listener);
 
+	public void addDoneListener(IModelDoneListener listener);
+
+	public void removeDoneListener(IModelDoneListener listener);
+
 	public void addI18NChangeListener(I18NChangeListener listener);
 
 	public void removeI18NChangeListener(I18NChangeListener listener);

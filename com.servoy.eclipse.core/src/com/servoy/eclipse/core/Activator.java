@@ -185,6 +185,10 @@ public class Activator extends Plugin
 
 	private IDesignerCallback designerCallback;
 
+	private volatile boolean isPostgresInstallChecked = false;
+
+	private Runnable postgressCheckedNotify;
+
 
 	@Override
 	public void start(BundleContext context) throws Exception
@@ -1210,14 +1214,42 @@ public class Activator extends Plugin
 						{
 							dumpFile.delete();
 						}
+						setPostgresChecked();
+					}
+					else
+					{
+						setPostgresChecked();
 					}
 					// 3 ask the same again later.
 				}
 			});
 		}
+		else
+		{
+			setPostgresChecked();
+		}
 	}
 
-	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception
+	void setPostgresChecked()
+	{
+		isPostgresInstallChecked = true;
+		if (this.postgressCheckedNotify != null) this.postgressCheckedNotify.run();
+	}
+
+	/**
+	 * return immediatly true when postgres installation is already checked or created
+	 * if that didn't happen yet it will return false and the runnable will be called when this happens.
+	 * @param toNotify
+	 * @return
+	 */
+	public boolean isPostgresChecked(Runnable toNotify)
+	{
+		if (isPostgresInstallChecked) return true;
+		this.postgressCheckedNotify = toNotify;
+		return false;
+	}
+
+	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, boolean lts, ActionListener listener) throws Exception
 	{
 		File file = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/../servoy_updater.jar");
 		try (InputStream is = Activator.class.getResourceAsStream("updater/servoy_updater.jar"))
@@ -1227,8 +1259,9 @@ public class Activator extends Plugin
 		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { file.toURI().toURL() });
 		Class< ? > versionCheckClass = loader.loadClass("com.servoy.updater.VersionCheck");
 		Method updateAppServerFromSerclipse = versionCheckClass.getMethod("updateAppServerFromSerclipse",
-			new Class[] { java.io.File.class, int.class, int.class, ActionListener.class });
-		return Utils.getAsInteger(updateAppServerFromSerclipse.invoke(null, new Object[] { parentFile, version, releaseNumber, listener }));
+			new Class[] { java.io.File.class, int.class, int.class, boolean.class, ActionListener.class });
+		return Utils.getAsInteger(updateAppServerFromSerclipse.invoke(null,
+			new Object[] { parentFile, Integer.valueOf(version), Integer.valueOf(releaseNumber), Boolean.valueOf(lts), listener }));
 	}
 
 	private void checkApplicationServerVersion(IApplicationServerSingleton applicationServer)
@@ -1295,7 +1328,7 @@ public class Activator extends Plugin
 												{
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
-														ClientVersion.getReleaseNumber(), new ActionListener()
+														ClientVersion.getReleaseNumber(), ClientVersion.isLts(), new ActionListener()
 														{
 															public void actionPerformed(ActionEvent e)
 															{

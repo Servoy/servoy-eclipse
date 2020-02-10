@@ -558,6 +558,7 @@ public class SolutionExplorerView extends ViewPart
 	private HashMap<String, Image> swtImageCache = new HashMap<String, Image>();
 
 	private IWorkingSetChangedListener workingSetChangedListener;
+	private boolean loadFirstForm = false;
 
 	public SolutionExplorerTreeContentProvider getTreeContentProvider()
 	{
@@ -799,6 +800,7 @@ public class SolutionExplorerView extends ViewPart
 	public SolutionExplorerView()
 	{
 		fDialogSettings = Activator.getDefault().getDialogSettings();
+		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> loadFirstForm = true);
 	}
 
 	public void selectionChanged(SelectionChangedEvent e)
@@ -2031,6 +2033,7 @@ public class SolutionExplorerView extends ViewPart
 
 	private void handleActiveProjectChanged(final ServoyProject activeProject)
 	{
+		boolean showFirstForm = this.loadFirstForm;
 		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).getResourcesNode().setToolTipText(getResourcesProjectName(activeProject));
 		refreshTreeCompletely();
 
@@ -2081,7 +2084,7 @@ public class SolutionExplorerView extends ViewPart
 					DesignerPreferences dp = new DesignerPreferences();
 					Form firstForm = null;
 
-					if (dp.getOpenFirstFormDesigner())
+					if (dp.getOpenFirstFormDesigner() && showFirstForm)
 					{
 						Solution activeSolution = activeProject.getSolution();
 						firstForm = activeSolution.getForm(activeSolution.getFirstFormID());

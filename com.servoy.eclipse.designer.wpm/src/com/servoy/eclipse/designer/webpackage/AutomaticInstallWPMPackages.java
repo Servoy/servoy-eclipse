@@ -58,7 +58,7 @@ public class AutomaticInstallWPMPackages implements IAutomaticImportWPMPackages
 					String name = pck.optString("name");
 					if (packageNames.contains(name))
 					{
-						InstallWebPackageHandler.importPackage(pck, null, null);
+						InstallWebPackageHandler.importPackage(pck, null);
 					}
 				}
 			}
