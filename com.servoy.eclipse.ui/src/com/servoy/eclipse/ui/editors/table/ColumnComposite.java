@@ -362,18 +362,21 @@ public class ColumnComposite extends Composite
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
 				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID)).addPreferredGap(
-					LayoutStyle.RELATED).add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+					LayoutStyle.RELATED)
+				.add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
 
 		tableLayout.setHorizontalGroup(tableLayout.createParallelGroup(GroupLayout.TRAILING).add(tableLayout.createSequentialGroup().addContainerGap().add(
 			tableLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
 				addButton).add(
 					tableLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
-						Short.MAX_VALUE).add(displayDataProviderID))).addContainerGap()));
+						Short.MAX_VALUE).add(displayDataProviderID)))
+			.addContainerGap()));
 		tableLayout.setVerticalGroup(
 			tableLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 				tableLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
 					LayoutStyle.RELATED).add(
-						tableLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID)).addContainerGap()));
+						tableLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID))
+					.addContainerGap()));
 		container.setLayout(tableLayout);
 		//
 
@@ -646,7 +649,7 @@ public class ColumnComposite extends Composite
 				tname = tname.substring(0, tname.length() - 1);
 			}
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 3)) + "_uuid";
+			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 5)) + "_uuid";
 			try
 			{
 				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType(t);
