@@ -344,11 +344,11 @@ export class BSWindow {
         this.renderer.listen(this.options.references.body, 'mouseup', () => {
             this.resizing = false;
             this.moving = false;
-            this.addClassToBodyChildren('disable-select');
-            this.renderer.addClass(this.element, 'west');
-            this.renderer.addClass(this.element, 'east');
-            this.renderer.addClass(this.element, 'north');
-            this.renderer.addClass(this.element, 'south');
+            this.removeClassToBodyChildren('disable-select');
+            this.renderer.removeClass(this.element, 'west');
+            this.renderer.removeClass(this.element, 'east');
+            this.renderer.removeClass(this.element, 'north');
+            this.renderer.removeClass(this.element, 'south');
             var width = this.element.getBoundingClientRect().width;
             var height = this.element.getBoundingClientRect().height;
             
@@ -406,18 +406,21 @@ export class BSWindow {
                     winHeadFootHeight += foot.offsetHeight;
                 }
                 if (this.element.classList.contains("east")) {
-                    this.renderer.setStyle(winBody, 'width', event.pageX - this.window_info.left);
+                    console.log("setting width to " + (event.pageX - this.window_info.left) + "px");
+                    console.log(winBody);
+
+                    this.renderer.setStyle(winBody, 'width', (event.pageX - this.window_info.left) + "px");
                 }
                 if (this.element.classList.contains("west")) {
-                    this.renderer.setStyle(winBody, 'width', this.window_info.width + (this.window_info.left  - event.pageX));
-                    this.renderer.setStyle(this.element, 'left', event.pageX);
+                    this.renderer.setStyle(winBody, 'width', this.window_info.width + (this.window_info.left  - event.pageX )+ "px");
+                    this.renderer.setStyle(this.element, 'left', event.pageX+ "px");
                 }
                 if (this.element.classList.contains("south")) {
-                    this.renderer.setStyle(winBody, 'height', event.pageY - this.window_info.top - winHeadFootHeight);
+                    this.renderer.setStyle(winBody, 'height', (event.pageY - this.window_info.top - winHeadFootHeight) + "px");
                 }
                 if (this.element.classList.contains("north")) {
-                    this.renderer.setStyle(winBody, 'height', this.window_info.height + (this.window_info.top  - event.pageY) - winHeadFootHeight);
-                    this.renderer.setStyle(this.element, 'top', event.pageY);
+                    this.renderer.setStyle(winBody, 'height', (this.window_info.height + (this.window_info.top  - event.pageY) - winHeadFootHeight) + "px");
+                    this.renderer.setStyle(this.element, 'top', event.pageY + "px");
                 }
             }
         });
