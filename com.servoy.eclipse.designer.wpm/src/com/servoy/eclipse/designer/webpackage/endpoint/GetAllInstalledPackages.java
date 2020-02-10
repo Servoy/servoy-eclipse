@@ -79,6 +79,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public static final String CONTENT_NOT_AVAILABLE_METHOD = "contentNotAvailable";
 	public static final String INSTALL_ERROR_METHOD = "installError";
 	public static final String MAIN_WEBPACKAGEINDEX = "https://servoy.github.io/webpackageindex/";
+	public static final String UNKNOWN_VERSION = "unknown";
 	private final WebPackageManagerEndpoint endpoint;
 	private static String selectedWebPackageIndex = MAIN_WEBPACKAGEINDEX;
 	private AvoidMultipleExecutionsJob reloadWPMSpecsJob;
@@ -167,7 +168,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							}
 							else
 							{
-								pack.put("installed", "unknown");
+								pack.put("installed", UNKNOWN_VERSION);
 							}
 						}
 					}

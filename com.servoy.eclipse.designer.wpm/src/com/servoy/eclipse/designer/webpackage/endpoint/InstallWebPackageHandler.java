@@ -215,7 +215,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 									}
 
 									// if no compatible version already installed try to install one
-									if (installedVersion.isEmpty() || !versionCheck(installedVersion, version, prefix))
+									if (installedVersion.isEmpty() || installedVersion.equals(GetAllInstalledPackages.UNKNOWN_VERSION) ||
+										!versionCheck(installedVersion, version, prefix))
 									{
 										for (int j = 0; j < releases.length(); j++)
 										{
