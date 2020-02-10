@@ -1,6 +1,7 @@
-import {OnInit, AfterViewInit , Input, Renderer2, ElementRef,ViewChild} from '@angular/core';
+import { OnInit, AfterViewInit, Input, Renderer2, ElementRef, ViewChild, Directive } from '@angular/core';
 import {ComponentContributor} from '../ngclient/component_contributor.service';
 
+@Directive()
 export class ServoyBaseComponent implements AfterViewInit, OnInit {
     @Input() name;
     @Input() servoyApi;

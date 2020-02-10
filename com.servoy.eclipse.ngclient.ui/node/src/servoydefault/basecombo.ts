@@ -1,4 +1,4 @@
-import { Renderer2, ElementRef, ViewChild, SimpleChanges } from '@angular/core';
+import { Renderer2, ElementRef, ViewChild, SimpleChanges, Directive } from '@angular/core';
 
 import { FormattingService } from '../ngclient/servoy_public'
 
@@ -10,6 +10,7 @@ export interface Item {
   realValue: any
 };
 
+@Directive()
 export class ServoyDefaultBaseCombo extends ServoyDefaultBaseField {
   @ViewChild('input', {static: true}) inputElement: ElementRef;
 

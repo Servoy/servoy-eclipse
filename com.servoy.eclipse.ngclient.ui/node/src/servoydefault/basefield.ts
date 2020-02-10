@@ -1,16 +1,10 @@
-import {
-  OnInit,
-  Input,
-  Output,
-  EventEmitter,
-  SimpleChanges,
-  Renderer2,
-} from '@angular/core';
+import { OnInit, Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive } from '@angular/core';
 
 import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
 
 import {ServoyDefaultBaseComponent} from './basecomponent'
 
+@Directive()
 export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implements OnInit{
 
     @Input() onDataChangeMethodID;

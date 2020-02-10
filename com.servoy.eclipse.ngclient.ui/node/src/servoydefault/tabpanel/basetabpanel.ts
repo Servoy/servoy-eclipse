@@ -1,4 +1,4 @@
-import { Input, ContentChild, TemplateRef, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2 } from '@angular/core';
+import { Input, ContentChild, TemplateRef, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, Directive } from '@angular/core';
 
 import { PropertyUtils, ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public'
 
@@ -12,6 +12,7 @@ import { ServoyDefaultBaseComponent } from '../basecomponent';
 
 
 
+@Directive()
 export abstract class BaseTabpanel extends ServoyBaseComponent implements OnChanges {
 
     @Input() onChangeMethodID;

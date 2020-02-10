@@ -1,9 +1,10 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild, AfterViewInit, Directive } from '@angular/core';
 
 import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
 
 import {ServoyDefaultBaseComponent} from './basecomponent'
 
+@Directive()
 export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implements AfterViewInit {
 
     @Input() hideText;

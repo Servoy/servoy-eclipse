@@ -1,8 +1,9 @@
-import {OnInit, Input, OnChanges, SimpleChanges,Renderer2,ElementRef,ViewChild, AfterViewInit } from '@angular/core';
+import { OnInit, Input, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild, AfterViewInit, Directive } from '@angular/core';
 
 import {PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public'
 
 
+@Directive()
 export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements AfterViewInit, OnChanges {
 
     @Input() onActionMethodID;
