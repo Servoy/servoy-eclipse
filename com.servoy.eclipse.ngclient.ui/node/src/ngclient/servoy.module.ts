@@ -25,6 +25,7 @@ import { DefaultNavigator } from '../servoycore/default-navigator/default-naviga
 import { ErrorBean } from '../servoycore/error-bean/error-bean';
 import { ServoyCoreSlider } from '../servoycore/slider/slider';
 import { SessionView } from '../servoycore/session-view/session-view';
+import { ViewportService } from './services/viewport.service'
 
 import { ComponentContributor } from './component_contributor.service';
 import { ServoyPublicModule } from './servoy_public.module';
@@ -52,7 +53,7 @@ import { ServoyPublicModule } from './servoy_public.module';
         HttpClientModule,
         ServoyPublicModule
     ],
-    providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, ComponentContributor],
+    providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, ComponentContributor, ViewportService],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent],
     schemas: [

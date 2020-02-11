@@ -16,7 +16,10 @@ import { DateConverter } from './converters/date_converter'
 import { JSONObjectConverter } from './converters/json_object_converter'
 import { JSONArrayConverter } from './converters/json_array_converter'
 import { ValuelistConverter } from './converters/valuelist_converter'
-import {I18NProvider} from './services/i18n_provider.service'
+import { FoundsetConverter } from './converters/foundset_converter'
+import { FoundsetLinkedConverter } from './converters/foundsetLinked_converter'
+import { I18NProvider } from './services/i18n_provider.service'
+import { ViewportService } from './services/viewport.service'
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 
@@ -46,7 +49,8 @@ export class ServoyService {
             specTypesService: SpecTypesService,
             sabloDeferHelper: SabloDeferHelper,
             iterableDiffers: IterableDiffers,
-            private logFactory: LoggerFactory) {
+            private logFactory: LoggerFactory,
+            private viewportService: ViewportService) {
 
         this.log = logFactory.getLogger("ServoyService");
         this.uiProperties = new UIProperties( sessionStorageService )
@@ -56,6 +60,8 @@ export class ServoyService {
         converterService.registerCustomPropertyHandler( "JSON_obj", new JSONObjectConverter( converterService, specTypesService ) );
         converterService.registerCustomPropertyHandler( "JSON_arr", new JSONArrayConverter( converterService, specTypesService, iterableDiffers ) );
         converterService.registerCustomPropertyHandler( "valuelist", new ValuelistConverter( sabloService, sabloDeferHelper) );
+        converterService.registerCustomPropertyHandler( "foundset",  new FoundsetConverter( converterService, sabloService, sabloDeferHelper, viewportService,  logFactory));
+        converterService.registerCustomPropertyHandler( "fsLinked",  new FoundsetLinkedConverter( converterService, sabloService, sabloDeferHelper, viewportService,  logFactory));
     }
 
     public connect() {
