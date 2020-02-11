@@ -17,6 +17,7 @@
 package com.servoy.eclipse.core.elements;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -156,6 +157,7 @@ public class ElementFactory
 		button.setOnDoubleClickMethodID(-1);
 		button.setOnRightClickMethodID(-1);
 		button.setText(text);
+		button.setRolloverCursor(Cursor.HAND_CURSOR);
 		placeElementOnTop(button);
 		return button;
 	}
@@ -615,7 +617,8 @@ public class ElementFactory
 						}
 						if (labelComponent == null)
 						{
-							outer : for (PackageSpecification<WebObjectSpecification> pck : WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications().values())
+							outer : for (PackageSpecification<WebObjectSpecification> pck : WebComponentSpecProvider.getSpecProviderState()
+								.getWebObjectSpecifications().values())
 							{
 								if (pck.getPackageName().equals("servoycore")) continue;
 								for (WebObjectSpecification wos : pck.getSpecifications().values())
@@ -824,6 +827,7 @@ public class ElementFactory
 			gc.setText("button");
 			gc.setOnActionMethodID(-1);
 			gc.setDataProviderID(dp.getDataProviderID());
+			gc.setRolloverCursor(Cursor.HAND_CURSOR);
 			return gc;
 		}
 		else if ("servoydefault-label".equals(name))
