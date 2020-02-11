@@ -140,6 +140,8 @@ import { ServoyApi } from '../servoy_api'
       
       <ng-template #servoycoreErrorbean let-state="state"><servoycore-errorbean [error]="state.model.error" [servoyApi]="getServoyApi(state)" [toolTipText]="state.model.toolTipText" #cmp></servoycore-errorbean></ng-template>
       <ng-template #servoycoreSlider let-state="state"><servoycore-slider  [styleClass]="state.model.styleClass" [min]="state.model.min" [max]="state.model.max" [orientation]="state.model.orientation" [step]="state.model.step" [enabled]="state.model.enabled" [toolTipText]="state.model.toolTipText" [visible]="state.model.visible" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [tabSeq]="state.model.tabSeq" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [onCreateMethodID]="getHandler(state,'onCreateMethodID')" [onSlideMethodID]="getHandler(state,'onSlideMethodID')" [onStartMethodID]="getHandler(state,'onStartMethodID')" [onStopMethodID]="getHandler(state,'onStopMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoycore-slider></ng-template>
+      
+      <ng-template #servoydefaultTable let-state="state"><servoydefault-table [foundset]="state.model.foundset" [columns]="state.model.columns" #cmp></servoydefault-table></ng-template>
       <!-- component template generate end -->
    `
 } )
@@ -171,6 +173,8 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild( 'servoydefaultImagemedia' ,{static: true}) readonly servoydefaultImagemedia: TemplateRef<any>;
     @ViewChild( 'servoycoreSlider' ,{static: true}) readonly servoycoreSlider: TemplateRef<any>;
     @ViewChild( 'servoycoreErrorbean' ,{static: true}) readonly servoycoreErrorbean: TemplateRef<any>;
+    
+    @ViewChild( 'servoydefaultTable' ,{static: true}) readonly servoydefaultTable: TemplateRef<any>;
     
   // component template generate end
 

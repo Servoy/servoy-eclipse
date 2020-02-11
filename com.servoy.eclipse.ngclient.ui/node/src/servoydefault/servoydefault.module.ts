@@ -40,6 +40,8 @@ import {ServoyDefaultSpinner} from "./spinner/spinner";
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { UploadDirective } from "../ngclient/utils/upload.directive";
 
+import { ServoyDefaultTable } from './table/table';
+
 @NgModule({
   declarations: [
     ServoyDefaultTextField,
@@ -64,7 +66,8 @@ import { UploadDirective } from "../ngclient/utils/upload.directive";
     ServoyDefaultImageMedia,
     BGSplitter,
     BGPane,
-    UploadDirective
+    UploadDirective,
+    ServoyDefaultTable
   ],
   imports:[
     FormsModule,
@@ -97,7 +100,8 @@ import { UploadDirective } from "../ngclient/utils/upload.directive";
             ServoyDefaultSpinner,
             ServoyDefaultHTMLView,
             ServoyDefaultListBox,
-            ServoyDefaultImageMedia
+            ServoyDefaultImageMedia,
+            ServoyDefaultTable
 
   ],
   providers: [

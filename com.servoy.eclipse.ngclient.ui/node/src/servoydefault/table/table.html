@@ -1,0 +1,12 @@
+<div #element>
+	<table class='bts-table'>
+	  <tr>
+	    <th *ngFor="let column of columns"><div [innerHtml]='column.headerText'></div></th>
+	  </tr>
+	  <tr *ngFor="let row of foundset.viewPort.rows">
+	    <td *ngFor="let column of columns">
+	    	<div [innerHtml]='column.dataprovider[foundset.viewPort.rows.indexOf(row)]'></div>
+		</td>
+	  </tr>
+	</table>
+</div>
