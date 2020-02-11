@@ -1886,11 +1886,11 @@ public class SolutionDeserializer
 									if (jsDocTagValue.length() > jsDocTagValue.indexOf("}}") + 2)
 										description = jsDocTagValue.substring(jsDocTagValue.indexOf("}}") + 2);
 								}
-								else if (jsDocTagValue.startsWith("{") && (endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
+								else if (jsDocTagValue.startsWith("{") && (endBracketIdx = jsDocTagValue.lastIndexOf("}")) != -1)
 								{
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
-									if (jsDocTagValue.length() > jsDocTagValue.indexOf("}") + 2)
-										description = jsDocTagValue.substring(jsDocTagValue.indexOf("}") + 2);
+									if (jsDocTagValue.length() > jsDocTagValue.lastIndexOf("}") + 2)
+										description = jsDocTagValue.substring(jsDocTagValue.lastIndexOf("}") + 2);
 								}
 
 								if (JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName))
