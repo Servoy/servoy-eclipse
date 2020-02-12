@@ -206,7 +206,7 @@ export class BSWindow {
             let backdropModals = this.document.getElementsByClassName('.modal-backdrop');
             while(backdropModals[0]) {
                 backdropModals[0].parentNode.removeChild(backdropModals[0]);
-            }​
+            }
         }
         var closeEvent = new Event('close');
         this.element.dispatchEvent(closeEvent);
@@ -395,6 +395,7 @@ export class BSWindow {
                 this.renderer.setStyle(this.element, 'left', (event.pageX - this.offset.x) + "px");
             }
             if (this.options.resizable && this.resizing) {
+	console.log("body move in resize ")
                 var winBody = this.element.querySelector(this.options.selectors.body);
                 var winHeadFootHeight = 0;
                 var head = this.element.querySelector(this.options.selectors.handle);
