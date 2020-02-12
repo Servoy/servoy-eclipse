@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges,SimpleChanges, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule } from '@angular/core';
 
 import { FormService, FormCache, StructureCache, FormComponentCache, ComponentCache } from '../form.service';
 
@@ -9,10 +9,10 @@ import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
 
 import { ServoyApi } from '../servoy_api'
 
-@Component( {
+@Component({
     selector: 'svy-form',
     template: `
-      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()"> <!-- main div -->
+      <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" svy-autosave> <!-- main div -->
           <div *ngFor="let item of formCache.items" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
           </div>
@@ -144,120 +144,134 @@ import { ServoyApi } from '../servoy_api'
       <ng-template #servoydefaultTable let-state="state"><servoydefault-table [foundset]="state.model.foundset" [columns]="state.model.columns" #cmp></servoydefault-table></ng-template>
       <!-- component template generate end -->
    `
-} )
+})
 
 export class FormComponent implements OnInit, OnDestroy, OnChanges {
-    @ViewChild( 'svyResponsiveDiv' ,{static: true}) readonly svyResponsiveDiv: TemplateRef<any>;
-    @ViewChild( 'formComponentDiv' ,{static: true}) readonly formComponentDiv: TemplateRef<any>;
+    @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
+    @ViewChild('formComponentDiv', { static: true }) readonly formComponentDiv: TemplateRef<any>;
     // component template generate start
-    @ViewChild( 'servoydefaultTextfield' ,{static: true}) readonly servoydefaultTextfield: TemplateRef<any>;
-    @ViewChild( 'servoydefaultTextarea' ,{static: true}) readonly servoydefaultTextarea: TemplateRef<any>;
-    @ViewChild( 'servoydefaultButton',{static: true} ) readonly servoydefaultButton: TemplateRef<any>;
-    @ViewChild( 'servoydefaultLabel' ,{static: true}) readonly servoydefaultLabel: TemplateRef<any>;
-    @ViewChild( 'servoydefaultRectangle' ,{static: true}) readonly servoydefaultRectangle: TemplateRef<any>;
-    @ViewChild( 'servoydefaultTabpanel',{static: true}) readonly servoydefaultTabpanel: TemplateRef<any>;
-    @ViewChild( 'servoydefaultTablesspanel' ,{static: true}) readonly servoydefaultTablesspanel: TemplateRef<any>;
-    @ViewChild( 'servoydefaultSplitpane',{static: true} ) readonly servoydefaultSplitpane: TemplateRef<any>;
-    @ViewChild( 'servoydefaultCalendar',{static: true} ) readonly servoydefaultCalendar: TemplateRef<any>;
-    
-    @ViewChild( 'servoydefaultCombobox',{static: true}) readonly servoydefaultCombobox: TemplateRef<any>;
-    @ViewChild( 'servoydefaultTypeahead' ,{static: true}) readonly servoydefaultTypeahead: TemplateRef<any>;
-    @ViewChild( 'servoydefaultCheck' ,{static: true}) readonly servoydefaultCheck: TemplateRef<any>;
-    @ViewChild( 'servoydefaultCheckgroup' ,{static: true}) readonly servoydefaultCheckgroup: TemplateRef<any>;
-    @ViewChild( 'servoydefaultRadiogroup',{static: true} ) readonly servoydefaultRadiogroup: TemplateRef<any>;
-    @ViewChild( 'servoydefaultPassword' , {static: true}) readonly servoydefaultPassword: TemplateRef<any>;
-    @ViewChild( 'servoydefaultHtmlarea' , {static: true}) readonly servoydefaultHtmlarea: TemplateRef<any>;
-    @ViewChild( 'servoydefaultSpinner', {static: true}) readonly servoydefaultSpinner: TemplateRef<any>;
-    @ViewChild( 'servoydefaultHtmlview',{static: true} ) readonly servoydefaultHtmlview: TemplateRef<any>;
-    @ViewChild( 'servoydefaultListbox' ,{static: true}) readonly servoydefaultListbox: TemplateRef<any>;
-    @ViewChild( 'servoydefaultImagemedia' ,{static: true}) readonly servoydefaultImagemedia: TemplateRef<any>;
-    @ViewChild( 'servoycoreSlider' ,{static: true}) readonly servoycoreSlider: TemplateRef<any>;
-    @ViewChild( 'servoycoreErrorbean' ,{static: true}) readonly servoycoreErrorbean: TemplateRef<any>;
-    
-    @ViewChild( 'servoydefaultTable' ,{static: true}) readonly servoydefaultTable: TemplateRef<any>;
-    
-  // component template generate end
+    @ViewChild('servoydefaultTextfield', { static: true }) readonly servoydefaultTextfield: TemplateRef<any>;
+    @ViewChild('servoydefaultTextarea', { static: true }) readonly servoydefaultTextarea: TemplateRef<any>;
+    @ViewChild('servoydefaultButton', { static: true }) readonly servoydefaultButton: TemplateRef<any>;
+    @ViewChild('servoydefaultLabel', { static: true }) readonly servoydefaultLabel: TemplateRef<any>;
+    @ViewChild('servoydefaultRectangle', { static: true }) readonly servoydefaultRectangle: TemplateRef<any>;
+    @ViewChild('servoydefaultTabpanel', { static: true }) readonly servoydefaultTabpanel: TemplateRef<any>;
+    @ViewChild('servoydefaultTablesspanel', { static: true }) readonly servoydefaultTablesspanel: TemplateRef<any>;
+    @ViewChild('servoydefaultSplitpane', { static: true }) readonly servoydefaultSplitpane: TemplateRef<any>;
+    @ViewChild('servoydefaultCalendar', { static: true }) readonly servoydefaultCalendar: TemplateRef<any>;
 
-    @ViewChildren( 'cmp' ) readonly components: QueryList<Component>;
+    @ViewChild('servoydefaultCombobox', { static: true }) readonly servoydefaultCombobox: TemplateRef<any>;
+    @ViewChild('servoydefaultTypeahead', { static: true }) readonly servoydefaultTypeahead: TemplateRef<any>;
+    @ViewChild('servoydefaultCheck', { static: true }) readonly servoydefaultCheck: TemplateRef<any>;
+    @ViewChild('servoydefaultCheckgroup', { static: true }) readonly servoydefaultCheckgroup: TemplateRef<any>;
+    @ViewChild('servoydefaultRadiogroup', { static: true }) readonly servoydefaultRadiogroup: TemplateRef<any>;
+    @ViewChild('servoydefaultPassword', { static: true }) readonly servoydefaultPassword: TemplateRef<any>;
+    @ViewChild('servoydefaultHtmlarea', { static: true }) readonly servoydefaultHtmlarea: TemplateRef<any>;
+    @ViewChild('servoydefaultSpinner', { static: true }) readonly servoydefaultSpinner: TemplateRef<any>;
+    @ViewChild('servoydefaultHtmlview', { static: true }) readonly servoydefaultHtmlview: TemplateRef<any>;
+    @ViewChild('servoydefaultListbox', { static: true }) readonly servoydefaultListbox: TemplateRef<any>;
+    @ViewChild('servoydefaultImagemedia', { static: true }) readonly servoydefaultImagemedia: TemplateRef<any>;
+    @ViewChild('servoycoreSlider', { static: true }) readonly servoycoreSlider: TemplateRef<any>;
+    @ViewChild('servoycoreErrorbean', { static: true }) readonly servoycoreErrorbean: TemplateRef<any>;
+
+    @ViewChild('servoydefaultTable', { static: true }) readonly servoydefaultTable: TemplateRef<any>;
+
+    // component template generate end
+
+    @ViewChildren('cmp') readonly components: QueryList<Component>;
 
     @Input() readonly name;
 
     formCache: FormCache;
 
-    private handlerCache: { [property: string]: { [property: string]: ( e ) => void } } = {};
+    private handlerCache: { [property: string]: { [property: string]: (e) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
 
-    constructor( private formservice: FormService, private sabloService: SabloService, private servoyService: ServoyService, private logFactory : LoggerFactory ) {
+    constructor(private formservice: FormService, private sabloService: SabloService, private servoyService: ServoyService, private logFactory: LoggerFactory) {
         this.log = logFactory.getLogger("FormComponent");
     }
-    
-    ngOnChanges( changes: SimpleChanges ) {
+
+    ngOnChanges(changes: SimpleChanges) {
         this.ngOnInit();
     }
-    
-    getTemplate( item: StructureCache | ComponentCache | FormComponentCache ): TemplateRef<any> {
-        if ( item instanceof StructureCache ) {
+
+    getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
+        if (item instanceof StructureCache) {
             return this.svyResponsiveDiv;
-        } else if ( item instanceof FormComponentCache ) {
+        } else if (item instanceof FormComponentCache) {
             return this.formComponentDiv;
         }
         else {
             if (this[item.type] === undefined && item.type !== undefined) {
-                this.log.error(this.log.buildMessage(() => ("Template for "+item.type+" was not found, please check form_component template.")));
+                this.log.error(this.log.buildMessage(() => ("Template for " + item.type + " was not found, please check form_component template.")));
             }
             return this[item.type]
         }
     }
 
     ngOnInit() {
-        this.formCache = this.formservice.getFormCache( this );
-        this.sabloService.callService( 'formService', 'formLoaded', { formname: this.name }, true );
+        this.formCache = this.formservice.getFormCache(this);
+        this.sabloService.callService('formService', 'formLoaded', { formname: this.name }, true);
     }
 
     ngOnDestroy() {
         this.formservice.destroy(this);
     }
-    
+
     public getAbsoluteFormStyle() {
         const formData = this.formCache.getComponent("");
-//        console.log(formData)
-        var position = {position:"absolute"};
-        if(this.formCache.getComponent('svy_default_navigator') != null) {
-            position['left'] = "70px";
-        } 
-        else if (this.formCache.navigatorForm &&  this.formCache.navigatorForm.name && this.formCache.navigatorForm.name.lastIndexOf("default_navigator_container.html") == -1)
-        {
-            position['left'] = this.formCache.navigatorForm.size.width + "px";
+        const position = {
+            left: "0px",
+            top: "0px",
+            right: "0px",
+            bottom: "0px",
+            position: "absolute",
+            minWidth: undefined,
+            minHeight: undefined,
+            backgroundColor: undefined
+        };
+        if (formData.model.borderType) {
+            const borderStyle = formData.model.borderType;
+            for (var key in borderStyle) {
+                position[key] = position[key];
+            }
         }
-        
+        if (formData.model.transparent) {
+            position.backgroundColor = 'transparent';
+        }
+
+        if (formData.model.addMinSize) {
+            position.minWidth = formData.model.size.width + "px";
+            position.minHeight = formData.model.size.height + "px";
+        }
         return position;
     }
 
-    public isFormAvailable( name ): boolean {
+    public isFormAvailable(name): boolean {
         //console.log("isFormAvailable: " + name + " " +  this.formservice.hasFormCacheEntry( name));
-        return this.formservice.hasFormCacheEntry( name );
+        return this.formservice.hasFormCacheEntry(name);
     }
 
-    private datachange( component: string, property: string, value ) {
-        const model = this.formCache.getComponent( component ).model;
+    private datachange(component: string, property: string, value) {
+        const model = this.formCache.getComponent(component).model;
         const oldValue = model[property];
-        this.formCache.getComponent( component ).model[property] = value;
-        this.formservice.sendChanges( this.name, component, property, value, oldValue );
+        this.formCache.getComponent(component).model[property] = value;
+        this.formservice.sendChanges(this.name, component, property, value, oldValue);
     }
 
-    private getHandler( item: ComponentCache, handler: string ) {
+    private getHandler(item: ComponentCache, handler: string) {
         let itemCache = this.handlerCache[item.name];
-        if ( itemCache == null ) {
+        if (itemCache == null) {
             itemCache = {};
             this.handlerCache[item.name] = itemCache;
         }
         let func = itemCache[handler];
-        if ( func == null ) {
-            if ( item.handlers && item.handlers.indexOf( handler ) >= 0 ) {
+        if (func == null) {
+            if (item.handlers && item.handlers.indexOf(handler) >= 0) {
                 const me = this;
-                func = function( e ) {
-                    me.formservice.executeEvent( me.name, item.name, handler, arguments );
+                func = function(e) {
+                    me.formservice.executeEvent(me.name, item.name, handler, arguments);
                 }
                 itemCache[handler] = func;
             }
@@ -265,40 +279,40 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         return func;
     }
 
-    private getServoyApi( item: ComponentCache ) {
+    private getServoyApi(item: ComponentCache) {
         let api = this.servoyApiCache[item.name];
-        if ( api == null ) {
-            api = new ServoyApi( item, this.name, this.formCache.absolute, this.formservice, this.servoyService );
+        if (api == null) {
+            api = new ServoyApi(item, this.name, this.formCache.absolute, this.formservice, this.servoyService);
             this.servoyApiCache[item.name] = api;
         }
         return api;
     }
 
-    public callApi( componentName: string, apiName: string, args: object ) : any{
-        let comp = this.components.find( item => item['name'] == componentName );
-        let proto = Object.getPrototypeOf( comp )
-        return proto[apiName].apply( comp, args );
+    public callApi(componentName: string, apiName: string, args: object): any {
+        let comp = this.components.find(item => item['name'] == componentName);
+        let proto = Object.getPrototypeOf(comp)
+        return proto[apiName].apply(comp, args);
     }
 }
 
-@Directive( { selector: '[config]' } )
+@Directive({ selector: '[config]' })
 export class AddAttributeDirective implements OnInit {
     @Input() config;
 
-    constructor( private el: ElementRef, private renderer: Renderer2 ) { }
+    constructor(private el: ElementRef, private renderer: Renderer2) { }
 
     ngOnInit() {
-        if ( this.config.classes ) {
-            this.config.classes.forEach( cls => this.renderer.addClass( this.el.nativeElement, cls ) );
+        if (this.config.classes) {
+            this.config.classes.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
         }
-        if ( this.config.styles ) {
-            for ( let key in this.config.styles ) {
-                this.renderer.setStyle( this.el.nativeElement, key, this.config.styles[key] );
+        if (this.config.styles) {
+            for (let key in this.config.styles) {
+                this.renderer.setStyle(this.el.nativeElement, key, this.config.styles[key]);
             }
         }
-        if ( this.config.layout ) {
-            for ( let key in this.config.layout ) {
-                this.renderer.setStyle( this.el.nativeElement, key, this.config.layout[key] );
+        if (this.config.layout) {
+            for (let key in this.config.layout) {
+                this.renderer.setStyle(this.el.nativeElement, key, this.config.layout[key]);
             }
         }
     }

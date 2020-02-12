@@ -37,4 +37,21 @@ export class MainComponent {
     public get sessionProblem(){
        return this.servoyService.getSolutionSettings().sessionProblem; 
     }
+
+	public getNavigatorStyle() {
+		const ltrOrientation = this.servoyService.getSolutionSettings().ltrOrientation;
+		const orientationVar = ltrOrientation ? 'left':'right';
+		const style = {'position':'absolute','top':'0px','bottom':'0px','width': this.servoyService.getSolutionSettings().navigatorForm.size.width+'px'}
+		style[orientationVar] = '0px';
+		return style;
+	}
+	public getFormStyle() {
+		const ltrOrientation = this.servoyService.getSolutionSettings().ltrOrientation;
+		const orientationVar1 = ltrOrientation ? 'right':'left';
+		const orientationVar2 = ltrOrientation ? 'left':'right';
+		const style = {'position':'absolute','top':'0px','bottom':'0px'}
+		style[orientationVar1] = '0px';
+		style[orientationVar2] =  this.servoyService.getSolutionSettings().navigatorForm.size.width+'px';
+		return style;
+	}
 }

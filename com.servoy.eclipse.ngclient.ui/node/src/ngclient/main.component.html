@@ -1,5 +1,9 @@
 <!--The content below is only a placeholder and can be replaced.-->
+<div class="svy-main-window-navigator-container"  *ngIf="hasDefaultNavigator() || navigatorForm != null"  [ngStyle]="getNavigatorStyle()" >
 <svy-default-navigator [name]="mainForm" *ngIf="hasDefaultNavigator()"></svy-default-navigator>
 <svy-form [name]="navigatorForm" *ngIf="navigatorForm != null"></svy-form>
-<svy-form [name]="mainForm" *ngIf="mainForm != null"></svy-form>
+</div>
+<div class="svy-main-window-container" autoscroll="true" svy-autosave   [ngStyle]="getFormStyle()"  *ngIf="mainForm != null">
+<svy-form [name]="mainForm"></svy-form>
+</div>
 <session-view *ngIf="sessionProblem != null"></session-view>
