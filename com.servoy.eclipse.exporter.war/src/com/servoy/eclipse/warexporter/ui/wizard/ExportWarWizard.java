@@ -599,7 +599,6 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		}
 
 		appendToBuilder(sb, " -useAsRealAdminUser", exportModel.isUseAsRealAdminUser());
-		appendToBuilder(sb, " -minimize", exportModel.isMinimizeJsCssResources());
 
 		if (exportModel.getLicenses() != null && exportModel.getLicenses().size() > 0)
 		{
