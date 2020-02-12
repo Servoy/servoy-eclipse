@@ -112,7 +112,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		setWindowTitle("New solution");
 		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.png"));
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
-		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
+		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "NewSolutionWizard");
 		setDialogSettings(section);
 	}
 
