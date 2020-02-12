@@ -91,6 +91,11 @@ public class Activator extends AbstractUIPlugin
 {
 
 	/**
+	 * 
+	 */
+	public static final String TUTORIALS_URL = "https://tutorials.servoy.com/solutions/content/index.html?loginToken=";
+
+	/**
 	 * The PLUGIN_ID for com.servoy.eclipse.ui.
 	 */
 	public static final String PLUGIN_ID = "com.servoy.eclipse.ui";
@@ -318,7 +323,7 @@ public class Activator extends AbstractUIPlugin
 						if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
 						{
 							BrowserDialog dialog = new BrowserDialog(activeShell,
-								"https://tutorials.servoy.com/solutions/content/index.html?loginToken=" + loginToken, true, true);
+								TUTORIALS_URL + loginToken, true, true);
 							dialog.open();
 						}
 					}
