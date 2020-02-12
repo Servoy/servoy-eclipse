@@ -286,7 +286,8 @@ export class FormCache {
     }
     public add( comp: ComponentCache ) {
         this.componentCache.set( comp.name, comp );
-        this._items.push( comp );
+		if (comp.type && comp.type != "servoycoreNavigator")
+        	this._items.push( comp );
     }
     set mainStructure( structure: StructureCache ) {
         this._mainStructure = structure;
