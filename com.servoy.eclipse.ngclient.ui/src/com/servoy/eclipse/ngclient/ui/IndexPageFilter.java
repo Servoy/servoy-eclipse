@@ -57,6 +57,7 @@ public class IndexPageFilter implements Filter
 		if (distFolder.exists())
 		{
 			HttpServletRequest request = (HttpServletRequest)servletRequest;
+			request.getSession();
 			String requestURI = request.getRequestURI();
 			String solutionName = getSolutionNameFromURI(requestURI);
 			if (solutionName != null &&
