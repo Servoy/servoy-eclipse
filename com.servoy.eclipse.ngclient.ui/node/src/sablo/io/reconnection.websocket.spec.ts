@@ -8,9 +8,9 @@ describe('ReconnectionWebsocket', () => {
   var normalWebSocket = null;
   beforeEach(() => {
       normalWebSocket =  window["WebSocket"];
-     window["WebSocket"] = WebSocketMock;
+     window["Web" + "Socket"] = WebSocketMock;
   });
-  
+   
   afterEach(() => {
       window["WebSocket"] = normalWebSocket;
   })
@@ -57,7 +57,7 @@ class WebSocketMock {
     public static instance:WebSocketMock;
     public url:string;
     public closed = false;
-    constructor(url:string) {
+    constructor( url: string, protocols?: string | string[] ) {
         this.url = url;
         WebSocketMock.instance = this;
         setTimeout(() => {

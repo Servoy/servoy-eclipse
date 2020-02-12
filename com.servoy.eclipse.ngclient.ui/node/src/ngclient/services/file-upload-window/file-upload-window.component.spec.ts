@@ -2,13 +2,13 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FileUploadWindowComponent } from './file-upload-window.component';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { I18NProvider } from '../../../ngclient/servoy_public'
 
 describe('FileUploadWindowComponent', () => {
   let component: FileUploadWindowComponent;
   let fixture: ComponentFixture<FileUploadWindowComponent>;
-  let i18nProvider;
+  let i18nProvider:any;
   beforeEach(async(() => {
     i18nProvider = jasmine.createSpyObj("I18NProvider",["getI18NMessages"]);
     const promise = Promise.resolve({});
@@ -16,7 +16,7 @@ describe('FileUploadWindowComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [ FileUploadWindowComponent ],
-      providers: [ { provide: NgbActiveModal }, { provide: HttpClient }, { provide: I18NProvider, useValue: i18nProvider }]
+      providers: [ { provide: NgbActiveModal }, { provide: HttpClient }, {provide:HttpHandler}, {provide: I18NProvider, useValue: i18nProvider }]
 
     })
     .compileComponents();

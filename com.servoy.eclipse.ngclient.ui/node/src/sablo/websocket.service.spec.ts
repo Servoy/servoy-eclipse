@@ -12,7 +12,7 @@ describe('WebsocketService', () => {
     let normalWebSocket = null;
   beforeEach(() => {
       normalWebSocket =  window["WebSocket"];
-      window["WebSocket"] = WebSocketMock;
+      window["Web" + "Socket"] = WebSocketMock;
       
       windowRef =  {nativeWindow:{}}
      const servicesService = jasmine.createSpyObj('ServicesService', ['callServiceApi','updateServiceScopes']);
