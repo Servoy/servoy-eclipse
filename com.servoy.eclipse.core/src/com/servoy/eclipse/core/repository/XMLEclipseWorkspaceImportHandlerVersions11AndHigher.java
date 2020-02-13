@@ -1214,4 +1214,10 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 	{
 		return webPackages.get(solutionName);
 	}
+
+	@Override
+	public boolean shouldCheckRepositorySolutionsOverride()
+	{
+		return true;
+	}
 }
