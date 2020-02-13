@@ -15,7 +15,6 @@ export class ViewportService {
     
     constructor( private converterService: ConverterService ) {}
     
-    //TODO use type Viewport for viewPortHolder
     public updateWholeViewport(viewPortHolder: ViewPort, viewPortPropertyName: string, internalState, viewPortUpdate, viewPortUpdateConversions, propertyContext) {
         if (viewPortUpdateConversions) {
             // do the actual conversion
