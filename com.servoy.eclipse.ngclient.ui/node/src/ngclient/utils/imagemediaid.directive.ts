@@ -7,8 +7,8 @@ import { IViewStateListener } from '../basecomponent';
 })
 export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnDestroy {
 
-    @Input('svyImageMediaId') media : any;
-    @Input('hostComponent') hostComponent: ServoyBaseComponent;
+    @Input('svyImageMediaId') media: any;
+    @Input() hostComponent: ServoyBaseComponent;
 
     private imgStyle: Map<string, any>;
     private rollOverImgStyle: Map<string, any>;
@@ -50,7 +50,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
                 }
                 else {
                     this.setCSSStyle(this.clearStyle);
-                } 
+                }
             }
         } );
     }
@@ -59,7 +59,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
         if (this.media && this.media.visible) {
             const componentSize = this.media.componentSize;
             const mediaOptions = this.media.mediaOptions;
-            if(this.media.rollOverImg) { 
+            if(this.media.rollOverImg) {
                 this.rollOverImgStyle = this.parseImageOptions(this.media.rollOverImg, mediaOptions, componentSize);
             } else {
                 this.rollOverImgStyle = null
@@ -70,17 +70,17 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
             } else {
                 this.imgStyle = null;
                 this.setCSSStyle(this.clearStyle);
-            } 
+            }
         }
     }
 
     private parseImageOptions(image, mediaOptions, componentSize): Map<string, any> {
         let bgstyle = new Map();
-        bgstyle.set('background-image', "url('" + image + "')"); 
+        bgstyle.set('background-image', "url('" + image + "')");
         bgstyle.set('background-repeat', "no-repeat");
         bgstyle.set('background-position', "left");
         bgstyle.set('display', "inline-block");
-        bgstyle.set('vertical-align', "middle"); 
+        bgstyle.set('vertical-align', "middle");
         if(mediaOptions == undefined) mediaOptions = 14; // reduce-enlarge & keep aspect ration
         const mediaKeepAspectRatio = mediaOptions == 0 || ((mediaOptions & 8) == 8);
 
@@ -91,7 +91,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
         if (image.indexOf('imageWidth=') > 0 && image.indexOf('imageHeight=') > 0)
         {
             let vars = {};
-            image.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
+            image.replace(/[?&]+([^=&]+)=([^&]*)/gi,
                     function(m,key,value) {
                 vars[key] = value;
             });
@@ -124,7 +124,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
                     imgWidth = componentSize.width;
                     imgHeight = componentSize.height;
                 }
-            }        			  
+            }
             else if ((mediaOptions & 2) == 2) // reduce
             {
                 if (widthChange > 1.01 && heightChange > 1.01)
@@ -221,7 +221,7 @@ export class ImageMediaIdDirective implements OnChanges, IViewStateListener, OnD
                     }
                 }
             }
-        }	  
+        }
 
         bgstyle.set('background-size', mediaKeepAspectRatio ? "contain" : "100% 100%");
         bgstyle.set('width', Math.round(imgWidth) + "px");

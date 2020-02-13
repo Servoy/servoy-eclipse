@@ -1,4 +1,5 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild, AfterViewInit, Directive } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,
+        Renderer2, ElementRef, ViewChild, AfterViewInit, Directive } from '@angular/core';
 
 import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
 
@@ -18,7 +19,7 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implemen
     @Input() verticalAlignment;
 
     @ViewChild('child', {static: true}) child:ElementRef;
-    
+
     constructor(renderer: Renderer2) {
         super(renderer);
     }
@@ -31,7 +32,7 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implemen
             } );
         }
     }
-    
+
     ngOnChanges( changes: SimpleChanges ) {
         for ( let property in changes ) {
             let change = changes[property];
@@ -50,7 +51,7 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implemen
         }
         super.ngOnChanges(changes);
     }
-    
+
     public getNativeChild() {
         return this.child.nativeElement;
     }
