@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService } from '../../sablo/converter.service'
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
-import { IFoundset, ChangeListener, ChangeEvent, FoundsetTypeConstants, FoundsetLinkedTypeConstants } from '../../sablo/spectypes.service'
+import { IFoundset, ChangeListener, ChangeEvent, FoundsetTypeConstants, FoundsetLinkedTypeConstants, ViewPort } from '../../sablo/spectypes.service'
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
 import { Deferred } from '../../sablo/util/deferred';
@@ -61,7 +61,7 @@ export class FoundsetLinkedConverter implements IConverter {
                 
                 this.viewportService.updateViewportGranularly(newValue, internalState, serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE],
                         this.converterService.getInDepthProperty(serverJSONValue, ConverterService.TYPES_KEY, FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE),
-                         propertyContext, true, null); //TODO row prototype??
+                         propertyContext, true);
                 this.log.spam("svy foundset linked * firing change listener: granular updates...");
                 internalState.fireChanges(serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE]);
             } else {
@@ -124,14 +124,13 @@ export class FoundsetLinkedConverter implements IConverter {
     
     private getUpdateWholeViewportFunc(propertyContext) {
         return (propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport, conversionInfos) => {
-            let viewPortHolder = { "tmp" : propValue };
-            this.viewportService.updateWholeViewport(viewPortHolder, "tmp", internalState, wholeViewport, conversionInfos, propertyContext);
+            let viewPortHolder = new ViewPort();
+            this.viewportService.updateWholeViewport(viewPortHolder, "rows", internalState, wholeViewport, conversionInfos, propertyContext);
             
-            // updateWholeViewport probably changed "tmp" reference to value of "wholeViewport"...
+            // updateWholeViewport probably changed "rows" reference to value of "wholeViewport"...
             // update current value reference because that is what is present in the model
             propValue.splice(0, propValue.length);
-            let tmp = viewPortHolder["tmp"];
-            for (let tz = 0; tz < tmp.length; tz++) propValue.push(tmp[tz]);
+            for (let tz = 0; tz < viewPortHolder.rows.length; tz++) propValue.push(viewPortHolder.rows[tz]);
             
             if (propValue && internalState && internalState.changeListeners.length > 0) {
                 let notificationParamForListeners : ChangeEvent;
@@ -180,11 +179,9 @@ class FoundsetLinked extends Array<Object> {
     }
 }
 
-//TODO is this really needed?? or we can reuse the fs state class??
 class FoundsetLinkedState {
-    
    
-    changeListeners: Array<ChangeListener>;//TODO check
+    changeListeners: Array<ChangeListener>;
     requests = [];
     conversionInfo = [];
     singleValueState = undefined;
@@ -192,7 +189,7 @@ class FoundsetLinkedState {
     selectionUpdateDefer: Deferred<any>;
     forFoundset: Function;
     recordLinked: boolean = false;
-    push_to_server: string = undefined; //TODO check
+    push_to_server: boolean = undefined;// value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
     
     constructor() {}
     

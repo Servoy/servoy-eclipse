@@ -16,7 +16,7 @@ export class ViewportService {
     constructor( private converterService: ConverterService ) {}
     
     //TODO use type Viewport for viewPortHolder
-    public updateWholeViewport(viewPortHolder, viewPortPropertyName: string, internalState, viewPortUpdate, viewPortUpdateConversions, propertyContext) {
+    public updateWholeViewport(viewPortHolder: ViewPort, viewPortPropertyName: string, internalState, viewPortUpdate, viewPortUpdateConversions, propertyContext) {
         if (viewPortUpdateConversions) {
             // do the actual conversion
             viewPortUpdate = this.converterService.convertFromServerToClient(viewPortUpdate, viewPortUpdateConversions, viewPortHolder[viewPortPropertyName], propertyContext);
@@ -33,8 +33,8 @@ export class ViewportService {
             this.updateRowConversionInfo(i, internalState, serverConversionInfo ? serverConversionInfo[i] : undefined);
     }
     
-    public updateViewportGranularly(viewPort, internalState, rowUpdates, rowUpdateConversions,
-            propertyContext, simpleRowValue/*not key/value pairs in each row*/, rowPrototype) {
+    public updateViewportGranularly(viewPort: any[], internalState, rowUpdates, rowUpdateConversions,
+            propertyContext:(propertyName: string)=>any, simpleRowValue/*not key/value pairs in each row*/, rowPrototype?:any) {
         // partial row updates (remove/insert/update)
 
         // {

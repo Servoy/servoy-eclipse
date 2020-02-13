@@ -137,11 +137,11 @@ export class FoundsetConverter implements IConverter {
                 let oldStartIndex = currentClientValue.viewPort.startIndex;
                 let oldSize = currentClientValue.viewPort.size;
 
-                if (viewPortUpdate[FoundsetConverter.START_INDEX] !== undefined && currentClientValue[FoundsetConverter.VIEW_PORT][FoundsetConverter.START_INDEX] != viewPortUpdate[FoundsetConverter.START_INDEX]) {
+                if (viewPortUpdate[FoundsetConverter.START_INDEX] !== undefined && currentClientValue.viewPort.startIndex != viewPortUpdate[FoundsetConverter.START_INDEX]) {
                     if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_START_INDEX_CHANGED] = { oldValue : currentClientValue.viewPort.startIndex, newValue : viewPortUpdate[FoundsetConverter.START_INDEX] };
                     currentClientValue.viewPort.startIndex = viewPortUpdate[FoundsetConverter.START_INDEX];
                 }
-                if (viewPortUpdate[FoundsetConverter.SIZE] !== undefined && currentClientValue[FoundsetConverter.VIEW_PORT][FoundsetConverter.SIZE] != viewPortUpdate[FoundsetConverter.SIZE]) {
+                if (viewPortUpdate[FoundsetConverter.SIZE] !== undefined && currentClientValue.viewPort.size != viewPortUpdate[FoundsetConverter.SIZE]) {
                     if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_SIZE_CHANGED] = { oldValue : currentClientValue.viewPort.size, newValue : viewPortUpdate[FoundsetConverter.SIZE] };
                     currentClientValue.viewPort.size = viewPortUpdate[FoundsetConverter.SIZE];
                 }
@@ -158,7 +158,7 @@ export class FoundsetConverter implements IConverter {
                     
                     if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_ROWS_COMPLETELY_CHANGED] = { oldValue : oldRows, newValue : currentClientValue.viewPort.rows };
                 } else if (viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] !== undefined) {
-                    this.viewportService.updateViewportGranularly(currentClientValue[FoundsetConverter.VIEW_PORT][FoundsetConverter.ROWS], internalState, viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS], viewPortUpdate[ConverterService.TYPES_KEY] && viewPortUpdate[ConverterService.TYPES_KEY][FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] ? viewPortUpdate[ConverterService.TYPES_KEY][FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] : undefined, propertyContext, false, internalState.rowPrototype);
+                    this.viewportService.updateViewportGranularly(currentClientValue.viewPort.rows, internalState, viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS], viewPortUpdate[ConverterService.TYPES_KEY] && viewPortUpdate[ConverterService.TYPES_KEY][FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] ? viewPortUpdate[ConverterService.TYPES_KEY][FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] : undefined, propertyContext, false, internalState.rowPrototype);
 
                     if (hasListeners) {
                         notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_ROW_UPDATES_RECEIVED] = { updates : viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] }; // viewPortUpdate[UPDATE_PREFIX + ROWS] was already prepared for listeners by $viewportModule.updateViewportGranularly
@@ -207,11 +207,11 @@ export class FoundsetConverter implements IConverter {
                     this.sabloDeferHelper.initInternalStateForDeferring(internalState, "svy foundset * ");
                 }   
                 // convert data if needed - specially done for Date send/receive as the rest are primitives anyway in case of foundset
-                this.viewportService.updateAllConversionInfo(rows, internalState, newValue.viewPort[ConverterService.TYPES_KEY] ? newValue[FoundsetConverter.VIEW_PORT][ConverterService.TYPES_KEY][FoundsetConverter.ROWS] : undefined);
-                if (newValue[FoundsetConverter.VIEW_PORT][ConverterService.TYPES_KEY]) {
+                this.viewportService.updateAllConversionInfo(rows, internalState, newValue.viewPort[ConverterService.TYPES_KEY] ? newValue.viewPort[ConverterService.TYPES_KEY][FoundsetConverter.ROWS] : undefined);
+                if (newValue.viewPort[ConverterService.TYPES_KEY]) {
                     // relocate conversion info in internal state and convert
                     this.converterService.convertFromServerToClient(rows, newValue.viewPort[ConverterService.TYPES_KEY][FoundsetConverter.ROWS], propertyContext);
-                    delete newValue[FoundsetConverter.VIEW_PORT][ConverterService.TYPES_KEY];
+                    delete newValue.viewPort[ConverterService.TYPES_KEY];
                 }
                 // do set prototype after rows are converted
                 for (let i = rows.length - 1; i >= 0; i--) {
@@ -227,7 +227,7 @@ export class FoundsetConverter implements IConverter {
             // restore/add watches
             //TODO watches????? addBackWatches(newValue, componentScope);
             
-            this.log.spam(this.log.buildMessage(() => ("svy foundset * updates or value received from server; new viewport and server size (" + (newValue ? newValue[FoundsetConverter.VIEW_PORT][FoundsetConverter.START_INDEX] + ", " + newValue[FoundsetConverter.VIEW_PORT][FoundsetConverter.SIZE] + ", " + newValue[FoundsetConverter.SERVER_SIZE] + ", " + JSON.stringify(newValue[FoundsetConverter.SELECTED_ROW_INDEXES]) : newValue) + ")")));
+            this.log.spam(this.log.buildMessage(() => ("svy foundset * updates or value received from server; new viewport and server size (" + (newValue ? newValue.viewPort.startIndex + ", " + newValue.viewPort.size + ", " + newValue.serverSize + ", " + JSON.stringify(newValue.selectedRowIndexes) : newValue) + ")")));
             if (notificationParamForListeners && Object.keys(notificationParamForListeners).length > 0) {
                 this.log.spam(this.log.buildMessage(() => ("svy foundset * firing founset listener notifications...")));
                 // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
