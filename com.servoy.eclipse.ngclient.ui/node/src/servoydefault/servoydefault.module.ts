@@ -21,24 +21,24 @@ import { ServoyDefaultCheckGroup } from './checkgroup/checkgroup';
 import { ServoyDefaultRadiogroup } from './radiogroup/radiogroup';
 import { ServoyDefaultCheck } from './check/check';
 import { ServoyDefaultPassword } from './password/password';
-import { ServoyDefaultHtmlarea } from "./htmlarea/htmlarea";
+import { ServoyDefaultHtmlarea } from './htmlarea/htmlarea';
 import { ServoyDefaultRectangle } from './rectangle/rectangle';
 import { ServoyDefaultHTMLView } from './htmlview/htmlview';
 import { ServoyDefaultListBox } from './listbox/listbox';
 import { ServoyDefaultImageMedia } from './imagemedia/imagemedia';
+import {ServoyDefaultSpinner} from './spinner/spinner';
 
 import { SabloModule } from '../sablo/sablo.module'
 import { ServoyPublicModule } from '../ngclient/servoy_public.module'
 
 import { FormattingService, I18NProvider} from '../ngclient/servoy_public'
 
-import { OwlDateTimeModule,OWL_DATE_TIME_FORMATS} from 'ng-pick-datetime';
-import { OwlMomentDateTimeModule ,OWL_MOMENT_DATE_TIME_FORMATS} from 'ng-pick-datetime-moment';
+import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
+import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {ServoyDefaultSpinner} from "./spinner/spinner";
 import { AngularEditorModule } from '@kolkov/angular-editor';
-import { UploadDirective } from "../ngclient/utils/upload.directive";
+import { UploadDirective } from '../ngclient/utils/upload.directive';
 
 import { ServoyDefaultTable } from './table/table';
 
@@ -69,7 +69,7 @@ import { ServoyDefaultTable } from './table/table';
     UploadDirective,
     ServoyDefaultTable
   ],
-  imports:[
+  imports: [
     FormsModule,
     CommonModule,
     NgbModule,
@@ -78,7 +78,7 @@ import { ServoyDefaultTable } from './table/table';
     OwlDateTimeModule,
     OwlMomentDateTimeModule,
     AngularEditorModule,
-	ServoyPublicModule
+    ServoyPublicModule
   ],
   exports: [
             ServoyDefaultTextField,
@@ -106,9 +106,8 @@ import { ServoyDefaultTable } from './table/table';
   ],
   providers: [
               FormattingService,
-              I18NProvider,
-              {provide: OWL_DATE_TIME_FORMATS, useValue: OWL_MOMENT_DATE_TIME_FORMATS}
-                     ],
+              I18NProvider
+             ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA
   ]
