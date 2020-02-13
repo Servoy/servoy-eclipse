@@ -3,7 +3,6 @@ import { Component, Renderer2, OnInit, OnChanges, SimpleChanges} from '@angular/
 import {FormattingService} from '../../ngclient/servoy_public'
 
 import {ServoyDefaultBaseField} from  '../basefield'
-import { ApplicationService } from "../../ngclient/services/application.service";
 
 @Component( {
     selector: 'servoydefault-imagemedia',
@@ -12,6 +11,7 @@ import { ApplicationService } from "../../ngclient/services/application.service"
 export class ServoyDefaultImageMedia extends ServoyDefaultBaseField implements OnInit, OnChanges {
   
     imageURL: string = "servoydefault/imagemedia/res/images/empty.gif";
+    increment: number = 0;
     
     constructor(renderer: Renderer2, 
                 formattingService : FormattingService) {
@@ -43,7 +43,7 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField implements O
     }
     
     private updateImageURL(dp) {
-        if(dp != null) {
+        if(dp != null && dp !='') {
             let contentType = dp.contentType;
             if (contentType != null && contentType != undefined && contentType.indexOf("image") == 0) {
                 this.imageURL = dp.url;
