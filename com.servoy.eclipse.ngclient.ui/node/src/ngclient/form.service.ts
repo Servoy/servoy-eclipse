@@ -10,6 +10,7 @@ import { ConverterService } from '../sablo/converter.service'
 import { LoggerService, LoggerFactory} from '../sablo/logger.service'
 
 import { ServoyService, FormSettings } from './servoy.service'
+import { FoundsetTypeConstants } from '../sablo/spectypes.service';
 
 @Injectable()
 export class FormService {
@@ -163,43 +164,71 @@ export class FormService {
             }
         } );
     }
+    
+    private getFoundsetLinkedDPInfo(propertyName, beanModel) {
+        let propertyNameForServerAndRowID;
+        
+        if ((propertyName.indexOf('.') > 0 || propertyName.indexOf('[') > 0) && propertyName.endsWith("]")) {
+            // TODO this is a big hack - see comment in pushDPChange below
+            
+            // now detect somehow if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
+            let lastIndexOfOpenBracket = propertyName.lastIndexOf('[');
+            let indexInLastArray = parseInt(propertyName.substring(lastIndexOfOpenBracket + 1, propertyName.length - 1));
+            let dpPathWithoutArray = propertyName.substring(0, lastIndexOfOpenBracket);
+            let foundsetLinkedDPValueCandidate = eval('beanModel.' + dpPathWithoutArray);
+            if (foundsetLinkedDPValueCandidate && foundsetLinkedDPValueCandidate.state
+                    && foundsetLinkedDPValueCandidate.state.forFoundset) {
+                
+                // it's very likely a foundsetLinked DP: it has the internals that that property type uses; get the corresponding rowID from the foundset property that it uses
+                // strip the last index as we now identify the record via rowId and server has no use for it anyway (on server side it's just a foundsetlinked property value, not an array, so property name should not contain that last index)
+                propertyNameForServerAndRowID = { propertyNameForServer: dpPathWithoutArray };
+
+                let foundset = foundsetLinkedDPValueCandidate.state.forFoundset();
+                if (foundset) {
+                    propertyNameForServerAndRowID.rowId = foundset.viewPort.rows[indexInLastArray][FoundsetTypeConstants.ROW_ID_COL_KEY];
+                }
+            }   
+        }
+        
+        return propertyNameForServerAndRowID;
+    }
 
     public sendChanges( formname: string, beanname: string, property: string, value: object, oldvalue: object ) {
         const formState = this.formsCache.get( formname );
         const changes = {};
 
-        var conversionInfo = formState.getConversionInfo( beanname );
-        var fslRowID = null;
+        let conversionInfo = formState.getConversionInfo( beanname );
+        let fslRowID = null;
         if ( conversionInfo && conversionInfo[property] ) {
             // I think this never happens currently
             changes[property] = this.converterService.convertFromClientToServer( value, conversionInfo[property], oldvalue );
         } else {
-            // TODO foundset linked stuff.
-            //          var dpValue = null;
-            //
-            //          if (property.indexOf('.') > 0 || property.indexOf('[') > 0) {
-            //              // TODO this is a big hack - it would be nicer in the future if we have type info for all properties on the client and move
-            //              // internal states out of the values of the properties and into a separate locations (so that we can have internal states even for primitive dataprovider types)
-            //              // to have DP types register themselves to the apply() and startEdit() and do the apply/startEdit completely through the property itself (send property updates);
-            //              // then we can get rid of all the custom apply code on server as well as all this pushDPChange on client
-            //              
-            //              // nested property; get the value correctly
-            //              dpValue = eval('formState.model[beanname].' + property)
-            //              
-            //              // now detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
-            //              var foundsetLinkedDPInfo = getFoundsetLinkedDPInfo(property, formState.model[beanname]);
-            //              if (foundsetLinkedDPInfo)   {
-            //                  fslRowID = foundsetLinkedDPInfo.rowId;
-            //                  property = foundsetLinkedDPInfo.propertyNameForServer;
-            //              }   
-            //          } else {
-            //              dpValue = formState.model[beanname][property];
-            //          }
+             //foundset linked stuff.
+             let dpValue = null;
+            
+             if (property.indexOf('.') > 0 || property.indexOf('[') > 0) {
+                 // TODO this is a big hack - it would be nicer in the future if we have type info for all properties on the client and move
+                 // internal states out of the values of the properties and into a separate locations (so that we can have internal states even for primitive dataprovider types)
+                 // to have DP types register themselves to the apply() and startEdit() and do the apply/startEdit completely through the property itself (send property updates);
+                 // then we can get rid of all the custom apply code on server as well as all this pushDPChange on client
+                          
+                 // nested property; get the value correctly
+                 dpValue = eval('formState.getComponent(beanname).model[' + property+']');
+                          
+                 // now detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server
+                 let foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(property, formState.getComponent(beanname));
+                 if (foundsetLinkedDPInfo)   {
+                     fslRowID = foundsetLinkedDPInfo.rowId;
+                     property = foundsetLinkedDPInfo.propertyNameForServer;
+                 }   
+              } else {
+                 dpValue = formState.getComponent(beanname).model[property];
+              }
 
             changes[property] = this.converterService.convertClientObject( value );
         }
 
-        var dpChange = { formname: formname, beanname: beanname, property: property, changes: changes };
+        let dpChange = { formname: formname, beanname: beanname, property: property, changes: changes };
         if ( fslRowID ) {
             dpChange['fslRowID'] = fslRowID;
         }
@@ -251,16 +280,16 @@ export class FormService {
     }
 
     public pushEditingStarted(formname, beanname, propertyname ) {
-        var messageForServer = { formname : formname, beanname : beanname, property : propertyname };
+        let messageForServer = { formname : formname, beanname : beanname, property : propertyname };
 			
         // // detect if this is a foundset linked dataprovider - in which case we need to provide a rowId for it to server and trim down the last array index which identifies the row on client
         // // TODO this is a big hack - see comment in pushDPChange below
-        // var formState = $sabloApplication.getFormStateEvenIfNotYetResolved(formName);
-        // var foundsetLinkedDPInfo = getFoundsetLinkedDPInfo(propertyName, formState.model[beanName]);
-        // if (foundsetLinkedDPInfo)	{
-        //     if (foundsetLinkedDPInfo.rowId) messageForServer['fslRowID'] = foundsetLinkedDPInfo.rowId;
-        //     messageForServer.property = foundsetLinkedDPInfo.propertyNameForServer;
-        // }	
+         let formState = this.formsCache.get(formname);
+         let foundsetLinkedDPInfo = this.getFoundsetLinkedDPInfo(propertyname, formState.getComponent(beanname));
+         if (foundsetLinkedDPInfo)	{
+             if (foundsetLinkedDPInfo.rowId) messageForServer['fslRowID'] = foundsetLinkedDPInfo.rowId;
+             messageForServer.property = foundsetLinkedDPInfo.propertyNameForServer;
+         }	
 
         this.sabloService.callService("formService", "startEdit", messageForServer, true);
     }
