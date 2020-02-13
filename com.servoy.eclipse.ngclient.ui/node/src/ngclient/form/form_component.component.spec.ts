@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
-import { FormComponent,AddAttributeDirective } from './form_component.component';
+import { FormComponent, AddAttributeDirective } from './form_component.component';
 
 import {FormService} from '../form.service';
 import {ServoyService} from '../servoy.service';
@@ -22,13 +22,19 @@ describe('FormComponent', () => {
   let servoyService;
 
   beforeEach(async(() => {
-      sabloService = jasmine.createSpyObj("SabloService", ["callService"]);
-      formService = jasmine.createSpyObj("FormService", {getFormCache:{absolute:true,getComponent:()=>null}, destroy:()=>null});
-      servoyService = jasmine.createSpyObj("ServoyService", ["connect"]);
+      sabloService = jasmine.createSpyObj('SabloService', ['callService']);
+      formService = jasmine.createSpyObj('FormService', {
+                        getFormCache: {
+                                  absolute: true,
+                                  getComponent: () => ({model: {}})
+                                },
+                        destroy: () => null
+                      });
+      servoyService = jasmine.createSpyObj('ServoyService', ['connect']);
     TestBed.configureTestingModule({
-      declarations: [ FormComponent,AddAttributeDirective,ServoyCoreSlider,ErrorBean ],
+      declarations: [ FormComponent, AddAttributeDirective, ServoyCoreSlider, ErrorBean ],
       imports: [
-                ServoyDefaultComponentsModule,ServoyPublicModule
+                ServoyDefaultComponentsModule, ServoyPublicModule
        ],
        providers:    [ {provide: FormService, useValue:  formService },
                                {provide: SabloService, useValue:  sabloService },
