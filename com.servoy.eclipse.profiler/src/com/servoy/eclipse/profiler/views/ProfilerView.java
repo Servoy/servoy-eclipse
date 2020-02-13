@@ -51,6 +51,8 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -62,6 +64,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -972,7 +975,7 @@ public class ProfilerView extends ViewPart
 	private TreeColumn fileColumn;
 	private TableColumn name;
 	private TableColumn time;
-	private TableColumn query;
+	private TableViewerColumn query;
 	private TableColumn arguments;
 	private TableColumn datasource;
 	private TableColumn transaction;
@@ -1125,7 +1128,8 @@ public class ProfilerView extends ViewPart
 
 		methodCallViewer.setInput(getViewSite());
 
-		sqlDataViewer = new TableViewer(sashForm);
+		sqlDataViewer = new TableViewer(sashForm, SWT.FULL_SELECTION);
+
 		Table table = sqlDataViewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
@@ -1140,10 +1144,10 @@ public class ProfilerView extends ViewPart
 		time.setWidth(timeTableColumnWidth);
 		time.setResizable(true);
 
-		query = new TableColumn(table, SWT.NONE);
-		query.setText("Query/Action");
-		query.setWidth(queryTableColumnWidth);
-		query.setResizable(true);
+		query = new TableViewerColumn(sqlDataViewer, SWT.NONE);
+		query.getColumn().setText("Query/Action");
+		query.getColumn().setWidth(queryTableColumnWidth);
+		query.getColumn().setResizable(true);
 
 		arguments = new TableColumn(table, SWT.NONE);
 		arguments.setText("Arguments");
@@ -1165,6 +1169,31 @@ public class ProfilerView extends ViewPart
 		sqlDataViewer.setLabelProvider(new DataCallLabelProvider());
 		sqlDataViewer.setContentProvider(dataCallContentProvider);
 		sqlDataViewer.setInput(getViewSite());
+
+		query.setLabelProvider(new ColumnLabelProvider()
+		{
+			@Override
+			public String getToolTipText(Object element)
+			{
+				String text = getText(element);
+				return text;
+			}
+
+			@Override
+			public String getText(Object element)
+			{
+				if (element instanceof DataCallProfileDataAggregate)
+				{
+					return ((DataCallProfileDataAggregate)element).getQuery();
+				}
+				else if (element instanceof DataCallProfileData)
+				{
+					return ((DataCallProfileData)element).getQuery();
+				}
+				return null;
+			}
+		});
+		ColumnViewerToolTipSupport.enableFor(query.getViewer());
 
 		methodCallViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
@@ -1769,7 +1798,7 @@ public class ProfilerView extends ViewPart
 		mem.putInteger(ARGS_COLUMN_WIDTH_SETTING, argsColumn.getWidth());
 		mem.putInteger(NAME_TABLE_COLUMN_WIDTH_SETTING, name.getWidth());
 		mem.putInteger(TIME_TABLE_COLUMN_WIDTH_SETTING, time.getWidth());
-		mem.putInteger(QUERY_TABLE_COLUMN_WIDTH_SETTING, query.getWidth());
+		mem.putInteger(QUERY_TABLE_COLUMN_WIDTH_SETTING, query.getColumn().getWidth());
 		mem.putInteger(ARGUMENTS_TABLE_COLUMN_WIDTH_SETTING, arguments.getWidth());
 		mem.putInteger(DATASOURCE_TABLE_COLUMN_WIDTH_SETTING, datasource.getWidth());
 		mem.putInteger(TRANSACTION_TABLE_COLUMN_WIDTH_SETTING, transaction.getWidth());
