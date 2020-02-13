@@ -1,11 +1,12 @@
 <input style="width:100%;height:100%;overflow:hidden"
 	   class='svy-textfield svy-field form-control form-control-sm svy-padding-xs'
-	   type="text"  
+	   type="text"
 	   [id]="servoyApi.getMarkupId()"
-	   [value]="findmode ? dataProviderID : dataProviderID | formatFilter:format?.display:format?.type:format" 
+	   [value]="findmode ? dataProviderID : dataProviderID | formatFilter:format?.display:format?.type:format"
 	   (change)="update($event.target.value)"
 	   [svyFormat]="format"
 	   [svyDecimalKeyConverter]="format"
-	   [svyStartEdit]="'dataProviderID'"
+     [svyStartEdit]="'dataProviderID'"
+     [hostComponent]="self"
 	   [svyTooltip]="toolTipText"
-	   #element/> 
+	   #element/>
