@@ -7,7 +7,7 @@ import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 import { FormattingService,TooltipService, I18NProvider} from '../../ngclient/servoy_public'
 import { By, BrowserModule } from '@angular/platform-browser';
 import { ServoyDefaultCalendar } from "./calendar";
-import { DateTimeAdapter, OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
+import { DateTimeAdapter, OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { Renderer2 } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { FormsModule } from '@angular/forms';
