@@ -291,7 +291,7 @@ export class Foundset implements IFoundset {
      * the multiselect mode of the server's foundset; if this is false,
      * selectedRowIndexes can only have one item in it
      */
-    multiSelect: boolean;
+    multiSelect: boolean = false;
     
     /**
      * if the foundset is large and on server-side only part of it is loaded (so
@@ -316,9 +316,7 @@ export class Foundset implements IFoundset {
     
     constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, private logFactory:LoggerFactory, private converterService: ConverterService, public state: FoundsetState, private values?: Array<Object>) {
         this.log = logFactory.getLogger("Foundset");
-        //see https://blog.simontest.net/extend-array-with-typescript-965cc1134b3
-        //set prototype, since adding a create method is not really working if we have the values
-        Object.setPrototypeOf(this, Object.create(Foundset.prototype)); 
+        this.viewPort = new ViewPort();
     }
     
     public loadRecordsAsync(startIndex:number, size:number): Promise<any> {

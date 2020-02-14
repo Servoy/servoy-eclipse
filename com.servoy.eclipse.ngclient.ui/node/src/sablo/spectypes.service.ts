@@ -335,7 +335,7 @@ export class FoundsetLinkedTypeConstants {
 export class ViewPort {
     startIndex: number;
     size: number;
-    rows: object[];
+    rows: object[] = [];
 }
 
 export class ChangeAwareState {
