@@ -139,12 +139,16 @@ public class TutorialView extends ViewPart
 			descriptor = descriptor.increaseHeight(6);
 			stepName.setFont(descriptor.createFont(parent.getDisplay()));
 
-			Label stepDescription = new Label(row, SWT.NONE);
+			Label stepDescription = new Label(row, SWT.WRAP);
 			stepDescription.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 			stepDescription.setText(rowData.optString("description"));
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.widthHint = 200;
+			stepDescription.setLayoutData(gd);
 			descriptor = FontDescriptor.createFrom(stepDescription.getFont());
 			descriptor = descriptor.increaseHeight(2);
 			stepDescription.setFont(descriptor.createFont(parent.getDisplay()));
+
 
 			StyledText gifURL = new StyledText(row, SWT.NONE);
 			gifURL.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
