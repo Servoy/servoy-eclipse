@@ -11,6 +11,7 @@ import { DebugElement, NgModule } from '@angular/core';
 import { ApplicationService } from '../../ngclient/services/application.service';
 import { By } from '@angular/platform-browser';
 import { FileUploadWindowComponent } from '../../ngclient/services/file-upload-window/file-upload-window.component';
+import { ViewportService } from '../../ngclient/services/viewport.service';
 
 @NgModule({
   declarations: [FileUploadWindowComponent],
@@ -32,7 +33,7 @@ describe("ServoyDefaultImageMedia", () => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultImageMedia, UploadDirective],
       imports: [SabloModule, ServoyPublicModule],
-      providers: [FormattingService,TooltipService, ApplicationService, ServoyService, I18NProvider, SvyUtilsService, {provide: ServoyApi, useValue: servoyApi}], 
+      providers: [FormattingService,TooltipService, ApplicationService, ServoyService, I18NProvider, SvyUtilsService, {provide: ServoyApi, useValue: servoyApi}, ViewportService], 
     })
     .compileComponents();
   }));
@@ -50,7 +51,7 @@ describe("ServoyDefaultImageMedia", () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
+  }); 
 
   it('should be the default image url', () => {
     expect(component.imageURL).toEqual('servoydefault/imagemedia/res/images/empty.gif');
