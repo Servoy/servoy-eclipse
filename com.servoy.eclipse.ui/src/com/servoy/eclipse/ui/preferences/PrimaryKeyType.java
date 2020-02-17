@@ -29,7 +29,7 @@ public enum PrimaryKeyType
 {
 	INTEGER(0, IColumnTypes.INTEGER, false, false), //
 	UUD_BYTE_ARRAY(16, IColumnTypes.MEDIA, true, false), //
-	UUD_STRING_ARRAY(32, IColumnTypes.TEXT, true, false), //
+	UUD_STRING_ARRAY(36, IColumnTypes.TEXT, true, false), //
 	UUD_NATIVE(16, IColumnTypes.MEDIA, true, true);
 
 	private final int length;
