@@ -338,7 +338,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			Pair<String, InputStream> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 			toImportSolutions.put(name, solution);
 		}
-		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false);
+		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName());
 
 		IRunnableWithProgress importPackagesRunnable = null;
 		final List<String> packs = configPage.getWebPackagesToImport();
@@ -414,8 +414,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	public static IRunnableWithProgress importSolutions(final Map<String, Pair<String, InputStream>> solutions, final String jobName, String newSolutionName,
-		boolean activateSolution)
+	public IRunnableWithProgress importSolutions(final Map<String, Pair<String, InputStream>> solutions, final String jobName, String newSolutionName)
 	{
 		Set<String> missingServerNames = searchMissingServers(solutions.keySet()).keySet();
 		IRunnableWithProgress importSolutionsRunnable = new IRunnableWithProgress()
@@ -434,7 +433,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
 							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
-								shouldAskOverwrite, activateSolution);
+								shouldAskOverwrite);
 							monitor.worked(1);
 						}
 					}
@@ -484,7 +483,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return importSolutionsRunnable;
 	}
 
-	public static HashMap<String, List<String>> searchMissingServers(final Collection<String> solutions)
+	public HashMap<String, List<String>> searchMissingServers(final Collection<String> solutions)
 	{
 		IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 		IServerManagerInternal serverHandler = ApplicationServerRegistry.get().getServerManager();
@@ -535,7 +534,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs()).anyMatch(s -> s.isPostgresDriver() && s.isEnabled());
 	}
 
-	protected static void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
+	protected void createMissingDbServers(Set<String> missingServerNames, IProgressMonitor monitor)
 	{
 		ServerConfig origConfig = Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
 			.filter(
@@ -598,8 +597,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
 	}
 
-	public static void importSolution(Pair<String, InputStream> packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
-		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution) throws IOException
+	public void importSolution(Pair<String, InputStream> packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
+		boolean reportImportFail, boolean shouldAskOverwrite) throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -617,7 +616,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
 		importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
 		importSolutionWizard.setAllowSolutionFilePathSelection(false);
-		importSolutionWizard.setActivateSolution(activateSolution);
 		importSolutionWizard.init(PlatformUI.getWorkbench(), null);
 		importSolutionWizard.setReportImportFail(reportImportFail);
 		importSolutionWizard.setSkipModulesImport(!shouldAskOverwrite);
@@ -651,7 +649,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		cleanUPImportSolution(importSolutionFile);
 	}
 
-	public static void addAsModule(final String name, final String targetSolution, final File importSolutionFile)
+	public void addAsModule(final String name, final String targetSolution, final File importSolutionFile)
 	{
 		final IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
 		final ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
@@ -702,7 +700,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 	}
 
-	private static void cleanUPImportSolution(File importSolutionFile)
+	private void cleanUPImportSolution(File importSolutionFile)
 	{
 		try
 		{
