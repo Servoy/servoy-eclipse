@@ -18,8 +18,11 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.PreparedStatement;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -51,17 +54,22 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidato
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectChooserComposite;
 import com.servoy.eclipse.core.repository.EclipseImportUserChannel;
 import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersions11AndHigher;
+import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.CryptUtils;
+import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.ServoyException;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
 import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
 
@@ -120,6 +128,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean allowDataModelChanges = false;
 	private boolean importSampleData = false;
 	private boolean allowSQLKeywords;
+	private boolean createMissingServer = false;
+	private String isMissingServer;
 
 	private static String getInitialImportPath()
 	{
@@ -254,7 +264,116 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						return super.askAllowSQLKeywords();
 					}
 
+					private ServerConfig getValidPostgresServerConfig()
+					{
+						return Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+							.filter(
+								s -> s.isEnabled() && s.isPostgresDriver() &&
+									ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
+									((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()))
+										.isValid())
+							.findAny()
+							.orElse(null);
+					}
 
+					@Override
+					public int askUnknownServerAction(String name)
+					{
+						if (ImportSolutionWizard.this.shouldCreateMissingServer())
+						{
+							ServerConfig sc = getValidPostgresServerConfig();
+							if (sc == null)
+							{
+								//if we don't have a valid postgres config, we ask the user
+								//to select an existing server or cancel
+								int asked = super.askUnknownServerAction(name);
+								if (asked == CANCEL_ACTION)
+								{
+									//if the user cancelled we use this info to know what further actions to take
+									//for instance show a tutorial on how to create a db connection
+									isMissingServer = name;
+									monitor.setCanceled(true);
+								}
+								return asked;
+							}
+
+							ServerConfig serverConfig = createServer(name, sc);
+							if (serverConfig == null)
+							{
+								return cannotCreateServer(monitor, name);
+							}
+							try
+							{
+								ApplicationServerRegistry.get().getServerManager().testServerConfigConnection(serverConfig, 0);
+								ApplicationServerRegistry.get().getServerManager().saveServerConfig(null, serverConfig);
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
+								return cannotCreateServer(monitor, name);
+							}
+
+							return RETRY_ACTION;
+						}
+						else
+						{
+							return super.askUnknownServerAction(name);
+						}
+					}
+
+					protected int cannotCreateServer(IProgressMonitor monitor, String name)
+					{
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot create server '" + name + "'",
+									"An unexpected error occured while creating new server, please create the server manually.");
+							}
+						});
+						isMissingServer = name;
+						monitor.setCanceled(true);
+						return CANCEL_ACTION;
+					}
+
+					protected ServerConfig createServer(String name, ServerConfig sc)
+					{
+						ServerConfig serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(),
+							DatabaseUtils.getPostgresServerUrl(sc, name),
+							sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
+							sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false,
+							sc.getPrefixTables(), sc.getQueryProcedures(), -1, sc.getSelectINValueCountLimit(), sc.getDialectClass());
+						if (ApplicationServerRegistry.get().getServerManager().validateServerConfig(null, serverConfig) != null)
+						{
+							// something is wrong
+							return null;
+						}
+
+						// create server
+						ITransactionConnection connection = null;
+						PreparedStatement ps = null;
+						try
+						{
+							IServerInternal serverPrototype = (IServerInternal)ApplicationServerRegistry.get().getServerManager()
+								.getServer(sc.getServerName());
+							connection = serverPrototype.getUnmanagedConnection();
+							ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
+							ps.execute();
+							ps.close();
+							ps = null;
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+							serverConfig = null;
+						}
+						finally
+						{
+							Utils.closeConnection(connection);
+							Utils.closeStatement(ps);
+						}
+						return serverConfig;
+					}
 				};
 				IApplicationServerSingleton as = ApplicationServerRegistry.get();
 				try
@@ -350,13 +469,22 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		});
 	}
 
+	public void shouldCreateMissingServer(boolean create)
+	{
+		this.createMissingServer = create;
+	}
+
+	protected boolean shouldCreateMissingServer()
+	{
+		return createMissingServer;
+	}
 
 	protected boolean askAllowSQLKeywords()
 	{
 		return allowSQLKeywords;
 	}
 
-	protected void shouldAllowSQLKeywords(boolean allow)
+	public void shouldAllowSQLKeywords(boolean allow)
 	{
 		this.allowSQLKeywords = allow;
 	}
@@ -615,5 +743,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			}
 			return finishPage;
 		}
+	}
+
+	public String isMissingServer()
+	{
+		return isMissingServer;
 	}
 }
