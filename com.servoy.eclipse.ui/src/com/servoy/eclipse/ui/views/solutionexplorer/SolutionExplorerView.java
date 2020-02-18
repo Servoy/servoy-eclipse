@@ -40,7 +40,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -2156,29 +2155,19 @@ public class SolutionExplorerView extends ViewPart
 
 	protected void refreshAfterPendingChangesWereTreatedInModel(Runnable refreshRunnable)
 	{
-		Display.getDefault().asyncExec(new Runnable()
+		UIJob job = new UIJob("Refresh solex")
 		{
-			public void run()
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor)
 			{
-				// we are in UI thread, but we must wait for ServoyModel to be updated by a fellow resources listener (so we do this by running the
-				// update)
-				try
-				{
-					ServoyModel.getWorkspace().run(new IWorkspaceRunnable()
-					{
-
-						public void run(IProgressMonitor monitor) throws CoreException
-						{
-							refreshRunnable.run();
-						}
-					}, null);
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError("Cannot update SolEx content", e);
-				}
+				refreshRunnable.run();
+				return Status.OK_STATUS;
 			}
-		});
+		};
+		job.setUser(false);
+		job.setSystem(true);
+		job.setRule(ServoyModel.getWorkspace().getRoot());
+		job.schedule();
 	}
 
 	private void addResourceListener(boolean reregisterExistingListener)
