@@ -424,7 +424,7 @@ public class ModelUtils
 
 		List<Form> formHierarchy = editingFlattenedSolution.getFormHierarchy(formBase);
 
-		if (sm != null && !sm.getParent().equals(formBase))
+		if (sm != null && !sm.getParent().equals(formBase) && sm.getParent() instanceof Form)
 		{
 			// found form method by id, now find the actual implementation based on name (respecting form hierarchy)
 			for (Form f : formHierarchy)
