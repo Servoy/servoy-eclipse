@@ -964,7 +964,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
 					try
 					{
-						marker.setAttribute("packageName", webcomponentNameAndSpec[0]);
+						if (marker != null) marker.setAttribute("packageName", webcomponentNameAndSpec[0]);
 					}
 					catch (CoreException e)
 					{
