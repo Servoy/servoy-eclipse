@@ -402,22 +402,15 @@ public class ModelUtils
 			// this code shouldn't be hit anymore
 			if (table != null)
 			{
-				try
+				Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(table);
+				while (tableNodes.hasNext())
 				{
-					Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(table);
-					while (tableNodes.hasNext())
+					TableNode tableNode = tableNodes.next();
+					IPersist method = AbstractBase.selectById(tableNode.getAllObjects(), methodId);
+					if (method instanceof IScriptProvider)
 					{
-						TableNode tableNode = tableNodes.next();
-						IPersist method = AbstractBase.selectById(tableNode.getAllObjects(), methodId);
-						if (method instanceof IScriptProvider)
-						{
-							return (IScriptProvider)method;
-						}
+						return (IScriptProvider)method;
 					}
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
 				}
 			}
 		}
