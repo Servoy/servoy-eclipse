@@ -49,6 +49,7 @@ import org.eclipse.ui.progress.IProgressService;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -200,7 +201,10 @@ public class BrowserDialog extends Dialog
 
 										ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel()
 											.getActiveResourcesProject();
-										importSolutionWizard.doImport(importSolutionFile, null, project, false, false, true, null, null, monitor);
+										String resourceProjectName = project == null ? getNewResourceProjectName() : null;
+
+										importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
+											monitor);
 										if (importSolutionWizard.isMissingServer() != null)
 										{
 											showTutorial[0] = introURL.getParameter("createDBConn");
@@ -304,6 +308,17 @@ public class BrowserDialog extends Dialog
 					}
 
 				}
+			}
+
+			private String getNewResourceProjectName()
+			{
+				String newResourceProjectName = "resources";
+				int counter = 1;
+				while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+				{
+					newResourceProjectName = "resources" + counter++;
+				}
+				return newResourceProjectName;
 			}
 
 			protected void showTinyTutorial(final String tutorialUrl)
