@@ -17,13 +17,17 @@
 package com.servoy.eclipse.ui.views;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
@@ -56,13 +60,23 @@ import org.eclipse.ui.views.properties.IPropertySheetEntryListener;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetSorter;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectFunctionDefinition;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
+import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -221,7 +235,8 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							TreeItem item = tree.getItem(new Point(event.x, event.y));
 							if (item != null)
 							{
-								String text = null;
+								String text = setTooltipText(item);
+
 								if ((RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONFOCUSLOSTMETHODID.getPropertyName(), null).equals(
 									item.getText(0)) ||
 									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(
@@ -268,6 +283,76 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							}
 						}
 					}
+				}
+
+				/**
+				 * This method will set a tool tip text for the hovered property of a web component.
+				 *
+				 * @param item the selected property
+				 * @return the tool tip text
+				 */
+				private String setTooltipText(TreeItem item)
+				{
+					Object selectionObject;
+					ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart().getSite()
+						.getSelectionProvider()
+						.getSelection();
+					Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
+					// iterate over all selected components
+					while (iterator.hasNext())
+					{
+						selectionObject = iterator.next();
+						IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
+						if (persist instanceof IFormElement)
+						{
+							// get the specification file
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+								.getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
+
+							// search for a model property to match the hovered property
+							PropertyDescription pdModel = spec.getProperty(item.getText());
+							if (pdModel != null)
+							{
+								Object tag = pdModel.getTag("tooltipText");
+								if (tag != null)
+								{
+									return tag.toString();
+								}
+							}
+							// model property not found, search for functions and handlers
+							String tooltipText = tooltipTextForFunctionsAndHandlers(item, spec.getApiFunctions().entrySet().iterator());
+							return (tooltipText != null) ? tooltipText : tooltipTextForFunctionsAndHandlers(item, spec.getHandlers().entrySet().iterator());
+						}
+					}
+					return null;
+				}
+
+				/**
+				 * Iterates over functions or handlers to check if the selected element matches.
+				 *
+				 * @param item the selected property
+				 * @param it the iterator for functions or handlers
+				 */
+				private String tooltipTextForFunctionsAndHandlers(TreeItem item, Iterator<Entry<String, WebObjectFunctionDefinition>> it)
+				{
+					while (it.hasNext())
+					{
+						PropertyDescription propertyDescription = it.next().getValue().getAsPropertyDescription();
+						if (propertyDescription.getName().contains(item.getText()))
+						{
+							try
+							{
+								JSONObject jsonObject = new JSONObject(propertyDescription.getConfig().toString());
+								return jsonObject.getString("tooltipText");
+							}
+							catch (JSONException err)
+							{
+								Debug.log("Exception while parsing the json object: " + err);
+							}
+						}
+					}
+
+					return null;
 				}
 			};
 			tree.addListener(SWT.Dispose, treeListener);
