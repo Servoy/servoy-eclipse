@@ -5434,31 +5434,32 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					while (tables.hasNext())
 					{
 						final String tableName = tables.next();
-						final ITable table = server.getTable(tableName);
-						IResource res = project;
-						if (getServoyModel().getDataModelManager() != null &&
-							getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
-						{
-							res = getServoyModel().getDataModelManager().getDBIFile(serverName, tableName);
-						}
-						if (table.isTableInvalidInDeveloperBecauseNoPk() && !table.isMarkedAsHiddenInDeveloper())
-						{
 
-							final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
-							final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
-								IMarker.PRIORITY_HIGH, null, null);
-							try
-							{
-								marker.setAttribute("serverName", serverName);
-								marker.setAttribute("tableName", tableName);
-							}
-							catch (CoreException e)
-							{
-								Debug.error(e);
-							}
-						}
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
+							final ITable table = server.getTable(tableName);
+							IResource res = project;
+							if (getServoyModel().getDataModelManager() != null &&
+								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
+							{
+								res = getServoyModel().getDataModelManager().getDBIFile(serverName, tableName);
+							}
+							if (table.isTableInvalidInDeveloperBecauseNoPk())
+							{
+
+								final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
+								final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
+									IMarker.PRIORITY_HIGH, null, null);
+								try
+								{
+									marker.setAttribute("serverName", serverName);
+									marker.setAttribute("tableName", tableName);
+								}
+								catch (CoreException e)
+								{
+									Debug.error(e);
+								}
+							}
 							Map<String, Column> columnsByName = new HashMap<String, Column>();
 							Map<String, Column> columnsByDataProviderID = new HashMap<String, Column>();
 							for (Column column : table.getColumns())
