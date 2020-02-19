@@ -376,9 +376,7 @@ public class WarExporter
 			args.add(wroPropertiesFile.getAbsolutePath());
 			args.add("-m");
 			args.add("-c");
-			String processors = "semicolonAppender";
-			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,yuiCssMin";
-			processors += ",cssDataUri";
+			String processors = "semicolonAppender,cssDataUri";
 			args.add(processors);
 
 			ProcessBuilder builder = new ProcessBuilder(args);
@@ -558,13 +556,9 @@ public class WarExporter
 				}
 			}
 		}
-		Attr attr;
 		Element element = doc.createElement(suffix);
 		group.appendChild(element);
 		element.setTextContent(path);
-		attr = doc.createAttribute("minimize");
-		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && !minFound));
-		element.setAttributeNode(attr);
 	}
 
 	/**

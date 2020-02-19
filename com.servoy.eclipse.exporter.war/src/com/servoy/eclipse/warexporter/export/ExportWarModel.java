@@ -105,7 +105,6 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String defaultAdminPassword;
 
 	private final List<String> excludedPackages = new ArrayList<>();
-	private boolean minimizeJsCssResources;
 
 	private boolean ready = false;
 	private boolean useAsRealAdminUser;
@@ -193,8 +192,6 @@ public class ExportWarModel extends AbstractWarExportModel
 		clearReferencesStatic = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStatic"));
 		clearReferencesStopThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopThreads"));
 		clearReferencesStopTimerThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopTimerThreads"));
-
-		minimizeJsCssResources = Utils.getAsBoolean(settings.get("export.minimizeJsCssResources"));
 
 		if (settings.get("export.overwriteDBServerProperties") != null)
 		{
@@ -393,7 +390,6 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.tomcat.clearReferencesStatic", clearReferencesStatic);
 		settings.put("export.tomcat.clearReferencesStopThreads", clearReferencesStopThreads);
 		settings.put("export.tomcat.clearReferencesStopTimerThreads", clearReferencesStopTimerThreads);
-		settings.put("export.minimizeJsCssResources", minimizeJsCssResources);
 		settings.put("export.defaultAdminUser", defaultAdminUser);
 		if (defaultAdminPassword != null)
 			settings.put("export.defaultAdminPassword", encryptPassword(desCipher, "export.defaultAdminPassword", defaultAdminPassword));
@@ -967,16 +963,6 @@ public class ExportWarModel extends AbstractWarExportModel
 	public boolean isUseAsRealAdminUser()
 	{
 		return useAsRealAdminUser;
-	}
-
-	public boolean isMinimizeJsCssResources()
-	{
-		return minimizeJsCssResources;
-	}
-
-	public void setMinimizeJsCssResources(boolean selection)
-	{
-		minimizeJsCssResources = selection;
 	}
 
 	public boolean isReady()

@@ -494,12 +494,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public boolean isMinimizeJsCssResources()
-		{
-			return configuration.isMinimizeJsCssResources();
-		}
-
-		@Override
 		public Collection<License> getLicenses()
 		{
 			return configuration.getLicenses().values();

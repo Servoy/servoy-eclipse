@@ -254,6 +254,17 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	/*
 	 * (non-Javadoc)
 	 *
+	 * @see com.servoy.j2db.persistence.IServerInternal#syncTableObjWithDB(com.servoy.j2db.persistence.Table, java.sql.Connection, boolean)
+	 */
+	@Override
+	public String[] syncTableObjWithDB(Table table, Connection connection, boolean createMissingDBSequences) throws SQLException, RepositoryException
+	{
+		return syncTableObjWithDB(table, createMissingDBSequences, createMissingDBSequences);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see com.servoy.j2db.persistence.IServerInternal#syncWithExternalTable(java.lang.String, com.servoy.j2db.persistence.Table)
 	 */
 	@Override
@@ -303,6 +314,12 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	public String[] removeTable(ITable t) throws SQLException, RepositoryException
 	{
 		return removeTable(t, null);
+	}
+
+	@Override
+	public String[] removeTable(Table t, Connection connection) throws SQLException, RepositoryException
+	{
+		return removeTable(t);
 	}
 
 	public String[] removeTable(ITable t, List<String> nodesToDelete) throws RepositoryException

@@ -18,14 +18,13 @@
 package com.servoy.eclipse.ui.dialogs;
 
 import java.awt.Dimension;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -50,14 +49,15 @@ import org.eclipse.ui.progress.IProgressService;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.views.TutorialView;
-import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
+import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -158,15 +158,16 @@ public class BrowserDialog extends Dialog
 						}
 					}
 
-					if (introURL.getParameter("importSample") != null)
+					String importSample = introURL.getParameter("importSample");
+					final String[] showTutorial = new String[] { null };
+					if (importSample != null)
 					{
 						if (!shell.isDisposed()) shell.close();
 
-						Map<String, Pair<String, InputStream>> solutions = new HashMap<>();
-						try (InputStream is = new URL(introURL.getParameter("importSample").startsWith("https://") ? introURL.getParameter("importSample")
-							: "https://" + introURL.getParameter("importSample")).openStream())
+						try (InputStream is = new URL(importSample.startsWith("https://") ? importSample
+							: "https://" + importSample).openStream())
 						{
-							String[] urlParts = introURL.getParameter("importSample").split("/");
+							String[] urlParts = importSample.split("/");
 							if (urlParts.length >= 1)
 							{
 								final String solutionName = urlParts[urlParts.length - 1].replace(".servoy", "");
@@ -174,25 +175,61 @@ public class BrowserDialog extends Dialog
 								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 								if (sp == null)
 								{
-									solutions.put(solutionName, new Pair<String, InputStream>("", is));
-									IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutions, "Import solution", null,
-										true);
-									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-									progressService.run(true, false, importSolutionsRunnable);
-								}
-								progressService.run(true, false, new IRunnableWithProgress()
-								{
-
-									@Override
-									public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+									final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(),
+										solutionName + ".servoy");
+									if (importSolutionFile.exists())
 									{
+										importSolutionFile.delete();
+									}
+									try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
+									{
+										Utils.streamCopy(is, fos);
+									}
+
+									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
+									progressService.run(true, false, (IProgressMonitor monitor) -> {
+										ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+										importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
+										importSolutionWizard.setAllowSolutionFilePathSelection(false);
+										importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+										importSolutionWizard.setReportImportFail(true);
+										importSolutionWizard.setSkipModulesImport(false);
+										importSolutionWizard.setAllowDataModelChanges(true);
+										importSolutionWizard.setImportSampleData(true);
+										importSolutionWizard.shouldAllowSQLKeywords(true);
+										importSolutionWizard.shouldCreateMissingServer(true);
+
+										ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel()
+											.getActiveResourcesProject();
+										String resourceProjectName = project == null ? getNewResourceProjectName() : null;
+
+										importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
+											monitor);
+										if (importSolutionWizard.isMissingServer() != null)
+										{
+											showTutorial[0] = introURL.getParameter("createDBConn");
+										}
+
+										try
+										{
+											importSolutionFile.delete();
+										}
+										catch (RuntimeException e)
+										{
+											Debug.error(e);
+										}
+									});
+								}
+								else
+								{
+									progressService.run(true, false, (IProgressMonitor monitor) -> {
 										ServoyModelManager.getServoyModelManager()
 											.getServoyModel()
 											.setActiveProject(ServoyModelManager.getServoyModelManager()
 												.getServoyModel()
 												.getServoyProject(solutionName), true);
-									}
-								});
+									});
+								}
 								ServoyModelManager.getServoyModelManager()
 									.getServoyModel()
 									.addActiveProjectListener(new IActiveProjectListener()
@@ -231,7 +268,11 @@ public class BrowserDialog extends Dialog
 							Debug.error(e);
 						}
 					}
-					if (introURL.getParameter("showTinyTutorial") != null)
+					if (showTutorial[0] != null)
+					{
+						showTinyTutorial(showTutorial[0]);
+					}
+					else if (introURL.getParameter("showTinyTutorial") != null)
 					{
 						showTinyTutorial(introURL);
 						if (!shell.isDisposed()) shell.close();
@@ -249,14 +290,50 @@ public class BrowserDialog extends Dialog
 					{
 						Rectangle size = getParent().getBounds();
 						Rectangle bounds = new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
-							(size.height - (int)(size.height / 1.5)) / 2 + size.y, (int)(size.width / 1.5), (int)(size.height / 1.5));
+							(size.height - (int)(size.height / 1.5)) / 2 + size.y, (int)(size.width / 1.5),
+							(int)(size.height / 1.5));
 						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
 						shell.layout(true, true);
 						return;
 					}
 
-					introURL.execute();
+					try
+					{
+						introURL.execute();
+					}
+					catch (Exception e)
+					{
+						Debug.error(e);
+					}
+
+				}
+			}
+
+			private String getNewResourceProjectName()
+			{
+				String newResourceProjectName = "resources";
+				int counter = 1;
+				while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+				{
+					newResourceProjectName = "resources" + counter++;
+				}
+				return newResourceProjectName;
+			}
+
+			protected void showTinyTutorial(final String tutorialUrl)
+			{
+				try
+				{
+					TutorialView view = (TutorialView)PlatformUI.getWorkbench()
+						.getActiveWorkbenchWindow()
+						.getActivePage()
+						.showView(TutorialView.PART_ID);
+					view.open(tutorialUrl.startsWith("https://") ? tutorialUrl : "https://" + tutorialUrl);
+				}
+				catch (PartInitException e)
+				{
+					Debug.error(e);
 				}
 			}
 

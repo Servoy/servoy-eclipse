@@ -86,7 +86,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String defaultAdminUser = "defaultAdminUser";
 	private static final String defaultAdminPassword = "defaultAdminPassword";
 	private static final String useAsRealAdminUser = "useAsRealAdminUser";
-	private static final String minimizeJsCss = "minimize";
 	private static final String licenses = "licenses";
 	private static final String license = "license";
 	private static final String license_name_suffix = ".company_name";
@@ -249,7 +248,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Context element; may only be used with createTomcatContextXML.\n"
 			+ "        -" + useAsRealAdminUser + " ... the  default admin user login  given via   -" + defaultAdminUser + "\n"
 			+ "             above will be available as a normal admin user in solutions as well.\n"
-			+ "        -" + minimizeJsCss + " ... minimize JS and CSS files \n"
 			+ "        -" + license+license_name_suffix +" OR "+license+".<i>"+license_name_suffix+",\n"
 			+ "             The name of the company that has the license,  where <i> is used when there are\n"
 			+ "             multiple licenses:\n"
@@ -660,11 +658,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean isUseAsRealAdminUser()
 	{
 		return argumentsMap.containsKey(useAsRealAdminUser);
-	}
-
-	public boolean isMinimizeJsCssResources()
-	{
-		return argumentsMap.containsKey(minimizeJsCss);
 	}
 
 	public Map<String, License> getLicenses()
