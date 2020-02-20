@@ -257,6 +257,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	private Boolean skipModuleChanged = null;
 
+	private volatile boolean doneFired = false;
+
 	protected ServoyModel()
 	{
 		activeProjectListeners = new ArrayList<IActiveProjectListener>();
@@ -1342,11 +1344,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	public void fireLoadingDone()
 	{
+		doneFired = true;
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
 			{
 				Arrays.asList(doneListeners.toArray(new IModelDoneListener[doneListeners.size()])).stream().forEach(listener -> listener.modelDone());
+				doneListeners.clear();
 			}
 		});
 
@@ -1804,14 +1808,15 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	public void addDoneListener(IModelDoneListener listener)
 	{
-		doneListeners.add(listener);
+		if (doneFired)
+		{
+			listener.modelDone();
+		}
+		else
+		{
+			doneListeners.add(listener);
+		}
 	}
-
-	public void removeDoneListener(IModelDoneListener listener)
-	{
-		doneListeners.remove(listener);
-	}
-
 
 	/**
 	 * @see firePersistsChanged
