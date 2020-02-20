@@ -173,7 +173,6 @@ export class FoundsetConverter implements IConverter {
                // conversion to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
                //TODO ?? newValue = SabloUtils.cloneWithDifferentPrototype(serverJSONValue, Foundset.prototype);
                 newValue = new Foundset(this.sabloService, this.sabloDeferHelper, this.logFactory, this.converterService, currentClientValue && currentClientValue.state ? currentClientValue.state : new FoundsetState() );
-                newValue[SabloUtils.DEFAULT_CONVERSION_TO_SERVER_FUNC] = () => {   return this[FoundsetConverter.FOUNDSET_ID]; };
                 Object.keys(serverJSONValue).forEach((prop) => {  
                     newValue[prop] = serverJSONValue[prop];
                 });
@@ -316,7 +315,7 @@ export class Foundset implements IFoundset {
     
     constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, private logFactory:LoggerFactory, private converterService: ConverterService, public state: FoundsetState, private values?: Array<Object>) {
         this.log = logFactory.getLogger("Foundset");
-        this.viewPort = new ViewPort();
+        this.viewPort = { startIndex: undefined, size: undefined, rows: []};
     }
     
     public loadRecordsAsync(startIndex:number, size:number): Promise<any> {
@@ -345,7 +344,7 @@ export class Foundset implements IFoundset {
         return this.state.deferred[requestID].defer.promise;
     }
     
-    public loadExtraRecordsAsync(negativeOrPositiveCount:number, dontNotifyYet:boolean): Promise<any>{
+    public loadExtraRecordsAsync(negativeOrPositiveCount:number, dontNotifyYet?:boolean): Promise<any>{
         this.log.spam(this.log.buildMessage(() => ("svy foundset * loadExtraRecordsAsync requested with (" + negativeOrPositiveCount + ", " + dontNotifyYet + ")")));
         if (isNaN(negativeOrPositiveCount)) throw new Error("loadExtraRecordsAsync: extrarecords is not a number (" + negativeOrPositiveCount + ")");
 
@@ -447,6 +446,10 @@ export class Foundset implements IFoundset {
     }
     public removeChangeListener(listener: ChangeListener) {
        this.state.removeChangeListener(listener);
+    }
+
+    public _dctsf() {
+        return this.foundsetId;
     }
 }
 

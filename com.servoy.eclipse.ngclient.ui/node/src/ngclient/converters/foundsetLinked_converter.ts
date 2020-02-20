@@ -124,7 +124,7 @@ export class FoundsetLinkedConverter implements IConverter {
     
     private getUpdateWholeViewportFunc(propertyContext) {
         return (propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport, conversionInfos) => {
-            let viewPortHolder = new ViewPort();
+            let viewPortHolder = { startIndex: undefined, size: undefined, rows: [] };
             this.viewportService.updateWholeViewport(viewPortHolder, "rows", internalState, wholeViewport, conversionInfos, propertyContext);
             
             // updateWholeViewport probably changed "rows" reference to value of "wholeViewport"...

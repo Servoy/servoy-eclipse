@@ -332,10 +332,10 @@ export class FoundsetLinkedTypeConstants {
     public static readonly RECORD_LINKED = "recordLinked";
 } 
 
-export class ViewPort {
+export type ViewPort  = {
     startIndex: number;
     size: number;
-    rows: object[] = [];
+    rows: object[];
 }
 
 export class ChangeAwareState {
