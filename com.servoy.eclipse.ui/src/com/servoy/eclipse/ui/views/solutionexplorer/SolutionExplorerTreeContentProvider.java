@@ -425,14 +425,7 @@ public class SolutionExplorerTreeContentProvider
 					{
 					}
 				}
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						addPluginsNodeChildren(plugins);
-					}
-				});
+				addPluginsNodeChildren(plugins);
 				return Status.OK_STATUS;
 			}
 		};
@@ -628,7 +621,6 @@ public class SolutionExplorerTreeContentProvider
 			allSolutionsNode.children = new PlatformSimpleUserNode[0];
 			return;
 		}
-
 		// the set of solutions a user can work with at a given time is determined
 		// by the active solution and active editor (in case of a calculation
 		// being edited);
@@ -735,18 +727,23 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else
 				{
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, servoyProject,
-						getServoyProjectImage(servoyProject, false, true));
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, servoyProject, null)
+					{
+						@Override
+						public String getToolTipText()
+						{
+							return servoyProject.getProject().getName() + "(" + getSolutionTypeAsString(servoyProject) + ")";
+						}
+
+						@Override
+						public Image getIcon()
+						{
+							return getServoyProjectImage(servoyProject, false, true);
+						}
+					};
 					node.setEnabled(false);
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
-
-					//String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
-					//if (solutionName == null) solutionName = servoyProject.getSolution().getName();
-					// above code would load all solutions
-					// do not load all solutions at startup by reading solution directly
-					node.setToolTipText(servoyProject.getProject().getName() + "(" + getSolutionTypeAsString(servoyProject) + ")");
-
 				}
 			}
 		}
@@ -944,8 +941,9 @@ public class SolutionExplorerTreeContentProvider
 						if (components.size() > 0)
 						{
 							Collections.sort(components);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
-								SolutionSerializer.COMPONENTS_DIR_NAME);
+							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
+								.getFolder(
+									SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
@@ -961,8 +959,9 @@ public class SolutionExplorerTreeContentProvider
 						if (layouts.size() > 0)
 						{
 							Collections.sort(layouts);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
-								SolutionSerializer.COMPONENTS_DIR_NAME);
+							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
+								.getFolder(
+									SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
@@ -2203,8 +2202,9 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else
 					{
-						IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
-							isService ? SolutionSerializer.SERVICES_DIR_NAME : SolutionSerializer.COMPONENTS_DIR_NAME);
+						IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
+							.getFolder(
+								isService ? SolutionSerializer.SERVICES_DIR_NAME : SolutionSerializer.COMPONENTS_DIR_NAME);
 						icon = loadImageFromFolder(folder, spec.getIcon());
 					}
 				}
