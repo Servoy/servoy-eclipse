@@ -1006,7 +1006,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 //					autoSetActiveProject = servoyProjects[i++];
 //				}
 //			}
-			if (autoSetActiveProject != null && autoSetActiveProject.getSolution() != null)
+			if (autoSetActiveProject != null)
 			{
 				activatingProject.set(true);
 				if (Display.getCurrent() != null)
