@@ -13,13 +13,7 @@ import { ViewportService} from '../services/viewport.service';
 import { DateConverter } from './date_converter';
 
 describe('FoundsetConverter', () => {
-    
-    const FILTER = "filter";
-    const HANDLED = "handledID";
-    const ID_KEY = "id";
-    const VALUE_KEY = "value";
-    const VALUES = "values";
-    
+
     let converterService: ConverterService;
     let loggerFactory;
     let sabloService: SabloService;
@@ -134,7 +128,7 @@ describe('FoundsetConverter', () => {
                 }
         };
         fs = converterService.convertFromServerToClient(updateValue,'foundset', fs);
-        fs.state.setChangeNotifier(function () { changeNotified = true });
+        fs.state.setChangeNotifier(() => { changeNotified = true });
         let copy = Object.assign({}, updateValue);
         delete copy["w"]; // this one goes to internal state
         // TODO expect(fs).toEqual(copy);
@@ -575,7 +569,7 @@ describe('FoundsetConverter', () => {
         expect(fs).toEqual(expectedfs);
     });
 
-    it("Should delete first position (new record should be received in its place)", function() {
+    it("Should delete first position (new record should be received in its place)", () => {
         let rows = [{"d": someDate, "i": 1234, "_svyRowId": "5.11112;_1"},
                     {"d": someDate, "i": 1234, "_svyRowId": "5.11113;_2"},
                     {"d": someDateMs, "i": 1234, "_svyRowId": "5.10350;_0"},
@@ -634,7 +628,7 @@ describe('FoundsetConverter', () => {
         expect(fs).toEqual(expectedfs);
     });
 
-    it("Should scroll down to bottom of foundset - viewport needs to be expanded )", function() {
+    it("Should scroll down to bottom of foundset - viewport needs to be expanded )", () => {
         let rows = [{"d": someDate, "i": 1234, "_svyRowId": "5.11113;_2"},
                     {"d": someDateMs, "i": 1234, "_svyRowId": "5.10350;_0"},
                     {"d": someDateMs, "i": 1234, "_svyRowId": "5.11110;_1"},
