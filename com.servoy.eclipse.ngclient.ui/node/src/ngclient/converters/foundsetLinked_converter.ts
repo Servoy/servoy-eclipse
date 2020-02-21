@@ -166,7 +166,7 @@ export class FoundsetLinkedConverter implements IConverter {
     }
 }
 
-class FoundsetLinked extends Array<Object> {
+export class FoundsetLinked extends Array<Object> {
     state : FoundsetLinkedState;
     idForFoundset : string;
 
