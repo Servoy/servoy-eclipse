@@ -478,7 +478,7 @@ describe('FoundsetConverter', () => {
             "serverSize": 14,
             "selectedRowIndexes": [ 2 ],
             "multiSelect": false,
-            "viewPort": { "startIndex": 0, "size": 9, "rows": rows }
+            "viewPort": { "startIndex": 0, "size": 9, "rows": rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
         fs.state.setChangeNotifier(() => { changeNotified = true });
@@ -517,7 +517,7 @@ describe('FoundsetConverter', () => {
         expectedfs.serverSize = 15;
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
-        rows[8] = {"d": someDateMs, "i": 1234, "_svyRowId": "5.11115;_29"};
+        rows[8] = {"d": someDate, "i": 1234, "_svyRowId": "5.11115;_29"};
         expectedfs.viewPort = { startIndex: 0, size: 9, rows: rows };
         expect(fs).toEqual(expectedfs);
     });
@@ -537,7 +537,7 @@ describe('FoundsetConverter', () => {
             "serverSize": 15,
             "selectedRowIndexes": [ 2 ],
             "multiSelect": false,
-            "viewPort": { "startIndex": 0, "size": 9, "rows": rows }
+            "viewPort": { "startIndex": 0, "size": 9, "rows": rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
         fs.state.setChangeNotifier(() => { changeNotified = true });
@@ -590,7 +590,7 @@ describe('FoundsetConverter', () => {
             "serverSize": 15,
             "selectedRowIndexes": [ 2 ],
             "multiSelect": false,
-            "viewPort": { "startIndex": 0, "size": 9, "rows": rows }
+            "viewPort": { "startIndex": 0, "size": 9, "rows": rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
         fs.state.setChangeNotifier(() => { changeNotified = true });
@@ -642,13 +642,14 @@ describe('FoundsetConverter', () => {
                     {"d": someDateMs, "i": 1234, "_svyRowId": "5.11108;_3"},
                     {"d": someDateMs, "i": 1234, "_svyRowId": "5.11109;_4"},
                     {"d": someDateMs, "i": 1234, "_svyRowId": "5.11106;_5"},
-                    {"d": someDate, "i": 1234, "_svyRowId": "5.11106;_29"}
+                    {"d": someDate, "i": 1234, "_svyRowId": "5.11106;_29"},
+                    {"d": someDate, "i": 1234, "_svyRowId": "5.11107;_29"}
                 ];
         let serverValue = {
             "serverSize": 13,
             "selectedRowIndexes": [ 1 ],
             "multiSelect": false,
-            "viewPort": { "startIndex": 0, "size": 9, "rows": rows }
+            "viewPort": { "startIndex": 0, "size": 9, "rows": rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
         fs.state.setChangeNotifier(() => { changeNotified = true });
@@ -689,25 +690,26 @@ describe('FoundsetConverter', () => {
         expectedfs.serverSize = 13;
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
-        rows.push({"d": someDateMs, "i": 1234, "_svyRowId": "5.10610;_9"});
-        rows.push({"d": someDateMs, "i": 1234, "_svyRowId": "5.10631;_10"});
-        rows.push({"d": someDateMs, "i": 1234, "_svyRowId": "5.10787;_11"});
-        rows.push({"d": someDateMs, "i": 1234, "_svyRowId": "5.10832;_12"});
+        rows.push({"d": someDate, "i": 1234, "_svyRowId": "5.10610;_9"});
+        rows.push({"d": someDate, "i": 1234, "_svyRowId": "5.10631;_10"});
+        rows.push({"d": someDate, "i": 1234, "_svyRowId": "5.10787;_11"});
+        rows.push({"d": someDate, "i": 1234, "_svyRowId": "5.10832;_12"});
         expectedfs.viewPort = { startIndex: 0, size: 13, rows: rows};
         expect(fs).toEqual(expectedfs);
 
         //Should send change of date value to server
-        /*let newDate : Date = fs.viewPort.rows[12]['d'] = new Date(new Date().getTime() + 1);
+        let newDate : Date = fs.viewPort.rows[12]['d'] = new Date(new Date().getTime() + 1);
+        fs.updateViewportRecord(fs.viewPort.rows[12]['_svyRowId'], "d", newDate, someDateMs);
         expect(getAndClearNotified()).toEqual(true);
         expect(fs.state.isChanged()).toEqual(true);
         expect(converterService.convertFromClientToServer(fs, 'foundset', fs)).toEqual(
-                [ { viewportDataChanged: { _svyRowId: '5.10832;_12', dp: 'd', value: newDate.getTime() } } ]
+                [ { viewportDataChanged: { _svyRowId: '5.10832;_12', dp: 'd', value: converterService.convertFromClientToServer(newDate, 'Date') } } ]
         );
         expect(getAndClearNotified()).toEqual(false);
         expect(fs.state.isChanged()).toEqual(false);
         
         //Should send change of int value to server
-        fs.viewPort.rows[0]['i']= 4321;
+        fs.updateViewportRecord(fs.viewPort.rows[0]['_svyRowId'], "i", 4321, fs.viewPort.rows[0]['i']); //WAS fs.viewPort.rows[0]['i']= 4321;
         expect(getAndClearNotified()).toEqual(true);
         expect(fs.state.isChanged()).toEqual(true);
         expect(converterService.convertFromClientToServer(fs, 'foundset', fs)).toEqual(
@@ -726,6 +728,6 @@ describe('FoundsetConverter', () => {
                 [ { sort: [ { name: 'i', direction: 'asc' }, { name: 'd', direction: 'desc' } ] } ]
         );
         expect(getAndClearNotified()).toEqual(false);
-        expect(fs.state.isChanged()).toEqual(false);*/
+        expect(fs.state.isChanged()).toEqual(false);
     });
 });
