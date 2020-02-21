@@ -302,11 +302,8 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			errorMsg.append("Export path must to be specified");
 			return errorMsg;
 		}
-		else if (winPlatform)
-		{
-			final File f = new File(value);
-			if (!f.mkdir()) errorMsg.append("Export path is not specified correctly");
-		}
+		final File f = new File(value);
+		if (!f.mkdir()) errorMsg.append("Export path can't be created (permission issues?)");
 
 		File myFile = new File(settings.get("icon_path"));
 		if (myFile.exists() && myFile.isFile() && myFile.length() > LOGO_SIZE * 1024)
