@@ -2091,27 +2091,40 @@ public class SolutionExplorerTreeContentProvider
 					}
 					if (scriptObject != null)
 					{
-						Image image = null;
-						if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
-						{
-							image = ImageDescriptor.createFromURL(((IIconProvider)plugin).getIconUrl()).createImage();
-						}
-						else
-						{
-							Icon icon = plugin.getImage();
-							if (icon != null)
-							{
-								image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay(), 16, 16);
-							}
-						}
-						if (image != null) pluginImages.add(image);//keeping a list so we can dispose them when they are not needed anymore
-						if (image == null)
-						{
-							image = uiActivator.loadImageFromBundle("plugin.png");
-						}
 
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, image,
-							scriptObject.getClass());
+
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, null,
+							scriptObject.getClass())
+						{
+							@Override
+							public Image getIcon()
+							{
+								Image image = super.getIcon();
+								if (image == null)
+								{
+									if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
+									{
+										image = ImageDescriptor.createFromURL(((IIconProvider)plugin).getIconUrl()).createImage();
+									}
+									else
+									{
+										Icon icon = plugin.getImage();
+										if (icon != null)
+										{
+											image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay(), 16, 16);
+										}
+									}
+									if (image != null) pluginImages.add(image);//keeping a list so we can dispose them when they are not needed anymore
+									if (image == null)
+									{
+										image = uiActivator.loadImageFromBundle("plugin.png");
+									}
+									setIcon(image);
+									image = super.getIcon();
+								}
+								return image;
+							}
+						};
 						if (view.isNonEmptyPlugin(node))
 						{
 							plugins.add(node);
