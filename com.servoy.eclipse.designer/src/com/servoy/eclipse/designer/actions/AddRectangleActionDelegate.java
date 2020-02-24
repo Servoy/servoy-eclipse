@@ -26,15 +26,20 @@ import com.servoy.j2db.persistence.RectShape;
  * Add a shape.
  * <p>
  * The actual command is performed via the selected edit parts' edit policy.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class AddRectangleActionDelegate extends AbstractEditpartActionDelegate
 {
 	public AddRectangleActionDelegate()
 	{
 		super(VisualFormEditor.REQ_PLACE_RECT_SHAPE);
+	}
+
+	@Override
+	protected void fillExtendedData()
+	{
 		addSetPropertyValue(
 			"shapeType",
 			Integer.valueOf(((ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(RectShape.RECTANGLE))));
