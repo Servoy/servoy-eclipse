@@ -198,6 +198,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
+import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.querybuilder.impl.QBAggregate;
 import com.servoy.j2db.querybuilder.impl.QBColumn;
@@ -3080,14 +3081,24 @@ public class TypeCreator extends TypeCache
 							createProperty("it2be_menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'), "Window plugin", null)));
 					}
 
-					Image clientImage = null;
-					Icon icon = clientPlugin.getImage();
-					if (icon != null)
+					Image clientImage = images.get(clientPlugin.getName());
+					if (clientImage == null)
 					{
-						clientImage = images.get(clientPlugin.getName());
-						if (clientImage == null)
+						if (clientPlugin instanceof IIconProvider && ((IIconProvider)clientPlugin).getIconUrl() != null)
 						{
-							clientImage = UIUtils.getSWTImageFromSwingIcon(icon, Display.getDefault(), 16, 16);
+							clientImage = ImageDescriptor.createFromURL(((IIconProvider)clientPlugin).getIconUrl()).createImage();
+						}
+						else
+						{
+							Icon icon = clientPlugin.getImage();
+							if (icon != null)
+							{
+								if (clientImage == null)
+								{
+									clientImage = UIUtils.getSWTImageFromSwingIcon(icon, Display.getDefault(), 16, 16);
+								}
+							}
+
 						}
 						if (clientImage != null)
 						{
@@ -3095,6 +3106,7 @@ public class TypeCreator extends TypeCache
 							images.put(clientPlugin.getName(), clientImage);
 						}
 					}
+
 					if (clientImage == null)
 					{
 						property.setAttribute(IMAGE_DESCRIPTOR, PLUGIN_DEFAULT);
@@ -3103,7 +3115,6 @@ public class TypeCreator extends TypeCache
 					{
 						property.setAttribute(IMAGE_DESCRIPTOR, ImageDescriptor.createFromImage(clientImage));
 					}
-
 					members.add(property);
 				}
 			}
