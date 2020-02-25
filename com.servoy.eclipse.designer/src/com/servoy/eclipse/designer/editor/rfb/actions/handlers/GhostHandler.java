@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.StringWriter;
@@ -651,15 +652,17 @@ public class GhostHandler implements IServerService
 		});
 		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
 		Map<String, FormElementGroup> groups = new HashMap<>();
-		Iterator<IPersist> it = editorPart.getForm().getAllObjects();
+		Form form = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
+		Iterator<IPersist> it = form.getAllObjects();
 		int formHeight = 0;
-		if (editorPart.getForm().getParts().hasNext())
+
+		if (form.getParts().hasNext())
 		{
 			formHeight = editorPart.getForm().getSize().height;
 		}
 		else
 		{
-			Form form = editorPart.getForm();
+			form = editorPart.getForm();
 			while (formHeight == 0 && (form = form.extendsForm) != null)
 			{
 				formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
@@ -671,7 +674,7 @@ public class GhostHandler implements IServerService
 			if (persist instanceof IFormElement && !PersistHelper.isOverrideOrphanElement((IFormElement)persist))
 			{
 				IFormElement fe = (IFormElement)persist;
-				Point location = fe.getLocation();
+				Point location = CSSPositionUtils.getLocation(fe);
 				if (!editorPart.getForm().isResponsiveLayout() && ((location.x > editorPart.getForm().getWidth()) || (location.y > formHeight)))
 				{
 					outsideElements.add(fe);
@@ -759,14 +762,16 @@ public class GhostHandler implements IServerService
 			writer.key("type").value(type);
 			writer.key("text").value(getGhostLabel(persist, "element"));
 			writer.key("location");
+			Point location = CSSPositionUtils.getLocation(persist);
 			writer.object();
-			writer.key("x").value(persist.getLocation().x);
-			writer.key("y").value(persist.getLocation().y);
+			writer.key("x").value(location.x);
+			writer.key("y").value(location.y);
 			writer.endObject();
 			writer.key("size");
+			Dimension size = CSSPositionUtils.getSize(persist);
 			writer.object();
-			writer.key("width").value(persist.getSize().width);
-			writer.key("height").value(persist.getSize().height);
+			writer.key("width").value(size.width);
+			writer.key("height").value(size.height);
 			writer.endObject();
 			writer.endObject();
 		}

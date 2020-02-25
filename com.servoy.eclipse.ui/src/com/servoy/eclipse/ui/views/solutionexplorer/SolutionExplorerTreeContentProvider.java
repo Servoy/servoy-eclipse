@@ -140,6 +140,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.plugins.IClientPlugin;
+import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
 import com.servoy.j2db.scripting.IReturnedTypesProvider;
@@ -247,7 +248,7 @@ public class SolutionExplorerTreeContentProvider
 
 	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
-	private final List<Image> imagesConvertedFromSwing = new ArrayList<Image>();
+	private final List<Image> pluginImages = new ArrayList<Image>();
 
 	private boolean includeModules;
 	private SpecProviderState componentsSpecProviderState;
@@ -425,14 +426,7 @@ public class SolutionExplorerTreeContentProvider
 					{
 					}
 				}
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						addPluginsNodeChildren(plugins);
-					}
-				});
+				addPluginsNodeChildren(plugins);
 				return Status.OK_STATUS;
 			}
 		};
@@ -496,11 +490,11 @@ public class SolutionExplorerTreeContentProvider
 		allSolutionsNode = null;
 
 		// dispose the (plugin) images that were allocated in SWT after conversion from Swing
-		for (Image i : imagesConvertedFromSwing)
+		for (Image i : pluginImages)
 		{
 			i.dispose();
 		}
-		imagesConvertedFromSwing.clear();
+		pluginImages.clear();
 
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(this);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeAvailableNGPackageProjectsListener(this);
@@ -628,7 +622,6 @@ public class SolutionExplorerTreeContentProvider
 			allSolutionsNode.children = new PlatformSimpleUserNode[0];
 			return;
 		}
-
 		// the set of solutions a user can work with at a given time is determined
 		// by the active solution and active editor (in case of a calculation
 		// being edited);
@@ -735,18 +728,23 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else
 				{
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, servoyProject,
-						getServoyProjectImage(servoyProject, false, true));
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayValue, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, servoyProject, null)
+					{
+						@Override
+						public String getToolTipText()
+						{
+							return servoyProject.getProject().getName() + "(" + getSolutionTypeAsString(servoyProject) + ")";
+						}
+
+						@Override
+						public Image getIcon()
+						{
+							return getServoyProjectImage(servoyProject, false, true);
+						}
+					};
 					node.setEnabled(false);
 					allSolutionChildren.add(node);
 					node.parent = allSolutionsNode;
-
-					//String solutionName = (String)servoyProject.getSolution().getProperty(StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName());
-					//if (solutionName == null) solutionName = servoyProject.getSolution().getName();
-					// above code would load all solutions
-					// do not load all solutions at startup by reading solution directly
-					node.setToolTipText(servoyProject.getProject().getName() + "(" + getSolutionTypeAsString(servoyProject) + ")");
-
 				}
 			}
 		}
@@ -944,8 +942,9 @@ public class SolutionExplorerTreeContentProvider
 						if (components.size() > 0)
 						{
 							Collections.sort(components);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
-								SolutionSerializer.COMPONENTS_DIR_NAME);
+							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
+								.getFolder(
+									SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
@@ -961,8 +960,9 @@ public class SolutionExplorerTreeContentProvider
 						if (layouts.size() > 0)
 						{
 							Collections.sort(layouts);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
-								SolutionSerializer.COMPONENTS_DIR_NAME);
+							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
+								.getFolder(
+									SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
@@ -2091,20 +2091,40 @@ public class SolutionExplorerTreeContentProvider
 					}
 					if (scriptObject != null)
 					{
-						Icon icon = plugin.getImage();
-						Image image = null; // will need SWT image
-						if (icon != null)
-						{
-							image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay(), 16, 16);
-							if (image != null) imagesConvertedFromSwing.add(image);
-						}
-						if (image == null)
-						{
-							image = uiActivator.loadImageFromBundle("plugin.png");
-						}
 
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, image,
-							scriptObject.getClass());
+
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, null,
+							scriptObject.getClass())
+						{
+							@Override
+							public Image getIcon()
+							{
+								Image image = super.getIcon();
+								if (image == null)
+								{
+									if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
+									{
+										image = ImageDescriptor.createFromURL(((IIconProvider)plugin).getIconUrl()).createImage();
+									}
+									else
+									{
+										Icon icon = plugin.getImage();
+										if (icon != null)
+										{
+											image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay(), 16, 16);
+										}
+									}
+									if (image != null) pluginImages.add(image);//keeping a list so we can dispose them when they are not needed anymore
+									if (image == null)
+									{
+										image = uiActivator.loadImageFromBundle("plugin.png");
+									}
+									setIcon(image);
+									image = super.getIcon();
+								}
+								return image;
+							}
+						};
 						if (view.isNonEmptyPlugin(node))
 						{
 							plugins.add(node);
@@ -2203,8 +2223,9 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else
 					{
-						IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
-							isService ? SolutionSerializer.SERVICES_DIR_NAME : SolutionSerializer.COMPONENTS_DIR_NAME);
+						IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject()
+							.getFolder(
+								isService ? SolutionSerializer.SERVICES_DIR_NAME : SolutionSerializer.COMPONENTS_DIR_NAME);
 						icon = loadImageFromFolder(folder, spec.getIcon());
 					}
 				}

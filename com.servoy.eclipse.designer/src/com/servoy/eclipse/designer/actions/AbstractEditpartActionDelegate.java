@@ -45,9 +45,9 @@ import com.servoy.eclipse.designer.property.SetValueCommand;
  * <p>
  * The action delegate subclasses collect data for the command (typically via a dialog). The command is performed by the selected edit parts' edit policy using
  * a DataRequest request.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindowActionDelegate, IActionDelegate2
 {
@@ -56,7 +56,6 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 	protected IAction fAction;
 	protected final RequestType requestType;
 	protected Map<Object, Object> extendedData = null;
-
 
 	public AbstractEditpartActionDelegate(RequestType requestType)
 	{
@@ -101,7 +100,7 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 			return;
 		}
 
-		// run the action on the first one if multiple are selected (for example, multiple labels are selected, 
+		// run the action on the first one if multiple are selected (for example, multiple labels are selected,
 		// add tab should be done once only because it actually works on the parent)
 		EditPart editPart = editParts.get(0);
 		Request request = getRequest(editPart);
@@ -125,19 +124,29 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 		return affected == null ? null : affected.getParent();
 	}
 
+	@SuppressWarnings("unchecked")
 	private Request getRequest(EditPart editPart)
 	{
 		Request request = createRequest(editPart);
-		if (extendedData != null && request != null)
+		if (request != null)
 		{
-			request.getExtendedData().putAll(extendedData);
+			if (extendedData == null) fillExtendedData();
+			if (extendedData != null)
+				request.getExtendedData().putAll(extendedData);
 		}
 		return request;
 	}
 
 	/**
+	 * @return
+	 */
+	protected void fillExtendedData()
+	{
+	}
+
+	/**
 	 * Collect the request data, typically via a dialog to the user.
-	 * 
+	 *
 	 * @param editPart
 	 * @return
 	 */
@@ -148,7 +157,7 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 
 	/**
 	 * Put some extra data in the request, to be interpreted by the executing command.
-	 * 
+	 *
 	 * @param key
 	 * @param value
 	 */
@@ -163,7 +172,7 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 
 	/**
 	 * Override for extra checks on the edit part
-	 * 
+	 *
 	 * @param editPart
 	 * @return
 	 */
@@ -195,7 +204,7 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 
 	/**
 	 * Get the currently selected edit parts.
-	 * 
+	 *
 	 */
 	protected List<EditPart> getEditparts()
 	{
@@ -208,7 +217,7 @@ public abstract class AbstractEditpartActionDelegate implements IWorkbenchWindow
 		Iterator< ? > elements = ((IStructuredSelection)fSelection).iterator();
 		while (elements.hasNext())
 		{
-			EditPart editPart = (EditPart)ResourceUtil.getAdapter(elements.next(), EditPart.class, true);
+			EditPart editPart = ResourceUtil.getAdapter(elements.next(), EditPart.class, true);
 			if (editPart != null)
 			{
 				editParts.add(editPart);

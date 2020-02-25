@@ -28,9 +28,9 @@ import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
 /**
  * Add a label with some special settings so that it appears as a horizontal line.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 
 public class AddHorizontalLineActionDelegate extends AddLabelActionDelegate
@@ -38,11 +38,18 @@ public class AddHorizontalLineActionDelegate extends AddLabelActionDelegate
 
 	public AddHorizontalLineActionDelegate()
 	{
+	}
+
+
+	@Override
+	protected void fillExtendedData()
+	{
 		addSetPropertyValue("text", "");
 		addSetPropertyValue("borderType", new SpecialMatteBorder(1, 0, 0, 0, Color.black, Color.black, Color.black, Color.black));
 		addSetPropertyValue(
 			"horizontalAlignment",
-			Integer.valueOf(((ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
+			Integer
+				.valueOf(((ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
 		addSetPropertyValue("transparent", Boolean.TRUE);
 		addSetPropertyValue("size", new Dimension(40, 1));
 	}

@@ -59,7 +59,6 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.IModelDoneListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
@@ -91,7 +90,7 @@ public class Activator extends AbstractUIPlugin
 {
 
 	/**
-	 * 
+	 *
 	 */
 	public static final String TUTORIALS_URL = "https://tutorials.servoy.com/solutions/content/index.html?loginToken=";
 
@@ -255,15 +254,7 @@ public class Activator extends AbstractUIPlugin
 
 			}
 		});
-		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(new IModelDoneListener()
-		{
-			@Override
-			public void modelDone()
-			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().removeDoneListener(this);
-				showLoginAndStart();
-			}
-		});
+		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> showLoginAndStart());
 	}
 
 	/**

@@ -235,7 +235,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							TreeItem item = tree.getItem(new Point(event.x, event.y));
 							if (item != null)
 							{
-								String text = setTooltipText(item);
+								String text = getTooltipText(item);
 
 								if ((RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONFOCUSLOSTMETHODID.getPropertyName(), null).equals(
 									item.getText(0)) ||
@@ -286,12 +286,12 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				}
 
 				/**
-				 * This method will set a tool tip text for the hovered property of a web component.
+				 * This method will get the tool tip text of the selected property.
 				 *
 				 * @param item the selected property
 				 * @return the tool tip text
 				 */
-				private String setTooltipText(TreeItem item)
+				private String getTooltipText(TreeItem item)
 				{
 					Object selectionObject;
 					ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart().getSite()
@@ -303,13 +303,16 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					{
 						selectionObject = iterator.next();
 						IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
-						if (persist instanceof IFormElement)
+						IPersist finalPersist = (persist instanceof IFormElement) ? persist : persist.getParent();
+						if (finalPersist instanceof IFormElement)
 						{
 							// get the specification file
 							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-								.getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
+								.getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)finalPersist));
 
-							// search for a model property to match the hovered property
+							String tooltipText = null;
+
+							// search for a model property to match the selected item
 							PropertyDescription pdModel = spec.getProperty(item.getText());
 							if (pdModel != null)
 							{
@@ -319,35 +322,89 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 									return tag.toString();
 								}
 							}
-							// model property not found, search for functions and handlers
-							String tooltipText = tooltipTextForFunctionsAndHandlers(item, spec.getApiFunctions().entrySet().iterator());
-							return (tooltipText != null) ? tooltipText : tooltipTextForFunctionsAndHandlers(item, spec.getHandlers().entrySet().iterator());
+
+							// check custom properties
+							Map<String, PropertyDescription> customProperties = spec.getCustomJSONProperties();
+							if (customProperties != null)
+							{
+								tooltipText = getPropertyTooltipText(customProperties, item);
+								if (tooltipText != null)
+								{
+									return tooltipText;
+								}
+							}
+
+							// check functions and handlers
+							tooltipText = tooltipTextForFunctionsAndHandlers(item, spec.getApiFunctions());
+							return (tooltipText != null) ? tooltipText : tooltipTextForFunctionsAndHandlers(item, spec.getHandlers());
 						}
 					}
 					return null;
 				}
 
 				/**
-				 * Iterates over functions or handlers to check if the selected element matches.
+				 * Iterates over the custom properties and gets the tool tip text (if defined)
+				 *
+				 * @param properties the custom properties
+				 * @param item the selected property
+				 * @return the tool tip text
+				 */
+				private String getPropertyTooltipText(Map<String, PropertyDescription> properties, TreeItem item)
+				{
+					String result = null;
+					Iterator<Entry<String, PropertyDescription>> it = properties.entrySet().iterator();
+					while (it.hasNext())
+					{
+						PropertyDescription propertyDescription = it.next().getValue();
+						if (propertyDescription.getName().equals(item.getText()))
+						{
+							Object tag = propertyDescription.getTag("tooltipText");
+							if (tag != null)
+							{
+								return tag.toString();
+							}
+						}
+
+						// check for other properties recursively
+						Map<String, PropertyDescription> internalProperties = propertyDescription.getProperties();
+						if (internalProperties != null && !internalProperties.isEmpty())
+						{
+							result = getPropertyTooltipText(propertyDescription.getProperties(), item);
+							if (result != null)
+							{
+								return result;
+							}
+						}
+					}
+					return null;
+				}
+
+				/**
+				 * Iterates over functions or handlers and gets the tool tip text.
 				 *
 				 * @param item the selected property
 				 * @param it the iterator for functions or handlers
+				 * @return the tool tip text
 				 */
-				private String tooltipTextForFunctionsAndHandlers(TreeItem item, Iterator<Entry<String, WebObjectFunctionDefinition>> it)
+				private String tooltipTextForFunctionsAndHandlers(TreeItem item, Map<String, WebObjectFunctionDefinition> values)
 				{
-					while (it.hasNext())
+					if (values != null)
 					{
-						PropertyDescription propertyDescription = it.next().getValue().getAsPropertyDescription();
-						if (propertyDescription.getName().contains(item.getText()))
+						Iterator<Entry<String, WebObjectFunctionDefinition>> it = values.entrySet().iterator();
+						while (it.hasNext())
 						{
-							try
+							PropertyDescription propertyDescription = it.next().getValue().getAsPropertyDescription();
+							if (propertyDescription.getName().contains(item.getText()))
 							{
-								JSONObject jsonObject = new JSONObject(propertyDescription.getConfig().toString());
-								return jsonObject.getString("tooltipText");
-							}
-							catch (JSONException err)
-							{
-								Debug.log("Exception while parsing the json object: " + err);
+								try
+								{
+									JSONObject jsonObject = new JSONObject(propertyDescription.getConfig().toString());
+									return jsonObject.getString("tooltipText");
+								}
+								catch (JSONException err)
+								{
+									Debug.log("Exception while parsing the json object: " + err);
+								}
 							}
 						}
 					}
