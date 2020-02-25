@@ -47,7 +47,9 @@ public class OpenWebPackageManagerCommandHandler extends AbstractHandler impleme
 	@Override
 	public boolean isEnabled()
 	{
-		return true;
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+		return activeProject != null;
 	}
 
 	/*
