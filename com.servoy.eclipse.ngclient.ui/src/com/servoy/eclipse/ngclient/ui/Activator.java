@@ -42,6 +42,20 @@ public class Activator extends Plugin
 	public void start(BundleContext context) throws Exception
 	{
 		plugin = this;
+		File stateLocation = Activator.getInstance().getStateLocation().toFile();
+		this.projectFolder = new File(stateLocation, "target");
+		new DistFolderCreatorJob(projectFolder).schedule();
+//		extractNode();
+//		copyNodeFolder();
+	}
+
+	public void copyNodeFolder()
+	{
+		new NodeFolderCreatorJob(this.projectFolder).schedule();
+	}
+
+	public void extractNode()
+	{
 		synchronized (plugin)
 		{
 			extractingNode = new Job("extracting nodejs")
@@ -72,11 +86,6 @@ public class Activator extends Plugin
 			};
 		}
 		extractingNode.schedule();
-
-		File stateLocation = Activator.getInstance().getStateLocation().toFile();
-		this.projectFolder = new File(stateLocation, "target");
-
-		new NodeFolderCreatorJob(this.projectFolder).schedule();
 	}
 
 	/**

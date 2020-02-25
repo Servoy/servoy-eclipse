@@ -117,14 +117,14 @@ public class NodeFolderCreatorJob extends Job
 		System.err.println("copied " + (System.currentTimeMillis() - time));
 		if (executeInstall) Activator.getInstance().executeNPMInstall();
 		else Activator.getInstance().executeNPMBuild();
-		createFileWatcher();
+		createFileWatcher(nodeFolder, "node");
 		System.err.println("done " + (System.currentTimeMillis() - time));
 		return Status.OK_STATUS;
 	}
 
-	private boolean ignoredResource(String filename)
+	private static boolean ignoredResource(String filename)
 	{
-		return filename.startsWith("/node_modules/") || filename.startsWith("/dist/") || filename.startsWith("/node/") || filename.endsWith(".spec.ts");
+		return filename.startsWith("/node_modules/") || filename.startsWith("/node/") || filename.endsWith(".spec.ts");
 	}
 
 
@@ -132,7 +132,7 @@ public class NodeFolderCreatorJob extends Job
 	 * This is is really only for using the developer in source mode. so that it will watch the node folder.
 	 * @param nodeFolder
 	 */
-	private void createFileWatcher()
+	static void createFileWatcher(File nodeFolder, String sourceDir)
 	{
 		String location = Activator.getInstance().getBundle().getLocation();
 		int index = location.indexOf("file:/");
@@ -140,7 +140,7 @@ public class NodeFolderCreatorJob extends Job
 		{
 			try
 			{
-				File file = new File(new File(new URI(location.substring(index))), "node");
+				File file = new File(new File(new URI(location.substring(index))), sourceDir);
 				if (file.exists())
 				{
 					final WatchService watchService = FileSystems.getDefault().newWatchService();
@@ -223,7 +223,7 @@ public class NodeFolderCreatorJob extends Job
 		}
 	}
 
-	private static void createFolder(File folder)
+	static void createFolder(File folder)
 	{
 		if (!folder.exists())
 		{
@@ -235,7 +235,7 @@ public class NodeFolderCreatorJob extends Job
 	 * @param file
 	 * @param watchService
 	 */
-	private void addAllDirs(File dir, WatchService watchService)
+	private static void addAllDirs(File dir, WatchService watchService)
 	{
 		String filename = dir.toURI().getPath();
 		int index = filename.indexOf("/node/");
@@ -278,7 +278,7 @@ public class NodeFolderCreatorJob extends Job
 	 * @throws CoreException
 	 * @throws IOException
 	 */
-	private void copyOrCreateFile(String filename, File nodeFolder, InputStream is)
+	static void copyOrCreateFile(String filename, File nodeFolder, InputStream is)
 	{
 		File file = new File(nodeFolder, filename);
 		try

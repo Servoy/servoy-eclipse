@@ -20,7 +20,6 @@ package com.servoy.eclipse.debug;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
@@ -45,8 +44,8 @@ public interface NGClientStarter
 	 */
 	default void runProgressBarAndNGClient(IProgressMonitor monitor)
 	{
-		Job[] buildJobs = Job.getJobManager().find(NGClientConstants.NPM_BUILD_JOB);
-		if (buildJobs.length == 0 || RunNPMCommand.isNGBuildRunning())
+//		Job[] buildJobs = Job.getJobManager().find(NGClientConstants.NPM_BUILD_JOB);
+		if ( /* buildJobs.length == 0 || */ RunNPMCommand.isNGBuildRunning())
 		{
 			Display.getDefault().asyncExec(() -> {
 				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
@@ -58,7 +57,7 @@ public interface NGClientStarter
 						public void run(IProgressMonitor monitorNpmBuild) throws InvocationTargetException, InterruptedException
 						{
 							monitorNpmBuild.beginTask(NGClientConstants.NPM_CONFIGURATION_TITLE_PROGRESS_BAR, IProgressMonitor.UNKNOWN);
-							while (Job.getJobManager().find(NGClientConstants.NPM_BUILD_JOB).length == 0 || RunNPMCommand.isNGBuildRunning())
+							while (/* Job.getJobManager().find(NGClientConstants.NPM_BUILD_JOB).length == 0 || */RunNPMCommand.isNGBuildRunning())
 							{
 								// verify the NG build job at every second
 								// the progress bar is completed if the command takes more than the given workload
