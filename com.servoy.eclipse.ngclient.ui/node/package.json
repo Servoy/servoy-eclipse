@@ -28,7 +28,7 @@
     "@danielmoncada/angular-datetime-picker": "^9.2.0",
     "@fortawesome/fontawesome-free-webfonts": "^1.0.9",
     "@kolkov/angular-editor": "^1.1.0",
-    "@ng-bootstrap/ng-bootstrap": "^5.2.2",
+    "@ng-bootstrap/ng-bootstrap": "^6.0.0",
     "angular-web-storage": "^4.1.0",
     "bootstrap": "^4.4.1",
     "core-js": "^3.6.4",
