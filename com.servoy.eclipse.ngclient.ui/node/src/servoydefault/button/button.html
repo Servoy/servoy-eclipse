@@ -2,6 +2,7 @@
               style='overflow:hidden; position:absolute; width:100%; height:100%'
               [id]="servoyApi.getMarkupId()" 
               [svyTooltip]="toolTipText"
+              [sabloTabseq]="tabSeq"
               #element>
 <div  style="width:100%; overflow:hidden; position:relative; white-space:nowrap; pointer-events: none;" #child>
             <span [svyImageMediaId]='{img: dataProviderID?.url ? dataProviderID.url : imageMediaID, componentSize: size, rollOverImg:rolloverImageMediaID, visible: visible, mediaOptions: mediaOptions}' [hostComponent]="self"></span>
