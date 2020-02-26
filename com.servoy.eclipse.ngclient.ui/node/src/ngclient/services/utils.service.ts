@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { SabloService } from "../../sablo/sablo.service";
+import { DOCUMENT } from '@angular/common';
 
 @Injectable()
 export class SvyUtilsService {
     
-    constructor(private sabloService: SabloService) {}
+    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document: Document) {}
     
     public createJSEvent(event:KeyboardEvent, eventType:string, contextFilter?:string, contextFilterElement?:any) {
         let targetEl = event.srcElement as Element
@@ -106,4 +107,8 @@ export class SvyUtilsService {
 
         return extended;
       };
+
+      public getMainBody() {
+        return document.getElementById("mainBody");
+      }
 }

@@ -163,7 +163,7 @@ export class BSWindowManager {
     addModal(windowObj) {
         /*PRIVATE FUNCTION*/
         if(this.modalStack.length  === 0) {
-            this.document.body.appendChild(windowObj.options.modalBackdrop);
+            this.utils.getMainBody().appendChild(windowObj.options.modalBackdrop);
             setTimeout(() => {
                 const backdrop = this.document.getElementsByClassName('modal-backdrop');
                 Array.from(backdrop).forEach((el, index) => {

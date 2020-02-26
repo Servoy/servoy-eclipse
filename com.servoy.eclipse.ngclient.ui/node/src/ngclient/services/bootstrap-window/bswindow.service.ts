@@ -46,7 +46,7 @@ export class BSWindow {
 
     
     private addClassToBodyChildren(cls:string) {
-        let childNodesBody = this.document.body.childNodes;
+        let childNodesBody = this.utilsService.getMainBody().childNodes;
         for(let i = 0; i < childNodesBody.length; i++) {
             if (childNodesBody[i] instanceof Element) {
                 const node =  childNodesBody[i] as Element;
@@ -65,7 +65,7 @@ export class BSWindow {
     }
     
     private removeClassToBodyChildren(cls:string) {
-        let childNodesBody = this.document.body.childNodes;
+        let childNodesBody = this.utilsService.getMainBody().childNodes;
         for(let i = 0; i < childNodesBody.length; i++) {
             if (childNodesBody[i] instanceof Element) {
                 const node = childNodesBody[i] as Element; 
@@ -90,7 +90,7 @@ export class BSWindow {
                 footer: null
             },
             references: {
-                body: this.document.body, // Is there a better way?
+                body: this.utilsService.getMainBody(), // Is there a better way?
                 window: this.windowRefService
             },
             parseHandleForTitle: true,
@@ -135,7 +135,7 @@ export class BSWindow {
     undock() {
         var _this = this;
         this.renderer.setStyle(this.element, 'visibility', 'hidden');
-        this.renderer.appendChild(this.document.body, this.element);
+        this.renderer.appendChild(this.utilsService.getMainBody(), this.element);
         if(!this.options.location){
             //default positioning
             this.centerWindow();        
@@ -323,8 +323,8 @@ export class BSWindow {
                 
                 let rectTarget = event.target.getBoundingClientRect();
                 let rectElement = this.element.getBoundingClientRect();
-                var windowOffsetX = (rectTarget.left + this.document.body.scrollLeft) - (rectElement.left + this.document.body.scrollLeft);
-                var windowOffsetY = (rectTarget.top + this.document.body.scrollTop) - (rectElement.top + this.document.body.scrollTop);
+                var windowOffsetX = (rectTarget.left + this.utilsService.getMainBody().scrollLeft) - (rectElement.left + this.utilsService.getMainBody().scrollLeft);
+                var windowOffsetY = (rectTarget.top + this.utilsService.getMainBody().scrollTop) - (rectElement.top + this.utilsService.getMainBody().scrollTop);
     
                 if (offY + windowOffsetY < 5) {
                     this.renderer.addClass(this.element, 'north');
@@ -438,8 +438,8 @@ export class BSWindow {
                 //target can be the header or footer, and event.offsetX/Y will be relative to the header/footer .Adjust to '.window';
                 let rectTarget = event.target.getBoundingClientRect();
                 let rectElement = this.element.getBoundingClientRect();
-                var windowOffsetX = (rectTarget.left + this.document.body.scrollLeft) - (rectElement.left + this.document.body.scrollLeft);
-                var windowOffsetY = (rectTarget.top + this.document.body.scrollTop) - (rectElement.top + this.document.body.scrollTop);
+                var windowOffsetX = (rectTarget.left + this.utilsService.getMainBody().scrollLeft) - (rectElement.left + this.utilsService.getMainBody().scrollLeft);
+                var windowOffsetY = (rectTarget.top + this.utilsService.getMainBody().scrollTop) - (rectElement.top + this.utilsService.getMainBody().scrollTop);
                 
                 var offX = event.offsetX;
                 var offY = event.offsetY;

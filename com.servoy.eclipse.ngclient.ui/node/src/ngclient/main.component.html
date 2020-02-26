@@ -1,5 +1,5 @@
+<div id="mainBody" [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}">
 <!--The content below is only a placeholder and can be replaced.-->
-<div [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}">
 <div class="svy-main-window-navigator-container"  *ngIf="hasDefaultNavigator() || navigatorForm != null"  [ngStyle]="getNavigatorStyle()" [sabloTabseq]="1" [sabloTabseqConfig]="{container: true}">
 <svy-default-navigator [name]="mainForm" *ngIf="hasDefaultNavigator()"></svy-default-navigator>
 <svy-form [name]="navigatorForm" *ngIf="navigatorForm != null"></svy-form>
@@ -7,5 +7,5 @@
 <div class="svy-main-window-container" autoscroll="true" svy-autosave   [ngStyle]="getFormStyle()"  *ngIf="mainForm != null" [sabloTabseq]="1" [sabloTabseqConfig]="{container: true}">
 <svy-form [name]="mainForm"></svy-form>
 </div>
-</div>
 <session-view *ngIf="sessionProblem != null"></session-view>
+</div>
