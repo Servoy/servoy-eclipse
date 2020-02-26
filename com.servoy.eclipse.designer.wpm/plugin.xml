@@ -74,6 +74,11 @@
                     style="push">
                  <visibleWhen
                        checkEnabled="true">
+                       <with
+                    		variable="com.servoy.eclipse.core.ngClientState">
+                	 		<equals value="ENABLED">
+                 		</equals>
+              			</with>
                  </visibleWhen>
               </command>
            </toolbar>
@@ -88,6 +93,12 @@
               style="push">
             <visibleWhen
                   checkEnabled="true">
+                  <with
+                    variable="com.servoy.eclipse.core.ngClientState">
+                 <equals
+                       value="ENABLED">
+                 </equals>
+              </with>
             </visibleWhen>
          </command>
       </menuContribution>
