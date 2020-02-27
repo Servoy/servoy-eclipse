@@ -250,6 +250,8 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         // unregister current tabSeq from parent tabSeq container
-        this.trigger(this._elemRef.nativeElement.parentNode, "unregisterCSTS", [this.designTabSeq, this.runtimeIndex]);
+        if(this._elemRef.nativeElement.parentNode) {
+            this.trigger(this._elemRef.nativeElement.parentNode, "unregisterCSTS", [this.designTabSeq, this.runtimeIndex]);
+        }
     }
 }
