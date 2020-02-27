@@ -111,6 +111,18 @@ public class ServoyLoginStatus extends WorkbenchWindowControlContribution implem
 			}
 		});
 
+		MenuItem logoutMenu = new MenuItem(menu, SWT.NONE);
+		logoutMenu.setText("Logout");
+		logoutMenu.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				ServoyLoginDialog.clearSavedInfo();
+				new ServoyLoginDialog(getWorkbenchWindow().getShell()).doLogin();
+			}
+		});
+
 		Rectangle bounds = statusBtn.getBounds();
 		Point point = statusBtn.getParent().toDisplay(bounds.x, bounds.y + bounds.height);
 		menu.setLocation(point);
