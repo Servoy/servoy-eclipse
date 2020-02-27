@@ -56,8 +56,8 @@ import { DOCUMENT } from '@angular/common';
     }
 
     firstElementFocused(event) {
-      var tabIndex = parseInt(this.document.getElementById("tabStop").getAttribute("tabindex"));
-      var newTarget = document.querySelector("[tabindex='" + ( tabIndex - 1 ) + "']");
+      const tabIndex = parseInt(this.document.getElementById("tabStop").getAttribute("tabindex"));
+      const newTarget: any = document.querySelector("[tabindex='" + ( tabIndex - 1 ) + "']");
       // if there is no focusable element in the window, then newTarget == e.target,
       // do a check here to avoid focus cycling
       if(event.target != newTarget) {
@@ -66,7 +66,7 @@ import { DOCUMENT } from '@angular/common';
     }
 
     lastElementFocused(event) {
-      var newTarget = document.querySelector("[tabindex='2']");
+      const newTarget:any = document.querySelector("[tabindex='2']");
       // if there is no focusable element in the window, then newTarget == e.target,
       // do a check here to avoid focus cycling
       if(event.target != newTarget) {
