@@ -489,7 +489,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						getNGPackageManager().clearReferencedNGPackageProjectsCache();
 						getNGPackageManager().reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.MODULES_UPDATED, null);
 					}
-					String[] moduleNames = Utils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
+					String[] moduleNames = activeProject != null && activeProject.getSolution() != null
+						? Utils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true)
+						: new String[0];
 					final ArrayList<ServoyProject> modulesToUpdate = new ArrayList<ServoyProject>();
 					final StringBuilder sbUpdateModuleNames = new StringBuilder();
 
@@ -1089,7 +1091,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					progressMonitor.worked(1);
 					progressMonitor.subTask("Announcing activation intent...");
 
-					ReturnValueRunnable uiRunnable = new ReturnValueRunnable()
+					ReturnValueRunnable<Boolean> uiRunnable = new ReturnValueRunnable<Boolean>()
 					{
 						public void run()
 						{
@@ -1097,7 +1099,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						}
 					};
 					Display.getDefault().syncExec(uiRunnable);
-					if (((Boolean)uiRunnable.getReturnValue()).booleanValue())
+					if (uiRunnable.getReturnValue().booleanValue())
 					{
 
 
@@ -1349,7 +1351,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		{
 			public void run()
 			{
-				Arrays.asList(doneListeners.toArray(new IModelDoneListener[doneListeners.size()])).stream().forEach(listener -> listener.modelDone());
+				doneListeners.stream().forEach(listener -> listener.modelDone());
 				doneListeners.clear();
 			}
 		});
