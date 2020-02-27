@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { SabloService } from '../../../sablo/sablo.service';
 import { SvyWindow } from '../window.service';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
     selector: 'app-dialog-window',
@@ -11,7 +12,7 @@ import { SvyWindow } from '../window.service';
 
     window: SvyWindow;
 
-    constructor(private sabloService: SabloService) {
+    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document: any) {
     }
 
     setWindow(window: SvyWindow) {
@@ -52,5 +53,24 @@ import { SvyWindow } from '../window.service';
 
     cancel() {
       this.sabloService.callService( "$windowService", "windowClosing", { window: this.window.name }, false )
+    }
+
+    firstElementFocused(event) {
+      var tabIndex = parseInt(this.document.getElementById("tabStop").getAttribute("tabindex"));
+      var newTarget = document.querySelector("[tabindex='" + ( tabIndex - 1 ) + "']");
+      // if there is no focusable element in the window, then newTarget == e.target,
+      // do a check here to avoid focus cycling
+      if(event.target != newTarget) {
+        newTarget.focus();
+      }
+    }
+
+    lastElementFocused(event) {
+      var newTarget = document.querySelector("[tabindex='2']");
+      // if there is no focusable element in the window, then newTarget == e.target,
+      // do a check here to avoid focus cycling
+      if(event.target != newTarget) {
+        newTarget.focus();
+      }
     }
   }

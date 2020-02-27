@@ -62,6 +62,14 @@ export class WindowService {
                 // already showing
                 return;
             }
+
+            if([...this.document.getElementsByClassName('svy-window')].length < 1) {
+                const customEvent = new CustomEvent("disableTabseq", {
+                    bubbles: true
+                  });
+                this.document.getElementById("mainForm").dispatchEvent(customEvent);
+            }
+
             if ( instance.storeBounds ) {
                 instance.location = this.localStorageService.get(
                     this.servoyService.getSolutionSettings().solutionName + name + '.storedBounds.location');
@@ -137,6 +145,12 @@ export class WindowService {
             
             instance.bsWindowInstance.element.addEventListener( 'bswin.resize', (event, size) => { instance.onResize(event, size) } );
             instance.bsWindowInstance.element.addEventListener( 'bswin.move', (event, location) => { instance.onResize(event, location) } );
+            instance.bsWindowInstance.element.addEventListener( 'bswin.active', (event) => {
+                const customEvent = new CustomEvent(event.detail.active ? "enableTabseq" : "disableTabseq", {
+                    bubbles: true
+                  });
+                event.target.dispatchEvent(customEvent);
+            } );
             [...this.document.getElementsByClassName('window-header')][0].focus();
             instance.bsWindowInstance.setActive( true );
             // init the size of the dialog
@@ -153,6 +167,12 @@ export class WindowService {
         let instance = this.instances[name];
         if (instance) {
             instance.hide();
+            if([...this.document.getElementsByClassName('svy-window')].length < 1) {
+                const customEvent = new CustomEvent("enableTabseq", {
+                    bubbles: true
+                  });
+                this.document.getElementById("mainForm").dispatchEvent(customEvent);
+            }
         }
     }
 

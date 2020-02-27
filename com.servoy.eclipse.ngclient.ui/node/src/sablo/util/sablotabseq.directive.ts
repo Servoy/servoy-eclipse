@@ -228,7 +228,7 @@ export class SabloTabseq implements OnInit, OnDestroy {
     disableTabseq(event): boolean {
         this.isEnabled = false;
         this.recalculateChildRuntimeIndexesStartingAt(0, true);
-        event.stopPropagation;
+        event.stopPropagation();
         return false;
     }    
 
