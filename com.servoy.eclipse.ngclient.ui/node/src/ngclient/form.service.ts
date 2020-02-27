@@ -140,7 +140,29 @@ export class FormService {
                 }
             } else
                 if ( elem.formComponent == true ) {
-                    const structure = new FormComponentCache();
+                    let classes: Array<string> = new Array();
+                    if (elem.model.styleClass)
+                    {
+                        classes.push(elem.model.styleClass);
+                    }    
+                    let layout: { [property: string]: string } = {};
+                    if (!elem.responsive)
+                    {
+                        let height = elem.model.height;
+                        if (!height) height = elem.model.containedForm.formHeight;
+                        let width = elem.model.width;
+                        if (!width) width = elem.model.containedForm.formWidth;
+                        if (height)
+                        {
+                            layout.height = height+'px';
+                        }
+                        if (width)
+                        {
+                            layout.width = width +'px';
+                        }    
+                    }    
+                    let formComponentProperties : FormComponentProperties = new FormComponentProperties(classes,layout)
+                    const structure = new FormComponentCache(elem.responsive,elem.position,formComponentProperties);
                     this.walkOverChildren(elem.children, formCache, structure);
                     if (parent == null) {
                         formCache.addFormComponent(structure);
@@ -395,7 +417,10 @@ export class StructureCache {
 }
 
 export class FormComponentCache{
-    constructor( public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
+    constructor( public readonly responsive: boolean,
+            public readonly layout: { [property: string]: string },
+            public readonly formComponentProperties: FormComponentProperties,
+            public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
             if ( !this.items ) this.items = [];
         }
 
@@ -404,5 +429,11 @@ export class FormComponentCache{
             if ( child instanceof FormComponentCache )
                 return child as FormComponentCache;
             return null;
+        }
+}
+
+export class FormComponentProperties{
+    constructor( public readonly classes: Array<string>,
+            public readonly layout: { [property: string]: string } ) {
         }
 }

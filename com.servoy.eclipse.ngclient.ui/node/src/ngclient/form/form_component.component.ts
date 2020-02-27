@@ -16,23 +16,29 @@ import { ServoyApi } from '../servoy_api'
           <div *ngFor="let item of formCache.items" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
           </div>
-          <div *ngFor="let formComponent of formCache.formComponents" [config]="formComponent" style="position:absolute" [config]="formComponent"> <!-- main container div -->
-            <ng-template *ngFor="let item of formComponent.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
+          <div *ngFor="let formComponent of formCache.formComponents" style="position:absolute" class="svy-wrapper" [config]="formComponent"> <!-- main container div -->
+            <ng-template [ngTemplateOutlet]="getTemplate(formComponent)" [ngTemplateOutletContext]="{state:formComponent}"></ng-template>
           </div>
       </div>
       <div *ngIf="!formCache.absolute" [config]="formCache.mainStructure"> <!-- main container div -->
             <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component or responsive div  -->
+            <ng-template *ngFor="let formComponent of formCache.formComponents" [ngTemplateOutlet]="getTemplate(formComponent)" [ngTemplateOutletContext]="{state:formComponent}"></ng-template>
       </div>
 
       <ng-template  #svyResponsiveDiv  let-state="state" >
           <div [config]="state">
-                     <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
+               <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
           </div>
       </ng-template>
-      <ng-template  #formComponentDiv  let-state="state" >
-          <div [config]="state">
-                     <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
+      <ng-template  #formComponentAbsoluteDiv  let-state="state" >
+          <div [config]="state.formComponentProperties" style="position:relative" class="svy-formcomponent">
+               <div *ngFor="let item of state.items" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
+               </div>
           </div>
+      </ng-template>
+      <ng-template  #formComponentResponsiveDiv  let-state="state" >
+          <ng-template *ngFor="let item of state.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
       </ng-template>
       <!-- component template generate start -->
       <ng-template #servoydefaultTextfield let-state="state"><servoydefault-textfield  [borderType]="state.model.borderType" [foreground]="state.model.foreground" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [transparent]="state.model.transparent" [valuelistID]="state.model.valuelistID" [findmode]="state.model.findmode" [placeholderText]="state.model.placeholderText" [text]="state.model.text" [toolTipText]="state.model.toolTipText" [fontType]="state.model.fontType" [margin]="state.model.margin" [visible]="state.model.visible" [editable]="state.model.editable" [format]="state.model.format" [readOnly]="state.model.readOnly" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [horizontalAlignment]="state.model.horizontalAlignment" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [displaysTags]="state.model.displaysTags" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [selectOnEnter]="state.model.selectOnEnter" [tabSeq]="state.model.tabSeq" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoydefault-textfield></ng-template>
@@ -148,7 +154,8 @@ import { ServoyApi } from '../servoy_api'
 
 export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('svyResponsiveDiv', { static: true }) readonly svyResponsiveDiv: TemplateRef<any>;
-    @ViewChild('formComponentDiv', { static: true }) readonly formComponentDiv: TemplateRef<any>;
+    @ViewChild('formComponentAbsoluteDiv', { static: true }) readonly formComponentAbsoluteDiv: TemplateRef<any>;
+    @ViewChild('formComponentResponsiveDiv', { static: true }) readonly formComponentResponsiveDiv: TemplateRef<any>;
     // component template generate start
     @ViewChild('servoydefaultTextfield', { static: true }) readonly servoydefaultTextfield: TemplateRef<any>;
     @ViewChild('servoydefaultTextarea', { static: true }) readonly servoydefaultTextarea: TemplateRef<any>;
@@ -200,7 +207,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         if (item instanceof StructureCache) {
             return this.svyResponsiveDiv;
         } else if (item instanceof FormComponentCache) {
-            return this.formComponentDiv;
+            return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         }
         else {
             if (this[item.type] === undefined && item.type !== undefined) {
