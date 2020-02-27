@@ -37,6 +37,9 @@ export class BSWindow {
     
     private renderer: Renderer2;
 
+    mouseDownListenerElement: any;
+    mouseDownListenerHandle: any;
+
     constructor(private windowRefService: WindowRefService,
                 private rendererFactory: RendererFactory2,
                 private utilsService: SvyUtilsService,
@@ -285,12 +288,11 @@ export class BSWindow {
             this.close();
         })
 
-        this.renderer.listen(this.element, 'mousedown', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-        })
-        
-        this.renderer.listen(this.element, 'mousedown', (event) => {
+
+        if(this.mouseDownListenerElement) {
+            this.mouseDownListenerElement();
+        }
+        this.mouseDownListenerElement = this.renderer.listen(this.element, 'mousedown', (event) => {
             var focusedEvent = new Event('focused');
             if (this.options.blocker) {
                 this.options.blocker.getElement().dispatchEvent(focusedEvent);
@@ -357,8 +359,10 @@ export class BSWindow {
             // not sure if it's okay, is there a better way to trigger events manually in Angular?
             this.element.dispatchEvent(new CustomEvent('bswin.resize', {detail: {resize: size}}));
         });
-        this.document.removeEventListener('mousedown', this.options.elements.handle, false);
-        this.renderer.listen( this.options.elements.handle, 'mousedown', (event) => {
+        if(this.mouseDownListenerHandle) {
+            this.mouseDownListenerHandle();
+        }
+        this.mouseDownListenerHandle = this.renderer.listen( this.options.elements.handle, 'mousedown', (event) => {
             var handleHeight = this.options.elements.handle.offsetHeight;
             var handleWidth = this.options.elements.handle.offsetWidth;
             var offX = event.offsetX;
