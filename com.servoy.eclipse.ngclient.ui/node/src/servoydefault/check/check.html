@@ -5,7 +5,8 @@
          [checked]="selected"
          [svyTooltip]="toolTipText"
     	 [id]="servoyApi.getMarkupId()"
-    	 [disabled]="!enabled || !editable"
+		 [disabled]="!enabled || !editable"
+		 [sabloTabseq]="tabSeq"
          #input />
 	 <span [innerHtml]="text"></span>
 </label>

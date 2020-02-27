@@ -9,6 +9,7 @@
            [checked]="value == item.realValue"
            [value]="item.realValue"
            [disabled]="!enabled || !editable"
+           [sabloTabseq]="tabSeq"
            #input/>
     <span [innerHtml]="item.displayValue"></span>
   </label>

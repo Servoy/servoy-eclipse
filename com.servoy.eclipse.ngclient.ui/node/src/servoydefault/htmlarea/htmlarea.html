@@ -2,6 +2,7 @@
      class='svy-htmlarea'
      [id]="servoyApi.getMarkupId()" 
      [svyTooltip]="toolTipText"
+     [sabloTabseq]="tabSeq"
      #element>
   <angular-editor [(ngModel)]="dataProviderID" (ngModelChange)="update($event)" [config]="config"></angular-editor>
 </div>

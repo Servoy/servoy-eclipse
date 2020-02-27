@@ -5,6 +5,7 @@
            [(ngModel)]="selection"
            readonly
            [id]="servoyApi.getMarkupId()"
+           [sabloTabseq]="tabSeq"
             #child>
     <div class="spinner-buttons">
       <button tabindex='-1' [disabled]="isDisabled()" class="btn btn-default spinner-button-up" type="button">
