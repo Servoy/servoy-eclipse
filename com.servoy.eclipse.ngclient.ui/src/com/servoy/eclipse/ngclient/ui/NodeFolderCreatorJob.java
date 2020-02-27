@@ -117,7 +117,7 @@ public class NodeFolderCreatorJob extends Job
 		System.err.println("copied " + (System.currentTimeMillis() - time));
 		if (executeInstall) Activator.getInstance().executeNPMInstall();
 		else Activator.getInstance().executeNPMBuild();
-		createFileWatcher(nodeFolder, "node");
+		createFileWatcher(nodeFolder, null);
 		System.err.println("done " + (System.currentTimeMillis() - time));
 		return Status.OK_STATUS;
 	}
@@ -132,7 +132,7 @@ public class NodeFolderCreatorJob extends Job
 	 * This is is really only for using the developer in source mode. so that it will watch the node folder.
 	 * @param nodeFolder
 	 */
-	static void createFileWatcher(File nodeFolder, String sourceDir)
+	static void createFileWatcher(File nodeFolder, String filter)
 	{
 		String location = Activator.getInstance().getBundle().getLocation();
 		int index = location.indexOf("file:/");
@@ -140,12 +140,12 @@ public class NodeFolderCreatorJob extends Job
 		{
 			try
 			{
-				File file = new File(new File(new URI(location.substring(index))), sourceDir);
+				File file = new File(new File(new URI(location.substring(index))), "node");
 				if (file.exists())
 				{
 					final WatchService watchService = FileSystems.getDefault().newWatchService();
 					final Path dir = file.toPath();
-					addAllDirs(file, watchService);
+					addAllDirs(file, watchService, filter);
 					new Thread(new Runnable()
 					{
 						@Override
@@ -176,9 +176,10 @@ public class NodeFolderCreatorJob extends Job
 									Path localPath = (Path)event.context();
 									Path filename = parent.resolve(localPath);
 
+									File target = new File(targetFolder, localPath.toString());
 									if (kind == StandardWatchEventKinds.ENTRY_DELETE)
 									{
-										FileUtils.deleteQuietly(new File(targetFolder, localPath.toString()));
+										FileUtils.deleteQuietly(target);
 									}
 									else if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY)
 									{
@@ -186,13 +187,23 @@ public class NodeFolderCreatorJob extends Job
 										{
 											if (kind == StandardWatchEventKinds.ENTRY_CREATE)
 											{
+												System.out.println("recreating folder " + filename);
 												// new dir, start watching it.
-												addAllDirs(filename.toFile(), watchService);
-												createFolder(new File(targetFolder, localPath.toString()));
+												addAllDirs(filename.toFile(), watchService, filter);
+												createFolder(target);
+												try
+												{
+													FileUtils.copyDirectory(filename.toFile(), target);
+												}
+												catch (IOException e)
+												{
+													ServoyLog.logError(e);
+												}
 											}
 										}
 										else
 										{
+											System.out.println("copy changed file " + filename);
 											try (InputStream is = new FileInputStream(filename.toFile()))
 											{
 												copyOrCreateFile(localPath.toString(), targetFolder, is);
@@ -235,19 +246,23 @@ public class NodeFolderCreatorJob extends Job
 	 * @param file
 	 * @param watchService
 	 */
-	private static void addAllDirs(File dir, WatchService watchService)
+	private static boolean addAllDirs(File dir, WatchService watchService, String filter)
 	{
 		String filename = dir.toURI().getPath();
 		int index = filename.indexOf("/node/");
-		if (index == -1) return;
+		if (index == -1) return false;
 		filename = filename.substring(index + 5);
 		// skip node modules
-		if (ignoredResource(filename)) return;
+		if (ignoredResource(filename)) return false;
 
+		boolean registerWatch = filter == null || filename.startsWith(filter);
 		try
 		{
-			dir.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE,
-				StandardWatchEventKinds.ENTRY_MODIFY);
+			if (registerWatch)
+			{
+				dir.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE,
+					StandardWatchEventKinds.ENTRY_MODIFY);
+			}
 		}
 		catch (IOException e1)
 		{
@@ -262,12 +277,29 @@ public class NodeFolderCreatorJob extends Job
 				return pathname.isDirectory();
 			}
 		});
-		if (dirs == null) return;
+		if (dirs == null) return registerWatch;
 
+		boolean childrenWatch = false;
 		for (File subDir : dirs)
 		{
-			addAllDirs(subDir, watchService);
+			childrenWatch = addAllDirs(subDir, watchService, filter) || childrenWatch;
 		}
+		// if a child did register then the parent needs to also register it.
+		if (childrenWatch && !registerWatch)
+		{
+			try
+			{
+				dir.toPath().register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE,
+					StandardWatchEventKinds.ENTRY_MODIFY);
+				registerWatch = true;
+			}
+			catch (IOException e)
+			{
+				// TODO Auto-generated catch block
+				ServoyLog.logError(e);
+			}
+		}
+		return registerWatch;
 	}
 
 	/**

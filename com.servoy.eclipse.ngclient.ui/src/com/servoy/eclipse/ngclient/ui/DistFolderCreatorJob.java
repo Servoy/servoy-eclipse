@@ -52,7 +52,8 @@ public class DistFolderCreatorJob extends Job
 		nodeFolder.mkdirs();
 		try
 		{
-			FileUtils.deleteDirectory(nodeFolder);
+			File dist = new File(nodeFolder, "dist");
+			if (dist.exists()) FileUtils.deleteDirectory(dist);
 		}
 		catch (IOException e1)
 		{
@@ -87,7 +88,7 @@ public class DistFolderCreatorJob extends Job
 			}
 		}
 		System.err.println("copied " + (System.currentTimeMillis() - time));
-		NodeFolderCreatorJob.createFileWatcher(new File(nodeFolder, "dist"), "node/dist");
+		NodeFolderCreatorJob.createFileWatcher(nodeFolder, "/dist");
 		return Status.OK_STATUS;
 	}
 
