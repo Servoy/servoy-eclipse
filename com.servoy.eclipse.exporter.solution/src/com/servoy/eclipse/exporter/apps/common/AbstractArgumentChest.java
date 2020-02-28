@@ -186,28 +186,21 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	protected String getHelpMessageCore()
 	{
 		// @formatter:off
-		return "USAGE:\n\n"
-			+ "   -help or -? or /? or no arguments ... shows current help message.\n\n"
-			+ "                  OR\n\n"
-			+ getMandatoryArgumentsMessage() + " [optional_args]\n\n"
-			+ "        Optional arguments:\n\n"
-			+ "        -verbose ... prints more info to console\n"
-			+ "        -p <properties_file> ... path and name of properties file used to start exporter.\n"
-			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
-			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n"
-			+ "             Default: '../../application_server'.\n"
-			+ "        -pl alternate project locations; solution, resources and  other needed projects will\n"
-			+ "             be searched for in subfolders (deep) of the given 'workspace_location' as well.\n"
-			+ "                                                                         For example: if the\n"
-			+ "             workspace needs to contain projects from different git repositories,  those can\n"
-			+ "             be checked out in '<workspace_loc>', '<workspace_loc>/a', '<workspace_loc>/b/c'\n"
-			+ "             and so on.\n"
-			+ "        -ie ignore build errors.  CAUTION! the use of this flag is discouraged; it can cause\n"
-			+ "             invalid solutions to be exported.\n"
-			+ "        -sb skip build. No build markers will be generated. This can greatly decrease\n"
-			+ "             export time. CAUTION! the use of this flag is discouraged;\n"
-			+ "             it can cause invalid solutions to be exported.\n"
-			+ getHelpMessageDbi();
+		return "USAGE:\n\n" + "   -help or -? or /? or no arguments ... shows current help message.\n\n" + "                  OR\n\n" +
+			getMandatoryArgumentsMessage() + " [optional_args]\n\n" + "        Optional arguments:\n\n" + "        -verbose ... prints more info to console\n" +
+			"        -p <properties_file> ... path and name of properties file used to start exporter.\n" +
+			"             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n" +
+			"        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n" +
+			"             Default: '../../application_server'.\n" +
+			"        -pl alternate project locations; solution, resources and  other needed projects will\n" +
+			"             be searched for in subfolders (deep) of the given 'workspace_location' as well.\n" +
+			"                                                                         For example: if the\n" +
+			"             workspace needs to contain projects from different git repositories,  those can\n" +
+			"             be checked out in '<workspace_loc>', '<workspace_loc>/a', '<workspace_loc>/b/c'\n" + "             and so on.\n" +
+			"        -ie ignore build errors.  CAUTION! the use of this flag is discouraged; it can cause\n" +
+			"             invalid solutions to be exported.\n" + "        -sb skip build. No build markers will be generated. This can greatly decrease\n" +
+			"             export time. CAUTION! the use of this flag is discouraged;\n" + "             it can cause invalid solutions to be exported.\n" +
+			getHelpMessageDbi();
 		// @formatter:on
 	}
 
@@ -226,8 +219,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	protected String getHelpMessageDbi()
 	{
 		// @formatter:off
-		return
-			  "        -dbi ... export based on dbi files (even if database servers are available)\n";
+		return "        -dbi ... export based on dbi files (even if database servers are available)\n";
 		// @formatter:on
 	}
 
@@ -302,6 +294,11 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		{
 			System.out.println(message);
 		}
+	}
+
+	public void clientInfo(String message, int priority)
+	{
+		this.info(message, priority);
 	}
 
 	@Override

@@ -238,7 +238,7 @@ public class BrowserDialog extends Dialog
 										@Override
 										public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 										{
-											return false;
+											return true;
 										}
 
 										@Override
@@ -271,11 +271,13 @@ public class BrowserDialog extends Dialog
 					if (showTutorial[0] != null)
 					{
 						showTinyTutorial(showTutorial[0]);
+						return;
 					}
 					else if (introURL.getParameter("showTinyTutorial") != null)
 					{
 						showTinyTutorial(introURL);
 						if (!shell.isDisposed()) shell.close();
+						return;
 					}
 					if (introURL.getParameter("maximize") != null)
 					{

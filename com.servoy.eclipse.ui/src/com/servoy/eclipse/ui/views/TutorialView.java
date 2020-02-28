@@ -208,9 +208,9 @@ public class TutorialView extends ViewPart
 
 	private void loadDataModel()
 	{
-		URL favURL = com.servoy.eclipse.ui.Activator.getDefault().getBundle().getEntry("favorites/tutorial.json");
-		String favoritesJSON = Utils.getURLContent(favURL);
-		dataModel = new JSONObject(favoritesJSON);
+//		URL favURL = com.servoy.eclipse.ui.Activator.getDefault().getBundle().getEntry("favorites/tutorial.json");
+//		String favoritesJSON = Utils.getURLContent(favURL);
+		dataModel = new JSONObject();
 	}
 
 	@Override

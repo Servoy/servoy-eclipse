@@ -559,6 +559,12 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		Debug.trace(message);
 	}
 
+	@Override
+	public void clientInfo(String message, int priority)
+	{
+		this.info(message, priority);
+	}
+
 	public String getAllImportantMSGes()
 	{
 		return allImportantMSGes.toString();

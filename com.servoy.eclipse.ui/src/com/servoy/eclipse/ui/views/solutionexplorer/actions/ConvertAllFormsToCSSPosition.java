@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -25,17 +28,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
-import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IPersistVisitor;
-import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
 
 /**
  * @author lvostinar
@@ -72,26 +70,12 @@ public class ConvertAllFormsToCSSPosition extends Action implements ISelectionCh
 		{
 			final ServoyProject project = (ServoyProject)node.getRealObject();
 			if (UIUtils.askConfirmation(new Shell(), "CSS Position Conversion", "Are you sure you want to convert all forms from solution '" +
-				project.getProject().getName() + "' to CSS Position? Note this action is irreversible and undoable."))
+				project.getProject().getName() +
+				"' to CSS Position? Note this action is irreversible and undoable, also all forms in inheritance hierarchy will also be converted.."))
 			{
 				EditorUtil.saveDirtyEditors(viewer.getSite().getShell(), true);
-				final Solution solution = project.getEditingSolution();
-				solution.acceptVisitor(new IPersistVisitor()
-				{
-					public Object visit(IPersist object)
-					{
-						if (object instanceof Form) CSSPositionUtils.convertToCSSPosition((Form)object);
-						return IPersistVisitor.CONTINUE_TRAVERSAL;
-					}
-				});
-				try
-				{
-					project.saveEditingSolutionNodes(new IPersist[] { solution }, true);
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				Iterable<Form> iterable = () -> project.getEditingSolution().getForms(null, false);
+				ElementUtil.convertToCSSPosition(StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toList()));
 			}
 		}
 	}
