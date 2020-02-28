@@ -7,7 +7,6 @@ export class SabloTabseq implements OnInit, OnDestroy {
 
     @Input('sabloTabseq') designTabSeq: number;
     @Input('sabloTabseqConfig') config: any;
-    @Input('sablotabseqcallback') tabSeqCallback: any;
     @HostBinding('attr.tabindex') tabindex: number;
 
     designChildIndexToArrayPosition = {};
@@ -127,10 +126,6 @@ export class SabloTabseq implements OnInit, OnDestroy {
             {	
                 this.setDOMTabIndex(undefined);
             }
-            if (this.tabSeqCallback)
-            {
-                this.tabSeqCallback({$tabindex : (this.runtimeIndex.startIndex !== 0 ? this.runtimeIndex.startIndex : undefined)});
-            }	
         }
     }
 

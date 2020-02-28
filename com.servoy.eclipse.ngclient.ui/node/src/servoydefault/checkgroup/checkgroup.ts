@@ -1,4 +1,4 @@
-import {Component, SimpleChanges, Renderer2, ViewChild, ElementRef, Input, OnInit} from '@angular/core';
+import {Component, SimpleChanges, Renderer2, ViewChild, ElementRef, Input, OnInit, Output, ChangeDetectorRef} from '@angular/core';
 import {FormattingService} from "../../ngclient/servoy_public";
 import {ServoyDefaultBaseChoice} from "../basechoice";
 
@@ -9,7 +9,9 @@ import {ServoyDefaultBaseChoice} from "../basechoice";
 })
 export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice{
 
-  constructor(renderer: Renderer2, formattingService: FormattingService) {
+  @Output() mainTabIndex;
+
+  constructor(renderer: Renderer2, formattingService: FormattingService, private cdRef:ChangeDetectorRef) {
     super(renderer, formattingService);
   }
   
@@ -59,6 +61,11 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice{
       if (this.onActionMethodID) this.onActionMethodID( event );
     });
     super.attachEventHandlers(element,index);
+  }
+
+  ngAfterViewChecked() {
+    this,this.mainTabIndex = this.getNativeElement().getAttribute('tabindex');
+    this.cdRef.detectChanges();
   }
 }
 

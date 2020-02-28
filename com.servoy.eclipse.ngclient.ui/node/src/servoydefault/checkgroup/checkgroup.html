@@ -8,6 +8,7 @@
     		[checked]="selection[i]"
             [value]="item.realValue"
             [disabled]="!enabled || !editable"
+            [tabindex]="mainTabIndex"
             #input />
     <span [innerHtml]="item.displayValue"></span>
   </label>
