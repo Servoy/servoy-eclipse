@@ -5,6 +5,7 @@ import { Item } from '../basecombo';
 import { ServoyDefaultCombobox } from './combobox';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
+import { SabloModule } from '../../sablo/sablo.module';
 const eventEnter: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'Enter'});
 const eventC: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'c'});
 const eventInput: Event = new Event('input');
@@ -63,7 +64,7 @@ describe('ComboboxComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultCombobox],
       providers: [ FormattingService,TooltipService],
-      imports: [ServoyPublicModule]
+      imports: [ServoyPublicModule, SabloModule]
     })
     .compileComponents();
   }));

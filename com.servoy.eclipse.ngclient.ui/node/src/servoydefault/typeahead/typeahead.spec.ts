@@ -5,6 +5,7 @@ import { Item } from '../basecombo';
 import { ServoyDefaultTypeahead } from './typeahead';
 import { FormattingService, TooltipService, ServoyApi} from "../../ngclient/servoy_public";
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { SabloModule } from '../../sablo/sablo.module';
 
 const eventEnter: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'Enter'});
 const eventC: KeyboardEvent = new KeyboardEvent('keyup', {'key': 'c'});
@@ -62,7 +63,7 @@ describe('TypeaheadComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultTypeahead ],
       providers: [ FormattingService , TooltipService],
-	  imports: [ServoyPublicModule]
+	  imports: [ServoyPublicModule, SabloModule]
     })
     .compileComponents();
   }));

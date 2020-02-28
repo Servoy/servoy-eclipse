@@ -10,6 +10,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { WindowRefService } from '../../sablo/util/windowref.service'
 import { LoggerFactory } from '../../sablo/logger.service'
+import { SabloModule } from '../../sablo/sablo.module';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
@@ -22,7 +23,7 @@ describe( 'ServoyDefaultTabpanel', () => {
             declarations: [
                 ServoyDefaultTablesspanel
             ],
-            imports: [NgbModule],
+            imports: [NgbModule, SabloModule],
             providers: [WindowRefService, LoggerFactory]
         } ).compileComponents();
     } ) );
