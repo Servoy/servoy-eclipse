@@ -128,13 +128,15 @@ describe("ServoyDefaultListBox", () => {
 
   // TODO : update test 
   it('should call ngOnChanges', fakeAsync(() => {
-    component.multiselectListbox = true;
-    fixture.detectChanges();
-    const changes = {dataProviderID: new SimpleChange(1, 2, false)};
-    spyOn(component, 'ngOnChanges');
-    component.ngOnChanges(changes);
-    fixture.detectChanges();
-    expect(component.ngOnChanges).toHaveBeenCalled();
+    fixture.whenStable().then(() => {
+      component.multiselectListbox = true;
+      fixture.detectChanges();
+      const changes = {dataProviderID: new SimpleChange(1, 2, false)};
+      spyOn(component, 'ngOnChanges');
+      component.ngOnChanges(changes);
+      fixture.detectChanges();
+      expect(component.ngOnChanges).toHaveBeenCalled();
+    });
   }));
 
   xit( 'should render markupid ', () => {
