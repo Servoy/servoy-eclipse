@@ -32,6 +32,8 @@ import org.eclipse.swt.graphics.Image;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IParentOverridable;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -742,5 +744,67 @@ public class ElementUtil
 			else image = Activator.getDefault().loadImageFromBundle("designer.png");
 		}
 		return image;
+	}
+
+	public static void convertToCSSPosition(List<Form> toConvert)
+	{
+		List<String> solutionNames = new ArrayList<String>();
+		if (toConvert != null && ServoyModelFinder.getServoyModel().getActiveProject() != null)
+		{
+			FlattenedSolution fs = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+			// add all parent forms for conversion
+			for (Form form : toConvert.toArray(new Form[0]))
+			{
+				List<Form> hierarchyForms = fs.getFormHierarchy(form);
+				for (Form parentForm : hierarchyForms)
+				{
+					if (!toConvert.contains(parentForm))
+						toConvert.add(parentForm);
+				}
+			}
+
+			// add all sibblings for conversion
+			Iterator<Form> it = fs.getForms(false);
+			while (it.hasNext())
+			{
+				Form currentForm = it.next();
+				if (!toConvert.contains(currentForm))
+				{
+					Form parentForm = currentForm.getExtendsForm();
+					while (parentForm != null)
+					{
+						if (toConvert.contains(parentForm))
+						{
+							toConvert.add(currentForm);
+							break;
+						}
+						parentForm = parentForm.getExtendsForm();
+					}
+				}
+			}
+
+			for (Form form : toConvert)
+			{
+				CSSPositionUtils.convertToCSSPosition(form);
+				String solutionName = form.getSolution().getName();
+				if (!solutionNames.contains(solutionName))
+				{
+					solutionNames.add(solutionName);
+				}
+			}
+		}
+		for (String solutionName : solutionNames)
+		{
+			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+				solutionName);
+			try
+			{
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { servoyProject.getEditingSolution() }, true);
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error(e);
+			}
+		}
 	}
 }
