@@ -192,7 +192,7 @@ public class ProfilerView extends ViewPart
 
 		private final List<AggregateData> callees = new ArrayList<AggregateData>();
 
-		private HashMap<String, DataCallProfileData> dataCallProfileDataMap;
+		private final HashMap<String, DataCallProfileData> dataCallProfileDataMap = new HashMap<String, DataCallProfileData>();
 
 		private Long queryTime;
 
@@ -210,10 +210,6 @@ public class ProfilerView extends ViewPart
 			if (pd.isInnerFunction() && pd.getLineNumbers() != null && pd.getLineNumbers().length > 0)
 			{
 				this.innerFunctionLineStart = pd.getLineNumbers()[0];
-			}
-			if (pd.getDataCallProfileDatas() != null && !pd.getDataCallProfileDatas().isEmpty())
-			{
-				dataCallProfileDataMap = new HashMap<String, DataCallProfileData>();
 			}
 			add(pd);
 		}
@@ -387,14 +383,14 @@ public class ProfilerView extends ViewPart
 
 		public Collection<DataCallProfileData> getDataCallProfileDataMap()
 		{
-			if (dataCallProfileDataMap != null) return dataCallProfileDataMap.values();
+			if (dataCallProfileDataMap.size() > 0) return dataCallProfileDataMap.values();
 			else return null;
 		}
 
 		public long getDataQueriesTime()
 		{
 			long time = 0;
-			if (dataCallProfileDataMap != null && dataCallProfileDataMap.size() > 0)
+			if (dataCallProfileDataMap.size() > 0)
 			{
 				for (DataCallProfileData profile : dataCallProfileDataMap.values())
 				{
