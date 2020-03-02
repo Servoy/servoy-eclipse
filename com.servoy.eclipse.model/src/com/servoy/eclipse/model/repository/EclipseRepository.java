@@ -145,7 +145,15 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 						if (rootObjectMetaData != null)
 						{
 							Solution module = (Solution)loadRootObject(rootObjectMetaData, rootObjectMetaData.getActiveRelease());
-							cacheRootObject(module);
+							AbstractRepository.lock();
+							try
+							{
+								if (!isSolutionLoaded(name)) cacheRootObject(module);
+							}
+							finally
+							{
+								AbstractRepository.unlock();
+							}
 							pool.execute(() -> loadAllModules(module, pool, checked));
 						}
 					}
