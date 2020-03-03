@@ -61,6 +61,11 @@ public class FunctionTemplateModel
 		return cg.getPublicName(obj.getReturnedType());
 	}
 
+	public String getReturnTypeDescription()
+	{
+		return obj.getReturnDescription();
+	}
+
 	/**
 	 * @return
 	 */
