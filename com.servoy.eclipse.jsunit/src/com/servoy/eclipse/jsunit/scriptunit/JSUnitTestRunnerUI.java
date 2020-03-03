@@ -88,9 +88,9 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 	// lines like "scopes.globals.testRoundingFailure1(f:0)"
 	protected static final Pattern MOBILE_STACK_FRAME_PATTERN = Pattern.compile("(?:(?:(.*)\\.(.*)\\.(.*))|javascript\\..*)?\\((.+):(\\d+)\\)");
 
-	protected static final String FORM_TEST_ELEMENT_PATTERN = "Form '([\\w\\s]+)' tests";
+	protected static final String FORM_TEST_ELEMENT_PATTERN = "Form '([\\w\\W\\s]+)' tests";
 
-	protected static final String SOLUTION_TEST_ELEMENT_PATTERN = "Solution '([\\w\\s]+)' tests";
+	protected static final String SOLUTION_TEST_ELEMENT_PATTERN = "Solution '([\\w\\W\\s]+)' tests";
 
 	protected static final String SCOPE_TESTS_PATTERN = "Scope tests";
 
