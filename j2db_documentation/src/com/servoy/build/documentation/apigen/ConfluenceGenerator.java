@@ -119,7 +119,7 @@ public class ConfluenceGenerator
 	private static HttpClientContext context;
 	private static Object parentId;
 
-	private static boolean realUpdate = true;
+	private static boolean realUpdate = false;
 
 	private static void createClient(String parentName) throws ClientProtocolException, IOException
 	{
@@ -276,7 +276,7 @@ public class ConfluenceGenerator
 				entityContent.put("title", name);
 				entityContent.put("space", new JSONObject().put("key", SPACE));
 				entityContent.put("body", new JSONObject().put("storage", new JSONObject().put("value", content).put("representation", "storage")));
-				entityContent.put("version", new JSONObject().put("number", version + 1));
+				entityContent.put("version", new JSONObject().put("number", version + 1).put("minorEdit", true));
 				put.setHeader("Content-Type", "application/json");
 				String putContent = entityContent.toString();
 				StringEntity entity = new StringEntity(putContent);
@@ -298,9 +298,10 @@ public class ConfluenceGenerator
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException
 	{
-		if (args.length != 2)
+		if (args.length < 2)
 		{
-			System.err.println("usage: ConfluenceGenerator uri_to_doc_xml common+root+wiki");
+			System.err.println(
+				"usage: ConfluenceGenerator uri_to_doc_xml common+root+wiki (will use d:/temp/generated and d:/temp/generated_old to generate in and compare to)");
 			return;
 		}
 		String parentName = args[1];
@@ -398,7 +399,11 @@ public class ConfluenceGenerator
 						char[] buf = new char[(int)file.length()];
 						reader.read(buf);
 						String old = new String(buf);
-						if (old.equals(output)) continue;
+						if (old.equals(output))
+						{
+							System.out.println("not updating remote content because the file is the same as the old value " + file);
+							continue;
+						}
 					}
 				}
 			}
@@ -562,8 +567,10 @@ public class ConfluenceGenerator
 		{
 			XMLBuilder2 start = root.e("p").t(" ").up().e("p").t(" ").up().e(MCR).a(NM, "table").e(PRM).a(NM, "id").up().e(PRM).a(NM, "class").t(
 				"servoy sSummary").up().e(RTB).e(MCR).a(NM, "colgroup").e(RTB).e(MCR).a(NM, "col").e(PRM).a(NM, "width").t("12%").up(2).e(MCR).a(NM, "col").e(
-					PRM).a(NM, "width").t("30%").up(2).e(MCR).a(NM, "col").e(PRM).a(NM, "width").t("58%").up(4).e(MCR).a(NM, "thead").e(RTB).e(MCR).a(NM,
-						"tr").e(PRM).a(NM, "style").t("height: 30px;").up().e(RTB).e(MCR).a(NM, "th").e(PRM).a(NM, "colspan").t("3").up().e(RTB).t(name).up(6);
+					PRM)
+				.a(NM, "width").t("30%").up(2).e(MCR).a(NM, "col").e(PRM).a(NM, "width").t("58%").up(4).e(MCR).a(NM, "thead").e(RTB).e(MCR).a(NM,
+					"tr")
+				.e(PRM).a(NM, "style").t("height: 30px;").up().e(RTB).e(MCR).a(NM, "th").e(PRM).a(NM, "colspan").t("3").up().e(RTB).t(name).up(6);
 
 			for (IFunctionDocumentation fd : functions)
 			{
@@ -629,8 +636,10 @@ public class ConfluenceGenerator
 		{
 			XMLBuilder2 start = root.e("p").t(" ").up().e("p").t(" ").up().e(MCR).a(NM, "table").e(PRM).a(NM, "id").t(id).up().e(PRM).a(NM, "class").t(
 				"servoy sDetail").up().e(RTB).e(MCR).a(NM, "colgroup").e(RTB).e(MCR).a(NM, "col").e(PRM).a(NM, "colspan").t("2").up().e(PRM).a(NM, "width").t(
-					"100%").up(2).e(MCR).a(NM, "col").up(3).e(MCR).a(NM, "thead").e(RTB).e(MCR).a(NM, "tr").e(PRM).a(NM, "style").t("height:30px").up().e(
-						RTB).e(MCR).a(NM, "th").e(PRM).a(NM, "colspan").t("2").up().e(RTB).t(name).up(6);
+					"100%")
+				.up(2).e(MCR).a(NM, "col").up(3).e(MCR).a(NM, "thead").e(RTB).e(MCR).a(NM, "tr").e(PRM).a(NM, "style").t("height:30px").up().e(
+					RTB)
+				.e(MCR).a(NM, "th").e(PRM).a(NM, "colspan").t("2").up().e(RTB).t(name).up(6);
 
 			for (IFunctionDocumentation fd : functions)
 			{
@@ -638,7 +647,8 @@ public class ConfluenceGenerator
 				FunctionTemplateModel ftm = new FunctionTemplateModel(fd, this);
 				start = start.e(MCR).a(NM, "tbody").e(PRM).a(NM, "id").t(fd.getMainName()).up().e(RTB).e(MCR).a(NM, "tr").e(PRM).a(NM, "id").t("name").up().e(
 					RTB).e(MCR).a(NM, "td").e(RTB).e("h4").t(getFullFunctionName(fd, cls)).up(5).e(MCR).a(NM, "tr").e(PRM).a(NM, "id").t("des").up().e(RTB).e(
-						MCR).a(NM, "td").e(RTB).e(MCR).a(NM, "div").e(PRM).a(NM, "class").t("sIndent").up().e(RTB).e("pre").t(ftm.getDescription()).up(7);
+						MCR)
+					.a(NM, "td").e(RTB).e(MCR).a(NM, "div").e(PRM).a(NM, "class").t("sIndent").up().e(RTB).e("pre").t(ftm.getDescription()).up(7);
 
 				if (fd.getType() == IFunctionDocumentation.TYPE_FUNCTION || fd.getType() == IFunctionDocumentation.TYPE_EVENT)
 				{
@@ -679,7 +689,16 @@ public class ConfluenceGenerator
 				{
 					// returns
 					start = start.e(MCR).a(NM, "tr").e(PRM).a(NM, "id").t("ret").up().e(RTB).e(MCR).a(NM, "td").e(RTB).e("p").e("strong").t("Returns").up(2).e(
-						MCR).a(NM, "div").e(PRM).a(NM, "class").t("sIndent").up().e(RTB).e(LNK).e(PG).a(CT, ftm.getReturnType()).up(8);
+						MCR).a(NM, "div").e(PRM).a(NM, "class").t("sIndent").up().e(RTB).e(LNK).e(PG).a(CT, ftm.getReturnType());
+					String returnTypeDescription = ftm.getReturnTypeDescription();
+					if (returnTypeDescription != null && !returnTypeDescription.trim().isEmpty())
+					{
+						start = start.up(2).e(RTB).t(" " + returnTypeDescription).up(7);
+					}
+					else
+					{
+						start = start.up(8);
+					}
 				}
 
 
@@ -698,8 +717,10 @@ public class ConfluenceGenerator
 				// sample
 				start = start.e(MCR).a(NM, "tr").e(PRM).a(NM, "id").t("sam").up().e(RTB).e(MCR).a(NM, "td").e(RTB).e("p").e("strong").t("Sample").up(2).e(
 					MCR).a(NM, "div").e(PRM).a(NM, "class").t("sIdent").up().e(RTB).e(MCR).a(NM, "code").e(PRM).a(NM, "language").t("javascript").up().e(
-						PTB).cdata(ftm.getSampleCode()).up(8).e(MCR).a(NM, "tr").e(PRM).a(NM, "class").t("lastDetailRow").up().e(RTB).e(MCR).a(NM, "td").e(
-							RTB).t(" ").up(6);
+						PTB)
+					.cdata(ftm.getSampleCode()).up(8).e(MCR).a(NM, "tr").e(PRM).a(NM, "class").t("lastDetailRow").up().e(RTB).e(MCR).a(NM, "td").e(
+						RTB)
+					.t(" ").up(6);
 			}
 			start.up();
 		}
@@ -733,7 +754,7 @@ public class ConfluenceGenerator
 			{
 				return "Number";
 			}
-			else if (type == String.class)
+			else if (type == String.class || com.servoy.j2db.documentation.scripting.docs.String.class == type)
 			{
 				return "String";
 			}
@@ -745,7 +766,7 @@ public class ConfluenceGenerator
 			{
 				return "Object";
 			}
-			else if (type.isArray() || type == NativeArray.class)
+			else if (type.isArray() || type == NativeArray.class || List.class.isAssignableFrom(type))
 			{
 				return "Array";
 			}
