@@ -35,8 +35,11 @@ import org.sablo.websocket.utils.PropertyUtils;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -128,7 +131,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						//we need to ask for component spec
 						List<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
-						WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
+						WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState()
+							.getAllWebComponentSpecifications();
 						for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
 						{
 							if (webComponentSpec.isDeprecated()) continue;
@@ -322,6 +326,22 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 													else
 													{
 														selectionProvider.setSelection(structuredSelection);
+													}
+													if (persist instanceof LayoutContainer &&
+														CSSPositionUtils.isCSSPositionContainer((LayoutContainer)persist))
+													{
+														if (org.eclipse.jface.dialogs.MessageDialog.openQuestion(UIUtils.getActiveShell(),
+															"Edit css position container",
+															"Do you want to zoom into the layout container so you can edit it ?"))
+														{
+															BaseVisualFormEditor editor = DesignerUtil.getActiveEditor();
+															if (editor != null)
+															{
+																BaseVisualFormEditorDesignPage activePage = editor.getGraphicaleditor();
+																if (activePage instanceof RfbVisualFormEditorDesignPage)
+																	((RfbVisualFormEditorDesignPage)activePage).showContainer((LayoutContainer)persist);
+															}
+														}
 													}
 												}
 											});
