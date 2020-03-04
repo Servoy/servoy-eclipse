@@ -294,16 +294,15 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				private String getTooltipText(TreeItem item)
 				{
 					Object selectionObject;
-					ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart().getSite()
-						.getSelectionProvider()
-						.getSelection();
+					ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()
+						.getSelectionProvider().getSelection();
 					Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
 					// iterate over all selected components
 					while (iterator.hasNext())
 					{
 						selectionObject = iterator.next();
 						IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
-						IPersist finalPersist = (persist instanceof IFormElement) ? persist : persist.getParent();
+						IPersist finalPersist = (persist == null || persist instanceof IFormElement) ? persist : persist.getParent();
 						if (finalPersist instanceof IFormElement)
 						{
 							// get the specification file
@@ -451,7 +450,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			tree.setLayoutData(fd_tree);
 		}
 
-		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
+		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 		if (activeEditor != null)
 		{
 			ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
