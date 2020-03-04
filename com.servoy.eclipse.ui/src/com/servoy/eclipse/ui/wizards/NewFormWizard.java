@@ -1188,7 +1188,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 				if (superForm != null)
 				{
-					boolean isParentLogicalForm = !superForm.isResponsiveLayout() && !superForm.getParts().hasNext();
+					boolean isParentLogicalForm = !superForm.isResponsiveLayout() && !flattenedSolution.getFlattenedForm(superForm).getParts().hasNext();
 					if (!isParentLogicalForm)
 					{
 						if (superForm.isResponsiveLayout())
