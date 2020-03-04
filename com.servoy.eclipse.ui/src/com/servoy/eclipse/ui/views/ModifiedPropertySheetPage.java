@@ -259,6 +259,24 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 								{
 									text = "Not supported in smart client for listview/tableview";
 								}
+								if ("width".equals(item.getText(0)) || "height".equals(item.getText(0)))
+								{
+									ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()
+										.getSelectionProvider().getSelection();
+									if (selection instanceof IStructuredSelection && ((IStructuredSelection)selection).size() == 1 &&
+										Platform.getAdapterManager().getAdapter(((IStructuredSelection)selection).getFirstElement(),
+											IPersist.class) instanceof IFormElement)
+									{
+										if ("height".equals(item.getText(0)))
+										{
+											text = "If top and bottom are set (anchored) this is minimum height.";
+										}
+										if ("width".equals(item.getText(0)))
+										{
+											text = "If left and right are set (anchored) this is minimum width.";
+										}
+									}
+								}
 								if (text != null)
 								{
 									if (tip != null && !tip.isDisposed()) tip.dispose();
