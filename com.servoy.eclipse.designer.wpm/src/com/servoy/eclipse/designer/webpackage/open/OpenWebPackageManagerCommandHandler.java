@@ -13,13 +13,13 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.IMainConceptsPageAction;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.EditorUtil;
 
-public class OpenWebPackageManagerCommandHandler extends AbstractHandler implements IHandler, IStartPageAction
+public class OpenWebPackageManagerCommandHandler extends AbstractHandler implements IHandler, IMainConceptsPageAction
 {
 
 	@Override

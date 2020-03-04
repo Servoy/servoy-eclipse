@@ -48,7 +48,7 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.progress.IProgressService;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.IMainConceptsPageAction;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -143,14 +143,14 @@ public class BrowserDialog extends Dialog
 
 						final Object actionObject = ModelLoaderUtil.createClassInstance(pluginId, className);
 
-						if (actionObject instanceof IStartPageAction)
+						if (actionObject instanceof IMainConceptsPageAction)
 						{
 							Display display = Display.getCurrent();
 							BusyIndicator.showWhile(display, new Runnable()
 							{
 								public void run()
 								{
-									((IStartPageAction)actionObject).runAction(introURL);
+									((IMainConceptsPageAction)actionObject).runAction(introURL);
 								}
 							});
 							if (!shell.isDisposed()) shell.close();
@@ -368,13 +368,13 @@ public class BrowserDialog extends Dialog
 		{
 			Button showNextTime = new Button(shell, SWT.CHECK);
 			showNextTime.setText("Do not show this dialog anymore");
-			showNextTime.setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")));
+			showNextTime.setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_MAIN_CONCEPTS_PAGE, "true")));
 			showNextTime.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, new Boolean(!showNextTime.getSelection()).toString());
+					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_MAIN_CONCEPTS_PAGE, new Boolean(!showNextTime.getSelection()).toString());
 				}
 			});
 		}

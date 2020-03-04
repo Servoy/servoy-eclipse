@@ -24,7 +24,7 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
  * @author gboros
  *
  */
-public interface IStartPageAction
+public interface IMainConceptsPageAction
 {
 	public void runAction(IntroURL introUrl);
 }

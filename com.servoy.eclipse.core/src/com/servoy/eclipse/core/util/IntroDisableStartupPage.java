@@ -35,7 +35,7 @@ public class IntroDisableStartupPage extends Action
 		{
 			public void run()
 			{
-				Settings.getInstance().setProperty("servoy.developer.showStartPage", "false");
+				Settings.getInstance().setProperty("servoy.developer.showMainConceptsPage", "false");
 			}
 		});
 	}

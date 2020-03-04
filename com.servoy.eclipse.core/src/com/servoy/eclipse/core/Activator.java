@@ -314,7 +314,7 @@ public class Activator extends Plugin
 				}
 
 				/* Hide the External Tools set */
-				final IEclipsePreferences eclipsePref = InstanceScope.INSTANCE.getNode(PLUGIN_ID);
+				final IEclipsePreferences eclipsePref = getEclipsePreferences();
 				final Preferences node = eclipsePref.node("activatedPerspectives"); //the activated perspectives will be stored in this node
 				final IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 
@@ -342,7 +342,7 @@ public class Activator extends Plugin
 				});
 
 				if (!ss.getApplicationServer().hasDeveloperLicense() ||
-					Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
+					Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showMainConceptsPage", "true")))
 				{
 					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
 					{
@@ -358,8 +358,8 @@ public class Activator extends Plugin
 									IEditorReference[] editorReferences = page.getEditorReferences();
 									for (IEditorReference editorReference : editorReferences)
 									{
-										if (editorReference.getEditor(false) instanceof StartPageBrowserEditor ||
-											StartPageBrowserEditorInput.NAME.equals(editorReference.getPartName()))
+										if (editorReference.getEditor(false) instanceof MainConceptsPageBrowserEditor ||
+											MainConceptsPageBrowserEditorInput.NAME.equals(editorReference.getPartName()))
 										{
 											// for some reason eclipse saved the start page editor, close it then
 											page.closeEditors(new IEditorReference[] { editorReference }, false);
@@ -369,8 +369,12 @@ public class Activator extends Plugin
 							}
 							try
 							{
-//								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
-//									StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
+								if (eclipsePref.getBoolean("firstRun", true))
+								{
+									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(MainConceptsPageBrowserEditor.INPUT,
+										MainConceptsPageBrowserEditor.MAINCONCEPTSPAGE_BROWSER_EDITOR_ID);
+									eclipsePref.putBoolean("firstRun", false);
+								}
 							}
 							catch (Exception e)
 							{

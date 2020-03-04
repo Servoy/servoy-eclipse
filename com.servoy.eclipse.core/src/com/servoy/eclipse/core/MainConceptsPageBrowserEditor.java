@@ -45,12 +45,12 @@ import com.servoy.j2db.util.Settings;
  *
  * @author pbakker
  */
-public class StartPageBrowserEditor extends EditorPart
+public class MainConceptsPageBrowserEditor extends EditorPart
 {
-	public static final String STARTPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.StartPageBrowserEditor";
-	public static final String STARTPAGE_URL = "https://servoy.com/start-servoy-developer/";
+	public static final String MAINCONCEPTSPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.MainConceptsPageBrowserEditor";
+	public static final String MAINCONCEPTSPAGE_URL = "https://servoy.github.io/servoy_documentation/202003/mainconcepts.html";
 
-	public static final StartPageBrowserEditorInput INPUT = new StartPageBrowserEditorInput();
+	public static final MainConceptsPageBrowserEditorInput INPUT = new MainConceptsPageBrowserEditorInput();
 
 	private Browser browser;
 
@@ -107,8 +107,8 @@ public class StartPageBrowserEditor extends EditorPart
 	public void createPartControl(Composite parent)
 	{
 		browser = new Browser(parent, SWT.NONE);
-		String url = STARTPAGE_URL + "?dl=" + (ApplicationServerRegistry.get().hasDeveloperLicense());
-		String showOnStartup = Settings.getInstance().getProperty("servoy.developer.showStartPage");
+		String url = MAINCONCEPTSPAGE_URL + "?dl=" + (ApplicationServerRegistry.get().hasDeveloperLicense());
+		String showOnStartup = Settings.getInstance().getProperty("servoy.developer.showMainConceptsPage");
 		if (showOnStartup == null || showOnStartup.equals("true"))
 		{
 			url += "&show=true";
@@ -140,14 +140,14 @@ public class StartPageBrowserEditor extends EditorPart
 
 						final Object actionObject = ModelLoaderUtil.createClassInstance(pluginId, className);
 
-						if (actionObject instanceof IStartPageAction)
+						if (actionObject instanceof IMainConceptsPageAction)
 						{
 							Display display = Display.getCurrent();
 							BusyIndicator.showWhile(display, new Runnable()
 							{
 								public void run()
 								{
-									((IStartPageAction)actionObject).runAction(introURL);
+									((IMainConceptsPageAction)actionObject).runAction(introURL);
 								}
 							});
 							return;
@@ -155,7 +155,7 @@ public class StartPageBrowserEditor extends EditorPart
 					}
 					introURL.execute();
 				}
-				else if (!url.startsWith(STARTPAGE_URL) && url.toLowerCase().contains("servoy"))
+				else if (!url.startsWith(MAINCONCEPTSPAGE_URL) && url.toLowerCase().contains("servoy"))
 				{
 					event.doit = false;
 					try

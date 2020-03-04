@@ -35,7 +35,7 @@ public class IntroEnableStartupPage extends Action
 		{
 			public void run()
 			{
-				Settings.getInstance().setProperty("servoy.developer.showStartPage", "true");
+				Settings.getInstance().setProperty("servoy.developer.showMainConceptsPage", "true");
 			}
 		});
 	}
