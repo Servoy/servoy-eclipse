@@ -314,46 +314,49 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					Object selectionObject;
 					ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()
 						.getSelectionProvider().getSelection();
-					Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
-					// iterate over all selected components
-					while (iterator.hasNext())
+					if (selection instanceof IStructuredSelection)
 					{
-						selectionObject = iterator.next();
-						IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
-						IPersist finalPersist = (persist == null || persist instanceof IFormElement) ? persist : persist.getParent();
-						if (finalPersist instanceof IFormElement)
+						Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
+						// iterate over all selected components
+						while (iterator.hasNext())
 						{
-							// get the specification file
-							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-								.getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)finalPersist));
-
-							String tooltipText = null;
-
-							// search for a model property to match the selected item
-							PropertyDescription pdModel = spec.getProperty(item.getText());
-							if (pdModel != null)
+							selectionObject = iterator.next();
+							IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
+							IPersist finalPersist = (persist == null || persist instanceof IFormElement) ? persist : persist.getParent();
+							if (finalPersist instanceof IFormElement)
 							{
-								Object tag = pdModel.getTag("tooltipText");
-								if (tag != null)
-								{
-									return tag.toString();
-								}
-							}
+								// get the specification file
+								WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+									.getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)finalPersist));
 
-							// check custom properties
-							Map<String, PropertyDescription> customProperties = spec.getCustomJSONProperties();
-							if (customProperties != null)
-							{
-								tooltipText = getPropertyTooltipText(customProperties, item);
-								if (tooltipText != null)
-								{
-									return tooltipText;
-								}
-							}
+								String tooltipText = null;
 
-							// check functions and handlers
-							tooltipText = tooltipTextForFunctionsAndHandlers(item, spec.getApiFunctions());
-							return (tooltipText != null) ? tooltipText : tooltipTextForFunctionsAndHandlers(item, spec.getHandlers());
+								// search for a model property to match the selected item
+								PropertyDescription pdModel = spec.getProperty(item.getText());
+								if (pdModel != null)
+								{
+									Object tag = pdModel.getTag("tooltipText");
+									if (tag != null)
+									{
+										return tag.toString();
+									}
+								}
+
+								// check custom properties
+								Map<String, PropertyDescription> customProperties = spec.getCustomJSONProperties();
+								if (customProperties != null)
+								{
+									tooltipText = getPropertyTooltipText(customProperties, item);
+									if (tooltipText != null)
+									{
+										return tooltipText;
+									}
+								}
+
+								// check functions and handlers
+								tooltipText = tooltipTextForFunctionsAndHandlers(item, spec.getApiFunctions());
+								return (tooltipText != null) ? tooltipText : tooltipTextForFunctionsAndHandlers(item, spec.getHandlers());
+							}
 						}
 					}
 					return null;
