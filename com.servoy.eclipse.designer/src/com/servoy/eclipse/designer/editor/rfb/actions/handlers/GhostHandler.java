@@ -40,7 +40,6 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
-import org.sablo.specification.property.types.VisiblePropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -713,30 +712,6 @@ public class GhostHandler implements IServerService
 		writer.endArray();
 		writer.endObject();
 		return new JSONObject(stringWriter.getBuffer().toString());
-	}
-
-	private boolean isVisible(IPersist persist)
-	{
-		boolean visible = true;
-		if (persist instanceof IFormElement)
-		{
-			IFormElement fe = (IFormElement)persist;
-			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
-			{
-				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((WebComponent)fe).getTypeName());
-				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
-				{
-					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();
-					visible = obj.optBoolean(pd.getName(), true);
-				}
-			}
-			else
-			{
-				visible = fe.getVisible();
-			}
-		}
-		return visible;
 	}
 
 	private void printGhostFormElements(final JSONWriter writer, Iterator<IFormElement> elementsIterator, String type) throws JSONException
