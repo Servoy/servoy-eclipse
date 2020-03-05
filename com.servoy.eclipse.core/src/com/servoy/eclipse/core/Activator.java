@@ -61,7 +61,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorReference;
@@ -101,6 +100,7 @@ import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.RadioButtonsDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
@@ -1168,10 +1168,12 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(),
-						"Default PostgreSQL database not installed.", "Should a default PostgreSQL database be installed? (Used by tutorials and samples) ",
-						SWT.NONE,
-						new String[] { "Yes (include sample)", "Yes (no sample)", "Never", "Later" });
+					final RadioButtonsDialog installPostgreSQLDialog = new RadioButtonsDialog(Display.getDefault().getActiveShell(),
+						Arrays.asList("I want to install PostgreSQL with all the sample data (used in samples and tutorials)",
+							"I want to install PostgreSQL without sample data", "Don't install PostgreSQL at all", "Ask me on the next start"),
+						"Default PostgreSQL database not installed.");
+					int open = installPostgreSQLDialog.open();
+
 					if (open == 0)
 					{
 						// create database with sample
