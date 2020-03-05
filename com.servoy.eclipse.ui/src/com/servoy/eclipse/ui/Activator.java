@@ -92,7 +92,8 @@ public class Activator extends AbstractUIPlugin
 	/**
 	 *
 	 */
-	public static final String TUTORIALS_URL = "https://tutorials.servoy.com/solutions/content/index.html?loginToken=";
+	public static final String TUTORIALS_URL = System.getProperty("servoy.tutorial.url") == null
+		? "https://tutorials.servoy.com/solutions/content/index.html?loginToken=" : System.getProperty("servoy.tutorial.url");
 
 	/**
 	 * The PLUGIN_ID for com.servoy.eclipse.ui.
