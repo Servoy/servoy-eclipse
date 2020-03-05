@@ -135,10 +135,49 @@ export class ViewportService {
         }
     }
     
-    public updateRowConversionInfo(idx, internalState, serverConversionInfo) {
+    public updateRowConversionInfo(idx:number, internalState, serverConversionInfo) {
         if (internalState[ViewportService.CONVERSIONS] === undefined) {
             internalState[ViewportService.CONVERSIONS] = {};
         }
         internalState[ViewportService.CONVERSIONS][idx] = serverConversionInfo;
+    }
+
+    public queueChange(viewPort: any[], internalState: any, idx: number, columnName: string, newValue: any, oldValue?:any) {
+        if (columnName === FoundsetTypeConstants.ROW_ID_COL_KEY) return;
+        
+        let conversionInfo = internalState[ViewportService.CONVERSIONS] ? internalState[ViewportService.CONVERSIONS][idx] : undefined;
+        if (!this.isChanged(newValue, oldValue, columnName, conversionInfo)) return;
+
+        let r = {};
+		if (internalState.forFoundset !== undefined) {
+			r[FoundsetTypeConstants.ROW_ID_COL_KEY] = internalState.forFoundset().viewPort.rows[idx][FoundsetTypeConstants.ROW_ID_COL_KEY];
+		} else {
+            // if it doesn't have internalState.forFoundset then it's probably the foundset property's viewport directly which has those in the viewport
+            r[FoundsetTypeConstants.ROW_ID_COL_KEY] = viewPort[idx][FoundsetTypeConstants.ROW_ID_COL_KEY];         
+        }
+        r[ViewportService.DATAPROVIDER_KEY] = columnName;
+		r[ViewportService.VALUE_KEY] = newValue;
+
+		// convert new data if necessary
+        if (conversionInfo && (!columnName || conversionInfo[columnName])){
+            r[ViewportService.VALUE_KEY] = this.converterService.convertFromClientToServer(r[ViewportService.VALUE_KEY], columnName ? conversionInfo[columnName] : conversionInfo, oldValue);
+        }
+        else {
+            r[ViewportService.VALUE_KEY] = this.converterService.convertClientObject(r[ViewportService.VALUE_KEY]);
+        }
+
+		internalState.requests.push({viewportDataChanged: r});
+		if (internalState.changeNotifier) internalState.changeNotifier();
+    }
+
+    private isChanged(newValue: any, oldValue: any, columnName:string, conversionInfo: any) {
+        if (newValue !== oldValue) {
+             /* this doesn't seem to work correctly for 2 identical Date objects in Chrome when debugging; but it should */
+			if (typeof newValue == "object") {
+				return ConverterService.isChanged(newValue, oldValue, conversionInfo ? (columnName ? conversionInfo[columnName] : conversionInfo) : undefined);
+            }
+            return true;
+        }
+        return false;
     }
 }

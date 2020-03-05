@@ -17,6 +17,7 @@ describe('FoundsetConverter', () => {
     let converterService: ConverterService;
     let loggerFactory;
     let sabloService: SabloService;
+    let viewportService: ViewportService;
     let sabloDeferHelper;
     let fs: Foundset;
     let changeNotified = false;
@@ -31,7 +32,7 @@ describe('FoundsetConverter', () => {
       sabloService = TestBed.get( SabloService );
       sabloService.connect({}, {}, "");
       sabloDeferHelper = TestBed.get( SabloDeferHelper );
-      let viewportService = TestBed.get( ViewportService );
+      viewportService = TestBed.get( ViewportService );
       loggerFactory = TestBed.get( LoggerFactory );
       converterService = TestBed.get( ConverterService );
       converterService.registerCustomPropertyHandler( "foundset", new FoundsetConverter( converterService, sabloService, sabloDeferHelper, viewportService, loggerFactory) );
@@ -107,9 +108,9 @@ describe('FoundsetConverter', () => {
 
         // so no "w": false in server received value...
         let tmp = fs.viewPort.rows[0]["i"];
-        fs.viewPort.rows[0]["i"] = 4321234;
+        fs.columnDataChanged(0, "i", 4321234);
         expect(getAndClearNotified()).toEqual(false);
-        expect(fs.state.isChanged()).toEqual(false);
+        expect(fs.state.isChanged()).toEqual(false)
         fs.viewPort.rows[0]["i"] = tmp;
     });
 
@@ -129,9 +130,13 @@ describe('FoundsetConverter', () => {
         };
         fs = converterService.convertFromServerToClient(updateValue,'foundset', fs);
         fs.state.setChangeNotifier(() => { changeNotified = true });
-        let copy = Object.assign({}, updateValue);
-        delete copy["w"]; // this one goes to internal state
-        // TODO expect(fs).toEqual(copy);
+
+        let copy = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
+        copy.serverSize = 6;
+        copy.selectedRowIndexes = [0];
+        copy.multiSelect = false;
+        copy.viewPort = { startIndex: 0, size: 0, rows: [] };
+        expect(fs).toEqual(copy);
 
         // *** request and receive new viewport (all records in this case)
         fs.loadRecordsAsync(0,6);
@@ -160,7 +165,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
 
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state);
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         expectedfs.serverSize = 6;
         expectedfs.selectedRowIndexes = [0];
         expectedfs.multiSelect = false;
@@ -243,7 +248,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
 
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state);
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         expectedfs.serverSize = 8;
         expectedfs.selectedRowIndexes = [4];
         expectedfs.multiSelect = false;
@@ -302,7 +307,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
         
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state);
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         expectedfs.serverSize = 5;
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
@@ -362,7 +367,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
         
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state); //we don't care too much about the state on the expectedfs, it has to be equal to the original one
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state); //we don't care too much about the state on the expectedfs, it has to be equal to the original one
         expectedfs.serverSize = 12;
         expectedfs.selectedRowIndexes = [0];
         expectedfs.multiSelect = false;
@@ -440,7 +445,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
 
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state);
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         expectedfs.serverSize = 14;
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
@@ -507,7 +512,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
 
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state);
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         expectedfs.serverSize = 15;
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
@@ -560,7 +565,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
        
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state);
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         expectedfs.serverSize = 14;
         expectedfs.selectedRowIndexes = [2];
         expectedfs.multiSelect = false;
@@ -618,7 +623,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
 
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state);
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         expectedfs.serverSize = 13;
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
@@ -643,6 +648,7 @@ describe('FoundsetConverter', () => {
             "serverSize": 13,
             "selectedRowIndexes": [ 1 ],
             "multiSelect": false,
+            "w": false,
             "viewPort": { "startIndex": 0, "size": 9, "rows": rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
@@ -680,7 +686,7 @@ describe('FoundsetConverter', () => {
             }
         },'foundset', fs);
 
-        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, fs.state);
+        let expectedfs = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         expectedfs.serverSize = 13;
         expectedfs.selectedRowIndexes = [1];
         expectedfs.multiSelect = false;
@@ -692,8 +698,8 @@ describe('FoundsetConverter', () => {
         expect(fs).toEqual(expectedfs);
 
         //Should send change of date value to server
-        let newDate : Date = fs.viewPort.rows[12]['d'] = new Date(new Date().getTime() + 1);
-        fs.updateViewportRecord(fs.viewPort.rows[12]['_svyRowId'], "d", newDate, someDateMs);
+        let newDate : number = new Date().getTime() + 1;
+        fs.columnDataChanged(12, 'd', newDate, someDateMs);
         expect(getAndClearNotified()).toEqual(true);
         expect(fs.state.isChanged()).toEqual(true);
         expect(converterService.convertFromClientToServer(fs, 'foundset', fs)).toEqual(
@@ -703,7 +709,7 @@ describe('FoundsetConverter', () => {
         expect(fs.state.isChanged()).toEqual(false);
         
         //Should send change of int value to server
-        fs.updateViewportRecord(fs.viewPort.rows[0]['_svyRowId'], "i", 4321, fs.viewPort.rows[0]['i']); //WAS fs.viewPort.rows[0]['i']= 4321;
+        fs.columnDataChanged(0, 'i', 4321);
         expect(getAndClearNotified()).toEqual(true);
         expect(fs.state.isChanged()).toEqual(true);
         expect(converterService.convertFromClientToServer(fs, 'foundset', fs)).toEqual(
