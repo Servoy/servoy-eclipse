@@ -653,21 +653,8 @@ public class GhostHandler implements IServerService
 		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
 		Map<String, FormElementGroup> groups = new HashMap<>();
 		Form form = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
+		int formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
 		Iterator<IPersist> it = form.getAllObjects();
-		int formHeight = 0;
-
-		if (form.getParts().hasNext())
-		{
-			formHeight = editorPart.getForm().getSize().height;
-		}
-		else
-		{
-			form = editorPart.getForm();
-			while (formHeight == 0 && (form = form.extendsForm) != null)
-			{
-				formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
-			}
-		}
 		while (it.hasNext())
 		{
 			IPersist persist = it.next();
