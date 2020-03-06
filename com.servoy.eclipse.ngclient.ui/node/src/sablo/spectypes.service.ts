@@ -241,6 +241,15 @@ export interface IFoundset {
      addChangeListener(changeListener : ChangeListener) : () => void;
      removeChangeListener(changeListener : ChangeListener) : void;
 
+    /**
+     * Mark the foundset data as changed on the client.
+     * If push to server is allowed for this foundset then the changes will be sent to the server, othwerwise the changes are ignored.
+     * @param index is the row index where the data change occurred
+     * @param columnID the name of the column
+     * @param newValue the new value (if undefined the change is ignored)
+     * @param oldValue the old value, is optional; the change is ignored if the oldValue is the same as the newValue
+     */
+    columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any)
 }
 
 export interface ChangeEvent {

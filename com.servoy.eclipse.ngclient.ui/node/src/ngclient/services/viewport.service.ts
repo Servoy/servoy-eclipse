@@ -15,7 +15,7 @@ export class ViewportService {
     
     constructor( private converterService: ConverterService ) {}
     
-    public updateWholeViewport(viewPortHolder: ViewPort, viewPortPropertyName: string, internalState, viewPortUpdate, viewPortUpdateConversions, propertyContext) {
+    public updateWholeViewport(viewPortHolder: ViewPort, viewPortPropertyName: string, internalState: any, viewPortUpdate, viewPortUpdateConversions, propertyContext:(propertyName: string)=>any) {
         if (viewPortUpdateConversions) {
             // do the actual conversion
             viewPortUpdate = this.converterService.convertFromServerToClient(viewPortUpdate, viewPortUpdateConversions, viewPortHolder[viewPortPropertyName], propertyContext);
@@ -142,11 +142,11 @@ export class ViewportService {
         internalState[ViewportService.CONVERSIONS][idx] = serverConversionInfo;
     }
 
-    public queueChange(viewPort: any[], internalState: any, idx: number, columnName: string, newValue: any, oldValue?:any) {
+    public queueChange(viewPort: any[], internalState: any, deep:boolean, idx: number, columnName: string, newValue: any, oldValue?:any) {
         if (columnName === FoundsetTypeConstants.ROW_ID_COL_KEY) return;
         
         let conversionInfo = internalState[ViewportService.CONVERSIONS] ? internalState[ViewportService.CONVERSIONS][idx] : undefined;
-        if (!this.isChanged(newValue, oldValue, columnName, conversionInfo)) return;
+        if ( deep && !this.isChanged(newValue, oldValue, columnName, conversionInfo)) return;
 
         let r = {};
 		if (internalState.forFoundset !== undefined) {

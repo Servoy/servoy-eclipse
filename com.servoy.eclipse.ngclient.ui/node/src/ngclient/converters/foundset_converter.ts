@@ -38,7 +38,7 @@ export class FoundsetConverter implements IConverter {
         this.log = logFactory.getLogger("FoundsetPropertyValue");
     }
     
-    fromServerToClient( serverJSONValue, currentClientValue?: Foundset, propertyContext?:(propertyName: string)=>any ) : IFoundset {
+    fromServerToClient( serverJSONValue: object, currentClientValue?: Foundset, propertyContext?:(propertyName: string)=>any ) : IFoundset {
         let newValue : Foundset = currentClientValue;
 
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
@@ -47,7 +47,7 @@ export class FoundsetConverter implements IConverter {
         
         // see if this is an update or whole value and handle it
         if (!serverJSONValue) {
-            newValue = serverJSONValue; // set it to nothing
+            newValue = undefined; // set it to nothing
             if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_FULL_VALUE_CHANGED] = { oldValue : currentClientValue, newValue : serverJSONValue };
             let oldInternalState = currentClientValue ? currentClientValue.state : undefined; // internal state / $sabloConverters interface
             if (oldInternalState) this.sabloDeferHelper.cancelAll(oldInternalState);
@@ -125,11 +125,8 @@ export class FoundsetConverter implements IConverter {
             
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.VIEW_PORT] !== undefined) {
                 updates = true;
-                let viewPortUpdate = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.VIEW_PORT];
-                
+                let viewPortUpdate = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.VIEW_PORT]; 
                 let internalState = currentClientValue.state;
-                
-                let oldStartIndex = currentClientValue.viewPort.startIndex;
                 let oldSize = currentClientValue.viewPort.size;
 
                 if (viewPortUpdate[FoundsetConverter.START_INDEX] !== undefined && currentClientValue.viewPort.startIndex != viewPortUpdate[FoundsetConverter.START_INDEX]) {
@@ -179,7 +176,7 @@ export class FoundsetConverter implements IConverter {
                     {
                         let recordRef = {};
                         recordRef[FoundsetTypeConstants.ROW_ID_COL_KEY] = this[FoundsetTypeConstants.ROW_ID_COL_KEY];
-                        recordRef[FoundsetConverter.FOUNDSET_ID] = newValue[FoundsetConverter.FOUNDSET_ID];
+                        recordRef[FoundsetConverter.FOUNDSET_ID] = newValue.foundsetId;
                         return recordRef;
                     }
                     return null
@@ -391,12 +388,12 @@ export class Foundset implements IFoundset {
         return this.state.selectionUpdateDefer.promise;
     }
     
-    public getRecordRefByRowID(rowID) {
+    public getRecordRefByRowID(rowID: string) {
         if (rowID)
         {
             let recordRef = {};
             recordRef[FoundsetTypeConstants.ROW_ID_COL_KEY] = rowID;
-            recordRef[FoundsetConverter.FOUNDSET_ID] = this.state[FoundsetConverter.FOUNDSET_ID];
+            recordRef[FoundsetConverter.FOUNDSET_ID] = this.foundsetId;
             return recordRef;
         }
         return null;
@@ -445,18 +442,9 @@ export class Foundset implements IFoundset {
     }
 
     public columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any) {
-        if (newValue !== undefined && newValue !== null) {
-            if (this.viewPort.rows) {
-                // prepare pushToServer values as needed for the following call
-                let pushToServer = false;
-                if (typeof this.state.push_to_server !== "undefined") {
-                    pushToServer =  this.state.push_to_server ? this.state.push_to_server[columnID] : true; // true or false then, just use that for adding watches (deep/shallow) to all columns
-                }
-
-                if (pushToServer) {
-                    this.viewportService.queueChange(this.viewPort.rows, this.state, index, columnID, newValue, oldValue);
-                }
-            }
+        if (this.state.push_to_server == undefined) return;
+        if (newValue !== undefined && this.viewPort.rows)  {
+            this.viewportService.queueChange(this.viewPort.rows, this.state, this.state.push_to_server, index, columnID, newValue, oldValue);
         }
     }
 }
@@ -484,7 +472,7 @@ class FoundsetState implements IDeferedState {
         return () => this.removeChangeListener(listener);
     }
     
-    public removeChangeListener(listener) {
+    public removeChangeListener(listener: (change: FoundsetChangeEvent) => void) {
         let index = this.changeListeners.indexOf(listener);
         if (index > -1) {
             this.changeListeners.splice(index, 1);
@@ -502,7 +490,7 @@ class FoundsetState implements IDeferedState {
         }
     }
     
-    public setChangeNotifier(changeNotifier) {
+    public setChangeNotifier(changeNotifier: Function) {
         this.changeNotifier = changeNotifier;
     }
     
