@@ -34,6 +34,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -190,7 +191,14 @@ public class TutorialView extends ViewPart
 					}
 					Point cursorLocation = Display.getCurrent().getCursorLocation();
 
+					Rectangle bounds = Display.getCurrent().getBounds();
+
+
 					Point location = new Point(cursorLocation.x - size.width - 50, cursorLocation.y + 5);
+					if ((location.y + size.height) > bounds.height)
+					{
+						location.y = bounds.height - size.height - 70;
+					}
 					if (dialog == null || dialog.isDisposed())
 					{
 						dialog = new BrowserDialog(parent.getShell(),
@@ -200,6 +208,7 @@ public class TutorialView extends ViewPart
 					else
 					{
 						dialog.setUrl(rowData.optString("gifURL"));
+						dialog.setLocationAndSize(location, size);
 					}
 				}
 			});

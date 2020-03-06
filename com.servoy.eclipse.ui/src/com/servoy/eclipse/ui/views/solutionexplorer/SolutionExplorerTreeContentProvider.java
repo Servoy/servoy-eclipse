@@ -751,7 +751,7 @@ public class SolutionExplorerTreeContentProvider
 
 		// set active solution node to usable/unusable
 		activeSolutionNode.setRealObject(servoyModel.getActiveProject());
-		if (activeSolutionNode.getRealObject() != null)
+		if (activeSolutionNode.getRealObject() != null && ((ServoyProject)activeSolutionNode.getRealObject()).getSolution() != null)
 		{
 			activeSolutionNode.setIcon(getServoyProjectImage(((ServoyProject)activeSolutionNode.getRealObject()), false, false));
 			String name = ((ServoyProject)activeSolutionNode.getRealObject()).getProject().getName();

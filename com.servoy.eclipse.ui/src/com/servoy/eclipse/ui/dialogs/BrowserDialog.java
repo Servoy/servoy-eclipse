@@ -406,4 +406,11 @@ public class BrowserDialog extends Dialog
 		this.url = url;
 		browser.setUrl(url);
 	}
+
+	public void setLocationAndSize(Point location, Dimension size)
+	{
+		browser.setSize(size.width, size.height);
+		shell.setLocation(location);
+		shell.pack();
+	}
 }
