@@ -134,10 +134,8 @@ describe('FoundsetLinked Converter', () => {
 			realClientValue.state.setChangeNotifier(() => { changeNotified = true });
 
 			// *** initial size no viewport
-            realClientValue[0] = "I am really changed and I should be sent"; 
-            realClientValue.state.requests.push({ viewportDataChanged: {value:'I am really changed and I should be sent'} }); //TODO is there another way to trigger a property change??
-
-			//TODO expect(getAndClearNotified()).toEqual(true);
+			realClientValue.columnDataChanged(0, null, "I am really changed and I should be sent");
+			expect(getAndClearNotified()).toEqual(true);
 			expect(realClientValue.state.isChanged()).toEqual(true);
 			expect(converterService.convertFromClientToServer(realClientValue, 'fsLinked', realClientValue)).toEqual(
 					[ { propertyChange: 'I am really changed and I should be sent' } ]
@@ -233,15 +231,14 @@ describe('FoundsetLinked Converter', () => {
 		});
 
 		it("Should not send value updates for when pushToServer is not specified", () => {
-            serverValue = { forFoundset: "myfoundset", "vp": [ 10643, 10702, 10835, 10952, 11011, 11081 ] };
+            serverValue = { forFoundset: "myfoundset", w:false, "vp": [ 10643, 10702, 10835, 10952, 11011, 11081 ] };
 			realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', undefined, componentModelGetter);
             realClientValue.state.setChangeNotifier(() => { changeNotified = true });
             
 			// *** initial size no viewport
-            realClientValue[3] = 1010101010; 
-            realClientValue.state.requests.push({viewportDataChanged: { _svyRowId: 'ha ha', dp: null, value: 1010101010 }}) //TODO is there another way to trigger a property change??
+           realClientValue.columnDataChanged(3, null, 1010101010);
 
-			//TODO expect(getAndClearNotified()).toEqual(true);
+			expect(getAndClearNotified()).toEqual(true);
 			expect(realClientValue.state.isChanged()).toEqual(true);
 			expect(converterService.convertFromClientToServer(realClientValue, 'fsLinked', realClientValue)).toEqual(
 					[ { viewportDataChanged: { _svyRowId: 'ha ha', dp: null, value: 1010101010 } } ]

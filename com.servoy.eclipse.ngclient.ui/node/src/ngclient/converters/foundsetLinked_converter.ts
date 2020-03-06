@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService } from '../../sablo/converter.service'
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
-import { IFoundset, ChangeListener, ChangeEvent, FoundsetTypeConstants, FoundsetLinkedTypeConstants, ViewPort } from '../../sablo/spectypes.service'
+import { ChangeListener, ChangeEvent, FoundsetTypeConstants, FoundsetLinkedTypeConstants } from '../../sablo/spectypes.service'
 import { SabloService } from '../../sablo/sablo.service';
-import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
+import { SabloDeferHelper } from '../../sablo/defer.service';
 import { Deferred } from '../../sablo/util/deferred';
-import { SabloUtils } from '../../sablo/websocket.service';
 import { ViewportService } from '../services/viewport.service';
 
 
@@ -27,17 +26,14 @@ export class FoundsetLinkedConverter implements IConverter {
         this.log = logFactory.getLogger("FoundsetLinkedPropertyValue");
     }
     
-    public fromServerToClient(serverJSONValue, currentClientValue, propertyContext) {
+    public fromServerToClient(serverJSONValue:object, currentClientValue: FoundsetLinked, propertyContext:(propertyName: string) => any) {
         let newValue : FoundsetLinked = currentClientValue;
-
-        // remove watches to avoid an unwanted detection of received changes
-        //TODO no watches anymore!!! removeAllWatches(currentClientValue);
 
         if (serverJSONValue !== null && serverJSONValue !== undefined) {
             let didSomething = false;
             let internalState = newValue !== undefined ? newValue.state : undefined;
             if (internalState == undefined) {
-                newValue = new FoundsetLinked();
+                newValue = new FoundsetLinked(this.viewportService);
                 newValue.state.setChangeListeners(currentClientValue);
                 internalState = newValue.state;
             }
@@ -52,8 +48,6 @@ export class FoundsetLinkedConverter implements IConverter {
             if (typeof serverJSONValue[FoundsetLinkedConverter.PUSH_TO_SERVER] !== 'undefined') {
                 internalState.push_to_server = serverJSONValue[FoundsetLinkedConverter.PUSH_TO_SERVER];
             }
-
-            let childChangedNotifier;
             
             if (serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE] !== undefined) {
                 internalState.singleValueState = undefined;
@@ -66,7 +60,7 @@ export class FoundsetLinkedConverter implements IConverter {
                 internalState.fireChanges(serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE_UPDATE]);
             } else {
                 // the rest will always be treated as a full viewport update (single values are actually going to generate a full viewport of 'the one' new value)
-                let conversionInfos;
+                let conversionInfos: any[];
                 let updateWholeViewportFunc : Function = this.getUpdateWholeViewportFunc(propertyContext);
                 
                 let wholeViewport;
@@ -97,13 +91,10 @@ export class FoundsetLinkedConverter implements IConverter {
         } else if (serverJSONValue[FoundsetLinkedTypeConstants.ID_FOR_FOUNDSET] !== undefined) {
             newValue.idForFoundset = serverJSONValue[FoundsetLinkedTypeConstants.ID_FOR_FOUNDSET];
         }
-        
-        // restore/add model watch
-        //TODO no watches to add back..... addBackWatches(newValue, componentScope);
         return newValue;
     }
     
-    public fromClientToServer(newClientData, oldClientData) {
+    public fromClientToServer(newClientData: FoundsetLinked, oldClientData?: any) {
         if (newClientData) {
             let internalState : FoundsetLinkedState = newClientData.state;
             if (internalState.isChanged()) {
@@ -122,8 +113,8 @@ export class FoundsetLinkedConverter implements IConverter {
         return [];
     }
     
-    private getUpdateWholeViewportFunc(propertyContext) {
-        return (propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport, conversionInfos) => {
+    private getUpdateWholeViewportFunc(propertyContext:(propertyName: string) => any) {
+        return (propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport: any[], conversionInfos: any[]) => {
             let viewPortHolder = { startIndex: undefined, size: undefined, rows: [] };
             this.viewportService.updateWholeViewport(viewPortHolder, "rows", internalState, wholeViewport, conversionInfos, propertyContext);
             
@@ -143,12 +134,12 @@ export class FoundsetLinkedConverter implements IConverter {
         }
     }
     
-    private handleSingleValue(singleValue, internalState: FoundsetLinkedState, conversionInfo) {
+    private handleSingleValue(singleValue: any, internalState: FoundsetLinkedState, conversionInfo: any[]) {
         // this gets called for values that are not actually record linked, and we 'fake' a viewport containing the same value on each row in the array
         internalState.recordLinked = false;
         
         // *** BEGIN we need the following in addBackWatches that is also called by updateAngularScope, that is why they are stored in internalState (iS)
-        internalState.singleValueState.generateWholeViewportFromOneValue = (internalState, vpSize) => {
+        internalState.singleValueState.generateWholeViewportFromOneValue = (internalState:FoundsetLinkedState, vpSize:number) => {
             if (vpSize === undefined) vpSize = 0;
             let wholeViewport = [];
             internalState.singleValueState.conversionInfos = conversionInfo ? [] : undefined; 
@@ -170,12 +161,24 @@ export class FoundsetLinked extends Array<Object> {
     state : FoundsetLinkedState;
     idForFoundset : string;
 
-    constructor(){
+    constructor(private viewportService: ViewportService){
         super();
         this.state = new FoundsetLinkedState();
         //see https://blog.simontest.net/extend-array-with-typescript-965cc1134b3
         //set prototype, since adding a create method is not really working if we have the values
         Object.setPrototypeOf(this, Object.create(FoundsetLinked.prototype));
+    }
+
+    public columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any) {
+        if (this.state.push_to_server == undefined) return; //we ignore all changes
+
+        if (newValue !== undefined) {
+            if (this.state.singleValueState && newValue !== oldValue) {
+                let wholeViewport =  this.state.singleValueState.handleSingleValue(newValue, this.state, this.state.singleValueState.conversionInfos);	
+                if (wholeViewport !== undefined) this.state.singleValueState.updateWholeViewport(newValue, this.state, wholeViewport, this.state.singleValueState.conversionInfos);				
+            }
+            this.viewportService.queueChange(this, this.state, this.state.push_to_server, index, columnID, newValue, oldValue);
+        }
     }
 }
 
@@ -198,27 +201,25 @@ class FoundsetLinkedState {
         return () => this.removeChangeListener(listener);
     }
     
-    public removeChangeListener(listener) {
+    public removeChangeListener(listener: (change: ChangeEvent) => void) {
         let index = this.changeListeners.indexOf(listener);
         if (index > -1) {
             this.changeListeners.splice(index, 1);
         }
     }
     
-    public setChangeListeners(currentClientValue)
+    public setChangeListeners(currentClientValue: FoundsetLinked)
     {
         this.changeListeners = currentClientValue && currentClientValue.state ? currentClientValue.state.changeListeners : [];
     }
     
     public fireChanges(foundsetChanges: ChangeEvent) {
         for(let i = 0; i < this.changeListeners.length; i++) {
-            //TODO needed?? what is componentScope? $webSocket.setIMHDTScopeHintInternal(componentScope);
             this.changeListeners[i](foundsetChanges);
-            //TODO $webSocket.setIMHDTScopeHintInternal(undefined);
         }
     }
     
-    public setChangeNotifier(changeNotifier) {
+    public setChangeNotifier(changeNotifier: Function) {
         this.changeNotifier = changeNotifier;
     }
     
