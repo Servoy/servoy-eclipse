@@ -14,12 +14,52 @@
 	{
 		"name":"Step 3",
 		"description":"Do not break anything",
+		"gifURL":"https://webcomicms.net/sites/default/files/clipart/128511/animated-gif-128511-9042985.gif"
+	},
+	{
+		"name":"Step 4",
+		"description":"Shutdown your PC",
+		"gifURL":"https://servoy.com/wp-content/uploads/servoy-animated.gif"
+	},
+	{
+		"name":"Step 5",
+		"description":"Take your time and breath deeply.",
+		"gifURL":"https://servoy.com/wp-content/uploads/servoy-animated.gif"
+	},
+	{
+		"name":"Step 6",
+		"description":"Move the mouse around in developer.",
+		"gifURL":"https://webcomicms.net/sites/default/files/clipart/128511/animated-gif-128511-9042985.gif"
+	},
+	{
+		"name":"Step 7",
+		"description":"Do not break anything",
 		"gifURL":"https://servoy.com/wp-content/uploads/servoy-animated.gif"
 	},
 	{
 		"name":"Last step",
 		"description":"Shutdown your PC",
+		"gifURL":"https://webcomicms.net/sites/default/files/clipart/128511/animated-gif-128511-9042985.gif"
+	},
+		{
+		"name":"Step 5",
+		"description":"Take your time and breath deeply.",
 		"gifURL":"https://servoy.com/wp-content/uploads/servoy-animated.gif"
+	},
+	{
+		"name":"Step 6",
+		"description":"Move the mouse around in developer.",
+		"gifURL":"https://webcomicms.net/sites/default/files/clipart/128511/animated-gif-128511-9042985.gif"
+	},
+	{
+		"name":"Step 7",
+		"description":"Do not break anything",
+		"gifURL":"https://servoy.com/wp-content/uploads/servoy-animated.gif"
+	},
+	{
+		"name":"Last step",
+		"description":"Shutdown your PC",
+		"gifURL":"https://webcomicms.net/sites/default/files/clipart/128511/animated-gif-128511-9042985.gif"
 	}
 	]
 }
