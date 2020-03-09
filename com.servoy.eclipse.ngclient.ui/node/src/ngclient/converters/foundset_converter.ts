@@ -360,7 +360,7 @@ export class Foundset implements IFoundset {
         return this.state.deferred[requestID].defer.promise;
     }
     
-    public setPreferredViewportSize(size: number, sendSelectionViewportInitially, initialSelectionViewportCentered) {
+    public setPreferredViewportSize(size: number, sendSelectionViewportInitially?:boolean, initialSelectionViewportCentered?:boolean) {
         this.log.spam(this.log.buildMessage(() => ("svy foundset * setPreferredViewportSize called with (" + size + ", " + sendSelectionViewportInitially + ", " + initialSelectionViewportCentered + ")")));
         if (isNaN(size)) throw new Error("setPreferredViewportSize(...): illegal argument; size is not a number (" + size + ")");
         let request = { "preferredViewportSize" : size };
