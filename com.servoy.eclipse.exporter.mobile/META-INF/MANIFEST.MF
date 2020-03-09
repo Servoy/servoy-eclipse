@@ -7,6 +7,8 @@ Bundle-Activator: com.servoy.eclipse.exporter.mobile.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.model,
  com.servoy.eclipse.core,
+ org.eclipse.core.commands,
+ org.eclipse.jface,
  org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,

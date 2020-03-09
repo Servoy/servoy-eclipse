@@ -9,6 +9,7 @@ Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.core.databinding.beans,
  org.eclipse.jface.databinding,
+ org.eclipse.jface,
  org.eclipse.ui,
  org.eclipse.ui.views,
  org.eclipse.core.runtime,
