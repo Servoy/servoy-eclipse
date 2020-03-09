@@ -134,7 +134,7 @@ describe('FoundsetLinked Converter', () => {
 			realClientValue.state.setChangeNotifier(() => { changeNotified = true });
 
 			// *** initial size no viewport
-			realClientValue.columnDataChanged(0, null, "I am really changed and I should be sent");
+			realClientValue.dataChanged(0, "I am really changed and I should be sent");
 			expect(getAndClearNotified()).toEqual(true);
 			expect(realClientValue.state.isChanged()).toEqual(true);
 			expect(converterService.convertFromClientToServer(realClientValue, 'fsLinked', realClientValue)).toEqual(
@@ -236,7 +236,7 @@ describe('FoundsetLinked Converter', () => {
             realClientValue.state.setChangeNotifier(() => { changeNotified = true });
             
 			// *** initial size no viewport
-           realClientValue.columnDataChanged(3, null, 1010101010);
+           realClientValue.dataChanged(3, 1010101010);
 
 			expect(getAndClearNotified()).toEqual(true);
 			expect(realClientValue.state.isChanged()).toEqual(true);

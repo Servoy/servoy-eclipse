@@ -169,7 +169,7 @@ export class FoundsetLinked extends Array<Object> {
         Object.setPrototypeOf(this, Object.create(FoundsetLinked.prototype));
     }
 
-    public columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any) {
+    public dataChanged(index: number, newValue: any, oldValue?: any) {
         if (this.state.push_to_server == undefined) return; //we ignore all changes
 
         if (newValue !== undefined) {
@@ -177,7 +177,7 @@ export class FoundsetLinked extends Array<Object> {
                 let wholeViewport =  this.state.singleValueState.handleSingleValue(newValue, this.state, this.state.singleValueState.conversionInfos);	
                 if (wholeViewport !== undefined) this.state.singleValueState.updateWholeViewport(newValue, this.state, wholeViewport, this.state.singleValueState.conversionInfos);				
             }
-            this.viewportService.queueChange(this, this.state, this.state.push_to_server, index, columnID, newValue, oldValue);
+            this.viewportService.queueChange(this, this.state, this.state.push_to_server, index, null, newValue, oldValue);
         }
     }
 }
