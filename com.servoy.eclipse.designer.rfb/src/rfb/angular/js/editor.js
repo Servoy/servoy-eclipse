@@ -370,7 +370,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				} else {
 					var xOffset = 20;
 					var yOffset = 20;
-	
+					if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT) {
+						// show outside component at exact location
+						xOffset = 0;
+						yOffset = 0;
+					}
 					// SOME of these are set directly in editor.css for .ghost-dnd-placeholder; if you change things that should affect
 					// the placeholder used when moving droppable config custom objects via drag&drop, please change them in editor.css as well
 					style = {
