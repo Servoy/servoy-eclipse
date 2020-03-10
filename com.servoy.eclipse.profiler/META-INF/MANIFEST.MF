@@ -7,6 +7,7 @@ Bundle-Activator: com.servoy.eclipse.profiler.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.model,
  servoy_debug,
+ org.eclipse.jface,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.text,
  org.eclipse.dltk.core,
