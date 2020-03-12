@@ -127,7 +127,7 @@ export class FormService {
 //        delete this.touchedForms[formName];
     }
 
-    private walkOverChildren( children, formCache: FormCache, parent?: StructureCache | FormComponentCache ) {
+    private walkOverChildren( children, formCache: FormCache, parent?: StructureCache | FormComponentCache | PartCache ) {
         children.forEach(( elem ) => {
             if ( elem.layout == true ) {
                 const structure = new StructureCache( elem.styleclass );
@@ -170,19 +170,23 @@ export class FormService {
                     else {
                         parent.addChild(structure);
                     }
-                }    
-            else {
-                if ( elem.model[ConverterService.TYPES_KEY] != null ) {
-                    this.converterService.convertFromServerToClient( elem.model, elem.model[ConverterService.TYPES_KEY], null, (property: string) => { return elem.model ? elem.model[property] : elem.model } );
-                    formCache.addConversionInfo( elem.name, elem.model[ConverterService.TYPES_KEY] );
                 }
-                const comp = new ComponentCache( elem.name, elem.type, elem.model, elem.handlers, elem.position );
-                if ( parent != null ) {
-                    parent.addChild( comp )
-                }
+                else
+                    if ( elem.part == true ) {
+                        const part = new PartCache(elem.classes,elem.layout);
+                        this.walkOverChildren(elem.children, formCache, part);
+                        formCache.addPart(part);
+                    }
                 else {
+                    if ( elem.model[ConverterService.TYPES_KEY] != null ) {
+                        this.converterService.convertFromServerToClient( elem.model, elem.model[ConverterService.TYPES_KEY], null, (property: string) => { return elem.model ? elem.model[property] : elem.model } );
+                        formCache.addConversionInfo( elem.name, elem.model[ConverterService.TYPES_KEY] );
+                    }
+                    const comp = new ComponentCache( elem.name, elem.type, elem.model, elem.handlers, elem.position );
                     formCache.add( comp );
-                }
+                    if ( parent != null ) {
+                        parent.addChild( comp )
+                    }  
             }
         } );
     }
@@ -326,20 +330,23 @@ export class FormCache {
     private _mainStructure: StructureCache;
 
     private _formComponents : Array<FormComponentCache>;
-    private _items: Array<ComponentCache>;
+    private _parts: Array<PartCache>;
     public navigatorForm: FormSettings;
     private conversionInfo = {};
 
     constructor() {
         this.componentCache = new Map();
-        this._items = [];
+        this._parts = [];
         this._formComponents = [];
     }
     public add( comp: ComponentCache ) {
         this.componentCache.set( comp.name, comp );
-		if (comp.type && comp.type != "servoycoreNavigator")
-        	this._items.push( comp );
     }
+    
+    public addPart( part: PartCache ) {
+        this._parts.push( part );
+    }
+    
     set mainStructure( structure: StructureCache ) {
         this._mainStructure = structure;
         this.findComponents( structure );
@@ -356,8 +363,8 @@ export class FormCache {
     get absolute(): boolean {
         return this._mainStructure == null;
     }
-    get items(): Array<ComponentCache> {
-        return this._items;
+    get parts(): Array<PartCache> {
+        return this._parts;
     }
 
     public addFormComponent(formComponent : FormComponentCache){
@@ -413,6 +420,20 @@ export class StructureCache {
         if ( child instanceof StructureCache )
             return child as StructureCache;
         return null;
+    }
+}
+
+export class PartCache {
+    constructor( public readonly classes: Array<string>,
+        public readonly layout: { [property: string]: string },    
+        public readonly items?: Array< StructureCache | ComponentCache | FormComponentCache>) {
+        if ( !this.items ) this.items = [];
+    }
+
+    addChild( child: StructureCache | ComponentCache | FormComponentCache ) {
+        if (child instanceof ComponentCache && child.type && child.type == "servoycoreNavigator")
+            return;
+        this.items.push( child );
     }
 }
 

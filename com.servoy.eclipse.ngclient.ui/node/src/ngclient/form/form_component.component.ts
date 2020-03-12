@@ -13,12 +13,11 @@ import { ServoyApi } from '../servoy_api'
     selector: 'svy-form',
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" svy-autosave> <!-- main div -->
-          <div *ngFor="let item of formCache.items" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
-               <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component  -->
-          </div>
-          <div *ngFor="let formComponent of formCache.formComponents" style="position:absolute" class="svy-wrapper" [config]="formComponent"> <!-- main container div -->
-            <ng-template [ngTemplateOutlet]="getTemplate(formComponent)" [ngTemplateOutletContext]="{state:formComponent}"></ng-template>
-          </div>
+           <div *ngFor="let part of formCache.parts" [config]="part"> <!-- part div -->
+               <div *ngFor="let item of part.items" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+                   <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component or formcomponent -->
+                </div>
+          </div> 
       </div>
       <div *ngIf="!formCache.absolute" [config]="formCache.mainStructure"> <!-- main container div -->
             <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component or responsive div  -->
