@@ -3468,6 +3468,7 @@ public class SolutionExplorerView extends ViewPart
 		setActive = new ActivateSolutionAction();
 
 		createInMemFromSPAction = new CreateInMemFromSpAction(this);
+		fRefreshAction = new RefreshAction(this);
 
 		// let the actions decide when they are enabled or disabled
 		addListSelectionChangedListener(moveCode);
@@ -3546,8 +3547,8 @@ public class SolutionExplorerView extends ViewPart
 		addTreeSelectionChangedListener(newLayoutFolderInWebPackageAction);
 		addTreeSelectionChangedListener(deleteWebObjectFolder);
 		addTreeSelectionChangedListener(newComponentResource);
+		addTreeSelectionChangedListener(fRefreshAction);
 
-		fRefreshAction = new RefreshAction(this);
 		collapseTreeAction = new CollapseTreeAction(tree);
 		collapseTreeAction.setId("collapseTreeAction");
 		selectAllActionInTree = new SelectAllAction(tree);
