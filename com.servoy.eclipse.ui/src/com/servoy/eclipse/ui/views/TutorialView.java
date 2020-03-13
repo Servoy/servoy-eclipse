@@ -177,7 +177,7 @@ public class TutorialView extends ViewPart
 						ImageData imgData = desc.getImageData(100);
 						if (imgData != null)
 						{
-							size = new Dimension(imgData.width + 20, imgData.height + 20);
+							size = new Dimension(imgData.width + 20, imgData.height + 25);
 						}
 					}
 					catch (MalformedURLException e1)

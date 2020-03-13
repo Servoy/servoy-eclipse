@@ -89,11 +89,11 @@ public class BrowserDialog extends Dialog
 	public Object open()
 	{
 		Rectangle size = getParent().getBounds();
-		Dimension newSize = new Dimension((int)(size.width / 1.5), (int)(size.height / 1.5));
+		Dimension newSize = new Dimension((int)(size.width / 1.5), (int)(size.height / 1.4));
 
 		int locationX, locationY;
 		locationX = (size.width - (int)(size.width / 1.5)) / 2 + size.x;
-		locationY = (size.height - (int)(size.height / 1.5)) / 2 + size.y;
+		locationY = (size.height - (int)(size.height / 1.4)) / 2 + size.y;
 
 		return this.open(new Point(locationX, locationY), newSize);
 	}
@@ -292,8 +292,8 @@ public class BrowserDialog extends Dialog
 					{
 						Rectangle size = getParent().getBounds();
 						Rectangle bounds = new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
-							(size.height - (int)(size.height / 1.5)) / 2 + size.y, (int)(size.width / 1.5),
-							(int)(size.height / 1.5));
+							(size.height - (int)(size.height / 1.4)) / 2 + size.y, (int)(size.width / 1.5),
+							(int)(size.height / 1.4));
 						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
 						shell.layout(true, true);
@@ -379,7 +379,7 @@ public class BrowserDialog extends Dialog
 			});
 		}
 		shell.setLocation(location);
-		shell.pack();
+		shell.setSize(size.width, size.height);
 		shell.open();
 		if (getStyle() == SWT.APPLICATION_MODAL)
 		{
@@ -411,6 +411,6 @@ public class BrowserDialog extends Dialog
 	{
 		browser.setSize(size.width, size.height);
 		shell.setLocation(location);
-		shell.pack();
+		shell.setSize(size.width, size.height);
 	}
 }
