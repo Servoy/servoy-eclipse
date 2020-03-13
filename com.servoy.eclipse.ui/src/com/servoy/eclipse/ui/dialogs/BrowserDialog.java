@@ -35,6 +35,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
@@ -102,7 +103,7 @@ public class BrowserDialog extends Dialog
 	{
 		Shell parent = getParent();
 		shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());
-
+		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
 		{
 			this.showSkipNextTime = false;
@@ -118,6 +119,7 @@ public class BrowserDialog extends Dialog
 		{
 			shell.setLayout(new FillLayout());
 		}
+		final Button[] showNextTime = new Button[1];
 		//load html file in textReader
 		browser = new Browser(shell, SWT.NONE);
 		browser.addLocationListener(new LocationListener()
@@ -281,6 +283,10 @@ public class BrowserDialog extends Dialog
 					}
 					if (introURL.getParameter("maximize") != null)
 					{
+						if (showNextTime != null && showNextTime[0] != null)
+						{
+							showNextTime[0].setVisible(false);
+						}
 						Rectangle bounds = parent.getBounds();
 						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
@@ -366,17 +372,20 @@ public class BrowserDialog extends Dialog
 
 		if (showSkipNextTime)
 		{
-			Button showNextTime = new Button(shell, SWT.CHECK);
-			showNextTime.setText("Do not show this dialog anymore");
-			showNextTime.setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_MAIN_CONCEPTS_PAGE, "true")));
-			showNextTime.addSelectionListener(new SelectionAdapter()
+			browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			showNextTime[0] = new Button(shell, SWT.CHECK);
+			showNextTime[0].setText("Do not show this dialog anymore");
+			showNextTime[0].setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_MAIN_CONCEPTS_PAGE, "true")));
+			showNextTime[0].addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_MAIN_CONCEPTS_PAGE, new Boolean(!showNextTime.getSelection()).toString());
+					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_MAIN_CONCEPTS_PAGE,
+						new Boolean(!showNextTime[0].getSelection()).toString());
 				}
 			});
+			showNextTime[0].setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		}
 		shell.setLocation(location);
 		shell.setSize(size.width, size.height);
