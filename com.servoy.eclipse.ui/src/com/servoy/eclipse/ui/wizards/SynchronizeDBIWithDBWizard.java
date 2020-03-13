@@ -277,7 +277,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					page1 = new SplitInThreeWizardPage<IServerInternal, String>("Missing tables",
 						"Database information files (.dbi from resources project) can point to tables that do not exist in the database.\nYou can choose to create those tables according to the information or delete the unwanted information files.",
 						"Skip", "Create table", "Delete .dbi", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
-						foundMissingTables, comparator, serverImage, tableImage, viewImage);
+						foundMissingTables, comparator, serverImage, tableImage, viewImage, "com.servoy.eclipse.ui.synchronizedbi_missingtables");
 				}
 				else
 				{
@@ -288,7 +288,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					page2 = new SplitInThreeWizardPage<IServerInternal, String>("Missing database information files",
 						"Tables in the database can lack an associated database information file (.dbi in the resources project).\nYou can choose to create the database information file or delete the table from the database.",
 						"Skip", "Create .dbi", "Delete table", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
-						foundSupplementalTables, comparator, serverImage, tableImage, viewImage);
+						foundSupplementalTables, comparator, serverImage, tableImage, viewImage, "com.servoy.eclipse.ui.synchronizedbi_missingdbi");
 				}
 				else
 				{
@@ -805,6 +805,12 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			return checked;
 		}
 
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.synchronizedbi_synccolumns");
+		}
+
 	}
 
 	public static class InitialChoiceWizardPage extends WizardPage
@@ -909,6 +915,12 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 				return super.getNextPage();
 			return null;
 		}
+
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.synchronizedbi_choicepage");
+		}
 	}
 	/**
 	 * The wizard page that is used by the user to split a set of tables into three sets.<br>
@@ -938,6 +950,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		private final String allSet1Label;
 		private final String allSet2Label;
 		private final String allSet3Label;
+		private final String helpID;
 
 		/**
 		 * Creates a new split-in-three wizard page. It will split the initial set "servers" into 3 subsets.
@@ -951,7 +964,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		 */
 		public SplitInThreeWizardPage(String title, String description, String labelForSet1, String labelForSet2, String labelForSet3, String allSet1Label,
 			String allSet2Label, String allSet3Label, List<Pair<T1, T2>> fatherChildrenPairs, Comparator<Pair<T1, T2>> c, Image image1, Image image2,
-			Image image3)
+			Image image3, String helpID)
 		{
 			super(title);
 			this.initialPairs = new SortedList<Pair<T1, T2>>(c, fatherChildrenPairs);
@@ -970,6 +983,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			this.image1 = image1;
 			this.image2 = image2;
 			this.image3 = image3;
+
+			this.helpID = helpID;
 
 		}
 
@@ -1117,6 +1132,12 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			fd.right = new FormAttachment(100, 0);
 			fd.bottom = new FormAttachment(100, 0);
 			allInSet3.setLayoutData(fd);
+		}
+
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp(helpID);
 		}
 
 		private void moveAllOrMultiSelectionToSet(int set)
