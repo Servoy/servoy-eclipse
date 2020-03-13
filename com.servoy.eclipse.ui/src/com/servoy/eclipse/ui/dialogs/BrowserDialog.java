@@ -388,7 +388,15 @@ public class BrowserDialog extends Dialog
 			showNextTime[0].setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		}
 		shell.setLocation(location);
-		shell.setSize(size.width, size.height);
+		if (Util.isMac())
+		{
+			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
+			shell.setSize(rect.width, rect.height);
+		}
+		else
+		{
+			shell.pack();
+		}
 		shell.open();
 		if (getStyle() == SWT.APPLICATION_MODAL)
 		{
