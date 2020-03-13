@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
@@ -177,7 +178,15 @@ public class TutorialView extends ViewPart
 						ImageData imgData = desc.getImageData(100);
 						if (imgData != null)
 						{
-							size = new Dimension(imgData.width + 20, imgData.height + 25);
+							if (Util.isMac())
+							{
+								size = new Dimension(imgData.width, imgData.height);
+							}
+							else
+							{
+								Point dpi = Display.getCurrent().getDPI();
+								size = new Dimension((int)(imgData.width * (dpi.x / 90f)), (int)(imgData.height * (dpi.y / 90f)));
+							}
 						}
 					}
 					catch (MalformedURLException e1)

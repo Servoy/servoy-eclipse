@@ -25,6 +25,7 @@ import java.net.URL;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -388,7 +389,15 @@ public class BrowserDialog extends Dialog
 			showNextTime[0].setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		}
 		shell.setLocation(location);
-		shell.setSize(size.width, size.height);
+		if (Util.isMac())
+		{
+			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
+			shell.setSize(rect.width, rect.height);
+		}
+		else
+		{
+			shell.pack();
+		}
 		shell.open();
 		if (getStyle() == SWT.APPLICATION_MODAL)
 		{
