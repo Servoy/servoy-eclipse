@@ -48,6 +48,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -409,9 +410,17 @@ public class SolutionExplorerTreeContentProvider
 																																			 */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
+		Job job = Job.create("Background loading of database connections", (ICoreRunnable)monitor -> {
+			addServersNodeChildren(servers);
+		});
+		job.setSystem(true);
+		job.setPriority(Job.LONG);
+		job.schedule();
+
+
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...
-		Job job = new Job("Background loading of plugins node")
+		job = new Job("Background loading of plugins node")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -2059,7 +2068,13 @@ public class SolutionExplorerTreeContentProvider
 					ArrayList<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
 					nodes.add(storedProceduresDataSources);
 					nodes.add(viewNode);
-					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
+					Job job = Job.create("Background loading of tables for server "+serverObj.getName(), (ICoreRunnable)monitor -> {
+						node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
+						view.refreshTreeNodeFromModel(node);
+					});
+					job.setSystem(true);
+					job.setPriority(Job.LONG);
+					job.schedule();
 					viewNode.parent = node;
 				}
 			}
