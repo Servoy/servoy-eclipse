@@ -108,7 +108,7 @@ public class MainConceptsPageBrowserEditor extends EditorPart
 	{
 		browser = new Browser(parent, SWT.NONE);
 		String url = MAINCONCEPTSPAGE_URL + "?dl=" + (ApplicationServerRegistry.get().hasDeveloperLicense());
-		String showOnStartup = Settings.getInstance().getProperty("servoy.developer.showMainConceptsPage");
+		String showOnStartup = Settings.getInstance().getProperty("servoy.developer.showStartPage");
 		if (showOnStartup == null || showOnStartup.equals("true"))
 		{
 			url += "&show=true";

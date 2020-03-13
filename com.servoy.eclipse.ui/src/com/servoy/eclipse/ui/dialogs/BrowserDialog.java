@@ -375,13 +375,13 @@ public class BrowserDialog extends Dialog
 			browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			showNextTime[0] = new Button(shell, SWT.CHECK);
 			showNextTime[0].setText("Do not show this dialog anymore");
-			showNextTime[0].setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_MAIN_CONCEPTS_PAGE, "true")));
+			showNextTime[0].setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")));
 			showNextTime[0].addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_MAIN_CONCEPTS_PAGE,
+					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_START_PAGE,
 						new Boolean(!showNextTime[0].getSelection()).toString());
 				}
 			});

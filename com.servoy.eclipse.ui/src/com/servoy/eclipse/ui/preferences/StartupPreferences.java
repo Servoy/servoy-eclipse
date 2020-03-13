@@ -58,7 +58,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS = "debugger.showConfirmationDialogWhenErrors";
 	public static final String DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS = "debugger.showConfirmationDialogWhenWarnings";
 	public static final String STARTUP_EXTENSION_UPDATE_CHECK = "startup.checkForExtensionUpdates";
-	public static final String STARTUP_SHOW_MAIN_CONCEPTS_PAGE = "servoy.developer.showMainConceptsPage";
+	public static final String STARTUP_SHOW_START_PAGE = "servoy.developer.showStartPage";
 	public static boolean DEFAULT_ERROR_CONFIRMATION = true;
 	public static boolean DEFAULT_WARNING_CONFIRMATION = false;
 	public static boolean DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK = false;
@@ -160,7 +160,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		showErrorsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, DEFAULT_ERROR_CONFIRMATION));
 		showWarningsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, DEFAULT_WARNING_CONFIRMATION));
 		startupExtensionUpdateCheck.setSelection(eclipsePreferences.getBoolean(STARTUP_EXTENSION_UPDATE_CHECK, DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK));
-		showStartPageCheck.setSelection(Utils.getAsBoolean(Settings.getInstance().getProperty(STARTUP_SHOW_MAIN_CONCEPTS_PAGE, "true")));
+		showStartPageCheck.setSelection(Utils.getAsBoolean(Settings.getInstance().getProperty(STARTUP_SHOW_START_PAGE, "true")));
 		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
 		{
 			showStartPageCheck.setEnabled(false);
@@ -192,10 +192,10 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, showErrorsConfirmation.getSelection());
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, showWarningsConfirmation.getSelection());
 		eclipsePreferences.putBoolean(STARTUP_EXTENSION_UPDATE_CHECK, startupExtensionUpdateCheck.getSelection());
-		Settings.getInstance().setProperty(STARTUP_SHOW_MAIN_CONCEPTS_PAGE, new Boolean(showStartPageCheck.getSelection()).toString());
+		Settings.getInstance().setProperty(STARTUP_SHOW_START_PAGE, new Boolean(showStartPageCheck.getSelection()).toString());
 		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
 		{
-			Settings.getInstance().setProperty(STARTUP_SHOW_MAIN_CONCEPTS_PAGE, "true");
+			Settings.getInstance().setProperty(STARTUP_SHOW_START_PAGE, "true");
 		}
 		return true;
 	}
