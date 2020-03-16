@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { ConverterService } from './converter.service'
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
+import { Observable } from 'rxjs';
 
 
 @Injectable()
@@ -51,7 +52,7 @@ export class SpecTypesService {
             guess = "JSON_arr";
         } else if ( instanceOfBaseCustomObject( val ) ) {
             guess = "JSON_obj";
-        } // else TODO do any other types need guessing? 
+        } // else TODO do any other types need guessing?
         //        else { // try to find it in types?
         //            this.registeredTypes.forEach(function(typeConstructorValue, typeNameKey) {
         //                if (val instanceof typeConstructorValue) guess = typeNameKey; // this wouldn't return the converter name like 'JSON_obj' but rather the actual name from spec of the custom type like "(...).tab"
@@ -86,9 +87,9 @@ export interface ICustomArray<T> extends Array<T>, IChangeAwareValue {
     markForChanged(): void;
 }
 
-export interface IValuelist extends Array<any>  {
-    filterList(filterString:string): Promise<any>;
-    getDisplayValue(realValue:any): Promise<any>;
+export interface IValuelist extends Array<{displayValue: string, realValue: any}>  {
+    filterList(filterString: string): Observable<any>;
+    getDisplayValue(realValue: any): Observable<any>;
     hasRealValues(): boolean;
 }
 
@@ -105,7 +106,7 @@ export interface IFoundset {
      *                   side. As with any promise you can register success, error callbacks, finally, ...
      */
      loadRecordsAsync(startIndex: number, size: number): Promise<any>;
-     
+
      /**
      * Request more records for your viewPort; if the argument is positive more records will be
      * loaded at the end of the 'viewPort', when negative more records will be loaded at the beginning
@@ -124,7 +125,7 @@ export interface IFoundset {
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
      */
      loadExtraRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any>;
-     
+
      /**
      * Request a shrink of the viewport; if the argument is positive the beginning of the viewport will
      * shrink, when it is negative then the end of the viewport will shrink - asynchronously.
@@ -142,14 +143,14 @@ export interface IFoundset {
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
      */
      loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any>;
-     
+
      /**
       * If you queue multiple loadExtraRecordsAsync and loadLessRecordsAsync by using dontNotifyYet = true
       * then you can - in the end - send all these requests to server (if any are queued) by calling
       * this method. If no requests are queued, it calling this method will have no effect.
       */
      notifyChanged(): void;
-     
+
      /**
      * Sort the foundset by the dataproviders/columns identified by sortColumns.
      *
@@ -169,7 +170,7 @@ export interface IFoundset {
      *                   and finally callbacks.
      */
      sort(sortColumns: Array<{ name: string, direction: ("asc" | "desc") }>): Promise<any>;
-     
+
      /**
      * Request a selection change of the selected row indexes. Returns a promise that is resolved
      * when the client receives the updated selection from the server. If successful, the array
@@ -182,7 +183,7 @@ export interface IFoundset {
      * E.g.: foundset.requestSelectionUpdate([2,3,4]).then(function(serverRows){},function(serverRows){});
      */
      requestSelectionUpdate(selectedRowIdxs: number[]): Promise<any>;
-     
+
      /**
      * Sets the preferred viewPort options hint on the server for this foundset, so that the next
      * (initial or new) load will automatically return that many rows, even without any of the loadXYZ
@@ -209,7 +210,7 @@ export interface IFoundset {
      *                                           preferredSize).
      */
      setPreferredViewportSize(preferredSize: number, sendViewportWithSelection: boolean, centerViewportOnSelected: boolean): void;
-     
+
      /**
      * Receives a client side rowID (taken from myFoundsetProp.viewPort.rows[idx]
      * [$foundsetTypeConstants.ROW_ID_COL_KEY]) and gives a Record reference, an object
@@ -231,10 +232,10 @@ export interface IFoundset {
      * This method has been added in Servoy 8.3.
      */
      getRecordRefByRowID(rowId: string): void;
-     
+
      /**
       * Adds a change listener that will get triggered when server sends changes for this foundset.
-      * 
+      *
       * @see $webSocket.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use $webSocket.addIncomingMessageHandlingDoneTask.
       * @param changeListener the listener to register.
       */
@@ -257,7 +258,7 @@ export interface ChangeEvent {
     // constants suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
     viewportRowsCompletelyChanged:  { oldValue: number, newValue: number },
- 
+
     // if we received add/remove/change operations on a set of rows from the viewport, this key
     // will be set; as seen below, it contains "updates" which is an array that holds a sequence of
     // granular update operations to the viewport; the array will hold one or more granular add or remove
@@ -297,7 +298,7 @@ type RowsInserted = { type: 1, startIndex: number, endIndex: number, removedFrom
  * a delete in the foundset itself; for example calling "loadLessRecordsAsync" can
  * result in a delete notification + smaller viewport size notification,
  * with appendedToVPEnd = 0
- */                                
+ */
 type RowsDeleted = { type: 2, startIndex : number, endIndex : number, appendedToVPEnd : number }
 
 export class BaseCustomObject implements ICustomObject {
@@ -333,13 +334,13 @@ export class FoundsetTypeConstants {
       // row update types for listener notifications - in case NOTIFY_VIEW_PORT_ROW_UPDATES_RECEIVED is triggered
       public static readonly ROWS_CHANGED: number = 0;
       public static readonly ROWS_INSERTED: number = 1;
-      public static readonly ROWS_DELETED: number = 2;   
+      public static readonly ROWS_DELETED: number = 2;
   }
 
 export class FoundsetLinkedTypeConstants {
     public static readonly ID_FOR_FOUNDSET = "idForFoundset";
     public static readonly RECORD_LINKED = "recordLinked";
-} 
+}
 
 export type ViewPort  = {
     startIndex: number;
@@ -522,5 +523,5 @@ export class ArrayState extends BaseCustomObjectState {
         }
         return changes;
     }
-    
+
 }
