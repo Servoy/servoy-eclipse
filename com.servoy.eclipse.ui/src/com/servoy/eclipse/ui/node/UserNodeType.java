@@ -153,5 +153,6 @@ public enum UserNodeType
 	VIEW_FOUNDSETS,
 	VIEW_FOUNDSET,
 	WEB_OBJECT_FOLDER,
-	ZIP_RESOURCE
+	ZIP_RESOURCE,
+	LOADING //a temporary node type which is displayed until the normal ones are loaded
 }

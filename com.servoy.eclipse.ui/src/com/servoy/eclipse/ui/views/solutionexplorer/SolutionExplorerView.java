@@ -1242,6 +1242,11 @@ public class SolutionExplorerView extends ViewPart
 		refreshTreeCompletely();
 	}
 
+	StructuredViewer getList()
+	{
+		return list;
+	}
+
 	/**
 	 * Returns the current selection. u
 	 *

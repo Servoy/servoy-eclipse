@@ -71,6 +71,7 @@ import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.MemberBox;
@@ -438,6 +439,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	protected Object[] loadData(SimpleUserNode un, UserNodeType type, Object mapKey, Object key, Map<Object, Object[]> parentMap)
 	{
+		if (type == UserNodeType.RESOURCES || type == UserNodeType.SERVERS || type == UserNodeType.USER_GROUP_SECURITY || type == UserNodeType.SECURITY ||
+			type == UserNodeType.I18N || type == UserNodeType.I18N_FILES || type == UserNodeType.APPLICATION || type == UserNodeType.SOLUTION_MODEL ||
+			type == UserNodeType.DATASOURCES || type == UserNodeType.TEMPLATES || type == UserNodeType.ALL_SOLUTIONS || type == UserNodeType.SOLUTION ||
+			type == UserNodeType.MODULES || type == UserNodeType.MODULE ||
+			type == UserNodeType.UTILS || type == UserNodeType.HISTORY || type == UserNodeType.JSUNIT)
+		{
+			return null;
+		}
 		Job job = Job.create("Loading solution explorer data...", (ICoreRunnable)monitor -> {
 			try
 			{
@@ -448,10 +457,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				ServoyLog.logError(e);
 			}
 		});
-		job.setSystem(true);
+		job.setUser(true);
 		job.setPriority(Job.LONG);
 		job.schedule();
-		return new Object[] { "Loading..." };
+		return new Object[] { new SimpleUserNode("Loading...", UserNodeType.LOADING) };
 	}
 
 	protected Object[] loadNodes(SimpleUserNode un, UserNodeType type, Object key, Object mapKey, Map<Object, Object[]> parentMap)
@@ -810,7 +819,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.JSLib.class, UserNodeType.JSLIB, null);
 		}
 
-		if (lm != null && key != null)
+		if (lm == null)
+		{
+			lm = EMPTY_LIST;
+		}
+		if (key != null)
 		{
 			if (parentMap != null)
 			{
@@ -821,6 +834,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				leafList.put(key, lm);
 			}
 		}
+		Display.getDefault().asyncExec(() -> {
+			view.getList().refresh();
+		});
 		return lm;
 	}
 
