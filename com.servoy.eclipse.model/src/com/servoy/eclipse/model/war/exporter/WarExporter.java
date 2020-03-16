@@ -655,7 +655,7 @@ public class WarExporter
 						}
 						copy = true;
 					}
-					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()))
+					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()) && exportedPackages.contains(name))
 					{
 						PackageSpecification<WebLayoutSpecification> spec = componentsSpecProviderState.getLayoutSpecifications().get(name);
 						copy = spec != null && (spec.getCssClientLibrary() != null && !spec.getCssClientLibrary().isEmpty() ||

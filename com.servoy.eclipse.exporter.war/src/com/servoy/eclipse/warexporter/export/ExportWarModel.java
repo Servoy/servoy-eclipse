@@ -1022,7 +1022,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	@Override
 	public Set<String> getExportedPackages()
 	{
-		return Stream.of(exportedComponentPackages, exportedServicePackages) //
+		return Stream.of(exportedComponentPackages, exportedServicePackages, exportedLayoutPackages) //
 			.flatMap(Set::stream) //
 			.collect(Collectors.toSet());
 	}
