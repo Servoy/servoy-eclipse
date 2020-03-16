@@ -1,33 +1,33 @@
 import { async, ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module'
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 
 import { ServoyDefaultListBox } from './listbox';
-import {  FormattingService, TooltipService, ServoyApi} from '../../ngclient/servoy_public'
+import {  FormattingService, TooltipService, ServoyApi} from '../../ngclient/servoy_public';
 
 import { FormsModule } from '@angular/forms';
-import { Item } from '../basecombo';
 import { By } from '@angular/platform-browser';
 import { DebugElement, ChangeDetectionStrategy, SimpleChange } from '@angular/core';
+import { IValuelist } from '../../sablo/spectypes.service';
 
-const mockDataValueList: Item[] = [
+const mockDataValueList = [
   {
     realValue: 1,
-    displayValue: "Bucuresti"
+    displayValue: 'Bucuresti'
   },
   {
     realValue: 2,
-    displayValue: "Timisoara"
+    displayValue: 'Timisoara'
   },
   {
     realValue: 3,
-    displayValue: "Cluj"
+    displayValue: 'Cluj'
   },
-];
+] as IValuelist;
 
 
-describe("ServoyDefaultListBox", () => {
+describe('ServoyDefaultListBox', () => {
   let component: ServoyDefaultListBox;
   let fixture: ComponentFixture<ServoyDefaultListBox>;
   let debugEl: DebugElement;
@@ -35,12 +35,12 @@ describe("ServoyDefaultListBox", () => {
   let servoyApi;
 
   beforeEach(async(() => {
-    servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","isInDesigner"]);
+    servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'isInDesigner']);
 
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultListBox],
-      imports: [SabloModule,FormsModule, ServoyPublicModule],
-      providers: [FormattingService,TooltipService]
+      imports: [SabloModule, FormsModule, ServoyPublicModule],
+      providers: [FormattingService, TooltipService]
     })
     .compileComponents();
   }));
@@ -59,7 +59,7 @@ describe("ServoyDefaultListBox", () => {
     debugEl = fixture.debugElement;
     element = debugEl.nativeElement;
     fixture.detectChanges();
-    
+
     // set some default values
     component.valuelistID = mockDataValueList;
     component.multiselectListbox = false;
@@ -126,7 +126,7 @@ describe("ServoyDefaultListBox", () => {
     expect(component.selectedValues).toEqual(['0: 1', '1: 2']);
   });
 
-  // TODO : update test 
+  // TODO : update test
   it('should call ngOnChanges', fakeAsync(() => {
     fixture.whenStable().then(() => {
       component.multiselectListbox = true;
@@ -140,9 +140,9 @@ describe("ServoyDefaultListBox", () => {
   }));
 
   xit( 'should render markupid ', () => {
-    component.servoyApi.getMarkupId.and.returnValue( "myid")
+    component.servoyApi.getMarkupId.and.returnValue( 'myid');
     fixture.detectChanges();
-    expect(element.id).toBe("myid");
+    expect(element.id).toBe('myid');
   });
 
   it( 'should have called servoyApi.getMarkupId', () => {

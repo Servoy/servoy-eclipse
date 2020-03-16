@@ -1,36 +1,37 @@
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 
 import { ServoyDefaultSpinner } from './spinner';
-import { SabloModule } from "../../sablo/sablo.module";
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
-import { FormattingService, ServoyApi, TooltipService } from "../../ngclient/servoy_public";
-import { FormsModule } from "@angular/forms";
-import { By } from "@angular/platform-browser";
-import { DebugElement } from "@angular/core";
+import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
+import { FormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+import { IValuelist } from '../../sablo/spectypes.service';
+
 
 const mockData = [
   {
     realValue: 3,
-    displayValue: "Bucharest"
+    displayValue: 'Bucharest'
   },
   {
     realValue: 1,
-    displayValue: "Timisoara"
+    displayValue: 'Timisoara'
   },
   {
     realValue: 2,
-    displayValue: "Amsterdam"
+    displayValue: 'Amsterdam'
   },
-];
+] as IValuelist;
 
 describe('ServoyDefaultCheckGroup', () => {
   let component: ServoyDefaultSpinner;
   let fixture: ComponentFixture<ServoyDefaultSpinner>;
-  let buttonUp :any;let buttonDown: any;
+  let buttonUp: any; let buttonDown: any;
   let servoyApi;
 
   beforeEach(async(() => {
-    servoyApi = jasmine.createSpyObj("ServoyApi", ["getMarkupId"]);
+    servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId']);
 
     TestBed.configureTestingModule({
       declarations: [ServoyDefaultSpinner],
@@ -59,66 +60,66 @@ describe('ServoyDefaultCheckGroup', () => {
   });
 
   xit('should click change value', () => {
-    let input = fixture.debugElement.query(By.css('input')).nativeElement;
+    const input = fixture.debugElement.query(By.css('input')).nativeElement;
   });
 
 
 
   it('should got undefined dp if dp is not present in valuelist', () => {
     component.dataProviderID = 'Salut';
-    let selection = component.getSelectionFromDataprovider();
+    const selection = component.getSelectionFromDataprovider();
     fixture.detectChanges();
     expect(selection).toBeFalsy();
   });
 
   it('should selection to match displayValue of dp 1', () => {
-    let selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe("Timisoara");
+    const selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe('Timisoara');
   });
 
   it('should change dp when click the up button', fakeAsync( () => {
     buttonDown.nativeElement.click();
     fixture.detectChanges();
     tick();
-    let selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe("Bucharest");
+    const selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe('Bucharest');
   }));
 
   it('should getSelectionFromDP', fakeAsync(() => {
     buttonUp.nativeElement.click();
     fixture.detectChanges();
     tick();
-    let selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe("Amsterdam");
+    const selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe('Amsterdam');
   }));
 
   xit('should change dp when press the down button', fakeAsync( () => {
-    let input = fixture.debugElement.query(By.css('input'));
+    const input = fixture.debugElement.query(By.css('input'));
     input.nativeElement.focus();
     input.triggerEventHandler('keyup', { key: 'ArrowDown' });
     fixture.detectChanges();
     tick();
-    let selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe("Bucharest");
+    const selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe('Bucharest');
   }));
 
   xit('should change dp when press the up button', fakeAsync(() => {
-    let input = fixture.debugElement.query(By.css('input'));
+    const input = fixture.debugElement.query(By.css('input'));
     input.nativeElement.focus();
     input.triggerEventHandler('keyup', { key: 'ArrowUp' });
     fixture.detectChanges();
     tick();
-    let selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe("Amsterdam");
+    const selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe('Amsterdam');
   }));
 
   xit('should change dp when scroll  ', fakeAsync(() => {
-    let input = fixture.debugElement.query(By.css('input'));
+    const input = fixture.debugElement.query(By.css('input'));
     input.nativeElement.scroll();
     fixture.detectChanges();
     tick();
-    let selection = component.getSelectionFromDataprovider();
-    expect(selection).toBe("Amsterdam");
+    const selection = component.getSelectionFromDataprovider();
+    expect(selection).toBe('Amsterdam');
   }));
 
 

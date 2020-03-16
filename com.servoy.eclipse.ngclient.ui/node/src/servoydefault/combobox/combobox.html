@@ -1,45 +1,28 @@
 
-<div class="svy-combobox ui-select-bootstrap dropdown ng-empty ng-valid"
-			[ngStyle]="styles"
-			[class.open]="isOpen"
-			appendTo="body" 
-			[svyTooltip]="toolTipText"
-			[sabloTabseq]="tabSeq"
-			#element>
-	<span class="ui-select-match ng-scope"
-				[ngStyle]="styles"
-				[class.btn-default-focus]="isElementFocused(selectLabel)"
-				*ngIf="selectedItem | async as selectedItem">
-		<span class="btn btn-default form-control ui-select-toggle"
-					[class.open]="isOpen"
-					tabindex="0"
-					#selectLabel
-					[class.ng-select-focused]="isElementFocused(selectLabel)"
-					(keyup)="onLabelKeyup($event)"
-					(keydown)="onNavigateAvay($event)"
-					(click)="onLabelClick()">{{ selectedItem.displayValue }}</span>
-		<i class="caret pull-right"
-			 *ngIf="!isOpen"></i>
-		<input type="search"
-						[class.ui-select-search-hidden]="!(isInputFocused | async)"
-						class="form-control form-control-sm ui-select-search ng-pristine ng-valid ng-empty ng-touched"
-						[ngStyle]="styles"
-						role="combobox"
-						[attr.tabindex]="getTabindex()"
-						(input)="onInput($event)"
-						(keydown.tab)="onNavigateAvay($event)"
-						(keydown)="onInputKeyDown($event)"
-						(keyup)="onInputKeyup($event, selectLabel)"
-						#input>
-	</span>
-	<ul class="ui-select-choices ui-select-choices-content ui-select-dropdown dropdown-menu ng-scope"
-			*ngIf="isOpen">
-		<li class="ui-select-choices-row ng-scope"
-				*ngFor="let item of filteredValueList; let i = index;"
-				(click)="selectItem(item, i)"
-				(mouseover)="activeItemIndex = i"
-				[class.active]="isItemSelected(i)">
-			<span>{{item.displayValue}}</span>
-		</li>
-	</ul>
+<div class="input-group-append"
+      style="width:100%;height:100%;overflow:hidden"
+      #element>
+  <input
+      type="text"
+      style="width:100%;height:100%;overflow:hidden"
+      class="svy-combobox form-control form-control-sm input-sm svy-padding-xs"
+      container="body"
+      editable="false"
+      [id]="servoyApi.getMarkupId()"
+      [value]="value() | async | formatFilter:format?.display:format?.type:format"
+      [svyFormat]="format"
+      [svyStartEdit]="'dataProviderID'"
+      [hostComponent]="self"
+      [svyTooltip]="toolTipText"
+      [sabloTabseq]="tabSeq"
+      [focusFirst]="false"
+      [ngbTypeahead]="values"
+      [resultFormatter]="formatter"
+      [inputFormatter]="formatter"
+      (focus)="focus$.next('')"
+      (click)="click$.next('')"
+      (selectItem)="valueChanged($event.item)"
+      #input
+      #instance="ngbTypeahead"/>
+      <span type="button" class="btn btn-sm dropdown-toggle svy-dropdown-border" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" (click)="getFocusElement().focus()"></span>
 </div>

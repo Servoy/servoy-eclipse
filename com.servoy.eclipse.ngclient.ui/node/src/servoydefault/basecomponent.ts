@@ -1,6 +1,6 @@
 import { OnInit, Input, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild, AfterViewInit, Directive } from '@angular/core';
 
-import {PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public'
+import {PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
 
 
 @Directive()
@@ -9,7 +9,7 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements A
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
     @Input() onDoubleClickMethodID;
-    
+
     @Input() background;
     @Input() borderType;
     @Input() dataProviderID;
@@ -29,117 +29,116 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements A
     @Input() transparent;
     @Input() visible;
     @Input() scrollbars;
-    
-    timeoutID:number;
-    
-    constructor(protected readonly renderer: Renderer2) { 
+
+    timeoutID: number;
+
+    constructor(protected readonly renderer: Renderer2) {
         super(renderer);
     }
 
     ngAfterViewInit() {
         super.ngAfterViewInit();
-		super.ngOnInit();
-        this.attachHandlers(); 
+        super.ngOnInit();
+        this.attachHandlers();
     }
 
-    protected attachHandlers(){
+    protected attachHandlers() {
       if ( this.onActionMethodID ) {
-          if (this.onDoubleClickMethodID){
-              let innerThis : ServoyDefaultBaseComponent = this;
+          if (this.onDoubleClickMethodID) {
+              const innerThis: ServoyDefaultBaseComponent = this;
               this.renderer.listen( this.getNativeElement(), 'click', e => {
-                  if(innerThis.timeoutID){
+                  if (innerThis.timeoutID) {
                       window.clearTimeout(innerThis.timeoutID);
-                      innerThis.timeoutID=null;
-                      //double click, do nothing
-                  }
-                  else{
-                      innerThis.timeoutID=window.setTimeout(function(){
-                          innerThis.timeoutID=null;
+                      innerThis.timeoutID = null;
+                      // double click, do nothing
+                  } else {
+                      innerThis.timeoutID = window.setTimeout(function() {
+                          innerThis.timeoutID = null;
                           innerThis.onActionMethodID( e );
-                      },250)}
+                      }, 250); }
                });
-          }
-          else {
+          } else {
               this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
-          }    
+          }
       }
       if ( this.onRightClickMethodID ) {
         this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { this.onRightClickMethodID( e ); return false; });
       }
     }
-    
-    getFocusElement() : any{
+
+    getFocusElement(): any {
         return this.getNativeElement();
     }
-    
+
     public requestFocus() {
         this.getFocusElement().focus();
     }
-    
-    public getScrollX() : number{
+
+    public getScrollX(): number {
         return this.getNativeElement().scrollLeft;
     }
-    
-    public getScrollY() : number{
+
+    public getScrollY(): number {
         return this.getNativeElement().scrollTop;
     }
-    
-    public setScroll(x : number, y: number)
-    {
+
+    public setScroll(x: number, y: number) {
         this.getNativeElement().scrollLeft = x;
         this.getNativeElement().scrollTop = y;
     }
-    
-    needsScrollbarInformation() : boolean{
+
+    needsScrollbarInformation(): boolean {
         return true;
     }
-    
+
     ngOnChanges( changes: SimpleChanges ) {
-        for ( let property in changes ) {
-            let change = changes[property];
+      if (changes) {
+        for ( const property of Object.keys(changes) ) {
+            const change = changes[property];
             switch ( property ) {
-                case "borderType":
-                    PropertyUtils.setBorder( this.getNativeElement(),this.renderer ,change.currentValue);
+                case 'borderType':
+                    PropertyUtils.setBorder( this.getNativeElement(), this.renderer , change.currentValue);
                     break;
-                case "background":
-                case "transparent":
-                    this.renderer.setStyle(this.getNativeElement(), "backgroundColor", this.transparent ? "transparent" : change.currentValue );
+                case 'background':
+                case 'transparent':
+                    this.renderer.setStyle(this.getNativeElement(), 'backgroundColor', this.transparent ? 'transparent' : change.currentValue );
                     break;
-                case "foreground":
-                    this.renderer.setStyle(this.getNativeElement(), "color", change.currentValue );
+                case 'foreground':
+                    this.renderer.setStyle(this.getNativeElement(), 'color', change.currentValue );
                     break;
-                case "fontType":
-                    PropertyUtils.setFont( this.getNativeElement(),this.renderer ,change.currentValue);
+                case 'fontType':
+                    PropertyUtils.setFont( this.getNativeElement(), this.renderer , change.currentValue);
                     break;
-                case "horizontalAlignment":
-                    PropertyUtils.setHorizontalAlignment(  this.getNativeChild(),this.renderer ,change.currentValue);
+                case 'horizontalAlignment':
+                    PropertyUtils.setHorizontalAlignment(  this.getNativeChild(), this.renderer , change.currentValue);
                     break;
-                case "scrollbars":
+                case 'scrollbars':
                     if (this.needsScrollbarInformation()) PropertyUtils.setScrollbars(this.getNativeChild(), change.currentValue);
                     break;
-                case "enabled":
+                case 'enabled':
                     if ( change.currentValue )
-                        this.renderer.removeAttribute(this.getNativeElement(),  "disabled" );
+                        this.renderer.removeAttribute(this.getNativeElement(),  'disabled' );
                     else
-                        this.renderer.setAttribute(this.getNativeElement(),  "disabled", "disabled" );
+                        this.renderer.setAttribute(this.getNativeElement(),  'disabled', 'disabled' );
                     break;
-                case "margin":
+                case 'margin':
                     if ( change.currentValue ) {
-                        for (let  style in change.currentValue) {
+                        for (const  style of Object.keys(change.currentValue)) {
                             this.renderer.setStyle(this.getNativeElement(), style, change.currentValue[style] );
                         }
                     }
                     break;
-                case "styleClass":
+                case 'styleClass':
                     if (change.previousValue)
-                        this.renderer.removeClass(this.getNativeElement(),change.previousValue );
+                        this.renderer.removeClass(this.getNativeElement(), change.previousValue );
                     if ( change.currentValue)
                         this.renderer.addClass( this.getNativeElement(), change.currentValue );
                     break;
-                case "visible":
-                    PropertyUtils.setVisible( this.getNativeElement(),this.renderer ,change.currentValue);
+                case 'visible':
+                    PropertyUtils.setVisible( this.getNativeElement(), this.renderer , change.currentValue);
                     break;
             }
         }
+      }
     }
 }

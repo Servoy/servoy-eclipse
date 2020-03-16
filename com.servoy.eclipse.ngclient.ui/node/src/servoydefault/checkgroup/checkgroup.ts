@@ -1,6 +1,6 @@
 import {Component, SimpleChanges, Renderer2, ViewChild, ElementRef, Input, OnInit, Output, ChangeDetectorRef} from '@angular/core';
-import {FormattingService} from "../../ngclient/servoy_public";
-import {ServoyDefaultBaseChoice} from "../basechoice";
+import {FormattingService} from '../../ngclient/servoy_public';
+import {ServoyDefaultBaseChoice} from '../basechoice';
 
 @Component({
   selector: 'servoydefault-checkgroup',
@@ -11,60 +11,60 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice{
 
   @Output() mainTabIndex;
 
-  constructor(renderer: Renderer2, formattingService: FormattingService, private cdRef:ChangeDetectorRef) {
+  constructor(renderer: Renderer2, formattingService: FormattingService, private cdRef: ChangeDetectorRef) {
     super(renderer, formattingService);
   }
-  
+
   getDataproviderFromSelection() {
-    let allowMultiselect = !this.format || this.format.type == "TEXT";
-    let ret = allowMultiselect ? "" : null;
+    const allowMultiselect = !this.format || this.format.type === 'TEXT';
+    let ret = allowMultiselect ? '' : null;
     this.selection.forEach((element, index) => {
-      if(element == true)
-        allowMultiselect ? ret+= this.valuelistID[index+this.allowNullinc].realValue+'\n': ret = this.valuelistID[index+this.allowNullinc].realValue
+      if (element === true)
+        allowMultiselect ? ret += this.valuelistID[index + this.allowNullinc].realValue + '\n' :
+                            ret = this.valuelistID[index + this.allowNullinc].realValue + '';
     });
-    if (allowMultiselect) ret = ret.replace(/\n$/, "");//remove the last \n
-    if(ret === "") ret = null;
+    if (allowMultiselect) ret = ret.replace(/\n$/, ''); // remove the last \n
+    if (ret === '') ret = null;
     return ret;
   }
 
   setSelectionFromDataprovider() {
     this.selection = [];
     if (this.dataProviderID === null || this.dataProviderID === undefined) return;
-    let arr = (typeof this.dataProviderID === "string") ? this.dataProviderID.split('\n') : [this.dataProviderID];
+    const arr = (typeof this.dataProviderID === 'string') ? this.dataProviderID.split('\n') : [this.dataProviderID];
     arr.forEach( (element, index, array) => {
       for (let i = 0; i < this.valuelistID.length; i++) {
-        let item = this.valuelistID[i];
-        if (item.realValue + '' == element + '' &&!this.isValueListNull(item)) this.selection[i - this.allowNullinc] = true;
+        const item = this.valuelistID[i];
+        if (item.realValue + '' === element + '' && !this.isValueListNull(item)) this.selection[i - this.allowNullinc] = true;
       }
     });
   }
 
   itemClicked(event, index) {
-    let checkedTotal = this.selection.filter(a => a === true).length;
+    const checkedTotal = this.selection.filter(a => a === true).length;
     let changed = true;
     if (event.target.checked) {
-      if (!(!this.format || this.format.type == "TEXT") && checkedTotal > 1) {
+      if (!(!this.format || this.format.type === 'TEXT') && checkedTotal > 1) {
         this.selection.map(() => false);
       }
       this.selection[index] = true;
-    }
-    else {
+    } else {
       event.target.checked = this.selection[index] = this.allowNullinc === 0 && checkedTotal <= 1 && !this.findmode;
       changed = !event.target.checked;
     }
-    super.baseItemClicked(event,changed, this.getDataproviderFromSelection());
+    super.baseItemClicked(event, changed, this.getDataproviderFromSelection());
   }
 
   attachEventHandlers(element, index){
     this.renderer.listen( element, 'click', ( event ) => {
-      this.itemClicked(event,index);
+      this.itemClicked(event, index);
       if (this.onActionMethodID) this.onActionMethodID( event );
     });
-    super.attachEventHandlers(element,index);
+    super.attachEventHandlers(element, index);
   }
 
   ngAfterViewChecked() {
-    this,this.mainTabIndex = this.getNativeElement().getAttribute('tabindex');
+    this.mainTabIndex = this.getNativeElement().getAttribute('tabindex');
     this.cdRef.detectChanges();
   }
 }

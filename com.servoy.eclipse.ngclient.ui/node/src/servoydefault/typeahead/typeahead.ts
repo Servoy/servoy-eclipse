@@ -1,97 +1,61 @@
-import { Component, OnInit, HostListener, ElementRef, Renderer2, Input } from '@angular/core';
-import { BehaviorSubject, interval, of } from 'rxjs';
-import { ServoyDefaultBaseCombo, Item } from '../basecombo';
-import { FormattingService, ServoyApi } from '../../ngclient/servoy_public';
- 
+import { Component, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Observable, merge, Subject, of } from 'rxjs';
+import { ServoyDefaultBaseField } from '../basefield';
+import {NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
+import { FormattingService } from '../../ngclient/servoy_public';
+import { map, debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
+
 @Component({
   selector: 'servoydefault-typeahead',
-  templateUrl: './typeahead.html',
-  styleUrls: [
-    '../basecombo.css',
-    './typeahead.css'
-  ]
+  templateUrl: './typeahead.html'
 })
-export class ServoyDefaultTypeahead extends ServoyDefaultBaseCombo implements OnInit {
+export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
+  // this is a hack so that this can be none static access because this references in this component to a conditional template
+  @ViewChild('instance', {static: true}) instance: NgbTypeahead;
+  focus$ = new Subject<string>();
+  click$ = new Subject<string>();
+
   constructor(renderer: Renderer2,
-              formattingService : FormattingService) {
-    super(renderer,formattingService);
-  }
- 
-  ngOnInit() {
-    super.onChanges();
-    super.setInitialStyles();
-    
-    this.selectedItem.subscribe(item => {
-      if (item) {
-        this.setInputValue();
-        const shortInterval = interval(100).subscribe(() => {
-          this.isOpen = false;
-          shortInterval.unsubscribe();
-        });
-      }
-    });
-  }
- 
-  @HostListener('document:click', ['$event']) onOutsideClick(event): void {
-    this.isOpen = this.getNativeElement().contains(event.target);
-  }
- 
-  onInputKeyup(event): void {
-    const keyCode = event.keyCode;
-    
-    if (this.isOpen) {
-      if (keyCode === 13) { // Enter key
-        this.selectedItem.next(this.filteredValueList[this.activeItemIndex] ? this.filteredValueList[this.activeItemIndex] :
-          this.selectedItem.getValue());
-        this.setInputValue();
-      } else if (keyCode === 38) { // Up key
-        this.activatePreviousListItem();
-      } else if (keyCode === 40) { // Down key
-        this.activateNextListItem();
-      } else if (keyCode <= 47 && keyCode >= 91) {
-        this.isOpen = false;
-      }
-      this.scrollIntoView(this.getNativeElement());
-    }
-  }
- 
-  selectItem(item, index): void {
-    this.selectedItemIndex = index - 1;
-    this.selectedItem.next(item);
-    this.update(item.realValue);
-    this.setInputValue();
-    this.focusElement(this.getNativeChild());
-  }
- 
-  onInput(event): void {
-    if (event.target.value !== '') {
-      this.filteredValueList = this.filterList(event.target.value);
-      if (this.filteredValueList.length > 0) {
-        this.isOpen = true;
-        this.activeItemIndex = 0;
-      }
-    } else {
-      this.isOpen = false;
-      this.activeItemIndex = 0;
-    }
+              formattingService: FormattingService) {
+    super(renderer, formattingService);
   }
 
-  closeDropdown() {
-    this.isOpen = false;
-  };
+  isEditable() {
+    return this.valuelistID && !this.valuelistID.hasRealValues();
+  }
 
-  onInputFocus() {
-    this.isOpen = true;
+  formatter = (result: {displayValue: string, realValue: object}) => {
+    console.log(result);
+    if (result.displayValue === null) return '';
+    if (result.displayValue !== undefined) return result.displayValue;
+    return result;
   }
- 
-  onInputBlur(): void {
-    this.setInputValue();
+
+  value = () => {
+    if (this.valuelistID && this.valuelistID.hasRealValues()) {
+      const found = this.valuelistID.find(entry => entry.realValue === this.dataProviderID);
+      if (found) return of(found.displayValue);
+      return this.valuelistID.getDisplayValue(this.dataProviderID);
+    }
+    return of(this.dataProviderID);
   }
- 
-  setInputValue(): void {
-    const interv = interval(100).subscribe(() => {
-      this.getNativeChild().value = this.selectedItem.getValue() ? this.selectedItem.getValue().displayValue : '';
-      interv.unsubscribe();
-    });
+
+  values = (text$: Observable<string>) => {
+    const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
+    const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
+    const inputFocus$ = this.focus$;
+
+    return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(
+      map(term => (term === '' ? this.valuelistID
+        : this.valuelistID.filter(v => v.displayValue.toLowerCase().indexOf(term.toLowerCase()) > -1)))
+    );
+  }
+
+  valueChanged(value: {displayValue: string, realValue: object}) {
+    console.log(value);
+    if (value && value.realValue) this.dataProviderID = value.realValue;
+    else if (value) this.dataProviderID = value;
+    else this.dataProviderID = null;
+    this.dataProviderIDChange.emit( this.dataProviderID );
   }
 }

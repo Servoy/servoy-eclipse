@@ -5,6 +5,14 @@ body {
 	font-size: 14px;
 }
 
+
+.svy-dropdown-border {
+  border-width: 1px 1px 1px 0px;
+  border-style: solid;
+  border-color: #DBDBDB;
+  padding:1px;
+}
+
 .svy-btn {
     display: inline-block;
     padding: 6px 12px;

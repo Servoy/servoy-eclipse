@@ -1,11 +1,13 @@
-import { OnInit, Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive } from '@angular/core';
+import { OnInit, Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges } from '@angular/core';
 
-import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
+import {PropertyUtils, FormattingService} from '../ngclient/servoy_public';
 
-import {ServoyDefaultBaseComponent} from './basecomponent'
+import {ServoyDefaultBaseComponent} from './basecomponent';
+
+import {IValuelist} from '../sablo/spectypes.service';
 
 @Directive()
-export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implements OnInit{
+export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implements OnInit, OnChanges {
 
     @Input() onDataChangeMethodID;
     @Input() onFocusGainedMethodID;
@@ -17,97 +19,99 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
     @Input() placeholderText;
     @Input() readOnly;
     @Input() selectOnEnter;
-    @Input() valuelistID;
+    @Input() valuelistID: IValuelist;
 
-    constructor(renderer: Renderer2, public formattingService : FormattingService) {
+    constructor(renderer: Renderer2, public formattingService: FormattingService) {
         super(renderer);
     }
 
     ngOnInit() {
       super.ngOnInit();
       this.attachFocusListeners(this.getFocusElement());
-      if (this.dataProviderID == undefined) {
+      if (this.dataProviderID === undefined) {
           this.dataProviderID = null;
       }
     }
-    
-    attachFocusListeners(nativeElement : any){
-        if(this.onFocusGainedMethodID)
+
+    attachFocusListeners(nativeElement: any) {
+        if (this.onFocusGainedMethodID)
             this.renderer.listen( nativeElement, 'focus', ( e ) => {
                 this.onFocusGainedMethodID(e);
             } );
-        if(this.onFocusLostMethodID)
+        if (this.onFocusLostMethodID)
             this.renderer.listen( nativeElement, 'blur', ( e ) => {
                 this.onFocusLostMethodID(e);
-            } ); 
+            } );
     }
 
     ngOnChanges( changes: SimpleChanges ) {
-        for ( let property in changes ) {
-            let change = changes[property];
+      if (changes) {
+        for ( const property of Object.keys(changes) ) {
+            const change = changes[property];
             switch ( property ) {
-                case "editable":
+                case 'editable':
                     if ( change.currentValue )
-                        this.renderer.removeAttribute(this.getFocusElement(),  "readonly" );
+                        this.renderer.removeAttribute(this.getFocusElement(),  'readonly' );
                     else
-                        this.renderer.setAttribute(this.getFocusElement(),  "readonly", "readonly" );
+                        this.renderer.setAttribute(this.getFocusElement(),  'readonly', 'readonly' );
                     break;
-                case "placeholderText":
+                case 'placeholderText':
                     if ( change.currentValue ) this.renderer.setAttribute(this.getNativeElement(),   'placeholder', change.currentValue );
                     else  this.renderer.removeAttribute(this.getNativeElement(),  'placeholder' );
                     break;
-                case "selectOnEnter":
+                case 'selectOnEnter':
                     if ( change.currentValue ) PropertyUtils.addSelectOnEnter( this.getFocusElement(), this.renderer );
                     break;
-                case "enabled":
+                case 'enabled':
                     if ( change.currentValue )
-                        this.renderer.removeAttribute(this.getFocusElement(),  "disabled" );
+                        this.renderer.removeAttribute(this.getFocusElement(),  'disabled' );
                     else
-                        this.renderer.setAttribute(this.getFocusElement(),  "disabled", "disabled" );
+                        this.renderer.setAttribute(this.getFocusElement(),  'disabled', 'disabled' );
                     break;
 
             }
         }
-        super.ngOnChanges(changes);
+      }
+      super.ngOnChanges(changes);
+
     }
 
     update( val: string ) {
-        if(!this.findmode && this.format) {
+      console.log("update:" + val);
+        if (!this.findmode && this.format) {
             this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
-        }
-        else this.dataProviderID = val;
+        } else this.dataProviderID = val;
         this.dataProviderIDChange.emit( this.dataProviderID );
     }
-    
+
     public selectAll() {
         this.getNativeElement().select();
     }
-    
-    public getSelectedText() : string{
+
+    public getSelectedText(): string {
         return window.getSelection().toString();
     }
-    
-    public replaceSelectedText(text: string){
-        let elem = this.getNativeElement();
-        var startPos =  elem.selectionStart;
-        var endPos = elem.selectionEnd;
-        
-        var beginning = elem.value.substring(0, startPos);
-        var end = elem.value.substring(endPos);
+
+    public replaceSelectedText(text: string) {
+        const elem = this.getNativeElement();
+        const startPos =  elem.selectionStart;
+        const endPos = elem.selectionEnd;
+
+        const beginning = elem.value.substring(0, startPos);
+        const end = elem.value.substring(endPos);
         elem.value = beginning + text + end;
         elem.selectionStart = startPos;
         elem.selectionEnd = startPos + text.length;
-        
-        var evt = document.createEvent("HTMLEvents");
-        evt.initEvent("change", false, true);
+
+        const evt = document.createEvent('HTMLEvents');
+        evt.initEvent('change', false, true);
         elem.dispatchEvent(evt);
     }
-    
-    public getAsPlainText() : string {
-        if (this.dataProviderID)
-        {
-            return this.dataProviderID.replace(/<[^>]*>/g, ''); 
-        }    
+
+    public getAsPlainText(): string {
+        if (this.dataProviderID) {
+            return this.dataProviderID.replace(/<[^>]*>/g, '');
+        }
         return this.dataProviderID;
     }
 }

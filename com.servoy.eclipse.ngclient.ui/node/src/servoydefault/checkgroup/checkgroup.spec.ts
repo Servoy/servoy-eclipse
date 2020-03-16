@@ -1,27 +1,28 @@
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 
 import { ServoyDefaultCheckGroup } from './checkgroup';
-import { SabloModule } from "../../sablo/sablo.module";
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
-import { FormattingService, ServoyApi, TooltipService } from "../../ngclient/servoy_public";
-import {FormsModule} from "@angular/forms";
-import {NotNullOrEmptyPipe} from "../../ngclient/pipes/pipes";
-import {By} from "@angular/platform-browser";
+import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
+import {FormsModule} from '@angular/forms';
+import {NotNullOrEmptyPipe} from '../../ngclient/pipes/pipes';
+import {By} from '@angular/platform-browser';
+import { IValuelist } from '../../sablo/spectypes.service';
 
 const mockData = [
                           {
                             realValue: 3,
-                            displayValue: "Bucharest"
+                            displayValue: 'Bucharest'
                           },
                           {
                             realValue: 1,
-                            displayValue: "Timisoara"
+                            displayValue: 'Timisoara'
                           },
                           {
                             realValue: 2,
-                            displayValue: "Amsterdam"
+                            displayValue: 'Amsterdam'
                           },
-                        ];
+                        ] as IValuelist;
 
 describe('ServoyDefaultCheckGroup', () => {
   let component: ServoyDefaultCheckGroup;
@@ -29,7 +30,8 @@ describe('ServoyDefaultCheckGroup', () => {
   let servoyApi;
 
   beforeEach(async(() => {
-    servoyApi = jasmine.createSpyObj("ServoyApi", ["getMarkupId", "trustAsHtml"]);
+    servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml']);
+    mockData.hasRealValues = () => true;
 
     TestBed.configureTestingModule({
       declarations: [ServoyDefaultCheckGroup],
@@ -58,9 +60,9 @@ describe('ServoyDefaultCheckGroup', () => {
   });
 
   xit('should click change value', () => {
-    let input = fixture.debugElement.query(By.css('input')).nativeElement;
-    let label = fixture.debugElement.query(By.css('label')).nativeElement;
-    let span = fixture.debugElement.query(By.css('span')).nativeElement;
+    const input = fixture.debugElement.query(By.css('input')).nativeElement;
+    const label = fixture.debugElement.query(By.css('label')).nativeElement;
+    const span = fixture.debugElement.query(By.css('span')).nativeElement;
 
     expect(input.checked).toBeFalsy(); // default state
     input.click();
@@ -86,7 +88,7 @@ describe('ServoyDefaultCheckGroup', () => {
     component.setSelectionFromDataprovider();
     fixture.detectChanges();
     tick();
-    let selectedElements = component.getSelectedElements()
+    const selectedElements = component.getSelectedElements();
     expect(selectedElements).toContain(+component.dataProviderID[0]);
     expect(selectedElements).toContain(+component.dataProviderID[2]);
   }));
@@ -96,7 +98,7 @@ describe('ServoyDefaultCheckGroup', () => {
     component.setSelectionFromDataprovider();
     fixture.detectChanges();
     tick();
-    let selectedElements = component.getDataproviderFromSelection();
+    const selectedElements = component.getDataproviderFromSelection();
     expect(selectedElements).toContain(component.dataProviderID[0]);
     expect(selectedElements).toContain(component.dataProviderID[2]);
     expect(selectedElements.length).toBe(component.dataProviderID.length);
