@@ -322,6 +322,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 						{
 							selectionObject = iterator.next();
 							IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
+							if (persist == null) continue;
 							IPersist finalPersist = (persist == null || persist instanceof IFormElement) ? persist : persist.getParent();
 							if (finalPersist instanceof IFormElement)
 							{
