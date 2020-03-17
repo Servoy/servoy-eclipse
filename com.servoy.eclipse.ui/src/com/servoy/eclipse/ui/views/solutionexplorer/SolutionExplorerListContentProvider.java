@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -428,7 +429,359 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 		if (lm == null)
 		{
-			lm = loadData(un, type, mapKey, key, parentMap);
+			if (type == UserNodeType.STYLES)
+			{
+				un.setRealObject(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
+				lm = createStyles();
+			}
+			else if (type == UserNodeType.I18N_FILES)
+			{
+				lm = createI18NFiles();
+			}
+			else if (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT)
+			{
+				lm = createComponentFileList(un);
+				key = null;
+			}
+			else if (type == UserNodeType.WEB_OBJECT_FOLDER)
+			{
+				lm = createWebObjectFileList(un);
+				key = null;
+			}
+			else if (type == UserNodeType.TEMPLATES)
+			{
+				un.setRealObject(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
+				lm = createTemplates();
+			}
+			else if (type == UserNodeType.TABLE_COLUMNS)
+			{
+				lm = createTableColumns((ITable)un.getRealObject(), un);
+			}
+			else if (type == UserNodeType.PROCEDURES)
+			{
+				lm = createProcedures((IServerInternal)un.getRealObject(), UserNodeType.PROCEDURE);
+			}
+			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
+			{
+				lm = runInJob(() -> createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE), key, mapKey, parentMap);
+			}
+			else if (type == UserNodeType.INMEMORY_DATASOURCES)
+			{
+				lm = createInMemTables(((MemServer)un.getRealObject()).getServoyProject(), includeModules);
+			}
+			else if (type == UserNodeType.VIEW_FOUNDSETS)
+			{
+				lm = createViewFoundsets(((ViewFoundsetsServer)un.getRealObject()).getServoyProject(), includeModules);
+			}
+			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
+			{
+				lm = createViews((IServerInternal)un.getRealObject());
+			}
+			else if (type == UserNodeType.GLOBALS_ITEM)
+			{
+				lm = createGlobalScripts(un);
+			}
+			else if (type == UserNodeType.GLOBAL_VARIABLES)
+			{
+				lm = createGlobalVariables(un);
+			}
+			else if (type == UserNodeType.FORM_VARIABLES)
+			{
+				lm = createFormVariables(un);
+			}
+			else if (type == UserNodeType.VALUELISTS)
+			{
+				lm = createValueLists(un);
+			}
+			else if (type == UserNodeType.MEDIA || type == UserNodeType.MEDIA_FOLDER)
+			{
+				lm = createMedia(un);
+			}
+			else if (type == UserNodeType.FORM)
+			{
+				Form currentForm = (Form)un.getRealObject();
+				lm = createFormScripts(currentForm);
+			}
+			else if (type == UserNodeType.RELATIONS)
+			{
+				// allrelations DEPRECATED in favour of solutionModel
+			}
+			else if (type == UserNodeType.RELATION)
+			{
+				Relation r = (Relation)un.getRealObject();
+				lm = createRelation(r, false);
+			}
+			else if (type == UserNodeType.GLOBALRELATIONS)
+			{
+				// allrelations DEPRECATED in favour of solutionModel
+			}
+			else if (type == UserNodeType.ALL_RELATIONS)
+			{
+				Solution sol = (Solution)un.getRealObject();
+				lm = createAllRelations(sol);
+			}
+			else if (type == UserNodeType.APPLICATION)
+			{
+				lm = getJSMethods(JSApplication.class, "application", null, UserNodeType.APPLICATION_ITEM, null, null);
+			}
+			else if (type == UserNodeType.HISTORY)
+			{
+				lm = getJSMethods(HistoryProvider.class, "history", null, UserNodeType.HISTORY_ITEM, null, null);
+			}
+			else if (type == UserNodeType.SOLUTION_MODEL)
+			{
+				lm = getJSMethods(JSSolutionModel.class, IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, null, UserNodeType.SOLUTION_MODEL_ITEM, null, null);
+			}
+			else if (type == UserNodeType.I18N)
+			{
+				lm = getJSMethods(JSI18N.class, "i18n", null, UserNodeType.I18N_ITEM, null, null);
+			}
+			else if (type == UserNodeType.EXCEPTIONS)
+			{
+				lm = getJSMethods(ServoyException.class, ".", null, UserNodeType.EXCEPTIONS_ITEM, null, null);
+			}
+			else if (type == UserNodeType.UTILS)
+			{
+				lm = getJSMethods(JSUtils.class, "utils", null, UserNodeType.UTIL_ITEM, null, null);
+			}
+			else if (type == UserNodeType.JSUNIT)
+			{
+				lm = getJSMethods(JSUnitAssertFunctions.class, IExecutingEnviroment.TOPLEVEL_JSUNIT, null, UserNodeType.JSUNIT_ITEM, null, null);
+			}
+			else if (type == UserNodeType.SECURITY)
+			{
+				lm = getJSMethods(JSSecurity.class, "security", null, UserNodeType.SECURITY_ITEM, null, null);
+			}
+			else if (type == UserNodeType.FUNCTIONS)
+			{
+				lm = TreeBuilder.createJSMathFunctions(this);
+			}
+			else if (type == UserNodeType.JSON)
+			{
+				lm = TreeBuilder.createJSONFunctions(this);
+			}
+			else if (type == UserNodeType.XML_METHODS)
+			{
+				lm = TreeBuilder.createXMLMethods(this);
+			}
+			else if (type == UserNodeType.XML_LIST_METHODS)
+			{
+				lm = TreeBuilder.createXMLListMethods(this);
+			}
+			else if (type == UserNodeType.CURRENT_FORM)
+			{
+				lm = getJSMethods(JSForm.class, "currentcontroller.", "current", UserNodeType.CURRENT_FORM_ITEM, null, null);
+			}
+			else if (type == UserNodeType.FORM_CONTROLLER)
+			{
+				lm = getJSMethods(JSForm.class, "controller.", null, UserNodeType.FORM_CONTROLLER_FUNCTION_ITEM, null, null);
+			}
+			else if (type == UserNodeType.FORMS)
+			{
+				lm = TreeBuilder.docToNodes(Forms.class, this, UserNodeType.ARRAY, "forms.", null);
+			}
+			else if (type == UserNodeType.PLUGINS)
+			{
+				lm = TreeBuilder.createLengthAndArray(this, PLUGIN_PREFIX);
+			}
+			else if (type == UserNodeType.STRING)
+			{
+				lm = TreeBuilder.createJSString(this);
+			}
+			else if (type == UserNodeType.NUMBER)
+			{
+				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.Number.class, UserNodeType.NUMBER, null);
+			}
+			else if (type == UserNodeType.DATE)
+			{
+				lm = TreeBuilder.createJSDate(this);
+			}
+			else if (type == UserNodeType.ARRAY)
+			{
+				lm = TreeBuilder.createJSArray(this);
+			}
+			else if (type == UserNodeType.OBJECT)
+			{
+				lm = TreeBuilder.createJSObject(this);
+			}
+			else if (type == UserNodeType.REGEXP)
+			{
+				lm = TreeBuilder.createJSRegexp(this);
+			}
+			else if (type == UserNodeType.STATEMENTS)
+			{
+				lm = TreeBuilder.createFlows(this);
+			}
+			else if (type == UserNodeType.SPECIAL_OPERATORS)
+			{
+				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, UserNodeType.SPECIAL_OPERATORS,
+					null);
+			}
+			else if (type == UserNodeType.FOUNDSET_MANAGER)
+			{
+				lm = getJSMethods(JSDatabaseManager.class, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null,
+					null);
+			}
+			else if (type == UserNodeType.DATASOURCES)
+			{
+				lm = getJSMethods(JSDataSources.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+			}
+			else if (type == UserNodeType.INMEMORY_DATASOURCE)
+			{
+				String prefix = '.' + DataSourceUtils.INMEM_DATASOURCE + '.' + ((IDataSourceWrapper)un.getRealObject()).getTableName();
+				lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+			}
+			else if (type == UserNodeType.TABLE)
+			{
+				String prefix = '.' + DataSourceUtilsBase.DB_DATASOURCE_SCHEME + '.' + ((TableWrapper)un.getRealObject()).getServerName() + '.' +
+					((TableWrapper)un.getRealObject()).getTableName();
+				lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+
+				ITable table = null;
+				try
+				{
+					table = ApplicationServerRegistry.get().getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName()).getTable(
+						((TableWrapper)un.getRealObject()).getTableName());
+				}
+				catch (RemoteException e)
+				{
+					ServoyLog.logError(e);
+				}
+				if (table != null)
+				{
+					Object[] tableColumns = createTableColumns(table, un);
+					Object[] newElements = new Object[lm.length + tableColumns.length];
+
+					System.arraycopy(tableColumns, 0, newElements, 0, tableColumns.length);
+					System.arraycopy(lm, 0, newElements, tableColumns.length, lm.length);
+
+					lm = newElements;
+				}
+			}
+			else if (type == UserNodeType.FORM_ELEMENTS)
+			{
+				lm = TreeBuilder.docToNodes(FormElements.class, this, UserNodeType.ARRAY, "elements.", null);
+			}
+			else if (type == UserNodeType.FORM_ELEMENTS_GROUP)
+			{
+				Object[] real = (Object[])un.getRealObject();
+				lm = getJSMethods(RuntimeGroup.class, "elements." + ((FormElementGroup)real[0]).getGroupID(), null, UserNodeType.FORM_ELEMENTS_ITEM_METHOD,
+					null, null);// TODO fix multiple anonymous groups
+			}
+			else if (type == UserNodeType.FORM_ELEMENTS_ITEM)
+			{
+				Object[] real = (Object[])un.getRealObject(); // [IPersist, Class]
+				Object model = real[0];
+				Class specificClass = (Class)real[1];
+				String prefix = "elements.";
+				if (model instanceof ISupportName)
+				{
+					prefix += ((ISupportName)model).getName();
+				}
+
+				if (model instanceof IBasicWebComponent && FormTemplateGenerator.isWebcomponentBean((IBasicWebComponent)model))
+				{
+					lm = getWebComponentMembers(prefix, (IBasicWebComponent)model);
+					key = null; // for now don't cache this.
+				}
+				else if (specificClass == null)
+				{
+					try
+					{
+						lm = getJSMethods(ElementUtil.getPersistScriptClass(Activator.getDefault().getDesignClient(), model), prefix, null,
+							UserNodeType.FORM_ELEMENTS_ITEM_METHOD, null, null);
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+				}
+				else
+				{
+					// this is a sub-type (for example, the JComponent sub-type of a
+					// JSplitPane element)
+					try
+					{
+						Class beanClass = specificClass;
+						if (model instanceof Bean)
+						{
+							IApplication application = Activator.getDefault().getDesignClient();
+							beanClass = application.getBeanManager().getClassLoader().loadClass(((Bean)model).getBeanClassName());
+						}
+						lm = getAllMethods(beanClass, specificClass, prefix, null, UserNodeType.FORM_ELEMENTS_ITEM_METHOD);
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+				}
+			}
+			// else if (type == UserNodeType.CALCULATIONS)
+			// {
+			// Table t = (Table)un.getRealObject();
+			// key = type.toString() + t.getName();
+			// lm = createCalculation(t);
+			// }
+			// else if (type == UserNodeType.BEAN)
+			// {
+			// Bean b = (Bean)un.getRealObject();
+			// lm = createBean(b);
+			// }
+			else if (type == UserNodeType.FORM_CONTAINERS_ITEM)
+			{
+				lm = TreeBuilder.docToNodes(RuntimeContainer.class, this, UserNodeType.ARRAY, "containers." + un.getName() + ".", null);
+			}
+			else if (type == UserNodeType.CALC_RELATION)
+			{
+				Relation r = (Relation)un.getRealObject();
+				lm = createRelation(r, true);
+			}
+			else if (type == UserNodeType.PLUGIN)
+			{
+				try
+				{
+					lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null);
+				}
+				catch (Exception ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+			else if (type == UserNodeType.RETURNTYPE)
+			{
+				Object real = un.getRealObject();
+
+				if (real instanceof IScriptObject)
+				{
+					ScriptObjectRegistry.registerScriptObjectForClass(real.getClass(), (IScriptObject)real);
+				}
+				else if (real instanceof IReturnedTypesProvider)
+				{
+					ScriptObjectRegistry.registerReturnedTypesProviderForClass(real.getClass(), (IReturnedTypesProvider)real);
+				}
+
+				Class cls = null;
+				if (real instanceof Class)
+				{
+					cls = (Class)real;
+				}
+				else
+				{
+					cls = real.getClass();
+				}
+				String elementName = ".";
+				if (un.parent.parent != null && un.parent.parent.getType() == UserNodeType.PLUGIN)
+				{
+					elementName = PLUGIN_PREFIX + "." + un.parent.parent.getName() + elementName;
+				}
+				lm = getJSMethods(cls, elementName, null, UserNodeType.RETURNTYPE_ELEMENT, null, null);
+			}
+			else if (type == UserNodeType.JSLIB)
+			{
+				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.JSLib.class, UserNodeType.JSLIB, null);
+			}
+
+			addToCache(key, mapKey, lm, parentMap);
 		}
 		if (lm == null)
 		{
@@ -437,393 +790,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return lm;
 	}
 
-	protected Object[] loadData(SimpleUserNode un, UserNodeType type, Object mapKey, Object key, Map<Object, Object[]> parentMap)
+	protected void addToCache(Object key, Object mapKey, Object[] lm, Map<Object, Object[]> parentMap)
 	{
-		if (type == UserNodeType.RESOURCES || type == UserNodeType.SERVERS || type == UserNodeType.USER_GROUP_SECURITY || type == UserNodeType.SECURITY ||
-			type == UserNodeType.I18N || type == UserNodeType.I18N_FILES || type == UserNodeType.APPLICATION || type == UserNodeType.SOLUTION_MODEL ||
-			type == UserNodeType.DATASOURCES || type == UserNodeType.TEMPLATES || type == UserNodeType.ALL_SOLUTIONS || type == UserNodeType.SOLUTION ||
-			type == UserNodeType.MODULES || type == UserNodeType.MODULE ||
-			type == UserNodeType.UTILS || type == UserNodeType.HISTORY || type == UserNodeType.JSUNIT)
-		{
-			return null;
-		}
-		Job job = Job.create("Loading solution explorer data...", (ICoreRunnable)monitor -> {
-			try
-			{
-				loadNodes(un, type, key, mapKey, parentMap);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-		});
-		job.setUser(true);
-		job.setPriority(Job.LONG);
-		job.schedule();
-		return new Object[] { new SimpleUserNode("Loading...", UserNodeType.LOADING) };
-	}
-
-	protected Object[] loadNodes(SimpleUserNode un, UserNodeType type, Object key, Object mapKey, Map<Object, Object[]> parentMap)
-		throws RepositoryException
-	{
-		Object[] lm = null;
-		if (type == UserNodeType.STYLES)
-		{
-			un.setRealObject(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
-			lm = createStyles();
-		}
-		else if (type == UserNodeType.I18N_FILES)
-		{
-			lm = createI18NFiles();
-		}
-		else if (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT)
-		{
-			lm = createComponentFileList(un);
-			key = null;
-		}
-		else if (type == UserNodeType.WEB_OBJECT_FOLDER)
-		{
-			lm = createWebObjectFileList(un);
-			key = null;
-		}
-		else if (type == UserNodeType.TEMPLATES)
-		{
-			un.setRealObject(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
-			lm = createTemplates();
-		}
-		else if (type == UserNodeType.TABLE_COLUMNS)
-		{
-			lm = createTableColumns((ITable)un.getRealObject(), un);
-		}
-		else if (type == UserNodeType.PROCEDURES)
-		{
-			lm = createProcedures((IServerInternal)un.getRealObject(), UserNodeType.PROCEDURE);
-		}
-		else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
-		{
-			lm = createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE);
-		}
-		else if (type == UserNodeType.INMEMORY_DATASOURCES)
-		{
-			lm = createInMemTables(((MemServer)un.getRealObject()).getServoyProject(), includeModules);
-		}
-		else if (type == UserNodeType.VIEW_FOUNDSETS)
-		{
-			lm = createViewFoundsets(((ViewFoundsetsServer)un.getRealObject()).getServoyProject(), includeModules);
-		}
-		else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
-		{
-			lm = createViews((IServerInternal)un.getRealObject());
-		}
-		else if (type == UserNodeType.GLOBALS_ITEM)
-		{
-			lm = createGlobalScripts(un);
-		}
-		else if (type == UserNodeType.GLOBAL_VARIABLES)
-		{
-			lm = createGlobalVariables(un);
-		}
-		else if (type == UserNodeType.FORM_VARIABLES)
-		{
-			lm = createFormVariables(un);
-		}
-		else if (type == UserNodeType.VALUELISTS)
-		{
-			lm = createValueLists(un);
-		}
-		else if (type == UserNodeType.MEDIA || type == UserNodeType.MEDIA_FOLDER)
-		{
-			lm = createMedia(un);
-		}
-		else if (type == UserNodeType.FORM)
-		{
-			Form currentForm = (Form)un.getRealObject();
-			lm = createFormScripts(currentForm);
-		}
-		else if (type == UserNodeType.RELATIONS)
-		{
-			// allrelations DEPRECATED in favour of solutionModel
-		}
-		else if (type == UserNodeType.RELATION)
-		{
-			Relation r = (Relation)un.getRealObject();
-			lm = createRelation(r, false);
-		}
-		else if (type == UserNodeType.GLOBALRELATIONS)
-		{
-			// allrelations DEPRECATED in favour of solutionModel
-		}
-		else if (type == UserNodeType.ALL_RELATIONS)
-		{
-			Solution sol = (Solution)un.getRealObject();
-			lm = createAllRelations(sol);
-		}
-		else if (type == UserNodeType.APPLICATION)
-		{
-			lm = getJSMethods(JSApplication.class, "application", null, UserNodeType.APPLICATION_ITEM, null, null);
-		}
-		else if (type == UserNodeType.HISTORY)
-		{
-			lm = getJSMethods(HistoryProvider.class, "history", null, UserNodeType.HISTORY_ITEM, null, null);
-		}
-		else if (type == UserNodeType.SOLUTION_MODEL)
-		{
-			lm = getJSMethods(JSSolutionModel.class, IExecutingEnviroment.TOPLEVEL_SOLUTION_MODIFIER, null, UserNodeType.SOLUTION_MODEL_ITEM, null, null);
-		}
-		else if (type == UserNodeType.I18N)
-		{
-			lm = getJSMethods(JSI18N.class, "i18n", null, UserNodeType.I18N_ITEM, null, null);
-		}
-		else if (type == UserNodeType.EXCEPTIONS)
-		{
-			lm = getJSMethods(ServoyException.class, ".", null, UserNodeType.EXCEPTIONS_ITEM, null, null);
-		}
-		else if (type == UserNodeType.UTILS)
-		{
-			lm = getJSMethods(JSUtils.class, "utils", null, UserNodeType.UTIL_ITEM, null, null);
-		}
-		else if (type == UserNodeType.JSUNIT)
-		{
-			lm = getJSMethods(JSUnitAssertFunctions.class, IExecutingEnviroment.TOPLEVEL_JSUNIT, null, UserNodeType.JSUNIT_ITEM, null, null);
-		}
-		else if (type == UserNodeType.SECURITY)
-		{
-			lm = getJSMethods(JSSecurity.class, "security", null, UserNodeType.SECURITY_ITEM, null, null);
-		}
-		else if (type == UserNodeType.FUNCTIONS)
-		{
-			lm = TreeBuilder.createJSMathFunctions(this);
-		}
-		else if (type == UserNodeType.JSON)
-		{
-			lm = TreeBuilder.createJSONFunctions(this);
-		}
-		else if (type == UserNodeType.XML_METHODS)
-		{
-			lm = TreeBuilder.createXMLMethods(this);
-		}
-		else if (type == UserNodeType.XML_LIST_METHODS)
-		{
-			lm = TreeBuilder.createXMLListMethods(this);
-		}
-		else if (type == UserNodeType.CURRENT_FORM)
-		{
-			lm = getJSMethods(JSForm.class, "currentcontroller.", "current", UserNodeType.CURRENT_FORM_ITEM, null, null);
-		}
-		else if (type == UserNodeType.FORM_CONTROLLER)
-		{
-			lm = getJSMethods(JSForm.class, "controller.", null, UserNodeType.FORM_CONTROLLER_FUNCTION_ITEM, null, null);
-		}
-		else if (type == UserNodeType.FORMS)
-		{
-			lm = TreeBuilder.docToNodes(Forms.class, this, UserNodeType.ARRAY, "forms.", null);
-		}
-		else if (type == UserNodeType.PLUGINS)
-		{
-			lm = TreeBuilder.createLengthAndArray(this, PLUGIN_PREFIX);
-		}
-		else if (type == UserNodeType.STRING)
-		{
-			lm = TreeBuilder.createJSString(this);
-		}
-		else if (type == UserNodeType.NUMBER)
-		{
-			lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.Number.class, UserNodeType.NUMBER, null);
-		}
-		else if (type == UserNodeType.DATE)
-		{
-			lm = TreeBuilder.createJSDate(this);
-		}
-		else if (type == UserNodeType.ARRAY)
-		{
-			lm = TreeBuilder.createJSArray(this);
-		}
-		else if (type == UserNodeType.OBJECT)
-		{
-			lm = TreeBuilder.createJSObject(this);
-		}
-		else if (type == UserNodeType.REGEXP)
-		{
-			lm = TreeBuilder.createJSRegexp(this);
-		}
-		else if (type == UserNodeType.STATEMENTS)
-		{
-			lm = TreeBuilder.createFlows(this);
-		}
-		else if (type == UserNodeType.SPECIAL_OPERATORS)
-		{
-			lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, UserNodeType.SPECIAL_OPERATORS,
-				null);
-		}
-		else if (type == UserNodeType.FOUNDSET_MANAGER)
-		{
-			lm = getJSMethods(JSDatabaseManager.class, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null,
-				null);
-		}
-		else if (type == UserNodeType.DATASOURCES)
-		{
-			lm = getJSMethods(JSDataSources.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
-		}
-		else if (type == UserNodeType.INMEMORY_DATASOURCE)
-		{
-			String prefix = '.' + DataSourceUtils.INMEM_DATASOURCE + '.' + ((IDataSourceWrapper)un.getRealObject()).getTableName();
-			lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
-		}
-		else if (type == UserNodeType.TABLE)
-		{
-			String prefix = '.' + DataSourceUtilsBase.DB_DATASOURCE_SCHEME + '.' + ((TableWrapper)un.getRealObject()).getServerName() + '.' +
-				((TableWrapper)un.getRealObject()).getTableName();
-			lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
-
-			ITable table = null;
-			try
-			{
-				table = ApplicationServerRegistry.get().getServerManager().getServer(((TableWrapper)un.getRealObject()).getServerName()).getTable(
-					((TableWrapper)un.getRealObject()).getTableName());
-			}
-			catch (RemoteException e)
-			{
-				ServoyLog.logError(e);
-			}
-			if (table != null)
-			{
-				Object[] tableColumns = createTableColumns(table, un);
-				Object[] newElements = new Object[lm.length + tableColumns.length];
-
-				System.arraycopy(tableColumns, 0, newElements, 0, tableColumns.length);
-				System.arraycopy(lm, 0, newElements, tableColumns.length, lm.length);
-
-				lm = newElements;
-			}
-		}
-		else if (type == UserNodeType.FORM_ELEMENTS)
-		{
-			lm = TreeBuilder.docToNodes(FormElements.class, this, UserNodeType.ARRAY, "elements.", null);
-		}
-		else if (type == UserNodeType.FORM_ELEMENTS_GROUP)
-		{
-			Object[] real = (Object[])un.getRealObject();
-			lm = getJSMethods(RuntimeGroup.class, "elements." + ((FormElementGroup)real[0]).getGroupID(), null, UserNodeType.FORM_ELEMENTS_ITEM_METHOD,
-				null, null);// TODO fix multiple anonymous groups
-		}
-		else if (type == UserNodeType.FORM_ELEMENTS_ITEM)
-		{
-			Object[] real = (Object[])un.getRealObject(); // [IPersist, Class]
-			Object model = real[0];
-			Class specificClass = (Class)real[1];
-			String prefix = "elements.";
-			if (model instanceof ISupportName)
-			{
-				prefix += ((ISupportName)model).getName();
-			}
-
-			if (model instanceof IBasicWebComponent && FormTemplateGenerator.isWebcomponentBean((IBasicWebComponent)model))
-			{
-				lm = getWebComponentMembers(prefix, (IBasicWebComponent)model);
-				key = null; // for now don't cache this.
-			}
-			else if (specificClass == null)
-			{
-				try
-				{
-					lm = getJSMethods(ElementUtil.getPersistScriptClass(Activator.getDefault().getDesignClient(), model), prefix, null,
-						UserNodeType.FORM_ELEMENTS_ITEM_METHOD, null, null);
-				}
-				catch (Exception ex)
-				{
-					ServoyLog.logError(ex);
-				}
-			}
-			else
-			{
-				// this is a sub-type (for example, the JComponent sub-type of a
-				// JSplitPane element)
-				try
-				{
-					Class beanClass = specificClass;
-					if (model instanceof Bean)
-					{
-						IApplication application = Activator.getDefault().getDesignClient();
-						beanClass = application.getBeanManager().getClassLoader().loadClass(((Bean)model).getBeanClassName());
-					}
-					lm = getAllMethods(beanClass, specificClass, prefix, null, UserNodeType.FORM_ELEMENTS_ITEM_METHOD);
-				}
-				catch (Exception ex)
-				{
-					ServoyLog.logError(ex);
-				}
-			}
-		}
-		// else if (type == UserNodeType.CALCULATIONS)
-		// {
-		// Table t = (Table)un.getRealObject();
-		// key = type.toString() + t.getName();
-		// lm = createCalculation(t);
-		// }
-		// else if (type == UserNodeType.BEAN)
-		// {
-		// Bean b = (Bean)un.getRealObject();
-		// lm = createBean(b);
-		// }
-		else if (type == UserNodeType.FORM_CONTAINERS_ITEM)
-		{
-			lm = TreeBuilder.docToNodes(RuntimeContainer.class, this, UserNodeType.ARRAY, "containers." + un.getName() + ".", null);
-		}
-		else if (type == UserNodeType.CALC_RELATION)
-		{
-			Relation r = (Relation)un.getRealObject();
-			lm = createRelation(r, true);
-		}
-		else if (type == UserNodeType.PLUGIN)
-		{
-			try
-			{
-				lm = getJSMethods(un.getRealObject(), PLUGIN_PREFIX + "." + un.getName(), null, UserNodeType.PLUGINS_ITEM, null, null);
-			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-			}
-		}
-		else if (type == UserNodeType.RETURNTYPE)
-		{
-			Object real = un.getRealObject();
-
-			if (real instanceof IScriptObject)
-			{
-				ScriptObjectRegistry.registerScriptObjectForClass(real.getClass(), (IScriptObject)real);
-			}
-			else if (real instanceof IReturnedTypesProvider)
-			{
-				ScriptObjectRegistry.registerReturnedTypesProviderForClass(real.getClass(), (IReturnedTypesProvider)real);
-			}
-
-			Class cls = null;
-			if (real instanceof Class)
-			{
-				cls = (Class)real;
-			}
-			else
-			{
-				cls = real.getClass();
-			}
-			String elementName = ".";
-			if (un.parent.parent != null && un.parent.parent.getType() == UserNodeType.PLUGIN)
-			{
-				elementName = PLUGIN_PREFIX + "." + un.parent.parent.getName() + elementName;
-			}
-			lm = getJSMethods(cls, elementName, null, UserNodeType.RETURNTYPE_ELEMENT, null, null);
-		}
-		else if (type == UserNodeType.JSLIB)
-		{
-			lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.JSLib.class, UserNodeType.JSLIB, null);
-		}
-
-		if (lm == null)
-		{
-			lm = EMPTY_LIST;
-		}
-		if (key != null)
+		if (lm != null && key != null)
 		{
 			if (parentMap != null)
 			{
@@ -834,10 +803,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				leafList.put(key, lm);
 			}
 		}
-		Display.getDefault().asyncExec(() -> {
-			view.getList().refresh();
+	}
+
+	private Object[] runInJob(Supplier<Object[]> supplier, Object key, Object mapKey, Map<Object, Object[]> map)
+	{
+		Job job = Job.create("Loading solution explorer data...", (ICoreRunnable)monitor -> {
+			Object[] l = supplier.get();
+			addToCache(key, mapKey, l, map);
+			Display.getDefault().asyncExec(() -> {
+				view.getList().refresh();
+			});
 		});
-		return lm;
+		job.setUser(true);
+		job.setPriority(Job.LONG);
+		job.schedule();
+		return new Object[] { new SimpleUserNode("Loading...", UserNodeType.LOADING) };
 	}
 
 	/**
