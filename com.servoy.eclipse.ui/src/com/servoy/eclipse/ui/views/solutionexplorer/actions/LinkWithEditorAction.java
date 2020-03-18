@@ -56,6 +56,7 @@ import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.view.ViewFoundsetTable;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -139,6 +140,7 @@ public class LinkWithEditorAction extends Action
 		String tableName = null;
 
 		boolean isInMemoryTable = false;
+		boolean isFoundsetTable = false;
 		ITable table = editorOrAdaptable.getAdapter(ITable.class);
 
 		if (persists.size() == 0)
@@ -166,6 +168,10 @@ public class LinkWithEditorAction extends Action
 						if (table instanceof MemTable)
 						{
 							isInMemoryTable = true;
+						}
+						if (table instanceof ViewFoundsetTable)
+						{
+							isFoundsetTable = true;
 						}
 					}
 				}
@@ -230,10 +236,12 @@ public class LinkWithEditorAction extends Action
 
 		if (serverName != null)
 		{
-			if (isInMemoryTable)
+			if (isInMemoryTable || isFoundsetTable)
 			{
+				final String solutionName = isInMemoryTable ? ((MemTable)table).getServoyProject().getSolution().getName()
+					: ((ViewFoundsetTable)table).getServoyProject().getSolution().getName();
 				final PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)treeContentProvider)
-					.getSolutionNode(((MemTable)table).getServoyProject().getSolution().getName());
+					.getSolutionNode(solutionName);
 				final SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider)
 					.getChildren(solutionNode);
 				if (children != null)
@@ -259,6 +267,22 @@ public class LinkWithEditorAction extends Action
 												tree.setSelection(
 													new TreeSelection(
 														new TreePath(new Object[] { solutionNode, child, dataSourcesChild, inMemoryChild })),
+													true);
+												break;
+											}
+										}
+									}
+									if (dataSourcesChild.getName().equals("View Foundsets"))
+									{
+										SimpleUserNode[] founsetsChildren = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider)
+											.getChildren(dataSourcesChild);
+										for (SimpleUserNode foundsetChild : founsetsChildren)
+										{
+											if (tableName.equals(foundsetChild.getName()))
+											{
+												tree.setSelection(
+													new TreeSelection(
+														new TreePath(new Object[] { solutionNode, child, dataSourcesChild, foundsetChild })),
 													true);
 												break;
 											}
