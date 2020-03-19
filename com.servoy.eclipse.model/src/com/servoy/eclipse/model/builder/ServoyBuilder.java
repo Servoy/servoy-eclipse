@@ -5498,6 +5498,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											compatibleForUUID = length == 0 || length >= 16;
 											break;
 										case IColumnTypes.TEXT :
+											if (column.hasFlag(IBaseColumn.NATIVE_COLUMN))
+											{
+												compatibleForUUID = length == 0 || length >= 16;
+												break;
+											}
 											compatibleForUUID = length == 0 || length >= 36;
 											break;
 									}
