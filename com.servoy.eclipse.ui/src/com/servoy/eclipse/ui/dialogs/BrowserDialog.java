@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -53,11 +54,13 @@ import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IMainConceptsPageAction;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
@@ -165,8 +168,6 @@ public class BrowserDialog extends Dialog
 					final String[] showTutorial = new String[] { null };
 					if (importSample != null)
 					{
-						if (!shell.isDisposed()) shell.close();
-
 						try (InputStream is = new URL(importSample.startsWith("https://") ? importSample
 							: "https://" + importSample).openStream())
 						{
@@ -178,6 +179,22 @@ public class BrowserDialog extends Dialog
 								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 								if (sp == null)
 								{
+									if (Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+										.filter(
+											s -> s.isEnabled() &&
+												ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
+												((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()))
+													.isValid())
+										.count() == 0)
+									{
+										// no valid servers
+										UIUtils.reportError("No valid server",
+											"There is no valid server defined in Servoy Developer, you must define servers / install PostgreSQL before importing the sample solution.");
+										return;
+									}
+
+									if (!shell.isDisposed()) shell.close();
+
 									final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(),
 										solutionName + ".servoy");
 									if (importSolutionFile.exists())
@@ -225,6 +242,7 @@ public class BrowserDialog extends Dialog
 								}
 								else
 								{
+									if (!shell.isDisposed()) shell.close();
 									progressService.run(true, false, (IProgressMonitor monitor) -> {
 										ServoyModelManager.getServoyModelManager()
 											.getServoyModel()
