@@ -21,22 +21,30 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.IServerInternal;
 
 
-public class RefreshAction extends Action
+public class RefreshAction extends Action implements ISelectionChangedListener
 {
 	private final SolutionExplorerView fPart;
+	private IServerInternal selectedServer;
 
 	public RefreshAction(SolutionExplorerView part)
 	{
@@ -45,6 +53,29 @@ public class RefreshAction extends Action
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("refresh.png"));
 		setActionDefinitionId("org.eclipse.ui.file.refresh");
 //        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);
+	}
+
+	@Override
+	public void selectionChanged(SelectionChangedEvent event)
+	{
+		selectedServer = null;
+		ISelection sel = event.getSelection();
+		if (sel instanceof IStructuredSelection)
+		{
+			IStructuredSelection s = (IStructuredSelection)sel;
+			if (s.size() == 1)
+			{
+				SimpleUserNode node = (SimpleUserNode)s.getFirstElement();
+				if (node.getRealObject() instanceof IServerInternal)
+				{
+					IServerInternal server = (IServerInternal)node.getRealObject();
+					if (server.getConfig().isEnabled() && server.isValid())
+					{
+						selectedServer = server;
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -90,6 +121,19 @@ public class RefreshAction extends Action
 					monitor.subTask("Solution explorer view...");
 					fPart.refreshView();
 					monitor.worked(1);
+					if (selectedServer != null &&
+						UIUtils.askQuestion(fPart.getSite().getShell(), "Reload server",
+							"Do you want to reload all tables from server: '" + selectedServer.getName() + "'?"))
+					{
+						try
+						{
+							selectedServer.reloadTables();
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
 				}
 				finally
 				{

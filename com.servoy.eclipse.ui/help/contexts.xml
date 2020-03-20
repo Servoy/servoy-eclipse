@@ -67,5 +67,17 @@
  </context>
     <context id="export_solution_deploy" title="Deploy Options">
     <topic href="https://servoy.github.io/servoy_documentation/201903/export_solution_deploy.html" label="Deploy Options"/>
- </context> 
+ </context>
+ <context id="synchronizedbi_choicepage" title="Synchronize Options">
+    <topic href="https://servoy.github.io/servoy_documentation/201903/synchronizedbi_choicepage.html" label="Synchronize Options"/>
+ </context>
+ <context id="synchronizedbi_missingdbi" title="Missing DBI Options">
+    <topic href="https://servoy.github.io/servoy_documentation/201903/synchronizedbi_missingdbi.html" label="Missing DBI Options"/>
+ </context>
+ <context id="synchronizedbi_missingtables" title="Missing Tables Options">
+    <topic href="https://servoy.github.io/servoy_documentation/201903/synchronizedbi_missingtables.html" label="Missing Tables Options"/>
+ </context>
+ <context id="synchronizedbi_synccolumns" title="Synchronize Columns">
+    <topic href="https://servoy.github.io/servoy_documentation/201903/synchronizedbi_synccolumns.html" label="Synchronize Columns"/>
+ </context>  
  </contexts>

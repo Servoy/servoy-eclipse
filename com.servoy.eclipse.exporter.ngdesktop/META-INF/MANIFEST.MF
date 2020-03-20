@@ -7,6 +7,8 @@ Bundle-Activator: com.servoy.eclipse.exporter.ngdesktop.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
+ org.eclipse.jface,
+ org.eclipse.core.commands,
  com.servoy.eclipse.ui,
  com.servoy.eclipse.model,
  servoy_shared,

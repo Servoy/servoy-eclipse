@@ -61,7 +61,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorReference;
@@ -101,6 +100,7 @@ import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.RadioButtonsDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
@@ -314,7 +314,7 @@ public class Activator extends Plugin
 				}
 
 				/* Hide the External Tools set */
-				final IEclipsePreferences eclipsePref = InstanceScope.INSTANCE.getNode(PLUGIN_ID);
+				final IEclipsePreferences eclipsePref = getEclipsePreferences();
 				final Preferences node = eclipsePref.node("activatedPerspectives"); //the activated perspectives will be stored in this node
 				final IWorkbenchWindow workbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 
@@ -358,8 +358,8 @@ public class Activator extends Plugin
 									IEditorReference[] editorReferences = page.getEditorReferences();
 									for (IEditorReference editorReference : editorReferences)
 									{
-										if (editorReference.getEditor(false) instanceof StartPageBrowserEditor ||
-											StartPageBrowserEditorInput.NAME.equals(editorReference.getPartName()))
+										if (editorReference.getEditor(false) instanceof MainConceptsPageBrowserEditor ||
+											MainConceptsPageBrowserEditorInput.NAME.equals(editorReference.getPartName()))
 										{
 											// for some reason eclipse saved the start page editor, close it then
 											page.closeEditors(new IEditorReference[] { editorReference }, false);
@@ -369,8 +369,12 @@ public class Activator extends Plugin
 							}
 							try
 							{
-//								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
-//									StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
+								if (eclipsePref.getBoolean("firstRun", true))
+								{
+									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(MainConceptsPageBrowserEditor.INPUT,
+										MainConceptsPageBrowserEditor.MAINCONCEPTSPAGE_BROWSER_EDITOR_ID);
+									eclipsePref.putBoolean("firstRun", false);
+								}
 							}
 							catch (Exception e)
 							{
@@ -1164,10 +1168,12 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					int open = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, Display.getDefault().getActiveShell(),
-						"Default PostgreSQL database not installed.", "Should a default PostgreSQL database be installed? (Used by tutorials and samples) ",
-						SWT.NONE,
-						new String[] { "Yes (include sample)", "Yes (no sample)", "Never", "Later" });
+					final RadioButtonsDialog installPostgreSQLDialog = new RadioButtonsDialog(Display.getDefault().getActiveShell(),
+						Arrays.asList("I want to install PostgreSQL with all the sample data (used in samples and tutorials)",
+							"I want to install PostgreSQL without sample data", "Don't install PostgreSQL at all", "Ask me on the next start"),
+						"Default PostgreSQL database not installed.");
+					int open = installPostgreSQLDialog.open();
+
 					if (open == 0)
 					{
 						// create database with sample

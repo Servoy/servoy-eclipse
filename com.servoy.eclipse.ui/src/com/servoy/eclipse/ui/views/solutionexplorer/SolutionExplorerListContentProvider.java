@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -49,6 +50,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.BinaryOperation;
@@ -69,6 +72,7 @@ import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.MemberBox;
@@ -459,7 +463,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
-				lm = createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE);
+				lm = runInJob(() -> createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE), key, mapKey, parentMap);
 			}
 			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
@@ -776,23 +780,44 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = TreeBuilder.createTypedArray(this, com.servoy.j2db.documentation.scripting.docs.JSLib.class, UserNodeType.JSLIB, null);
 			}
-			if (lm != null && key != null)
-			{
-				if (parentMap != null)
-				{
-					parentMap.put(mapKey, lm);
-				}
-				else
-				{
-					leafList.put(key, lm);
-				}
-			}
+
+			addToCache(key, mapKey, lm, parentMap);
 		}
 		if (lm == null)
 		{
 			lm = EMPTY_LIST;
 		}
 		return lm;
+	}
+
+	protected void addToCache(Object key, Object mapKey, Object[] lm, Map<Object, Object[]> parentMap)
+	{
+		if (lm != null && key != null)
+		{
+			if (parentMap != null)
+			{
+				parentMap.put(mapKey, lm);
+			}
+			else
+			{
+				leafList.put(key, lm);
+			}
+		}
+	}
+
+	private Object[] runInJob(Supplier<Object[]> supplier, Object key, Object mapKey, Map<Object, Object[]> map)
+	{
+		Job job = Job.create("Loading solution explorer data...", (ICoreRunnable)monitor -> {
+			Object[] l = supplier.get();
+			addToCache(key, mapKey, l, map);
+			Display.getDefault().asyncExec(() -> {
+				view.getList().refresh();
+			});
+		});
+		job.setUser(true);
+		job.setPriority(Job.LONG);
+		job.schedule();
+		return new Object[] { new SimpleUserNode("Loading...", UserNodeType.LOADING) };
 	}
 
 	/**
@@ -2440,8 +2465,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					Form form = (Form)persist;
 					if (ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution() != null)
 					{
-						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDirectlyInheritingForms(
-							form);
+						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution()
+							.getDirectlyInheritingForms(
+								form);
 						for (Form f : formHierarchy)
 						{
 							if (f != form)

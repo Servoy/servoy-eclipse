@@ -29,6 +29,8 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.debug.Debugger;
 
+import com.servoy.j2db.util.Debug;
+
 import de.berlios.jsunit.JsUnitException;
 import de.berlios.jsunit.JsUnitRuntimeException;
 
@@ -101,7 +103,7 @@ public class JSUnitToJavaRunner
 
 	/**
 	 * Creates a new JSUnit runner using the given scope. If scope is null a new scope will be created.
-	 * 
+	 *
 	 * @param scope the scope to be used by this runner. (the library will be loaded in the toplevel scope in this scope's parent chain)
 	 * @param createSeparateScopeForTestCode
 	 */
@@ -154,7 +156,7 @@ public class JSUnitToJavaRunner
 	 * <br>
 	 * For example ["1" NEXT_CHILD_GROUP "2" "3" NEXT_CHILD_GROUP "4" NEXT_CHILD_GROUP "5" "6" NEXT_CHILD_GROUP NEXT_CHILD_GROUP NEXT_CHILD_GROUP
 	 * NEXT_CHILD_GROUP] will stand for the tree:<br>
-	 * 
+	 *
 	 * <pre>
 	 *     &quot;1&quot;
 	 *  |---+---|
@@ -162,7 +164,7 @@ public class JSUnitToJavaRunner
 	 *  |     |-+-|
 	 * &quot;4&quot;   &quot;5&quot; &quot;6&quot;
 	 * </pre>
-	 * 
+	 *
 	 * @param suiteName the name of the javaScript test suite who's structure will be inspected.
 	 * @return an array representing the test tree as described above. It will only contain String objects and NEXT_CHILD_GROUP values.
 	 * @throws JsUnitException when the javaScript that inspects the test suite structure fails for some reason.
@@ -195,7 +197,7 @@ public class JSUnitToJavaRunner
 
 	/**
 	 * Load additional code into the JavaScript context. The provided reader is read until execution and closed afterwards.
-	 * 
+	 *
 	 * @param reader the reader providing the code
 	 * @param name an identifying name of the code (normally the file name)
 	 * @return the evaluated value
@@ -232,7 +234,7 @@ public class JSUnitToJavaRunner
 
 	/**
 	 * Evaluate the given JavaScript in the current context.
-	 * 
+	 *
 	 * @param code the JavaScript
 	 * @param name the name of the script (may be null)
 	 * @return the evaluated value
@@ -294,11 +296,14 @@ public class JSUnitToJavaRunner
 			}
 			catch (final EcmaError e)
 			{
-				throw new JsUnitRuntimeException("JavaScript error running/preparing tests", e);
+				// do not send error while context is gone
+				Debug.error(e);
+				throw new JsUnitRuntimeException("JavaScript error running/preparing tests", null);
 			}
 			catch (final JavaScriptException e)
 			{
-				throw new JsUnitRuntimeException(exceptionMessage, e);
+				Debug.error(e);
+				throw new JsUnitRuntimeException(exceptionMessage, null);
 			}
 			finally
 			{
@@ -338,7 +343,7 @@ public class JSUnitToJavaRunner
 //	/**
 //	 * Runs the TestSuite &quot;AllTests&quot;. The result of the test is written in XML format into the given writer. Since the result is a complete XML
 //	 * document, the writer is closed by the method (even in case of an exception).
-//	 * 
+//	 *
 //	 * @param writer the writer receiving the result
 //	 * @throws IOException if writing to the <code>writer</code> fails
 //	 * @throws IllegalArgumentException if <code>writer</code>is <code>null</code>
@@ -383,7 +388,7 @@ public class JSUnitToJavaRunner
 //	 * Runs all JavaScript TestSuites in the context. The method will collect any JavaScript <code>TestSuite</code> in the context in a collecting
 //	 * <code>TestSuite</code> and run it. The result of the test is written in XML format into the given writer. Since the result is a complete XML document,
 //	 * the writer is closed by the method (even in case of an exception).
-//	 * 
+//	 *
 //	 * @param writer the writer receiving the result
 //	 * @param name the name of the collecting <code>TestSuite</code> (may be null)
 //	 * @throws IOException if writing to the <code>writer</code> fails
@@ -430,7 +435,7 @@ public class JSUnitToJavaRunner
 //	 * Runs all JavaScript TestCases in the context. The method will collect any JavaScript <code>TestCase</code> in the context in a collecting
 //	 * <code>TestSuite</code> and run it. The result of the test is written in XML format into the given writer. Since the result is a complete XML document,
 //	 * the writer is closed by the method (even in case of an exception).
-//	 * 
+//	 *
 //	 * @param writer the writer receiving the result
 //	 * @param name the name of the collecting <code>TestSuite</code> (may be null)
 //	 * @throws IOException if writing to the <code>writer</code> fails

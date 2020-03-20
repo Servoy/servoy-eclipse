@@ -8,6 +8,7 @@ Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui,
+ org.eclipse.jface,
  org.eclipse.core.runtime,
  com.servoy.eclipse.model,
  org.eclipse.ui.forms,

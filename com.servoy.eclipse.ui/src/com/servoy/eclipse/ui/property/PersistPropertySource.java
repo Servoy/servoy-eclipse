@@ -2138,6 +2138,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						((IDeveloperRepository)((AbstractBase)persistContext.getPersist()).getRootObject().getRepository()).deleteObject(
 							persistContext.getPersist());
 						persistContext.getPersist().getParent().removeChild(persistContext.getPersist());
+						ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(),
+							false);
 						persistContext = PersistContext.create(superPersist, persistContext.getContext());
 						beansProperties = null;
 						propertyDescriptors = null;

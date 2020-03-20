@@ -536,6 +536,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 						.collect(Collectors.toSet())) //
 					.flatMap(Set::stream) //
 					.collect(Collectors.toSet());
+				exportedPackages.addAll(exportedLayoutPackages);
 			}
 			return exportedPackages;
 		}

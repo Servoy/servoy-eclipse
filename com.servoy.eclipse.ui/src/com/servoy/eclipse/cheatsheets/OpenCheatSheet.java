@@ -29,13 +29,13 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.intro.IIntroSite;
 import org.eclipse.ui.intro.config.IIntroAction;
 
-import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.IMainConceptsPageAction;
 
 /**
  * @author gboros
  *
  */
-public class OpenCheatSheet implements IIntroAction, IStartPageAction
+public class OpenCheatSheet implements IIntroAction, IMainConceptsPageAction
 {
 	/*
 	 * @see org.eclipse.ui.intro.config.IIntroAction#run(org.eclipse.ui.intro.IIntroSite, java.util.Properties)

@@ -116,6 +116,7 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.Resources
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -1249,6 +1250,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 												else if (ei instanceof FileEditorInput)
 												{
 													file = ((FileEditorInput)editorReference.getEditorInput()).getFile();
+												}
+												else if (ei instanceof TableEditorInput)
+												{
+													String dataSource = ((TableEditorInput)ei).getDataSource();
+													ITable table = getDataSourceManager().getDataSource(dataSource);
+													if (table != null) continue;
 												}
 												else
 												{

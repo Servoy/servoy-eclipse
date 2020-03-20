@@ -7,6 +7,8 @@ Bundle-Activator: com.servoy.eclipse.jsunit.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.dltk.javascript.rhino,
  org.eclipse.core.runtime,
+ org.eclipse.core.commands,
+ org.eclipse.jface,
  org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.debug.ui,

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target includeMode="feature" name="eclipse" sequenceNumber="60">
+<target includeMode="feature" name="eclipse_sources" sequenceNumber="60">
     <locations>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="net.sourceforge.sqlexplorer.feature.feature.group" version="3.6.2"/>
 		    <repository location="http://developer.servoy.com/sqlexplorer/"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="org.eclipse.emf.ecore.feature.group" version="2.16.0.v20181124-0637"/>
 		    <repository location="http://download.eclipse.org/modeling/emf/emf/builds/release/2.16/"/>
+		    <unit id="org.eclipse.emf.feature.group" version="2.16.0.v20181206-1055"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="org.eclipse.draw2d.feature.group" version="3.10.100.201606061308"/>
@@ -24,13 +24,6 @@
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.201908130254"/>
 		    <repository location="http://dl.maketechnology.io/chromium-cef/rls/repository"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://download.eclipse.org/egit/updates"/>
-		    <unit id="org.eclipse.egit.feature.group" version="5.6.1.202002131546-r"/>
-		    <unit id="org.eclipse.jgit.feature.group" version="5.6.1.202002131546-r"/>
-		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.6.1.202002131546-r"/>
-		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.6.1.202002131546-r"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://dl.maketechnology.io/chromium-swt/rls/repository"/>
@@ -70,6 +63,8 @@
 		    <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20190827152740/repository"/>
 		    <unit id="org.objectweb.asm.util" version="7.1.0.v20190412-2143"/>
 		    <unit id="org.objectweb.asm.util.source" version="7.1.0.v20190412-2143"/>
+		    <unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
+		    <unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/technology/m2e/releases/"/>
@@ -78,6 +73,15 @@
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/eclipse/updates/4.14/"/>
 		    <unit id="org.eclipse.sdk.ide" version="4.14.0.I20191210-0610"/>
+		    <unit id="org.eclipse.equinox.executable" version="3.8.600.v20191014-2025"/>
+		    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.600.v20191014-2025"/>
+	    </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <repository location="https://download.eclipse.org/egit/updates-5.6.1"/>
+		    <unit id="org.eclipse.egit.feature.group" version="5.6.1.202002131546-r"/>
+		    <unit id="org.eclipse.jgit.feature.group" version="5.6.1.202002131546-r"/>
+		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.6.1.202002131546-r"/>
+		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.6.1.202002131546-r"/>
 	    </location>
     </locations>
 </target>

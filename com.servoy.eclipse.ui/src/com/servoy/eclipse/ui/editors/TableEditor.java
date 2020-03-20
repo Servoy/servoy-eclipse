@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -126,21 +127,12 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private IPersistChangeListener persistListener;
 
+	private boolean delayedLoad = false;
+
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
 	{
 		super.init(site, convertInput(input));
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() == null)
-		{
-			closeEditor(true);
-			Display.getCurrent().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					UIUtils.reportWarning("Warning", "The table editor cannot be opened since there is no active solution.");
-				}
-			});
-		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
 	}
 
@@ -160,6 +152,11 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	@Override
 	protected void createPages()
 	{
+		if (delayedLoad)
+		{
+			setPageText(addPage(new Composite(getContainer(), SWT.NONE)), "Loading Solution");
+			return;
+		}
 		createColumnPage();
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 		{
@@ -566,156 +563,159 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	protected void setInput(IEditorInput input)
 	{
 		super.setInput(input);
-		TableEditorInput tableInput = (TableEditorInput)input;
-		table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tableInput.getDataSource());
-
-		if (table == null)
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 		{
-			throw new RuntimeException("Could not initialize table editor table could not be found");
-		}
-		isModified = isModified || !table.getExistInDB() || (table instanceof AbstractMemTable && ((AbstractMemTable)table).isChanged());
+			TableEditorInput tableInput = (TableEditorInput)input;
+			table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tableInput.getDataSource());
 
-		IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+			if (table == null)
+			{
+				throw new RuntimeException("Could not initialize table editor table could not be found");
+			}
+			isModified = isModified || !table.getExistInDB() || (table instanceof AbstractMemTable && ((AbstractMemTable)table).isChanged());
 
-		server = (IServerInternal)serverManager.getServer(table.getServerName(), true, true);
-		if (server == null)
-		{
-			if (DataSourceUtils.INMEM_DATASOURCE.equals(table.getServerName()))
-			{
-				MemTable memTable = (MemTable)table;
-				server = memTable.getParent();
-			}
-			else if (DataSourceUtils.VIEW_DATASOURCE.equals(table.getServerName()))
-			{
-				ViewFoundsetTable viewTable = (ViewFoundsetTable)table;
-				server = viewTable.getParent();
-			}
+			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
+
+			server = (IServerInternal)serverManager.getServer(table.getServerName(), true, true);
 			if (server == null)
 			{
-				throw new RuntimeException("Could not initialize table editor server is not enabled or valid");
-			}
-		}
-
-		// close this editor if the server or table get deleted
-		tableListener = new ITableListener.TableListener()
-		{
-			public void tablesRemoved(IServerInternal s, ITable tables[], boolean delete)
-			{
-				for (ITable t : tables)
+				if (DataSourceUtils.INMEM_DATASOURCE.equals(table.getServerName()))
 				{
-					if (t.getName().equalsIgnoreCase(table.getName()))
+					MemTable memTable = (MemTable)table;
+					server = memTable.getParent();
+				}
+				else if (DataSourceUtils.VIEW_DATASOURCE.equals(table.getServerName()))
+				{
+					ViewFoundsetTable viewTable = (ViewFoundsetTable)table;
+					server = viewTable.getParent();
+				}
+				if (server == null)
+				{
+					throw new RuntimeException("Could not initialize table editor server is not enabled or valid");
+				}
+			}
+
+			// close this editor if the server or table get deleted
+			tableListener = new ITableListener.TableListener()
+			{
+				public void tablesRemoved(IServerInternal s, ITable tables[], boolean delete)
+				{
+					for (ITable t : tables)
+					{
+						if (t.getName().equalsIgnoreCase(table.getName()))
+						{
+							closeEditor(false);
+						}
+					}
+				}
+
+				@Override
+				public void serverStateChanged(IServerInternal s, int oldState, int newState)
+				{
+					if ((newState & (VALID | ENABLED)) != (VALID | ENABLED))
+					{
+						// the server is now either disabled or invalid
+						closeEditor(false);
+					}
+				}
+			};
+			server.addTableListener(tableListener);
+			serverListener = new IServerListener()
+			{
+
+				public void serverAdded(IServerInternal s)
+				{
+				}
+
+				public void serverRemoved(IServerInternal s)
+				{
+					if (s == server)
 					{
 						closeEditor(false);
 					}
 				}
-			}
+			};
+			serverManager.addServerListener(serverListener);
 
-			@Override
-			public void serverStateChanged(IServerInternal s, int oldState, int newState)
+			columnListener = new IItemChangeListener<IColumn>()
 			{
-				if ((newState & (VALID | ENABLED)) != (VALID | ENABLED))
+				public void itemChanged(IColumn column)
 				{
-					// the server is now either disabled or invalid
-					closeEditor(false);
+					itemChanged(Collections.singletonList(column));
 				}
-			}
-		};
-		server.addTableListener(tableListener);
-		serverListener = new IServerListener()
-		{
 
-			public void serverAdded(IServerInternal s)
-			{
-			}
-
-			public void serverRemoved(IServerInternal s)
-			{
-				if (s == server)
+				public void itemChanged(Collection<IColumn> columns)
 				{
-					closeEditor(false);
-				}
-			}
-		};
-		serverManager.addServerListener(serverListener);
-
-		columnListener = new IItemChangeListener<IColumn>()
-		{
-			public void itemChanged(IColumn column)
-			{
-				itemChanged(Collections.singletonList(column));
-			}
-
-			public void itemChanged(Collection<IColumn> columns)
-			{
-				UIUtils.runInUI(new Runnable()
-				{
-					public void run()
+					UIUtils.runInUI(new Runnable()
 					{
-						refresh();
-					}
-				}, false);
-			}
-
-			public void itemCreated(IColumn column)
-			{
-				UIUtils.runInUI(new Runnable()
-				{
-					public void run()
-					{
-						refresh();
-					}
-				}, false);
-			}
-
-			public void itemRemoved(IColumn column)
-			{
-				UIUtils.runInUI(new Runnable()
-				{
-					public void run()
-					{
-						refresh();
-					}
-				}, false);
-			}
-		};
-		table.addIColumnListener(columnListener);
-
-		persistListener = new IPersistChangeListener()
-		{
-
-			public void persistChanges(Collection<IPersist> changes)
-			{
-				IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
-				for (IPersist persist : changes)
-				{
-					try
-					{
-						if (persist instanceof TableNode && table.equals(dsm.getDataSource(((TableNode)persist).getDataSource())))
+						public void run()
 						{
-							final boolean changed = persist.isChanged();
-							UIUtils.runInUI(new Runnable()
+							refresh();
+						}
+					}, false);
+				}
+
+				public void itemCreated(IColumn column)
+				{
+					UIUtils.runInUI(new Runnable()
+					{
+						public void run()
+						{
+							refresh();
+						}
+					}, false);
+				}
+
+				public void itemRemoved(IColumn column)
+				{
+					UIUtils.runInUI(new Runnable()
+					{
+						public void run()
+						{
+							refresh();
+						}
+					}, false);
+				}
+			};
+			table.addIColumnListener(columnListener);
+
+			persistListener = new IPersistChangeListener()
+			{
+
+				public void persistChanges(Collection<IPersist> changes)
+				{
+					IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
+					for (IPersist persist : changes)
+					{
+						try
+						{
+							if (persist instanceof TableNode && table.equals(dsm.getDataSource(((TableNode)persist).getDataSource())))
 							{
-								public void run()
+								final boolean changed = persist.isChanged();
+								UIUtils.runInUI(new Runnable()
 								{
-									refresh();
-									flagModified(!changed);
-								}
-							}, false);
+									public void run()
+									{
+										refresh();
+										flagModified(!changed);
+									}
+								}, false);
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
 						}
 					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
 				}
-			}
-		};
+			};
 
-		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistListener);
-		// servoyProject =
-		// ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persistInput.getSolutionName());
-		// persist = servoyProject.getEditingPersist(persistInput.getUuid(),
-		// revertToOriginal);
+			ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistListener);
+		}
+		else
+		{
+			delayedLoad = true;
+		}
 	}
 
 	@Override
@@ -983,6 +983,17 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	 */
 	public void activeProjectChanged(ServoyProject activeProject)
 	{
+		if (delayedLoad)
+		{
+			delayedLoad = false;
+			// place hoder, replace it and create the normal pages
+			Display.getDefault().asyncExec(() -> {
+				setInput(getEditorInput());
+				removePage(0);
+				createPages();
+				setActivePage(0);
+			});
+		}
 	}
 
 	/**
@@ -990,6 +1001,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	 */
 	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 	{
+		if (delayedLoad) return;
 		if (updateInfo == IActiveProjectListener.MODULES_UPDATED || updateInfo == IActiveProjectListener.RESOURCES_UPDATED_ON_ACTIVE_PROJECT ||
 			updateInfo == IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED || updateInfo == IActiveProjectListener.COLUMN_INFO_CHANGED ||
 			updateInfo == IActiveProjectListener.SECURITY_INFO_CHANGED || updateInfo == IActiveProjectListener.SCOPE_NAMES_CHANGED)
@@ -1035,6 +1047,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	 */
 	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 	{
+		if (delayedLoad) return true;
 		closeEditor(true);
 		return true;
 	}

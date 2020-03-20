@@ -22,9 +22,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -35,6 +37,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
@@ -48,14 +51,16 @@ import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.progress.IProgressService;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.IMainConceptsPageAction;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
@@ -89,11 +94,11 @@ public class BrowserDialog extends Dialog
 	public Object open()
 	{
 		Rectangle size = getParent().getBounds();
-		Dimension newSize = new Dimension((int)(size.width / 1.5), (int)(size.height / 1.5));
+		Dimension newSize = new Dimension((int)(size.width / 1.5), (int)(size.height / 1.4));
 
 		int locationX, locationY;
 		locationX = (size.width - (int)(size.width / 1.5)) / 2 + size.x;
-		locationY = (size.height - (int)(size.height / 1.5)) / 2 + size.y;
+		locationY = (size.height - (int)(size.height / 1.4)) / 2 + size.y;
 
 		return this.open(new Point(locationX, locationY), newSize);
 	}
@@ -102,7 +107,7 @@ public class BrowserDialog extends Dialog
 	{
 		Shell parent = getParent();
 		shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());
-
+		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		if (!ApplicationServerRegistry.get().hasDeveloperLicense())
 		{
 			this.showSkipNextTime = false;
@@ -118,6 +123,7 @@ public class BrowserDialog extends Dialog
 		{
 			shell.setLayout(new FillLayout());
 		}
+		final Button[] showNextTime = new Button[1];
 		//load html file in textReader
 		browser = new Browser(shell, SWT.NONE);
 		browser.addLocationListener(new LocationListener()
@@ -143,14 +149,14 @@ public class BrowserDialog extends Dialog
 
 						final Object actionObject = ModelLoaderUtil.createClassInstance(pluginId, className);
 
-						if (actionObject instanceof IStartPageAction)
+						if (actionObject instanceof IMainConceptsPageAction)
 						{
 							Display display = Display.getCurrent();
 							BusyIndicator.showWhile(display, new Runnable()
 							{
 								public void run()
 								{
-									((IStartPageAction)actionObject).runAction(introURL);
+									((IMainConceptsPageAction)actionObject).runAction(introURL);
 								}
 							});
 							if (!shell.isDisposed()) shell.close();
@@ -162,8 +168,6 @@ public class BrowserDialog extends Dialog
 					final String[] showTutorial = new String[] { null };
 					if (importSample != null)
 					{
-						if (!shell.isDisposed()) shell.close();
-
 						try (InputStream is = new URL(importSample.startsWith("https://") ? importSample
 							: "https://" + importSample).openStream())
 						{
@@ -175,6 +179,22 @@ public class BrowserDialog extends Dialog
 								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 								if (sp == null)
 								{
+									if (Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+										.filter(
+											s -> s.isEnabled() &&
+												ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
+												((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()))
+													.isValid())
+										.count() == 0)
+									{
+										// no valid servers
+										UIUtils.reportError("No valid server",
+											"There is no valid server defined in Servoy Developer, you must define servers / install PostgreSQL before importing the sample solution.");
+										return;
+									}
+
+									if (!shell.isDisposed()) shell.close();
+
 									final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(),
 										solutionName + ".servoy");
 									if (importSolutionFile.exists())
@@ -222,6 +242,7 @@ public class BrowserDialog extends Dialog
 								}
 								else
 								{
+									if (!shell.isDisposed()) shell.close();
 									progressService.run(true, false, (IProgressMonitor monitor) -> {
 										ServoyModelManager.getServoyModelManager()
 											.getServoyModel()
@@ -281,6 +302,10 @@ public class BrowserDialog extends Dialog
 					}
 					if (introURL.getParameter("maximize") != null)
 					{
+						if (showNextTime != null && showNextTime[0] != null)
+						{
+							showNextTime[0].setVisible(false);
+						}
 						Rectangle bounds = parent.getBounds();
 						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
@@ -292,8 +317,8 @@ public class BrowserDialog extends Dialog
 					{
 						Rectangle size = getParent().getBounds();
 						Rectangle bounds = new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
-							(size.height - (int)(size.height / 1.5)) / 2 + size.y, (int)(size.width / 1.5),
-							(int)(size.height / 1.5));
+							(size.height - (int)(size.height / 1.4)) / 2 + size.y, (int)(size.width / 1.5),
+							(int)(size.height / 1.4));
 						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
 						shell.layout(true, true);
@@ -366,20 +391,31 @@ public class BrowserDialog extends Dialog
 
 		if (showSkipNextTime)
 		{
-			Button showNextTime = new Button(shell, SWT.CHECK);
-			showNextTime.setText("Do not show this dialog anymore");
-			showNextTime.setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")));
-			showNextTime.addSelectionListener(new SelectionAdapter()
+			browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			showNextTime[0] = new Button(shell, SWT.CHECK);
+			showNextTime[0].setText("Do not show this dialog anymore");
+			showNextTime[0].setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")));
+			showNextTime[0].addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, new Boolean(!showNextTime.getSelection()).toString());
+					Settings.getInstance().setProperty(StartupPreferences.STARTUP_SHOW_START_PAGE,
+						new Boolean(!showNextTime[0].getSelection()).toString());
 				}
 			});
+			showNextTime[0].setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		}
 		shell.setLocation(location);
-		shell.pack();
+		if (Util.isMac())
+		{
+			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
+			shell.setSize(rect.width, rect.height);
+		}
+		else
+		{
+			shell.pack();
+		}
 		shell.open();
 		if (getStyle() == SWT.APPLICATION_MODAL)
 		{
@@ -405,5 +441,12 @@ public class BrowserDialog extends Dialog
 	{
 		this.url = url;
 		browser.setUrl(url);
+	}
+
+	public void setLocationAndSize(Point location, Dimension size)
+	{
+		browser.setSize(size.width, size.height);
+		shell.setLocation(location);
+		shell.setSize(size.width, size.height);
 	}
 }

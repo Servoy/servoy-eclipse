@@ -259,6 +259,24 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 								{
 									text = "Not supported in smart client for listview/tableview";
 								}
+								if ("width".equals(item.getText(0)) || "height".equals(item.getText(0)))
+								{
+									ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()
+										.getSelectionProvider().getSelection();
+									if (selection instanceof IStructuredSelection && ((IStructuredSelection)selection).size() == 1 &&
+										Platform.getAdapterManager().getAdapter(((IStructuredSelection)selection).getFirstElement(),
+											IPersist.class) instanceof IFormElement)
+									{
+										if ("height".equals(item.getText(0)))
+										{
+											text = "If top and bottom are set (anchored) this is minimum height.";
+										}
+										if ("width".equals(item.getText(0)))
+										{
+											text = "If left and right are set (anchored) this is minimum width.";
+										}
+									}
+								}
 								if (text != null)
 								{
 									if (tip != null && !tip.isDisposed()) tip.dispose();
@@ -294,49 +312,52 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				private String getTooltipText(TreeItem item)
 				{
 					Object selectionObject;
-					ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart().getSite()
-						.getSelectionProvider()
-						.getSelection();
-					Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
-					// iterate over all selected components
-					while (iterator.hasNext())
+					ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()
+						.getSelectionProvider().getSelection();
+					if (selection instanceof IStructuredSelection)
 					{
-						selectionObject = iterator.next();
-						IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
-						IPersist finalPersist = (persist instanceof IFormElement) ? persist : persist.getParent();
-						if (finalPersist instanceof IFormElement)
+						Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
+						// iterate over all selected components
+						while (iterator.hasNext())
 						{
-							// get the specification file
-							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-								.getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)finalPersist));
-
-							String tooltipText = null;
-
-							// search for a model property to match the selected item
-							PropertyDescription pdModel = spec.getProperty(item.getText());
-							if (pdModel != null)
+							selectionObject = iterator.next();
+							IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
+							if (persist == null) continue;
+							IPersist finalPersist = (persist == null || persist instanceof IFormElement) ? persist : persist.getParent();
+							if (finalPersist instanceof IFormElement)
 							{
-								Object tag = pdModel.getTag("tooltipText");
-								if (tag != null)
-								{
-									return tag.toString();
-								}
-							}
+								// get the specification file
+								WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
+									.getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)finalPersist));
 
-							// check custom properties
-							Map<String, PropertyDescription> customProperties = spec.getCustomJSONProperties();
-							if (customProperties != null)
-							{
-								tooltipText = getPropertyTooltipText(customProperties, item);
-								if (tooltipText != null)
-								{
-									return tooltipText;
-								}
-							}
+								String tooltipText = null;
 
-							// check functions and handlers
-							tooltipText = tooltipTextForFunctionsAndHandlers(item, spec.getApiFunctions());
-							return (tooltipText != null) ? tooltipText : tooltipTextForFunctionsAndHandlers(item, spec.getHandlers());
+								// search for a model property to match the selected item
+								PropertyDescription pdModel = spec.getProperty(item.getText());
+								if (pdModel != null)
+								{
+									Object tag = pdModel.getTag("tooltipText");
+									if (tag != null)
+									{
+										return tag.toString();
+									}
+								}
+
+								// check custom properties
+								Map<String, PropertyDescription> customProperties = spec.getCustomJSONProperties();
+								if (customProperties != null)
+								{
+									tooltipText = getPropertyTooltipText(customProperties, item);
+									if (tooltipText != null)
+									{
+										return tooltipText;
+									}
+								}
+
+								// check functions and handlers
+								tooltipText = tooltipTextForFunctionsAndHandlers(item, spec.getApiFunctions());
+								return (tooltipText != null) ? tooltipText : tooltipTextForFunctionsAndHandlers(item, spec.getHandlers());
+							}
 						}
 					}
 					return null;
@@ -451,7 +472,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			tree.setLayoutData(fd_tree);
 		}
 
-		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
+		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 		if (activeEditor != null)
 		{
 			ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();

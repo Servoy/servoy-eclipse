@@ -52,26 +52,28 @@ import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.model.view.ViewFoundsetTable;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Pair;
@@ -99,7 +101,7 @@ public class LinkWithEditorAction extends Action
 	public void run()
 	{
 		IContentProvider contentProvider = tree.getContentProvider();
-		IEditorPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		final IEditorPart activeEditor = EditorUtil.getActivePage().getActiveEditor();
 		if (activeEditor == null || !(contentProvider instanceof SolutionExplorerTreeContentProvider))
 		{
 			return;
@@ -137,6 +139,10 @@ public class LinkWithEditorAction extends Action
 		String serverName = null;
 		String tableName = null;
 
+		boolean isInMemoryTable = false;
+		boolean isFoundsetTable = false;
+		ITable table = editorOrAdaptable.getAdapter(ITable.class);
+
 		if (persists.size() == 0)
 		{
 			// none found, go via the editor
@@ -149,6 +155,26 @@ public class LinkWithEditorAction extends Action
 			else if (persist != null)
 			{
 				persists.add(persist);
+			}
+			else if (editorOrAdaptable != null)
+			{
+				ServerConfig config = editorOrAdaptable.getAdapter(ServerConfig.class);
+				if (config == null)
+				{
+					if (table != null)
+					{
+						serverName = table.getServerName();
+						tableName = table.getName();
+						if (table instanceof MemTable)
+						{
+							isInMemoryTable = true;
+						}
+						if (table instanceof ViewFoundsetTable)
+						{
+							isFoundsetTable = true;
+						}
+					}
+				}
 			}
 		}
 
@@ -168,9 +194,155 @@ public class LinkWithEditorAction extends Action
 				}
 			}
 		}
-		else if (serverName == null)
+		if (persists.size() == 1 && persists.get(0) instanceof Relation)
 		{
-			IFile file = (editor != null ? editor.getEditorInput().getAdapter(IFile.class) : null);
+			setProperSelection(persists.get(0), UserNodeType.ALL_RELATIONS, treeContentProvider);
+		}
+		else if (persists.size() == 1 && persists.get(0) instanceof ValueList)
+		{
+			setProperSelection(persists.get(0), UserNodeType.VALUELISTS, treeContentProvider);
+		}
+		else if (persists.size() == 1 && persists.get(0) instanceof Media)
+		{
+			setProperSelection(persists.get(0), UserNodeType.MEDIA, treeContentProvider);
+		}
+		else if (files.size() > 0)
+		{
+			List<TreePath> paths = new ArrayList<TreePath>();
+			for (Map.Entry<UUID, IFile> entry : files.entrySet())
+			{
+				TreePath path = ((SolutionExplorerTreeContentProvider)treeContentProvider).getTreePath(entry.getKey());
+				if (path != null)
+				{
+					tree.expandToLevel(path, 1);
+					paths.add(path);
+				}
+				else
+				{
+					ServoyLog.log(IStatus.WARNING, IStatus.OK, "Could not find tree path for : " + entry, null);
+				}
+			}
+			tree.setSelection(new TreeSelection(paths.toArray(new TreePath[paths.size()])), true);
+		}
+
+		if (files.size() > 0)
+		{
+			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IPageLayout.ID_RES_NAV);
+			if (part instanceof ISetSelectionTarget)
+			{
+				((ISetSelectionTarget)part).selectReveal(new StructuredSelection(files.values().toArray()));
+			}
+		}
+
+		if (serverName != null)
+		{
+			if (isInMemoryTable || isFoundsetTable)
+			{
+				final String solutionName = isInMemoryTable ? ((MemTable)table).getServoyProject().getSolution().getName()
+					: ((ViewFoundsetTable)table).getServoyProject().getSolution().getName();
+				final PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)treeContentProvider)
+					.getSolutionNode(solutionName);
+				final SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider)
+					.getChildren(solutionNode);
+				if (children != null)
+				{
+					for (SimpleUserNode child : children)
+					{
+						if (child.getName().equals("Datasources"))
+						{
+							SimpleUserNode[] dataSourcesChildren = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider)
+								.getChildren(child);
+							if (children != null)
+							{
+								for (SimpleUserNode dataSourcesChild : dataSourcesChildren)
+								{
+									if (dataSourcesChild.getName().equals("In Memory"))
+									{
+										SimpleUserNode[] inMemoryChildren = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider)
+											.getChildren(dataSourcesChild);
+										for (SimpleUserNode inMemoryChild : inMemoryChildren)
+										{
+											if (tableName.equals(inMemoryChild.getName()))
+											{
+												tree.setSelection(
+													new TreeSelection(
+														new TreePath(new Object[] { solutionNode, child, dataSourcesChild, inMemoryChild })),
+													true);
+												break;
+											}
+										}
+									}
+									if (dataSourcesChild.getName().equals("View Foundsets"))
+									{
+										SimpleUserNode[] founsetsChildren = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider)
+											.getChildren(dataSourcesChild);
+										for (SimpleUserNode foundsetChild : founsetsChildren)
+										{
+											if (tableName.equals(foundsetChild.getName()))
+											{
+												tree.setSelection(
+													new TreeSelection(
+														new TreePath(new Object[] { solutionNode, child, dataSourcesChild, foundsetChild })),
+													true);
+												break;
+											}
+										}
+									}
+								}
+
+							}
+							break;
+						}
+					}
+				}
+
+			}
+			else
+			{
+				PlatformSimpleUserNode databaseServerNode = ((SolutionExplorerTreeContentProvider)treeContentProvider).getServers();
+				SimpleUserNode[] databaseServersChildren = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider)
+					.getChildren(databaseServerNode);
+				if (databaseServersChildren != null)
+				{
+					for (SimpleUserNode databaseServer : databaseServersChildren)
+					{
+						try
+						{
+							if (serverName.equals(((IServer)databaseServer.getRealObject()).getName()))
+							{
+								if (tableName != null)
+								{
+									SimpleUserNode[] tables = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider)
+										.getChildren(databaseServer);
+
+									for (SimpleUserNode dbTable : tables)
+									{
+										if (tableName.equals(dbTable.getName()))
+										{
+											tree.setSelection(
+												new TreeSelection(new TreePath(new Object[] { ((SolutionExplorerTreeContentProvider)treeContentProvider)
+													.getResourcesNode(), databaseServerNode, databaseServer, dbTable })),
+												true);
+											break;
+										}
+									}
+
+								}
+								break;
+							}
+						}
+						catch (RemoteException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+
+			IFile file = (editor != null ? (IFile)editor.getEditorInput().getAdapter(IFile.class) : null);
 			if (file != null)
 			{
 				// globals, scope or foundset
@@ -233,102 +405,6 @@ public class LinkWithEditorAction extends Action
 				{
 					setProperWebObjectSelection(file, (SolutionExplorerTreeContentProvider)treeContentProvider);
 				}
-			}
-			else
-			{
-				ServerConfig config = editorOrAdaptable.getAdapter(ServerConfig.class);
-				if (config == null)
-				{
-					Table table = editorOrAdaptable.getAdapter(Table.class);
-					if (table != null)
-					{
-						serverName = table.getServerName();
-						tableName = table.getName();
-					}
-				}
-				else
-				{
-					serverName = config.getServerName();
-				}
-			}
-		}
-		if (serverName != null)
-		{
-			PlatformSimpleUserNode servers = ((SolutionExplorerTreeContentProvider)treeContentProvider).getServers();
-			SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider).getChildren(servers);
-			if (children != null)
-			{
-				for (SimpleUserNode child : children)
-				{
-					try
-					{
-						if (serverName.equals(((IServer)child.getRealObject()).getName()))
-						{
-							tree.setSelection(new TreeSelection(new TreePath(new Object[] { servers, child })), true);
-							if (tableName != null)
-							{
-								Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
-								if (elements != null)
-								{
-									for (Object element : elements)
-									{
-										Object realObject = ((SimpleUserNode)element).getRealObject();
-										if (realObject instanceof TableWrapper && ((TableWrapper)realObject).getTableName().equals(tableName))
-										{
-											list.setSelection(new StructuredSelection(element), true);
-											break;
-										}
-									}
-								}
-
-							}
-							break;
-						}
-					}
-					catch (RemoteException e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-			}
-		}
-		if (persists.size() == 1 && persists.get(0) instanceof Relation)
-		{
-			setProperSelection(persists.get(0), UserNodeType.ALL_RELATIONS, treeContentProvider);
-		}
-		else if (persists.size() == 1 && persists.get(0) instanceof ValueList)
-		{
-			setProperSelection(persists.get(0), UserNodeType.VALUELISTS, treeContentProvider);
-		}
-		else if (persists.size() == 1 && persists.get(0) instanceof Media)
-		{
-			setProperSelection(persists.get(0), UserNodeType.MEDIA, treeContentProvider);
-		}
-		else if (files.size() > 0)
-		{
-			List<TreePath> paths = new ArrayList<TreePath>();
-			for (Map.Entry<UUID, IFile> entry : files.entrySet())
-			{
-				TreePath path = ((SolutionExplorerTreeContentProvider)treeContentProvider).getTreePath(entry.getKey());
-				if (path != null)
-				{
-					tree.expandToLevel(path, 1);
-					paths.add(path);
-				}
-				else
-				{
-					ServoyLog.log(IStatus.WARNING, IStatus.OK, "Could not find tree path for : " + entry, null);
-				}
-			}
-			tree.setSelection(new TreeSelection(paths.toArray(new TreePath[paths.size()])), true);
-		}
-
-		if (files.size() > 0)
-		{
-			IViewPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IPageLayout.ID_RES_NAV);
-			if (part instanceof ISetSelectionTarget)
-			{
-				((ISetSelectionTarget)part).selectReveal(new StructuredSelection(files.values().toArray()));
 			}
 		}
 	}
@@ -451,9 +527,8 @@ public class LinkWithEditorAction extends Action
 		{
 			PlatformSimpleUserNode treeSelection = webObjectNode;
 			PlatformSimpleUserNode child = null;
-			outer : for (int i = 0; i < segments.length; i++)
+			outer : for (String segment : segments)
 			{
-				String segment = segments[i];
 				if (treeContentProvider.getChildren(treeSelection).length > 0)
 				{
 					for (Object c : treeContentProvider.getChildren(treeSelection))

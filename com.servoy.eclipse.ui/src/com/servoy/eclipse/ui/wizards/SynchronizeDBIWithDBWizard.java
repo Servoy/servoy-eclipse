@@ -46,6 +46,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -62,10 +63,12 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -103,6 +106,7 @@ import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedList;
@@ -118,6 +122,7 @@ import com.servoy.j2db.util.Utils;
 public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWizard
 {
 	private WizardPage errorPage;
+	private InitialChoiceWizardPage initialChoicePage;
 	private SplitInThreeWizardPage<IServerInternal, String> page1;
 	private SplitInThreeWizardPage<IServerInternal, String> page2;
 	private CheckBoxWizardPage page3;
@@ -272,7 +277,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					page1 = new SplitInThreeWizardPage<IServerInternal, String>("Missing tables",
 						"Database information files (.dbi from resources project) can point to tables that do not exist in the database.\nYou can choose to create those tables according to the information or delete the unwanted information files.",
 						"Skip", "Create table", "Delete .dbi", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
-						foundMissingTables, comparator, serverImage, tableImage, viewImage);
+						foundMissingTables, comparator, serverImage, tableImage, viewImage, "com.servoy.eclipse.ui.synchronizedbi_missingtables");
 				}
 				else
 				{
@@ -283,7 +288,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					page2 = new SplitInThreeWizardPage<IServerInternal, String>("Missing database information files",
 						"Tables in the database can lack an associated database information file (.dbi in the resources project).\nYou can choose to create the database information file or delete the table from the database.",
 						"Skip", "Create .dbi", "Delete table", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
-						foundSupplementalTables, comparator, serverImage, tableImage, viewImage);
+						foundSupplementalTables, comparator, serverImage, tableImage, viewImage, "com.servoy.eclipse.ui.synchronizedbi_missingdbi");
 				}
 				else
 				{
@@ -397,6 +402,11 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		{
 			addPage(errorPage);
 		}
+		else
+		{
+			initialChoicePage = new InitialChoiceWizardPage();
+			addPage(initialChoicePage);
+		}
 		if (page1 != null)
 		{
 			addPage(page1);
@@ -426,59 +436,80 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 						{
 							public void run(IProgressMonitor monitor) throws CoreException
 							{
-								int work1 = (page1 != null ? page1.getSet2().size() + page1.getSet3().size() : 0);
-								int work2 = (page2 != null ? page2.getSet2().size() + page2.getSet3().size() : 0);
-								int work3 = (page3 != null ? (page3.isChecked() ? countTables() : 0) : 0);
-
-								monitor.beginTask("Synchronizing database with database information files", work1 + work2 + work3);
-								try
+								if (initialChoicePage.isSynchronizeDBI())
 								{
-									MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
-									if (page1 != null && !monitor.isCanceled())
+									int work1 = (page1 != null ? page1.getSet2().size() + page1.getSet3().size() : 0);
+									int work2 = (page2 != null ? page2.getSet2().size() + page2.getSet3().size() : 0);
+									int work3 = (page3 != null ? (page3.isChecked() ? countTables() : 0) : 0);
+									monitor.beginTask("Synchronizing database with database information files", work1 + work2 + work3);
+									try
 									{
-										monitor.subTask("- handling missing tables");
-										handleMissingTables(page1.getSet2(), page1.getSet3(), new SubProgressMonitor(monitor, work1), warnings, work1);
-									}
-									if (page2 != null && !monitor.isCanceled())
-									{
-										monitor.subTask("- handling supplemental tables");
-										handleSupplementalTables(page2.getSet2(), page2.getSet3(), new SubProgressMonitor(monitor, work2), warnings, work2);
-									}
-									if (page3 != null && page3.isChecked() && !monitor.isCanceled())
-									{
-										monitor.subTask("- read and check database information");
-										readAndCheckDatabaseInformation(new SubProgressMonitor(monitor, work3), work3);
-									}
-									if (warnings.getChildren().length > 0)
-									{
-										final MultiStatus fw = warnings;
+										MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
+										if (page1 != null && !monitor.isCanceled())
+										{
+											monitor.subTask("- handling missing tables");
+											handleMissingTables(page1.getSet2(), page1.getSet3(), new SubProgressMonitor(monitor, work1), warnings, work1);
+										}
+										if (page2 != null && !monitor.isCanceled())
+										{
+											monitor.subTask("- handling supplemental tables");
+											handleSupplementalTables(page2.getSet2(), page2.getSet3(), new SubProgressMonitor(monitor, work2), warnings, work2);
+										}
+										if (page3 != null && page3.isChecked() && !monitor.isCanceled())
+										{
+											monitor.subTask("- read and check database information");
+											readAndCheckDatabaseInformation(new SubProgressMonitor(monitor, work3), work3);
+										}
+										if (warnings.getChildren().length > 0)
+										{
+											final MultiStatus fw = warnings;
+											UIUtils.runInUI(new Runnable()
+											{
+												public void run()
+												{
+													ErrorDialog.openError(getShell(), null, null, fw);
+												}
+											}, false);
+										}
 										UIUtils.runInUI(new Runnable()
 										{
 											public void run()
 											{
-												ErrorDialog.openError(getShell(), null, null, fw);
+												HandleDBIMarkersWizard wizard = new HandleDBIMarkersWizard(servers, selectedTableName);
+												int returnCode = Window.OK;
+												while (returnCode == Window.OK && wizard.hasMarkers(false))
+												{
+													WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+														wizard);
+													dialog.create();
+													returnCode = dialog.open();
+													wizard = new HandleDBIMarkersWizard(servers, selectedTableName);
+												}
 											}
 										}, false);
 									}
-									UIUtils.runInUI(new Runnable()
+									finally
 									{
-										public void run()
+										monitor.done();
+									}
+								}
+								if (initialChoicePage.reloadTables())
+								{
+									monitor.beginTask("Reloading tables from database", IProgressMonitor.UNKNOWN);
+									if (servers != null)
+									{
+										for (IServerInternal server : servers)
 										{
-											HandleDBIMarkersWizard wizard = new HandleDBIMarkersWizard(servers, selectedTableName);
-											int returnCode = Window.OK;
-											while (returnCode == Window.OK && wizard.hasMarkers(false))
+											try
 											{
-												WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);
-												dialog.create();
-												returnCode = dialog.open();
-												wizard = new HandleDBIMarkersWizard(servers, selectedTableName);
+												server.reloadTables();
+											}
+											catch (RepositoryException e)
+											{
+												Debug.error(e);
 											}
 										}
-									}, false);
-								}
-								finally
-								{
-									monitor.done();
+									}
 								}
 							}
 						}, ServoyModel.getWorkspace().getRoot(), IWorkspace.AVOID_UPDATE, m);
@@ -774,8 +805,123 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			return checked;
 		}
 
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.synchronizedbi_synccolumns");
+		}
+
 	}
 
+	public static class InitialChoiceWizardPage extends WizardPage
+	{
+		private boolean reloadTables = false;
+		private boolean synchronizeDBI = true;
+
+		public InitialChoiceWizardPage()
+		{
+			super("Select synchronize choices");
+		}
+
+		@Override
+		public void createControl(Composite parent)
+		{
+			initializeDialogUnits(parent);
+
+			// create visual components
+			Composite topLevel = new Composite(parent, SWT.NONE);
+			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+			setControl(topLevel);
+			FormLayout layout = new FormLayout();
+			layout.marginHeight = layout.marginWidth = 5;
+			topLevel.setLayout(layout);
+
+			Label infoLabel = new Label(topLevel, SWT.WRAP);
+			infoLabel.setText("Synchronize DBI files with database structure");
+			FormData data = new FormData();
+			data.left = new FormAttachment(0, 0);
+			data.top = new FormAttachment(0, 0);
+			data.right = new FormAttachment(100, 0);
+			infoLabel.setLayoutData(data);
+
+			FontDescriptor descriptor = FontDescriptor.createFrom(infoLabel.getFont());
+			descriptor = descriptor.setStyle(SWT.BOLD);
+			infoLabel.setFont(descriptor.createFont(infoLabel.getDisplay()));
+
+			Button checkBox = new Button(topLevel, SWT.CHECK | SWT.WRAP);
+			checkBox.setSelection(true);
+			checkBox.setText(
+				"Servoy stores table information in special DBI files located in resources project. This wizard helps you synchronize the file structure and database structure for each table.");
+			data = new FormData();
+			data.left = new FormAttachment(0, 20);
+			data.top = new FormAttachment(infoLabel, 20);
+			data.right = new FormAttachment(100, 0);
+			checkBox.setLayoutData(data);
+			checkBox.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					synchronizeDBI = checkBox.getSelection();
+					InitialChoiceWizardPage.this.getContainer().updateButtons();
+				}
+			});
+
+			Label infoLabel2 = new Label(topLevel, SWT.WRAP);
+			infoLabel2.setText("Reload tables from database structure");
+			data = new FormData();
+			data.left = new FormAttachment(0, 0);
+			data.top = new FormAttachment(checkBox, 50);
+			data.right = new FormAttachment(100, 0);
+			infoLabel2.setLayoutData(data);
+
+			descriptor = FontDescriptor.createFrom(infoLabel2.getFont());
+			descriptor = descriptor.setStyle(SWT.BOLD);
+			infoLabel2.setFont(descriptor.createFont(infoLabel2.getDisplay()));
+
+			final Button checkBox2 = new Button(topLevel, SWT.CHECK | SWT.WRAP);
+			checkBox2.setSelection(false);
+			checkBox2.setText(
+				"In case database changes were done outside Servoy you should reload the tables in memory so that Servoy contains the latest information.");
+			data = new FormData();
+			data.left = new FormAttachment(0, 20);
+			data.top = new FormAttachment(infoLabel2, 20);
+			data.right = new FormAttachment(100, 0);
+			checkBox2.setLayoutData(data);
+			checkBox2.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					reloadTables = checkBox2.getSelection();
+				}
+			});
+		}
+
+		public boolean reloadTables()
+		{
+			return reloadTables;
+		}
+
+		public boolean isSynchronizeDBI()
+		{
+			return synchronizeDBI;
+		}
+
+		@Override
+		public IWizardPage getNextPage()
+		{
+			if (synchronizeDBI)
+				return super.getNextPage();
+			return null;
+		}
+
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.synchronizedbi_choicepage");
+		}
+	}
 	/**
 	 * The wizard page that is used by the user to split a set of tables into three sets.<br>
 	 * UI consists of a single tree table with check boxes.
@@ -804,6 +950,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		private final String allSet1Label;
 		private final String allSet2Label;
 		private final String allSet3Label;
+		private final String helpID;
 
 		/**
 		 * Creates a new split-in-three wizard page. It will split the initial set "servers" into 3 subsets.
@@ -817,7 +964,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 		 */
 		public SplitInThreeWizardPage(String title, String description, String labelForSet1, String labelForSet2, String labelForSet3, String allSet1Label,
 			String allSet2Label, String allSet3Label, List<Pair<T1, T2>> fatherChildrenPairs, Comparator<Pair<T1, T2>> c, Image image1, Image image2,
-			Image image3)
+			Image image3, String helpID)
 		{
 			super(title);
 			this.initialPairs = new SortedList<Pair<T1, T2>>(c, fatherChildrenPairs);
@@ -836,6 +983,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			this.image1 = image1;
 			this.image2 = image2;
 			this.image3 = image3;
+
+			this.helpID = helpID;
 
 		}
 
@@ -983,6 +1132,12 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 			fd.right = new FormAttachment(100, 0);
 			fd.bottom = new FormAttachment(100, 0);
 			allInSet3.setLayoutData(fd);
+		}
+
+		@Override
+		public void performHelp()
+		{
+			PlatformUI.getWorkbench().getHelpSystem().displayHelp(helpID);
 		}
 
 		private void moveAllOrMultiSelectionToSet(int set)

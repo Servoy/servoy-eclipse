@@ -23,17 +23,17 @@ import org.eclipse.ui.IPersistableElement;
 
 /**
  * Input for the Marketplace browser editor.
- * 
+ *
  * @author pbakker
  *
  */
-public class StartPageBrowserEditorInput implements IEditorInput
+public class MainConceptsPageBrowserEditorInput implements IEditorInput
 {
 
-	public static final String NAME = "StartPage";
+	public static final String NAME = "MainConceptsPage";
 
 
-	public StartPageBrowserEditorInput()
+	public MainConceptsPageBrowserEditorInput()
 	{
 	}
 

@@ -423,6 +423,8 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		enableSolutionExportData();
 
 		setControl(composite);
+
+		this.getWizard().getContainer().getShell().pack();
 	}
 
 	private void applyNrOfExportedSampleDataSpinnerValue()
