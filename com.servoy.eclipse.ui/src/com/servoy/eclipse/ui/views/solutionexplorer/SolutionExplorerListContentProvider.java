@@ -1910,14 +1910,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			if (ids != null)
 			{
 				List<SimpleUserNode> serviceIds = new ArrayList<SimpleUserNode>();
-				for (Object element : ids)
+				for (String id : ids)
 				{
 					Image icon = propertiesIcon;
 					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebObjectSpecification)o).getScriptingName() + ".";
-					IDeveloperFeedback feedback = new FieldFeedback((String)element, pluginsPrefix, null, null, null);
-					if (spec.getApiFunction((String)element) != null)
+					IDeveloperFeedback feedback;
+
+					if (spec.getApiFunction(id) != null)
 					{
-						final WebObjectFunctionDefinition api = spec.getApiFunction((String)element);
+						final WebObjectFunctionDefinition api = spec.getApiFunction(id);
 						if (api.isDeprecated()) continue;
 						icon = functionIcon;
 						final List<String> parNames = new ArrayList<String>();
@@ -1927,7 +1928,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							parNames.add(pd.getName());
 							parTypes.add(pd.getType().getName());
 						}
-						feedback = new MethodFeedback((String)element, parTypes.toArray(new String[0]), pluginsPrefix, null, new IScriptObject()
+						feedback = new MethodFeedback(id, parTypes.toArray(new String[0]), pluginsPrefix, null, new IScriptObject()
 						{
 
 							@Override
@@ -1962,7 +1963,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 						}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
 					}
-					UserNode node = new UserNode((String)element, actionType, feedback, real, icon);
+					else feedback = new WebObjectFieldFeedback(spec.getProperty(id), pluginsPrefix + id);
+
+					UserNode node = new UserNode(id, actionType, feedback, real, icon);
 					node.setClientSupport(ClientSupport.ng);
 					serviceIds.add(node);
 				}
@@ -2276,7 +2279,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				// and skip the dataprovider properties (those are not accesable through scripting)
 				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 				{
-					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, prefixForWebComponentMembers + name, name, webcomponent, propertiesIcon));
+					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, new WebObjectFieldFeedback(pd, prefixForWebComponentMembers + name), webcomponent,
+						propertiesIcon));
 				}
 			}
 			Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
@@ -2440,8 +2444,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					Form form = (Form)persist;
 					if (ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution() != null)
 					{
-						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDirectlyInheritingForms(
-							form);
+						List<Form> formHierarchy = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution()
+							.getDirectlyInheritingForms(
+								form);
 						for (Form f : formHierarchy)
 						{
 							if (f != form)
@@ -3060,7 +3065,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else if (bp instanceof Field)
 				{
-					tmp = "<b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name + "</b>";
+					tmp = "<b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name +
+						"</b>";
 				}
 				else if (bp == null)
 				{
@@ -3072,6 +3078,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					}
 				}
 			}
+
 			if ("".equals(toolTip))
 			{
 				toolTip = tmp;
@@ -3081,6 +3088,41 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				toolTip = tmp + "<br><pre>" + toolTip + "</pre>";
 			}
 			return toolTip;
+		}
+
+	}
+
+	/**
+	 * Field feedback for properties of NG web components and services. The information is taken from their .spec files.
+	 *
+	 * @author acostescu
+	 */
+	private static class WebObjectFieldFeedback implements IDeveloperFeedback
+	{
+		private final String basicSampleCode;
+		private final PropertyDescription pd;
+
+		public WebObjectFieldFeedback(PropertyDescription pd, String basicSampleCode)
+		{
+			// TODO make the whole .spec documentation work with tag resolvers for solex context/parse or provide sample code similar to what legacy beans have
+			// I think currently for custom component/service apis we support @example... use that here as well?
+			this.basicSampleCode = basicSampleCode;
+			this.pd = pd;
+		}
+
+		public String getCode()
+		{
+			return basicSampleCode;
+		}
+
+		public String getSample()
+		{
+			return basicSampleCode;
+		}
+
+		public String getToolTipText()
+		{
+			return pd.getDocumentation();
 		}
 	}
 

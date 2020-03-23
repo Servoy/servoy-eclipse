@@ -28,7 +28,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.servoy.eclipse.ui.Activator;
 
@@ -39,7 +38,7 @@ import com.servoy.eclipse.ui.Activator;
  *
  */
 
-public class CheckboxPropertyDescriptor extends PropertyDescriptor
+public class CheckboxPropertyDescriptor extends PropertyDescriptorWithTooltip
 {
 	static final CheckboxLabelProvider LABEL_PROVIDER = new CheckboxLabelProvider();
 

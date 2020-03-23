@@ -18,8 +18,6 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.awt.Dimension;
 import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,7 +59,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
-import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.action.Action;
@@ -83,8 +80,6 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewer;
-import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -112,7 +107,6 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.search.internal.ui.SearchMessages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
@@ -136,9 +130,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -265,7 +257,6 @@ import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
-import com.servoy.j2db.util.Utils;
 
 /**
  * This view is meant to be similar to the old designer's tree (in editor) in looks and in functionality. It will show a logical presentation of the eclipse
@@ -1531,83 +1522,6 @@ public class SolutionExplorerView extends ViewPart
 					return;
 				}
 			}
-		}
-	}
-
-	private static class HTMLToolTipSupport extends ColumnViewerToolTipSupport
-	{
-
-		protected HTMLToolTipSupport(ColumnViewer viewer, int style, boolean manualActivation)
-		{
-			super(viewer, style, manualActivation);
-			setHideOnMouseDown(false);
-		}
-
-
-		@Override
-		protected Composite createToolTipContentArea(Event event, Composite parent)
-		{
-			Composite comp = new Composite(parent, SWT.NONE);
-			GridLayout l = new GridLayout(1, false);
-			l.horizontalSpacing = 0;
-			l.marginWidth = 0;
-			l.marginHeight = 0;
-			l.verticalSpacing = 0;
-
-			comp.setLayout(l);
-			final Browser browser = new Browser(comp, SWT.BORDER);
-			browser.addListener(SWT.MouseMove, new Listener()
-			{
-
-				@Override
-				public void handleEvent(Event event)
-				{
-					Rectangle rect = browser.getBounds();
-					rect.x += 3;
-					rect.y += 3;
-					rect.width -= 6;
-					rect.height -= 6;
-					if (!rect.contains(event.x, event.y))
-					{
-						// if we are on the right side exit
-						rect = browser.getBounds();
-						rect.x += rect.width / 2;
-						if (rect.contains(event.x, event.y))
-						{
-							hide();
-						}
-					}
-				}
-
-			});
-			String text = getText(event);
-			JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(text));
-			try
-			{
-				text = reader.getString();
-			}
-			catch (IOException e)
-			{
-				ServoyLog.logInfo("Could not convert tooltip text to HTML: " + text);
-			}
-			Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
-			float systemDPI = Utils.isLinuxOS() ? 96f : 72f;
-			int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / systemDPI);
-			browser.setText("<html><body style='background-color:#ffffcc;font-type:" + f.getFontData()[0].getName() + ";font-size:" + pxHeight +
-				"px;font-weight:500'>" + text + "</body></html>");
-			GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n")) ? new GridData(600, 150) : new GridData(450, 50);
-			data.horizontalAlignment = GridData.FILL;
-			data.verticalAlignment = GridData.FILL;
-			data.grabExcessHorizontalSpace = true;
-			data.grabExcessVerticalSpace = true;
-			browser.setLayoutData(data);
-			setShift(new Point(1, 1));
-			return comp;
-		}
-
-		public static final void enableFor(ColumnViewer viewer, int style)
-		{
-			new HTMLToolTipSupport(viewer, style, false);
 		}
 	}
 

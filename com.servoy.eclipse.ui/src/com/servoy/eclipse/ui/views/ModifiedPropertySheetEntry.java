@@ -56,9 +56,9 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 		return new ModifiedPropertySheetEntry();
 	}
 
-/*
- * (non-Javadoc) Method declared on IPropertySheetEntry. Also uses label provider for null value.
- */
+	/*
+	 * (non-Javadoc) Method declared on IPropertySheetEntry. Also uses label provider for null value.
+	 */
 	@Override
 	public String getValueAsString()
 	{
@@ -137,15 +137,15 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 		{
 			// get the current ids
 			Object[] ids = intersection.keySet().toArray();
-			for (int j = 0; j < ids.length; j++)
+			for (Object id : ids)
 			{
-				Object object = propertyDescriptorMaps[i].get(ids[j]);
+				Object object = propertyDescriptorMaps[i].get(id);
 				if (object == null ||
 					// see if the descriptors (which have the same id) are
 					// compatible
-					!((IPropertyDescriptor)intersection.get(ids[j])).isCompatibleWith((IPropertyDescriptor)object))
+					!((IPropertyDescriptor)intersection.get(id)).isCompatibleWith((IPropertyDescriptor)object))
 				{
-					intersection.remove(ids[j]);
+					intersection.remove(id);
 				}
 			}
 		}
@@ -319,5 +319,12 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	public CellEditor getCreatedEditor()
 	{
 		return editor;
+	}
+
+	/* just to make it available to classes in this package as well */
+	@Override
+	protected IPropertyDescriptor getDescriptor()
+	{
+		return super.getDescriptor();
 	}
 }

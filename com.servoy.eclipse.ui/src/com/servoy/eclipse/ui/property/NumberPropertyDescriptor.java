@@ -22,13 +22,12 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellEditorValidator;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 /**
  * A Generic property descriptor for numbers. It will use the NumberCellEditor and Label provider. These editors and providers display and format the numbers in
  * locale format.
  */
-public class NumberPropertyDescriptor extends PropertyDescriptor
+public class NumberPropertyDescriptor extends PropertyDescriptorWithTooltip
 {
 	public NumberPropertyDescriptor(Object propertyID, String propertyDisplayname)
 	{
