@@ -32,11 +32,6 @@ import com.servoy.eclipse.ui.wizards.NewSolutionWizardDefaultPackages;
 public class Startup implements IStartup
 {
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.IStartup#earlyStartup()
-	 */
 	@Override
 	public void earlyStartup()
 	{

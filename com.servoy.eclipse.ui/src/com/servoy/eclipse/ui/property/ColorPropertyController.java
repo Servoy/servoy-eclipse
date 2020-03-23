@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.ColorCellEditor;
@@ -37,7 +36,7 @@ import com.servoy.j2db.util.Utils;
  *
  */
 
-public class ColorPropertyController extends PropertyDescriptor implements IPropertyController<java.awt.Color, String>
+public class ColorPropertyController extends PropertyDescriptorWithTooltip implements IPropertyController<java.awt.Color, String>
 {
 	public static final PropertyColorConverter PROPERTY_COLOR_CONVERTER = new PropertyColorConverter();
 	public static final ColorLabelProvider COLOR_LABEL_PROVIDER = new ColorLabelProvider();

@@ -200,4 +200,10 @@ public class DelegatePropertyController<P, E> extends PropertyController<P, E> i
 		return null;
 	}
 
+	@Override
+	public String getTooltipText()
+	{
+		return propertyDescriptor instanceof IProvidesTooltip ? ((IProvidesTooltip)propertyDescriptor).getTooltipText() : null;
+	}
+
 }

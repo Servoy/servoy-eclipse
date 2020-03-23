@@ -81,7 +81,7 @@ public class XMLScriptObjectAdapterLoader
 		}
 	}
 
-	public static void loadDocumentationFromXML(ClassLoader loader, IDocumentationManager docmgr)
+	private static void loadDocumentationFromXML(ClassLoader loader, IDocumentationManager docmgr)
 	{
 		Date start = new Date();
 

@@ -49,6 +49,7 @@ import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
+import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
@@ -662,6 +663,17 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				setInput(getEditorInput());
 				removePage(0);
 				createPages();
+				if (getEditorSite() != null && getEditorSite().getPage().getActivePart() == this)
+				{
+					//if an editor was previously open, then after restart we have to make sure that our modified properties sheet page is used
+					//we do partClosed and partActivated to make it call getAdapter again for IPropertySheetPage.class and return our own
+					PropertySheet propertySheet = (PropertySheet)getEditorSite().getPage().findView("org.eclipse.ui.views.PropertySheet");
+					if (propertySheet != null)
+					{
+						propertySheet.partClosed(this);
+						propertySheet.partActivated(this);
+					}
+				}
 				setActivePage(0);
 			});
 		}

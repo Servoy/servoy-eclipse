@@ -445,7 +445,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				return result;
 			}
 		}
-		return remotePackagesCache.get(webPackageIndex).getRight();
+		Pair<Long, List<JSONObject>> remotePackages = remotePackagesCache.get(webPackageIndex);
+		return remotePackages != null ? remotePackages.getRight() : Collections.emptyList(); // could be null if either developer or github/other site are offline
 	}
 
 	private static long getChecksum(List<JSONObject> list)
