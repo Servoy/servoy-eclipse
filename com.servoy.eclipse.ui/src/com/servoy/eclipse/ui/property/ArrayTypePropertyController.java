@@ -425,7 +425,8 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	 *
 	 * @author acostescu
 	 */
-	protected static class ArrayItemPropertyDescriptorWrapper implements IPropertyController, IPropertySetter<Object, ISetterAwarePropertySource>
+	protected static class ArrayItemPropertyDescriptorWrapper
+		implements IPropertyController<Object, Object>, IPropertySetter<Object, ISetterAwarePropertySource>, IProvidesTooltip
 	{
 
 		protected final static Object DELETE_CURRENT_COMMAND_VALUE = new Object();
@@ -588,37 +589,37 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		@Override
 		public void setProperty(ISetterAwarePropertySource propertySource, Object value)
 		{
-			IPropertyDescriptor basePD = getRootBasePD();
-			if (basePD instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePD).setProperty(propertySource, value);
+			IPropertyDescriptor basePDLocal = getRootBasePD();
+			if (basePDLocal instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePDLocal).setProperty(propertySource, value);
 			else propertySource.defaultSetProperty(getId(), value);
 		}
 
 		@Override
 		public Object getProperty(ISetterAwarePropertySource propertySource)
 		{
-			IPropertyDescriptor basePD = getRootBasePD();
-			if (basePD instanceof IPropertySetter< ? , ? >) return ((IPropertySetter)basePD).getProperty(propertySource);
+			IPropertyDescriptor basePDLocal = getRootBasePD();
+			if (basePDLocal instanceof IPropertySetter< ? , ? >) return ((IPropertySetter)basePDLocal).getProperty(propertySource);
 			else return propertySource.defaultGetProperty(getId());
 		}
 
 		@Override
 		public boolean isPropertySet(ISetterAwarePropertySource propertySource)
 		{
-			IPropertyDescriptor basePD = getRootBasePD();
-			if (basePD instanceof IPropertySetter< ? , ? >) return ((IPropertySetter)basePD).isPropertySet(propertySource);
+			IPropertyDescriptor basePDLocal = getRootBasePD();
+			if (basePDLocal instanceof IPropertySetter< ? , ? >) return ((IPropertySetter)basePDLocal).isPropertySet(propertySource);
 			else return propertySource.isPropertySet(getId());
 		}
 
 		@Override
 		public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 		{
-			IPropertyDescriptor basePD = getRootBasePD();
-			if (basePD instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePD).resetPropertyValue(propertySource);
+			IPropertyDescriptor basePDLocal = getRootBasePD();
+			if (basePDLocal instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePDLocal).resetPropertyValue(propertySource);
 			else propertySource.defaultResetProperty(getId());
 		}
 
 		@Override
-		public IPropertyConverter getConverter()
+		public IPropertyConverter<Object, Object> getConverter()
 		{
 			return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).getConverter() : null;
 		}
@@ -642,6 +643,13 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 			{
 				((IPropertyController)basePD).setReadonly(readonly);
 			}
+		}
+
+		@Override
+		public String getTooltipText()
+		{
+			if (basePD instanceof IProvidesTooltip) return ((IProvidesTooltip)basePD).getTooltipText();
+			else return null;
 		}
 
 	}

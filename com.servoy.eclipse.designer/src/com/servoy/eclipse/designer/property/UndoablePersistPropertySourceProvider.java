@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.IPersist;
 /**
  * IPropertySourceProvider implementation that provides UndoablePropertySource wrapper around PersistPropertySource.
  * Properties are set via the command stack, this enables undo/redo.
- * 
+ *
  * @author rgansevles
  */
 
@@ -49,7 +49,7 @@ public class UndoablePersistPropertySourceProvider implements IPropertySourcePro
 		}
 		else
 		{
-			propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(object, IPropertySource.class);
+			propertySource = Platform.getAdapterManager().getAdapter(object, IPropertySource.class);
 		}
 		return propertySource == null ? null : new UndoablePropertySource(propertySource, editorPart);
 	}

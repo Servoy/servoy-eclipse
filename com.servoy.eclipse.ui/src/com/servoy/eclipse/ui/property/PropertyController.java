@@ -29,12 +29,12 @@ import com.servoy.eclipse.ui.Messages;
 
 /**
  * simple IPropertyController implementation.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class PropertyController<P, E> extends PropertyDescriptor implements IPropertyController<P, E>, ICellEditorFactory, IAdaptable,
-	Comparable<PropertyController< ? , ? >>
+	Comparable<PropertyController< ? , ? >>, IKeepsTooltip
 {
 	// comparator based on sequence, see applySequencePropertyComparator
 	public static Comparator<PropertyController< ? , ? >> PROPERTY_SEQ_COMPARATOR = new Comparator<PropertyController< ? , ? >>()
@@ -50,6 +50,8 @@ public class PropertyController<P, E> extends PropertyDescriptor implements IPro
 	private boolean readOnly = false;
 	private boolean supportsReadonly = false;
 	private Comparator<PropertyController< ? , ? >> comparator;
+	private String tooltipText;
+	private IProvidesTooltip tooltipProvider;
 
 	private int sequence;
 
@@ -67,6 +69,24 @@ public class PropertyController<P, E> extends PropertyDescriptor implements IPro
 		setLabelProvider(labelProvider);
 		this.propertyConverter = propertyConverter;
 		this.cellEditorFactory = cellEditorFactory;
+	}
+
+	public void setTooltipText(String tooltipText)
+	{
+		this.tooltipText = tooltipText;
+	}
+
+	@Override
+	public void setTooltipProvider(IProvidesTooltip tooltipProvider)
+	{
+		this.tooltipProvider = tooltipProvider;
+	}
+
+	public String getTooltipText()
+	{
+		String tooltip = tooltipText;
+		if (tooltipProvider != null) tooltip = tooltipProvider.getTooltipText();
+		return tooltip;
 	}
 
 	public boolean supportsReadonly()
@@ -173,4 +193,5 @@ public class PropertyController<P, E> extends PropertyDescriptor implements IPro
 	{
 		sequence = i;
 	}
+
 }

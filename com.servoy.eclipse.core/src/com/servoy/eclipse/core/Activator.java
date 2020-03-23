@@ -942,6 +942,7 @@ public class Activator extends Plugin
 		}.schedule();
 
 		Runnable loadDocs = () -> {
+			XMLDesignDocsLoader.loadDocumentationFromXML();
 			XMLScriptObjectAdapterLoader.loadCoreDocumentationFromXML();
 			MethodTemplatesLoader.loadMethodTemplatesFromXML();
 
