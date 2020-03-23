@@ -340,7 +340,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 										{
 											JSONObject returns = config.getJSONObject("returns");
 											returnType = ArgumentType.valueOf(returns.optString("type", ""));
-											returnTypeDescription = returns.optString("description", "");
+											returnTypeDescription = returns.optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS,
+												returns.optString("description", ""));
 											if (returns.has("default"))
 											{
 												hasDefaultValue = true;
@@ -389,11 +390,15 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 												argumentType = "Array<" + argumentType + ">";
 											}
 											arguments.add(new MethodArgument(parameter.optString("name"), ArgumentType.valueOf(argumentType),
-												parameter.optString("description", ""), parameter.optBoolean("optional", false)));
+												parameter.optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS,
+													parameter.optString("description", "")),
+												parameter.optBoolean("optional", false)));
 										}
 									}
 									template = (MethodTemplate)MethodTemplatesFactory.getInstance().createMethodTemplate(methodKey,
-										config.optString("description", ""), returnType, returnTypeDescription,
+										config.optString(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS,
+											config.optString("description", "")),
+										returnType, returnTypeDescription,
 										arguments.toArray(new MethodArgument[arguments.size()]), defaultMethodCode, true);
 								}
 							}
