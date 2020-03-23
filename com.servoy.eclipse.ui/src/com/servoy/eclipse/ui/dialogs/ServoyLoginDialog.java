@@ -26,7 +26,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -67,7 +67,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	public static final String SERVOY_LOGIN_USERNAME = "USERNAME";
 	public static final String SERVOY_LOGIN_PASSWORD = "PASSWORD";
 	public static final String SERVOY_LOGIN_TOKEN = "TOKEN";
-	public static final String CROWD_URL = "https://analytics-dev.analytics.servoy-cloud.eu/servoy-service/rest_ws/svyAnalyticsServer/v1/auth";
+	public static final String CROWD_URL = "https://analytics-prod.analytics.servoy-cloud.eu/servoy-service/rest_ws/svyAnalyticsServer/v1/auth";
 
 	private String dlgUsername = "";
 	private String dlgPassword = "";
@@ -152,19 +152,19 @@ public class ServoyLoginDialog extends TitleAreaDialog
 		String loginToken = null;
 
 		HttpClient httpclient = HttpClients.createDefault();
-		HttpPost httppost = new HttpPost(CROWD_URL);
+		HttpGet httpget = new HttpGet(CROWD_URL);
 
 		String auth = username + ":" + password;
 		byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(Charset.forName("ISO-8859-1")));
 		String authHeader = "Basic " + new String(encodedAuth);
-		httppost.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
-		httppost.addHeader(HttpHeaders.ACCEPT, "application/json");
+		httpget.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+		httpget.addHeader(HttpHeaders.ACCEPT, "application/json");
 
 		// execute the request
 		HttpResponse response;
 		try
 		{
-			response = httpclient.execute(httppost);
+			response = httpclient.execute(httpget);
 			HttpEntity responseEntity = response.getEntity();
 			String responseString = EntityUtils.toString(responseEntity);
 			if (response.getStatusLine().getStatusCode() == 200)
