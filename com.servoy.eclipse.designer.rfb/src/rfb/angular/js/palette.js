@@ -432,6 +432,9 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
         				}
         				angularElement.css(css);
     				}
+    				else {
+    					return null;
+    				}
     				return angularElement;
 				}
 			
