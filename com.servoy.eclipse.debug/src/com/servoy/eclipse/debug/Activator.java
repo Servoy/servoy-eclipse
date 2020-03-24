@@ -29,10 +29,8 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IStartup;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -77,54 +75,23 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			// GTK LaF causes crashes or hangs on linux in developer
 			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel");
 		}
-		IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		if (activePage != null)
-		{
-			activePage.addPartListener(new IPartListener()
+		// this is an hack to force a reconcile on a javascript text editor.
+		// so that after loading of the full solution the editor doesn't show warnings for references that where not there when the active solution wasn't loaded yet.
+		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> {
+			try
 			{
-				@Override
-				public void partOpened(IWorkbenchPart part)
+				IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+				if (editor instanceof ITextEditor)
 				{
+					IDocument document = ((ITextEditor)editor).getDocumentProvider().getDocument(((ITextEditor)editor).getEditorInput());
+					if (document != null) document.replace(0, 0, "");
+					((ITextEditor)editor).doRevertToSaved();
 				}
-
-				@Override
-				public void partDeactivated(IWorkbenchPart part)
-				{
-				}
-
-				@Override
-				public void partClosed(IWorkbenchPart part)
-				{
-				}
-
-				@Override
-				public void partBroughtToTop(IWorkbenchPart part)
-				{
-				}
-
-				@Override
-				public void partActivated(IWorkbenchPart part)
-				{
-					if (part instanceof ITextEditor)
-					{
-						// this is an hack to force a reconcile on a javascript text editor.
-						// so that after loading of the full solution the editor doesn't show warnings for references that where not there when the active solution wasn't loaded yet.
-						ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> {
-							try
-							{
-								IDocument document = ((ITextEditor)part).getDocumentProvider().getDocument(((ITextEditor)part).getEditorInput());
-								if (document != null) document.replace(0, 0, "");
-								((ITextEditor)part).doRevertToSaved();
-							}
-							catch (Exception e)
-							{
-							}
-						});
-					}
-					activePage.removePartListener(this);
-				}
-			});
-		}
+			}
+			catch (Exception e)
+			{
+			}
+		});
 	}
 
 
