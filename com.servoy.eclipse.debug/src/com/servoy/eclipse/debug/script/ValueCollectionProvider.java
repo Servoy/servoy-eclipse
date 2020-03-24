@@ -19,6 +19,8 @@ package com.servoy.eclipse.debug.script;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -77,7 +79,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
 	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> globalScriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
-	private static final WeakHashMap<Type, IValueCollection> typeToValueCollectionCache = new WeakHashMap<Type, IValueCollection>();
+	private static final WeakHashMap<Type, TypeCacheItem> typeToValueCollectionCache = new WeakHashMap<>();
 	private static final IValueCollection EMPTY = ValueCollectionFactory.createValueCollection();
 
 	public static void clear()
@@ -101,14 +103,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				if (irType instanceof IRSimpleType)
 				{
 					memberType = ((IRSimpleType)irType).getTarget();
-					cached = typeToValueCollectionCache.get(memberType);
+					cached = getAndTestFromCache(memberType);
 				}
 			}
 		}
 		else if (member instanceof Type)
 		{
 			memberType = (Type)member;
-			cached = typeToValueCollectionCache.get(member);
+			cached = getAndTestFromCache(memberType);
 		}
 		if (cached != null)
 		{
@@ -129,18 +131,20 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			{
 				IValueCollection collection = ValueCollectionFactory.createValueCollection();
 				ValueCollectionFactory.copyInto(collection, valueCollection);
-				collection = getSuperFormContext(context, form, collection);
+				Pair<IValueCollection, List<IFile>> superFormCollection = getSuperFormContext(context, form, collection);
+				collection = superFormCollection.getLeft();
 				if (member.getAttribute(SUPER_SCOPE) != null)
 				{
 					((IValueProvider)collection).getValue().setAttribute(SUPER_SCOPE, Boolean.TRUE);
 				}
-				return addToCache(memberType, collection);
+				superFormCollection.getRight().add(file);
+				return addToCache(memberType, collection, superFormCollection.getRight());
 			}
 
 			if (!creatingCollection.get().contains(file))
 			{
 				//avoid to add empty types for recursive calls
-				addToCache(memberType, EMPTY);
+				addToCache(memberType, EMPTY, Collections.emptyList());
 			}
 			return null;
 		}
@@ -184,15 +188,17 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 					if (dataSource != null)
 					{
+						List<IFile> files = new ArrayList<IFile>();
 						Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(dataSource);
 						IValueCollection valueCollection = ValueCollectionFactory.createValueCollection();
 						while (tableNodes.hasNext())
 						{
 							TableNode tableNode = tableNodes.next();
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(tableNode, false)));
+							files.add(file);
 							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
 						}
-						return addToCache(memberType, valueCollection);
+						return addToCache(memberType, valueCollection, files);
 					}
 				}
 			}
@@ -236,7 +242,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 							if (globalsValueCollection == null && !fileName.equals(SolutionSerializer.GLOBALS_FILE))
 							{
-								addToCache(memberType, EMPTY);
+								addToCache(memberType, EMPTY, Collections.emptyList());
 								return null;
 							}
 
@@ -252,13 +258,24 @@ public class ValueCollectionProvider implements IMemberEvaluator
 								ValueCollectionProvider.getGlobalModulesValueCollection(editingFlattenedSolution, fileName, collection);
 							}
 							// scopes other than globals are not merged
-							return addToCache(memberType, collection);
+							return addToCache(memberType, collection, Arrays.asList(file));
 						}
 					}
 				}
 			}
 		}
-		addToCache(memberType, EMPTY);
+		addToCache(memberType, EMPTY, Collections.emptyList());
+		return null;
+	}
+
+	/**
+	 * @param memberType
+	 * @return
+	 */
+	private IValueCollection getAndTestFromCache(Type memberType)
+	{
+		TypeCacheItem item = typeToValueCollectionCache.get(memberType);
+		if (item != null) return item.get();
 		return null;
 	}
 
@@ -266,11 +283,11 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	 * @param member
 	 * @param memberType
 	 */
-	private IValueCollection addToCache(Element member, IValueCollection collection)
+	private IValueCollection addToCache(Element member, IValueCollection collection, List<IFile> files)
 	{
 		if (resolve.get() == null && member instanceof Type)
 		{
-			typeToValueCollectionCache.put((Type)member, collection);
+			typeToValueCollectionCache.put((Type)member, new TypeCacheItem(files, collection));
 			return ValueCollectionFactory.shallowCloneValueCollection(collection);
 		}
 		return collection;
@@ -282,13 +299,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	 * @param formCollection
 	 */
 	@SuppressWarnings("restriction")
-	private IValueCollection getSuperFormContext(ITypeInfoContext context, Form form, IValueCollection formCollection)
+	private Pair<IValueCollection, List<IFile>> getSuperFormContext(ITypeInfoContext context, Form form, IValueCollection formCollection)
 	{
 		if (form.getExtendsID() > 0)
 		{
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs != null)
 			{
+				List<IFile> files = new ArrayList<IFile>();
 				IValueCollection superForms = null;
 				Form superForm = fs.getForm(form.getExtendsID());
 
@@ -303,6 +321,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					{
 						String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 						IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+						files.add(file);
 						IValueCollection vc = null;
 						IValueCollection collection = getValueCollection(file);
 						if (collection != null)
@@ -350,10 +369,10 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					ValueCollectionFactory.copyInto(superForms, ValueCollectionFactory.makeImmutable(superCollections.get(i)));
 				}
 				if (formCollection != null) ValueCollectionFactory.copyInto(superForms, formCollection);
-				return superForms;
+				return new Pair<>(superForms, files);
 			}
 		}
-		return formCollection;
+		return new Pair<>(formCollection, new ArrayList<>());
 	}
 
 	/*
@@ -401,7 +420,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							return null;
 						}
 						// superform
-						return getSuperFormContext(context, form, null);
+						return getSuperFormContext(context, form, null).getLeft();
 					}
 
 					String[] serverTablename = SolutionSerializer.getDataSourceForCalculationJSFile(resource);
