@@ -100,7 +100,6 @@
                     "type": "string"
                 }
            },
-           "required": [],
            "additionalProperties": false
        }
     },
@@ -390,11 +389,10 @@
 												"type": {
 													"type": "string"
 												},
-												"default": {
-												    "type": "boolean"
-												}
+												"default": {}
 											},
-											"required": ["type"]
+											"required": ["type"],
+											"additionalProperties": false
 										}
 									]
 								},
