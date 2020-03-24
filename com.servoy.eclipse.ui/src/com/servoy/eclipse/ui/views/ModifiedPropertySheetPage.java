@@ -126,7 +126,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			final Tree tree = (Tree)control;
 
 			// register our custom tooltip; this constructor also registers the listeners it needs
-			new ToolTip(tree, ToolTip.NO_RECREATE, false)
+			ToolTip tooltip = new ToolTip(tree, ToolTip.NO_RECREATE, false)
 			{
 
 				private TreeItem itemOfLastTooltipText;
@@ -254,7 +254,9 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					return text;
 				}
 
-			}.setPopupDelay(500); // additional delay so that the properties view tooltip doesn't become annoying - can be increased if needed
+			};
+			tooltip.setPopupDelay(500); // additional delay so that the properties view tooltip doesn't become annoying - can be increased if needed
+			tooltip.setHideOnMouseDown(false);
 
 			tree.addControlListener(new ControlAdapter()
 			{

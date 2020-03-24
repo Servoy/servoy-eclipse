@@ -3,6 +3,107 @@
 	"$schema": "http://json-schema.org/draft-04/schema#",
 	"description": "Spec file schema",
 	"type": "object",
+	
+    "definitions": {
+       "propertyConfig": {
+           "type": "object",
+           "properties": {
+                "droppable": {
+                    "type": "boolean"
+                },
+                "for": {
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "blockingOn": {
+                    "type": "boolean"
+                },
+                "provideColumnFormats": {
+                    "type": "boolean"
+                },
+                "includeColumnNames": {
+                    "type": "boolean"
+                },
+                "columnTypes": {
+                    "type": "object"
+                },
+                "tags": {
+                    "type": "object"
+                },
+                "values": {
+                    "type": "array"
+                },
+                "default": {
+                },
+                "initialValue": {
+                },
+                "ondatachange": {
+                    "description": "object that configures that this dataprovider type has ondatachange support",
+                    "type": "object",
+                    "properties": {
+                          "onchange": {"type":"string"},
+                          "callback": {"type":"string"},
+                          "parsehtml": {"type":"boolean"}
+                        },
+                      "required": ["onchange"],
+                    "additionalProperties": false
+                },
+                "forFoundset": {
+                    "type": "string"
+                },
+                "displayTagsPropertyName": {
+                    "type": "string"
+                },
+                "resolveValuelist": {
+                    "type": "boolean"
+                },
+                "oppositeOf": {
+                    "type": "string"
+                },
+                "dynamicDataproviders": {
+                    "type": "boolean"
+                },
+                "initialPreferredViewPortSize": {
+                    "type": "number"
+                },
+                "sendSelectionViewportInitially": {
+                    "type": "boolean"
+                },
+                "pushToServer": {
+                      "enum" : ["reject", "allow", "shallow", "deep"]
+                },
+                "stringformat": {
+                    "type": "boolean"
+                },
+                "dataproviders": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "max": {
+                    "type": "number"
+                },
+                "lazyLoading": {
+                    "type": "boolean"
+                },
+                "deprecated": {
+                    "type": "string"
+                }
+           },
+           "additionalProperties": false
+       }
+    },
+
 	"properties": 
 	{
 		"libraries": 
@@ -225,31 +326,27 @@
 								"stringformat": {
 									"type": "boolean"
 								},
-								"elementConfig": {
+                                "dataproviders": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "max": {
+                                    "type": "number"
+                                },
+                                "lazyLoading": {
+                                    "type": "boolean"
+                                },
+                                "deprecated": {
+                                    "type": "string"
+                                },
+                                "elementConfig": {
 									"type": "object",
-									"properties": {
-										"forFoundset": {
-											"type": "string"
-										}
-									}
-								},
-								"dataproviders": {
-									"type": "array",
-									"items": {
-										"type": "string"
-									}
-								},
-								"max": {
-									"type": "number"
-								},
-								"lazyLoading": {
-									"type": "boolean"
-								},
-								"deprecated": {
-									"type": "string"
+                                    "allOf": [ { "$ref": "#/definitions/propertyConfig" } ]
 								}
 							},
-				        	  "required":["type"],
+				        	"required":["type"],
 							"additionalProperties": false
 						}
 					]
@@ -266,14 +363,14 @@
 					"oneOf": [
 						{
 							"type": "string",
-				        	  "enum" : ["function"]
+				        	"enum" : ["function"]
 						},
 						{
 							"type": "object",
 							"description": "The description of this component handler",
 							"properties": {
 								"returns": {
-									"description": "the datatype this handler call returns",
+                                    "description": "the datatype this handler call returns",
 									"oneOf": [
 										{
 											"type": "string"
@@ -281,14 +378,21 @@
 										{
 											"type": "object",
 											"properties": {
-												"description": {
-													"description": "the description of the result",
-													"type": "string"
-												},
+                                                "description": {
+                                                    "description": "the description of the result (please use 'doc' instead)",
+                                                    "type": "string"
+                                                },
+                                                "doc": {
+                                                    "description": "the description of the result",
+                                                    "type": "string"
+                                                },
 												"type": {
 													"type": "string"
-												}
-											}
+												},
+												"default": {}
+											},
+											"required": ["type"],
+											"additionalProperties": false
 										}
 									]
 								},
@@ -302,10 +406,14 @@
 												"description": "the name of the parameter",
 												"type": "string"
 											},
-											"description": {
-												"description": "the description of the parameter",
-												"type": "string"
-											},
+                                            "description": {
+                                                "description": "the description of the parameter (please use 'doc' instead)",
+                                                "type": "string"
+                                            },
+                                            "doc": {
+                                                "description": "the description of the parameter",
+                                                "type": "string"
+                                            },
 											"type": {
 												"description": "the type of the parameter",
 												"oneOf": [
@@ -522,51 +630,106 @@
 								{
 									"type": "object",
 									"properties": {
-										"type": {
-											"type": "string"
-										},
-										"values": {
-											"type": "array"
-										},
-										"default": {
-										},
-										"initialValue": {
-										},
-										"pushToServer": {
-				        			  		"enum" : ["reject", "allow", "shallow", "deep"]
-										},
-										"forFoundset": {
-											"type": "string"
-										},
-										"resolveValuelist": {
-											"type": "boolean"
-										},
-										"for": {
-											"oneOf": [
-												{
-													"type": "string"
-												},
-												{
-													"type": "array"
-												},
-												{
-													"type": "object"
-												}
-											]
-										},
-										"tags": {
-											"type": "object"
-										},
-										"elementConfig": {
-											"type": "object",
-											"properties": {
-												"forFoundset": {
-													"type": "string"
-												}
-											}
-										}
+                                        "type": {
+                                            "type": "string"
+                                        },
+                                        "droppable": {
+                                            "type": "boolean"
+                                        },
+                                        "for": {
+                                            "oneOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "array"
+                                                },
+                                                {
+                                                    "type": "object"
+                                                }
+                                            ]
+                                        },
+                                        "blockingOn": {
+                                            "type": "boolean"
+                                        },
+                                        "provideColumnFormats": {
+                                            "type": "boolean"
+                                        },
+                                        "includeColumnNames": {
+                                            "type": "boolean"
+                                        },
+                                        "columnTypes": {
+                                            "type": "object"
+                                        },
+                                        "pushToServer": {
+                                              "enum" : ["reject", "allow", "shallow", "deep"]
+                                        },
+                                        "tags": {
+                                            "type": "object"
+                                        },
+                                        "values": {
+                                            "type": "array"
+                                        },
+                                        "default": {
+                                        },
+                                        "initialValue": {
+                                        },
+                                        "ondatachange": {
+                                            "description": "object that configures that this dataprovider type has ondatachange support",
+                                            "type": "object",
+                                            "properties": {
+                                                  "onchange": {"type":"string"},
+                                                  "callback": {"type":"string"},
+                                                  "parsehtml": {"type":"boolean"}
+                                                },
+                                              "required": ["onchange"],
+                                            "additionalProperties": false
+                                        },
+                                        "forFoundset": {
+                                            "type": "string"
+                                        },
+                                        "displayTagsPropertyName": {
+                                            "type": "string"
+                                        },
+                                        "resolveValuelist": {
+                                            "type": "boolean"
+                                        },
+                                        "oppositeOf": {
+                                            "type": "string"
+                                        },
+                                        "dynamicDataproviders": {
+                                            "type": "boolean"
+                                        },
+                                        "initialPreferredViewPortSize": {
+                                            "type": "number"
+                                        },
+                                        "sendSelectionViewportInitially": {
+                                            "type": "boolean"
+                                        },
+                                        "stringformat": {
+                                            "type": "boolean"
+                                        },
+                                        "dataproviders": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "max": {
+                                            "type": "number"
+                                        },
+                                        "lazyLoading": {
+                                            "type": "boolean"
+                                        },
+                                        "deprecated": {
+                                            "type": "string"
+                                        },
+                                        "elementConfig": {
+                                            "type": "object",
+                                            "allOf": [ { "$ref": "#/definitions/propertyConfig" } ]
+                                        }
 									},
-					        	  "required":["type"],
+					        	    "required":["type"],
 									"additionalProperties": false
 								}
 							]

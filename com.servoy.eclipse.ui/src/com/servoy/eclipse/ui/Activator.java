@@ -79,7 +79,6 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -276,7 +275,6 @@ public class Activator extends AbstractUIPlugin
 						Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
 						for (int i = shells.length; --i >= 0;)
 						{
-							Debug.warn(shells[i] + "  +++ " + shells[i].getParent() + " +++" + shells[i].isVisible());
 							if (shells[i].getParent() == null && shells[i].isVisible())
 							{
 								activeShell = shells[i];
@@ -285,17 +283,14 @@ public class Activator extends AbstractUIPlugin
 						}
 						if (activeShell == null)
 						{
-							Debug.warn("active shell is null");
 							Display.getDefault().asyncExec(this);
 							return;
 						}
-						Debug.warn("active shell found looping of all shells" + activeShell);
 					}
-					while (activeShell.getParent() instanceof Shell)
+					while (activeShell.getParent() instanceof Shell && activeShell.getParent().isVisible())
 					{
 						activeShell = (Shell)activeShell.getParent();
 					}
-					Debug.warn("active shell FOUND " + activeShell);
 					//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
 					String username = null;
 					try

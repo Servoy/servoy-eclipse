@@ -287,8 +287,19 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					    //it can happen that we have the node in the bean model but it is outside the form
 					    //in this case do not update the css as that will be done in the 'if (ghostObject) {...}'
 						if (!ghostObject && !updated.has(uuid)) { 
+								var element = angular.element(node);
         						css = { top: beanModel.location.y, left: beanModel.location.x }
-        						angular.element(node).css(css);
+        						var rightValue = element.css('right');
+        						if (rightValue && rightValue.indexOf('px') > 0)
+        						{
+        							css['right'] = (parseInt(rightValue.substring(0,rightValue.length-2)) - changeX) + 'px';
+        						}
+        						var bottomValue = element.css('bottom');
+        						if (bottomValue && bottomValue.indexOf('px') > 0)
+        						{
+        							css['bottom'] = (parseInt(bottomValue.substring(0,bottomValue.length-2)) - changeY) + 'px';
+        						}
+        						element.css(css);
         						updated.add(uuid)
 						}
 					}
