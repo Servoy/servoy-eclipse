@@ -303,7 +303,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			return errorMsg;
 		}
 		final File f = new File(value);
-		if (!f.mkdir()) errorMsg.append("Export path can't be created (permission issues?)");
+		if (!f.exists() && !f.mkdir()) errorMsg.append("Export path can't be created (permission issues?)");
 
 		File myFile = new File(settings.get("icon_path"));
 		if (myFile.exists() && myFile.isFile() && myFile.length() > LOGO_SIZE * 1024)
