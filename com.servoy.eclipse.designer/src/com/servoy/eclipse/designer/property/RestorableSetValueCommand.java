@@ -30,6 +30,7 @@ public class RestorableSetValueCommand extends BaseRestorableCommand implements 
 	private final IModelSavePropertySource target;
 	private final Object propertyId;
 	private final Object propertyValue;
+	private final boolean preExecute;
 
 	/**
 	 * @param label
@@ -37,12 +38,13 @@ public class RestorableSetValueCommand extends BaseRestorableCommand implements 
 	 * @param propertyId
 	 * @param propertyValue
 	 */
-	RestorableSetValueCommand(String label, IModelSavePropertySource target, Object propertyId, Object propertyValue)
+	RestorableSetValueCommand(String label, IModelSavePropertySource target, Object propertyId, Object propertyValue, boolean preExecute)
 	{
 		super(label);
 		this.target = target;
 		this.propertyId = propertyId;
 		this.propertyValue = propertyValue;
+		this.preExecute = preExecute;
 	}
 
 	@Override
@@ -56,7 +58,13 @@ public class RestorableSetValueCommand extends BaseRestorableCommand implements 
 	@Override
 	public void execute()
 	{
-		// do not save model , preExecute should do this
-		target.setPropertyValue(propertyId, propertyValue);
+		if (preExecute)
+		{
+			target.setPropertyValue(propertyId, propertyValue);
+		}
+		else
+		{
+			setPropertyValue(target, propertyId, propertyValue);
+		}
 	}
 }
