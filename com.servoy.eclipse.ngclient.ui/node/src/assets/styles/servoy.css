@@ -104,6 +104,11 @@ body {
 .svy-nomargin {
 	margin:0px;
 }
+.svy-reconnecting
+{
+	background:lightgray;
+	opacity:.75;
+}
 
 #mktipmsg {
   display: none;

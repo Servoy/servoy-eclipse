@@ -15,9 +15,10 @@ import { LoggerFactory } from './logger.service'
 import { SpecTypesService } from './spectypes.service'
 import { SabloDeferHelper} from './defer.service';
 import { SabloTabseq } from './util/sablotabseq.directive';
+import { SabloReconnectingFeedback } from "./util/reconnectingFeedback.directive";
 
 @NgModule( {
-    declarations: [TrustAsHtmlPipe, SabloTabseq
+    declarations: [TrustAsHtmlPipe, SabloTabseq, SabloReconnectingFeedback
     ],
     imports: [
         AngularWebStorageModule
@@ -31,7 +32,7 @@ import { SabloTabseq } from './util/sablotabseq.directive';
         LoggerFactory,
         SabloDeferHelper,
         ServiceChangeHandler],
-    exports: [TrustAsHtmlPipe, SabloTabseq]
+    exports: [TrustAsHtmlPipe, SabloTabseq, SabloReconnectingFeedback]
 } )
 
 export class SabloModule { }

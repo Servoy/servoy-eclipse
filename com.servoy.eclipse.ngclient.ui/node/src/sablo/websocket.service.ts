@@ -164,6 +164,10 @@ export class WebsocketService {
     public setLastServerMessageNumber( num: number ) {
         this.lastServerMessageNumber = num;
     }
+    
+    public isReconnecting() {
+        return this.wsSession.isReconnecting();
+    }
 }
 
 
