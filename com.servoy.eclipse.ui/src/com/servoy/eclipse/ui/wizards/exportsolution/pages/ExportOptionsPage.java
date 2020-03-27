@@ -17,7 +17,9 @@
 
 package com.servoy.eclipse.ui.wizards.exportsolution.pages;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -27,18 +29,26 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Debug;
 
 /**
  * @author gboros
@@ -90,6 +100,10 @@ public class ExportOptionsPage extends WizardPage implements Listener
 	{
 		setMessage(null);
 		setErrorMessage(null);
+		if (Strings.isEmpty(exportSolutionWizard.getActiveSolution().getVersion()))
+		{
+			setMessage("Please set a version number for the main solution to be able to complete the export.", IMessageProvider.WARNING);
+		}
 		if (resourcesProjectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && exportUsingDbiFileInfoOnlyButton != null &&
 			exportUsingDbiFileInfoOnlyButton.getSelection())
 		{
@@ -121,6 +135,46 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 
+		Composite comp = new Composite(composite, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 3;
+		comp.setLayout(layout);
+		Label mainSolution = new Label(comp, SWT.NONE);
+		mainSolution.setText("Solution version");
+		Text mainSolutionVersion = new Text(comp, SWT.BORDER);
+		GridData gd = new GridData(SWT.LEFT, SWT.BEGINNING, true, false);
+		gd.horizontalIndent = 10;
+		gd.widthHint = 150;
+		mainSolutionVersion.setLayoutData(gd);
+		mainSolutionVersion.setText(exportSolutionWizard.getActiveSolution().getVersion() != null ? exportSolutionWizard.getActiveSolution().getVersion() : "");
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
+		Label warnLabel = new Label(comp, SWT.NONE);
+		Solution editingSolution = servoyModel.getServoyProject(exportSolutionWizard.getActiveSolution().getName()).getEditingSolution();
+		mainSolutionVersion.addListener(SWT.FocusOut, event -> {
+			exportSolutionWizard.getActiveSolution().setVersion(mainSolutionVersion.getText());
+			try
+			{
+				repository.updateRootObject(editingSolution);
+				warnLabel.setVisible(Strings.isEmpty(mainSolutionVersion.getText()));
+				if (isCurrentPage()) getWizard().getContainer().updateButtons();
+			}
+			catch (RepositoryException ex)
+			{
+				Debug.error(ex);
+				Display.getDefault().syncExec(() -> {
+					MessageDialog.openError(Display.getDefault().getActiveShell(),
+						"Cannot set the version for solution '" + exportSolutionWizard.getActiveSolution().getName() + "'.",
+						ex.getMessage());
+				});
+			}
+		});
+
+		warnLabel.setImage(Activator.getDefault().loadImageFromBundle("warning.png"));
+		warnLabel.setToolTipText("Please set a version for the main solution.");
+		warnLabel.setVisible(Strings.isEmpty(mainSolutionVersion.getText()));
+		warnLabel.setLayoutData(gd);
+
 		protectWithPasswordButton = new Button(composite, SWT.CHECK);
 		protectWithPasswordButton.setText("Protect solution with password");
 		protectWithPasswordButton.setSelection(exportSolutionWizard.getModel().isProtectWithPassword());
@@ -130,6 +184,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		exportReferencedModulesButton.setText("Export referenced modules");
 		exportReferencedModulesButton.setSelection(exportSolutionWizard.getModel().isExportReferencedModules());
 		exportReferencedModulesButton.addListener(SWT.Selection, this);
+		exportReferencedModulesButton.setEnabled(exportSolutionWizard.getActiveSolution().getModulesNames() != null);
 
 		exportReferencedWebPackagesButton = new Button(composite, SWT.CHECK);
 		exportReferencedWebPackagesButton.setText("Export referenced Servoy packages ( for importing ONLY into developer)");
@@ -356,7 +411,8 @@ public class ExportOptionsPage extends WizardPage implements Listener
 	@Override
 	public IWizardPage getNextPage()
 	{
-		if (exportSolutionWizard.getModel().isExportReferencedModules()) return exportSolutionWizard.getModulesSelectionPage();
+		if (exportSolutionWizard.getModel().isExportReferencedModules() && exportSolutionWizard.getActiveSolution().getModulesNames() != null)
+			return exportSolutionWizard.getModulesSelectionPage();
 		else if (exportSolutionWizard.getModel().isProtectWithPassword()) return exportSolutionWizard.getPasswordPage();
 		else if (exportSolutionWizard.getModel().useImportSettings()) return exportSolutionWizard.getImportPage();
 		else return null;

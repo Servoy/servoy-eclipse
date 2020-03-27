@@ -36,7 +36,6 @@ import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -351,7 +350,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 				{
 					if (event.getSelectedPage() == modulesSelectionPage)
 					{
-						modulesSelectionPage.checkStateChanged(null);
+						modulesSelectionPage.handleEvent(null);
 					}
 					if (event.getSelectedPage() == passwordPage)
 					{
@@ -396,7 +395,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		if (currentPage == exportConfirmationPage) return false;
 		if (exportModel.isExportReferencedModules() && currentPage == exportOptionsPage)
 		{
-			modulesSelectionPage.checkStateChanged(null);
+			modulesSelectionPage.handleEvent(null);
 			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !modulesSelectionPage.hasDBDownErrors()) return false;
 		}
 		if (currentPage == modulesSelectionPage)
@@ -405,6 +404,9 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		}
 		if (exportModel.useImportSettings() && (currentPage != importPage) && (currentPage != deployProgressPage)) return false;
 		if (currentPage == importPage && deployToApplicationServer) return false;
+		//TODO Strings.isEmpty(getActiveSolution().getVersion()) ||
+		if (exportModel.isExportReferencedModules() && !modulesSelectionPage.solutionVersionsPresent)
+			return false;
 		return exportModel.canFinish();
 	}
 
