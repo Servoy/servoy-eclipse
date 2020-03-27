@@ -1,6 +1,6 @@
-<div id="mainBody" [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}">
+<div id="mainBody" [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}" #mainBody>
 <!--The content below is only a placeholder and can be replaced.-->
-<div sabloReconnectingFeedback class="svy-reconnecting"></div>
+<div sabloReconnectingFeedback></div>
 <div class="svy-main-window-navigator-container"  *ngIf="hasDefaultNavigator() || navigatorForm != null"  [ngStyle]="getNavigatorStyle()">
 <svy-default-navigator [name]="mainForm" *ngIf="hasDefaultNavigator()"></svy-default-navigator>
 <svy-form [name]="navigatorForm" *ngIf="navigatorForm != null"></svy-form>

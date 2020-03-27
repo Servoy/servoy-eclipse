@@ -1,6 +1,7 @@
 import { Directive, OnInit, HostBinding, Input, Output, ViewChild, ElementRef, AfterViewInit, Renderer2 } from "@angular/core";
 import { WebsocketService } from "../websocket.service";
 import { I18NProvider } from '../../ngclient/services/i18n_provider.service';
+import { ServoyService } from "../../ngclient/servoy.service";
 
 @Directive({
     selector: '[sabloReconnectingFeedback]'
@@ -12,10 +13,11 @@ export class SabloReconnectingFeedback implements OnInit {
     constructor(private websocketService: WebsocketService,
          private i18nProvider: I18NProvider, 
          private renderer: Renderer2,
-         private elRef: ElementRef) {
+         private elRef: ElementRef,
+         private servoyService: ServoyService) {
     }
     
-    @HostBinding('style.visibility') visibility: string;
+    @HostBinding('style.visibility') visibility: string; 
 
     ngOnInit() {
         if (!this.websocketService.isReconnecting()) {
@@ -26,6 +28,7 @@ export class SabloReconnectingFeedback implements OnInit {
                   this.i18n_reconnecting_feedback = val["servoy.ngclient.reconnecting"];
                 });
             this.renderer.appendChild(this.elRef.nativeElement, this.renderer.createText(this.i18n_reconnecting_feedback));
+            this.servoyService.reconnectingEmitter.next(true);
         }
     }
 }

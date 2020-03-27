@@ -25,6 +25,8 @@ import { IterableDiffers, IterableDiffer } from '@angular/core';
 
 import { SpecTypesService } from '../sablo/spectypes.service'
 
+import { Subject } from 'rxjs';
+
 import * as numeral from 'numeral';
 import 'numeral/locales';
 
@@ -82,6 +84,7 @@ export class ServoyService {
   private findModeShortCutCallback: any = null;
   private log: LoggerService;
   private loadedLocale: Deferred<any>;
+  reconnectingEmitter = new Subject<boolean>();
 
   constructor(private websocketService: WebsocketService,
     private sabloService: SabloService,

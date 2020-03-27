@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Renderer2 } from '@angular/core';
 
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';
@@ -9,10 +9,15 @@ import { FormService } from './form.service';
   templateUrl: './main.component.html'
 })
 
-export class MainComponent {
+export class MainComponent implements OnInit, AfterViewInit {
   title = 'Servoy NGClient';
+  isReconnecting: boolean = false;
+  @ViewChild('mainBody') mainBody: ElementRef;
 
-  constructor(private servoyService: ServoyService, private allService: AllServiceService, private formservice: FormService) {
+  constructor(private servoyService: ServoyService, 
+          private allService: AllServiceService, 
+          private formservice: FormService,
+          private renderer: Renderer2) {
     this.servoyService.connect();
   }
 
@@ -59,5 +64,17 @@ export class MainComponent {
     style[orientationVar1] = '0px';
     style[orientationVar2] = this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px';
     return style;
+  }
+  
+  ngOnInit() {
+      this.servoyService.reconnectingEmitter.subscribe(isReconnecting => {
+          this.isReconnecting = isReconnecting;
+      })
+  }
+  
+  ngAfterViewInit() {
+      if (this.isReconnecting) {
+          this.renderer.addClass(this.mainBody.nativeElement, 'svy-reconnecting');
+      }
   }
 }
