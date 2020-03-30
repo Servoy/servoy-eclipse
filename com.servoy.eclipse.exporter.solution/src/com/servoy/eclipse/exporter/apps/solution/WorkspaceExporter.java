@@ -20,8 +20,11 @@ package com.servoy.eclipse.exporter.apps.solution;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -107,6 +110,39 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 				String importSettingsString = Utils.getTXTFileContent(new File(configuration.getImportOptionsFile()), Charset.forName("UTF8"));
 				importSettings = new JSONObject(importSettingsString);
 			}
+
+			if (Strings.isEmpty(solution.getVersion()))
+			{
+				outputError("EXPORT FAILED. Please provide a version number for solution '" + solution.getName() + "' (in the developer properties view).");
+				exitCode = EXIT_EXPORT_FAILED;
+			}
+			try
+			{
+				if (configuration.shouldExportModules())
+				{
+					Map<String, Solution> modules = new HashMap<String, Solution>();
+					solution.getReferencedModulesRecursive(modules);
+					modules.remove(solution.getName());
+					List<String> exportedModules = configuration.getModuleIncludeList(new ArrayList<String>(modules.keySet()));
+					for (String module : exportedModules)
+					{
+						if (Strings.isEmpty(modules.get(module).getVersion()))
+						{
+							outputError(
+								"EXPORT FAILED. Please provide a version number for solution '" + module + "' (in the developer properties view).");
+							exitCode = EXIT_EXPORT_FAILED;
+						}
+					}
+				}
+			}
+			catch (final RepositoryException e)
+			{
+				ServoyLog.logError("Failed to export solution.", e);
+				outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
+				exitCode = EXIT_EXPORT_FAILED;
+			}
+			if (exitCode == EXIT_EXPORT_FAILED) return;
+
 			try
 			{
 				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
