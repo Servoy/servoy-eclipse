@@ -41,6 +41,7 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
@@ -150,25 +151,11 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		EclipseRepository repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 		Label warnLabel = new Label(comp, SWT.NONE);
-		Solution editingSolution = servoyModel.getServoyProject(exportSolutionWizard.getActiveSolution().getName()).getEditingSolution();
-		mainSolutionVersion.addListener(SWT.FocusOut, event -> {
-			exportSolutionWizard.getActiveSolution().setVersion(mainSolutionVersion.getText());
-			try
-			{
-				repository.updateRootObject(editingSolution);
-				warnLabel.setVisible(Strings.isEmpty(mainSolutionVersion.getText()));
-				if (isCurrentPage()) getWizard().getContainer().updateButtons();
-			}
-			catch (RepositoryException ex)
-			{
-				Debug.error(ex);
-				Display.getDefault().syncExec(() -> {
-					MessageDialog.openError(Display.getDefault().getActiveShell(),
-						"Cannot set the version for solution '" + exportSolutionWizard.getActiveSolution().getName() + "'.",
-						ex.getMessage());
-				});
-			}
-		});
+		ServoyProject servoyProject = servoyModel.getServoyProject(exportSolutionWizard.getActiveSolution().getName());
+		Solution editingSolution = servoyProject.getEditingSolution();
+		mainSolutionVersion.addModifyListener(event -> setMainSolutionVersion(mainSolutionVersion, repository, warnLabel, editingSolution));
+		mainSolutionVersion.addListener(SWT.FocusOut, event -> setMainSolutionVersion(mainSolutionVersion, repository, warnLabel, editingSolution));
+		mainSolutionVersion.addListener(SWT.CR, event -> setMainSolutionVersion(mainSolutionVersion, repository, warnLabel, editingSolution));
 
 		warnLabel.setImage(Activator.getDefault().loadImageFromBundle("warning.png"));
 		warnLabel.setToolTipText("Please set a version for the main solution.");
@@ -298,6 +285,27 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		useImportSettingsButton.addListener(SWT.Selection, this);
 
 		setControl(composite);
+	}
+
+	protected void setMainSolutionVersion(Text mainSolutionVersion, EclipseRepository repository, Label warnLabel, Solution editingSolution)
+	{
+		if (mainSolutionVersion.getText().trim().equals(editingSolution.getVersion())) return;
+		try
+		{
+			editingSolution.setVersion(mainSolutionVersion.getText());
+			repository.updateRootObject(editingSolution);
+			warnLabel.setVisible(Strings.isEmpty(mainSolutionVersion.getText()));
+			if (isCurrentPage()) getWizard().getContainer().updateButtons();
+		}
+		catch (RepositoryException ex)
+		{
+			Debug.error(ex);
+			Display.getDefault().syncExec(() -> {
+				MessageDialog.openError(Display.getDefault().getActiveShell(),
+					"Cannot set the version for solution '" + exportSolutionWizard.getActiveSolution().getName() + "'.",
+					ex.getMessage());
+			});
+		}
 	}
 
 	private void applyNrOfExportedSampleDataSpinnerValue()

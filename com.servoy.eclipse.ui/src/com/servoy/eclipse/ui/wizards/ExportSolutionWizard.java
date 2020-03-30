@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -404,8 +405,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		}
 		if (exportModel.useImportSettings() && (currentPage != importPage) && (currentPage != deployProgressPage)) return false;
 		if (currentPage == importPage && deployToApplicationServer) return false;
-		//TODO Strings.isEmpty(getActiveSolution().getVersion()) ||
-		if (exportModel.isExportReferencedModules() && !modulesSelectionPage.solutionVersionsPresent)
+		if (Strings.isEmpty(getActiveSolution().getVersion()) || exportModel.isExportReferencedModules() && !modulesSelectionPage.solutionVersionsPresent)
 			return false;
 		return exportModel.canFinish();
 	}
