@@ -1652,7 +1652,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	{
 		for (ServoyProject p : getModulesOfActiveProject())
 		{
-			p.resetEditingFlattenedSolution(true);
+			p.resetFlattenedSolution(true);
 		}
 	}
 
@@ -2250,7 +2250,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						// a project was deleted, closed, or it does not have Servoy nature; see if it is was part of the repository and if so, remove it
 						if (getServoyProject(resource.getName()) != null)
 						{
-							getServoyProject(resource.getName()).resetEditingFlattenedSolution(false);
+							getServoyProject(resource.getName()).resetFlattenedSolution(false);
 							refreshServoyProjects();
 						}
 						boolean isLoaded = eclipseRepository.isSolutionMetaDataLoaded(resource.getName());

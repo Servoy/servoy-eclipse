@@ -22,8 +22,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -71,9 +68,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
-import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.ICustomType;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -123,14 +118,12 @@ import com.servoy.j2db.persistence.CSSPositionUtils;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -156,7 +149,6 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Media;
-import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
@@ -176,37 +168,25 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
-import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
-import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
-import com.servoy.j2db.server.ngclient.property.ValueListConfig;
-import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
-import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
-import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.FormatParser;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
 import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
-import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
-import com.servoy.j2db.util.keyword.Ident;
 
 /**
  * Builds Servoy projects. Adds problem markers where needed.
@@ -223,25 +203,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	class ServoyDeltaVisitor implements IResourceDeltaVisitor
 	{
+		final List<IResource> resources = new ArrayList<IResource>();
+
 		public boolean visit(IResourceDelta delta) throws CoreException
 		{
 			IResource resource = delta.getResource();
-			switch (delta.getKind())
-			{
-				case IResourceDelta.ADDED :
-					// handle added resource
-					checkResource(resource);
-					break;
-				case IResourceDelta.REMOVED :
-					// handle removed resource
-					checkResource(resource);
-					break;
-				case IResourceDelta.CHANGED :
-					// handle changed resource
-					checkResource(resource);
-					break;
-			}
-			//return true to continue visiting children.
+			resources.add(resource);
 			return true;
 		}
 	}
@@ -932,7 +899,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
 					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
-					deleteMarkers(module.getProject(), PARAMETERS_MISMATCH);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
@@ -995,20 +961,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					catch (CoreException e)
 					{
 						ServoyLog.logError(e);
-					}
-				}
-			}
-			else
-			{
-				Collection<WebObjectFunctionDefinition> handlers = spec.getHandlers().values();
-				for (WebObjectFunctionDefinition handler : handlers)
-				{
-					List<Object> instanceMethodArguments = ((WebComponent)o).getFlattenedMethodArguments(handler.getName());
-					if (instanceMethodArguments != null && instanceMethodArguments.size() > 0 &&
-						handler.getParameters().size() >= instanceMethodArguments.size())
-					{
-						ServoyMarker mk = MarkerMessages.Parameters_Mismatch.fill(((WebComponent)o).getName(), handler.getName());
-						addMarker(project, mk.getType(), mk.getText(), -1, PARAMETERS_MISMATCH_SEVERITY, IMarker.PRIORITY_NORMAL, null, o);
 					}
 				}
 			}
@@ -2218,37 +2170,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				checkDataSources(project);
 
 				final Solution solution = servoyProject.getSolution();
-				if (servoyModel.getActiveProject().getSolution().getName().equals(solution.getName()))
-				{
-					//skipping modules when checking for web service solutions
-					if (solution.getMustAuthenticate())
-					{
-						//check if solution is used as web service
-						Iterator<Form> formsIt = Solution.getForms(solution.getAllObjectsAsList(), null, false);
-						boolean isServiceSolution = false;
-						while (formsIt.hasNext() && !isServiceSolution)
-						{
-							Iterator<ScriptMethod> methodIt = formsIt.next().getScriptMethods(false);
-							while (methodIt.hasNext())
-							{
-								String methodName = methodIt.next().getName();
-								if (methodName.equals("ws_read") || methodName.equals("ws_create") || methodName.equals("ws_delete") ||
-									methodName.equals("ws_update") || methodName.equals("ws_authenticate") || methodName.equals("ws_response_headers"))
-								{
-									isServiceSolution = true;
-									break;
-								}
-							}
-						}
-						if (isServiceSolution)
-						{
-							//create warning marker
-							ServoyMarker mk = MarkerMessages.SolutionUsedAsWebServiceMustAuthenticateProblem.fill(solution.getName());
-							addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM, IMarker.PRIORITY_HIGH,
-								null, solution);
-						}
-					}
-				}
+
+				ServoyBuilderUtils.checkServiceSolutionMustAuthenticate(servoyModel, solution, project);
 
 				if (!servoyModel.shouldBeModuleOfActiveSolution(solution.getName()) &&
 					solution.getSolutionMetaData().getFileVersion() > AbstractRepository.repository_version)
@@ -2428,168 +2351,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 										}
 										final IPersist foundPersist = elementIdPersistMap.get(element_id);
-										if (foundPersist == null && !element.getName().equals(StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName()))
-										{
-											String elementName = null;
-											String inForm = null;
-											if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
-												elementName = ((ISupportName)o).getName();
-											if (context instanceof Form) inForm = ((Form)context).getName();
-											ServoyMarker mk;
-											Pair<String, ProblemSeverity> problemPair;
-											boolean addMarker = true;
-											if (elementName == null)
-											{
-												if (inForm == null)
-												{
-													mk = MarkerMessages.PropertyTargetNotFound.fill(element.getName());
-													problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
-												}
-												else
-												{
-													mk = MarkerMessages.PropertyInFormTargetNotFound.fill(element.getName(), inForm);
-													problemPair = FORM_PROPERTY_TARGET_NOT_FOUND;
-												}
-											}
-											else
-											{
-												if (inForm == null)
-												{
-													mk = MarkerMessages.PropertyOnElementTargetNotFound.fill(element.getName(), elementName);
-													problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
-													IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null,
-														o);
-													marker.setAttribute("Uuid", o.getUUID().toString());
-													marker.setAttribute("SolutionName", elementName);
-													marker.setAttribute("PropertyName", element.getName());
-													marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(element.getName(), o.getClass()));
-													addMarker = false;
-												}
-												else
-												{
-													mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(element.getName(), elementName, inForm);
-													problemPair = FORM_PROPERTY_TARGET_NOT_FOUND;
-												}
-											}
-											if (BaseComponent.isEventProperty(element.getName()) || BaseComponent.isCommandProperty(element.getName()))
-											{
-												// TODO: this is a place where the same marker appears in more than one category...
-												IMarker marker = addMarker(project,
-													BaseComponent.isEventProperty(element.getName()) ? INVALID_EVENT_METHOD : INVALID_COMMAND_METHOD,
-													mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null, o);
-												if (marker != null)
-												{
-													marker.setAttribute("EventName", element.getName());
-													if (context instanceof Form)
-													{
-														marker.setAttribute("DataSource", ((Form)context).getDataSource());
-														marker.setAttribute("ContextTypeId", context.getTypeID());
-													}
-													if (context instanceof TableNode)
-													{
-														marker.setAttribute("DataSource", ((TableNode)context).getDataSource());
-														marker.setAttribute("ContextTypeId", context.getTypeID());
-													}
-												}
-											}
-											else if (addMarker)
-											{
-												addMarker(project, mk.getType(), mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null, o);
-											}
-										}
-										else if (foundPersist instanceof ScriptMethod && context != null)
-										{
-											ScriptMethod scriptMethod = (ScriptMethod)foundPersist;
-											if (scriptMethod.getParent() != context && scriptMethod.isPrivate())
-											{
-												String elementName = null;
-												String inForm = null;
-												if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
-													elementName = ((ISupportName)o).getName();
-												if (context instanceof Form) inForm = ((Form)context).getName();
-												ServoyMarker mk;
-												Pair<String, ProblemSeverity> problemPair;
-												String prefix = "";
-												if (scriptMethod.getScopeName() != null)
-												{
-													prefix = scriptMethod.getScopeName() + '.';
-												}
-												else if (scriptMethod.getParent() instanceof TableNode)
-												{
-													prefix = ((TableNode)scriptMethod.getParent()).getDataSource() + '/';
-												}
-												if (elementName == null)
-												{
-													if (inForm == null)
-													{
-														mk = MarkerMessages.PropertyTargetNotAccessible.fill(element.getName(),
-															prefix + scriptMethod.getName());
-														problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
-													}
-													else
-													{
-														mk = MarkerMessages.PropertyInFormTargetNotAccessible.fill(element.getName(), inForm,
-															prefix + scriptMethod.getName());
-														problemPair = FORM_PROPERTY_TARGET_NOT_FOUND;
-													}
-												}
-												else
-												{
-													if (inForm == null)
-													{
-														mk = MarkerMessages.PropertyOnElementTargetNotAccessible.fill(element.getName(), elementName,
-															prefix + scriptMethod.getName());
-														problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
-													}
-													else
-													{
-														mk = MarkerMessages.PropertyOnElementInFormTargetNotAccessible.fill(element.getName(), elementName,
-															inForm, prefix + scriptMethod.getName());
-														problemPair = FORM_PROPERTY_TARGET_NOT_FOUND;
-													}
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null, o);
-											}
-											else if (context instanceof Form)
-											{
-												Form parentForm = (Form)context;
-												Form methodForm = (Form)scriptMethod.getAncestor(IRepository.FORMS);
-												if (methodForm != null &&
-													!ServoyBuilder.getPersistFlattenedSolution(parentForm, flattenedSolution).getFormHierarchy(
-														parentForm).contains(methodForm))
-												{
-													ServoyMarker mk;
-													if (!(o instanceof ISupportName) || o instanceof Form || ((ISupportName)o).getName() == null)
-													{
-														mk = MarkerMessages.FormPropertyMethodNotAccessible.fill(element.getName(), parentForm.getName(),
-															methodForm.getName());
-													}
-													else
-													{
-														mk = MarkerMessages.FormPropertyOnElementMethodNotAccessible.fill(element.getName(),
-															((ISupportName)o).getName(), parentForm.getName(), methodForm.getName());
-													}
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_PROPERTY_METHOD_NOT_ACCESIBLE, IMarker.PRIORITY_LOW,
-														null, o);
-												}
-												else if (scriptMethod.isDeprecated())
-												{
-													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
-														"form " + parentForm.getName(), element.getName());
-													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-														IMarker.PRIORITY_NORMAL, null, o);
-												}
+										ServoyBuilderUtils.addNullReferenceMarker(project, o, foundPersist, context, element);
+										ServoyBuilderUtils.addNotAccessibleMethodMarkers(project, o, foundPersist, context, element, flattenedSolution);
+										ServoyBuilderUtils.addMethodParseErrorMarkers(project, o, foundPersist, element, methodsParsed,
+											methodsReferences);
 
-											}
-											else if (scriptMethod.isDeprecated())
-											{
-												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
-													"solution " + project.getName(), element.getName());
-												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-													IMarker.PRIORITY_NORMAL, null, o);
-											}
-										}
-										else if (foundPersist instanceof Form)
+										if (foundPersist instanceof Form)
 										{
 											if (!StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(element.getName()) &&
 												!formCanBeInstantiated(((Form)foundPersist),
@@ -2612,106 +2379,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_REFERENCE_INVALID_PROPERTY, IMarker.PRIORITY_NORMAL, null,
 												context);
 										}
-										if (BaseComponent.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
-											(foundPersist instanceof ScriptMethod) && !methodsParsed.contains(foundPersist.getUUID()))
-										{
-											methodsParsed.add(foundPersist.getUUID());
-											parseEventMethod(project, (ScriptMethod)foundPersist, element.getName());
-										}
-										if ((foundPersist instanceof ScriptMethod) &&
-											(BaseComponent.isEventProperty(element.getName()) || BaseComponent.isCommandProperty(element.getName())))
-										{
-											if (methodsReferences.containsKey(foundPersist))
-											{
-												if (methodsReferences.get(foundPersist).booleanValue())
-												{
-													String elementName = "";
-													ServoyMarker mk = null;
-													Pair<String, ProblemSeverity> problemSeverity = null;
-													if (o instanceof ISupportName)
-													{
-														elementName = ((ISupportName)o).getName();
-														if (elementName == null || "".equals(elementName)) elementName = "<no name>";
-														mk = MarkerMessages.PropertyMultipleMethodsOnSameElement.fill(elementName);
-														problemSeverity = FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT;
-													}
-													else if (o instanceof TableNode)
-													{
-														elementName = ((TableNode)o).getTableName();
-														mk = MarkerMessages.PropertyMultipleMethodsOnSameTable.fill(elementName);
-														problemSeverity = PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE;
-													}
-													methodsReferences.put(foundPersist, Boolean.FALSE);
-													addMarker(project, mk.getType(), mk.getText(), -1, problemSeverity, IMarker.PRIORITY_LOW, null, o);
-												}
-											}
-											else
-											{
-												methodsReferences.put(foundPersist, Boolean.TRUE);
-											}
-											if (o instanceof AbstractBase)
-											{
-												Pair<List<String>, List<Object>> instanceParameters = ((AbstractBase)o).getFlattenedMethodParameters(
-													element.getName());
-												MethodArgument[] methodArguments = ((ScriptMethod)foundPersist).getRuntimeProperty(
-													IScriptProvider.METHOD_ARGUMENTS);
-												if (instanceParameters != null && instanceParameters.getRight() != null)
-												{
-													boolean signatureMismatch = false;
-													if (instanceParameters.getLeft() != null)
-													{
-														// check for parameter name differences
-														for (int i = 0; i < instanceParameters.getLeft().size(); i++)
-														{
-															String name = instanceParameters.getLeft().get(i);
-															if (i >= methodArguments.length)
-															{
-																signatureMismatch = true;
-																break;
-															}
-															else if (!name.equals(methodArguments[i].getName()))
-															{
-																signatureMismatch = true;
-																break;
-															}
-														}
-													}
-													if (instanceParameters.getRight().size() > methodArguments.length)
-													{
-														signatureMismatch = true;
-													}
-													// add marker if signature mismach
-													if (signatureMismatch)
-													{
-														String handlerName = element.getName().substring(0, (element.getName().indexOf("MethodID") > 0
-															? element.getName().indexOf("MethodID") : element.getName().length()));
 
-														String functionDefinitionName = ((ScriptMethod)foundPersist).getName();
-														if (((ScriptMethod)foundPersist).getScopeName() != null)
-														{
-															functionDefinitionName = ((ScriptMethod)foundPersist).getScopeName() + "." + functionDefinitionName;
-														}
-														else
-														{
-															functionDefinitionName = "forms." +
-																((ISupportName)((ScriptMethod)foundPersist).getParent()).getName() + "." +
-																functionDefinitionName;
-														}
-
-														String componentName = "";
-														if (o instanceof ISupportName && ((ISupportName)o).getName() != null &&
-															((ISupportName)o).getName().length() > 1)
-														{
-															componentName = " \"" + ((ISupportName)o).getName() + "\"";
-														}
-														ServoyMarker mk = MarkerMessages.EventHandlerSignatureMismatch.fill(functionDefinitionName, handlerName,
-															RepositoryHelper.getObjectTypeName(o.getTypeID()), componentName);
-														addMarker(project, mk.getType(), mk.getText(), -1, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
-															IMarker.PRIORITY_LOW, null, o);
-													}
-												}
-											}
-										}
 									}
 								}
 							}
@@ -2730,38 +2398,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ApplicationServerRegistry.get().getServerManager(), false), vl);
 						}
 						checkCancel();
+						ServoyBuilderUtils.addWebComponentMissingHandlers(project, flattenedSolution, o);
+						checkCancel();
 						if (o instanceof WebComponent)
 						{
 							WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
-							if (spec != null && spec.getHandlers() != null)
-							{
-								for (String handler : spec.getHandlers().keySet())
-								{
-									UUID uuid = Utils.getAsUUID(((WebComponent)o).getProperty(handler), false);
-									if (uuid != null)
-									{
-										ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(uuid.toString());
-										if (scriptMethod == null)
-										{
-											ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
-												o.getAncestor(IRepository.FORMS));
-											IMarker marker = addMarker(project, INVALID_EVENT_METHOD, mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND,
-												IMarker.PRIORITY_LOW, null, o);
-											if (marker != null)
-											{
-												try
-												{
-													marker.setAttribute("EventName", handler);
-												}
-												catch (Exception ex)
-												{
-													ServoyLog.logError(ex);
-												}
-											}
-										}
-									}
-								}
-							}
 							if (spec != null)
 							{
 								Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
@@ -2844,7 +2485,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											(JSONObject)propertyValue, frm, flattenedSolution);
 										for (FormElement element : cache.getFormComponentElements())
 										{
-											checkDataProviders(element.getPersistIfAvailable(), context, datasource);
+											ServoyBuilderUtils.checkDataProviders(servoyProject, element.getPersistIfAvailable(), context, datasource,
+												flattenedSolution);
 										}
 									}
 								}
@@ -2862,7 +2504,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						checkDataProviders(o, context, null);
+						ServoyBuilderUtils.checkDataProviders(servoyProject, o, context, null, flattenedSolution);
 						checkCancel();
 						if (o instanceof IFormElement)
 						{
@@ -3101,19 +2743,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							try
 							{
-								if (table != null)
-								{
-									Iterator<ScriptVariable> iterator = form.getScriptVariables(false);
-									while (iterator.hasNext())
-									{
-										ScriptVariable var = iterator.next();
-										if (table.getColumn(var.getName()) != null)
-										{
-											ServoyMarker mk = MarkerMessages.FormVariableTableCol.fill(form.getName(), var.getName(), form.getTableName());
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_VARIABLE_TYPE_COL, IMarker.PRIORITY_NORMAL, null, var);
-										}
-									}
-								}
+								ServoyBuilderUtils.addFormVariablesHideTableColumn(project, form, table);
 							}
 							catch (Exception ex)
 							{
@@ -3876,23 +3506,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							// debugging engine needs this info for scriptproviders !!
 							((AbstractBase)o).setSerializableRuntimeProperty(IScriptProvider.FILENAME, null);
 						}
-						if (o instanceof ScriptVariable && servoyModel.getFlattenedSolution().getSolution().getSolutionType() == SolutionMetaData.MOBILE &&
-							Ident.checkIfReservedBrowserWindowObjectWord(((ScriptVariable)o).getName()))
-						{
-							Pair<String, String> pathPair = SolutionSerializer.getFilePath(o, false);
-							String path = ((AbstractBase)o).getSerializableRuntimeProperty(IScriptProvider.FILENAME);
-							IResource file = project;
-							if (path != null && !"".equals(path))
-							{
-								file = getEclipseResourceFromJavaIO(new java.io.File(path), project);
-								if (file != null) path = file.getProjectRelativePath().toString();
-							}
-							if (path == null || "".equals(path)) path = pathPair.getRight();
+						ServoyBuilderUtils.addMobileReservedWordsVariable(project, o);
 
-							ServoyMarker mk = MarkerMessages.ReservedWindowObjectProperty.fill(((ScriptVariable)o).getName());
-
-							addMarker(file, mk.getType(), mk.getText(), -1, RESERVED_WINDOW_OBJECT_PROPERTY, IMarker.PRIORITY_NORMAL, path, o);
-						}
 						if (o instanceof AbstractBase &&
 							Boolean.TRUE.equals(((AbstractBase)o).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName)))
 						{
@@ -3959,607 +3574,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								return IPersistVisitor.CONTINUE_TRAVERSAL;
 							}
 						});
-					}
-
-					private void checkDataProviders(final IPersist o, IPersist context, String datasource)
-					{
-						String id = null;
-						if (o instanceof ISupportDataProviderID)
-						{
-							id = ((ISupportDataProviderID)o).getDataProviderID();
-						}
-						else if (o instanceof WebComponent || o instanceof WebCustomType)
-						{
-							Collection<PropertyDescription> dpProperties = new ArrayList<PropertyDescription>();
-
-							if (o instanceof WebComponent)
-							{
-								WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
-								if (spec != null)
-								{
-									dpProperties.addAll(spec.getProperties().values());
-								}
-							}
-							else
-							{
-								WebCustomType customType = (WebCustomType)o;
-								WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
-								WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(parent.getTypeName());
-								if (parentSpec != null)
-								{
-									PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
-										customType.getTypeName())).getCustomJSONTypeDefinition();
-									if (cpd != null)
-									{
-										dpProperties.addAll(cpd.getProperties().values());
-									}
-								}
-							}
-
-							for (PropertyDescription pd : dpProperties)
-							{
-								if (pd.getType() instanceof DataproviderPropertyType || pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > ||
-									pd.getType() instanceof FoundsetPropertyType)
-								{
-
-									Object propertyValue = ((IBasicWebObject)o).getProperty(pd.getName());
-									if (propertyValue != null)
-									{
-										if ((pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > &&
-											((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof TagStringPropertyType))
-										{
-											TagStringPropertyType wrappedPd = (TagStringPropertyType)((FoundsetLinkedConfig)pd.getConfig())
-												.getWrappedPropertyDescription().getType();
-											TargetDataLinks links = wrappedPd.getDataLinks((String)propertyValue, pd, flattenedSolution,
-												new FormElement((IFormElement)o.getParent(), flattenedSolution, new PropertyPath(), true));
-											if (!TargetDataLinks.NOT_LINKED_TO_DATA.equals(links))
-											{
-												for (String dp : links.dataProviderIDs)
-												{
-													checkDataProvider(o, context, dp, pd, datasource);
-												}
-											}
-											continue;
-										}
-										else if (pd.getType() instanceof FoundsetPropertyType)
-										{
-											if (propertyValue instanceof JSONObject)
-											{
-												JSONObject val = (JSONObject)propertyValue;
-												FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
-
-												//first check if the foundset is valid
-												boolean invalid = false;
-												String fs = val.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-												if (!"".equals(fs)) //Form foundset, no need to check
-												{
-													if (DataSourceUtils.isDatasourceUri(fs))
-													{
-														ITable table = persistFlattenedSolution.getTable(fs);
-														invalid = table == null;
-														if (table != null && context instanceof Form)
-														{
-															Form form = (Form)context;
-															Iterator<ScriptVariable> iterator = form.getScriptVariables(false);
-															while (iterator.hasNext())
-															{
-																ScriptVariable var = iterator.next();
-																if (table.getColumn(var.getName()) != null)
-																{
-																	ServoyMarker mk = MarkerMessages.FormVariableTableColFromComponent.fill(form.getName(),
-																		var.getName(), table.getName(),
-																		((ISupportName)o).getName() != null ? ((ISupportName)o).getName() : "", pd.getName());
-																	addMarker(project, mk.getType(), mk.getText(), -1, FORM_VARIABLE_TYPE_COL,
-																		IMarker.PRIORITY_NORMAL, null, o);
-																}
-															}
-														}
-													}
-													else
-													{
-														invalid = persistFlattenedSolution.getRelationSequence(fs) == null;
-														if (invalid)
-														{
-															IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
-															try
-															{
-																if (serviceProvider != null &&
-																	serviceProvider.getFoundSetManager().getNamedFoundSet(fs) != null)
-																{
-																	invalid = false;
-																}
-															}
-															catch (ServoyException e)
-															{
-																ServoyLog.logError(e);
-															}
-														}
-													}
-													if (invalid)
-													{
-														String comp_name = ((ISupportName)o).getName() != null ? ((ISupportName)o).getName() : "";
-														ServoyMarker mk = MarkerMessages.ComponentInvalidFoundset.fill(fs, comp_name);
-														addMarker(project, mk.getType(), mk.getText(), -1, COMPONENT_FOUNDSET_INVALID, IMarker.PRIORITY_NORMAL,
-															null, o);
-														continue;
-													}
-												}
-												if (val.has("dataproviders"))
-												{
-													JSONObject dataproviders = val.getJSONObject("dataproviders");
-													for (String dp : dataproviders.keySet())
-													{
-														checkDataProvider(o, context, dataproviders.optString(dp), pd, datasource);
-													}
-												}
-											}
-										}
-										else if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > &&
-											pd.getConfig() instanceof FoundsetLinkedConfig &&
-											(((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof ValueListPropertyType))
-										{
-											continue;
-										}
-										else
-										{
-											checkDataProvider(o, context, (String)propertyValue, pd, datasource);
-										}
-									}
-								}
-							}
-
-						}
-						checkDataProvider(o, context, id, null, datasource);
-
-					}
-
-					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd, String datasource)
-					{
-						try
-						{
-							if (id != null && !"".equals(id))
-							{
-								if (!(context instanceof Form))
-								{
-									ServoyLog.logError("Could not find parent form for element " + o, null);
-								}
-								else
-								{
-									Form parentForm = (Form)context;
-									if (!missingServers.containsKey(parentForm.getServerName()))
-									{
-										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(context, flattenedSolution);
-										IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
-											servoyModel.getDataSourceManager().getDataSource(datasource != null ? datasource : parentForm.getDataSource()), id);
-										if (dataProvider == null)
-										{
-											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(context);
-											if (flattenedForm != null)
-											{
-												dataProvider = flattenedForm.getScriptVariable(id);
-											}
-										}
-										if (dataProvider == null)
-										{
-											try
-											{
-												dataProvider = persistFlattenedSolution.getGlobalDataProvider(id, false);
-											}
-											catch (Exception e)
-											{
-												exceptionCount++;
-												if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
-											}
-										}
-										if (dataProvider == null && o.getParent() instanceof WebComponent)
-										{
-											WebComponent parent = (WebComponent)o.getParent();
-											dataProvider = checkComponentDataproviders(id, persistFlattenedSolution, parent);
-										}
-										if (dataProvider == null && o instanceof WebComponent)
-										{
-											dataProvider = checkComponentDataproviders(id, persistFlattenedSolution, (WebComponent)o);
-										}
-
-										String elementName = null;
-										String inForm = null;
-										if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
-										{
-											elementName = ((ISupportName)o).getName();
-										}
-										inForm = parentForm.getName();
-
-
-										// check for valuelist type matching dataprovider type in web components
-										if ((o instanceof WebComponent || o instanceof WebCustomType) && dataProvider != null)
-										{
-											Collection<PropertyDescription> dpProperties = new ArrayList<PropertyDescription>();
-
-											if (o instanceof WebComponent)
-											{
-												WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(
-													((WebComponent)o).getTypeName());
-												if (spec != null)
-												{
-													dpProperties.addAll(spec.getProperties().values());
-												}
-											}
-											else
-											{
-												WebCustomType customType = (WebCustomType)o;
-												WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
-												WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(
-													parent.getTypeName());
-												if (parentSpec != null)
-												{
-													PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
-														customType.getTypeName())).getCustomJSONTypeDefinition();
-													if (cpd != null)
-													{
-														dpProperties.addAll(cpd.getProperties().values());
-													}
-												}
-											}
-
-											for (PropertyDescription pd1 : dpProperties)
-											{
-												if (pd1.getType() instanceof ValueListPropertyType &&
-													pd.getName().equals(((ValueListConfig)pd1.getConfig()).getFor()))
-												{
-													Object valuelistUUID = ((AbstractBase)o).getProperty(pd1.getName());
-													if (valuelistUUID != null)
-													{
-														ValueList valuelist = (ValueList)flattenedSolution.searchPersist(valuelistUUID.toString());
-														if (valuelist != null)
-														{
-															checkValueListRealValueToDataProviderTypeMatch(valuelist, dataProvider, elementName, inForm,
-																solution, valuelistUUID);
-														}
-													}
-												}
-											}
-
-										}
-										if ((o instanceof Field || o instanceof GraphicalComponent) && dataProvider != null)
-										{
-											// check for valuelist type matching dataprovider type
-											int valuelistID = o instanceof Field ? ((Field)o).getValuelistID() : ((GraphicalComponent)o).getValuelistID();
-											ValueList valuelist = persistFlattenedSolution.getValueList(valuelistID);
-											if (valuelist != null)
-											{
-												checkValueListRealValueToDataProviderTypeMatch(valuelist, dataProvider, elementName, inForm, solution,
-													valuelist.getUUID());
-											}
-
-											String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
-											if (o instanceof Field && ((Field)o).getDisplayType() != Field.TEXT_FIELD &&
-												((Field)o).getDisplayType() != Field.TYPE_AHEAD && ((Field)o).getDisplayType() != Field.CALENDAR)
-											{
-												format = null;
-											}
-											if (format != null && format.length() > 0)
-											{
-												ParsedFormat parsedFormat = FormatParser.parseFormatProperty(format);
-												int dataType = getDataType(project, dataProvider, parsedFormat, o);
-												if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:"))
-												{
-													try
-													{
-														if (dataType == IColumnTypes.DATETIME)
-														{
-															new SimpleDateFormat(parsedFormat.getDisplayFormat());
-															if (parsedFormat.getEditFormat() != null) new SimpleDateFormat(parsedFormat.getEditFormat());
-														}
-														else if (dataType == IColumnTypes.INTEGER || dataType == IColumnTypes.NUMBER)
-														{
-															new DecimalFormat(parsedFormat.getDisplayFormat(),
-																RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
-															if (parsedFormat.getEditFormat() != null) new DecimalFormat(parsedFormat.getEditFormat(),
-																RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
-														}
-													}
-													catch (Exception ex)
-													{
-														Debug.trace(ex);
-
-														ServoyMarker mk;
-														if (elementName == null)
-														{
-															mk = MarkerMessages.FormFormatInvalid.fill(inForm, parsedFormat.getFormatString());
-														}
-														else
-														{
-															mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm,
-																parsedFormat.getFormatString());
-														}
-														addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL, null,
-															o);
-													}
-												}
-											}
-										}
-										if (o instanceof Field &&
-											(((Field)o).getDisplayType() == Field.TYPE_AHEAD || ((Field)o).getDisplayType() == Field.TEXT_FIELD) &&
-											((Field)o).getValuelistID() > 0 && ((Field)o).getFormat() != null)
-										{
-											boolean showWarning = false;
-											ValueList vl = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getValueList(
-												((Field)o).getValuelistID());
-											if (vl != null && vl.getValueListType() == IValueListConstants.CUSTOM_VALUES && vl.getCustomValues() != null &&
-												(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
-											{
-												showWarning = true;
-											}
-											if (vl != null && vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
-												vl.getReturnDataProviders() != vl.getShowDataProviders())
-											{
-												showWarning = true;
-											}
-											if (showWarning)
-											{
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormFormatIncompatible.fill(inForm);
-												}
-												else
-												{
-													mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL, null, o);
-											}
-
-										}
-										if (o instanceof Field && dataProvider != null)
-										{
-											Field field = (Field)o;
-											if (field.getEditable() &&
-												(field.getDisplayType() == Field.HTML_AREA || field.getDisplayType() == Field.RTF_AREA) &&
-												dataProvider.getColumnWrapper() != null && dataProvider.getColumnWrapper().getColumn() instanceof Column)
-											{
-												Column column = (Column)dataProvider.getColumnWrapper().getColumn();
-												if (column.getLength() < MIN_FIELD_LENGTH && column.getLength() > 0)
-												{
-													ServoyMarker mk = MarkerMessages.FormColumnLengthTooSmall.fill(elementName != null ? elementName : "",
-														inForm);
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_COLUMN_LENGTH_TOO_SMALL, IMarker.PRIORITY_NORMAL,
-														null, o);
-												}
-											}
-											if (((dataProvider instanceof ScriptVariable &&
-												((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA &&
-												((ScriptVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-												(dataProvider instanceof AggregateVariable &&
-													((AggregateVariable)dataProvider).getType() == IColumnTypes.MEDIA &&
-													((AggregateVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-												(dataProvider instanceof ScriptCalculation &&
-													((ScriptCalculation)dataProvider).getType() == IColumnTypes.MEDIA &&
-													((ScriptCalculation)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-												(dataProvider instanceof Column &&
-													Column.mapToDefaultType(((Column)dataProvider).getType()) == IColumnTypes.MEDIA) &&
-													((Column)dataProvider).getColumnInfo() != null &&
-													((Column)dataProvider).getColumnInfo().getConverterName() == null) &&
-												field.getDisplayType() != Field.IMAGE_MEDIA)
-											{
-												ServoyMarker mk = MarkerMessages.FormIncompatibleElementType.fill(
-													elementName != null ? elementName : field.getUUID(), inForm);
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INCOMPATIBLE_ELEMENT_TYPE, IMarker.PRIORITY_NORMAL,
-													null, o);
-											}
-											if (dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
-											{
-												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName(),
-													"form " + inForm, "dataProvider");
-												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-													IMarker.PRIORITY_NORMAL, null, o);
-											}
-											else if (dataProvider instanceof ScriptCalculation && ((ScriptCalculation)dataProvider).isDeprecated())
-											{
-												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
-													((ScriptCalculation)dataProvider).getName(), "form " + inForm, "dataProvider");
-												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-													IMarker.PRIORITY_NORMAL, null, o);
-											}
-										}
-
-										if (dataProvider == null && (parentForm.getDataSource() != null || ScopesUtils.isVariableScope(id)))
-										{
-											ServoyMarker mk;
-											if (elementName == null)
-											{
-												mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
-											}
-											else
-											{
-												mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
-											}
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
-										}
-
-										boolean checkIfDataproviderIsBasedOnFormTable = true;
-										if (o instanceof IBasicWebObject && pd != null)
-										{
-											String foundsetSelector = getWebBaseObjectPropertyFoundsetSelector((IBasicWebObject)o, pd);
-											if (!"".equals(foundsetSelector))
-											{
-												// it is not form foundset based
-												checkIfDataproviderIsBasedOnFormTable = false;
-											}
-										}
-
-										if (checkIfDataproviderIsBasedOnFormTable && parentForm.getDataSource() != null &&
-											dataProvider instanceof ColumnWrapper)
-										{
-											Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
-											if (relations != null && !relations[0].isGlobal() &&
-												!parentForm.getDataSource().equals(relations[0].getPrimaryDataSource()))
-											{
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormDataproviderNotBasedOnFormTable.fill(inForm, id);
-												}
-												else
-												{
-													mk = MarkerMessages.FormDataproviderOnElementNotBasedOnFormTable.fill(elementName, inForm, id);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
-											}
-										}
-										if (dataProvider instanceof AggregateVariable && o instanceof Field && ((Field)o).getEditable())
-										{
-											ServoyMarker mk;
-											if (elementName == null)
-											{
-												mk = MarkerMessages.FormDataproviderAggregateNotEditable.fill(inForm, id);
-											}
-											else
-											{
-												mk = MarkerMessages.FormDataproviderOnElementAggregateNotEditable.fill(elementName, inForm, id);
-											}
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_DATAPROVIDER_AGGREGATE_NOT_EDITABLE, IMarker.PRIORITY_LOW,
-												null, o);
-										}
-										if (dataProvider != null && dataProvider instanceof Column && ((Column)dataProvider).getColumnInfo() != null)
-										{
-											if (((Column)dataProvider).getColumnInfo().isExcluded())
-											{
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
-												}
-												else
-												{
-													mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
-											}
-										}
-										if (dataProvider instanceof ColumnWrapper)
-										{
-											Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
-											if (relations != null)
-											{
-												for (Relation r : relations)
-												{
-													addEncapsulationMarker(project, o, r, (Form)context);
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-						catch (
-
-						Exception e)
-
-						{
-							exceptionCount++;
-							if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
-						}
-					}
-
-					private void checkValueListRealValueToDataProviderTypeMatch(ValueList valuelist, IDataProvider dataProvider, String elementName,
-						String inForm, IPersist o, Object valuelistUUID) throws CoreException
-					{
-						int realValueType = valuelist.getRealValueType();
-						if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
-						{
-							boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
-								((realValueType == IColumnTypes.INTEGER && dataProvider.getDataProviderType() == IColumnTypes.NUMBER) ||
-									(realValueType == IColumnTypes.NUMBER && dataProvider.getDataProviderType() == IColumnTypes.INTEGER));
-
-							if (!isValidNumberVariable)
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-									elementName != null ? elementName : "", inForm);
-								IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
-									IMarker.PRIORITY_NORMAL, null, o);
-								marker.setAttribute("Uuid", valuelistUUID.toString());
-								marker.setAttribute("SolutionName", valuelist.getRootObject().getName());
-							}
-						}
-					}
-
-					private String getWebBaseObjectPropertyFoundsetSelector(IBasicWebObject webObject, PropertyDescription pd)
-					{
-						if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? >)
-						{
-							String forFoundset = ((FoundsetLinkedConfig)pd.getConfig()).getForFoundsetName();
-							IBasicWebObject parent = webObject;
-							while (parent.getParent() instanceof IBasicWebObject)
-							{
-								parent = (IBasicWebObject)parent.getParent();
-							}
-							Object forFoundsetValue = parent.getProperty(forFoundset);
-							if (forFoundsetValue instanceof JSONObject)
-							{
-								return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-							}
-						}
-						return "";
-					}
-
-					private IDataProvider checkComponentDataproviders(String id, FlattenedSolution persistFlattenedSolution, WebComponent component)
-						throws RepositoryException
-					{
-						IDataProvider dataProvider = null;
-						WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(component.getTypeName());
-						if (spec != null)
-						{
-							Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);
-							for (PropertyDescription pd : fsPD)
-							{
-								Object relatedFS = component.getProperty(pd.getName());
-								if (relatedFS instanceof JSONObject)
-								{
-									String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-									if ("".equals(fs)) //Form foundset
-									{
-										Form f = (Form)component.getAncestor(IRepository.FORMS);
-										fs = f.getDataSource();
-									}
-									if (fs == null) break;
-									if (DataSourceUtils.isDatasourceUri(fs))
-									{
-										ITable table = persistFlattenedSolution.getTable(fs);
-										if (table != null)
-										{
-											dataProvider = persistFlattenedSolution.getDataProviderForTable(table, id);
-										}
-									}
-									else
-									{
-										Relation[] relations = persistFlattenedSolution.getRelationSequence(fs);
-										if (relations != null)
-										{
-											Relation r = relations[relations.length - 1];
-											dataProvider = getDataProvider(persistFlattenedSolution, id, r.getPrimaryServerName(), r.getPrimaryTableName());
-											if (dataProvider == null)
-												dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignServerName(), r.getForeignTableName());
-										}
-									}
-									if (dataProvider != null) break;
-								}
-							}
-						}
-						return dataProvider;
-					}
-
-					private IDataProvider getDataProvider(FlattenedSolution fs, String id, String serverName, String tableName) throws RepositoryException
-					{
-						IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
-						if (server != null)
-						{
-							ITable table = server.getTable(tableName);
-							if (table != null)
-							{
-								return fs.getDataProviderForTable(table, id);
-							}
-						}
-						return null;
 					}
 				});
 
@@ -5267,39 +4281,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ServoyLog.logWarning(mk.getText(), null);
 	}
 
-	private void parseEventMethod(final IProject project, final ScriptMethod eventMethod, final String eventName)
-	{
-		if (eventMethod != null && (eventMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS) == null ||
-			eventMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS).length == 0) && eventMethod.getDeclaration().contains("arguments"))
-		{
-			int offset = ScriptingUtils.getArgumentsUsage(eventMethod.getDeclaration());
-			if (offset >= 0)
-			{
-				ServoyMarker mk = MarkerMessages.MethodEventParameters;
-				IMarker marker = addMarker(project, mk.getType(), mk.getText(), eventMethod.getLineNumberOffset() + offset, METHOD_EVENT_PARAMETERS,
-					IMarker.PRIORITY_NORMAL, null, eventMethod);
-				if (marker != null)
-				{
-					try
-					{
-						marker.setAttribute("EventName", eventName);
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-					}
-				}
-			}
-		}
-	}
-
-	private boolean skipEventMethod(String name)
-	{
-		if ("onOpenMethodID".equals(name)) return true;
-		return false;
-	}
-
-	private IResource getEclipseResourceFromJavaIO(File javaIOFile, IProject project)
+	public static IResource getEclipseResourceFromJavaIO(File javaIOFile, IProject project)
 	{
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IPath location = Path.fromOSString(javaIOFile.getAbsolutePath());
@@ -5334,7 +4316,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_BAD_STRUCTURE, IMarker.PRIORITY_LOW, path, o);
 	}
 
-	private ServoyProject getServoyProject(IProject project)
+	private static ServoyProject getServoyProject(IProject project)
 	{
 		ServoyProject sp = null;
 		try
@@ -6759,7 +5741,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		// the visitor does the work.
 		this.monitor = progressMonitor;
-		delta.accept(new ServoyDeltaVisitor());
+
+		ServoyDeltaVisitor visitor = new ServoyDeltaVisitor();
+		delta.accept(visitor);
+		if (!ServoyBuilderUtils.checkIncrementalBuild(visitor.resources))
+		{
+			for (IResource resource : visitor.resources)
+			{
+				checkResource(resource);
+			}
+		}
 		this.monitor = null;
 	}
 
@@ -6790,7 +5781,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	private int getDataType(IResource resource, IDataProvider dataProvider, ParsedFormat parsedFormat, IPersist persist) throws IOException
+	public static int getDataType(IResource resource, IDataProvider dataProvider, ParsedFormat parsedFormat, IPersist persist) throws IOException
 	{
 		int dataType = dataProvider.getDataProviderType();
 		IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
@@ -6816,7 +5807,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (propertyDescriptor != null && propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
 						{
 							String methodName = parsedFormat.getUIConverterProperties().get(key);
-							ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
+							ScriptMethod scriptMethod = ServoyModelFinder.getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
 							if (scriptMethod == null)
 							{
 								Form form = (Form)persist.getAncestor(IRepository.FORMS);
@@ -6914,13 +5905,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return table != null && dpid != null && flattenedSolution.getScriptCalculation(dpid, table) != null && table.getColumn(dpid) == null;
 	}
 
-	private static FlattenedSolution getPersistFlattenedSolution(IPersist persist, FlattenedSolution fallbackFlattenedSolution)
+	public static FlattenedSolution getPersistFlattenedSolution(IPersist persist, FlattenedSolution fallbackFlattenedSolution)
 	{
 		FlattenedSolution persistFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 		return persistFlattenedSolution != null ? persistFlattenedSolution : fallbackFlattenedSolution;
 	}
 
-	private void addEncapsulationMarker(IProject project, IPersist persist, IPersist foundPersist, Form context)
+	public static void addEncapsulationMarker(IProject project, IPersist persist, IPersist foundPersist, Form context)
 	{
 		if (foundPersist instanceof ISupportEncapsulation)
 		{
