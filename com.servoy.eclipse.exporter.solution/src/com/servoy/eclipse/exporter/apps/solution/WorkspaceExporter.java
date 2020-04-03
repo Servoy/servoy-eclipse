@@ -149,7 +149,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
 					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
 					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager, true, importSettings,
-					null);
+					null, true);
 			}
 			catch (final RepositoryException e)
 			{
