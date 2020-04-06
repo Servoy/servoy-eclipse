@@ -61,6 +61,11 @@ import org.eclipse.swt.widgets.Display;
 public abstract class ImageDescriptor extends DeviceResourceDescriptor {
 
 	/**
+	 *
+	 */
+	public volatile static ImageDescriptorRelay loaderRelay = null;
+
+	/**
 	 * A small red square used to warn that an image cannot be created.
 	 */
 	protected static final ImageData DEFAULT_IMAGE_DATA = new ImageData(6, 6, 1, new PaletteData(new RGB(255, 0, 0)));
@@ -80,6 +85,11 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor {
 	 * @return a new image descriptor
 	 */
 	public static ImageDescriptor createFromFile(Class<?> location, String filename) {
+		if (loaderRelay != null) {
+			URL url = loaderRelay.getReplacementFromFile(location, filename);
+			if (url != null)
+				return new URLImageDescriptor(url);
+		}
 		return new FileImageDescriptor(location, filename);
 	}
 
@@ -174,6 +184,11 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor {
 	public static ImageDescriptor createFromURL(URL url) {
 		if (url == null) {
 			return getMissingImageDescriptor();
+		}
+		if (loaderRelay != null) {
+			URL replacement = loaderRelay.getReplacementFromURL(url);
+			if (replacement != null)
+				return new URLImageDescriptor(replacement);
 		}
 		return new URLImageDescriptor(url);
 	}
