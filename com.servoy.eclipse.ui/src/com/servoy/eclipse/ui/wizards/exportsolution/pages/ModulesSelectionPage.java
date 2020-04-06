@@ -256,7 +256,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			Label label = new Label(composite, SWT.ICON);
 			String v = servoyModel.getServoyProject(module).getSolution().getVersion();
 			version.setText(v == null ? "" : v);
-			version.setLayoutData(gd);
+			version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			version.addListener(SWT.FocusOut, event -> {
 				Solution solution = servoyModel.getServoyProject(module).getEditingSolution();
 				solution.setVersion(version.getText());
