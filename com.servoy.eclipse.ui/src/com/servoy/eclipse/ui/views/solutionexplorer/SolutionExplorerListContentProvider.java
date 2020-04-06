@@ -853,7 +853,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
 				IPackageReader reader = WebComponentSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
 				if (reader == null) reader = WebServiceSpecProvider.getSpecProviderState().getPackageReader(spec.getPackageName());
-				try (ZipFile zip = new ZipFile(reader.getResource().toURI().toURL().getFile()))
+				try (ZipFile zip = new ZipFile(reader.getResource()))
 				{
 					Enumeration< ? extends ZipEntry> e = zip.entries();
 					while (e.hasMoreElements())
