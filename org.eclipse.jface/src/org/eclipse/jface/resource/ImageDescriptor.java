@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jface.resource;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 import org.eclipse.swt.SWTException;
@@ -57,10 +59,6 @@ import org.eclipse.swt.widgets.Display;
  * @see org.eclipse.swt.graphics.Image
  */
 public abstract class ImageDescriptor extends DeviceResourceDescriptor {
-	/**
-	 *
-	 */
-	public volatile static ImageDescriptorRelay loaderRelay = null;
 
 	/**
 	 * A small red square used to warn that an image cannot be created.
@@ -82,11 +80,6 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor {
 	 * @return a new image descriptor
 	 */
 	public static ImageDescriptor createFromFile(Class<?> location, String filename) {
-		if (loaderRelay != null) {
-			URL url = loaderRelay.getReplacementFromFile(location, filename);
-			if (url != null)
-				return new URLImageDescriptor(url);
-		}
 		return new FileImageDescriptor(location, filename);
 	}
 
@@ -182,12 +175,28 @@ public abstract class ImageDescriptor extends DeviceResourceDescriptor {
 		if (url == null) {
 			return getMissingImageDescriptor();
 		}
-		if (loaderRelay != null) {
-			URL replacement = loaderRelay.getReplacementFromURL(url);
-			if (replacement != null)
-				return new URLImageDescriptor(replacement);
-		}
 		return new URLImageDescriptor(url);
+	}
+
+
+	/**
+	 * Convenient method to create an ImageDescriptor from an URI
+	 *
+	 * Delegates to ImageDescriptor createFromURL
+	 *
+	 * @param uriIconPath The URI of the image file.
+	 * @return a new image descriptor
+	 *
+	 * @since 3.19
+	 */
+	public ImageDescriptor imageDescriptorFromURI(URI uriIconPath) {
+		try {
+			return ImageDescriptor.createFromURL(new URL(uriIconPath.toString()));
+		} catch (MalformedURLException | NullPointerException e) {
+			// return the missing image placeholder to indicate
+			// the incorrect call without interfering with the user flow
+			return getMissingImageDescriptor();
+		}
 	}
 
 	@Override
