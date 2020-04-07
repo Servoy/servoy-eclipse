@@ -17,10 +17,13 @@
 
 package com.servoy.eclipse.ui.wizards.exportsolution.pages;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -46,6 +49,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.ui.Activator;
@@ -175,11 +179,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 	protected void initializeModulesToExport()
 	{
 		String[] moduleNames = getSelectedModules();
-		if (moduleNames.length > 0)
-		{
-			exportSolutionWizard.getModel().setModulesToExport(moduleNames);
-		}
-		else exportSolutionWizard.getModel().setModulesToExport(null);
+		exportSolutionWizard.getModel().setModulesToExport(moduleNames);
 		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		solutionVersionsPresent = !Strings.isEmpty(exportSolutionWizard.getActiveSolution().getVersion()) && (moduleNames.length == 0 ||
 			Arrays.stream(moduleNames).noneMatch(name -> Strings.isEmpty(servoyModel.getServoyProject(name).getSolution().getVersion())));
@@ -244,36 +244,34 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		checks = new ArrayList<Button>();
 		for (String module : getEntries())
 		{
+			ServoyProject moduleProject = servoyModel.getServoyProject(module);
+			if (moduleProject == null)
+			{
+				Debug.error("Module '"+module+"' project was not found, cannot export it.");
+				continue;
+			}
 			Button moduleCheck = new Button(composite, SWT.CHECK);
 			moduleCheck.setBackground(backgroundColor);
 			moduleCheck.setText(module);
 			moduleCheck.setSelection(exportSolutionWizard.getModel().getModulesToExport() == null ? true
-				: Arrays.stream(exportSolutionWizard.getModel().getModulesToExport()).allMatch(name -> module.equals(name)));
+				: Arrays.stream(exportSolutionWizard.getModel().getModulesToExport()).anyMatch(name -> module.equals(name)));
 			moduleCheck.addListener(SWT.Selection, this);
 			checks.add(moduleCheck);
 
 			Text version = new Text(composite, SWT.BORDER);
 			Label label = new Label(composite, SWT.ICON);
-			String v = servoyModel.getServoyProject(module).getSolution().getVersion();
+			String v = moduleProject.getSolution().getVersion();
+			if (v == null)
+			{
+				//if it's a module installed via WPM we can get the version from there
+				v = getSPMVersion(moduleProject);
+				if (v != null) setSolutionVersion(servoyModel, module, v, false);
+			}
 			version.setText(v == null ? "" : v);
 			version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			version.addListener(SWT.FocusOut, event -> {
-				Solution solution = servoyModel.getServoyProject(module).getEditingSolution();
-				solution.setVersion(version.getText());
-				try
-				{
-					repository.updateRootObject(solution);
-					handleEvent(null);
-					if (isCurrentPage()) getWizard().getContainer().updateButtons();
-				}
-				catch (RepositoryException ex)
-				{
-					Debug.error(ex);
-					Display.getDefault().syncExec(() -> {
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot set the version for module '" + module + "'.",
-							ex.getMessage());
-					});
-				}
+				setSolutionVersion(servoyModel, module, version.getText(), true);
+				handleEvent(null);
 				label.setVisible(Strings.isEmpty(version.getText()));
 			});
 
@@ -287,5 +285,54 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		initializeModulesToExport();
 
 		setControl(composite);
+	}
+
+	protected boolean setSolutionVersion(final IDeveloperServoyModel servoyModel, String module, String version, boolean displayError)
+	{
+		Solution solution = servoyModel.getServoyProject(module).getEditingSolution();
+		if (version.trim().equals(solution.getVersion())) return false;
+		solution.setVersion(version.trim());
+		try
+		{
+			repository.updateRootObject(solution);
+			if (isCurrentPage()) getWizard().getContainer().updateButtons();
+		}
+		catch (RepositoryException ex)
+		{
+			Debug.error(ex);
+			if (displayError)
+			{
+				Display.getDefault().syncExec(() -> {
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot set the version for module '" + module + "'.",
+						ex.getMessage());
+				});
+			}
+			return false;
+		}
+		return true;
+	}
+
+	protected String getSPMVersion(ServoyProject solutionProject)
+	{
+		File wpmPropertiesFile = new File(solutionProject.getProject().getLocation().toFile(), "wpm.properties");
+		if (wpmPropertiesFile.exists())
+		{
+			Properties wpmProperties = new Properties();
+
+			try (FileInputStream wpmfis = new FileInputStream(wpmPropertiesFile))
+			{
+				wpmProperties.load(wpmfis);
+				String version = wpmProperties.getProperty("version");
+				if (version != null)
+				{
+					return version;
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.log(ex);
+			}
+		}
+		return null;
 	}
 }
