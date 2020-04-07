@@ -17,7 +17,9 @@
 
 package com.servoy.eclipse.debug.script;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
@@ -26,15 +28,15 @@ import org.eclipse.dltk.javascript.typeinference.IValueCollection;
  * @author jcompagner
  * @since 2020.03
  */
-public class TypeCacheItem
+public class ValueCollectionCacheItem
 {
-	private final List<IFile> files;
+	private final Set<IFile> files;
 	private final IValueCollection collection;
 	private final long timestamp;
 
-	public TypeCacheItem(List<IFile> files, IValueCollection collection)
+	public ValueCollectionCacheItem(Set<IFile> files, IValueCollection collection)
 	{
-		this.files = files;
+		this.files = new HashSet<IFile>(files);
 		this.collection = collection;
 		this.timestamp = files.stream().mapToLong(file -> file.getModificationStamp()).sum();
 	}
@@ -51,5 +53,10 @@ public class TypeCacheItem
 			return collection;
 		}
 		return null;
+	}
+
+	public Set<IFile> files()
+	{
+		return Collections.unmodifiableSet(files);
 	}
 }
