@@ -31,10 +31,12 @@ import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalListener;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -130,6 +132,7 @@ public class LessPropertiesComposite extends Composite
 	private CachingChildrenComposite area;
 	private final ScrolledComposite sc;
 	private final PropertiesLessEditor editor;
+	private final Color backgroundColor;
 
 	public LessPropertiesComposite(Composite parent, int style, final PropertiesLessEditor editor)
 	{
@@ -139,7 +142,8 @@ public class LessPropertiesComposite extends Composite
 		sc = new ScrolledComposite(parent, SWT.TRANSPARENT | SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
-
+		backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+		sc.setBackground(backgroundColor);
 		createArea();
 	}
 
@@ -156,12 +160,20 @@ public class LessPropertiesComposite extends Composite
 		area.setLayout(layout);
 		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+		FontDescriptor descriptor = FontDescriptor.createFrom(sc.getFont());
+		descriptor = descriptor.setStyle(SWT.BOLD);
+		Font font = descriptor.createFont(getShell().getDisplay());
+
 		try
 		{
 			PropertiesLessEditorInput propertiesLessEditorInput = (PropertiesLessEditorInput)editor.getEditorInput();
 
-			new Label(area, SWT.NONE).setText("Servoy Theme Version");
+			Label l = new Label(area, SWT.NONE);
+			l.setText("Servoy Theme Version");
+			l.setBackground(backgroundColor);
+			l.setFont(font);
 			CCombo combo = new CCombo(area, SWT.READ_ONLY | SWT.BORDER);
+			combo.setBackground(backgroundColor);
 			combo.setItems(ThemeResourceLoader.VERSIONS);
 			combo.select(Arrays.asList(ThemeResourceLoader.VERSIONS).indexOf(propertiesLessEditorInput.getVersion()));
 			combo.addListener(SWT.Selection, e -> {
@@ -207,6 +219,8 @@ public class LessPropertiesComposite extends Composite
 			for (LessPropertyEntry property : propertiesLessEditorInput.getProperties())
 			{
 				Label label = new Label(area, SWT.NONE);
+				label.setBackground(backgroundColor);
+				label.setFont(font);
 				label.setText(property.getLabel());
 				final Text txtName = new Text(area, SWT.BORDER);
 
@@ -262,6 +276,7 @@ public class LessPropertiesComposite extends Composite
 				if (property.getType() == LessPropertyType.COLOR)
 				{
 					Button editButton = new Button(area, SWT.FLAT);
+					editButton.setBackground(backgroundColor);
 					editButton.setText("Select Color");
 					editButton.addListener(SWT.Selection, e -> {
 						final Display display = editButton.getDisplay();
