@@ -1,29 +1,18 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Package, WpmService } from '../wpm.service';
-import { PackageList } from '../content/content.component'
+import { Component, Input } from '@angular/core';
+import { Package, WpmService, PACKAGE_TYPE_SOLUTION, PACKAGE_TYPE_MODULE } from '../wpm.service';
 
 @Component({
   selector: 'app-packages',
   templateUrl: './packages.component.html',
   styleUrls: ['./packages.component.css']
 })
-export class PackagesComponent implements OnInit {
+export class PackagesComponent {
 
-  @Input() packageList: PackageList;
-  packages: Package[];
+  @Input() packages: Package[];
   selectedPackage: Package;
   descriptionExpanded: boolean;
 
   constructor(public wpmService: WpmService) {
-  }
-
-  ngOnInit() {
-    this.wpmService.getPackages().subscribe(p => {
-      if(p.packageType == this.packageList.type) {
-        this.packages = p.packages;
-        this.packageList.updateCount = this.getUpgradeCount(this.packages);
-      }
-    })
   }
 
   install(p: Package) {
@@ -51,7 +40,7 @@ export class PackagesComponent implements OnInit {
   }
 
   canBeRemoved(p: Package): boolean {
-    return p.installed && p.installedIsWPA && (p.packageType != 'Solution');
+    return p.installed && p.installedIsWPA && (p.packageType != PACKAGE_TYPE_MODULE) && (p.packageType != PACKAGE_TYPE_SOLUTION);
   }
 
   isLatestRelease(p: Package): boolean {
@@ -97,37 +86,25 @@ export class PackagesComponent implements OnInit {
     return this.wpmService.getAllSolutions();
   }
 
-  getUpgradeCount(packages: Package[]): number {
-    let count = 0;
-    try {
-      for (let i = 0; i < packages.length; i++) {
-          let pckg = packages[i];
-          if (pckg.installed && pckg.installed < pckg.releases[0].version) {
-            count++;
-          }
-      }
-    } catch (e) {}
-    return count;
-  }
-
   getReleaseTooltip(p: Package): string {
     if (p.installed) { 
       return "Released versions";
     } else {
-      return "Version to add to the active solution or modules...";
+      return this.needsActiveSolution(p) ? "Version to add to the active solution or modules..." : "Version to install";
     }
   }
 
   getInstallTooltip(p: Package): string {
+    const packageType = p.packageType == PACKAGE_TYPE_MODULE ? "module" : p.packageType == PACKAGE_TYPE_SOLUTION ? "solution" : "web package";
     if (p.installed) { 
       const installedVersion = p.installed == 'unknown' ? '' : p.installed;
       return p.installing ?
-        (p.selected > installedVersion ? "Upgrading the web package..." : "Downgrading the web package...") :
-        (p.selected > installedVersion ? "Upgrade the web package to the selected release version." : "Downgrade the web package to the selected release version.");
+        (p.selected > installedVersion ? "Upgrading the " + packageType + "..." : "Downgrading the " + packageType + "...") :
+        (p.selected > installedVersion ? "Upgrade the " + packageType + " to the selected release version." : "Downgrade the " + packageType + " to the selected release version.");
     } else if(p.installing) {
-      return "Adding the web package...";		      
+      return "Adding the " + packageType + "...";		      
     } else {
-      return "Add the web package to solution '" + p.activeSolution + "'.";
+      return this.needsActiveSolution(p) ? "Add the " + packageType + " to solution '" + p.activeSolution + "'." : "Install the " + packageType;
     }    
   }
 
@@ -151,5 +128,9 @@ export class PackagesComponent implements OnInit {
     } else {
       return "Solution that this package will be added to if you press the 'Add' button.";
     }    
+  }
+
+  needsActiveSolution(p: Package): boolean {
+    return p.packageType != PACKAGE_TYPE_SOLUTION;
   }
 }
