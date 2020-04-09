@@ -301,12 +301,11 @@ public class ValueCollectionProvider implements IMemberEvaluator
 									}
 								}
 							}
+							if (formCollection != null) ValueCollectionFactory.copyInto(vc, formCollection);
+							return vc;
 						}
 					}
 				}
-
-				if (formCollection != null) ValueCollectionFactory.copyInto(vc, formCollection);
-				return vc;
 			}
 		}
 		return formCollection;
