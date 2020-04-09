@@ -54,6 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
@@ -162,6 +163,7 @@ public class Activator extends AbstractUIPlugin
 						{
 							ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 							final Map<String, Set<String>> processedPackages = new HashMap<>();
+							SpecProviderState componentSpecProvider = WebComponentSpecProvider.getSpecProviderState();
 							for (final ServoyProject module : modules)
 							{
 								module.getSolution().acceptVisitor(new IPersistVisitor()
@@ -173,23 +175,33 @@ public class Activator extends AbstractUIPlugin
 										String missingPackage = null;
 										if (o instanceof WebComponent && ((WebComponent)o).getTypeName() != null)
 										{
-											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-												.getWebComponentSpecification(
-													((WebComponent)o).getTypeName());
+											WebObjectSpecification spec = componentSpecProvider.getWebComponentSpecification(((WebComponent)o).getTypeName());
 											if (spec == null)
 											{
-												missingPackage = ((WebComponent)o).getTypeName().split("-")[0];
+												// see if package is there or not; the component is not present
+												String packageName = ((WebComponent)o).getTypeName().split("-")[0];
+												if (componentSpecProvider.getPackageReader(packageName) == null)
+												{
+													missingPackage = packageName;
+												} // else the component is not there but the package is there; this can happen for example if you use a project package
+													// and you edit a spec file and save it with errors; that results in a component that is not recognized, but is there with errors
+													// and you also have and error problem marker or more for that; in this case we shouldn't offer to import the package automatically
 											}
 										}
 										if (o instanceof LayoutContainer)
 										{
-											PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState()
-												.getLayoutSpecifications()
-												.get(
-													((LayoutContainer)o).getPackageName());
+											PackageSpecification<WebLayoutSpecification> pkg = componentSpecProvider.getLayoutSpecifications()
+												.get(((LayoutContainer)o).getPackageName());
 											if (pkg == null)
 											{
-												missingPackage = ((LayoutContainer)o).getPackageName();
+												// see if package is there or not; the layout is not present
+												String packageName = ((LayoutContainer)o).getPackageName();
+												if (componentSpecProvider.getPackageReader(packageName) == null)
+												{
+													missingPackage = packageName;
+												} // else the layout is not there but the package is there; this can happen for example if you use a project package
+													// and you edit a spec file and save it with errors; that results in a layout that is not recognized, but is there with errors
+													// and you also have and error problem marker or more for that; in this case we shouldn't offer to import the package automatically
 											}
 										}
 										if (missingPackage != null)

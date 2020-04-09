@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -84,7 +86,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 		Map<String, Pair<String, InputStream>> solutionsWithDependencies = new HashMap<String, Pair<String, InputStream>>();
 		Map<String, Pair<String, InputStream>> webpackagesWithDependencies = new HashMap<String, Pair<String, InputStream>>();
 		Map<String, String> packagesInstalledResources = new HashMap<String, String>();
-		getPackageWithDependencies(pck, selectedVersion, selectedSolution, solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources);
+		getPackageWithDependencies(pck, selectedVersion, selectedSolution, solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources,
+			new ArrayList<String>());
 
 		IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(selectedSolution, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 		for (String packageName : webpackagesWithDependencies.keySet())
@@ -121,7 +124,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 	private static void getPackageWithDependencies(JSONObject pck, String selectedVersion, String selectedSolution,
 		Map<String, Pair<String, InputStream>> solutionsWithDependencies, Map<String, Pair<String, InputStream>> webpackagesWithDependencies,
-		Map<String, String> packagesInstalledResources)
+		Map<String, String> packagesInstalledResources, List<String> installActions)
 		throws IOException
 	{
 		JSONArray jsonArray = pck.getJSONArray("releases");
@@ -226,24 +229,34 @@ public class InstallWebPackageHandler implements IDeveloperService
 												int[] response = { Window.OK };
 												if (!installedVersion.isEmpty())
 												{
-													Display.getDefault().syncExec(new Runnable()
+													if (installActions.contains(nameAndVersion[0] + installVersion))
 													{
-														public void run()
+														// already handled
+														response[0] = Window.CANCEL;
+													}
+													else
+													{
+														Display.getDefault().syncExec(new Runnable()
 														{
-															response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager",
-																null,
-																"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
-																	", but you already have version " + installedVersion +
-																	" installed. Do you want to overwrite the installed one?",
-																MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL },
-																0).open();
-														}
-													});
+															public void run()
+															{
+																response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager",
+																	null,
+																	"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
+																		", but you already have version " + installedVersion +
+																		" installed. Do you want to overwrite the installed one?",
+																	MessageDialog.QUESTION,
+																	new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL },
+																	0).open();
+															}
+														});
+														installActions.add(nameAndVersion[0] + installVersion);
+													}
 												}
 												if (response[0] == Window.OK)
 												{
 													getPackageWithDependencies(pckObject, installVersion, selectedSolution, solutionsWithDependencies,
-														webpackagesWithDependencies, packagesInstalledResources);
+														webpackagesWithDependencies, packagesInstalledResources, installActions);
 												}
 												break;
 											}
@@ -256,7 +269,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 									if (installedVersion.isEmpty())
 									{
 										getPackageWithDependencies(pckObject, releases.getJSONObject(0).optString("version"), selectedSolution,
-											solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources);
+											solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources, installActions);
 									}
 								}
 								break;

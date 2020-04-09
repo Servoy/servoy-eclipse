@@ -15,16 +15,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<all.url>http://developer.servoy.com/p2_repository/2020.03</all.url>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>all</id>
-			<url>${all.url}</url>
-			<layout>p2</layout>
-		</repository>
-	</repositories>
+
 
 	<build>
 		<plugins>
@@ -49,6 +42,13 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho.version}</version>
 				<configuration>
+					<target>
+						<artifact>
+							<groupId>com.servoy</groupId>
+							<artifactId>com.servoy.eclipse.target</artifactId>
+							<version>${project.parent.version}</version>
+						</artifact>
+					</target>
 					<pomDependencies>consider</pomDependencies>
 					<resolver>p2</resolver>
 					<environments>
@@ -225,6 +225,12 @@
 
 	<profiles>
 		<profile>
+			<id>target</id>
+			<modules>
+				<module>launch_targets</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>product</id>
 			<modules>
 				<module>com.servoy.jre.linux.x86_64</module>
@@ -270,6 +276,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
+				<module>launch_targets</module>
 				<module>com.servoy.eclipse.model</module>
 				<module>com.servoy.eclipse.model.exporter.mobile</module>
 				<module>com.servoy.eclipse.core</module>
@@ -289,7 +296,6 @@
 				<module>com.servoy.eclipse.profiler</module>
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
-				<module>org.eclipse.help.ui</module>
 				<module>org.eclipse.jface</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>

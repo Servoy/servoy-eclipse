@@ -65,7 +65,7 @@ public class MethodTemplatesLoader
 						counter++;
 					}
 				}
-				System.out.println("Loaded " + counter + " method templates.");
+				ServoyLog.logInfo("Loaded " + counter + " method templates.");
 			}
 			catch (Throwable e)
 			{

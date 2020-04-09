@@ -47,7 +47,7 @@ public class XMLDesignDocsLoader
 				{
 					Date start = new Date();
 					docManager = documentationManagerProvider.fromXML(url, null);
-					System.out.println("Designtime documentation initialized successfully in " + (new Date().getTime() - start.getTime()) + " ms.");
+					ServoyLog.logInfo("Designtime documentation initialized successfully in " + (new Date().getTime() - start.getTime()) + " ms.");
 				}
 			}
 			catch (Throwable t)

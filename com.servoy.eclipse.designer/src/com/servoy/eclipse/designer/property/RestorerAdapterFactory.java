@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdapterFactory;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -101,6 +102,12 @@ public class RestorerAdapterFactory implements IAdapterFactory
 				{
 					v = ((ServoyJSONObject)v).clone();
 				}
+				else if (v instanceof JSONObject)
+				{
+					// deep copy
+					v = new JSONObject(v.toString());
+				}
+
 				cloned.put(key, v);
 			}
 			return cloned;

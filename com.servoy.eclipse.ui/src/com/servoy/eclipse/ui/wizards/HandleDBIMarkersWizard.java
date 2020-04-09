@@ -85,7 +85,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 
 /**
  * @author lvostinar
- * 
+ *
  * Handles dbi markers quickfix in a wizard.
  */
 public class HandleDBIMarkersWizard extends Wizard
@@ -219,7 +219,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 		/**
 		 * Create a new instance of the receiver.
-		 * 
+		 *
 		 * @param problemDescription
 		 *            the description of the problem being fixed
 		 * @param resolutions
@@ -294,7 +294,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 		/**
 		 * Create the table buttons for the receiver.
-		 * 
+		 *
 		 * @param control
 		 * @return {@link Composite}
 		 */
@@ -317,7 +317,7 @@ public class HandleDBIMarkersWizard extends Wizard
 			{
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 				 */
 				@Override
@@ -336,7 +336,7 @@ public class HandleDBIMarkersWizard extends Wizard
 			{
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 				 */
 				@Override
@@ -388,7 +388,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 		/**
 		 * Create the table that shows the markers.
-		 * 
+		 *
 		 * @param control
 		 */
 		private void createMarkerTable(Composite control)
@@ -401,7 +401,7 @@ public class HandleDBIMarkersWizard extends Wizard
 			{
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 				 */
 				public void dispose()
@@ -411,7 +411,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 				 */
 				public Object[] getElements(Object inputElement)
@@ -431,7 +431,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 				 */
 				public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
@@ -445,7 +445,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
 				 */
 				public Image getColumnImage(Object element, int columnIndex)
@@ -456,13 +456,13 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
 				 */
 				public String getColumnText(Object element, int columnIndex)
 				{
 					IMarker marker = (IMarker)element;
-					if (columnIndex == 0) return Util.getResourceName(marker);
+					if (columnIndex == 0) return Util.getContainerName(marker);
 
 					// Is the location override set?
 					String locationString = marker.getAttribute(IMarker.LOCATION, MarkerSupportInternalUtilities.EMPTY_STRING);
@@ -482,7 +482,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(org.eclipse.jface.viewers.ILabelProviderListener)
 				 */
 				public void addListener(ILabelProviderListener listener)
@@ -493,7 +493,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
 				 */
 				public void dispose()
@@ -504,7 +504,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(java.lang.Object, java.lang.String)
 				 */
 				public boolean isLabelProperty(Object element, String property)
@@ -514,7 +514,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(org.eclipse.jface.viewers.ILabelProviderListener)
 				 */
 				public void removeListener(ILabelProviderListener listener)
@@ -528,7 +528,7 @@ public class HandleDBIMarkersWizard extends Wizard
 			{
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
 				 */
 				public void checkStateChanged(CheckStateChangedEvent event)
@@ -571,7 +571,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 		/**
 		 * Return the marker being edited.
-		 * 
+		 *
 		 * @return IMarker or <code>null</code>
 		 */
 		public IMarker getSelectedMarker()
@@ -587,7 +587,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.wizard.WizardPage#isPageComplete()
 		 */
 		@Override
@@ -624,7 +624,7 @@ public class HandleDBIMarkersWizard extends Wizard
 					{
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.jface.operation.IRunnableWithProgress#run(org.eclipse.core.runtime.IProgressMonitor)
 						 */
 						public void run(IProgressMonitor monitor)
@@ -655,7 +655,7 @@ public class HandleDBIMarkersWizard extends Wizard
 					{
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.jface.operation.IRunnableWithProgress#run(org.eclipse.core.runtime.IProgressMonitor)
 						 */
 						public void run(IProgressMonitor monitor)
@@ -688,7 +688,7 @@ public class HandleDBIMarkersWizard extends Wizard
 
 		/**
 		 * Return the marker resolution that is currently selected/
-		 * 
+		 *
 		 * @return IMarkerResolution or <code>null</code> if there is no
 		 *         selection.
 		 */

@@ -37,7 +37,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -144,7 +143,7 @@ final public class ExportSolutionJob extends WorkspaceJob
 				exportModel.isExportMetaData() && !dbDown, exportModel.isExportSampleData() && !dbDown, exportModel.getNumberOfSampleDataExported(),
 				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
 				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null,
-				exportModel.isExportReferencedWebPackages() ? getModulesWebPackages() : null);
+				exportModel.isExportReferencedWebPackages() ? getModulesWebPackages() : null, true);
 
 			if (exportModel.isSaveImportSettingsToDisk() && exportModel.useImportSettings())
 			{

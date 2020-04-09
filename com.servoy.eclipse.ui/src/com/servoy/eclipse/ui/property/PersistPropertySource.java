@@ -2821,6 +2821,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				DatasourceLabelProvider.INSTANCE_NO_IMAGE_FULLY_QUALIFIED);
 		}
 
+		if (id.equals("version"))
+		{
+			return new VersionPropertyController(id, displayName);
+		}
 
 		return null;
 	}

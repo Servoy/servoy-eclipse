@@ -17,7 +17,10 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -36,7 +39,6 @@ import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -106,6 +108,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 	 *
 	 */
 	private static final String EXPORT_REFERENCED_MODULES = "exportReferencedModules";
+	private static final String EXPORTED_MODULES = "exportedModules";
 
 	/**
 	 *
@@ -200,6 +203,11 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		dialogSettings.put(PROTECT_WITH_PASSWORD, exportModel.isProtectWithPassword());
 		dialogSettings.put(EXPORT_REFERENCED_MODULES, exportModel.isExportReferencedModules());
 		dialogSettings.put(EXPORT_REFERENCED_WEB_PACKAGES, exportModel.isExportReferencedWebPackages());
+		if (exportModel.isExportReferencedModules())
+		{
+			dialogSettings.put(EXPORTED_MODULES,
+				exportModel.getModulesToExport() == null ? null : Arrays.stream(exportModel.getModulesToExport()).collect(Collectors.joining(",")));
+		}
 		dialogSettings.put(EXPORT_ALL_TABLES_FROM_REFERENCED_SERVERS, exportModel.isExportAllTablesFromReferencedServers());
 		dialogSettings.put(EXPORT_META_DATA, exportModel.isExportMetaData());
 		dialogSettings.put(CHECK_METADATA_TABLES, exportModel.isCheckMetadataTables());
@@ -276,6 +284,8 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 			exportModules = exportModules && dialogSettings.getBoolean(EXPORT_REFERENCED_MODULES);
 		}
 		exportModel.setExportReferencedModules(exportModules);
+		exportModel
+			.setModulesToExport(dialogSettings.get(EXPORTED_MODULES) != null ? dialogSettings.get(EXPORTED_MODULES).split(",") : null);
 
 		exportModel.setExportReferencedWebPackages(dialogSettings.getBoolean(EXPORT_REFERENCED_WEB_PACKAGES));
 		exportModel.setExportAllTablesFromReferencedServers(dialogSettings.getBoolean(EXPORT_ALL_TABLES_FROM_REFERENCED_SERVERS));
@@ -351,7 +361,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 				{
 					if (event.getSelectedPage() == modulesSelectionPage)
 					{
-						modulesSelectionPage.checkStateChanged(null);
+						modulesSelectionPage.handleEvent(null);
 					}
 					if (event.getSelectedPage() == passwordPage)
 					{
@@ -396,7 +406,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		if (currentPage == exportConfirmationPage) return false;
 		if (exportModel.isExportReferencedModules() && currentPage == exportOptionsPage)
 		{
-			modulesSelectionPage.checkStateChanged(null);
+			modulesSelectionPage.handleEvent(null);
 			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !modulesSelectionPage.hasDBDownErrors()) return false;
 		}
 		if (currentPage == modulesSelectionPage)
@@ -405,6 +415,8 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 		}
 		if (exportModel.useImportSettings() && (currentPage != importPage) && (currentPage != deployProgressPage)) return false;
 		if (currentPage == importPage && deployToApplicationServer) return false;
+		if (Strings.isEmpty(getActiveSolution().getVersion()) || exportModel.isExportReferencedModules() && !modulesSelectionPage.solutionVersionsPresent)
+			return false;
 		return exportModel.canFinish();
 	}
 

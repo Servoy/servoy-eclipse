@@ -17,61 +17,101 @@
 
 package com.servoy.eclipse.ui.wizards.exportsolution.pages;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.IDeveloperServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
 /**
  * @author gboros
  *
  */
-public class ModulesSelectionPage extends ListSelectionPage
+public class ModulesSelectionPage extends WizardPage implements Listener
 {
 	public static final String DB_DOWN_WARNING = "Error markers will be ignored because the DB seems to be offline (.dbi files will be used instead).";
 
 	private final ExportSolutionWizard exportSolutionWizard;
 	public int projectProblemsType = BuilderUtils.HAS_NO_MARKERS;
 	private boolean moduleDbDownErrors = false;
+	public boolean solutionVersionsPresent = false;
+	private boolean applyChanges = true;
+
+	private ArrayList<Button> checks;
+	private Button checkAll;
+	private final ArrayList<Label> warnLabels = new ArrayList<Label>();
+	private final EclipseRepository repository;
+	private String[] referencedModules;
 
 	public ModulesSelectionPage(ExportSolutionWizard exportSolutionWizard)
 	{
-		super("page3", "Choose modules to export", "Select additional modules that you want to have exported too");
+		super("page3");
+		setTitle("Choose modules to export");
+		setDescription("Select additional modules that you want to have exported too");
 		this.exportSolutionWizard = exportSolutionWizard;
+		referencedModules = getEntries();
+		repository = (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository();
 	}
 
-	@Override
 	String[] getEntries()
 	{
-		String[] moduleNames = null;
+		referencedModules = null;
 		try
 		{
 			Map<String, Solution> modules = new HashMap<String, Solution>();
 			exportSolutionWizard.getActiveSolution().getReferencedModulesRecursive(modules);
 			if (modules.containsKey(exportSolutionWizard.getActiveSolution().getName())) modules.remove(exportSolutionWizard.getActiveSolution().getName());
-			moduleNames = modules.keySet().toArray(new String[modules.keySet().size()]);
+			referencedModules = modules.keySet().toArray(new String[modules.keySet().size()]);
 		}
 		catch (Exception e)
 		{
 			Debug.error("Failed to retrieve referenced modules for solution.", e);
 		}
-		Arrays.sort(moduleNames);
+		Arrays.sort(referencedModules);
 
-		return moduleNames;
+		return referencedModules;
 	}
 
-	public void checkStateChanged(CheckStateChangedEvent event)
+	public void handleEvent(Event event)
 	{
+		if (!applyChanges) return;
+
 		initializeModulesToExport();
 		projectProblemsType = BuilderUtils.getMarkers(exportSolutionWizard.getModel().getModulesToExport());
 		if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
@@ -101,23 +141,23 @@ public class ModulesSelectionPage extends ListSelectionPage
 				"There are warnings in the modules that may prevent the solution from functioning well. You may want to solve warnings (problems view) first.",
 				IMessageProvider.WARNING);
 		}
+		if (!solutionVersionsPresent)
+		{
+			setMessage("Please set a version number for the exported modules to be able to complete the export.", IMessageProvider.WARNING);
+		}
 
 		if (isCurrentPage()) getWizard().getContainer().updateButtons();
 
 		exportSolutionWizard.getExportOptionsPage().refreshDBIDownFlag(hasDBDownErrors());
 
-		if (treeViewer.getCheckedElements().length == treeViewer.getTree().getItemCount() && treeViewer.getCheckedElements().length == 0)
+		applyChanges = false;
+		checkAll.setSelection(getSelectedModules().length == referencedModules.length);
+		if (getSelectedModules().length == 0)
 		{
-			selectAllButtons.disableButtons();
+			//hide all warnings if no modules are selected
+			warnLabels.stream().forEach(label -> label.setVisible(false));
 		}
-		else if (treeViewer.getCheckedElements().length < treeViewer.getTree().getItemCount())
-		{
-			selectAllButtons.enableAll();
-		}
-		else
-		{
-			selectAllButtons.disableSelectAll();
-		}
+		applyChanges = true;
 	}
 
 	/**
@@ -138,26 +178,161 @@ public class ModulesSelectionPage extends ListSelectionPage
 
 	protected void initializeModulesToExport()
 	{
-		Object[] currentSelection = treeViewer.getCheckedElements();
-		if (currentSelection.length > 0)
-		{
-			String[] moduleNames = new String[currentSelection.length];
-			for (int i = 0; i < currentSelection.length; i++)
-				moduleNames[i] = ((String)currentSelection[i]);
-			exportSolutionWizard.getModel().setModulesToExport(moduleNames);
-		}
-		else exportSolutionWizard.getModel().setModulesToExport(null);
+		String[] moduleNames = getSelectedModules();
+		exportSolutionWizard.getModel().setModulesToExport(moduleNames);
+		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		solutionVersionsPresent = !Strings.isEmpty(exportSolutionWizard.getActiveSolution().getVersion()) && (moduleNames.length == 0 ||
+			Arrays.stream(moduleNames).noneMatch(name -> Strings.isEmpty(servoyModel.getServoyProject(name).getSolution().getVersion())));
+	}
+
+	protected String[] getSelectedModules()
+	{
+		return checks.stream().filter(check -> check.getSelection()).map(check -> check.getText()).toArray(String[]::new);
 	}
 
 	@Override
 	public boolean canFlipToNextPage()
 	{
-		return (projectProblemsType == BuilderUtils.HAS_NO_MARKERS || projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS) && super.canFlipToNextPage();
+		return solutionVersionsPresent && (projectProblemsType == BuilderUtils.HAS_NO_MARKERS || projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS) &&
+			super.canFlipToNextPage();
 	}
 
 	@Override
 	public void performHelp()
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.ui.export_solution_module_selection");
+	}
+
+	@Override
+	public void createControl(Composite parent)
+	{
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.numColumns = 3;
+
+		Composite composite = new Composite(parent, SWT.NONE);
+		Color backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+		composite.setBackground(backgroundColor);
+		composite.setLayout(gridLayout);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridData gd = new GridData(SWT.LEFT, SWT.BEGINNING, true, false);
+		gd.horizontalIndent = 10;
+		gd.widthHint = 200;
+
+		FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont());
+		descriptor = descriptor.setStyle(SWT.BOLD);
+		Font font = descriptor.createFont(getShell().getDisplay());
+
+		checkAll = new Button(composite, SWT.CHECK);
+		checkAll.setText("Select/Deselect All");
+		checkAll.setFont(font);
+		checkAll.setBackground(backgroundColor);
+		checkAll.addListener(SWT.Selection, e -> {
+			checks.stream().forEach(check -> check.setSelection(checkAll.getSelection()));
+			handleEvent(null);
+		});
+
+		Label versionLabel = new Label(composite, SWT.NONE);
+		versionLabel.setText("Version");
+		versionLabel.setFont(font);
+		versionLabel.setBackground(backgroundColor);
+		versionLabel.setLayoutData(gd);
+		new Label(composite, SWT.NONE);
+
+		final IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		Image warn = Activator.getDefault().loadImageFromBundle("warning.png");
+
+		checks = new ArrayList<Button>();
+		for (String module : getEntries())
+		{
+			ServoyProject moduleProject = servoyModel.getServoyProject(module);
+			if (moduleProject == null)
+			{
+				Debug.error("Module '"+module+"' project was not found, cannot export it.");
+				continue;
+			}
+			Button moduleCheck = new Button(composite, SWT.CHECK);
+			moduleCheck.setBackground(backgroundColor);
+			moduleCheck.setText(module);
+			moduleCheck.setSelection(exportSolutionWizard.getModel().getModulesToExport() == null ? true
+				: Arrays.stream(exportSolutionWizard.getModel().getModulesToExport()).anyMatch(name -> module.equals(name)));
+			moduleCheck.addListener(SWT.Selection, this);
+			checks.add(moduleCheck);
+
+			Text version = new Text(composite, SWT.BORDER);
+			Label label = new Label(composite, SWT.ICON);
+			String v = moduleProject.getSolution().getVersion();
+			if (v == null)
+			{
+				//if it's a module installed via WPM we can get the version from there
+				v = getSPMVersion(moduleProject);
+				if (v != null) setSolutionVersion(servoyModel, module, v, false);
+			}
+			version.setText(v == null ? "" : v);
+			version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			version.addListener(SWT.FocusOut, event -> {
+				setSolutionVersion(servoyModel, module, version.getText(), true);
+				handleEvent(null);
+				label.setVisible(Strings.isEmpty(version.getText()));
+			});
+
+			label.setImage(warn);
+			label.setVisible(Strings.isEmpty(v));
+			label.setToolTipText("Please set a version for  module '" + module + "'.");
+			label.setBackground(backgroundColor);
+			label.setLayoutData(gd);
+			warnLabels.add(label);
+		}
+		initializeModulesToExport();
+
+		setControl(composite);
+	}
+
+	protected boolean setSolutionVersion(final IDeveloperServoyModel servoyModel, String module, String version, boolean displayError)
+	{
+		Solution solution = servoyModel.getServoyProject(module).getEditingSolution();
+		if (version.trim().equals(solution.getVersion())) return false;
+		solution.setVersion(version.trim());
+		try
+		{
+			repository.updateRootObject(solution);
+			if (isCurrentPage()) getWizard().getContainer().updateButtons();
+		}
+		catch (RepositoryException ex)
+		{
+			Debug.error(ex);
+			if (displayError)
+			{
+				Display.getDefault().syncExec(() -> {
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot set the version for module '" + module + "'.",
+						ex.getMessage());
+				});
+			}
+			return false;
+		}
+		return true;
+	}
+
+	protected String getSPMVersion(ServoyProject solutionProject)
+	{
+		File wpmPropertiesFile = new File(solutionProject.getProject().getLocation().toFile(), "wpm.properties");
+		if (wpmPropertiesFile.exists())
+		{
+			Properties wpmProperties = new Properties();
+
+			try (FileInputStream wpmfis = new FileInputStream(wpmPropertiesFile))
+			{
+				wpmProperties.load(wpmfis);
+				String version = wpmProperties.getProperty("version");
+				if (version != null)
+				{
+					return version;
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.log(ex);
+			}
+		}
+		return null;
 	}
 }
