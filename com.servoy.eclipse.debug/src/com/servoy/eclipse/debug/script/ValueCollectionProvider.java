@@ -325,8 +325,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			Set<IFile> files = sr.get().files();
 			// this includes its own so we need to strip that.
-			System.err.println("for: " + resource + ":: " + files);
-			return files.stream().filter(file -> !file.equals(resource)).collect(Collectors.toSet());
+			Set<IFile> collect = files.stream().filter(file -> !file.equals(resource)).collect(Collectors.toSet());
+			return collect;
 		}
 		return Collections.emptyList();
 	}
@@ -338,7 +338,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			IFile resource = (IFile)context.getModelElement().getResource();
 			if (resource != null && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 			{
-				System.err.println(" top value of " + resource + "  " + context);
 				// javascript file
 				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs != null)
