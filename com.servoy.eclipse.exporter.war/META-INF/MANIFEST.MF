@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy War Exporter Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.exporter.war;singleton:=true
-Bundle-Version: 2020.3.0.3560_rc
+Bundle-Version: 2020.6.0.3580_rc
 Bundle-Activator: com.servoy.eclipse.warexporter.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.resources,
  org.eclipse.ui,
+ org.eclipse.jface,
  org.eclipse.core.runtime,
  servoy_shared,
  org.eclipse.core.databinding,

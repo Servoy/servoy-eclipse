@@ -24,7 +24,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.ScriptProviderCellEditor;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodPropertySource;
@@ -35,7 +34,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.ScopesUtils;
@@ -72,48 +70,41 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 			{
 				if (value == null || value.length() == 0) return NONE;
 
-				try
+				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
+
+				// try global method
+				IPersist method = flattenedSolution.getScriptMethod(null, value);
+
+				if (method == null && table != null)
 				{
-					FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-
-					// try global method
-					IPersist method = flattenedSolution.getScriptMethod(null, value);
-
-					if (method == null && table != null)
+					// try calc or foundset method
+					Iterator<TableNode> tableNodes = flattenedSolution.getTableNodes(table);
+					while (method == null && tableNodes.hasNext())
 					{
-						// try calc or foundset method
-						Iterator<TableNode> tableNodes = flattenedSolution.getTableNodes(table);
-						while (method == null && tableNodes.hasNext())
-						{
-							method = AbstractBase.selectByName(tableNodes.next().getAllObjects(), value);
-						}
-					}
-
-					IPersist persist = persistContext.getPersist();
-					if (method != null)
-					{
-						SafeArrayList<Object> args = null;
-						if (persist instanceof AbstractBase)
-						{
-							List<Object> instanceArgs = ((AbstractBase)persist).getFlattenedMethodArguments(id.toString());
-							if (instanceArgs != null)
-							{
-								args = new SafeArrayList<Object>(instanceArgs);
-							}
-						}
-						return new ComplexProperty<MethodWithArguments>(MethodWithArguments.create(method, args))
-						{
-							@Override
-							public IPropertySource getPropertySource()
-							{
-								return new MethodPropertySource(this, persistContext, table, getId().toString(), isReadOnly());
-							}
-						};
+						method = AbstractBase.selectByName(tableNodes.next().getAllObjects(), value);
 					}
 				}
-				catch (RepositoryException e)
+
+				IPersist persist = persistContext.getPersist();
+				if (method != null)
 				{
-					ServoyLog.logError(e);
+					SafeArrayList<Object> args = null;
+					if (persist instanceof AbstractBase)
+					{
+						List<Object> instanceArgs = ((AbstractBase)persist).getFlattenedMethodArguments(id.toString());
+						if (instanceArgs != null)
+						{
+							args = new SafeArrayList<Object>(instanceArgs);
+						}
+					}
+					return new ComplexProperty<MethodWithArguments>(MethodWithArguments.create(method, args))
+					{
+						@Override
+						public IPropertySource getPropertySource()
+						{
+							return new MethodPropertySource(this, persistContext, table, getId().toString(), isReadOnly());
+						}
+					};
 				}
 
 				return new UnresolvedMethodWithArguments(value);

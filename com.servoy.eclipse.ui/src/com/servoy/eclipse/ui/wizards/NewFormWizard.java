@@ -49,6 +49,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
+import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -667,6 +669,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 			boolean activeSolutionMobile = SolutionMetaData.isServoyMobileSolution(getActiveSolution());
+			boolean isNGSolution = SolutionMetaData.isNGOnlySolution(servoyProject.getSolutionMetaData().getSolutionType());
 
 			Label formNameLabel = new Label(topLevel, SWT.NONE);
 			formNameLabel.setText("&Form name");
@@ -771,6 +774,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			Control extendsFormControl = extendsFormViewer.getControl();
 
 			Label styleLabel = new Label(topLevel, SWT.NONE);
+			styleLabel.setVisible(isNGSolution ? false : true);
 			styleLabel.setText("St&yle");
 			styleLabel.setEnabled(!activeSolutionMobile && !SolutionMetaData.isNGOnlySolution(getActiveSolution().getSolutionType()));
 			styleNameCombo = new ComboViewer(topLevel, SWT.BORDER | SWT.READ_ONLY);
@@ -900,44 +904,69 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
-			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
-					styleLabel).add(templateLabel).add(workingSetLabel).add(typeFormLabel)).add(15, 15, 15).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(typeFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
-							projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
-								Short.MAX_VALUE).add(workingSetNameCombo.getCombo(), GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(styleNameComboControl,
-									GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
-										dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
-											groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374,
-												Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED))).addContainerGap()));
-			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(formNameLabel).add(
-					formNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.CENTER).add(
-							groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(dataSOurceControl)).add(
-								datasourceLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-									groupLayout.createParallelGroup(GroupLayout.CENTER).add(extendsLabel).add(extendsFormControl, GroupLayout.PREFERRED_SIZE,
-										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-											groupLayout.createParallelGroup(GroupLayout.CENTER).add(styleNameComboControl, GroupLayout.PREFERRED_SIZE,
-												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(styleLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-													groupLayout.createParallelGroup(GroupLayout.CENTER).add(templateNameComboControl,
-														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
-															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(workingSetNameCombo.getCombo(),
-																			GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																			GroupLayout.PREFERRED_SIZE).add(workingSetLabel)).addPreferredGap(
-																				LayoutStyle.RELATED).add(
-																					groupLayout.createParallelGroup(GroupLayout.CENTER).add(typeFormLabel).add(
-																						typeFormControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																						GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																							groupLayout.createParallelGroup(
-																								GroupLayout.CENTER)).addContainerGap(100, Short.MAX_VALUE)));
+			SequentialGroup sequentialHorizontalGroup = groupLayout.createSequentialGroup().addContainerGap();
+
+			ParallelGroup parallelGroupForHorizontalLabels = groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel)
+				.add(datasourceLabel).add(projectLabel);
+
+			ParallelGroup parallelGroupForHorizontalValues = groupLayout.createParallelGroup(GroupLayout.LEADING)
+				.add(typeFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+				.add(projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+				.add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+				.add(workingSetNameCombo.getCombo(), GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE);
+
+			if (!isNGSolution)
+			{
+				parallelGroupForHorizontalLabels.add(styleLabel);
+				parallelGroupForHorizontalValues.add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE);
+			}
+
+			parallelGroupForHorizontalLabels.add(templateLabel).add(workingSetLabel).add(typeFormLabel);
+			parallelGroupForHorizontalValues.add(extendsFormControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+				.add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+				.add(groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+					.addPreferredGap(LayoutStyle.RELATED));
+
+			groupLayout.setHorizontalGroup(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(sequentialHorizontalGroup.add(parallelGroupForHorizontalLabels).add(15, 15, 15)
+					.add(parallelGroupForHorizontalValues).addContainerGap()));
+
+			SequentialGroup sequentialVerticalGroup = groupLayout.createSequentialGroup().addContainerGap()
+				.add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(formNameLabel)
+					.add(formNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER)
+					.add(groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(dataSOurceControl)).add(datasourceLabel))
+				.addPreferredGap(LayoutStyle.RELATED)
+				.add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(extendsLabel).add(extendsFormControl, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+
+			if (!isNGSolution)
+			{
+				sequentialVerticalGroup.addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.CENTER).add(styleNameComboControl, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(styleLabel));
+			}
+
+			sequentialVerticalGroup
+				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(templateNameComboControl,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(templateLabel))
+				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(workingSetNameCombo.getCombo(),
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(workingSetLabel))
+				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(typeFormLabel)
+					.add(typeFormControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(100, Short.MAX_VALUE);
+
+			groupLayout.setVerticalGroup(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(sequentialVerticalGroup));
+
 			topLevel.setLayout(groupLayout);
-			topLevel.setTabList(
-				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, workingSetNameCombo.getCombo(), typeFormControl });
+			topLevel.setTabList((isNGSolution)
+				? new Control[] { formNameField, dataSOurceControl, extendsFormControl, templateNameComboControl, projectComboControl, workingSetNameCombo
+					.getCombo(), typeFormControl }
+				: new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, workingSetNameCombo
+					.getCombo(), typeFormControl });
 		}
 
 		/**
@@ -1159,7 +1188,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 				if (superForm != null)
 				{
-					boolean isParentLogicalForm = !superForm.isResponsiveLayout() && !superForm.getParts().hasNext();
+					boolean isParentLogicalForm = !superForm.isResponsiveLayout() && !flattenedSolution.getFlattenedForm(superForm).getParts().hasNext();
 					if (!isParentLogicalForm)
 					{
 						if (superForm.isResponsiveLayout())

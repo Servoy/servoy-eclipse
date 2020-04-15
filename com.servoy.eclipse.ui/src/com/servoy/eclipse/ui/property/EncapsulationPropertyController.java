@@ -66,7 +66,7 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 	{
 		private static final int ALL = PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE + PersistEncapsulation.MODULE_SCOPE +
 			PersistEncapsulation.HIDE_CONTROLLER + PersistEncapsulation.HIDE_DATAPROVIDERS + PersistEncapsulation.HIDE_ELEMENTS +
-			PersistEncapsulation.HIDE_FOUNDSET + PersistEncapsulation.HIDE_ELEMENTS;
+			PersistEncapsulation.HIDE_FOUNDSET + PersistEncapsulation.HIDE_CONTAINERS;
 
 		private static final String HIDE_IN_SCRIPTING_MODULE_SCOPE = "hide in scripting; module scope";
 		private static final String MODULE_SCOPE = "module scope";

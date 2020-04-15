@@ -7,9 +7,18 @@ import * as Rx from 'rxjs'
 export const PACKAGE_TYPE_WEB_COMPONENT = "Web-Component";
 export const PACKAGE_TYPE_WEB_SERVICE = "Web-Service";
 export const PACKAGE_TYPE_WEB_LAYOUT = "Web-Layout";
-export const PACKAGE_TYPE_SOLUTION = "Solution";
+export const PACKAGE_TYPE_MODULE = "Solution";
+export const PACKAGE_TYPE_SOLUTION = "Solution-Main";
 
-const ALL_PACKAGE_TYPES = [ PACKAGE_TYPE_WEB_COMPONENT, PACKAGE_TYPE_WEB_SERVICE, PACKAGE_TYPE_WEB_LAYOUT, PACKAGE_TYPE_SOLUTION ];
+export const PACKAGE_TYPE_TO_TITLE_MAP = {
+  "Web-Component": "Components",
+  "Web-Service": "Services",
+  "Web-Layout": "Layouts",
+  "Solution": "Modules",
+  "Solution-Main": "Solutions"
+}
+
+export const ALL_PACKAGE_TYPES = [ PACKAGE_TYPE_WEB_COMPONENT, PACKAGE_TYPE_WEB_SERVICE, PACKAGE_TYPE_WEB_LAYOUT, PACKAGE_TYPE_MODULE, PACKAGE_TYPE_SOLUTION ];
 
 interface Message {
   method: string;

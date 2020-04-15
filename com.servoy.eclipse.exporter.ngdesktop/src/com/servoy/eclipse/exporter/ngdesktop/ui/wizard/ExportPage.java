@@ -51,13 +51,13 @@ public class ExportPage extends WizardPage
 	public static String WINDOWS_PLATFORM = "win";
 	public static String MACOS_PLATFORM = "mac";
 	public static String LINUX_PLATFORM = "linux";
-	
+
 	private Text applicationURLText;
 	private Text saveDirPath;
 	private Button browseDirButton;
 	private Group platformGroup;
-	
-	
+
+
 	private Text iconPath;
 	private Button browseIconButton;
 	private Text imgPath;
@@ -67,8 +67,8 @@ public class ExportPage extends WizardPage
 	private Text widthText;
 	private Text heightText;
 
-	private List<String> selectedPlatforms = new ArrayList<String>();
-	private ExportNGDesktopWizard exportElectronWizard;
+	private final List<String> selectedPlatforms = new ArrayList<String>();
+	private final ExportNGDesktopWizard exportElectronWizard;
 
 	public ExportPage(ExportNGDesktopWizard exportElectronWizard)
 	{
@@ -77,16 +77,17 @@ public class ExportPage extends WizardPage
 		setTitle("Export Servoy application");
 	}
 
+	@Override
 	public void createControl(Composite parent)
 	{
-		Composite rootComposite = new Composite(parent, SWT.NONE);
+		final Composite rootComposite = new Composite(parent, SWT.NONE);
 		rootComposite.setLayout(new FormLayout());
-		
-		GridLayout gridLayout = new GridLayout(3, false);
-		Composite composite = new Composite(rootComposite, SWT.NONE);
+
+		final GridLayout gridLayout = new GridLayout(3, false);
+		final Composite composite = new Composite(rootComposite, SWT.NONE);
 		composite.setLayout(gridLayout);
 
-		Label applicationURLLabel = new Label(composite, SWT.NONE);
+		final Label applicationURLLabel = new Label(composite, SWT.NONE);
 		applicationURLLabel.setText("Servoy application URL");
 		applicationURLText = new Text(composite, SWT.BORDER);
 		applicationURLText.setText(getInitialApplicationURL());
@@ -95,13 +96,13 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 2;
 		applicationURLText.setLayoutData(gd);
 
-		Label platformLabel = new Label(composite, SWT.NONE);
+		final Label platformLabel = new Label(composite, SWT.NONE);
 		platformLabel.setText("Platform");
 
 		platformGroup = new Group(composite, SWT.NONE);
 		platformGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 
-		Button winBtn = new Button(platformGroup, SWT.CHECK);
+		final Button winBtn = new Button(platformGroup, SWT.CHECK);
 		winBtn.setData(WINDOWS_PLATFORM);
 		winBtn.setText("Windows");
 		winBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("win_export"));
@@ -116,7 +117,7 @@ public class ExportPage extends WizardPage
 			}
 		});
 
-		Button macBtn = new Button(platformGroup, SWT.CHECK);
+		final Button macBtn = new Button(platformGroup, SWT.CHECK);
 		macBtn.setText("MacOS");
 		macBtn.setData(MACOS_PLATFORM);
 		macBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("osx_export"));
@@ -131,7 +132,7 @@ public class ExportPage extends WizardPage
 			}
 		});
 
-		Button linuxBtn = new Button(platformGroup, SWT.CHECK);
+		final Button linuxBtn = new Button(platformGroup, SWT.CHECK);
 		linuxBtn.setText("Linux");
 		linuxBtn.setData(LINUX_PLATFORM);
 		linuxBtn.setSelection(exportElectronWizard.getDialogSettings().getBoolean("linux_export"));
@@ -150,17 +151,17 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 2;
 		platformGroup.setLayoutData(gd);
 
-		Label outputDirLabel = new Label(composite, SWT.NONE);
+		final Label outputDirLabel = new Label(composite, SWT.NONE);
 		outputDirLabel.setText("Save directory");
 
 		saveDirPath = new Text(composite, SWT.BORDER);
-		String saveDir = exportElectronWizard.getDialogSettings().get("save_dir");
+		final String saveDir = exportElectronWizard.getDialogSettings().get("save_dir");
 		saveDirPath.setText(saveDir != null ? saveDir : "");
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 1;
 		saveDirPath.setLayoutData(gd);
-		
-		
+
+
 		browseDirButton = new Button(composite, SWT.NONE);
 		browseDirButton.setText("Browse");
 		browseDirButton.addSelectionListener(new SelectionAdapter()
@@ -168,146 +169,146 @@ public class ExportPage extends WizardPage
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.NONE);
+				final DirectoryDialog dlg = new DirectoryDialog(getShell(), SWT.NONE);
 				dlg.setFilterPath(getDlgInitPath(saveDirPath.getText()));
-				String path = dlg.open();
-				if (path != null)
-				{
-					saveDirPath.setText(path);
-				}
+				final String path = dlg.open();
+				if (path != null) saveDirPath.setText(path);
 			}
 		});
 
-			Label iconLabel = new Label(composite, SWT.NONE);
-			iconLabel.setText("Icon path:");
-			iconLabel.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum size (KB): " + ExportNGDesktopWizard.LOGO_SIZE);
-			
-			iconPath = new Text(composite, SWT.BORDER);
-			iconPath.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum file size (KB): " + ExportNGDesktopWizard.LOGO_SIZE);
-			iconPath.setEditable(true);
-			iconPath.setVisible(true);
-			String value = exportElectronWizard.getDialogSettings().get("icon_path");
-			iconPath.setText(value != null ? value : "");
-			gd = new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan = 1;
-			iconPath.setLayoutData(gd);
-			
+		final Label iconLabel = new Label(composite, SWT.NONE);
+		iconLabel.setText("Icon path:");
+		iconLabel.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum size (KB): " + ExportNGDesktopWizard.LOGO_SIZE);
 
-			browseIconButton = new Button(composite, SWT.NONE);
-			browseIconButton.setText("Browse");
-			browseIconButton.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
-					dlg.setFilterExtensions(new String[] { "*.png" });
-					File myFile = new File(getDlgInitPath(iconPath.getText())); //make sure we have a usable path
-					dlg.setFilterPath(myFile.isDirectory() ? myFile.getAbsolutePath() : myFile.getParent());
-					String path = dlg.open();
-					if (path != null)
-					{
-						iconPath.setText(path);
-					}
-				}
-			});
-			
-			Label imgLabel = new Label(composite, SWT.NONE);
-			imgLabel.setText("Image path:");
-			imgLabel.setToolTipText("Bitmap image used in the installer. For Windows installer the recommended size is 164 px width, 314 px height.\nMaximum file size (KB): " + ExportNGDesktopWizard.IMG_SIZE);
-			
-			imgPath = new Text(composite, SWT.BORDER);
-			imgPath.setToolTipText("Bitmap image used in the installer. For Windows installer the recommended size is 164 px width, 314 px height.\nMaximum file size (KB): " + ExportNGDesktopWizard.IMG_SIZE);
-			imgPath.setEditable(true);
-			imgPath.setVisible(true);
-			value = exportElectronWizard.getDialogSettings().get("image_path");
-			imgPath.setText(value != null ? value : "");
-			gd = new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan = 1;
-			imgPath.setLayoutData(gd);
-			
+		iconPath = new Text(composite, SWT.BORDER);
+		iconPath
+			.setToolTipText("Logo image (png) used by the NG Desktop Client and the installer.\nMaximum file size (KB): " + ExportNGDesktopWizard.LOGO_SIZE);
+		iconPath.setEditable(true);
+		iconPath.setVisible(true);
+		String value = exportElectronWizard.getDialogSettings().get("icon_path");
+		iconPath.setText(value != null ? value : "");
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		iconPath.setLayoutData(gd);
 
-			browseImgButton = new Button(composite, SWT.NONE);
-			browseImgButton.setText("Browse");
-			browseImgButton.addSelectionListener(new SelectionAdapter()
+
+		browseIconButton = new Button(composite, SWT.NONE);
+		browseIconButton.setText("Browse");
+		browseIconButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
 			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
-					dlg.setFilterExtensions(new String[] { "*.bmp" });
-					File myFile = new File(getDlgInitPath(imgPath.getText())); //make sure we have a usable path
-					dlg.setFilterPath(myFile.isDirectory() ? myFile.getAbsolutePath() : myFile.getParent());
-					String path = dlg.open();
-					if (path != null)
-					{
-						imgPath.setText(path);
-					}
-				}
-			});
-			
-			Label copyrightLabel = new Label(composite, SWT.NONE);
-			copyrightLabel.setText("Copyright:");
-			copyrightLabel.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
-			
-			copyrightText = new Text(composite, SWT.BORDER);
-			copyrightText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
-			copyrightText.setEditable(true);
-			copyrightText.setVisible(true);
-			value = exportElectronWizard.getDialogSettings().get("copyright");
-			copyrightText.setText(value != null ? value : "");
-			gd = new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan = 2;
-			copyrightText.setLayoutData(gd);
-						
-			Label sizeLabel = new Label(composite, SWT.NONE);
-			sizeLabel.setText("NG Desktop size:");
-			sizeGroup = new Group(composite, SWT.NONE);
-			RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
-			rowLayout.fill = true;
-			sizeGroup.setLayout(rowLayout);
-			
-			widthText = new Text(sizeGroup, SWT.BORDER);
-			value = exportElectronWizard.getDialogSettings().get("ngdesktop_width");
-			widthText.setText(value != null ? value : "");
-			Label widthLabel = new Label(sizeGroup, SWT.NONE);
-			widthLabel.setText("Width  ");
-			
-			heightText = new Text(sizeGroup, SWT.BORDER);
-			value = exportElectronWizard.getDialogSettings().get("ngdesktop_height");
-			heightText.setText(value != null ? value : "");
-			Label heightLabel = new Label(sizeGroup, SWT.NONE);
-			heightLabel.setText("Height");
-			
-			
-			gd = new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan = 2;
-			sizeGroup.setLayoutData(gd);		
-						
-			Label noteLabel = new Label(composite, SWT.NONE);
-			noteLabel.setText("*For now we only support generating Windows branded installers");
-			noteLabel.setEnabled(false); //set to gray
-			gd = new GridData( SWT.FILL, SWT.FILL, true, true );
-			gd.verticalAlignment = GridData.VERTICAL_ALIGN_END;
-			gd.horizontalSpan = 3;
-			noteLabel.setLayoutData(gd);
-			noteLabel.setVisible(true);	
-		
+				final FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
+				dlg.setFilterExtensions(new String[] { "*.png" });
+				final File myFile = new File(getDlgInitPath(iconPath.getText())); //make sure we have a usable path
+				dlg.setFilterPath(myFile.isDirectory() ? myFile.getAbsolutePath() : myFile.getParent());
+				final String path = dlg.open();
+				if (path != null) iconPath.setText(path);
+			}
+		});
+
+		final Label imgLabel = new Label(composite, SWT.NONE);
+		imgLabel.setText("Image path:");
+		imgLabel.setToolTipText(
+			"Bitmap image used in the installer. For Windows installer the recommended size is 164 px width, 314 px height.\nMaximum file size (KB): " +
+				ExportNGDesktopWizard.IMG_SIZE);
+
+		imgPath = new Text(composite, SWT.BORDER);
+		imgPath.setToolTipText(
+			"Bitmap image used in the installer. For Windows installer the recommended size is 164 px width, 314 px height.\nMaximum file size (KB): " +
+				ExportNGDesktopWizard.IMG_SIZE);
+		imgPath.setEditable(true);
+		imgPath.setVisible(true);
+		value = exportElectronWizard.getDialogSettings().get("image_path");
+		imgPath.setText(value != null ? value : "");
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		imgPath.setLayoutData(gd);
+
+
+		browseImgButton = new Button(composite, SWT.NONE);
+		browseImgButton.setText("Browse");
+		browseImgButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				final FileDialog dlg = new FileDialog(getShell(), SWT.NONE);
+				dlg.setFilterExtensions(new String[] { "*.bmp" });
+				final File myFile = new File(getDlgInitPath(imgPath.getText())); //make sure we have a usable path
+				dlg.setFilterPath(myFile.isDirectory() ? myFile.getAbsolutePath() : myFile.getParent());
+				final String path = dlg.open();
+				if (path != null) imgPath.setText(path);
+			}
+		});
+
+		final Label copyrightLabel = new Label(composite, SWT.NONE);
+		copyrightLabel.setText("Copyright:");
+		copyrightLabel.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
+
+		copyrightText = new Text(composite, SWT.BORDER);
+		copyrightText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
+		copyrightText.setEditable(true);
+		copyrightText.setVisible(true);
+		value = exportElectronWizard.getDialogSettings().get("copyright");
+		copyrightText.setText(value != null ? value : "");
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		copyrightText.setLayoutData(gd);
+
+		final Label sizeLabel = new Label(composite, SWT.NONE);
+		sizeLabel.setText("NG Desktop size:");
+		sizeGroup = new Group(composite, SWT.NONE);
+		final RowLayout rowLayout = new RowLayout(SWT.HORIZONTAL);
+		rowLayout.fill = true;
+		sizeGroup.setLayout(rowLayout);
+
+		widthText = new Text(sizeGroup, SWT.BORDER);
+		value = exportElectronWizard.getDialogSettings().get("ngdesktop_width");
+		widthText.setText(value != null ? value : "");
+		final Label widthLabel = new Label(sizeGroup, SWT.NONE);
+		widthLabel.setText("Width  ");
+
+		heightText = new Text(sizeGroup, SWT.BORDER);
+		value = exportElectronWizard.getDialogSettings().get("ngdesktop_height");
+		heightText.setText(value != null ? value : "");
+		final Label heightLabel = new Label(sizeGroup, SWT.NONE);
+		heightLabel.setText("Height");
+
+
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		sizeGroup.setLayoutData(gd);
+
+		final Label noteLabel = new Label(composite, SWT.NONE);
+		noteLabel.setText("*For now we only support generating Windows branded installers");
+		noteLabel.setEnabled(false); //set to gray
+		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.verticalAlignment = GridData.VERTICAL_ALIGN_END;
+		gd.horizontalSpan = 3;
+		noteLabel.setLayoutData(gd);
+		noteLabel.setVisible(true);
+
 		setControl(composite);
+		this.getWizard().getContainer().getShell().pack();
 	}
-	
-	public String getIconPath() {
+
+	public String getIconPath()
+	{
 		return iconPath.getText();
 	}
-	
-	public String getImgPath() {
+
+	public String getImgPath()
+	{
 		return imgPath.getText();
 	}
-	
-	public String getCopyright() {
+
+	public String getCopyright()
+	{
 		return copyrightText.getText();
 	}
-	
+
 	private static String getInitialImportPath()
 	{
 		String as_dir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory().replace("\\", "/").replace("//", "/");
@@ -320,7 +321,7 @@ public class ExportPage extends WizardPage
 		String applicationURL = exportElectronWizard.getDialogSettings().get("application_url");
 		if (applicationURL == null)
 		{
-			String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
+			final String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
 			applicationURL = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solutionName + "/index.html";
 		}
 		return applicationURL;
@@ -328,10 +329,8 @@ public class ExportPage extends WizardPage
 
 	private String getDlgInitPath(String value)
 	{
-		if (value != null && value.trim().length() > 0 && (new File(value)).exists()) {
-			return value;
-		}
-		String newValue = System.getProperty("user.home");
+		if (value != null && value.trim().length() > 0 && new File(value).exists()) return value;
+		final String newValue = System.getProperty("user.home");
 		if (newValue != null) return newValue;
 		//still here? then return something ... :D
 		return getInitialImportPath();
@@ -339,7 +338,7 @@ public class ExportPage extends WizardPage
 
 	private Object platformSelectionChangeListener(String selectedPlatform)
 	{
-		int index = selectedPlatforms.indexOf(selectedPlatform);
+		final int index = selectedPlatforms.indexOf(selectedPlatform);
 		// the result type is different depending on the execution leaf
 		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
 	}
@@ -348,11 +347,11 @@ public class ExportPage extends WizardPage
 	{
 		return selectedPlatforms;
 	}
-	
+
 	public void saveState()
 	{
 		//invalid values are not saved; that's easier for later validation;
-		IDialogSettings settings = exportElectronWizard.getDialogSettings();
+		final IDialogSettings settings = exportElectronWizard.getDialogSettings();
 		settings.put("win_export", selectedPlatforms.indexOf(WINDOWS_PLATFORM) != -1);
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
 		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);

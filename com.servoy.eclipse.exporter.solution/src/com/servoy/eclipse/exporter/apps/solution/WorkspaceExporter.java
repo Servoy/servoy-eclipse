@@ -20,8 +20,11 @@ package com.servoy.eclipse.exporter.apps.solution;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -107,13 +110,52 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 				String importSettingsString = Utils.getTXTFileContent(new File(configuration.getImportOptionsFile()), Charset.forName("UTF8"));
 				importSettings = new JSONObject(importSettingsString);
 			}
+			boolean exportVersions = true;
+			try
+			{
+				if (configuration.shouldExportModules())
+				{
+					Map<String, Solution> modules = new HashMap<String, Solution>();
+					solution.getReferencedModulesRecursive(modules);
+					modules.put(solution.getName(), solution);
+					List<String> exportedModules = configuration.getModuleIncludeList(new ArrayList<String>(modules.keySet()));
+					exportedModules.add(0, solution.getName());
+					for (String module : exportedModules)
+					{
+						if (Strings.isEmpty(modules.get(module).getVersion()))
+						{
+							if (exportVersions)
+							{
+								output("#############################################################################");
+								output(
+									"WARNING! For using the exported file in the SERVOY DEVELOPER, please set versions for the following solutions, then re-export.");
+								exportVersions = false;
+							}
+							output("Missing version: " + module);
+						}
+					}
+					if (!exportVersions)
+					{
+						output("You can set the solution versions in the developer properties view.");
+						output("#############################################################################");
+					}
+				}
+			}
+			catch (final RepositoryException e)
+			{
+				ServoyLog.logError("Failed to export solution.", e);
+				outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
+				exitCode = EXIT_EXPORT_FAILED;
+			}
+			if (exitCode == EXIT_EXPORT_FAILED) return;
+
 			try
 			{
 				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
 					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
 					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
 					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager, true, importSettings,
-					null);
+					null, exportVersions);
 			}
 			catch (final RepositoryException e)
 			{

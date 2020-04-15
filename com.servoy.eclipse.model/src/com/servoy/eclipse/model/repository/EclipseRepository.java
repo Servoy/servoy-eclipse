@@ -114,7 +114,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 	public List<RootObjectReference> getActiveSolutionModuleMetaDatas(int solutionId) throws RepositoryException
 	{
 		Solution sol = (Solution)getActiveRootObject(solutionId);
-		if (!Utils.getTokenElementsAsList(sol.getModulesNames(), ",", true).stream().allMatch(this::isSolutionLoaded))
+		if (sol != null && !Utils.getTokenElementsAsList(sol.getModulesNames(), ",", true).stream().allMatch(this::isSolutionLoaded))
 		{
 			ForkJoinPool pool = new ForkJoinPool();
 			ConcurrentMap<String, String> checked = new ConcurrentHashMap<String, String>();
@@ -145,7 +145,15 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 						if (rootObjectMetaData != null)
 						{
 							Solution module = (Solution)loadRootObject(rootObjectMetaData, rootObjectMetaData.getActiveRelease());
-							cacheRootObject(module);
+							AbstractRepository.lock();
+							try
+							{
+								if (!isSolutionLoaded(name)) cacheRootObject(module);
+							}
+							finally
+							{
+								AbstractRepository.unlock();
+							}
 							pool.execute(() -> loadAllModules(module, pool, checked));
 						}
 					}

@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Util;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
@@ -34,6 +35,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -139,12 +141,16 @@ public class TutorialView extends ViewPart
 			descriptor = descriptor.increaseHeight(6);
 			stepName.setFont(descriptor.createFont(parent.getDisplay()));
 
-			Label stepDescription = new Label(row, SWT.NONE);
+			Label stepDescription = new Label(row, SWT.WRAP);
 			stepDescription.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 			stepDescription.setText(rowData.optString("description"));
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+			gd.widthHint = 200;
+			stepDescription.setLayoutData(gd);
 			descriptor = FontDescriptor.createFrom(stepDescription.getFont());
 			descriptor = descriptor.increaseHeight(2);
 			stepDescription.setFont(descriptor.createFont(parent.getDisplay()));
+
 
 			StyledText gifURL = new StyledText(row, SWT.NONE);
 			gifURL.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -172,7 +178,15 @@ public class TutorialView extends ViewPart
 						ImageData imgData = desc.getImageData(100);
 						if (imgData != null)
 						{
-							size = new Dimension(imgData.width + 20, imgData.height + 20);
+							if (Util.isMac())
+							{
+								size = new Dimension(imgData.width, imgData.height);
+							}
+							else
+							{
+								Point dpi = Display.getCurrent().getDPI();
+								size = new Dimension((int)(imgData.width * (dpi.x / 90f)), (int)(imgData.height * (dpi.y / 90f)));
+							}
 						}
 					}
 					catch (MalformedURLException e1)
@@ -186,7 +200,14 @@ public class TutorialView extends ViewPart
 					}
 					Point cursorLocation = Display.getCurrent().getCursorLocation();
 
+					Rectangle bounds = Display.getCurrent().getBounds();
+
+
 					Point location = new Point(cursorLocation.x - size.width - 50, cursorLocation.y + 5);
+					if ((location.y + size.height) > bounds.height)
+					{
+						location.y = bounds.height - size.height - 70;
+					}
 					if (dialog == null || dialog.isDisposed())
 					{
 						dialog = new BrowserDialog(parent.getShell(),
@@ -196,6 +217,7 @@ public class TutorialView extends ViewPart
 					else
 					{
 						dialog.setUrl(rowData.optString("gifURL"));
+						dialog.setLocationAndSize(location, size);
 					}
 				}
 			});
@@ -204,9 +226,9 @@ public class TutorialView extends ViewPart
 
 	private void loadDataModel()
 	{
-		URL favURL = com.servoy.eclipse.ui.Activator.getDefault().getBundle().getEntry("favorites/tutorial.json");
-		String favoritesJSON = Utils.getURLContent(favURL);
-		dataModel = new JSONObject(favoritesJSON);
+//		URL favURL = com.servoy.eclipse.ui.Activator.getDefault().getBundle().getEntry("favorites/tutorial.json");
+//		String favoritesJSON = Utils.getURLContent(favURL);
+		dataModel = new JSONObject();
 	}
 
 	@Override

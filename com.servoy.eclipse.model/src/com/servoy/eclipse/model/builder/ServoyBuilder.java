@@ -964,7 +964,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
 					try
 					{
-						marker.setAttribute("packageName", webcomponentNameAndSpec[0]);
+						if (marker != null) marker.setAttribute("packageName", webcomponentNameAndSpec[0]);
 					}
 					catch (CoreException e)
 					{
@@ -2284,8 +2284,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						Map<IPersist, Boolean> methodsReferences = new HashMap<IPersist, Boolean>();
 						try
 						{
-							final Map<String, Method> methods = ((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getGettersViaIntrospection(
-								o);
+							final Map<String, Method> methods = ((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository())
+								.getGettersViaIntrospection(
+									o);
 							for (ContentSpec.Element element : Utils.iterate(
 								((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
 									o.getTypeID())))
@@ -3267,27 +3268,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								{
 									if (table != null)
 									{
-										Iterator<TableNode> tableNodes = null;
-										try
+										ScriptCalculation calc = formFlattenedSolution.getScriptCalculation(form.getRowBGColorCalculation(), table);
+										if (calc != null)
 										{
-											tableNodes = formFlattenedSolution.getTableNodes(table);
-										}
-										catch (RepositoryException e)
-										{
-											ServoyLog.logError(e);
-										}
-										if (tableNodes != null)
-										{
-											while (tableNodes.hasNext())
-											{
-												ScriptCalculation calc = AbstractBase.selectByName(tableNodes.next().getScriptCalculations(),
-													form.getRowBGColorCalculation());
-												if (calc != null)
-												{
-													unresolved = false;
-													break;
-												}
-											}
+											unresolved = false;
 										}
 									}
 								}
@@ -4024,7 +4008,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if ((pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > &&
 											((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof TagStringPropertyType))
 										{
-											TagStringPropertyType wrappedPd = (TagStringPropertyType)((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType();
+											TagStringPropertyType wrappedPd = (TagStringPropertyType)((FoundsetLinkedConfig)pd.getConfig())
+												.getWrappedPropertyDescription().getType();
 											TargetDataLinks links = wrappedPd.getDataLinks((String)propertyValue, pd, flattenedSolution,
 												new FormElement((IFormElement)o.getParent(), flattenedSolution, new PropertyPath(), true));
 											if (!TargetDataLinks.NOT_LINKED_TO_DATA.equals(links))
@@ -5449,31 +5434,32 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					while (tables.hasNext())
 					{
 						final String tableName = tables.next();
-						final ITable table = server.getTable(tableName);
-						IResource res = project;
-						if (getServoyModel().getDataModelManager() != null &&
-							getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
-						{
-							res = getServoyModel().getDataModelManager().getDBIFile(serverName, tableName);
-						}
-						if (table.isTableInvalidInDeveloperBecauseNoPk() && !table.isMarkedAsHiddenInDeveloper())
-						{
 
-							final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
-							final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
-								IMarker.PRIORITY_HIGH, null, null);
-							try
-							{
-								marker.setAttribute("serverName", serverName);
-								marker.setAttribute("tableName", tableName);
-							}
-							catch (CoreException e)
-							{
-								Debug.error(e);
-							}
-						}
 						if (server.isTableLoaded(tableName) && !server.isTableMarkedAsHiddenInDeveloper(tableName))
 						{
+							final ITable table = server.getTable(tableName);
+							IResource res = project;
+							if (getServoyModel().getDataModelManager() != null &&
+								getServoyModel().getDataModelManager().getDBIFile(serverName, tableName).exists())
+							{
+								res = getServoyModel().getDataModelManager().getDBIFile(serverName, tableName);
+							}
+							if (table.isTableInvalidInDeveloperBecauseNoPk())
+							{
+
+								final ServoyMarker servoyMarker = MarkerMessages.InvalidTableNoPrimaryKey.fill(tableName);
+								final IMarker marker = addMarker(res, servoyMarker.getType(), servoyMarker.getText(), -1, INVALID_TABLE_NO_PRIMARY_KEY,
+									IMarker.PRIORITY_HIGH, null, null);
+								try
+								{
+									marker.setAttribute("serverName", serverName);
+									marker.setAttribute("tableName", tableName);
+								}
+								catch (CoreException e)
+								{
+									Debug.error(e);
+								}
+							}
 							Map<String, Column> columnsByName = new HashMap<String, Column>();
 							Map<String, Column> columnsByDataProviderID = new HashMap<String, Column>();
 							for (Column column : table.getColumns())
@@ -5512,6 +5498,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											compatibleForUUID = length == 0 || length >= 16;
 											break;
 										case IColumnTypes.TEXT :
+											if (column.hasFlag(IBaseColumn.NATIVE_COLUMN))
+											{
+												compatibleForUUID = length == 0 || length >= 16;
+												break;
+											}
 											compatibleForUUID = length == 0 || length >= 36;
 											break;
 									}

@@ -47,6 +47,9 @@ public class PseudoPropertyHandler implements IPropertyHandler
 	// null type: use property controller internally
 	public static final PropertyDescription LOGIN_SOLUTION_DESCRIPTION = new PropertyDescriptionBuilder().withName("loginSolutionName").withConfig(
 		new LoginSolutionPropertyController("loginSolutionName", RepositoryHelper.getDisplayName("loginSolutionName", Solution.class))).build();
+	public static final PropertyDescription SOLUTION_VERSION_DESCRIPTION = new PropertyDescriptionBuilder().withName("version").withConfig(
+		new VersionPropertyController("version", RepositoryHelper.getDisplayName("version", Solution.class))).build();
+
 
 	// null type: use property controller internally
 	public static final PropertyDescription DESIGN_PROPERTIES_DESCRIPTION = new PropertyDescriptionBuilder().withName("designTimeProperties").withConfig(
@@ -184,7 +187,8 @@ public class PseudoPropertyHandler implements IPropertyHandler
 						((BaseComponent)p).putUnmergedAttributes((Map<String, String>)value);
 					}
 				}
-			}).build();
+			})
+		.build();
 
 
 	public static abstract class CustomPropertySetterDelegatePropertyController<P extends Map<String, ? >, S extends PersistPropertySource>
@@ -288,6 +292,11 @@ public class PseudoPropertyHandler implements IPropertyHandler
 		if (name.equals("loginSolutionName"))
 		{
 			return LOGIN_SOLUTION_DESCRIPTION;
+		}
+
+		if (name.equals("version"))
+		{
+			return SOLUTION_VERSION_DESCRIPTION;
 		}
 
 		if (name.equals("designTimeProperties"))

@@ -97,9 +97,6 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public boolean isUseAsRealAdminUser();
 
-
-	boolean isMinimizeJsCssResources();
-
 	Collection<License> getLicenses();
 
 	String decryptPassword(Cipher desCipher, String code);

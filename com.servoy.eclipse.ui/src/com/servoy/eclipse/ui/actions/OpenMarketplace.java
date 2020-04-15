@@ -24,11 +24,11 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 
-import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.IMainConceptsPageAction;
 import com.servoy.eclipse.marketplace.MarketplaceBrowserEditor;
 import com.servoy.eclipse.model.util.ServoyLog;
 
-public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IStartPageAction
+public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IMainConceptsPageAction
 {
 	protected String deepLink = null;
 

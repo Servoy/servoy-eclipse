@@ -40,7 +40,7 @@
         <td class="column-fitwidth">
           <!-- Added -->
           <div class="align-center"> 
-            <p matTooltip="{{ getNotWPAAddedTooltip() }}" matTooltipDisabled="{{ !package.installed || package.installedIsWPA }}">{{ package.installed }}</p>
+            <p matTooltip="{{ getNotWPAAddedTooltip() }}" matTooltipDisabled="{{ !package.installed || package.installedIsWPA }}">{{ package.installed == 'unknown' ? 'installed' : package.installed }}</p>
             <button mat-icon-button *ngIf="canBeRemoved(package)" [disabled]="isInstallingOrRemoving(package)" (click)="uninstall(package)">
               <mat-icon matTooltip="{{ getRemoveTooltip(package) }}">delete_outline</mat-icon>
             </button>
@@ -48,7 +48,7 @@
         </td>
         <td class="column-fitwidth">
           <!-- Active Solution -->
-          <div class="align-center">
+          <div class="align-center" *ngIf="needsActiveSolution(package)">
             <mat-select [(value)]="package.activeSolution" [disabled]="!installEnabled(package)" matTooltip="{{ getSolutionTooltip(package) }}">
               <mat-option *ngFor="let solution of getSolutions()" [value]="solution">{{ solution }}</mat-option>
             </mat-select>

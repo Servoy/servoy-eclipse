@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -415,6 +416,7 @@ public class CreateComponentHandler implements IServerService
 					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
 					gc.setText("button");
 					gc.setOnActionMethodID(-1);
+					gc.setRolloverCursor(Cursor.HAND_CURSOR);
 					CSSPositionUtils.setLocation(gc, x, y);
 					CSSPositionUtils.setSize(gc, w, h);
 					return new IPersist[] { gc };
@@ -691,8 +693,9 @@ public class CreateComponentHandler implements IServerService
 					}
 					else
 					{
-						PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
-							args.optString("packageName"));
+						PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications()
+							.get(
+								args.optString("packageName"));
 						if (specifications != null)
 						{
 							WebLayoutSpecification layoutSpec = specifications.getSpecification(name);

@@ -27,11 +27,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.ui.editor.IReconcile;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IStartup;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Utils;
@@ -70,6 +74,21 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			// GTK LaF causes crashes or hangs on linux in developer
 			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel");
 		}
+		// this is an hack to force a reconcile on a javascript text editor.
+		// so that after loading of the full solution the editor doesn't show warnings for references that where not there when the active solution wasn't loaded yet.
+		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> {
+			try
+			{
+				IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+				if (editor instanceof IReconcile)
+				{
+					((IReconcile)editor).reconcile();
+				}
+			}
+			catch (Exception e)
+			{
+			}
+		});
 	}
 
 

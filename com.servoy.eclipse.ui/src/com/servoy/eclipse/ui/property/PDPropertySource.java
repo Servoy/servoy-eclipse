@@ -35,7 +35,6 @@ import org.sablo.specification.property.types.ValuesPropertyType;
 import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.PseudoPropertyHandler.CustomPropertySetterDelegatePropertyController;
-import com.servoy.eclipse.ui.util.DeveloperUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -248,16 +247,13 @@ public class PDPropertySource extends PersistPropertySource
 			{
 				config.addDefault(desc.getDefaultValue(), null);
 			}
-			JSONObject tags = null;
-			if (desc.hasTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE))
-			{
-				tags = new JSONObject();
-				tags.accumulate(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE, desc.getTag(DeveloperUtils.TAG_PROPERTY_INPUT_FIELD_TYPE));
-			}
+
 			createdPropertyHandler = createWebComponentPropertyHandler(
 				new PropertyDescriptionBuilder().withName(desc.getName()).withType(ValuesPropertyType.INSTANCE).withConfig(config).withDefaultValue(
-					desc.getDefaultValue()).withInitialValue(desc.getInitialValue()).withHasDefault(desc.hasDefault()).withTags(tags).withDeprecated(
-						desc.getDeprecated()).build(),
+					desc.getDefaultValue()).withInitialValue(desc.getInitialValue()).withHasDefault(desc.hasDefault()).withTagsCopiedFrom(desc)
+					.withDeprecated(
+						desc.getDeprecated())
+					.build(),
 				persistContext);
 		}
 		else

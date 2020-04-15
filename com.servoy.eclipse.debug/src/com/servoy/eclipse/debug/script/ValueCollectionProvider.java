@@ -18,20 +18,25 @@
 package com.servoy.eclipse.debug.script;
 
 import java.lang.ref.SoftReference;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.internal.javascript.ti.IValueProvider;
 import org.eclipse.dltk.internal.javascript.ti.JSVariable;
@@ -40,11 +45,8 @@ import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
 import org.eclipse.dltk.javascript.typeinfo.IMemberEvaluator;
 import org.eclipse.dltk.javascript.typeinfo.IModelBuilder.IMember;
-import org.eclipse.dltk.javascript.typeinfo.IRSimpleType;
-import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
-import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
 import org.eclipse.dltk.javascript.typeinfo.model.RecordType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
@@ -55,7 +57,6 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.persistence.Form;
@@ -66,54 +67,31 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.Utils;
 
 public class ValueCollectionProvider implements IMemberEvaluator
 {
 	public static final String PRIVATE = "PRIVATE";
 	public static final String SUPER_SCOPE = "SUPER_SCOPE";
 
-	private static final int MAX_SCRIPT_CACHE_SIZE = Utils.getAsInteger(System.getProperty("servoy.script.cache.size", "300"));
+	private static final Map<IFile, SoftReference<ValueCollectionCacheItem>> scriptCache = new ConcurrentHashMap<>();
 
-	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> scriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
-	private static final Map<IFile, SoftReference<Pair<Long, IValueCollection>>> globalScriptCache = new ConcurrentHashMap<IFile, SoftReference<Pair<Long, IValueCollection>>>();
-	private static final WeakHashMap<Type, IValueCollection> typeToValueCollectionCache = new WeakHashMap<Type, IValueCollection>();
-	private static final IValueCollection EMPTY = ValueCollectionFactory.createValueCollection();
+	private static final ThreadLocal<Deque<Set<IFile>>> depedencyStack = new ThreadLocal<Deque<Set<IFile>>>()
+	{
+		@Override
+		protected Deque<Set<IFile>> initialValue()
+		{
+			return new ArrayDeque<Set<IFile>>();
+		}
+	};
 
 	public static void clear()
 	{
 		scriptCache.clear();
-		globalScriptCache.clear();
-		typeToValueCollectionCache.clear();
 	}
 
 	@SuppressWarnings("restriction")
 	public IValueCollection valueOf(ITypeInfoContext context, Element member)
 	{
-		IValueCollection cached = null;
-		Type memberType = null;
-		if (member instanceof Member)
-		{
-			JSType type = ((Member)member).getType();
-			if (type != null)
-			{
-				IRType irType = context.contextualize(type);
-				if (irType instanceof IRSimpleType)
-				{
-					memberType = ((IRSimpleType)irType).getTarget();
-					cached = typeToValueCollectionCache.get(memberType);
-				}
-			}
-		}
-		else if (member instanceof Type)
-		{
-			memberType = (Type)member;
-			cached = typeToValueCollectionCache.get(member);
-		}
-		if (cached != null)
-		{
-			return cached == EMPTY ? null : ValueCollectionFactory.shallowCloneValueCollection(cached);
-		}
 		Object attribute = member.getAttribute(TypeCreator.LAZY_VALUECOLLECTION);
 		if (attribute instanceof Form)
 		{
@@ -134,13 +112,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					((IValueProvider)collection).getValue().setAttribute(SUPER_SCOPE, Boolean.TRUE);
 				}
-				return addToCache(memberType, collection);
-			}
-
-			if (!creatingCollection.get().contains(file))
-			{
-				//avoid to add empty types for recursive calls
-				addToCache(memberType, EMPTY);
+				return ValueCollectionFactory.shallowCloneValueCollection(collection);
 			}
 			return null;
 		}
@@ -184,15 +156,17 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 					if (dataSource != null)
 					{
+						List<IFile> files = new ArrayList<IFile>();
 						Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(dataSource);
 						IValueCollection valueCollection = ValueCollectionFactory.createValueCollection();
 						while (tableNodes.hasNext())
 						{
 							TableNode tableNode = tableNodes.next();
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(tableNode, false)));
+							files.add(file);
 							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
 						}
-						return addToCache(memberType, valueCollection);
+						return ValueCollectionFactory.shallowCloneValueCollection(valueCollection);
 					}
 				}
 			}
@@ -236,7 +210,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 							if (globalsValueCollection == null && !fileName.equals(SolutionSerializer.GLOBALS_FILE))
 							{
-								addToCache(memberType, EMPTY);
 								return null;
 							}
 
@@ -252,28 +225,13 @@ public class ValueCollectionProvider implements IMemberEvaluator
 								ValueCollectionProvider.getGlobalModulesValueCollection(editingFlattenedSolution, fileName, collection);
 							}
 							// scopes other than globals are not merged
-							return addToCache(memberType, collection);
+							return ValueCollectionFactory.shallowCloneValueCollection(collection);
 						}
 					}
 				}
 			}
 		}
-		addToCache(memberType, EMPTY);
 		return null;
-	}
-
-	/**
-	 * @param member
-	 * @param memberType
-	 */
-	private IValueCollection addToCache(Element member, IValueCollection collection)
-	{
-		if (resolve.get() == null && member instanceof Type)
-		{
-			typeToValueCollectionCache.put((Type)member, collection);
-			return ValueCollectionFactory.shallowCloneValueCollection(collection);
-		}
-		return collection;
 	}
 
 	/**
@@ -289,22 +247,29 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 			if (fs != null)
 			{
-				IValueCollection superForms = null;
 				Form superForm = fs.getForm(form.getExtendsID());
 
-				superForms = ValueCollectionFactory.createScopeValueCollection();
-				List<IValueCollection> superCollections = new ArrayList<IValueCollection>();
-				Boolean resolving = resolve.get();
-				try
+				IValueCollection vc = null;
+				if (superForm != null)
 				{
-					// do resolve the whole super form structure.
-					resolve.remove();
-					while (superForm != null)
+					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
+					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+					Deque<Set<IFile>> stack = depedencyStack.get();
+					Set<IFile> depedencies = stack.peek();
+
+					ValueCollectionCacheItem fromCache = getFromScriptCache(file);
+					if (fromCache == null)
 					{
-						String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
-						IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
-						IValueCollection vc = null;
-						IValueCollection collection = getValueCollection(file);
+						getValueCollection(file);
+						fromCache = getFromScriptCache(file);
+					}
+					if (fromCache != null)
+					{
+						if (depedencies != null)
+						{
+							depedencies.addAll(fromCache.files());
+						}
+						IValueCollection collection = fromCache.get();
 						if (collection != null)
 						{
 							vc = ValueCollectionFactory.createScopeValueCollection();
@@ -336,40 +301,44 @@ public class ValueCollectionProvider implements IMemberEvaluator
 									}
 								}
 							}
-							superCollections.add(vc);
+							if (formCollection != null) ValueCollectionFactory.copyInto(vc, formCollection);
+							return vc;
 						}
-						superForm = fs.getForm(superForm.getExtendsID());
 					}
 				}
-				finally
-				{
-					if (resolving != null) resolve.set(Boolean.TRUE);
-				}
-				for (int i = superCollections.size(); --i >= 0;)
-				{
-					ValueCollectionFactory.copyInto(superForms, ValueCollectionFactory.makeImmutable(superCollections.get(i)));
-				}
-				if (formCollection != null) ValueCollectionFactory.copyInto(superForms, formCollection);
-				return superForms;
 			}
 		}
 		return formCollection;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.dltk.javascript.typeinfo.IElementResolver#getTopValueCollection(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext)
-	 */
+	public Collection<IFile> getDependencies(ISourceModule sourceModule)
+	{
+		IResource resource = sourceModule.getResource();
+		SoftReference<ValueCollectionCacheItem> sr = scriptCache.get(resource);
+		if ((sr == null || sr.get() == null) && resource instanceof IFile && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
+		{
+			// quicky create it.
+			getValueCollection((IFile)resource);
+			sr = scriptCache.get(resource);
+		}
+		if (sr != null && sr.get() != null)
+		{
+			Set<IFile> files = sr.get().files();
+			// this includes its own so we need to strip that.
+			System.err.println("for: " + resource + ":: " + files);
+			return files.stream().filter(file -> !file.equals(resource)).collect(Collectors.toSet());
+		}
+		return Collections.emptyList();
+	}
+
 	public IValueCollection getTopValueCollection(ITypeInfoContext context)
 	{
 		if (context.getModelElement() != null)
 		{
-			IResource resource = context.getModelElement().getResource();
+			IFile resource = (IFile)context.getModelElement().getResource();
 			if (resource != null && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 			{
-				Pair<Long, IValueCollection> pair = getFromScriptCache(resource);
-				removeFromScriptCache(resource, pair);
+				System.err.println(" top value of " + resource + "  " + context);
 				// javascript file
 				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs != null)
@@ -384,7 +353,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 								ValueCollectionFactory.createValueCollection());
 							if (fullGlobalScope.get().booleanValue())
 							{
-								ValueCollectionFactory.copyInto(globalsValueCollection, getValueCollection((IFile)resource));
+								ValueCollectionFactory.copyInto(globalsValueCollection, getValueCollection(resource));
 							}
 							return globalsValueCollection;
 						}
@@ -432,28 +401,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		if (modules != null)
 		{
 			// don't resolve all the globals scopes when filling one.
-			Boolean resolving = resolve.get();
-			resolve.set(Boolean.TRUE);
-			try
+			for (Solution module : modules)
 			{
-				for (Solution module : modules)
+				ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
+				IFile file = project.getProject().getFile(filename);
+				if (file.exists())
 				{
-					ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(module.getName());
-					IFile file = project.getProject().getFile(filename);
-					if (file.exists())
-					{
-						IValueCollection moduleCollection = getValueCollection(file);
-						if (moduleCollection != null)
-						{
-							ValueCollectionFactory.copyInto(collection, moduleCollection);
-						}
-					}
+					ValueCollectionFactory.copyInto(collection, getValueCollection(file));
 				}
-			}
-			finally
-			{
-				if (resolving != null) resolve.set(resolving);
-				else resolve.remove();
 			}
 		}
 		return collection;
@@ -476,12 +431,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						IFolder serverFolder = folder.getFolder(serverName);
 						if (serverFolder.exists())
 						{
-							IValueCollection moduleCollection = getValueCollection(
-								serverFolder.getFile(tableName + (calcs ? SolutionSerializer.CALCULATIONS_POSTFIX : SolutionSerializer.FOUNDSET_POSTFIX)));
-							if (moduleCollection != null)
-							{
-								ValueCollectionFactory.copyInto(collection, moduleCollection);
-							}
+							ValueCollectionFactory.copyInto(collection, getValueCollection(
+								serverFolder.getFile(tableName + (calcs ? SolutionSerializer.CALCULATIONS_POSTFIX : SolutionSerializer.FOUNDSET_POSTFIX))));
 						}
 					}
 				}
@@ -490,131 +441,54 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		return collection;
 	}
 
-	private static final ThreadLocal<Set<IFile>> creatingCollection = new ThreadLocal<Set<IFile>>()
+	private static IValueCollection getValueCollection(IFile file)
 	{
-		@Override
-		protected java.util.Set<IFile> initialValue()
+		ValueCollectionCacheItem item = null;
+		try
 		{
-			return new HashSet<IFile>();
-		}
-	};
-
-	private static final ThreadLocal<Boolean> resolve = new ThreadLocal<Boolean>();
-
-	public static IValueCollection getValueCollection(IFile file)
-	{
-		IValueCollection collection = null;
-		synchronized (scriptCache)
-		{
-			try
+			Deque<Set<IFile>> stack = depedencyStack.get();
+			Set<IFile> current = stack.peek();
+			if (current != null)
 			{
-				Pair<Long, IValueCollection> pair = getFromScriptCache(file);
-				if (pair == null || pair.getLeft().longValue() != file.getModificationStamp())
-				{
-					DesignerPreferences dp = new DesignerPreferences();
-					boolean skipBody = dp.skipFunctionBodyWhenParsingJS();
-
-					Set<IFile> set = creatingCollection.get();
-					if (set.contains(file))
-					{
-						if (pair != null) return pair.getRight();
-						return null;
-					}
-					removeFromScriptCache(file, pair);
-					boolean globalsFile = file.getName().equals(SolutionSerializer.GLOBALS_FILE);
-					if (!globalsFile)
-					{
-						// if the current thread set size is 0 (first request, so not in recursion)
-						if (set.size() == 0)
-						{
-							// and the scriptCache size is bigger then the default 300 or the system property
-							int max = MAX_SCRIPT_CACHE_SIZE;
-							if (skipBody) max = max * 2;
-							if (scriptCache.size() > max)
-							{
-								// clear the cache to help the garbage collector.
-								scriptCache.clear();
-								typeToValueCollectionCache.clear();
-							}
-						}
-					}
-					set.add(file);
-					boolean doResolve = skipBody;
-					if (!skipBody && resolve.get() == null)
-					{
-						doResolve = true;
-						resolve.set(Boolean.TRUE);
-					}
-					try
-					{
-						collection = ValueCollectionFactory.createValueCollection(file, doResolve, !skipBody);
-						collection = ValueCollectionFactory.makeImmutable(collection);
-						if (globalsFile)
-						{
-							globalScriptCache.put(file, new SoftReference<Pair<Long, IValueCollection>>(
-								new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection)));
-						}
-						else
-						{
-							scriptCache.put(file, new SoftReference<Pair<Long, IValueCollection>>(
-								new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection)));
-						}
-					}
-					finally
-					{
-						set.remove(file);
-						if (doResolve) resolve.remove();
-					}
-				}
-				else
-				{
-					collection = pair.getRight();
-				}
+				current.add(file);
 			}
-			catch (Exception e)
+			item = getFromScriptCache(file);
+			if (item == null)
 			{
-				ServoyLog.logError(e);
+				// its starting, setup the stack for generating the new Set of files.
+				HashSet<IFile> depedencies = new HashSet<>();
+				depedencies.add(file);
+				stack.push(depedencies);
+
+				IValueCollection collection = ValueCollectionFactory.createValueCollection(file, true, false, (fl, col) -> {
+					// put in cache for recursion.
+					scriptCache.put(fl, new SoftReference<ValueCollectionCacheItem>(new ValueCollectionCacheItem(depedencies, col)));
+				});
+				stack.pop();
+				// we need to do this again because the depedencies did change and ValueCollectionCacheItem needs to recalculate the current timestamp
+				scriptCache.put(file, new SoftReference<ValueCollectionCacheItem>(new ValueCollectionCacheItem(depedencies, collection)));
+				return collection;
+			}
+			else
+			{
+				return item.get();
 			}
 		}
-
-		return collection;
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+		return ValueCollectionFactory.createScopeValueCollection();
 	}
 
 	/**
 	 * @param resource
 	 * @return
 	 */
-	private static Pair<Long, IValueCollection> getFromScriptCache(IResource resource)
+	private static ValueCollectionCacheItem getFromScriptCache(IResource resource)
 	{
-		SoftReference<Pair<Long, IValueCollection>> sr = null;
-		if (resource.getName().equals(SolutionSerializer.GLOBALS_FILE))
-		{
-			sr = globalScriptCache.get(resource);
-		}
-		else
-		{
-			sr = scriptCache.get(resource);
-		}
-		return sr != null ? sr.get() : null;
-	}
-
-	/**
-	 * @param file
-	 * @param pair
-	 */
-	private static void removeFromScriptCache(IResource file, Pair<Long, IValueCollection> pair)
-	{
-		if (pair != null && pair.getLeft().longValue() != file.getModificationStamp())
-		{
-			if (file.getName().equals(SolutionSerializer.GLOBALS_FILE))
-			{
-				globalScriptCache.remove(file);
-			}
-			else
-			{
-				scriptCache.remove(file);
-			}
-		}
+		SoftReference<ValueCollectionCacheItem> sr = scriptCache.get(resource);
+		return sr != null && sr.get().get() != null ? sr.get() : null;
 	}
 
 	private static final ThreadLocal<Boolean> fullGlobalScope = new ThreadLocal<Boolean>()

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Responsive Form Builder Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.designer.rfb;singleton:=true
-Bundle-Version: 2020.3.0.3560_rc
+Bundle-Version: 2020.6.0.3580_rc
 Bundle-Vendor: Servoy
 Require-Bundle: org.apache.tomcat,
  slf4j.api,
@@ -15,6 +15,7 @@ Require-Bundle: org.apache.tomcat,
  com.servoy.eclipse.debug,
  org.eclipse.ui,
  org.eclipse.core.runtime,
+ org.eclipse.jface,
  org.apache.httpcomponents.httpcore,
  org.apache.httpcomponents.httpclient,
  org.apache.commons.io;bundle-version="2.6.0",

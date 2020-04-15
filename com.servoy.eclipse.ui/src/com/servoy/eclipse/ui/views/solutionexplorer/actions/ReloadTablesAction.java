@@ -18,6 +18,8 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -87,62 +89,69 @@ public class ReloadTablesAction extends Action implements ISelectionChangedListe
 	{
 		if (selectedServers == null) return;
 
-		try
+		if (selectedServers.size() == 1)
 		{
-			if (selectedServers.size() == 1)
+			// is "Servers node" selected?
+			SimpleUserNode node = (SimpleUserNode)selectedServers.getFirstElement();
+			UserNodeType type = node.getType();
+			if (type == UserNodeType.SERVERS)
 			{
-				// is "Servers node" selected?
-				SimpleUserNode node = (SimpleUserNode)selectedServers.getFirstElement();
-				UserNodeType type = node.getType();
-				if (type == UserNodeType.SERVERS)
+				for (SimpleUserNode serverNode : node.children)
 				{
-					for (SimpleUserNode serverNode : node.children)
-					{
-						reload(serverNode);
-					}
-				}
-				else if (type == UserNodeType.SERVER)
-				{
-					reload(node);
+					reload(serverNode);
 				}
 			}
-			else if (selectedServers.size() > 1)
+			else if (type == UserNodeType.SERVER)
 			{
-				Iterator<SimpleUserNode> it = selectedServers.iterator();
-				while (it.hasNext())
-				{
-					SimpleUserNode serverNode = it.next();
-					if (serverNode.getType() == UserNodeType.SERVER)
-					{
-						reload(serverNode);
-					}
-				}
+				reload(node);
 			}
 		}
-		catch (RepositoryException e)
+		else if (selectedServers.size() > 1)
 		{
-			ServoyLog.logError("Error reloading servers", e);
+			Iterator<SimpleUserNode> it = selectedServers.iterator();
+			while (it.hasNext())
+			{
+				SimpleUserNode serverNode = it.next();
+				if (serverNode.getType() == UserNodeType.SERVER)
+				{
+					reload(serverNode);
+				}
+			}
 		}
 	}
 
-	private void reload(SimpleUserNode serverNode) throws RepositoryException
+	private void reload(SimpleUserNode serverNode)
 	{
 		IServerInternal s = (IServerInternal)serverNode.getRealObject();
-		if (s.getConfig().isEnabled() && s.isValid())
-		{
-			s.reloadTables();
-		}
-		else if (s.getConfig().isEnabled())
-		{
-			try
-			{
-				s.testConnection(0);
-				s.flagValid();
-			}
-			catch (Exception e)
-			{
-				// still invalid
-			}
-		}
+			Job job = Job.create("Reloading tables for server '" + s.getName() + "'", (ICoreRunnable)monitor -> {
+				try
+				{
+					if (s.getConfig().isEnabled() && s.isValid())
+					{
+
+						s.reloadTables();
+					}
+					else if (s.getConfig().isEnabled())
+					{
+						try
+						{
+							s.testConnection(0);
+							s.flagValid();
+						}
+						catch (Exception e)
+						{
+							// still invalid
+						}
+					}
+					monitor.done();
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError("Error reloading servers", e);
+				}
+			});
+			job.setUser(true);
+			job.setPriority(Job.LONG);
+			job.schedule();
 	}
 }

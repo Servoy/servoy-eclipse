@@ -34,7 +34,7 @@ public class WebPackagesServiceHandler
 	{
 		GetAllInstalledPackages getAllInstalledPackages = new GetAllInstalledPackages(endpoint);
 		configuredHandlers.put(GetAllInstalledPackages.CLIENT_SERVER_METHOD, getAllInstalledPackages);
-		configuredHandlers.put("install", new InstallWebPackageHandler(getAllInstalledPackages));
+		configuredHandlers.put("install", new InstallWebPackageHandler());
 		configuredHandlers.put("showurl", new ShowUrllWebPackageHandler());
 		configuredHandlers.put("remove", new RemoveWebPackageHandler());
 		configuredHandlers.put(GetSolutionList.GET_SOLUTION_LIST_METHOD, new GetSolutionList(endpoint));

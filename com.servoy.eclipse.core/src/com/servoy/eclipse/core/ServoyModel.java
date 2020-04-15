@@ -116,6 +116,7 @@ import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.Resources
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -256,6 +257,8 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	private final List<IResourceChangeEvent> outstandingPostChangeEvents = new ArrayList<>();
 
 	private Boolean skipModuleChanged = null;
+
+	private volatile boolean doneFired = false;
 
 	protected ServoyModel()
 	{
@@ -487,7 +490,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						getNGPackageManager().clearReferencedNGPackageProjectsCache();
 						getNGPackageManager().reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.MODULES_UPDATED, null);
 					}
-					String[] moduleNames = Utils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true);
+					String[] moduleNames = activeProject != null && activeProject.getSolution() != null
+						? Utils.getTokenElements(activeProject.getSolution().getModulesNames(), ",", true)
+						: new String[0];
 					final ArrayList<ServoyProject> modulesToUpdate = new ArrayList<ServoyProject>();
 					final StringBuilder sbUpdateModuleNames = new StringBuilder();
 
@@ -1004,7 +1009,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 //					autoSetActiveProject = servoyProjects[i++];
 //				}
 //			}
-			if (autoSetActiveProject != null && autoSetActiveProject.getSolution() != null)
+			if (autoSetActiveProject != null)
 			{
 				activatingProject.set(true);
 				if (Display.getCurrent() != null)
@@ -1087,7 +1092,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					progressMonitor.worked(1);
 					progressMonitor.subTask("Announcing activation intent...");
 
-					ReturnValueRunnable uiRunnable = new ReturnValueRunnable()
+					ReturnValueRunnable<Boolean> uiRunnable = new ReturnValueRunnable<Boolean>()
 					{
 						public void run()
 						{
@@ -1095,7 +1100,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						}
 					};
 					Display.getDefault().syncExec(uiRunnable);
-					if (((Boolean)uiRunnable.getReturnValue()).booleanValue())
+					if (uiRunnable.getReturnValue().booleanValue())
 					{
 
 
@@ -1246,6 +1251,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 												{
 													file = ((FileEditorInput)editorReference.getEditorInput()).getFile();
 												}
+												else if (ei instanceof TableEditorInput)
+												{
+													String dataSource = ((TableEditorInput)ei).getDataSource();
+													ITable table = getDataSourceManager().getDataSource(dataSource);
+													if (table != null) continue;
+												}
 												else
 												{
 													ServoyLog.logInfo("Cannot determine if editor '" + editorReference.getPartName() + "' with input '" + ei +
@@ -1342,11 +1353,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	public void fireLoadingDone()
 	{
+		doneFired = true;
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
 			{
-				Arrays.asList(doneListeners.toArray(new IModelDoneListener[doneListeners.size()])).stream().forEach(listener -> listener.modelDone());
+				doneListeners.stream().forEach(listener -> listener.modelDone());
+				doneListeners.clear();
 			}
 		});
 
@@ -1804,14 +1817,15 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 	public void addDoneListener(IModelDoneListener listener)
 	{
-		doneListeners.add(listener);
+		if (doneFired)
+		{
+			listener.modelDone();
+		}
+		else
+		{
+			doneListeners.add(listener);
+		}
 	}
-
-	public void removeDoneListener(IModelDoneListener listener)
-	{
-		doneListeners.remove(listener);
-	}
-
 
 	/**
 	 * @see firePersistsChanged

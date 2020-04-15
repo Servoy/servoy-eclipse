@@ -20,11 +20,14 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -32,13 +35,11 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -51,6 +52,7 @@ import org.eclipse.ui.ISaveablePart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 import org.eclipse.ui.views.properties.IPropertySheetEntryListener;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -59,8 +61,12 @@ import org.eclipse.ui.views.properties.PropertySheetSorter;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
+import com.servoy.eclipse.ui.property.IProvidesTooltip;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
+import com.servoy.eclipse.ui.views.solutionexplorer.HTMLToolTipSupport;
+import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.util.Settings;
@@ -118,6 +124,140 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 		if (control instanceof Tree)
 		{
 			final Tree tree = (Tree)control;
+
+			// register our custom tooltip; this constructor also registers the listeners it needs
+			ToolTip tooltip = new ToolTip(tree, ToolTip.NO_RECREATE, false)
+			{
+
+				private TreeItem itemOfLastTooltipText;
+				private String lastTooltipText;
+
+				@Override
+				protected Composite createToolTipContentArea(Event event, Composite parent)
+				{
+					TreeItem item = tree.getItem(new Point(event.x, event.y));
+					if (item != null)
+					{
+						if (itemOfLastTooltipText != item)
+						{
+							itemOfLastTooltipText = item;
+							lastTooltipText = getTooltipText(item);
+						}
+
+						if (lastTooltipText != null)
+						{
+							// the contains(">") and "<" below are an attempt to detect if the tooltip text is html based or just a simple String (in which case we need to change \n to <br/>)
+							return HTMLToolTipSupport.createBrowserTooltipContentArea(this,
+								lastTooltipText.contains("<") && lastTooltipText.contains(">") ? lastTooltipText : lastTooltipText.replaceAll("\\n", "<br/>"),
+								parent, false, 300,
+								200);
+						} // else should never happen because of shouldCreateToolTip() below that should have returned false
+					}
+					return new Composite(parent, SWT.NONE); // no tooltip
+				}
+
+				@Override
+				protected boolean shouldCreateToolTip(Event event)
+				{
+					if (super.shouldCreateToolTip(event))
+					{
+						TreeItem item = tree.getItem(new Point(event.x, event.y));
+						if (item != null)
+						{
+							// see if we have a tooltip text for the item we are hovering above
+							if (itemOfLastTooltipText != item)
+							{
+								itemOfLastTooltipText = item;
+								lastTooltipText = getTooltipText(item);
+							}
+							return lastTooltipText != null;
+						}
+						else return false;
+					}
+					else return false;
+				}
+
+				@Override
+				protected Object getToolTipArea(Event event)
+				{
+					// identify correctly "the area" for which this tooltip is shown so that NO_RECREATE above works correctly
+					return tree.getItem(new Point(event.x, event.y));
+				}
+
+				/**
+				 * This method will get the tool tip text of the selected property from .spec or legacy documentation classes (as it was set when creating this item as a property descriptor).
+				 *
+				 * @param item the selected property
+				 * @return the tool tip text
+				 */
+				private String getTooltipText(TreeItem item)
+				{
+					Object data = item.getData();
+					String text = null;
+					if (data instanceof ModifiedPropertySheetEntry)
+					{
+						IPropertyDescriptor descriptor = ((ModifiedPropertySheetEntry)data).getDescriptor();
+						if (descriptor instanceof IProvidesTooltip)
+						{
+							text = ((IProvidesTooltip)descriptor).getTooltipText();
+						}
+					}
+
+					String hardcodedText = null;
+					if ((RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONFOCUSLOSTMETHODID.getPropertyName(), null).equals(
+						item.getText(0)) ||
+						RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(
+							item.getText(0))) ||
+						RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONDATACHANGEMETHODID.getPropertyName(), null).equals(
+							item.getText(0)))
+					{
+						hardcodedText = "Warning: Do not use dialogs, as a dialog will interfere with focus";
+					}
+					else if (StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName().equals(item.getText(0)))
+					{
+						hardcodedText = "Set value <empty> for no title text";
+					}
+					else if (StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(item.getText(0)))
+					{
+						hardcodedText = "Set z-index of the element.";
+					}
+					else if (StaticContentSpecLoader.PROPERTY_ROLLOVERCURSOR.getPropertyName().equals(item.getText(0)) ||
+						StaticContentSpecLoader.PROPERTY_ROLLOVERIMAGEMEDIAID.getPropertyName().replace("ID", "").equals(item.getText(0)))
+					{
+						hardcodedText = "Not supported in smart client for listview/tableview";
+					}
+					else if ("width".equals(item.getText(0)) || "height".equals(item.getText(0)))
+					{
+						ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()
+							.getSelectionProvider().getSelection();
+						if (selection instanceof IStructuredSelection && ((IStructuredSelection)selection).size() == 1 &&
+							Platform.getAdapterManager().getAdapter(((IStructuredSelection)selection).getFirstElement(),
+								IPersist.class) instanceof IFormElement)
+						{
+							if ("height".equals(item.getText(0)))
+							{
+								hardcodedText = "If top and bottom are set (anchored) this is minimum height.";
+							}
+							if ("width".equals(item.getText(0)))
+							{
+								hardcodedText = "If left and right are set (anchored) this is minimum width.";
+							}
+						}
+					}
+
+					if (hardcodedText != null)
+					{
+						if (text == null) text = hardcodedText;
+						else text += "\n\n(" + hardcodedText + ")";
+					}
+
+					return text;
+				}
+
+			};
+			tooltip.setPopupDelay(500); // additional delay so that the properties view tooltip doesn't become annoying - can be increased if needed
+			tooltip.setHideOnMouseDown(false);
+
 			tree.addControlListener(new ControlAdapter()
 			{
 				@Override
@@ -197,84 +337,6 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				}
 			};
 
-			Listener treeListener = new Listener()
-			{
-				Shell tip = null;
-				Label label = null;
-
-				public void handleEvent(Event event)
-				{
-					switch (event.type)
-					{
-						case SWT.Dispose :
-						case SWT.KeyDown :
-						case SWT.MouseMove :
-						{
-							if (tip == null) break;
-							tip.dispose();
-							tip = null;
-							label = null;
-							break;
-						}
-						case SWT.MouseHover :
-						{
-							TreeItem item = tree.getItem(new Point(event.x, event.y));
-							if (item != null)
-							{
-								String text = null;
-								if ((RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONFOCUSLOSTMETHODID.getPropertyName(), null).equals(
-									item.getText(0)) ||
-									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(
-										item.getText(0))) ||
-									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONDATACHANGEMETHODID.getPropertyName(), null).equals(
-										item.getText(0)))
-								{
-									text = "Warning: Do not use dialogs, as a dialog will interfere with focus";
-								}
-								if (StaticContentSpecLoader.PROPERTY_TITLETEXT.getPropertyName().equals(item.getText(0)))
-								{
-									text = "Set value <empty> for no title text";
-								}
-								if (StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(item.getText(0)))
-								{
-									text = "Set z-index of the element.";
-								}
-								if (StaticContentSpecLoader.PROPERTY_ROLLOVERCURSOR.getPropertyName().equals(item.getText(0)) ||
-									StaticContentSpecLoader.PROPERTY_ROLLOVERIMAGEMEDIAID.getPropertyName().replace("ID", "").equals(item.getText(0)))
-								{
-									text = "Not supported in smart client for listview/tableview";
-								}
-								if (text != null)
-								{
-									if (tip != null && !tip.isDisposed()) tip.dispose();
-									tip = new Shell(tree.getShell(), SWT.ON_TOP | SWT.NO_FOCUS | SWT.TOOL);
-									tip.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-									FillLayout layout = new FillLayout();
-									layout.marginWidth = 2;
-									tip.setLayout(layout);
-									label = new Label(tip, SWT.NONE);
-									label.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-									label.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-									label.setData("_TREEITEM", item);
-									label.setText(text);
-									label.addListener(SWT.MouseExit, labelListener);
-									label.addListener(SWT.MouseDown, labelListener);
-									Point size = tip.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-									Rectangle rect = item.getBounds(0);
-									Point pt = tree.toDisplay(rect.x, rect.y);
-									tip.setBounds(pt.x, pt.y, size.x, size.y);
-									tip.setVisible(true);
-								}
-							}
-						}
-					}
-				}
-			};
-			tree.addListener(SWT.Dispose, treeListener);
-			tree.addListener(SWT.KeyDown, treeListener);
-			tree.addListener(SWT.MouseMove, treeListener);
-			tree.addListener(SWT.MouseHover, treeListener);
-
 			tree.addTraverseListener(e -> {
 
 				TreeItem currentSelectedItem = tree.getSelection() != null && tree.getSelection().length > 0 ? tree.getSelection()[0] : null;
@@ -309,7 +371,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 			tree.setLayoutData(fd_tree);
 		}
 
-		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
+		IWorkbenchPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 		if (activeEditor != null)
 		{
 			ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();

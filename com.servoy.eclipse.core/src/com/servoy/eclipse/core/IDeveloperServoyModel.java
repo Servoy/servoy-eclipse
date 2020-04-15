@@ -66,9 +66,12 @@ public interface IDeveloperServoyModel extends IServoyModel
 
 	public void removeActiveProjectListener(IActiveProjectListener listener);
 
+	/**
+	 * Will call the listener when the model is done loading, will call it right away when it is already loaded.
+	 * Will remove the listener itself after it is called.
+	 * @param listener
+	 */
 	public void addDoneListener(IModelDoneListener listener);
-
-	public void removeDoneListener(IModelDoneListener listener);
 
 	public void addI18NChangeListener(I18NChangeListener listener);
 

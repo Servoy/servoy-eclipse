@@ -377,9 +377,7 @@ public class WarExporter
 			args.add(wroPropertiesFile.getAbsolutePath());
 			args.add("-m");
 			args.add("-c");
-			String processors = "semicolonAppender";
-			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,yuiCssMin";
-			processors += ",cssDataUri";
+			String processors = "semicolonAppender,cssDataUri";
 			args.add(processors);
 
 			ProcessBuilder builder = new ProcessBuilder(args);
@@ -559,13 +557,9 @@ public class WarExporter
 				}
 			}
 		}
-		Attr attr;
 		Element element = doc.createElement(suffix);
 		group.appendChild(element);
 		element.setTextContent(path);
-		attr = doc.createAttribute("minimize");
-		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && !minFound));
-		element.setAttributeNode(attr);
 	}
 
 	/**
@@ -661,7 +655,7 @@ public class WarExporter
 						}
 						copy = true;
 					}
-					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()))
+					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()) && exportedPackages.contains(name))
 					{
 						PackageSpecification<WebLayoutSpecification> spec = componentsSpecProviderState.getLayoutSpecifications().get(name);
 						copy = spec != null && (spec.getCssClientLibrary() != null && !spec.getCssClientLibrary().isEmpty() ||
@@ -1025,7 +1019,7 @@ public class WarExporter
 			exporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), ClientVersion.getVersion(),
 				ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(), exportModel.getNumberOfSampleDataExported(),
 				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
-				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null, null);
+				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null, null, false);
 
 			monitor.done();
 		}

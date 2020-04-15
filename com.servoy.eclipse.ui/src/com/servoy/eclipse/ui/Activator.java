@@ -54,12 +54,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
-import com.servoy.eclipse.core.IModelDoneListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
@@ -80,7 +80,6 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
@@ -89,6 +88,12 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin
 {
+
+	/**
+	 *
+	 */
+	public static final String TUTORIALS_URL = System.getProperty("servoy.tutorial.url") == null
+		? "https://tutorials.servoy.com/solutions/content/index.html?loginToken=" : System.getProperty("servoy.tutorial.url");
 
 	/**
 	 * The PLUGIN_ID for com.servoy.eclipse.ui.
@@ -158,6 +163,7 @@ public class Activator extends AbstractUIPlugin
 						{
 							ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 							final Map<String, Set<String>> processedPackages = new HashMap<>();
+							SpecProviderState componentSpecProvider = WebComponentSpecProvider.getSpecProviderState();
 							for (final ServoyProject module : modules)
 							{
 								module.getSolution().acceptVisitor(new IPersistVisitor()
@@ -169,23 +175,33 @@ public class Activator extends AbstractUIPlugin
 										String missingPackage = null;
 										if (o instanceof WebComponent && ((WebComponent)o).getTypeName() != null)
 										{
-											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState()
-												.getWebObjectSpecification(
-													((WebComponent)o).getTypeName());
+											WebObjectSpecification spec = componentSpecProvider.getWebComponentSpecification(((WebComponent)o).getTypeName());
 											if (spec == null)
 											{
-												missingPackage = ((WebComponent)o).getTypeName().split("-")[0];
+												// see if package is there or not; the component is not present
+												String packageName = ((WebComponent)o).getTypeName().split("-")[0];
+												if (componentSpecProvider.getPackageReader(packageName) == null)
+												{
+													missingPackage = packageName;
+												} // else the component is not there but the package is there; this can happen for example if you use a project package
+													// and you edit a spec file and save it with errors; that results in a component that is not recognized, but is there with errors
+													// and you also have and error problem marker or more for that; in this case we shouldn't offer to import the package automatically
 											}
 										}
 										if (o instanceof LayoutContainer)
 										{
-											PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState()
-												.getLayoutSpecifications()
-												.get(
-													((LayoutContainer)o).getPackageName());
+											PackageSpecification<WebLayoutSpecification> pkg = componentSpecProvider.getLayoutSpecifications()
+												.get(((LayoutContainer)o).getPackageName());
 											if (pkg == null)
 											{
-												missingPackage = ((LayoutContainer)o).getPackageName();
+												// see if package is there or not; the layout is not present
+												String packageName = ((LayoutContainer)o).getPackageName();
+												if (componentSpecProvider.getPackageReader(packageName) == null)
+												{
+													missingPackage = packageName;
+												} // else the layout is not there but the package is there; this can happen for example if you use a project package
+													// and you edit a spec file and save it with errors; that results in a layout that is not recognized, but is there with errors
+													// and you also have and error problem marker or more for that; in this case we shouldn't offer to import the package automatically
 											}
 										}
 										if (missingPackage != null)
@@ -250,16 +266,8 @@ public class Activator extends AbstractUIPlugin
 
 			}
 		});
-		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(new IModelDoneListener()
-		{
-			@Override
-			public void modelDone()
-			{
-				ServoyModelManager.getServoyModelManager().getServoyModel().removeDoneListener(this);
-				showLoginAndStart();
+		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> showLoginAndStart());
 			}
-		});
-	}
 
 	/**
 	 *
@@ -279,7 +287,6 @@ public class Activator extends AbstractUIPlugin
 						Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
 						for (int i = shells.length; --i >= 0;)
 						{
-							Debug.warn(shells[i] + "  +++ " + shells[i].getParent() + " +++" + shells[i].isVisible());
 							if (shells[i].getParent() == null && shells[i].isVisible())
 							{
 								activeShell = shells[i];
@@ -288,17 +295,14 @@ public class Activator extends AbstractUIPlugin
 						}
 						if (activeShell == null)
 						{
-							Debug.warn("active shell is null");
 							Display.getDefault().asyncExec(this);
 							return;
 						}
-						Debug.warn("active shell found looping of all shells" + activeShell);
 					}
-					while (activeShell.getParent() instanceof Shell)
+					while (activeShell.getParent() instanceof Shell && activeShell.getParent().isVisible())
 					{
 						activeShell = (Shell)activeShell.getParent();
 					}
-					Debug.warn("active shell FOUND " + activeShell);
 					//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
 					String username = null;
 					try
@@ -318,7 +322,7 @@ public class Activator extends AbstractUIPlugin
 						if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
 						{
 							BrowserDialog dialog = new BrowserDialog(activeShell,
-								"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true, true);
+								TUTORIALS_URL + loginToken, true, true);
 							dialog.open();
 						}
 					}

@@ -198,6 +198,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.plugins.IClientPluginAccess;
+import com.servoy.j2db.plugins.IIconProvider;
 import com.servoy.j2db.plugins.IPluginManager;
 import com.servoy.j2db.querybuilder.impl.QBAggregate;
 import com.servoy.j2db.querybuilder.impl.QBColumn;
@@ -245,6 +246,7 @@ import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
@@ -1172,7 +1174,7 @@ public class TypeCreator extends TypeCache
 				{
 					memberType = TypeUtil.arrayOf(memberType);
 				}
-				Property property = createProperty(name, false, memberType, "", null);
+				Property property = createProperty(name, false, memberType, pd.getDocumentation(), null);
 				property.setDeprecated(pd.isDeprecated());
 				members.add(property);
 			}
@@ -1324,6 +1326,7 @@ public class TypeCreator extends TypeCache
 		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE ||
 			type == TitleStringPropertyType.NG_INSTANCE) return getTypeRef(context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
+		if (RuntimeComponentPropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, "Component");
 		if (FoundsetPropertyType.TYPE_NAME.equals(type.getName()))
 		{
 			Type recordType = TypeInfoModelFactory.eINSTANCE.createType();
@@ -3080,14 +3083,24 @@ public class TypeCreator extends TypeCache
 							createProperty("it2be_menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'), "Window plugin", null)));
 					}
 
-					Image clientImage = null;
-					Icon icon = clientPlugin.getImage();
-					if (icon != null)
+					Image clientImage = images.get(clientPlugin.getName());
+					if (clientImage == null)
 					{
-						clientImage = images.get(clientPlugin.getName());
-						if (clientImage == null)
+						if (clientPlugin instanceof IIconProvider && ((IIconProvider)clientPlugin).getIconUrl() != null)
 						{
-							clientImage = UIUtils.getSWTImageFromSwingIcon(icon, Display.getDefault(), 16, 16);
+							clientImage = ImageDescriptor.createFromURL(((IIconProvider)clientPlugin).getIconUrl()).createImage();
+						}
+						else
+						{
+							Icon icon = clientPlugin.getImage();
+							if (icon != null)
+							{
+								if (clientImage == null)
+								{
+									clientImage = UIUtils.getSWTImageFromSwingIcon(icon, Display.getDefault(), 16, 16);
+								}
+							}
+
 						}
 						if (clientImage != null)
 						{
@@ -3095,6 +3108,7 @@ public class TypeCreator extends TypeCache
 							images.put(clientPlugin.getName(), clientImage);
 						}
 					}
+
 					if (clientImage == null)
 					{
 						property.setAttribute(IMAGE_DESCRIPTOR, PLUGIN_DEFAULT);
@@ -3103,7 +3117,6 @@ public class TypeCreator extends TypeCache
 					{
 						property.setAttribute(IMAGE_DESCRIPTOR, ImageDescriptor.createFromImage(clientImage));
 					}
-
 					members.add(property);
 				}
 			}

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Web Package Manager
 Bundle-SymbolicName: com.servoy.eclipse.designer.wpm;singleton:=true
-Bundle-Version: 2020.3.0.3560_rc
+Bundle-Version: 2020.6.0.3580_rc
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: javax.servlet,
@@ -10,6 +10,7 @@ Require-Bundle: javax.servlet,
  jabsorb,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
+ org.eclipse.jface,
  sablo,
  servoy_shared,
  com.servoy.eclipse.model,

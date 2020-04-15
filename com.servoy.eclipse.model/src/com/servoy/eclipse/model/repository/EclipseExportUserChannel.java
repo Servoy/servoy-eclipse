@@ -69,6 +69,12 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 		}
 	}
 
+	@Override
+	public void clientInfo(String message, int priority)
+	{
+		this.info(message, priority);
+	}
+
 	public boolean getExportAllTablesFromReferencedServers()
 	{
 		return exportModel.isExportAllTablesFromReferencedServers();

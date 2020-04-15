@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.StringWriter;
@@ -39,7 +40,6 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
-import org.sablo.specification.property.types.VisiblePropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -651,27 +651,16 @@ public class GhostHandler implements IServerService
 		});
 		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
 		Map<String, FormElementGroup> groups = new HashMap<>();
-		Iterator<IPersist> it = editorPart.getForm().getAllObjects();
-		int formHeight = 0;
-		if (editorPart.getForm().getParts().hasNext())
-		{
-			formHeight = editorPart.getForm().getSize().height;
-		}
-		else
-		{
-			Form form = editorPart.getForm();
-			while (formHeight == 0 && (form = form.extendsForm) != null)
-			{
-				formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
-			}
-		}
+		Form form = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
+		int formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
+		Iterator<IPersist> it = form.getAllObjects();
 		while (it.hasNext())
 		{
 			IPersist persist = it.next();
 			if (persist instanceof IFormElement && !PersistHelper.isOverrideOrphanElement((IFormElement)persist))
 			{
 				IFormElement fe = (IFormElement)persist;
-				Point location = fe.getLocation();
+				Point location = CSSPositionUtils.getLocation(fe);
 				if (!editorPart.getForm().isResponsiveLayout() && ((location.x > editorPart.getForm().getWidth()) || (location.y > formHeight)))
 				{
 					outsideElements.add(fe);
@@ -725,30 +714,6 @@ public class GhostHandler implements IServerService
 		return new JSONObject(stringWriter.getBuffer().toString());
 	}
 
-	private boolean isVisible(IPersist persist)
-	{
-		boolean visible = true;
-		if (persist instanceof IFormElement)
-		{
-			IFormElement fe = (IFormElement)persist;
-			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
-			{
-				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecification(((WebComponent)fe).getTypeName());
-				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
-				{
-					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();
-					visible = obj.optBoolean(pd.getName(), true);
-				}
-			}
-			else
-			{
-				visible = fe.getVisible();
-			}
-		}
-		return visible;
-	}
-
 	private void printGhostFormElements(final JSONWriter writer, Iterator<IFormElement> elementsIterator, String type) throws JSONException
 	{
 		while (elementsIterator.hasNext())
@@ -759,14 +724,16 @@ public class GhostHandler implements IServerService
 			writer.key("type").value(type);
 			writer.key("text").value(getGhostLabel(persist, "element"));
 			writer.key("location");
+			Point location = CSSPositionUtils.getLocation(persist);
 			writer.object();
-			writer.key("x").value(persist.getLocation().x);
-			writer.key("y").value(persist.getLocation().y);
+			writer.key("x").value(location.x);
+			writer.key("y").value(location.y);
 			writer.endObject();
 			writer.key("size");
+			Dimension size = CSSPositionUtils.getSize(persist);
 			writer.object();
-			writer.key("width").value(persist.getSize().width);
-			writer.key("height").value(persist.getSize().height);
+			writer.key("width").value(size.width);
+			writer.key("height").value(size.height);
 			writer.endObject();
 			writer.endObject();
 		}

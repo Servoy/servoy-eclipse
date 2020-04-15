@@ -83,7 +83,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	private Button addUsersToAdminGroupButton;
 	private Button createNoneExistingUsersButton;
 	private Button overwriteExistingUsersButton;
-//	private Button minimizeJSAndCSS;
 
 	public FileSelectionPage(ExportWarModel exportModel)
 	{
@@ -423,22 +422,9 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		}
 		enableSolutionExportData();
 
-
-//   leave out for now
-//		minimizeJSAndCSS = new Button(horizontalComposite, SWT.CHECK);
-//		minimizeJSAndCSS.setEnabled(exportModel.isNGExport());
-//		minimizeJSAndCSS.setText("Minimize JS and CSS");
-//		minimizeJSAndCSS.setSelection(exportModel.isMinimizeJsCssResources());
-//		minimizeJSAndCSS.addSelectionListener(new SelectionAdapter()
-//		{
-//			@Override
-//			public void widgetSelected(SelectionEvent e)
-//			{
-//				exportModel.setMinimizeJsCssResources(minimizeJSAndCSS.getSelection());
-//			}
-//		});
-
 		setControl(composite);
+
+		this.getWizard().getContainer().getShell().pack();
 	}
 
 	private void applyNrOfExportedSampleDataSpinnerValue()
@@ -669,8 +655,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		addUsersToAdminGroupButton.setSelection(false);
 		exportModel.setImportUserPolicy(0);
 		enableSolutionExportData();
-//		minimizeJSAndCSS.setSelection(false);
-		exportModel.setMinimizeJsCssResources(false);
 
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();

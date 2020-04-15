@@ -24,6 +24,7 @@ import java.beans.PropertyDescriptor;
 import javax.swing.border.Border;
 
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.property.types.BooleanPropertyType;
@@ -77,11 +78,28 @@ import com.servoy.j2db.server.ngclient.property.types.CSSPositionPropertyType;
  */
 public class BasePropertyHandler implements IPropertyHandler
 {
+
+	/**
+	 * This is a HACK for sablo PropertyDescription objects returned by {@link #getPropertyDescription(Object, IPropertySource, PersistContext)} that
+	 * are static / constants declared in this class and that do not give in their "config" a PropertyController but might need to show tooltips.
+	 *
+	 * So when this happens we cannot set the tooltip directly on a new instance of PropertyController so that it's shown in the UI, instead the code that called this method will/might
+	 * look at the PropertyDescription's "doc" tag to generate a tooltip when it creates the PropertyController. The problem is here that some of these constants can be
+	 * used for multiple properties of the same type - and might need different tooltips.
+	 *
+	 * So although it's strange, for all these constants (PDs) in this class that we described we use the same "tags" object reference; and we can modify then
+	 * the "doc" in it to the value we find in the .spec file of this legacy component (if it runs single threaded then it will have the correct tooltip value for long enough - until
+	 * the PropertyController is created and then it won't matter that we change it for a property that follows in a next call).
+	 *
+	 * We use it as a convenience even for new (non constant) PDs that don't have a PropertyController as "config". Which are basically the same, but could instead be given separate "tags" obj. instances.
+	 */
+	protected static final JSONObject setTooltipOnTagsJSONObjectHack = new JSONObject();
+
 	// null type: use property controller internally
 	public static final PropertyDescription ANCHORS_DESCRIPTION = new PropertyDescriptionBuilder().withName("anchors")
 		.withConfig(
 			new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class)))
-		.build();
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	protected final PropertyDescriptor propertyDescriptor;
 
@@ -121,22 +139,26 @@ public class BasePropertyHandler implements IPropertyHandler
 
 		if (clazz == java.awt.Dimension.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(DimensionPropertyType.TYPE_NAME)).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(DimensionPropertyType.TYPE_NAME))
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == java.awt.Point.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(PointPropertyType.TYPE_NAME)).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(PointPropertyType.TYPE_NAME))
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == java.awt.Insets.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(InsetsPropertyType.TYPE_NAME)).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(InsetsPropertyType.TYPE_NAME))
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == java.awt.Color.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(ColorPropertyType.TYPE_NAME)).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(ColorPropertyType.TYPE_NAME))
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == java.awt.Font.class)
@@ -145,59 +167,64 @@ public class BasePropertyHandler implements IPropertyHandler
 				.withType(TypesRegistry.getType(FontPropertyType.TYPE_NAME))
 				.withConfig(
 					Boolean.FALSE)
-				.build();
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == Border.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(BorderPropertyType.INSTANCE).withConfig(Boolean.FALSE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(BorderPropertyType.INSTANCE).withConfig(Boolean.FALSE)
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == CSSPosition.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(CSSPositionPropertyType.INSTANCE).withConfig(Boolean.FALSE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(CSSPositionPropertyType.INSTANCE).withConfig(Boolean.FALSE)
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 
 		if (clazz == boolean.class || clazz == Boolean.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == String.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(StringPropertyType.INSTANCE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(StringPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == byte.class || clazz == Byte.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(BytePropertyType.INSTANCE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(BytePropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == double.class || clazz == Double.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(DoublePropertyType.INSTANCE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(DoublePropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == float.class || clazz == Float.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(FloatPropertyType.INSTANCE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(FloatPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == int.class || clazz == Integer.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(IntPropertyType.INSTANCE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(IntPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == long.class || clazz == Long.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(LongPropertyType.INSTANCE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(LongPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
 
 		if (clazz == short.class || clazz == Short.class)
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(IntPropertyType.INSTANCE).build();
+			return new PropertyDescriptionBuilder().withName(name).withType(IntPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
+
+		// setTooltipOnTagsJSONObjectHack is used by child class PersistPropertyHandler when it's a property also listed in the .spec file of legacy form elements;
+		// no use trying to get that here as another child class is BeanPropertyHandler (smart client beans that don't have .spec files)
 
 		return null;
 	}
@@ -243,8 +270,8 @@ public class BasePropertyHandler implements IPropertyHandler
 			if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(getName()) && value instanceof Point && persistContext != null &&
 				!(persistContext.getPersist() instanceof Tab) &&
 				((persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getUseCssPosition()) ||
-					CSSPositionUtils.useCSSPosition(persistContext.getPersist())) ||
-				CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist()))
+					CSSPositionUtils.useCSSPosition(persistContext.getPersist()) ||
+					CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist())))
 			{
 				// for tab we always use location
 				CSSPositionUtils.setLocation((ISupportBounds)obj, ((Point)value).x, ((Point)value).y);
@@ -294,7 +321,8 @@ public class BasePropertyHandler implements IPropertyHandler
 				return false;
 			}
 			if (IContentSpecConstants.PROPERTY_CSS_POSITION.equals(name) && persistContext.getContext() instanceof Form &&
-				!((Form)persistContext.getContext()).getUseCssPosition() && !CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist()))
+				!((Form)persistContext.getContext()).getUseCssPosition() && !CSSPositionUtils.isInAbsoluteLayoutMode(persistContext.getPersist()) &&
+				!CSSPositionUtils.useCSSPosition(persistContext.getPersist()))
 			{
 				return false;
 			}

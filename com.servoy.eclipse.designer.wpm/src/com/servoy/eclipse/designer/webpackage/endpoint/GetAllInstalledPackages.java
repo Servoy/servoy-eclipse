@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -79,6 +80,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public static final String CONTENT_NOT_AVAILABLE_METHOD = "contentNotAvailable";
 	public static final String INSTALL_ERROR_METHOD = "installError";
 	public static final String MAIN_WEBPACKAGEINDEX = "https://servoy.github.io/webpackageindex/";
+	public static final String UNKNOWN_VERSION = "unknown";
 	private final WebPackageManagerEndpoint endpoint;
 	private static String selectedWebPackageIndex = MAIN_WEBPACKAGEINDEX;
 	private AvoidMultipleExecutionsJob reloadWPMSpecsJob;
@@ -94,12 +96,12 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 
 	public JSONArray executeMethod(JSONObject msg)
 	{
-		return getAllInstalledPackages(msg, this);
+		return getAllInstalledPackages(msg, this, false);
 	}
 
-	public static JSONArray getAllInstalledPackages()
+	public static JSONArray getAllInstalledPackages(boolean ignoreActiveSolution)
 	{
-		return getAllInstalledPackages(null, null);
+		return getAllInstalledPackages(null, null, ignoreActiveSolution);
 	}
 
 	private static List<JSONObject> sortPackages(List<JSONObject> remotePackages)
@@ -112,7 +114,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return remotePackages;
 	}
 
-	private static JSONArray getAllInstalledPackages(JSONObject msg, GetAllInstalledPackages getAllInstalledPackagesService)
+	private static JSONArray getAllInstalledPackages(JSONObject msg, GetAllInstalledPackages getAllInstalledPackagesService, boolean ignoreActiveSolution)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 		ServoyProject[] activeProjecWithModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
@@ -132,19 +134,19 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				pack.remove("installedResource");
 				pack.remove("activeSolution");
 
-				String name = pack.getString("name");
-				String type = pack.getString("packageType");
-
-				if ("Solution".equals(type))
+				if (!ignoreActiveSolution)
 				{
-					String moduleParent = findModuleParent(ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolution(), name,
-						new HashSet<String>());
-					if (moduleParent != null)
-					{
-						pack.put("activeSolution", moduleParent);
+					String name = pack.getString("name");
+					String type = pack.getString("packageType");
 
+					if (activeSolutionName == null && !"Solution-Main".equals(type)) continue;
+					if ("Solution".equals(type) || "Solution-Main".equals(type))
+					{
+						String moduleParent = findModuleParent(ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolution(), name,
+							new HashSet<String>());
 						ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
-						if (solutionProject != null)
+						pack.put("activeSolution", moduleParent != null ? moduleParent : activeSolutionName);
+						if (solutionProject != null && (moduleParent != null || "Solution-Main".equals(type)))
 						{
 							File wpmPropertiesFile = new File(solutionProject.getProject().getLocation().toFile(), "wpm.properties");
 							if (wpmPropertiesFile.exists())
@@ -165,33 +167,33 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									Debug.log(ex);
 								}
 							}
+							else if (!Strings.isEmpty(solutionProject.getSolution().getVersion()))
+							{
+								pack.put("installed", solutionProject.getSolution().getVersion());
+							}
 							else
 							{
-								pack.put("installed", "unknown");
+								pack.put("installed", UNKNOWN_VERSION);
 							}
 						}
 					}
 					else
 					{
-						pack.put("activeSolution", activeSolutionName);
-					}
-				}
-				else
-				{
-					IPackageReader reader = componentSpecProviderState.getPackageReader(name);
-					if (reader == null) reader = serviceSpecProviderState.getPackageReader(name);
-					if (reader != null)
-					{
-						pack.put("installed", reader.getVersion());
-						pack.put("installedIsWPA", isWebPackageArchive(activeProjecWithModules, reader.getResource()));
-						File installedResource = reader.getResource();
-						if (installedResource != null) pack.put("installedResource", installedResource.getName());
-						String parentSolutionName = getParentProjectNameForPackage(reader.getResource());
-						pack.put("activeSolution", parentSolutionName != null ? parentSolutionName : activeSolutionName);
-					}
-					else
-					{
-						pack.put("activeSolution", msg != null && msg.has("solution") ? msg.get("solution") : activeSolutionName);
+						IPackageReader reader = componentSpecProviderState.getPackageReader(name);
+						if (reader == null) reader = serviceSpecProviderState.getPackageReader(name);
+						if (reader != null)
+						{
+							pack.put("installed", reader.getVersion());
+							pack.put("installedIsWPA", isWebPackageArchive(activeProjecWithModules, reader.getResource()));
+							File installedResource = reader.getResource();
+							if (installedResource != null) pack.put("installedResource", installedResource.getName());
+							String parentSolutionName = getParentProjectNameForPackage(reader.getResource());
+							pack.put("activeSolution", parentSolutionName != null ? parentSolutionName : activeSolutionName);
+						}
+						else
+						{
+							pack.put("activeSolution", msg != null && msg.has("solution") ? msg.get("solution") : activeSolutionName);
+						}
 					}
 				}
 
@@ -444,7 +446,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				return result;
 			}
 		}
-		return remotePackagesCache.get(webPackageIndex).getRight();
+		Pair<Long, List<JSONObject>> remotePackages = remotePackagesCache.get(webPackageIndex);
+		return remotePackages != null ? remotePackages.getRight() : Collections.emptyList(); // could be null if either developer or github/other site are offline
 	}
 
 	private static long getChecksum(List<JSONObject> list)

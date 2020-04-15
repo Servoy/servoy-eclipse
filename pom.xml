@@ -8,77 +8,16 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>2020.3.0.3560_rc</version>
+	<version>2020.6.0.3580_rc</version>
 	<properties>
 		<tycho.version>1.5.1</tycho.version>
 		<tycho.extra.version>1.5.1</tycho.extra.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.14/</eclipse.url>
-		<git.url>http://download.eclipse.org/egit/updates</git.url>
-		<orbit.url>https://download.eclipse.org/tools/orbit/downloads/drops/R20190226160451/repository</orbit.url>
-		<dltk.url>http://developer.servoy.com/p2_repository/dltk_repository/2019.12/</dltk.url>
-		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/2019.12/</servoy-shiplibs.url>
-		<sqlexplorer.url>http://developer.servoy.com/sqlexplorer/</sqlexplorer.url>
-		<gef.url>http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/</gef.url>
-		<emf.url>http://download.eclipse.org/modeling/emf/emf/builds/release/2.16/</emf.url>
-		<chromium.url>http://dl.maketechnology.io/chromium-swt/rls/repository</chromium.url>
-		<cef.url>http://dl.maketechnology.io/chromium-cef/rls/repository</cef.url>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>eclipse</id>
-			<url>${eclipse.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>git</id>
-			<url>${git.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>dltk</id>
-			<url>${dltk.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>servoy_shiplibs</id>
-			<url>${servoy-shiplibs.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>sqlexplorer</id>
-			<url>${sqlexplorer.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>gef</id>
-			<url>${gef.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>emf</id>
-			<url>${emf.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>chromium</id>
-			<url>${chromium.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>cef</id>
-			<url>${cef.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>orbit</id>
-			<url>${orbit.url}</url>
-			<layout>p2</layout>
-		</repository>
-	</repositories>
+
 
 	<build>
 		<plugins>
@@ -103,6 +42,13 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho.version}</version>
 				<configuration>
+					<target>
+						<artifact>
+							<groupId>com.servoy</groupId>
+							<artifactId>com.servoy.eclipse.target</artifactId>
+							<version>${project.parent.version}</version>
+						</artifact>
+					</target>
 					<pomDependencies>consider</pomDependencies>
 					<resolver>p2</resolver>
 					<environments>
@@ -193,6 +139,13 @@
 								<version>${project.version}</version>
 							</restrictTo>
 						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>com.servoy.eclipse.ui.tweaks</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
 					</filters>
 					<includePackedArtifacts>true</includePackedArtifacts>
 				</configuration>
@@ -272,6 +225,12 @@
 
 	<profiles>
 		<profile>
+			<id>target</id>
+			<modules>
+				<module>launch_targets</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>product</id>
 			<modules>
 				<module>com.servoy.jre.linux.x86_64</module>
@@ -290,6 +249,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
+				<module>launch_targets</module>
 				<module>com.servoy.eclipse.model</module>
 				<module>com.servoy.eclipse.model.exporter.mobile</module>
 				<module>com.servoy.eclipse.core</module>
@@ -309,7 +269,6 @@
 				<module>com.servoy.eclipse.profiler</module>
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
-				<module>org.eclipse.help.ui</module>
 				<module>org.eclipse.jface</module>
 				<module>j2db_documentation</module>
 			</modules>

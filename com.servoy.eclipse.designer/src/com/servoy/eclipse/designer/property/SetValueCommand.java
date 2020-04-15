@@ -28,6 +28,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySource2;
 
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
+import com.servoy.eclipse.designer.editor.IPreExecuteCommand;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 import com.servoy.j2db.util.Pair;
 
@@ -38,7 +39,7 @@ import com.servoy.j2db.util.Pair;
  * @author rgansevles
  */
 
-public class SetValueCommand extends Command
+public class SetValueCommand extends Command implements IPreExecuteCommand
 {
 	private static Comparator<Pair<String, Object>> PAIR_LEFT_KEY_COMPARATOR = new Comparator<Pair<String, Object>>()
 	{
@@ -63,13 +64,15 @@ public class SetValueCommand extends Command
 
 	private Object undoValue;
 	private boolean resetOnUndo;
+	private final boolean preExecute;
 
-	private SetValueCommand(String label, IPropertySource target, Object propertyId, Object propertyValue)
+	private SetValueCommand(String label, IPropertySource target, Object propertyId, Object propertyValue, boolean preExecute)
 	{
 		super(label);
 		this.target = target;
 		this.propertyId = propertyId;
 		this.propertyValue = propertyValue;
+		this.preExecute = preExecute;
 	}
 
 	@Override
@@ -82,8 +85,12 @@ public class SetValueCommand extends Command
  * means we need to reset.
  */
 		boolean wasPropertySet = target.isPropertySet(propertyId);
-		undoValue = target.getPropertyValue(propertyId);
-		if (undoValue instanceof IPropertySource) undoValue = ((IPropertySource)undoValue).getEditableValue();
+		if (!preExecute)
+		{
+			// preexecute should save the undo value, if called
+			undoValue = target.getPropertyValue(propertyId);
+			if (undoValue instanceof IPropertySource) undoValue = ((IPropertySource)undoValue).getEditableValue();
+		}
 		if (propertyValue instanceof IPropertySource) propertyValue = ((IPropertySource)propertyValue).getEditableValue();
 		if (propertyValue == DEFAULT_VALUE)
 		{
@@ -111,6 +118,13 @@ public class SetValueCommand extends Command
 		else target.setPropertyValue(propertyId, undoValue);
 	}
 
+	@Override
+	public void preExecute()
+	{
+		undoValue = target.getPropertyValue(propertyId);
+		if (undoValue instanceof IPropertySource) undoValue = ((IPropertySource)undoValue).getEditableValue();
+	}
+
 	/**
 	 * Create a command for setting a value.
 	 * Use BaseRestorableCommand if possible (saves state completely before setting).
@@ -124,16 +138,22 @@ public class SetValueCommand extends Command
 	 */
 	public static Command createSetvalueCommand(String propLabel, final IPropertySource target, final Object propertyId, final Object propertyValue)
 	{
+		return createSetvalueCommand(propLabel, target, propertyId, propertyValue, false);
+	}
+
+	public static Command createSetvalueCommand(String propLabel, final IPropertySource target, final Object propertyId, final Object propertyValue,
+		boolean preExecute)
+	{
 		String label = (propLabel != null && propLabel.length() > 0) ? "Set " + propLabel + " Property" : "";
 		if (propertyValue != SetValueCommand.DEFAULT_VALUE && target instanceof IModelSavePropertySource &&
 			BaseRestorableCommand.getRestorer(((IModelSavePropertySource)target).getSaveModel()) != null)
 		{
 			// save the state before applying the property
-			return new RestorableSetValueCommand(label, (IModelSavePropertySource)target, propertyId, propertyValue);
+			return new RestorableSetValueCommand(label, (IModelSavePropertySource)target, propertyId, propertyValue, preExecute);
 		}
 
 		// state cannot be saved, use the old style set-value-command
-		return new SetValueCommand(label, target, propertyId, propertyValue);
+		return new SetValueCommand(label, target, propertyId, propertyValue, preExecute);
 	}
 
 	public static Command createSetPropertiesCommand(IPropertySource target, Map<Object, Object> extendedData)

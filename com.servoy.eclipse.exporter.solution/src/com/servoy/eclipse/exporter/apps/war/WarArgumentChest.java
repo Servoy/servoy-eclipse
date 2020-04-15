@@ -86,7 +86,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String defaultAdminUser = "defaultAdminUser";
 	private static final String defaultAdminPassword = "defaultAdminPassword";
 	private static final String useAsRealAdminUser = "useAsRealAdminUser";
-	private static final String minimizeJsCss = "minimize";
 	private static final String licenses = "licenses";
 	private static final String license = "license";
 	private static final String license_name_suffix = ".company_name";
@@ -184,19 +183,17 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             you don't run the exporter from [servoy_install]/developer/exporter\n"
 			+ "             Default: '../plugins'.\n"
 			+ "        -crefs ... exports only the components used by the (current if -s has more) solution\n"
-			+ "             Default: all components are exported.\n"
 			+ "        -crefs <additional_component_names> ... can be 'all'  (without the ')  or a  list of\n"
 			+ "             components separated by spaces; exports the  components  used  by  the solution\n"
 			+ "             (current if -s has more) and the components in this additional components list.\n"
-			+ "             Default: all components are exported.\n"
+			+ "             Default: only the used components exported.\n"
 			+ "        -excludeComponentPkgs ... space separated list of excluded component packages\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -srefs ... exports  only the services used by  the (current if -s has more) solution\n"
-			+ "             Default: all services are exported.\n"
 			+ "        -srefs <additional_service_names> ... can  be  'all' (no ')  or  a list  of services\n"
 			+ "             separated by spaces; exports the services used by the  (current if -s has more)\n"
 			+ "             solution  and the services in this additional services list.\n"
-			+ "             Default: all services are exported.\n"
+			+ "             Default: only the used services are exported.\n"
 			+ "        -excludeServicePkgs ... space separated list of excluded service packages.\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -md ... export metadata tables (tables marked as metadata); uses the metadata stored\n"
@@ -249,7 +246,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Context element; may only be used with createTomcatContextXML.\n"
 			+ "        -" + useAsRealAdminUser + " ... the  default admin user login  given via   -" + defaultAdminUser + "\n"
 			+ "             above will be available as a normal admin user in solutions as well.\n"
-			+ "        -" + minimizeJsCss + " ... minimize JS and CSS files \n"
 			+ "        -" + license+license_name_suffix +" OR "+license+".<i>"+license_name_suffix+",\n"
 			+ "             The name of the company that has the license,  where <i> is used when there are\n"
 			+ "             multiple licenses:\n"
@@ -660,11 +656,6 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean isUseAsRealAdminUser()
 	{
 		return argumentsMap.containsKey(useAsRealAdminUser);
-	}
-
-	public boolean isMinimizeJsCssResources()
-	{
-		return argumentsMap.containsKey(minimizeJsCss);
 	}
 
 	public Map<String, License> getLicenses()

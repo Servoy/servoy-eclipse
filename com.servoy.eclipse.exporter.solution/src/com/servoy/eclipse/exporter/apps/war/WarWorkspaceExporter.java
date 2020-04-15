@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -43,7 +42,6 @@ import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.Pair;
@@ -265,10 +263,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				Set<String> set = new HashSet<String>();
 				if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
 				{
-					for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebObjectSpecifications())
-					{
-						set.add(spec.getName());
-					}
+					Arrays.stream(componentsSpecProviderState.getAllWebObjectSpecifications()).map(spec -> spec.getName()).forEach(set::add);
 				}
 				else
 				{
@@ -304,10 +299,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				Set<String> set = new HashSet<String>();
 				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
 				{
-					for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
-					{
-						set.add(spec.getName());
-					}
+					Arrays.stream(servicesSpecProviderState.getAllWebObjectSpecifications()).map(spec -> spec.getName()).forEach(set::add);
 				}
 				else
 				{
@@ -494,12 +486,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
-		public boolean isMinimizeJsCssResources()
-		{
-			return configuration.isMinimizeJsCssResources();
-		}
-
-		@Override
 		public Collection<License> getLicenses()
 		{
 			return configuration.getLicenses().values();
@@ -542,6 +528,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 						.collect(Collectors.toSet())) //
 					.flatMap(Set::stream) //
 					.collect(Collectors.toSet());
+				exportedPackages.addAll(exportedLayoutPackages);
 			}
 			return exportedPackages;
 		}

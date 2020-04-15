@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -77,6 +79,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	private final Set<String> usedComponents;
 	private final Set<String> usedServices;
+	protected final Set<String> exportedLayoutPackages;
 	protected final Map<String, License> licenses;
 
 	protected SpecProviderState componentsSpecProviderState;
@@ -92,6 +95,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	{
 		usedComponents = new TreeSet<String>();
 		usedServices = new TreeSet<String>();
+		exportedLayoutPackages = new HashSet<String>();
 		licenses = new HashMap<String, License>();
 
 		this.isNgExport = isNGExport;
@@ -201,6 +205,11 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			if (persist instanceof ISupportChilds)
 			{
 				findUsedComponents((ISupportChilds)persist);
+			}
+			if (persist instanceof LayoutContainer)
+			{
+				LayoutContainer layout = (LayoutContainer)persist;
+				exportedLayoutPackages.add(layout.getPackageName());
 			}
 		}
 	}

@@ -18,6 +18,7 @@
 package com.servoy.eclipse.notification.rss;
 
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -149,7 +150,11 @@ public class RSSNotificationJob extends Job
 				}
 			}
 		}
-		catch(Exception ex)
+		catch (UnknownHostException e)
+		{
+			ServoyLog.logInfo("Cannot get RSS notifications. It's likely that either the developer or the remote site is offline: " + e.getLocalizedMessage());
+		}
+		catch (Exception ex)
 		{
 			ServoyLog.logError("Error getting RSS notifications", ex);			
 		}

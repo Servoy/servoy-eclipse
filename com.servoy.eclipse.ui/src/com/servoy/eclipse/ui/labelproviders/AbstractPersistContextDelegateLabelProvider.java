@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.IToolTipProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.ui.views.properties.PropertySheetEntry;
 
 import com.servoy.j2db.persistence.IPersist;
 
@@ -59,7 +60,7 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 	{
 		if (getLabelProvider() instanceof IFontProvider)
 		{
-			return ((IFontProvider)getLabelProvider()).getFont(element);
+			return ((IFontProvider)getLabelProvider()).getFont(convertPropertySheetEntry(element));
 		}
 		return null;
 	}
@@ -73,7 +74,7 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 	{
 		if (getLabelProvider() instanceof IColorProvider)
 		{
-			return ((IColorProvider)getLabelProvider()).getBackground(element);
+			return ((IColorProvider)getLabelProvider()).getBackground(convertPropertySheetEntry(element));
 		}
 		return null;
 	}
@@ -87,7 +88,7 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 	{
 		if (getLabelProvider() instanceof IColorProvider)
 		{
-			return ((IColorProvider)getLabelProvider()).getForeground(element);
+			return ((IColorProvider)getLabelProvider()).getForeground(convertPropertySheetEntry(element));
 		}
 		return null;
 	}
@@ -105,5 +106,19 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 			return ((IToolTipProvider)getLabelProvider()).getToolTipText(element);
 		}
 		return null;
+	}
+
+	private Object convertPropertySheetEntry(Object element)
+	{
+		if (element instanceof PropertySheetEntry)
+		{
+			Object[] values = ((PropertySheetEntry)element).getValues();
+			if (values != null && values.length == 1)
+			{
+				return values[0];
+			}
+			return null;
+		}
+		return element;
 	}
 }

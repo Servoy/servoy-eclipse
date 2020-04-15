@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Profiler
 Bundle-SymbolicName: com.servoy.eclipse.profiler; singleton:=true
-Bundle-Version: 2020.3.0.3560_rc
+Bundle-Version: 2020.6.0.3580_rc
 Bundle-Activator: com.servoy.eclipse.profiler.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: com.servoy.eclipse.model,
  servoy_debug,
+ org.eclipse.jface,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.text,
  org.eclipse.dltk.core,

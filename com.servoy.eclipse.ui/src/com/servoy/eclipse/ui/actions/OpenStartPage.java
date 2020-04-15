@@ -24,6 +24,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
 import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 
@@ -60,7 +61,7 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 		if (loginToken != null)
 		{
 			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-				"https://team2-dev.hackaton.servoy-cloud.eu/solutions/content/index.html?loginToken=" + loginToken, true, false);
+				Activator.TUTORIALS_URL + loginToken, true, false);
 			dialog.open();
 		}
 	}

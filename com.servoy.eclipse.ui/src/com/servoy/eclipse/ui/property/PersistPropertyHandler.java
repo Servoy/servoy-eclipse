@@ -43,6 +43,8 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.PropertyDescriptionBuilder;
 import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.WebObjectFunctionDefinition;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.FontPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
@@ -51,6 +53,9 @@ import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.query.IJoinConstants;
+import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.XMLDesignDocsLoader;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -66,10 +71,13 @@ import com.servoy.eclipse.ui.labelproviders.PageFormatLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MediaPropertyController.MediaPropertyControllerConfig;
 import com.servoy.eclipse.ui.property.PersistPropertySource.NullDefaultLabelProvider;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
 import com.servoy.j2db.IForm;
+import com.servoy.j2db.documentation.IFunctionDocumentation;
+import com.servoy.j2db.documentation.IObjectDocumentation;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -83,6 +91,7 @@ import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
@@ -108,6 +117,7 @@ import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -121,21 +131,25 @@ import com.servoy.j2db.util.Utils;
  */
 public class PersistPropertyHandler extends BasePropertyHandler
 {
+
 	public static final PropertyDescription ROTATION_VALUES = new PropertyDescriptionBuilder().withName("rotation").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
-			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(0), Integer.valueOf(90), Integer.valueOf(180), Integer.valueOf(270) })).build();
+			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(0), Integer.valueOf(90), Integer.valueOf(180), Integer.valueOf(270) }))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription HORIZONTAL_ALIGNMENT_VALUES = new PropertyDescriptionBuilder().withName("horizontalAlignment").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(
 				new Integer[] { Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.RIGHT) },
-				new String[] { Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }).addDefault(Integer.valueOf(-1), null)).build();
+				new String[] { Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight }).addDefault(Integer.valueOf(-1), null))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription VERTICAL_ALIGNMENT_VALUES = new PropertyDescriptionBuilder().withName("verticalAlignment").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(
 				new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.CENTER), Integer.valueOf(SwingConstants.BOTTOM) },
-				new String[] { Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }).addDefault(Integer.valueOf(-1), null)).build();
+				new String[] { Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }).addDefault(Integer.valueOf(-1), null))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription SOLUTION_TYPE_VALUES;
 
@@ -156,37 +170,43 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				new Integer[] { Integer.valueOf(Solution.TEXT_ORIENTATION_LEFT_TO_RIGHT), Integer.valueOf(
 					Solution.TEXT_ORIENTATION_RIGHT_TO_LEFT), Integer.valueOf(Solution.TEXT_ORIENTATION_LOCALE_SPECIFIC) },
 				new String[] { Messages.OrientationLeftToRight, Messages.OrientationRightToLeft, Messages.OrientationLocaleSpecific }).addDefault(
-					Integer.valueOf(Solution.TEXT_ORIENTATION_DEFAULT), null)).build();
+					Integer.valueOf(Solution.TEXT_ORIENTATION_DEFAULT), null))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription ROLLOVER_CURSOR_VALUES = new PropertyDescriptionBuilder().withName("rolloverCursor").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(Cursor.HAND_CURSOR) }, new String[] { Messages.CursorHand }).addDefault(
-				Integer.valueOf(Cursor.DEFAULT_CURSOR), null)).build();
+				Integer.valueOf(Cursor.DEFAULT_CURSOR), null))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription SHAPE_TYPE_VALUES = new PropertyDescriptionBuilder().withName("shapeType").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(
 				new Integer[] { Integer.valueOf(RectShape.BORDER_PANEL), Integer.valueOf(RectShape.RECTANGLE), Integer.valueOf(
 					RectShape.ROUNDED_RECTANGLE), Integer.valueOf(RectShape.OVAL) },
-				new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" })).build();
+				new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription VIEW_TYPE_VALUES = new PropertyDescriptionBuilder().withName("view").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(
 				new Integer[] { Integer.valueOf(IForm.RECORD_VIEW), Integer.valueOf(IForm.LIST_VIEW), Integer.valueOf(
 					IForm.LOCKED_RECORD_VIEW), Integer.valueOf(FormController.LOCKED_LIST_VIEW), Integer.valueOf(FormController.LOCKED_TABLE_VIEW) },
-				new String[] { "Record view", "List view", "Record view (locked)", "List view (locked)", "Table view (locked)" })).build();
+				new String[] { "Record view", "List view", "Record view (locked)", "List view (locked)", "Table view (locked)" }))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription SELECTION_MODE_VALUES = new PropertyDescriptionBuilder().withName("selectionMode").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(IForm.SELECTION_MODE_SINGLE), Integer.valueOf(IForm.SELECTION_MODE_MULTI) },
 				new String[] { Messages.SelectionModeSingle, Messages.SelectionModeMulti }).addDefault(Integer.valueOf(IForm.SELECTION_MODE_DEFAULT),
-					null)).build();
+					null))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription JOIN_TYPE_VALUES = new PropertyDescriptionBuilder().withName("joinType").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(IJoinConstants.INNER_JOIN), Integer.valueOf(IJoinConstants.LEFT_OUTER_JOIN) },
-				new String[] { ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.LEFT_OUTER_JOIN] })).build();
+				new String[] { ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[IJoinConstants.LEFT_OUTER_JOIN] }))
+		.build();
 
 	public static final PropertyDescription DISPLAY_TYPE_VALUES = new PropertyDescriptionBuilder().withName(
 		"displayType").withType(ValuesPropertyType.INSTANCE).withConfig(new ValuesConfig().setValues(
@@ -194,7 +214,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				Field.HTML_AREA), Integer.valueOf(Field.TYPE_AHEAD), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(
 					Field.CHECKS), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.IMAGE_MEDIA), Integer.valueOf(
 						Field.PASSWORD), Integer.valueOf(Field.LIST_BOX), Integer.valueOf(Field.MULTISELECT_LISTBOX), Integer.valueOf(Field.SPINNER) },
-			new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD", "LISTBOX", "MULTISELECT_LISTBOX", "SPINNER" })).build();
+			new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD", "LISTBOX", "MULTISELECT_LISTBOX", "SPINNER" }))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription TAB_ORIENTATION_VALUES = new PropertyDescriptionBuilder().withName("tabOrientation").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
@@ -202,14 +223,18 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(
 					SwingConstants.BOTTOM), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(
 						TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
-				new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }).addDefault(
-					Integer.valueOf(TabPanel.DEFAULT_ORIENTATION), null)).build();
+				new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" })
+				.addDefault(
+					Integer.valueOf(TabPanel.DEFAULT_ORIENTATION), null))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 	public static final PropertyDescription MNEMONIC_VALUES = new PropertyDescriptionBuilder().withName("mnemonic").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(
-				new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" }).setEditable(
-					true)).build();
+				new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" })
+				.setEditable(
+					true))
+		.withTags(setTooltipOnTagsJSONObjectHack).build();
 
 
 	// null type: use property controller internally
@@ -225,16 +250,18 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			new ValuesConfig().setValues(
 				new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(
 					PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) },
-				new String[] { Messages.Public, Messages.HideInScriptingModuleScope, Messages.ModuleScope })).build();
+				new String[] { Messages.Public, Messages.HideInScriptingModuleScope, Messages.ModuleScope }))
+		.build();
 	public static final PropertyDescription OTHER_ENCAPSULATION_VALUES = new PropertyDescriptionBuilder().withName("encapsulation").withType(
 		ValuesPropertyType.INSTANCE).withConfig(
 			new ValuesConfig().setValues(new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) },
-				new String[] { Messages.Public, Messages.ModuleScope })).build();
+				new String[] { Messages.Public, Messages.ModuleScope }))
+		.build();
 
 
 	// null type: use property controller internally
-	public static final PropertyDescription PAGE_FORMAT_DESCRIPTION = new PropertyDescriptionBuilder().withName("defaultPageFormat").withConfig(
-		new PropertyController<String, PageFormat>("defaultPageFormat", RepositoryHelper.getDisplayName("defaultPageFormat", Form.class),
+	public static final PropertyDescription PAGE_FORMAT_DESCRIPTION = new PropertyDescriptionBuilder().withName("defaultPageFormat")
+		.withConfig(new PropertyController<String, PageFormat>("defaultPageFormat", RepositoryHelper.getDisplayName("defaultPageFormat", Form.class),
 			new IPropertyConverter<String, PageFormat>()
 			{
 				public PageFormat convertProperty(Object id, String value)
@@ -253,18 +280,17 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				{
 					return new PageFormatEditor(parent, "Page Setup", PageFormatLabelProvider.INSTANCE);
 				}
-			})).build();
+			}))
+		.build();
 
 
 	// null type: use property controller internally
 	public static final PropertyDescription GROUP_BY_DESCRIPTION = new PropertyDescriptionBuilder().withName("groupbyDataProviderIDs").withConfig(
 		new PropertyController<String, Object[]>("groupbyDataProviderIDs", RepositoryHelper.getDisplayName("groupbyDataProviderIDs", Part.class),
-			new StringTokenizerConverter(",", true), null, null)).build();
+			new StringTokenizerConverter(",", true), null, null))
+		.build();
 
 
-	/**
-	 * @param element
-	 */
 	public PersistPropertyHandler(java.beans.PropertyDescriptor propertyDescriptor)
 	{
 		super(propertyDescriptor);
@@ -277,11 +303,20 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		String displayName = RepositoryHelper.getDisplayName(name, obj.getClass());
 
 		PropertyCategory category = PropertyCategory.createPropertyCategory(name);
-		if (category == PropertyCategory.Events || category == PropertyCategory.Commands)
+		if (category == PropertyCategory.Events)
+		{
+			applyTooltipFromJavadocOrSpec(name, persistContext.getPersist(), true, null);
+			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(FunctionPropertyType.TYPE_NAME)).withConfig(
+				Boolean.valueOf(category == PropertyCategory.Commands)).withTags(setTooltipOnTagsJSONObjectHack).build();
+		}
+		else if (category == PropertyCategory.Commands)
 		{
 			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(FunctionPropertyType.TYPE_NAME)).withConfig(
 				Boolean.valueOf(category == PropertyCategory.Commands)).build();
 		}
+
+		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip = null;
+		PropertyDescription builtSabloPD;
 
 		final Form form = persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null;
 		final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
@@ -290,85 +325,81 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		if (name.equals("mediaOptions"))
 		{
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(new MediaoptionsPropertyController(name, displayName, propertySource)).build();
+			propertyControllerThatMightNeedTooltip = new MediaoptionsPropertyController(name, displayName, propertySource);
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name)
+				.withConfig(propertyControllerThatMightNeedTooltip)
+				.build();
 		}
-
-		if (name.endsWith("printSliding"))
+		else if (name.endsWith("printSliding"))
 		{
-			return SLIDING_OPTIONS_DESCRIPTION;
+			builtSabloPD = SLIDING_OPTIONS_DESCRIPTION;
+			propertyControllerThatMightNeedTooltip = (PropertyController)SLIDING_OPTIONS_DESCRIPTION.getConfig();
 		}
-
-
-		if (obj instanceof Media && ("mimeType".equals(name) || "name".equals(name)))
-		{
-			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(
-				new PropertyController<String, String>(name, displayName, PersistPropertySource.NULL_STRING_CONVERTER, null, null)).build();
-		}
-
-		if ("tabSeq".equals(name))
+		else if (obj instanceof Media && ("mimeType".equals(name) || "name".equals(name)))
 		{
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(
-				new PropertyController<String, String>(name, displayName, null, null, new ICellEditorFactory()
+			propertyControllerThatMightNeedTooltip = new PropertyController<String, String>(name, displayName, PersistPropertySource.NULL_STRING_CONVERTER,
+				null,
+				null);
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(propertyControllerThatMightNeedTooltip).build();
+		}
+		else if ("tabSeq".equals(name))
+		{
+			// null type: use property controller internally
+			propertyControllerThatMightNeedTooltip = new PropertyController<String, String>(name, displayName, null, null, new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
 				{
-					public CellEditor createPropertyEditor(Composite parent)
-					{
-						if (form != null) return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(form), true, SWT.NONE);
-						else return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(null), true, SWT.NONE);
-					}
-				})).build();
+					if (form != null) return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(form), true, SWT.NONE);
+					else return new TabSeqDialogCellEditor(parent, null, new TabSeqDialogValueEditor(null), true, SWT.NONE);
+				}
+			});
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(propertyControllerThatMightNeedTooltip).build();
 		}
-
-		if (name.equals("encapsulation"))
+		else if (name.equals("encapsulation"))
 		{
 			if (persistContext.getPersist() instanceof Form)
 			{
 				// null type: use property controller internally
-				return FORM_ENCAPSULATION_DESCRIPTION;
+				builtSabloPD = FORM_ENCAPSULATION_DESCRIPTION;
 			}
-
-			if (obj instanceof Relation)
+			else if (obj instanceof Relation)
 			{
-				return RELATION_ENCAPSULATION_VALUES;
+				builtSabloPD = RELATION_ENCAPSULATION_VALUES;
 			}
-
-			return OTHER_ENCAPSULATION_VALUES;
+			else
+			{
+				builtSabloPD = OTHER_ENCAPSULATION_VALUES;
+			}
 		}
-
-		if (name.equals(IContentSpecConstants.PROPERTY_STYLESHEET))
+		else if (name.equals(IContentSpecConstants.PROPERTY_STYLESHEET) && persistContext.getPersist() instanceof Solution)
 		{
-			if (persistContext.getPersist() instanceof Solution)
-			{
-				return new PropertyDescriptionBuilder().withName(name).withType(MediaPropertyType.INSTANCE).withConfig(
-					new MediaPropertyControllerConfig("Solution CSS picker (from media library)", new IFilter()
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(MediaPropertyType.INSTANCE).withConfig(
+				new MediaPropertyControllerConfig("Solution CSS picker (from media library)", new IFilter()
+				{
+
+					@Override
+					public boolean select(Object toTest)
 					{
-						@Override
-						public boolean select(Object toTest)
+						if (toTest instanceof MediaNode)
 						{
-							if (toTest instanceof MediaNode)
-							{
-								MediaNode node = ((MediaNode)toTest);
-								return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css") ||
-									node.getName().endsWith(".less") && !ThemeResourceLoader.CUSTOM_PROPERTIES_LESS.equals(node.getName());
-							}
-							return false;
+							MediaNode node = ((MediaNode)toTest);
+							return node.getType() == MediaNode.TYPE.FOLDER || node.getName().endsWith(".css") ||
+								node.getName().endsWith(".less") && !ThemeResourceLoader.CUSTOM_PROPERTIES_LESS.equals(node.getName());
 						}
-					}, false)).build();
-			}
+						return false;
+					}
+				}, false)).build();
 		}
-
-		if (name.equals("namedFoundSet"))
+		else if (name.equals("namedFoundSet") && form != null)
 		{
-			if (form != null)
-			{
-				// null type: use property controller internally
-				return new PropertyDescriptionBuilder().withName("namedFoundSet").withConfig(
-					new NamedFoundSetPropertyController(name, displayName, NamedFoundSetPropertyController.getDisplayValues(form), form)).build();
-			}
+			// null type: use property controller internally
+			propertyControllerThatMightNeedTooltip = new NamedFoundSetPropertyController(name, displayName,
+				NamedFoundSetPropertyController.getDisplayValues(form),
+				form);
+			builtSabloPD = new PropertyDescriptionBuilder().withName("namedFoundSet").withConfig(propertyControllerThatMightNeedTooltip).build();
 		}
-
-		if (name.endsWith("rowBGColorCalculation"))
+		else if (name.endsWith("rowBGColorCalculation"))
 		{
 			if (form == null) return null;
 			ITable table = null;
@@ -386,11 +417,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			}
 
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(
-				new ScriptProviderPropertyController(name, displayName, table, persistContext)).build();
+			propertyControllerThatMightNeedTooltip = new ScriptProviderPropertyController(name, displayName, table, persistContext);
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(propertyControllerThatMightNeedTooltip).build();
 		}
-
-		if ("variableType".equals(name) && persistContext.getPersist() instanceof ScriptVariable && propertySource instanceof PersistPropertySource)
+		else if ("variableType".equals(name) && persistContext.getPersist() instanceof ScriptVariable && propertySource instanceof PersistPropertySource)
 		{
 			int[] iTypes = Column.allDefinedTypes;
 			Integer[] integerTypes = new Integer[iTypes.length];
@@ -403,30 +433,31 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(
-				new PropertySetterDelegatePropertyController<Integer, PersistPropertySource>(new ComboboxPropertyController<Integer>(name, displayName,
-					new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved), name)
+			propertyControllerThatMightNeedTooltip = new PropertySetterDelegatePropertyController<Integer, PersistPropertySource>(
+				new ComboboxPropertyController<Integer>(name, displayName,
+					new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved),
+				name)
+			{
+				// handle setting of this property via a IPropertySetter so that we can do additional stuff when the property is set.
+				public void setProperty(PersistPropertySource propertySource, Integer value)
 				{
-					// handle setting of this property via a IPropertySetter so that we can do additional stuff when the property is set.
-					public void setProperty(PersistPropertySource propertySource, Integer value)
-					{
-						propertySource.setPersistPropertyValue(name, value);
+					propertySource.setPersistPropertyValue(name, value);
 
-						// the variable type is being set; the default value should change if incompatible
-						ScriptVariable variable = (ScriptVariable)propertySource.getPersist();
-						String defaultValue = variable.getDefaultValue();
-						if (defaultValue != null)
+					// the variable type is being set; the default value should change if incompatible
+					ScriptVariable variable = (ScriptVariable)propertySource.getPersist();
+					String defaultValue = variable.getDefaultValue();
+					if (defaultValue != null)
+					{
+						String newDefault = null;
+						int type = value.intValue();
+						if (type == IColumnTypes.TEXT)
 						{
-							String newDefault = null;
-							int type = value.intValue();
-							if (type == IColumnTypes.TEXT)
+							if (!isQuoted(defaultValue))
 							{
-								if (!isQuoted(defaultValue))
-								{
-									newDefault = Utils.makeJSExpression(defaultValue);
-								}
+								newDefault = Utils.makeJSExpression(defaultValue);
 							}
-							else if (type == IColumnTypes.INTEGER)
+						}
+						else if (type == IColumnTypes.INTEGER)
 						{
 							if (isQuoted(defaultValue))
 							{
@@ -446,7 +477,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 								newDefault = "";
 							}
 						}
-							else if (type == IColumnTypes.NUMBER)
+						else if (type == IColumnTypes.NUMBER)
 						{
 							if (isQuoted(defaultValue))
 							{
@@ -467,43 +498,36 @@ public class PersistPropertyHandler extends BasePropertyHandler
 							}
 						}
 
-							if (newDefault != null)
-							{
-								variable.setDefaultValue(newDefault);
-							}
+						if (newDefault != null)
+						{
+							variable.setDefaultValue(newDefault);
 						}
 					}
-				}).build();
+				}
+			};
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(propertyControllerThatMightNeedTooltip).build();
 		}
-
-
-		if (name.equals("textRotation"))
+		else if (name.equals("textRotation"))
 		{
-			return ROTATION_VALUES;
+			builtSabloPD = ROTATION_VALUES;
 		}
-
-		if (name.equals("horizontalAlignment"))
+		else if (name.equals("horizontalAlignment"))
 		{
-			return HORIZONTAL_ALIGNMENT_VALUES;
+			builtSabloPD = HORIZONTAL_ALIGNMENT_VALUES;
 		}
-
-		if (name.equals("verticalAlignment"))
+		else if (name.equals("verticalAlignment"))
 		{
-			return VERTICAL_ALIGNMENT_VALUES;
+			builtSabloPD = VERTICAL_ALIGNMENT_VALUES;
 		}
-
-
-		if (name.equals("solutionType"))
+		else if (name.equals("solutionType"))
 		{
-			return SOLUTION_TYPE_VALUES;
+			builtSabloPD = SOLUTION_TYPE_VALUES;
 		}
-
-		if (name.equals("textOrientation"))
+		else if (name.equals("textOrientation"))
 		{
-			return TEXT_ORIENTATION_VALUES;
+			builtSabloPD = TEXT_ORIENTATION_VALUES;
 		}
-
-		if (name.endsWith("navigatorID") && form != null)
+		else if (name.endsWith("navigatorID") && form != null)
 		{
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
 				persistContext.getContext());
@@ -514,21 +538,21 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				{
 					// TODO: use PropertyType.form with options
 					boolean isMobile = form.getSolution().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
-					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
+					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, form),
+						formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), false,
 						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true, false,
 							null),
-						SWT.NONE, null, "navigatorFormDialog", "Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
+						SWT.NONE, null, "navigatorFormDialog",
+						"Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
 
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(pd).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(pd).build();
 		}
-
-
-		if (name.equals("extendsID") && form != null)
+		else if (name.equals("extendsID") && form != null)
 		{
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true),
 				persistContext.getContext());
@@ -537,9 +561,11 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
+					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form),
+						formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), false,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY, null, true, false, false, form.isFormComponent(), null),
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY, null, true, false, false, form.isFormComponent(),
+							null),
 						SWT.NONE, null, "parentFormDialog")
 					{
 						@Override
@@ -635,35 +661,30 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			pd.setLabelProvider(formLabelProvider);
 
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(pd).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(pd).build();
 		}
-
-
-		if (name.equals("firstFormID") || name.equals("loginFormID") || name.equals("containsFormID"))
+		else if (name.equals("firstFormID") || name.equals("loginFormID") || name.equals("containsFormID"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(FormPropertyType.INSTANCE).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(FormPropertyType.INSTANCE).build();
 		}
-
-		if (name.equals("rolloverImageMediaID") || name.equals("imageMediaID"))
+		else if (name.equals("rolloverImageMediaID") || name.equals("imageMediaID"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(MediaPropertyType.INSTANCE).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(MediaPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack)
+				.build();
 		}
-
-		if (name.equals("text") || name.equals("toolTipText") || name.equals("titleText") || name.equals("innerHTML"))
+		else if (name.equals("text") || name.equals("toolTipText") || name.equals("titleText") || name.equals("innerHTML"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(TagStringPropertyType.INSTANCE).withConfig(
-				Boolean.valueOf(name.equals("innerHTML"))).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(TagStringPropertyType.INSTANCE).withConfig(
+				Boolean.valueOf(name.equals("innerHTML"))).withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
-
-		if (name.equals("styleClass"))
+		else if (name.equals("styleClass"))
 		{
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(PersistPropertySource.createStyleClassPropertyController(
-				persistContext.getPersist(), name, displayName, ModelUtils.getStyleLookupname(persistContext.getPersist()), form)).build();
+			propertyControllerThatMightNeedTooltip = PersistPropertySource.createStyleClassPropertyController(
+				persistContext.getPersist(), name, displayName, ModelUtils.getStyleLookupname(persistContext.getPersist()), form);
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(propertyControllerThatMightNeedTooltip).build();
 		}
-
-
-		if (name.equals("styleName"))
+		else if (name.equals("styleName"))
 		{
 			List<String> styleNames = new ArrayList<String>();
 			try
@@ -684,11 +705,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				PersistPropertySource.NullDefaultLabelProvider.LABEL_DEFAULT);
 
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(new ComboboxPropertyController<String>(name, displayName, model,
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(new ComboboxPropertyController<String>(name, displayName, model,
 				Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(StyleValueEditor.INSTANCE, model))).build();
 		}
-
-		if (name.endsWith("initialSort"))
+		else if (name.endsWith("initialSort"))
 		{
 			final ITableDisplay tableDisplay;
 			if (persistContext != null && persistContext.getPersist() instanceof Portal)
@@ -740,7 +760,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			}
 
 			// null type: use property controller internally
-			return new PropertyDescriptionBuilder().withName(name).withConfig(new PropertyController<String, String>(name, displayName,
+			propertyControllerThatMightNeedTooltip = new PropertyController<String, String>(name, displayName,
 				PersistPropertySource.NULL_STRING_CONVERTER, NullDefaultLabelProvider.LABEL_DEFAULT, new ICellEditorFactory()
 				{
 					public CellEditor createPropertyEditor(Composite parent)
@@ -748,145 +768,132 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						return new SortCellEditor(parent, flattenedEditingSolution, tableDisplay, "Select sorting fields",
 							NullDefaultLabelProvider.LABEL_DEFAULT);
 					}
-				})).build();
+				});
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withConfig(propertyControllerThatMightNeedTooltip).build();
 		}
-
-
-		if (name.equals("defaultPageFormat"))
+		else if (name.equals("defaultPageFormat"))
 		{
-			return PAGE_FORMAT_DESCRIPTION;
+			builtSabloPD = PAGE_FORMAT_DESCRIPTION;
 		}
-
-		if (name.equals("groupbyDataProviderIDs"))
+		else if (name.equals("groupbyDataProviderIDs"))
 		{
-			return GROUP_BY_DESCRIPTION;
+			builtSabloPD = GROUP_BY_DESCRIPTION;
 		}
-
-		if (name.equals("borderType"))
+		else if (name.equals("borderType"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(BorderPropertyType.INSTANCE).withConfig(Boolean.TRUE).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(BorderPropertyType.INSTANCE).withConfig(Boolean.TRUE)
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
-
-		if (name.equals("scrollbars"))
+		else if (name.equals("scrollbars"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(ScrollbarsPropertyType.INSTANCE).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(ScrollbarsPropertyType.INSTANCE).build();
 		}
-
-		if (name.endsWith("dataProviderID"))
+		else if (name.endsWith("dataProviderID"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(DataproviderPropertyType.INSTANCE).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(DataproviderPropertyType.INSTANCE)
+				.withTags(setTooltipOnTagsJSONObjectHack)
+				.build();
 		}
-
-		if (name.equals("format"))
+		else if (name.equals("format"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(FormatPropertyType.INSTANCE).withConfig(
-				new String[] { StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName() }).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(FormatPropertyType.INSTANCE).withConfig(
+				new String[] { StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), StaticContentSpecLoader.PROPERTY_DATAPROVIDERID
+					.getPropertyName() })
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
-
-		if (name.equals("relationName"))
+		else if (name.equals("relationName"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(RelationPropertyType.INSTANCE).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(RelationPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack)
+				.build();
 		}
-
-		if (name.equals("fontType"))
+		else if (name.equals("fontType"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(FontPropertyType.TYPE_NAME)).withConfig(Boolean.TRUE).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(TypesRegistry.getType(FontPropertyType.TYPE_NAME))
+				.withConfig(Boolean.TRUE)
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
 		}
-
-		if (name.endsWith("valuelistID"))
+		else if (name.endsWith("valuelistID"))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(ValueListPropertyType.INSTANCE).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(ValueListPropertyType.INSTANCE).withTags(setTooltipOnTagsJSONObjectHack)
+				.build();
 		}
-
-		if ("rolloverCursor".equals(name))
+		else if ("rolloverCursor".equals(name))
 		{
-			return ROLLOVER_CURSOR_VALUES;
+			builtSabloPD = ROLLOVER_CURSOR_VALUES;
 		}
-
-		if (name.endsWith("shapeType"))
+		else if (name.endsWith("shapeType"))
 		{
-			return SHAPE_TYPE_VALUES;
+			builtSabloPD = SHAPE_TYPE_VALUES;
 		}
-
-		if (name.equals("view"))
+		else if (name.equals("view"))
 		{
-			return VIEW_TYPE_VALUES;
+			builtSabloPD = VIEW_TYPE_VALUES;
 		}
-
-		if ("selectionMode".equals(name))
+		else if ("selectionMode".equals(name))
 		{
-			return SELECTION_MODE_VALUES;
+			builtSabloPD = SELECTION_MODE_VALUES;
 		}
-
-		if (name.equals("joinType"))
+		else if (name.equals("joinType"))
 		{
-			return JOIN_TYPE_VALUES;
+			builtSabloPD = JOIN_TYPE_VALUES;
 		}
-
-		if (name.equals("displayType"))
+		else if (name.equals("displayType"))
 		{
-			return DISPLAY_TYPE_VALUES;
+			builtSabloPD = DISPLAY_TYPE_VALUES;
 		}
-
-		if (name.equals("tabOrientation"))
+		else if (name.equals("tabOrientation"))
 		{
-			return TAB_ORIENTATION_VALUES;
+			builtSabloPD = TAB_ORIENTATION_VALUES;
 		}
-
-		if (name.equals("mnemonic"))
+		else if (name.equals("mnemonic"))
 		{
-			return MNEMONIC_VALUES;
+			builtSabloPD = MNEMONIC_VALUES;
 		}
-
-		if (name.equals("labelFor"))
+		else if (name.equals("labelFor") && form != null)
 		{
-			if (form != null)
+			Form flattenedForm = flattenedEditingSolution.getFlattenedForm(form);
+			int bodyStart = -1, bodyEnd = -1;
+			if (flattenedForm.getView() == FormController.TABLE_VIEW || flattenedForm.getView() == FormController.LOCKED_TABLE_VIEW)
 			{
-				Form flattenedForm = flattenedEditingSolution.getFlattenedForm(form);
-				int bodyStart = -1, bodyEnd = -1;
-				if (flattenedForm.getView() == FormController.TABLE_VIEW || flattenedForm.getView() == FormController.LOCKED_TABLE_VIEW)
+				bodyStart = 0;
+				Iterator<Part> parts = flattenedForm.getParts();
+				while (parts.hasNext())
 				{
-					bodyStart = 0;
-					Iterator<Part> parts = flattenedForm.getParts();
-					while (parts.hasNext())
+					Part part = parts.next();
+					if (part.getPartType() == Part.BODY)
 					{
-						Part part = parts.next();
-						if (part.getPartType() == Part.BODY)
-						{
-							bodyEnd = part.getHeight();
-							break;
-						}
-						bodyStart = part.getHeight();
+						bodyEnd = part.getHeight();
+						break;
 					}
+					bodyStart = part.getHeight();
 				}
-
-				List<String> names = new ArrayList<String>();
-				for (IPersist object : flattenedForm.getAllObjectsAsList())
-				{
-					if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
-					{
-						boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
-							!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
-						if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
-						{
-							// TableView, add elements in the body
-							Point location = ((IFormElement)object).getLocation();
-							add = (location != null && location.y >= bodyStart && location.y < bodyEnd);
-						}
-						if (add)
-						{
-							names.add(((IFormElement)object).getName());
-						}
-					}
-				}
-				String[] array = names.toArray(new String[names.size()]);
-				Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
-				return new PropertyDescriptionBuilder().withName(name).withType(ValuesPropertyType.INSTANCE).withConfig(
-					new ValuesConfig().setValues(array).setEditable(true)).build();
 			}
-		}
 
-		if (name.equals("modulesNames"))
+			List<String> names = new ArrayList<String>();
+			for (IPersist object : flattenedForm.getAllObjectsAsList())
+			{
+				if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
+				{
+					boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
+						!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
+					if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
+					{
+						// TableView, add elements in the body
+						Point location = ((IFormElement)object).getLocation();
+						add = (location != null && location.y >= bodyStart && location.y < bodyEnd);
+					}
+					if (add)
+					{
+						names.add(((IFormElement)object).getName());
+					}
+				}
+			}
+			String[] array = names.toArray(new String[names.size()]);
+			Arrays.sort(array, String.CASE_INSENSITIVE_ORDER);
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(ValuesPropertyType.INSTANCE).withConfig(
+				new ValuesConfig().setValues(array).setEditable(true)).withTags(setTooltipOnTagsJSONObjectHack).build();
+		}
+		else if (name.equals("modulesNames"))
 		{
 			List<String> availableSolutions = new ArrayList<String>();
 			if (obj instanceof Solution)
@@ -914,21 +921,114 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				}
 			}
 
-			return new PropertyDescriptionBuilder().withName(name).withType(ValuesPropertyType.INSTANCE).withConfig(
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(ValuesPropertyType.INSTANCE).withConfig(
 				new ValuesConfig().setValues(availableSolutions.toArray()).setMultiple(true)).build();
 		}
-
-		if (name.equals(IContentSpecConstants.PROPERTY_NG_READONLY_MODE))
+		else if (name.equals(IContentSpecConstants.PROPERTY_NG_READONLY_MODE))
 		{
-			return new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).withHasDefault(true).build();
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).withHasDefault(true).build();
+		}
+		else if (name.equals(IContentSpecConstants.PROPERTY_FORM_COMPONENT))
+		{
+			builtSabloPD = new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).withHasDefault(true)
+				.withTags(setTooltipOnTagsJSONObjectHack).build();
+		}
+		else builtSabloPD = super.getPropertyDescription(obj, propertySource, persistContext);
+
+		applyTooltipFromJavadocOrSpec(name, persistContext.getPersist(), false, propertyControllerThatMightNeedTooltip);
+
+		return builtSabloPD;
+	}
+
+	/**
+	 * Looks in case of IFormElement persists for legacy java interface javadoc or a .spec file with "doc" tag on that property or doc key on the handler.<br/>
+	 * What it finds it provides either to the propertyControllerThatMightNeedTooltip if given or it sets it as string into setTooltipOnTagsJSONObjectHack.
+	 */
+	private void applyTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
+		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip)
+	{
+		// it's not always a trivial thing to compute it for all properties so if possible give a tooltip provider - not a string
+		// so that it will be computed only when it needs to be shown
+		if (propertyControllerThatMightNeedTooltip != null)
+		{
+			propertyControllerThatMightNeedTooltip.setTooltipProvider(new IProvidesTooltip()
+			{
+				@Override
+				public String getTooltipText()
+				{
+					return getTooltipFromJavadocOrSpec(propertyOrHandlerName, persist, isHandler,
+						propertyControllerThatMightNeedTooltip);
+				}
+			});
+		}
+		else
+		{
+			// as the controller will be created later we can only set the tooltip as string in the PropertyDescription
+			setTooltipOnTagsJSONObjectHack.put(PropertyDescription.DOCUMENTATION_TAG_FOR_PROP_OR_KEY_FOR_HANDLERS,
+				getTooltipFromJavadocOrSpec(propertyOrHandlerName, persist, isHandler,
+					propertyControllerThatMightNeedTooltip)); // sets it or removes it if null
+		}
+	}
+
+
+	private String getTooltipFromJavadocOrSpec(String propertyOrHandlerName, IPersist persist, boolean isHandler,
+		PropertyController< ? , ? > propertyControllerThatMightNeedTooltip)
+	{
+		String toolTip = null;
+		if (persist instanceof IFormElement && propertyOrHandlerName != null)
+		{
+			if (isHandler)
+			{
+				// first see if this maps on the javadoc on one of the legacy element interfaces
+				MethodTemplate legacyMethodTemplate = MethodTemplate.getTemplate(persist.getClass(), propertyOrHandlerName);
+				if (legacyMethodTemplate != null) toolTip = legacyMethodTemplate.getDescription();
+
+				if (toolTip == null || "".equals(toolTip))
+				{
+					// try to find the spec even for legacy components - to get the property/handler docs from the .spec file
+					// normally you don't get here - as a legacy java interface with javadoc should already be found above
+					WebObjectSpecification sabloSpecEvenForLegacyComponents = FormTemplateGenerator.getWebObjectSpecification((IFormElement)persist);
+					if (sabloSpecEvenForLegacyComponents != null)
+					{
+						WebObjectFunctionDefinition handler = sabloSpecEvenForLegacyComponents.getHandler(propertyOrHandlerName);
+						toolTip = (handler != null ? handler.getDocumentation() : null);
+					}
+				}
+			}
+			else
+			{
+				// first see if this maps on the javadoc on one of the legacy element persist interfaces
+				Class< ? > docClassForLegacy = ElementUtil.getPersistClassForDesignDoc(Activator.getDefault().getDesignClient(), persist);
+				if (docClassForLegacy != null)
+				{
+					IObjectDocumentation persistDocs = XMLDesignDocsLoader
+						.getObjectDocumentation(docClassForLegacy);
+
+					if (persistDocs != null)
+					{
+						IFunctionDocumentation fieldDocs = persistDocs.getFunction(propertyOrHandlerName, (Class[])null);
+						if (fieldDocs != null)
+							toolTip = fieldDocs.getDescription(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
+					}
+				}
+
+				if (toolTip == null || "".equals(toolTip))
+				{
+					// try to find the spec even for legacy components - to get the property/handler docs from the .spec file
+					// normally you don't get here - as a legacy java interface with javadoc should already be found above
+					WebObjectSpecification sabloSpecEvenForLegacyComponents = FormTemplateGenerator.getWebObjectSpecification((IFormElement)persist);
+					if (sabloSpecEvenForLegacyComponents != null)
+					{
+						PropertyDescription propertyDescription = sabloSpecEvenForLegacyComponents.getProperty(propertyOrHandlerName);
+						toolTip = (propertyDescription != null ? propertyDescription.getDocumentation() : null);
+					}
+				}
+			}
+
 		}
 
-		if (name.equals(IContentSpecConstants.PROPERTY_FORM_COMPONENT))
-		{
-			return new PropertyDescriptionBuilder().withName(name).withType(BooleanPropertyType.INSTANCE).withHasDefault(true).build();
-		}
-
-		return super.getPropertyDescription(obj, propertySource, persistContext);
+		if ("".equals(toolTip)) toolTip = null;
+		return toolTip;
 	}
 
 	private static boolean isQuoted(String text)

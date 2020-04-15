@@ -81,7 +81,7 @@ public class XMLScriptObjectAdapterLoader
 		}
 	}
 
-	public static void loadDocumentationFromXML(ClassLoader loader, IDocumentationManager docmgr)
+	private static void loadDocumentationFromXML(ClassLoader loader, IDocumentationManager docmgr)
 	{
 		Date start = new Date();
 
@@ -111,18 +111,17 @@ public class XMLScriptObjectAdapterLoader
 				}
 				catch (Throwable e)
 				{
-					System.out.println("Class " + objDoc.getQualifiedName() + " not found for script object registration.");
+					ServoyLog.logError("Class " + objDoc.getQualifiedName() + " not found for script object registration.", e);
 					failed++;
 				}
 			}
 
-			System.out.print("Documentation loaded successfully. " + succeeded + " classes registered successfully.");
-			if (failed > 0) System.out.print(" " + failed + " classes failed registration.");
-			System.out.println();
+			ServoyLog.logInfo("Documentation loaded successfully. " + succeeded + " classes registered successfully.");
+			if (failed > 0) ServoyLog.logError(" " + failed + " classes failed registration.", null);
 		}
 
 		Date stop = new Date();
-		System.out.println("Documentation loaded and registered in " + (stop.getTime() - start.getTime()) + " ms.");
+		ServoyLog.logInfo("Documentation loaded and registered in " + (stop.getTime() - start.getTime()) + " ms.");
 	}
 
 	public static IObjectDocumentation getObjectDocumentation(Class< ? > clz)

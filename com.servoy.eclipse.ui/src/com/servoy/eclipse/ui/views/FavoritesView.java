@@ -36,7 +36,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.IStartPageAction;
+import com.servoy.eclipse.core.IMainConceptsPageAction;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.util.Utils;
@@ -198,9 +198,9 @@ public class FavoritesView extends ViewPart
 					{
 						Object actionObject = ModelLoaderUtil.createClassInstance(introURL.getParameter(IntroURL.KEY_PLUGIN_ID),
 							introURL.getParameter(IntroURL.KEY_CLASS));
-						if (actionObject instanceof IStartPageAction)
+						if (actionObject instanceof IMainConceptsPageAction)
 						{
-							((IStartPageAction)actionObject).runAction(introURL);
+							((IMainConceptsPageAction)actionObject).runAction(introURL);
 						}
 						else
 						{

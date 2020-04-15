@@ -32,6 +32,8 @@ import org.eclipse.swt.graphics.Image;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IParentOverridable;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -45,6 +47,20 @@ import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
+import com.servoy.j2db.documentation.persistence.docs.DocsTextArea;
+import com.servoy.j2db.documentation.persistence.docs.DocsTextField;
+import com.servoy.j2db.documentation.persistence.docs.DocsButton;
+import com.servoy.j2db.documentation.persistence.docs.DocsCalendar;
+import com.servoy.j2db.documentation.persistence.docs.DocsCheckBoxes;
+import com.servoy.j2db.documentation.persistence.docs.DocsComboBox;
+import com.servoy.j2db.documentation.persistence.docs.DocsImage;
+import com.servoy.j2db.documentation.persistence.docs.DocsLabel;
+import com.servoy.j2db.documentation.persistence.docs.DocsListForm;
+import com.servoy.j2db.documentation.persistence.docs.DocsPassword;
+import com.servoy.j2db.documentation.persistence.docs.DocsPortal;
+import com.servoy.j2db.documentation.persistence.docs.DocsRadioButtons;
+import com.servoy.j2db.documentation.persistence.docs.DocsRectShape;
+import com.servoy.j2db.documentation.persistence.docs.DocsTabPanel;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -374,7 +390,24 @@ public class ElementUtil
 
 	private static Map<String, WeakReference<Class< ? >>> beanClassCache = new ConcurrentHashMap<String, WeakReference<Class< ? >>>();
 
+	public static Class< ? > getPersistClassForDesignDoc(final IApplication application, Object persist)
+	{
+		return getPersistClassForDocumentation(application, persist, false);
+	}
+
 	public static Class< ? > getPersistScriptClass(final IApplication application, Object model)
+	{
+		return getPersistClassForDocumentation(application, model, true);
+	}
+
+	/**
+	 * Maps a given persist class to the appropriate design or scripting documentation class.<br/>
+	 * For example for a button (GraphicalComponent persist) it might map it to IRuntimeButton if forScripting is true and to DocsButton is forScripting is false.
+	 *
+	 * @param model the persist object
+	 * @param forScripting true if it should return the class for scripting documentation; false if it should return the design documentation class.
+	 */
+	private static Class< ? > getPersistClassForDocumentation(final IApplication application, Object model, boolean forScripting)
 	{
 		if (model instanceof GraphicalComponent)
 		{
@@ -383,16 +416,16 @@ public class ElementUtil
 			{
 				if (label.getDataProviderID() == null && !label.getDisplaysTags())
 				{
-					return IRuntimeButton.class;
+					return forScripting ? IRuntimeButton.class : DocsButton.class;
 				}
-				return IRuntimeDataButton.class;
+				return forScripting ? IRuntimeDataButton.class : DocsButton.class;
 			}
 
 			if (label.getDataProviderID() == null && !label.getDisplaysTags())
 			{
-				return IScriptScriptLabelMethods.class;
+				return forScripting ? IScriptScriptLabelMethods.class : DocsLabel.class;
 			}
-			return IScriptDataLabelMethods.class;
+			return forScripting ? IScriptDataLabelMethods.class : DocsLabel.class;
 		}
 
 		if (model instanceof Field)
@@ -402,38 +435,38 @@ public class ElementUtil
 			switch (field.getDisplayType())
 			{
 				case Field.PASSWORD :
-					return IRuntimePassword.class;
+					return forScripting ? IRuntimePassword.class : DocsPassword.class;
 				case Field.RTF_AREA :
-					return IRuntimeRtfArea.class;
+					return forScripting ? IRuntimeRtfArea.class : DocsTextField.class; // don't have a dedicated class for rtf area so use the basic field docs
 				case Field.HTML_AREA :
-					return IRuntimeHtmlArea.class;
+					return forScripting ? IRuntimeHtmlArea.class : DocsTextField.class; // don't have a dedicated class for rtf area so use the basic field docs
 				case Field.TEXT_AREA :
-					return IRuntimeTextArea.class;
+					return forScripting ? IRuntimeTextArea.class : DocsTextArea.class;
 				case Field.CHECKS :
 					if (isSingle(application, field))
 					{
-						return IRuntimeCheck.class;
+						return forScripting ? IRuntimeCheck.class : DocsCheckBoxes.class;
 					}
-					return IRuntimeChecks.class;
+					return forScripting ? IRuntimeChecks.class : DocsCheckBoxes.class;
 				case Field.RADIOS :
 					if (isSingle(application, field))
 					{
-						return IRuntimeRadio.class;
+						return forScripting ? IRuntimeRadio.class : DocsRadioButtons.class;
 					}
-					return IRuntimeRadios.class;
+					return forScripting ? IRuntimeRadios.class : DocsRadioButtons.class;
 				case Field.COMBOBOX :
-					return IRuntimeCombobox.class;
+					return forScripting ? IRuntimeCombobox.class : DocsComboBox.class;
 				case Field.CALENDAR :
-					return IRuntimeCalendar.class;
+					return forScripting ? IRuntimeCalendar.class : DocsCalendar.class;
 				case Field.IMAGE_MEDIA :
-					return IRuntimeImageMedia.class;
+					return forScripting ? IRuntimeImageMedia.class : DocsImage.class;
 				case Field.LIST_BOX :
 				case Field.MULTISELECT_LISTBOX :
-					return IRuntimeListBox.class;
+					return forScripting ? IRuntimeListBox.class : DocsTextField.class; // don't have a dedicated class for list box so use the basic field docs;
 				case Field.SPINNER :
-					return IRuntimeSpinner.class;
+					return forScripting ? IRuntimeSpinner.class : DocsTextField.class; // don't have a dedicated class for list box so use the basic field docs;
 				default :
-					return IRuntimeTextField.class;
+					return forScripting ? IRuntimeTextField.class : DocsTextField.class;
 			}
 		}
 
@@ -441,7 +474,7 @@ public class ElementUtil
 		{
 			if (ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile())
 			{
-				return IScriptMobileBean.class;
+				return forScripting ? IScriptMobileBean.class : model.getClass(); // currently we don't support design time docs (properties view tooltips for example) for smart client/web client/mobile beans
 			}
 
 			final Bean bean = (Bean)model;
@@ -485,34 +518,35 @@ public class ElementUtil
 					Debug.error("Error loading bean: " + bean.getName() + " clz: " + beanClassName, e);
 				}
 			}
-			return beanClass;
+			return forScripting ? beanClass : model.getClass();
 		}
 
 		if (model instanceof TabPanel)
 		{
 			int orient = ((TabPanel)model).getTabOrientation();
-			if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL) return IScriptSplitPaneMethods.class;
-			if (orient == TabPanel.ACCORDION_PANEL) return IScriptAccordionPanelMethods.class;
-			return IScriptTabPanelMethods.class;
+			if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL)
+				return forScripting ? IScriptSplitPaneMethods.class : DocsTabPanel.class;
+			if (orient == TabPanel.ACCORDION_PANEL) return forScripting ? IScriptAccordionPanelMethods.class : DocsTabPanel.class;
+			return forScripting ? IScriptTabPanelMethods.class : DocsTabPanel.class;
 		}
 
 		if (model instanceof MobileListModel)
 		{
-			return IScriptInsetListComponentMethods.class;
+			return forScripting ? IScriptInsetListComponentMethods.class : DocsListForm.class;
 		}
 
 		if (model instanceof Portal)
 		{
 			if (((Portal)model).isMobileInsetList())
 			{
-				return IScriptInsetListComponentMethods.class;
+				return forScripting ? IScriptInsetListComponentMethods.class : model.getClass(); // don't have a dedicated class for mobile list component...
 			}
-			return IScriptPortalComponentMethods.class;
+			return forScripting ? IScriptPortalComponentMethods.class : DocsPortal.class;
 		}
 
 		if (model instanceof RectShape)
 		{
-			return IRuntimeRectangle.class;
+			return forScripting ? IRuntimeRectangle.class : DocsRectShape.class;
 		}
 
 		if (model instanceof FormElementGroup)
@@ -522,7 +556,7 @@ public class ElementUtil
 			{
 				if (elem instanceof AbstractBase && ((AbstractBase)elem).getCustomMobileProperty(IMobileProperties.COMPONENT_TITLE.propertyName) == null)
 				{
-					return getPersistScriptClass(application, elem);
+					return getPersistClassForDocumentation(application, elem, forScripting);
 				}
 			}
 		}
@@ -742,5 +776,67 @@ public class ElementUtil
 			else image = Activator.getDefault().loadImageFromBundle("designer.png");
 		}
 		return image;
+	}
+
+	public static void convertToCSSPosition(List<Form> toConvert)
+	{
+		List<String> solutionNames = new ArrayList<String>();
+		if (toConvert != null && ServoyModelFinder.getServoyModel().getActiveProject() != null)
+		{
+			FlattenedSolution fs = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+			// add all parent forms for conversion
+			for (Form form : toConvert.toArray(new Form[0]))
+			{
+				List<Form> hierarchyForms = fs.getFormHierarchy(form);
+				for (Form parentForm : hierarchyForms)
+				{
+					if (!toConvert.contains(parentForm))
+						toConvert.add(parentForm);
+				}
+			}
+
+			// add all sibblings for conversion
+			Iterator<Form> it = fs.getForms(false);
+			while (it.hasNext())
+			{
+				Form currentForm = it.next();
+				if (!toConvert.contains(currentForm))
+				{
+					Form parentForm = currentForm.getExtendsForm();
+					while (parentForm != null)
+					{
+						if (toConvert.contains(parentForm))
+						{
+							toConvert.add(currentForm);
+							break;
+						}
+						parentForm = parentForm.getExtendsForm();
+					}
+				}
+			}
+
+			for (Form form : toConvert)
+			{
+				CSSPositionUtils.convertToCSSPosition(form);
+				String solutionName = form.getSolution().getName();
+				if (!solutionNames.contains(solutionName))
+				{
+					solutionNames.add(solutionName);
+				}
+			}
+		}
+		for (String solutionName : solutionNames)
+		{
+			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+				solutionName);
+			try
+			{
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { servoyProject.getEditingSolution() }, true);
+			}
+			catch (RepositoryException e)
+			{
+				Debug.error(e);
+			}
+		}
 	}
 }
