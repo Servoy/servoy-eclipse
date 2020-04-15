@@ -175,7 +175,7 @@ public class Activator extends AbstractUIPlugin
 										String missingPackage = null;
 										if (o instanceof WebComponent && ((WebComponent)o).getTypeName() != null)
 										{
-											WebObjectSpecification spec = componentSpecProvider.getWebComponentSpecification(((WebComponent)o).getTypeName());
+											WebObjectSpecification spec = componentSpecProvider.getWebObjectSpecification(((WebComponent)o).getTypeName());
 											if (spec == null)
 											{
 												// see if package is there or not; the component is not present
@@ -267,7 +267,7 @@ public class Activator extends AbstractUIPlugin
 			}
 		});
 		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> showLoginAndStart());
-			}
+	}
 
 	/**
 	 *
