@@ -1,24 +1,26 @@
 import { Injectable } from '@angular/core';
-import { IConverter, ConverterService } from '../../sablo/converter.service'
+import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service'
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
-import { ChangeListener, ChangeEvent, FoundsetTypeConstants, FoundsetLinkedTypeConstants } from '../../sablo/spectypes.service'
+import { ChangeListener, ViewportChangeEvent } from '../../sablo/spectypes.service'
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper } from '../../sablo/defer.service';
 import { Deferred } from '../../sablo/util/deferred';
-import { ViewportService } from '../services/viewport.service';
+import { ViewportService, IViewportConversion } from '../services/viewport.service';
 
 
 @Injectable()
 export class FoundsetLinkedConverter implements IConverter {
     
-    public static readonly SINGLE_VALUE = "sv";
-    public static readonly SINGLE_VALUE_UPDATE = "svu";
-    public static readonly VIEWPORT_VALUE = "vp";
-    public static readonly VIEWPORT_VALUE_UPDATE = "vpu";
-    public static readonly CONVERSION_NAME = "fsLinked";
-    public static readonly PROPERTY_CHANGE = "propertyChange";
-    public static readonly PUSH_TO_SERVER = "w"; // value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
+    private static readonly SINGLE_VALUE = "sv";
+    private static readonly SINGLE_VALUE_UPDATE = "svu";
+    private static readonly VIEWPORT_VALUE = "vp";
+    private static readonly VIEWPORT_VALUE_UPDATE = "vpu";
+    private static readonly CONVERSION_NAME = "fsLinked";
+    private static readonly PROPERTY_CHANGE = "propertyChange";
+    private static readonly PUSH_TO_SERVER = "w"; // value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
 
+    private static readonly FOR_FOUNDSET_PROPERTY: string = 'forFoundset';
+    private static readonly ID_FOR_FOUNDSET = "idForFoundset";
      
     private log: LoggerService;
 
@@ -26,7 +28,7 @@ export class FoundsetLinkedConverter implements IConverter {
         this.log = logFactory.getLogger("FoundsetLinkedPropertyValue");
     }
     
-    public fromServerToClient(serverJSONValue:object, currentClientValue: FoundsetLinked, propertyContext:(propertyName: string) => any) {
+    public fromServerToClient(serverJSONValue:object, currentClientValue: FoundsetLinked, propertyContext:PropertyContext) {
         let newValue : FoundsetLinked = currentClientValue;
 
         if (serverJSONValue !== null && serverJSONValue !== undefined) {
@@ -38,9 +40,9 @@ export class FoundsetLinkedConverter implements IConverter {
                 internalState = newValue.state;
             }
 
-            if (serverJSONValue[FoundsetTypeConstants.FOR_FOUNDSET_PROPERTY] !== undefined) {
+            if (serverJSONValue[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY] !== undefined) {
                 // the foundset that this property is linked to; keep that info in internal state; viewport.js needs it
-                let forFoundsetPropertyName = serverJSONValue[FoundsetTypeConstants.FOR_FOUNDSET_PROPERTY];
+                let forFoundsetPropertyName = serverJSONValue[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY];
                 internalState.forFoundset = () => { return propertyContext(forFoundsetPropertyName); };
                 didSomething = true;
             }
@@ -86,10 +88,10 @@ export class FoundsetLinkedConverter implements IConverter {
             }
         }
         
-        if (serverJSONValue[FoundsetLinkedTypeConstants.ID_FOR_FOUNDSET] === null) {
+        if (serverJSONValue[FoundsetLinkedConverter.ID_FOR_FOUNDSET] === null) {
             if (newValue.idForFoundset !== undefined) newValue.idForFoundset = undefined;
-        } else if (serverJSONValue[FoundsetLinkedTypeConstants.ID_FOR_FOUNDSET] !== undefined) {
-            newValue.idForFoundset = serverJSONValue[FoundsetLinkedTypeConstants.ID_FOR_FOUNDSET];
+        } else if (serverJSONValue[FoundsetLinkedConverter.ID_FOR_FOUNDSET] !== undefined) {
+            newValue.idForFoundset = serverJSONValue[FoundsetLinkedConverter.ID_FOR_FOUNDSET];
         }
         return newValue;
     }
@@ -113,19 +115,18 @@ export class FoundsetLinkedConverter implements IConverter {
         return [];
     }
     
-    private getUpdateWholeViewportFunc(propertyContext:(propertyName: string) => any) {
+    private getUpdateWholeViewportFunc(propertyContext: PropertyContext) {
         return (propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport: any[], conversionInfos: any[]) => {
-            let viewPortHolder = { startIndex: undefined, size: undefined, rows: [] };
-            this.viewportService.updateWholeViewport(viewPortHolder, "rows", internalState, wholeViewport, conversionInfos, propertyContext);
+            let rows = this.viewportService.updateWholeViewport([], internalState, wholeViewport, conversionInfos, propertyContext);
             
             // updateWholeViewport probably changed "rows" reference to value of "wholeViewport"...
             // update current value reference because that is what is present in the model
             propValue.splice(0, propValue.length);
-            for (let tz = 0; tz < viewPortHolder.rows.length; tz++) propValue.push(viewPortHolder.rows[tz]);
+            for (let tz = 0; tz < rows.length; tz++) propValue.push(rows[tz]);
             
             if (propValue && internalState && internalState.changeListeners.length > 0) {
-                let notificationParamForListeners : ChangeEvent;
-                notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_ROWS_COMPLETELY_CHANGED] = { oldValue: propValue, newValue: propValue }; // should we not set oldValue here? old one has changed into new one so basically we do not have old content anymore...
+                let notificationParamForListeners : ViewportChangeEvent;
+                notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: propValue, newValue: propValue }; // should we not set oldValue here? old one has changed into new one so basically we do not have old content anymore...
                 
                 this.log.spam("svy foundset linked * firing change listener: full viewport changed...");
                 // use previous (current) value as newValue might be undefined/null and the listeners would be the same anyway
@@ -182,8 +183,9 @@ export class FoundsetLinked extends Array<Object> {
     }
 }
 
-class FoundsetLinkedState {
-   
+class FoundsetLinkedState implements IViewportConversion {
+    
+    viewportConversions: Record<string, object>[] = [];
     changeListeners: Array<ChangeListener>;
     requests = [];
     conversionInfo = [];
@@ -196,12 +198,12 @@ class FoundsetLinkedState {
     
     constructor() {}
     
-    public addChangeListener(listener: (change: ChangeEvent) => void) {
+    public addChangeListener(listener: (change: ViewportChangeEvent) => void) {
         this.changeListeners.push(listener);
         return () => this.removeChangeListener(listener);
     }
     
-    public removeChangeListener(listener: (change: ChangeEvent) => void) {
+    public removeChangeListener(listener: (change: ViewportChangeEvent) => void) {
         let index = this.changeListeners.indexOf(listener);
         if (index > -1) {
             this.changeListeners.splice(index, 1);
@@ -213,7 +215,7 @@ class FoundsetLinkedState {
         this.changeListeners = currentClientValue && currentClientValue.state ? currentClientValue.state.changeListeners : [];
     }
     
-    public fireChanges(foundsetChanges: ChangeEvent) {
+    public fireChanges(foundsetChanges: ViewportChangeEvent) {
         for(let i = 0; i < this.changeListeners.length; i++) {
             this.changeListeners[i](foundsetChanges);
         }

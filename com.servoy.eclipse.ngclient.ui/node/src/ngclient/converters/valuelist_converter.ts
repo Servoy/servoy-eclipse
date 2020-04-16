@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IConverter, ConverterService } from '../../sablo/converter.service'
+import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service'
 import { IValuelist } from '../../sablo/spectypes.service'
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
@@ -18,7 +18,7 @@ export class ValuelistConverter implements IConverter {
     constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper) {
     }
 
-    fromServerToClient( serverJSONValue, currentClientValue?: Valuelist, propertyContext?:(propertyName: string)=>any ) : IValuelist {
+    fromServerToClient( serverJSONValue, currentClientValue?: Valuelist, propertyContext?:PropertyContext ) : IValuelist {
         let newValue : Valuelist = currentClientValue;
         let state: ValuelistState = null;
 

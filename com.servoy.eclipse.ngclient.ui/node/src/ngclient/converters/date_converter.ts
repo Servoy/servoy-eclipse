@@ -1,10 +1,10 @@
-import { IConverter } from '../../sablo/converter.service'
+import { IConverter, PropertyContext } from '../../sablo/converter.service'
 
 import * as moment from 'moment';
 
 export class DateConverter implements IConverter {
     
-    fromServerToClient( serverJSONValue, currentClientValue?, propertyContext?:(propertyName: string)=>any) {
+    fromServerToClient( serverJSONValue, currentClientValue?, propertyContext?:PropertyContext) {
         var dateObj = new Date( serverJSONValue );
         return dateObj;
     }

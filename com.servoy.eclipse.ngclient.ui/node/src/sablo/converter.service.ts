@@ -17,7 +17,7 @@ export class ConverterService {
         this.log = logFactory.getLogger("ConverterService");
     }
 
-    public convertFromServerToClient( serverSentData, conversionInfo, currentClientData?, propertyContext?:(propertyName: string)=>any) {
+    public convertFromServerToClient( serverSentData, conversionInfo, currentClientData?, propertyContext?:PropertyContext) {
         if ( typeof conversionInfo === 'string' || typeof conversionInfo === 'number' ) {
             var customConverter = this.customPropertyConverters[conversionInfo];
             if ( customConverter ) serverSentData = customConverter.fromServerToClient( serverSentData, currentClientData, propertyContext);
@@ -32,7 +32,7 @@ export class ConverterService {
         return serverSentData;
     }
 
-    public convertFromClientToServer( newClientData, conversionInfo, oldClientData?, propertyContext?) {
+    public convertFromClientToServer( newClientData, conversionInfo, oldClientData?, propertyContext?:PropertyContext) {
         if ( typeof conversionInfo === 'string' || typeof conversionInfo === 'number' ) {
             var customConverter = this.customPropertyConverters[conversionInfo];
             if ( customConverter ) return customConverter.fromClientToServer( newClientData, oldClientData );
@@ -220,7 +220,7 @@ export class ConverterService {
 }
 
 export interface IConverter {
-    fromServerToClient( serverSentData: Object, currentClientData: Object, propertyContext:(propertyName: string)=>any ): Object;
+    fromServerToClient( serverSentData: Object, currentClientData: Object, propertyContext: PropertyContext ): Object;
     fromClientToServer( newClientData: Object, oldClientData: Object ): Object;
 }
 
@@ -241,3 +241,5 @@ class SwingModifiers {
     public static readonly DOWN_MASK = 4096;
     public static readonly ALT_GRAPH_DOWN_MASK = 8192;
 }
+
+export type PropertyContext = (propertyName: string) => any;

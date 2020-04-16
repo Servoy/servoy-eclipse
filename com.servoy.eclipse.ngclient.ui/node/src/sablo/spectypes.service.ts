@@ -94,6 +94,18 @@ export interface IValuelist extends Array<{displayValue: string, realValue: any}
 }
 
 export interface IFoundset {
+
+    /**
+     * An identifier that allows you to use this foundset via the 'foundsetRef' type;
+     * when a 'foundsetRef' type sends a foundset from server to client (for example
+     * as a return value of callServerSideApi) it will translate to this identifier
+     * on client (so you can use it to find the actual foundset property in the model if
+     * server side script put it in the model as well); internally when sending a
+     * 'foundset' typed property to server through a 'foundsetRef' typed argument or prop,
+     * it will use this foundsetId as well to find it on server and give a real Foundset
+     */
+    foundsetId: number;
+
     /**
      * Request a change of viewport bounds from the server; the requested data will be loaded
      * asynchronously in 'viewPort'
@@ -102,7 +114,7 @@ export interface IFoundset {
      *                   the real foundset (so the beginning of the viewPort).
      * @param size the number of records to load in viewPort.
      *
-     * @return a $q promise that will get resolved when the requested records arrived browser-
+     * @return a promise that will get resolved when the requested records arrived browser-
      *                   side. As with any promise you can register success, error callbacks, finally, ...
      */
      loadRecordsAsync(startIndex: number, size: number): Promise<any>;
@@ -119,7 +131,7 @@ export interface IFoundset {
      *                      to server. If false/undefined it will send this (and any previously queued
      *                      request) to server. See also notifyChanged(). See also notifyChanged().
      *
-     * @return a $q promise that will get resolved when the requested records arrived browser-
+     * @return a promise that will get resolved when the requested records arrived browser-
      *                   side. As with any promise you can register success, error callbacks, finally, ...
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
@@ -137,7 +149,7 @@ export interface IFoundset {
      *                      to server. If false/undefined it will send this (and any previously queued
      *                      request) to server. See also notifyChanged(). See also notifyChanged().
      *
-     * @return a $q promise that will get resolved when the requested records arrived browser
+     * @return a promise that will get resolved when the requested records arrived browser
      *                   -side. As with any promise you can register success, error callbacks, finally, ...
      *                   That allows custom component to make sure that loadExtra/loadLess calls from
      *                   client do not stack on not yet updated viewports to result in wrong bounds.
@@ -147,7 +159,7 @@ export interface IFoundset {
      /**
       * If you queue multiple loadExtraRecordsAsync and loadLessRecordsAsync by using dontNotifyYet = true
       * then you can - in the end - send all these requests to server (if any are queued) by calling
-      * this method. If no requests are queued, it calling this method will have no effect.
+      * this method. If no requests are queued, calling this method will have no effect.
       */
      notifyChanged(): void;
 
@@ -165,7 +177,7 @@ export interface IFoundset {
      *
      * @param sortColumns an array of JSONObjects { name : dataprovider_id,
      *                    direction : sortDirection }, where the sortDirection can be "asc" or "desc".
-     * @return (added in Servoy 8.2.1) a $q promise that will get resolved when the new sort
+     * @return (added in Servoy 8.2.1) a promise that will get resolved when the new sort
      *                   will arrive browser-side. As with any promise you can register success, error
      *                   and finally callbacks.
      */
@@ -212,22 +224,22 @@ export interface IFoundset {
      setPreferredViewportSize(preferredSize: number, sendViewportWithSelection: boolean, centerViewportOnSelected: boolean): void;
 
      /**
-     * Receives a client side rowID (taken from myFoundsetProp.viewPort.rows[idx]
-     * [$foundsetTypeConstants.ROW_ID_COL_KEY]) and gives a Record reference, an object
+     * Receives a client side rowID (taken from myFoundsetProp.viewPort.rows[idx]._svyRowId)
+     * and gives a Record reference, an object
      * which can be resolved server side to the exact Record via the 'record' property type;
-     * for example if you call a handler or a $scope.svyServoyapi.callServerSideApi(...) and want
+     * for example if you call a handler or a servoyapi.callServerSideApi(...) and want
      * to give it a Record as parameter and you have the rowID and foundset in your code,
-     * you can use this method. E.g: $scope.svyServoyapi.callServerSideApi("doSomethingWithRecord",
-     *                     [$scope.model.myFoundsetProp.getRecordRefByRowID(clickedRowId)]);
+     * you can use this method. E.g: servoyapi.callServerSideApi("doSomethingWithRecord",
+     *                     [this.myFoundsetProperty.getRecordRefByRowID(clickedRowId)]);
      *
      * NOTE: if in your component you know the whole row (so myFoundsetProp.viewPort.rows[idx])
      * already - not just the rowID - that you want to send you can just give that directly to the
      * handler/serverSideApi; you do not need to use this method in that case. E.g:
      * // if you have the index inside the viewport
-     * $scope.svyServoyapi.callServerSideApi("doSomethingWithRecord",
-     *           [$scope.model.myFoundsetProp.viewPort.rows[clickedRowIdx]]);
+     * servoyapi.callServerSideApi("doSomethingWithRecord",
+     *           [this.myFoundsetProperty.viewPort.rows[clickedRowIdx]]);
      * // or if you have the row directly
-     * $scope.svyServoyapi.callServerSideApi("doSomethingWithRecord", [clickedRow]);
+     * servoyapi.callServerSideApi("doSomethingWithRecord", [clickedRow]);
      *
      * This method has been added in Servoy 8.3.
      */
@@ -236,7 +248,7 @@ export interface IFoundset {
      /**
       * Adds a change listener that will get triggered when server sends changes for this foundset.
       *
-      * @see $webSocket.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use $webSocket.addIncomingMessageHandlingDoneTask.
+      * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
       * @param changeListener the listener to register.
       */
      addChangeListener(changeListener : ChangeListener) : () => void;
@@ -245,7 +257,7 @@ export interface IFoundset {
     /**
      * Mark the foundset data as changed on the client.
      * If push to server is allowed for this foundset then the changes will be sent to the server, othwerwise the changes are ignored.
-     * @param index is the row index where the data change occurred
+     * @param index is the row index (relative to the viewport) where the data change occurred
      * @param columnID the name of the column
      * @param newValue the new value (if undefined the change is ignored)
      * @param oldValue the old value, is optional; the change is ignored if the oldValue is the same as the newValue
@@ -253,11 +265,11 @@ export interface IFoundset {
     columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any)
 }
 
-export interface ChangeEvent {
+export interface ViewportChangeEvent {
     // the following keys appear if each of these got updated from server; the names of those
     // constants suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
-    viewportRowsCompletelyChanged:  { oldValue: number, newValue: number },
+    viewportRowsCompletelyChanged:  { oldValue: object[], newValue: object[] },
 
     // if we received add/remove/change operations on a set of rows from the viewport, this key
     // will be set; as seen below, it contains "updates" which is an array that holds a sequence of
@@ -266,40 +278,37 @@ export interface ChangeEvent {
     // all the "startIndex" and "endIndex" values below are relative to the viewport's state after all
     // previous updates in the array were already processed (so they are NOT relative to the initial state);
     // indexes are 0 based
-    viewportRowsUpdated: { updates: ViewportRowUpdates, oldViewportSize: number }
+    viewportRowsUpdated: {updates: ViewportRowUpdates}
 }
 
-export type ChangeListener = (changeEvent: ChangeEvent) => void;
+export type ChangeListener = (changeEvent: ViewportChangeEvent) => void;
 
-type ViewportRowUpdate = RowsChanged | RowsInserted | RowsDeleted;
+export type ViewportRowUpdate = { type: ChangeType, startIndex: number, endIndex: number };
 export type ViewportRowUpdates = ViewportRowUpdate[];
 
-type RowsChanged = { type: 0, startIndex: number, endIndex: number };
+export enum ChangeType {
+    ROWS_CHANGED =0,
 
-/**
- * When an INSERT happened but viewport size remained the same, it is
- * possible that some of the rows that were previously at the end of the viewport
- * slided out of it; "removedFromVPEnd" gives the number of such rows that were removed
- * from the end of the viewport due to the insert operation;
- * NOTE: insert signifies an insert into the client viewport, not necessarily
- * an insert in the foundset itself; for example calling "loadExtraRecordsAsync"
- * can result in an insert notification + bigger viewport size notification,
- * with removedFromVPEnd = 0
- */
-type RowsInserted = { type: 1, startIndex: number, endIndex: number, removedFromVPEnd: number };
+    /**
+    * When an INSERT happened but viewport size remained the same, it is
+    * possible that some of the rows that were previously at the end of the viewport
+    * slided out of it;
+    * NOTE: insert signifies an insert into the client viewport, not necessarily
+    * an insert in the foundset itself; for example calling "loadExtraRecordsAsync"
+    * can result in an insert notification + bigger viewport size notification
+    */
+    ROWS_INSERTED,
 
-
-/**
- * When a DELETE happened inside the viewport but there were more rows available in the
- * foundset after current viewport, it is possible that some of those rows
- * slided into the viewport; "appendedToVPEnd " gives the number of such rows
- * that were appended to the end of the viewport due to the DELETE operation
- * NOTE: delete signifies a delete from the client viewport, not necessarily
- * a delete in the foundset itself; for example calling "loadLessRecordsAsync" can
- * result in a delete notification + smaller viewport size notification,
- * with appendedToVPEnd = 0
- */
-type RowsDeleted = { type: 2, startIndex : number, endIndex : number, appendedToVPEnd : number }
+    /**
+    * When a DELETE happened inside the viewport but there were more rows available in the
+    * foundset after current viewport, it is possible that some of those rows
+    * slided into the viewport;
+    * NOTE: delete signifies a delete from the client viewport, not necessarily
+    * a delete in the foundset itself; for example calling "loadLessRecordsAsync" can
+    * result in a delete notification + smaller viewport size notification
+    */
+    ROWS_DELETED
+}
 
 export class BaseCustomObject implements ICustomObject {
     private state = new BaseCustomObjectState();
@@ -310,42 +319,14 @@ export class BaseCustomObject implements ICustomObject {
 
 }
 
-export class FoundsetTypeConstants {
-    //if you change any of these please also update ChangeEvent and other types in foundset.d.ts and or component.d.ts
-      public static readonly ROW_ID_COL_KEY: string = '_svyRowId';
-      public static readonly FOR_FOUNDSET_PROPERTY: string = 'forFoundset';
-
-      // listener notification constants follow; prefixed just to separate them a bit from other constants
-      public static readonly NOTIFY_FULL_VALUE_CHANGED: string ="fullValueChanged";
-      public static readonly NOTIFY_SERVER_SIZE_CHANGED: string ="serverFoundsetSizeChanged";
-      public static readonly NOTIFY_HAS_MORE_ROWS_CHANGED: string = "hasMoreRowsChanged";
-      public static readonly NOTIFY_MULTI_SELECT_CHANGED: string ="multiSelectChanged";
-      public static readonly NOTIFY_COLUMN_FORMATS_CHANGED:string = "columnFormatsChanged";
-      public static readonly NOTIFY_SORT_COLUMNS_CHANGED: string ="sortColumnsChanged";
-      public static readonly NOTIFY_SELECTED_ROW_INDEXES_CHANGED:string = "selectedRowIndexesChanged";
-      public static readonly NOTIFY_USER_SET_SELECTION:string = "userSetSelection";
-      public static readonly NOTIFY_VIEW_PORT_START_INDEX_CHANGED: string = "viewPortStartIndexChanged";
-      public static readonly NOTIFY_VIEW_PORT_SIZE_CHANGED: string = "viewPortSizeChanged";
-      public static readonly NOTIFY_VIEW_PORT_ROWS_COMPLETELY_CHANGED: string = "viewportRowsCompletelyChanged";
-      public static readonly NOTIFY_VIEW_PORT_ROW_UPDATES_RECEIVED: string ="viewportRowsUpdated";
-      public static readonly NOTIFY_VIEW_PORT_ROW_UPDATES_OLD_VIEWPORTSIZE:string = "oldViewportSize"; // deprecated since 8.4 where granular updates are pre-processed server side and can be applied directed on client - making this not needed
-      public static readonly NOTIFY_VIEW_PORT_ROW_UPDATES: string = "updates";
-
-      // row update types for listener notifications - in case NOTIFY_VIEW_PORT_ROW_UPDATES_RECEIVED is triggered
-      public static readonly ROWS_CHANGED: number = 0;
-      public static readonly ROWS_INSERTED: number = 1;
-      public static readonly ROWS_DELETED: number = 2;
-  }
-
-export class FoundsetLinkedTypeConstants {
-    public static readonly ID_FOR_FOUNDSET = "idForFoundset";
-    public static readonly RECORD_LINKED = "recordLinked";
-}
-
 export type ViewPort  = {
     startIndex: number;
     size: number;
-    rows: object[];
+    rows: ViewPortRow[];
+}
+
+export interface ViewPortRow extends Record<string, any>{
+    _svyRowId: string;
 }
 
 export class ChangeAwareState {
@@ -524,4 +505,10 @@ export class ArrayState extends BaseCustomObjectState {
         return changes;
     }
 
+}
+
+export type ColumnRef = {
+    _svyRowId: string;
+    dp: string;
+    value: string;
 }

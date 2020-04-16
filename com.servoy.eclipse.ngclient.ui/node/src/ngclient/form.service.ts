@@ -10,7 +10,6 @@ import { ConverterService } from '../sablo/converter.service'
 import { LoggerService, LoggerFactory} from '../sablo/logger.service'
 
 import { ServoyService, FormSettings } from './servoy.service'
-import { FoundsetTypeConstants } from '../sablo/spectypes.service';
 
 @Injectable()
 export class FormService {
@@ -211,7 +210,7 @@ export class FormService {
 
                 let foundset = foundsetLinkedDPValueCandidate.state.forFoundset();
                 if (foundset) {
-                    propertyNameForServerAndRowID.rowId = foundset.viewPort.rows[indexInLastArray][FoundsetTypeConstants.ROW_ID_COL_KEY];
+                    propertyNameForServerAndRowID.rowId = foundset.viewPort.rows[indexInLastArray]._svyRowId;
                 }
             }   
         }
@@ -322,6 +321,10 @@ export class FormService {
     
     public goToForm(formname) {
         this.sabloService.callService("formService", "gotoform", {formname: formname});
+    }
+
+    public callServerSideApi(formname, beanname, methodName, args) {
+        this.sabloService.callService("formService", "callServerSideApi", {formname:formname,beanname:beanname,methodName:methodName,args:args});
     }
 }
 

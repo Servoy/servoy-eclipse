@@ -1,4 +1,4 @@
-import { IConverter, ConverterService } from '../../sablo/converter.service'
+import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service'
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 
@@ -18,7 +18,7 @@ export class JSONArrayConverter implements IConverter {
     constructor( private converterService: ConverterService, private specTypesService: SpecTypesService, private iterableDiffers: IterableDiffers ) {
     }
 
-    fromServerToClient( serverJSONValue, currentClientValue?: ICustomArray<any>, propertyContext?:(propertyName: string)=>any) {
+    fromServerToClient( serverJSONValue, currentClientValue?: ICustomArray<any>, propertyContext?:PropertyContext) {
         let newValue = currentClientValue;
         let state: ArrayState = null;
 

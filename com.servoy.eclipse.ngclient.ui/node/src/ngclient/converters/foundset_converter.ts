@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { IConverter, ConverterService } from '../../sablo/converter.service';
+import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
-import { IFoundset, ChangeListener, ChangeEvent, FoundsetTypeConstants, ViewPort, ViewportRowUpdates } from '../../sablo/spectypes.service';
+import { IFoundset, ChangeListener, ViewPort, ViewPortRow, ViewportRowUpdate, ViewportRowUpdates, ViewportChangeEvent, ColumnRef } from '../../sablo/spectypes.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
 import { Deferred } from '../../sablo/util/deferred';
 import { SabloUtils } from '../../sablo/websocket.service';
-import { ViewportService } from '../services/viewport.service';
+import { ViewportService, IViewportConversion } from '../services/viewport.service';
 
 @Injectable()
 export class FoundsetConverter implements IConverter {
@@ -28,7 +28,6 @@ export class FoundsetConverter implements IConverter {
     static readonly ID_KEY = 'id';
     static readonly VALUE_KEY = 'value';
     static readonly DATAPROVIDER_KEY = 'dp';
-    static readonly CONVERSIONS = 'viewportConversions'; // data conversion info
     static readonly PUSH_TO_SERVER = 'w';
     static readonly NO_OP = 'n';
 
@@ -38,7 +37,7 @@ export class FoundsetConverter implements IConverter {
         this.log = logFactory.getLogger('FoundsetPropertyValue');
     }
 
-    fromServerToClient( serverJSONValue: object, currentClientValue?: Foundset, propertyContext?:(propertyName: string) => any ): IFoundset {
+    fromServerToClient( serverJSONValue: object, currentClientValue?: Foundset, propertyContext?: PropertyContext): IFoundset {
         let newValue: Foundset = currentClientValue;
 
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
@@ -48,15 +47,15 @@ export class FoundsetConverter implements IConverter {
         // see if this is an update or whole value and handle it
         if (!serverJSONValue) {
             newValue = undefined; // set it to nothing
-            if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_FULL_VALUE_CHANGED] = { oldValue : currentClientValue, newValue : serverJSONValue };
-            const oldInternalState = currentClientValue ? currentClientValue.state : undefined; // internal state / $sabloConverters interface
+            if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue : currentClientValue, newValue : serverJSONValue };
+            const oldInternalState = currentClientValue ? currentClientValue.state : undefined; // internal state
             if (oldInternalState) this.sabloDeferHelper.cancelAll(oldInternalState);
 
         } else {
             // check for updates
             let updates = false;
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE] !== undefined) {
-                if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_SERVER_SIZE_CHANGED] = { oldValue : currentClientValue[FoundsetConverter.SERVER_SIZE], newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE] };
+                if (hasListeners) notificationParamForListeners.serverFoundsetSizeChanged = { oldValue : currentClientValue.serverSize, newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE] };
                 currentClientValue.serverSize = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SERVER_SIZE]; // currentClientValue should always be defined in this case
                 updates = true;
             }
@@ -65,12 +64,12 @@ export class FoundsetConverter implements IConverter {
                 updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.HAS_MORE_ROWS] !== undefined) {
-                if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_HAS_MORE_ROWS_CHANGED] = { oldValue : currentClientValue[FoundsetConverter.HAS_MORE_ROWS], newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.HAS_MORE_ROWS] };
+                if (hasListeners) notificationParamForListeners.hasMoreRowsChanged = { oldValue : currentClientValue.hasMoreRows, newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.HAS_MORE_ROWS] };
                 currentClientValue.hasMoreRows = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.HAS_MORE_ROWS];
                 updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.MULTI_SELECT] !== undefined) {
-                if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_MULTI_SELECT_CHANGED] = { oldValue : currentClientValue[FoundsetConverter.MULTI_SELECT], newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.MULTI_SELECT] };
+                if (hasListeners) notificationParamForListeners.multiSelectChanged = { oldValue : currentClientValue.multiSelect, newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.MULTI_SELECT] };
                 currentClientValue.multiSelect = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.MULTI_SELECT];
                 updates = true;
             }
@@ -79,25 +78,25 @@ export class FoundsetConverter implements IConverter {
                 updates = true;
             }
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.COLUMN_FORMATS] !== undefined) {
-                if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_COLUMN_FORMATS_CHANGED] = { oldValue : currentClientValue[FoundsetConverter.COLUMN_FORMATS], newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.COLUMN_FORMATS] };
+                if (hasListeners) notificationParamForListeners.columnFormatsChanged = { oldValue : currentClientValue.columnFormats, newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.COLUMN_FORMATS] };
                 currentClientValue.columnFormats = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.COLUMN_FORMATS];
                 updates = true;
             }
 
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SORT_COLUMNS] !== undefined) {
-                if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_SORT_COLUMNS_CHANGED] = { oldValue : currentClientValue[FoundsetConverter.SORT_COLUMNS], newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SORT_COLUMNS] };
+                if (hasListeners) notificationParamForListeners.sortColumnsChanged = { oldValue : currentClientValue.sortColumns, newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SORT_COLUMNS] };
                 currentClientValue.sortColumns = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SORT_COLUMNS];
                 updates = true;
             }
 
             if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SELECTED_ROW_INDEXES] !== undefined) {
                 if (hasListeners) {
-                    notificationParamForListeners[FoundsetTypeConstants.NOTIFY_SELECTED_ROW_INDEXES_CHANGED] = { oldValue : currentClientValue[FoundsetConverter.SELECTED_ROW_INDEXES], newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SELECTED_ROW_INDEXES] };
+                    notificationParamForListeners.selectedRowIndexesChanged = { oldValue : currentClientValue.selectedRowIndexes, newValue : serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SELECTED_ROW_INDEXES] };
                     if (serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.USER_SET_SELECTION] !== undefined) {
-                        notificationParamForListeners[FoundsetTypeConstants.NOTIFY_USER_SET_SELECTION] = true;
+                        notificationParamForListeners.userSetSelection = true;
                     }
                 }
-                currentClientValue[FoundsetConverter.SELECTED_ROW_INDEXES] = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SELECTED_ROW_INDEXES];
+                currentClientValue.selectedRowIndexes = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.SELECTED_ROW_INDEXES];
                 updates = true;
             }
 
@@ -127,20 +126,19 @@ export class FoundsetConverter implements IConverter {
                 updates = true;
                 const viewPortUpdate = serverJSONValue[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.VIEW_PORT];
                 const internalState = currentClientValue.state;
-                const oldSize = currentClientValue.viewPort.size;
 
-                if (viewPortUpdate[FoundsetConverter.START_INDEX] !== undefined && currentClientValue.viewPort.startIndex !== viewPortUpdate[FoundsetConverter.START_INDEX]) {
-                    if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_START_INDEX_CHANGED] = { oldValue : currentClientValue.viewPort.startIndex, newValue : viewPortUpdate[FoundsetConverter.START_INDEX] };
-                    currentClientValue.viewPort.startIndex = viewPortUpdate[FoundsetConverter.START_INDEX];
+                if (viewPortUpdate.startIndex !== undefined && currentClientValue.viewPort.startIndex !== viewPortUpdate.startIndex) {
+                    if (hasListeners) notificationParamForListeners.viewPortStartIndexChanged = { oldValue : currentClientValue.viewPort.startIndex, newValue : viewPortUpdate.startIndex };
+                    currentClientValue.viewPort.startIndex = viewPortUpdate.startIndex;
                 }
-                if (viewPortUpdate[FoundsetConverter.SIZE] !== undefined && currentClientValue.viewPort.size !== viewPortUpdate[FoundsetConverter.SIZE]) {
-                    if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_SIZE_CHANGED] = { oldValue : currentClientValue.viewPort.size, newValue : viewPortUpdate[FoundsetConverter.SIZE] };
-                    currentClientValue.viewPort.size = viewPortUpdate[FoundsetConverter.SIZE];
+                if (viewPortUpdate.size !== undefined && currentClientValue.viewPort.size !== viewPortUpdate.size) {
+                    if (hasListeners) notificationParamForListeners.viewPortSizeChanged= { oldValue : currentClientValue.viewPort.size, newValue : viewPortUpdate.size };
+                    currentClientValue.viewPort.size = viewPortUpdate.size;
                 }
-                if (viewPortUpdate[FoundsetConverter.ROWS] !== undefined) {
+                if (viewPortUpdate.rows !== undefined) {
                     const oldRows = currentClientValue.viewPort.rows;
-                    this.viewportService.updateWholeViewport(currentClientValue.viewPort, FoundsetConverter.ROWS, internalState, viewPortUpdate[FoundsetConverter.ROWS],
-                            viewPortUpdate[ConverterService.TYPES_KEY] && viewPortUpdate[ConverterService.TYPES_KEY][FoundsetConverter.ROWS] ? viewPortUpdate[ConverterService.TYPES_KEY][FoundsetConverter.ROWS] : undefined, propertyContext);
+                    currentClientValue.viewPort.rows = this.viewportService.updateWholeViewport(currentClientValue.viewPort.rows, internalState, viewPortUpdate.rows,
+                            viewPortUpdate[ConverterService.TYPES_KEY] && viewPortUpdate[ConverterService.TYPES_KEY].rows ? viewPortUpdate[ConverterService.TYPES_KEY].rows : undefined, propertyContext);
 
                     // new rows; set prototype for each row
                     const rows = currentClientValue.viewPort.rows;
@@ -148,13 +146,13 @@ export class FoundsetConverter implements IConverter {
                         rows[i] = SabloUtils.cloneWithDifferentPrototype(rows[i], internalState.rowPrototype);
                     }
 
-                    if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_ROWS_COMPLETELY_CHANGED] = { oldValue : oldRows, newValue : currentClientValue.viewPort.rows };
+                    if (hasListeners) notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue : oldRows, newValue : currentClientValue.viewPort.rows };
                 } else if (viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] !== undefined) {
                     this.viewportService.updateViewportGranularly(currentClientValue.viewPort.rows, internalState, viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS], viewPortUpdate[ConverterService.TYPES_KEY] && viewPortUpdate[ConverterService.TYPES_KEY][FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] ? viewPortUpdate[ConverterService.TYPES_KEY][FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] : undefined, propertyContext, false, internalState.rowPrototype);
 
                     if (hasListeners) {
-                        notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_ROW_UPDATES_RECEIVED] = { updates : viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS] }; // viewPortUpdate[UPDATE_PREFIX + ROWS] was already prepared for listeners by $viewportModule.updateViewportGranularly
-                        notificationParamForListeners[FoundsetTypeConstants.NOTIFY_VIEW_PORT_ROW_UPDATES_RECEIVED][FoundsetTypeConstants.NOTIFY_VIEW_PORT_ROW_UPDATES_OLD_VIEWPORTSIZE] = oldSize; // deprecated since 8.4 where granular updates are pre-processed server side and can be applied directed on client - making this not needed
+                        const upd : ViewportRowUpdates = viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS];
+                        notificationParamForListeners.viewportRowsUpdated = { updates : upd }; // viewPortUpdate[UPDATE_PREFIX + ROWS] was already prepared for listeners by viewportService.updateViewportGranularly
                     }
                 }
             }
@@ -167,16 +165,15 @@ export class FoundsetConverter implements IConverter {
                 Object.keys(serverJSONValue).forEach((prop) => {
                     newValue[prop] = serverJSONValue[prop];
                 });
-               if (hasListeners) notificationParamForListeners[FoundsetTypeConstants.NOTIFY_FULL_VALUE_CHANGED] = { oldValue : currentClientValue, newValue : newValue };
+               if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue : currentClientValue, newValue : newValue };
                const internalState = newValue.state;
 
-                // conversion of rows to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
+				internalState.rowPrototype = {};
+				// conversion of rows to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
                 internalState.rowPrototype[SabloUtils.DEFAULT_CONVERSION_TO_SERVER_FUNC] = () => {
-                    if (this[FoundsetTypeConstants.ROW_ID_COL_KEY]) {
-                        const recordRef = {};
-                        recordRef[FoundsetTypeConstants.ROW_ID_COL_KEY] = this[FoundsetTypeConstants.ROW_ID_COL_KEY];
-                        recordRef[FoundsetConverter.FOUNDSET_ID] = newValue.foundsetId;
-                        return recordRef;
+                    if (internalState.rowPrototype._svyRowId) {
+                        const r: FoundsetRow = {_svyRowId: internalState.rowPrototype._svyRowId, foundsetId: newValue.foundsetId};
+                        return r;
                     }
                     return null;
                 };
@@ -293,12 +290,12 @@ export class Foundset implements IFoundset {
      * browser yourself; keys are the dataprovider names and values are objects that contain
      * the format contents
      */
-    columnFormats: object;
+    columnFormats: Record<string, object>;
 
     private log: LoggerService;
 
     constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, private logFactory: LoggerFactory,
-                private converterService: ConverterService, private viewportService: ViewportService, public state: FoundsetState, private values?: Array<Object>) {
+                private converterService: ConverterService, private viewportService: ViewportService, public state: FoundsetState) {
         this.log = logFactory.getLogger('Foundset');
         this.viewPort = { startIndex: undefined, size: undefined, rows: []};
     }
@@ -387,33 +384,26 @@ export class Foundset implements IFoundset {
 
     public getRecordRefByRowID(rowID: string) {
         if (rowID) {
-            const recordRef = {};
-            recordRef[FoundsetTypeConstants.ROW_ID_COL_KEY] = rowID;
-            recordRef[FoundsetConverter.FOUNDSET_ID] = this.foundsetId;
-            return recordRef;
+            return {_svyRowId: rowID, foundsetId:  this.foundsetId};
         }
         return null;
     }
 
     public updateViewportRecord(rowID: string, columnID: string, newValue: any, oldValue: any) {
         this.log.spam(this.log.buildMessage(() => ('svy foundset * updateRecord requested with (' + rowID + ', ' + columnID + ', ' + newValue)));
-        const r = {};
-        r[FoundsetTypeConstants.ROW_ID_COL_KEY] = rowID;
-        r[FoundsetConverter.DATAPROVIDER_KEY] = columnID;
-        r[FoundsetConverter.VALUE_KEY] = newValue;
-
+        const r : ColumnRef = {_svyRowId: rowID, dp :  columnID, value: newValue};
         // convert new data if necessary
         let conversionInfo;
-        if (this.state[FoundsetConverter.CONVERSIONS]) {
+        if (this.state.viewportConversions) {
             for (const idx in this.viewPort.rows) {
-                if (this.viewPort.rows[idx][FoundsetTypeConstants.ROW_ID_COL_KEY] === rowID) {
-                    conversionInfo = this.state[FoundsetConverter.CONVERSIONS][idx];
+                if (this.viewPort.rows[idx]._svyRowId === rowID) {
+                    conversionInfo = this.state.viewportConversions[idx];
                     break;
                 }
             }
         }
-        if (conversionInfo && conversionInfo[columnID]) r[FoundsetConverter.VALUE_KEY] = this.converterService.convertFromClientToServer(r[FoundsetConverter.VALUE_KEY], conversionInfo[columnID], oldValue);
-        else r[FoundsetConverter.VALUE_KEY] = this.converterService.convertClientObject(r[FoundsetConverter.VALUE_KEY]);
+        if (conversionInfo && conversionInfo[columnID]) r.value = this.converterService.convertFromClientToServer(r.value, conversionInfo[columnID], oldValue);
+        else r.value = this.converterService.convertClientObject(r.value);
 
         this.state.requests.push({viewportDataChanged: r});
         if (this.state.changeNotifier) this.state.changeNotifier();
@@ -422,7 +412,7 @@ export class Foundset implements IFoundset {
     /**
      * Adds a change listener that will get triggered when server sends changes for this foundset.
      *
-     * @see $webSocket.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use $webSocket.addIncomingMessageHandlingDoneTask.
+     * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
      * @param listener the listener to register.
      */
     public addChangeListener(listener: ChangeListener) {
@@ -445,17 +435,24 @@ export class Foundset implements IFoundset {
     }
 }
 
-class FoundsetState implements IDeferedState {
+//TODO can we further improve this to also have the conversion function??
+type FoundsetRow = {
+    _svyRowId?: string;
+    foundsetId?: number;
+}
+
+class FoundsetState implements IDeferedState, IViewportConversion {
 
     deferred: {[key: string]: {defer: Deferred<any>, timeoutId: any}};
     currentMsgId: number;
     timeoutRejectLogPrefix: string;
     changeListeners: ChangeListener[];
     requests = [];
-    rowPrototype = {};
+    rowPrototype: FoundsetRow;
     changeNotifier: Function;
     selectionUpdateDefer: Deferred<any>;
     push_to_server: any = undefined;
+    viewportConversions: Record<string, object>[] = [];
 
     init(deferred: {[key: string]: {defer: Deferred<any>, timeoutId: any}}, currentMsgId: number, timeoutRejectLogPrefix: string) {
         this.deferred = deferred;
@@ -494,13 +491,13 @@ class FoundsetState implements IDeferedState {
     }
 }
 
-interface IFoundsetChangeEvent extends ChangeEvent {
+class FoundsetChangeEvent implements ViewportChangeEvent {
     // if value was non-null and had a listener attached before, and a full value update was
     // received from server, this key is set; if newValue is non-null, it will automatically get the old
     // value's listeners registered to itself
     // NOTE: it might be easier to rely just on a shallow $watch of the foundset value (to catch even the
     // null to non-null scenario that you still need) and not use NOTIFY_FULL_VALUE_CHANGED at all
-    fullValueChanged: { oldValue: object, newValue: object };
+    fullValueChanged: { oldValue: Foundset, newValue: object };
 
     // the following keys appear if each of these got updated from server; the names of those
     // constants suggest what it was that changed; oldValue and newValue are the values for what changed
@@ -508,28 +505,17 @@ interface IFoundsetChangeEvent extends ChangeEvent {
     serverFoundsetSizeChanged: { oldValue: number, newValue: number };
     hasMoreRowsChanged:  { oldValue: boolean, newValue: boolean };
     multiSelectChanged:  { oldValue: boolean, newValue: boolean };
-    columnFormatsChanged:  { oldValue: object, newValue: object };
+    columnFormatsChanged:  { oldValue: Record<string, object>, newValue: Record<string, object> };
     sortColumnsChanged:  { oldValue: string, newValue: string };
     selectedRowIndexesChanged:  { oldValue: number[], newValue: number[] };
     viewPortStartIndexChanged:  { oldValue: number, newValue: number };
-    viewPortSizeChanged:  { oldValue: number, newValue: number };
-}
-
-class FoundsetChangeEvent implements IFoundsetChangeEvent {
-    fullValueChanged: { oldValue: object; newValue: object; };
-    serverFoundsetSizeChanged: { oldValue: number; newValue: number; };
-    hasMoreRowsChanged: { oldValue: boolean; newValue: boolean; };
-    multiSelectChanged: { oldValue: boolean; newValue: boolean; };
-    columnFormatsChanged: { oldValue: object; newValue: object; };
-    sortColumnsChanged: { oldValue: string; newValue: string; };
-    selectedRowIndexesChanged: { oldValue: number[]; newValue: number[]; };
-    viewPortStartIndexChanged: { oldValue: number; newValue: number; };
-    viewPortSizeChanged: { oldValue: number; newValue: number; };
+    viewPortSizeChanged :  { oldValue: number, newValue: number };
     viewportRowsCompletelyChanged: {
-    oldValue: number;
+    oldValue: ViewPortRow[];
         // not updates - so whole thing receive
         // conversion to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
-        newValue: number;
+        newValue: ViewPortRow[];
     };
-    viewportRowsUpdated: { updates: ViewportRowUpdates; oldViewportSize: number; };
+    viewportRowsUpdated: {updates: ViewportRowUpdates};
+    userSetSelection: boolean;
 }

@@ -1,4 +1,4 @@
-import { IConverter, ConverterService } from '../../sablo/converter.service'
+import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service'
 
 import { BaseCustomObject, IChangeAwareValue } from '../../sablo/spectypes.service'
 
@@ -17,7 +17,7 @@ export class JSONObjectConverter implements IConverter {
     constructor( private converterService: ConverterService, private specTypesService: SpecTypesService ) {
     }
 
-    fromServerToClient( serverJSONValue, currentClientValue?: BaseCustomObject, propertyContext?:(propertyName: string)=>any) {
+    fromServerToClient( serverJSONValue, currentClientValue?: BaseCustomObject, propertyContext?:PropertyContext) {
         let newValue = currentClientValue;
         // remove old watches (and, at the end create new ones) to avoid old watches getting triggered by server side change
         // TODO  removeAllWatches(currentClientValue);
@@ -173,7 +173,7 @@ export class JSONObjectConverter implements IConverter {
 
     }
     
-    getCustomObjectPropertyContext(currentClientValue: BaseCustomObject, parentPropertyContext:(propertyName: string)=>any) : any {
+    getCustomObjectPropertyContext(currentClientValue: BaseCustomObject, parentPropertyContext:PropertyContext) : any {
         // property context that we pass here should search first in the current custom object value and only fallback to "parentPropertyContext" if needed
         return propertyName => {
             if (currentClientValue.hasOwnProperty(propertyName)) return currentClientValue[propertyName]; // can even be null or undefined as long as it is set on this object
