@@ -1,5 +1,5 @@
-import { TestBed, inject } from '@angular/core/testing';
-import { ConverterService } from '../../sablo/converter.service';
+import { TestBed} from '@angular/core/testing';
+import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { LoggerFactory } from '../../sablo/logger.service'
 import { WindowRefService } from '../../sablo/util/windowref.service';
@@ -13,14 +13,13 @@ import { SessionStorageService } from 'angular-web-storage';
 import { ViewportService} from '../services/viewport.service';
 
 describe('FoundsetLinked Converter', () => {
-    let converterService;
-    let loggerFactory;
+    let converterService: ConverterService;
+    let loggerFactory: LoggerFactory;
     let sabloService: SabloService;
-    let sabloDeferHelper;
+    let sabloDeferHelper: SabloDeferHelper;
     
-    var iS;
-    var componentModelGetter;
-	var serverValue;
+    var componentModelGetter: PropertyContext;
+	var serverValue: object;
 	var realClientValue : FoundsetLinked;
 
     var changeNotified = false;
@@ -128,7 +127,7 @@ describe('FoundsetLinked Converter', () => {
 
 		});
 
-		it("Should not send value updates for when pushToServer is not specified", () => {
+		it("Should send value updates for when pushToServer is false", () => {
             serverValue = { forFoundset: "myfoundset", w: false };
 			realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', undefined, componentModelGetter);
 			realClientValue.state.setChangeNotifier(() => { changeNotified = true });
@@ -188,6 +187,7 @@ describe('FoundsetLinked Converter', () => {
 		it("Should not send value updates for when pushToServer is not specified", () => {
 			// *** initial size no viewport
 			realClientValue[2] = 100001010; 
+			realClientValue.dataChanged(2, 100001010);
 
 			expect(getAndClearNotified()).toEqual(false);
 			expect(realClientValue.state.isChanged()).toEqual(false);
