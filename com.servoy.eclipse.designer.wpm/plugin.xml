@@ -72,14 +72,6 @@
                		icon="icons/webpackagemanager.png"
                		label="Download/Install with Servoy Package Manager"
                     style="push">
-                 <visibleWhen
-                       checkEnabled="true">
-                       <with
-                    		variable="com.servoy.eclipse.core.ngClientState">
-                	 		<equals value="ENABLED">
-                 		</equals>
-              			</with>
-                 </visibleWhen>
               </command>
            </toolbar>
         </menuContribution>
@@ -91,15 +83,6 @@
               icon="icons/webpackagemanager.png"
               label="Download/Install with Servoy Package Manager"
               style="push">
-            <visibleWhen
-                  checkEnabled="true">
-                  <with
-                    variable="com.servoy.eclipse.core.ngClientState">
-                 <equals
-                       value="ENABLED">
-                 </equals>
-              </with>
-            </visibleWhen>
          </command>
       </menuContribution>
    </extension>

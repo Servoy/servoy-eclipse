@@ -48,7 +48,7 @@
         </td>
         <td class="column-fitwidth">
           <!-- Active Solution -->
-          <div class="align-center">
+          <div class="align-center" *ngIf="needsActiveSolution(package)">
             <mat-select [(value)]="package.activeSolution" [disabled]="!installEnabled(package)" matTooltip="{{ getSolutionTooltip(package) }}">
               <mat-option *ngFor="let solution of getSolutions()" [value]="solution">{{ solution }}</mat-option>
             </mat-select>

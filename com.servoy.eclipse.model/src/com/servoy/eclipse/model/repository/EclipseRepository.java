@@ -216,11 +216,14 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 
 	private int last_element_id = Integer.MAX_VALUE / 2;
 
-	public synchronized int getNewElementID(UUID new_uuid) throws RepositoryException
+	public int getNewElementID(UUID new_uuid) throws RepositoryException
 	{
-		int element_id = last_element_id++;
-		if (new_uuid != null) uuid_element_id_map.put(new_uuid, new Integer(element_id));
-		return element_id;
+		synchronized (uuid_element_id_map)
+		{
+			int element_id = last_element_id++;
+			if (new_uuid != null) uuid_element_id_map.put(new_uuid, new Integer(element_id));
+			return element_id;
+		}
 	}
 
 	/*

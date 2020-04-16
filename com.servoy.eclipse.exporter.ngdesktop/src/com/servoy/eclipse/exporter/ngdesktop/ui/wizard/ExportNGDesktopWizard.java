@@ -1,5 +1,6 @@
 package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import com.servoy.eclipse.exporter.ngdesktop.utils.NgDesktopServiceMonitor;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -306,14 +308,25 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		if (!f.exists() && !f.mkdir()) errorMsg.append("Export path can't be created (permission issues?)");
 
 		File myFile = new File(settings.get("icon_path"));
-		if (myFile.exists() && myFile.isFile() && myFile.length() > LOGO_SIZE * 1024)
+		if (myFile.exists() && myFile.isFile())
 		{
-			errorMsg.append("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
-			return errorMsg;
+
+			if (myFile.length() > LOGO_SIZE * 1024)
+			{
+				errorMsg.append("Logo file exceeds the maximum allowed limit (" + LOGO_SIZE * 1024 + " KB): " + myFile.length());
+				return errorMsg;
+			}
+
+			final Dimension iconSize = ImageLoader.getSize(myFile);
+			if (iconSize.getWidth() < 256 || iconSize.getHeight() < 256)
+			{
+				errorMsg.append("Image size too small (" + iconSize.getWidth() + " : " + iconSize.getHeight() + ")");
+				return errorMsg;
+			}
 		}
 
 		myFile = new File(settings.get("image_path"));
-		if (myFile.exists() && myFile.isFile() && myFile.length() > LOGO_SIZE * 1024)
+		if (myFile.exists() && myFile.isFile()) if (myFile.length() > LOGO_SIZE * 1024)
 		{
 			errorMsg.append("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
 			return errorMsg;

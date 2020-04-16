@@ -78,53 +78,78 @@ public class InstallWebPackageHandler implements IDeveloperService
 		return null;
 	}
 
-
 	public static void importPackage(JSONObject pck, String selectedVersion) throws IOException
 	{
-		final String selectedSolution = pck.optString("activeSolution", null) != null ? pck.optString("activeSolution", null)
-			: ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+		final boolean isMainSolutionInstall = "Solution-Main".equals(pck.getString("packageType"));
+		final String selectedSolution = isMainSolutionInstall ? pck.getString("name") : pck.optString("activeSolution", null) != null
+			? pck.optString("activeSolution", null) : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 		Map<String, Pair<String, InputStream>> solutionsWithDependencies = new HashMap<String, Pair<String, InputStream>>();
 		Map<String, Pair<String, InputStream>> webpackagesWithDependencies = new HashMap<String, Pair<String, InputStream>>();
 		Map<String, String> packagesInstalledResources = new HashMap<String, String>();
 		getPackageWithDependencies(pck, selectedVersion, selectedSolution, solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources,
-			new ArrayList<String>());
+			new ArrayList<String>(), isMainSolutionInstall);
 
-		IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(selectedSolution, SolutionSerializer.NG_PACKAGES_DIR_NAME);
-		for (String packageName : webpackagesWithDependencies.keySet())
-		{
-			String installedResource = packagesInstalledResources.get(packageName);
-			importZipFileComponent(componentsFolder, webpackagesWithDependencies.get(packageName).getRight(), packageName, installedResource);
-		}
-		if (solutionsWithDependencies.size() > 0)
+		final Boolean installingSolutions = new Boolean(solutionsWithDependencies.size() > 0);
+		if (installingSolutions.booleanValue())
 		{
 			Display.getDefault().asyncExec(new Runnable()
 			{
 				public void run()
 				{
 					IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutionsWithDependencies, "Import solution",
-						selectedSolution,
-						false);
+						isMainSolutionInstall ? null : selectedSolution, false);
 					try
 					{
 						IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 						progressService.run(true, false, importSolutionsRunnable);
-						for (String packageName : solutionsWithDependencies.keySet())
+						if (!isMainSolutionInstall)
 						{
-							NewSolutionWizard.addAsModule(packageName, selectedSolution, null);
+							NewSolutionWizard.addAsModule(pck.getString("name"), selectedSolution, null);
 						}
 					}
 					catch (Exception e)
 					{
 						ServoyLog.logError(e);
 					}
+					synchronized (installingSolutions)
+					{
+						installingSolutions.notify();
+					}
 				}
 			});
+		}
+		// wait for the solutions to be installed
+		if (installingSolutions.booleanValue())
+		{
+			synchronized (installingSolutions)
+			{
+				try
+				{
+					installingSolutions.wait();
+				}
+				catch (InterruptedException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		}
+		IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(selectedSolution, SolutionSerializer.NG_PACKAGES_DIR_NAME);
+		for (String packageName : webpackagesWithDependencies.keySet())
+		{
+			String installedResource = packagesInstalledResources.get(packageName);
+			importZipFileComponent(componentsFolder, webpackagesWithDependencies.get(packageName).getRight(), packageName, installedResource);
+		}
+
+		if (isMainSolutionInstall)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel()
+				.setActiveProject(ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedSolution), true);
 		}
 	}
 
 	private static void getPackageWithDependencies(JSONObject pck, String selectedVersion, String selectedSolution,
 		Map<String, Pair<String, InputStream>> solutionsWithDependencies, Map<String, Pair<String, InputStream>> webpackagesWithDependencies,
-		Map<String, String> packagesInstalledResources, List<String> installActions)
+		Map<String, String> packagesInstalledResources, List<String> installActions, boolean isMainSolutionInstall)
 		throws IOException
 	{
 		JSONArray jsonArray = pck.getJSONArray("releases");
@@ -149,7 +174,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 		{
 			URL url = new URL(urlString);
 			URLConnection conn = url.openConnection();
-			if ("Solution".equals(packageType))
+			if ("Solution".equals(packageType) || "Solution-Main".equals(packageType))
 			{
 				solutionsWithDependencies.put(packageName, new Pair<String, InputStream>(pckVersion, conn.getInputStream()));
 			}
@@ -168,18 +193,21 @@ public class InstallWebPackageHandler implements IDeveloperService
 				{
 					String[] nameAndVersion = dependendPck.split("#");
 
-					if (!"Solution".equals(pck.getString("packageType")))
+					if (!"Solution".equals(pck.getString("packageType")) && !"Solution-Main".equals(pck.getString("packageType")))
 					{
 						ServoyProject activeSolutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(selectedSolution);
 						// if active solution has an ng-package-project with the same name, skip downloading from WPM
 						boolean hasNGPackageProject = false;
-						for (ServoyNGPackageProject ngProject : activeSolutionProject.getNGPackageProjects())
+						if (activeSolutionProject != null)
 						{
-							DirPackageReader dirPackageReader = new DirPackageReader(ngProject.getProject().getLocation().toFile());
-							if (nameAndVersion[0].equals(dirPackageReader.getPackageName()))
+							for (ServoyNGPackageProject ngProject : activeSolutionProject.getNGPackageProjects())
 							{
-								hasNGPackageProject = true;
-								break;
+								DirPackageReader dirPackageReader = new DirPackageReader(ngProject.getProject().getLocation().toFile());
+								if (nameAndVersion[0].equals(dirPackageReader.getPackageName()))
+								{
+									hasNGPackageProject = true;
+									break;
+								}
 							}
 						}
 						if (hasNGPackageProject)
@@ -190,7 +218,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 					if (allInstalledPackages == null)
 					{
-						allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages();
+						allInstalledPackages = GetAllInstalledPackages.getAllInstalledPackages(isMainSolutionInstall);
 					}
 
 					for (Object pckObj : allInstalledPackages)
@@ -256,7 +284,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 												if (response[0] == Window.OK)
 												{
 													getPackageWithDependencies(pckObject, installVersion, selectedSolution, solutionsWithDependencies,
-														webpackagesWithDependencies, packagesInstalledResources, installActions);
+														webpackagesWithDependencies, packagesInstalledResources, installActions, isMainSolutionInstall);
 												}
 												break;
 											}
@@ -269,7 +297,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 									if (installedVersion.isEmpty())
 									{
 										getPackageWithDependencies(pckObject, releases.getJSONObject(0).optString("version"), selectedSolution,
-											solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources, installActions);
+											solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources, installActions,
+											isMainSolutionInstall);
 									}
 								}
 								break;
