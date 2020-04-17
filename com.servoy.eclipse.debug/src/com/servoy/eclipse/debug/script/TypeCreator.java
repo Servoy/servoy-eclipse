@@ -509,6 +509,9 @@ public class TypeCreator extends TypeCache
 	@Override
 	protected Type createType(String context, String typeName)
 	{
+		// if there is no active solution yet, then don't try to make any types.
+		if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null;
+
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
 		Type type = null;
