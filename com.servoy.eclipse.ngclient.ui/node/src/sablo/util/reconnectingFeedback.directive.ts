@@ -20,7 +20,7 @@ export class SabloReconnectingFeedback implements OnInit {
     @HostBinding('style.visibility') visibility: string; 
 
     ngOnInit() {
-        if (this.websocketService.isReconnecting()) {
+        if (!this.websocketService.isReconnecting()) {
             this.visibility = 'hidden';
         } else {
             this.i18nProvider.getI18NMessages(
