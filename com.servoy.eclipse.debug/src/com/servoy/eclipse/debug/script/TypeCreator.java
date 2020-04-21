@@ -509,6 +509,9 @@ public class TypeCreator extends TypeCache
 	@Override
 	protected Type createType(String context, String typeName)
 	{
+		// if there is no active solution yet, then don't try to make any types.
+		if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null;
+
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
 		Type type = null;
@@ -2020,7 +2023,8 @@ public class TypeCreator extends TypeCache
 			clear(bucket);
 		}
 		relationCache.clear();
-		ValueCollectionProvider.clear();
+		// for now don't flush the cache anymore, the valuecollection provider will take care of that itself.
+//		ValueCollectionProvider.clear();
 	}
 
 //	final Set<String> staticTypes = Collections.synchronizedSet(new TreeSet<String>());

@@ -19,13 +19,11 @@ package com.servoy.eclipse.debug.script;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -156,15 +154,16 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 					if (dataSource != null)
 					{
-						List<IFile> files = new ArrayList<IFile>();
 						Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(dataSource);
 						IValueCollection valueCollection = ValueCollectionFactory.createValueCollection();
 						while (tableNodes.hasNext())
 						{
 							TableNode tableNode = tableNodes.next();
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(tableNode, false)));
-							files.add(file);
-							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
+							if (file.exists())
+							{
+								ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
+							}
 						}
 						return ValueCollectionFactory.shallowCloneValueCollection(valueCollection);
 					}

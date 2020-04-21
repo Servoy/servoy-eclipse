@@ -23,7 +23,7 @@ Require-Bundle: servoy_shared,
  org.apache.commons.commons-pool2,
  j2db_server,
  org.apache.commons.codec,
- org.apache.commons.io;bundle-version="2.6.0",
+ org.apache.commons.io,
  org.apache.commons.commons-collections4,
  sablo,
  javax.websocket

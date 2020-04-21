@@ -305,7 +305,11 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			return errorMsg;
 		}
 		final File f = new File(value);
-		if (!f.exists() && !f.mkdir()) errorMsg.append("Export path can't be created (permission issues?)");
+		if (!f.exists() && !f.mkdirs())
+		{
+			errorMsg.append("Export path can't be created (permission issues?)");
+			return errorMsg;
+		}
 
 		File myFile = new File(settings.get("icon_path"));
 		if (myFile.exists() && myFile.isFile())
@@ -326,7 +330,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 
 		myFile = new File(settings.get("image_path"));
-		if (myFile.exists() && myFile.isFile()) if (myFile.length() > LOGO_SIZE * 1024)
+		if (myFile.exists() && myFile.isFile() && myFile.length() > LOGO_SIZE * 1024)
 		{
 			errorMsg.append("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
 			return errorMsg;

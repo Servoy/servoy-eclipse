@@ -81,7 +81,7 @@
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2020.06/"/>
 		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202004061215"/>
-		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202004091352"/>
+		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202004210949"/>
 	    </location>
     </locations>
 </target>

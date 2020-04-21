@@ -67,13 +67,13 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  servoy_ngclient,
- org.apache.commons.io;bundle-version="2.6.0",
- org.maven.ide.eclipse.grouplayout;bundle-version="1.1.0",
+ org.apache.commons.io,
+ org.maven.ide.eclipse.grouplayout,
  org.apache.commons.commons-dbcp2,
  org.eclipse.jface,
  sj.jsonschemavalidation,
- org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
- org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore,
  com.servoy.eclipse.ui.tweaks,
  org.apache.commons.codec,
  org.eclipse.help,
@@ -104,3 +104,4 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.wizards
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: com.servoy.eclipse.ui
