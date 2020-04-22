@@ -96,15 +96,53 @@ export interface IValuelist extends Array<{displayValue: string, realValue: any}
 export interface IFoundset {
 
     /**
-     * An identifier that allows you to use this foundset via the 'foundsetRef' type;
-     * when a 'foundsetRef' type sends a foundset from server to client (for example
-     * as a return value of callServerSideApi) it will translate to this identifier
-     * on client (so you can use it to find the actual foundset property in the model if
-     * server side script put it in the model as well); internally when sending a
-     * 'foundset' typed property to server through a 'foundsetRef' typed argument or prop,
-     * it will use this foundsetId as well to find it on server and give a real Foundset
+	 * the size of the foundset on server (so not necessarily the total record count
+	 * in case of large DB tables)
+	 */
+	serverSize: number;
+		
+	/**
+	 * this is the data you need to have loaded on client (just request what you need via provided
+	 * loadRecordsAsync or loadExtraRecordsAsync)
+	 */
+	viewPort: ViewPort;
+		
+	/**
+	 * array of selected records in foundset; indexes can be out of current
+     * viewPort as well
      */
-    foundsetId: number;
+	selectedRowIndexes: number[],
+		
+	/**
+	 * sort string of the foundset, the same as the one used in scripting for
+     * foundset.sort and foundset.getCurrentSort. Example: 'orderid asc'.
+     */
+	sortColumns: string;
+		
+	/**
+	 * the multiselect mode of the server's foundset; if this is false,
+     * selectedRowIndexes can only have one item in it
+	 */
+    multiSelect: boolean;
+		
+    /**
+     * if the foundset is large and on server-side only part of it is loaded (so
+     * there are records in the foundset beyond 'serverSize') this is set to true;
+     * in this way you know you can load records even after 'serverSize' (requesting
+     * viewport to load records at index serverSize-1 or greater will load more
+     * records in the foundset)
+     */
+    hasMoreRows: boolean;
+
+    /** 
+     * columnFormats is only present if you specify
+     * "provideColumnFormats": true inside the .spec file for this foundset property;
+     * it gives the default column formatting that Servoy would normally use for
+     * each column of the viewport - which you can then also use in the
+     * browser yourself; keys are the dataprovider names and values are objects that contain
+     * the format contents
+     */
+    columnFormats: Record<string, object>; 
 
     /**
      * Request a change of viewport bounds from the server; the requested data will be loaded
