@@ -1,4 +1,4 @@
-<div id="mainBody" [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}" #mainBody>
+<div id="mainBody" [sabloTabseq]="1" [sabloTabseqConfig]="{root: true}" [ngClass]="{'svy-reconnecting' : (this.servoyService.reconnectingEmitter | async) === true}" >
 <!--The content below is only a placeholder and can be replaced.-->
 <div sabloReconnectingFeedback></div>
 <div class="svy-main-window-navigator-container"  *ngIf="hasDefaultNavigator() || navigatorForm != null"  [ngStyle]="getNavigatorStyle()">
@@ -9,4 +9,4 @@
 <svy-form [name]="mainForm"></svy-form>
 </div> 
 <session-view *ngIf="sessionProblem != null"></session-view>
-</div>
+</div> 

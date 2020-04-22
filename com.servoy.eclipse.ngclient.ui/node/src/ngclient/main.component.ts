@@ -9,15 +9,12 @@ import { FormService } from './form.service';
   templateUrl: './main.component.html'
 })
 
-export class MainComponent implements OnInit, AfterViewInit {
+export class MainComponent {
   title = 'Servoy NGClient';
-  isReconnecting: boolean = false;
-  @ViewChild('mainBody') mainBody: ElementRef;
 
   constructor(private servoyService: ServoyService, 
           private allService: AllServiceService, 
-          private formservice: FormService,
-          private renderer: Renderer2) {
+          private formservice: FormService) { 
     this.servoyService.connect();
   }
 
@@ -56,6 +53,7 @@ export class MainComponent implements OnInit, AfterViewInit {
     style[orientationVar] = '0px';
     return style;
   }
+  
   public getFormStyle() {
     const ltrOrientation = this.servoyService.getSolutionSettings().ltrOrientation;
     const orientationVar1 = ltrOrientation ? 'right' : 'left';
@@ -64,17 +62,5 @@ export class MainComponent implements OnInit, AfterViewInit {
     style[orientationVar1] = '0px';
     style[orientationVar2] = this.servoyService.getSolutionSettings().navigatorForm.size.width + 'px';
     return style;
-  }
-  
-  ngOnInit() {
-      this.servoyService.reconnectingEmitter.subscribe(isReconnecting => {
-          this.isReconnecting = isReconnecting;
-      })
-  }
-  
-  ngAfterViewInit() {
-      if (this.isReconnecting) {
-          this.renderer.addClass(this.mainBody.nativeElement, 'svy-reconnecting');
-      }
   }
 }
