@@ -28,7 +28,11 @@ export class SabloReconnectingFeedback implements OnInit {
                   this.i18n_reconnecting_feedback = val["servoy.ngclient.reconnecting"];
                 });
             this.renderer.appendChild(this.elRef.nativeElement, this.renderer.createText(this.i18n_reconnecting_feedback));
-            this.servoyService.reconnectingEmitter.next(true);
         }
+        setTimeout(() => {
+            // setTimeout is needed for avoiding "Expression has changed after it was checked" error
+            // see https://blog.angular-university.io/angular-debugging/
+            this.servoyService.reconnectingEmitter.next(true);
+        }); 
     }
 }

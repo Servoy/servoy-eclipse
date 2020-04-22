@@ -12,7 +12,7 @@ import { FormService } from './form.service';
 export class MainComponent {
   title = 'Servoy NGClient';
 
-  constructor(private servoyService: ServoyService, 
+  constructor(public servoyService: ServoyService, 
           private allService: AllServiceService, 
           private formservice: FormService) { 
     this.servoyService.connect();
