@@ -109,7 +109,7 @@ export class ServoyService {
     converterService.registerCustomPropertyHandler('foundset',
       new FoundsetConverter(converterService, sabloService, sabloDeferHelper, viewportService, logFactory));
     converterService.registerCustomPropertyHandler('fsLinked',
-      new FoundsetLinkedConverter(converterService, sabloService, sabloDeferHelper, viewportService, logFactory));
+      new FoundsetLinkedConverter(converterService, viewportService, logFactory));
   }
 
   public connect() {
