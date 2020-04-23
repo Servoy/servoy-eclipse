@@ -338,7 +338,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			Pair<String, InputStream> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
 			toImportSolutions.put(name, solution);
 		}
-		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false);
+		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false, false);
 
 		IRunnableWithProgress importPackagesRunnable = null;
 		final List<String> packs = configPage.getWebPackagesToImport();
@@ -415,7 +415,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	}
 
 	public static IRunnableWithProgress importSolutions(final Map<String, Pair<String, InputStream>> solutions, final String jobName, String newSolutionName,
-		boolean activateSolution)
+		boolean activateSolution, boolean overwriteModules)
 	{
 		Set<String> missingServerNames = searchMissingServers(solutions.keySet()).keySet();
 		IRunnableWithProgress importSolutionsRunnable = new IRunnableWithProgress()
@@ -430,11 +430,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					IDeveloperServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 					for (String name : solutions.keySet())
 					{
-						boolean shouldAskOverwrite = sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name);
+						boolean shouldAskOverwrite = (sm.getServoyProject(name) == null ? false : shouldOverwrite(sm, name));
 						if (sm.getServoyProject(name) == null || shouldAskOverwrite)
 						{
 							importSolution(solutions.get(name), name, newSolutionName, monitor, true,
-								shouldAskOverwrite, activateSolution);
+								shouldAskOverwrite, activateSolution, overwriteModules);
 							monitor.worked(1);
 						}
 					}
@@ -599,7 +599,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	}
 
 	public static void importSolution(Pair<String, InputStream> packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
-		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution) throws IOException
+		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules) throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -620,6 +620,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setActivateSolution(activateSolution);
 		importSolutionWizard.init(PlatformUI.getWorkbench(), null);
 		importSolutionWizard.setReportImportFail(reportImportFail);
+		importSolutionWizard.setOverwriteModule(overwriteModules);
 		importSolutionWizard.setSkipModulesImport(!shouldAskOverwrite);
 		importSolutionWizard.setAllowDataModelChanges(true);
 		importSolutionWizard.setImportSampleData(true);
