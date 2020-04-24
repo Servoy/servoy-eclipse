@@ -152,6 +152,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean allowSQLKeywords;
 	private boolean createMissingServer = false;
 	private String isMissingServer;
+	private boolean shouldOverwriteModule = false;
 
 	private static String getInitialImportPath()
 	{
@@ -193,6 +194,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	public boolean shouldSkipModulesImport()
 	{
 		return shouldSkipModulesImport;
+	}
+
+	public void setOverwriteModule(boolean overwrite)
+	{
+		this.shouldOverwriteModule = overwrite;
+	}
+
+	public boolean shouldOverwriteModule()
+	{
+		return shouldOverwriteModule;
 	}
 
 	protected String getFirstPageTitle()
@@ -270,6 +281,10 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					public int askStyleAlreadyExistsAction(String name)
 					{
 						if (existingSolutionAction.containsKey(name)) return existingSolutionAction.get(name).intValue();
+						if (ImportSolutionWizard.this.shouldOverwriteModule())
+						{
+							return OVERWRITE_ACTION;
+						}
 						if (ImportSolutionWizard.this.shouldSkipModulesImport())
 						{
 							return SKIP_ACTION;

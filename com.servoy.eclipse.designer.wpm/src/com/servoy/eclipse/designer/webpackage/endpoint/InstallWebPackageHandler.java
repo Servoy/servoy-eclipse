@@ -97,7 +97,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 				public void run()
 				{
 					IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutionsWithDependencies, "Import solution",
-						isMainSolutionInstall ? null : selectedSolution, false);
+						isMainSolutionInstall ? null : selectedSolution, false, true);
 					try
 					{
 						IProgressService progressService = PlatformUI.getWorkbench().getProgressService();

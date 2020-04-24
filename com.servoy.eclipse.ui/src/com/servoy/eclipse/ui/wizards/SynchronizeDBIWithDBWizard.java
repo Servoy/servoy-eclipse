@@ -105,6 +105,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.TableChangeHandler;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -541,6 +542,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					IProgressMonitor monitor, MultiStatus warnings, int workUnits)
 				{
 					monitor.beginTask("Handling missing tables", workUnits);
+					Map<IServerInternal, List<String>> tablesAdded = new HashMap<IServerInternal, List<String>>();
 					try
 					{
 						monitor.subTask("- creating missing tables");
@@ -556,7 +558,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 									String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
 									Utils.closeInputStream(is);
 									String problems = DatabaseUtils.createNewTableFromColumnInfo(tableToCreate.getLeft(), tableToCreate.getRight(),
-										dbiFileContent, false);
+										dbiFileContent, false, false);
 									if (problems != null)
 									{
 										StringTokenizer st = new StringTokenizer(problems, "\n");
@@ -565,6 +567,11 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 											warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, st.nextToken()));
 										}
 									}
+									if (!tablesAdded.containsKey(tableToCreate.getLeft()))
+									{
+										tablesAdded.put(tableToCreate.getLeft(), new ArrayList<String>());
+									}
+									tablesAdded.get(tableToCreate.getLeft()).add(tableToCreate.getRight());
 								}
 								catch (CoreException e)
 								{
@@ -579,6 +586,11 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 									"Cannot find .dbi file to create missing table " + tableToCreate.getLeft().getName() + " - " + tableToCreate.getRight()));
 							}
 							monitor.worked(1);
+						}
+						for (IServerInternal server : tablesAdded.keySet())
+						{
+							TableChangeHandler.getInstance().fireTablesAdded(server,
+								tablesAdded.get(server).toArray(new String[tablesAdded.get(server).size()]));
 						}
 
 						if (!monitor.isCanceled())

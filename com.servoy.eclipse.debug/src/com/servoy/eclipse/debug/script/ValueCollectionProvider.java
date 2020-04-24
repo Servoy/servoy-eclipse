@@ -253,6 +253,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+					while (!file.exists())
+					{
+						// super form without a js file.
+						superForm = fs.getForm(superForm.getExtendsID());
+						if (superForm == null) return formCollection;
+						scriptPath = SolutionSerializer.getScriptPath(superForm, false);
+						file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+					}
 					Deque<Set<IFile>> stack = depedencyStack.get();
 					Set<IFile> depedencies = stack.peek();
 

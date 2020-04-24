@@ -62,6 +62,11 @@ public final class DatabaseUtils
 		// not meant to be instantiated
 	}
 
+	public static String createNewTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent, boolean writeBackLater)
+	{
+		return createNewTableFromColumnInfo(server, tableName, dbiFileContent, writeBackLater, true);
+	}
+
 	/**
 	 * Creates a new table in the database based on the contents of a .dbi file.
 	 *
@@ -71,7 +76,8 @@ public final class DatabaseUtils
 	 * @param writeBackLater if true, the new table's info will be written to it's dbi file later. Otherwise the write will occur during this call.
 	 * @return null if all is OK; if any problems are encountered, they will be added to this String, separated by "\n"
 	 */
-	public static String createNewTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent, boolean writeBackLater)
+	public static String createNewTableFromColumnInfo(IServerInternal server, String tableName, String dbiFileContent, boolean writeBackLater,
+		boolean fireTableCreated)
 	{
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 		if (dmm == null) return "Cannot find database information manager. There may be problems with the resources project.";
@@ -112,9 +118,9 @@ public final class DatabaseUtils
 					}
 				}
 			};
-			ITable table = server.createNewTable(validator, tableName, false);
+			ITable table = server.createNewTable(validator, tableName, false, fireTableCreated);
 			table.setMarkedAsMetaData(Boolean.TRUE.equals(tableInfo.isMetaData));
-			server.setTableMarkedAsHiddenInDeveloper(tableName, tableInfo.hiddenInDeveloper);
+			server.setTableMarkedAsHiddenInDeveloper(tableName, tableInfo.hiddenInDeveloper, fireTableCreated);
 
 			// Warn if the table types are different.
 			if (table.getTableType() != tableInfo.tableType)

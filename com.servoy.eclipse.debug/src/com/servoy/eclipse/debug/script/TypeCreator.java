@@ -732,6 +732,7 @@ public class TypeCreator extends TypeCache
 				{
 					creator.flush();
 				}
+				ValueCollectionProvider.clear();
 				servoyStaticTypeSystem.reset();
 				clear(null);
 				flushCache();
@@ -2023,8 +2024,6 @@ public class TypeCreator extends TypeCache
 			clear(bucket);
 		}
 		relationCache.clear();
-		// for now don't flush the cache anymore, the valuecollection provider will take care of that itself.
-//		ValueCollectionProvider.clear();
 	}
 
 //	final Set<String> staticTypes = Collections.synchronizedSet(new TreeSet<String>());
