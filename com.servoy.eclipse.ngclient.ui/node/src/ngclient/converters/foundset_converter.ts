@@ -491,7 +491,7 @@ class FoundsetState implements IDeferedState, IViewportConversion {
     }
 }
 
-class FoundsetChangeEvent implements ViewportChangeEvent {
+export class FoundsetChangeEvent implements ViewportChangeEvent {
     // if value was non-null and had a listener attached before, and a full value update was
     // received from server, this key is set; if newValue is non-null, it will automatically get the old
     // value's listeners registered to itself

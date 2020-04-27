@@ -3,6 +3,7 @@ import { IConverter, ConverterService, PropertyContext } from '../../sablo/conve
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
 import { ChangeListener, ViewportChangeEvent } from '../../sablo/spectypes.service'
 import { ViewportService, IViewportConversion } from '../services/viewport.service';
+import { FoundsetChangeEvent, Foundset } from '../converters/foundset_converter';
 
 
 @Injectable()
@@ -67,6 +68,17 @@ export class FoundsetLinkedConverter implements IConverter {
                     const singleValue = serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] !== undefined ? serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] : serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE_UPDATE];
                     internalState.singleValueState = new SingleValueState(this, propertyContext, conversionInfo);
                     wholeViewport = internalState.handleSingleValue(singleValue);
+                    const fs: Foundset = internalState.forFoundset();
+                    fs.addChangeListener((event: FoundsetChangeEvent) => {
+                        if (event.viewPortSizeChanged) {
+                            if (event.viewPortSizeChanged.newValue === internalState.singleValueState.viewPortSize) return;
+                            internalState.singleValueState.viewPortSize = event.viewPortSizeChanged.newValue;
+                            if (event.viewPortSizeChanged.newValue == undefined)  internalState.singleValueState.viewPortSize = 0;
+                            wholeViewport = internalState.singleValueState.generateWholeViewportFromOneValue(singleValue)
+                            internalState.singleValueState.updateWholeViewport(newValue, internalState, wholeViewport);
+                        }
+                    });
+
                 } else if (serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE] !== undefined) {
                     internalState.singleValueState = undefined;
                     internalState.recordLinked = true;
@@ -158,7 +170,7 @@ class FoundsetLinkedState implements IViewportConversion {
     conversionInfo = [];
     singleValueState : SingleValueState = undefined;
     changeNotifier: Function;
-    forFoundset: Function;
+    forFoundset: () => Foundset;
     recordLinked: boolean = false;
     push_to_server: boolean = undefined;// value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
     

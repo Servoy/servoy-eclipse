@@ -65,9 +65,10 @@ describe('FoundsetLinked Converter', () => {
 						"rows": [ { "_svyRowId" : "bla bla" }, { "_svyRowId" : "har har" } ]
 					}
 			};
+			let fs = converterService.convertFromServerToClient(myfoundset, 'foundset');
 			componentModelGetter = (prop) => {
 				return {
-					myfoundset: myfoundset
+					myfoundset: fs
 				}[prop];
 			};
 
@@ -107,9 +108,10 @@ describe('FoundsetLinked Converter', () => {
 						"rows": [ { "_svyRowId" : "bla bla" }, { "_svyRowId" : "har har" } ]
 					}
 			};
+			let fs = converterService.convertFromServerToClient(myfoundset, 'foundset');
 			componentModelGetter = (prop) => {
 				return {
-					myfoundset: myfoundset
+					myfoundset: fs
 				}[prop];
 			};
 
@@ -160,9 +162,10 @@ describe('FoundsetLinked Converter', () => {
 						"rows": [ { "_svyRowId" : "bla bla" }, { "_svyRowId" : "har har" }, { "_svyRowId" : "bl bl" }, { "_svyRowId" : "ha ha" }, { "_svyRowId" : "b b" }, { "_svyRowId" : "h h" } ]
 					}
 			};
+			let fs = converterService.convertFromServerToClient(myfoundset, 'foundset');
 			componentModelGetter = (prop) => {
 				return {
-					myfoundset: myfoundset
+					myfoundset: fs
 				}[prop];
 			};
 
@@ -208,9 +211,10 @@ describe('FoundsetLinked Converter', () => {
 						"rows": [ { "_svyRowId" : "bla bla" }, { "_svyRowId" : "har har" }, { "_svyRowId" : "bl bl" }, { "_svyRowId" : "ha ha" }, { "_svyRowId" : "b b" }, { "_svyRowId" : "h h" } ]
 					}
 			};
+			let fs = converterService.convertFromServerToClient(myfoundset, 'foundset');
 			componentModelGetter = (prop) => {
 				return {
-					myfoundset: myfoundset
+					myfoundset: fs
 				}[prop];
 			};
 
