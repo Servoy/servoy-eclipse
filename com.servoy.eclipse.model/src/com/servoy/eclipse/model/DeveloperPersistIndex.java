@@ -17,20 +17,30 @@
 
 package com.servoy.eclipse.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentMap;
 
 import com.servoy.j2db.ISolutionModelPersistIndex;
 import com.servoy.j2db.PersistIndex;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ISupportScope;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -41,6 +51,8 @@ import com.servoy.j2db.util.Utils;
 public class DeveloperPersistIndex extends PersistIndex implements ISolutionModelPersistIndex
 {
 	private final Map<String, Set<Form>> formCacheByDataSource = new HashMap<String, Set<Form>>();
+	private final Map<UUID, List<IPersist>> duplicatesUUIDs = new HashMap<UUID, List<IPersist>>();
+	private final Map<String, Map<String, List<IPersist>>> duplicateNames = new HashMap<String, Map<String, List<IPersist>>>();
 	private final Map<Form, String> formToDataSource = new HashMap<>();
 	private static final String ALL_FORMS = "";
 
@@ -88,6 +100,8 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		super.destroy();
 		formCacheByDataSource.clear();
 		formToDataSource.clear();
+		duplicatesUUIDs.clear();
+		duplicateNames.clear();
 	}
 
 	@Override
@@ -192,6 +206,46 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 				ServoyModelFinder.getServoyModel().fireFormComponentChanged();
 			}
 		}
+		if (duplicatesUUIDs.containsKey(persist.getUUID()))
+		{
+			List<IPersist> duplicates = duplicatesUUIDs.get(persist.getUUID());
+			if (duplicates != null && duplicates.contains(persist))
+			{
+				duplicates.remove(persist);
+			}
+			if (duplicates == null || duplicates.size() <= 1)
+			{
+				duplicatesUUIDs.remove(persist.getUUID());
+			}
+		}
+	}
+
+	@Override
+	protected void putInCache(IPersist persist)
+	{
+		if (uuidToPersist.containsKey(persist.getUUID().toString()))
+		{
+			IPersist existingPersist = uuidToPersist.get(persist.getUUID().toString());
+			if (!Utils.equalObjects(persist, existingPersist))
+			{
+				List<IPersist> duplicates = duplicatesUUIDs.get(persist.getUUID());
+				if (duplicates == null)
+				{
+					duplicates = new ArrayList<IPersist>();
+					duplicatesUUIDs.put(persist.getUUID(), duplicates);
+				}
+				if (!duplicates.contains(persist))
+				{
+					duplicates.add(persist);
+				}
+				if (!duplicates.contains(existingPersist))
+				{
+					duplicates.add(existingPersist);
+				}
+			}
+		}
+		super.putInCache(persist);
+
 	}
 
 	// below method are teh one of the ISoluitonModelPersistIndex. they are just empty in the developer fs.
@@ -220,5 +274,238 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	public boolean isRemoved(IPersist persist)
 	{
 		return false;
+	}
+
+	public Map<UUID, List<IPersist>> getDuplicateUUIDList()
+	{
+		return duplicatesUUIDs;
+	}
+
+	@Override
+	protected void addInNameCache(ConcurrentMap<String, IPersist> cache, IPersist persist)
+	{
+		String name = ((ISupportName)persist).getName();
+		if (cache.containsKey(name))
+		{
+			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+			if (duplicates == null)
+			{
+				duplicates = new HashMap<String, List<IPersist>>();
+				duplicateNames.put(name, duplicates);
+			}
+			List<IPersist> duplicatePersists = duplicates.get(persist.getClass().getName());
+			if (duplicatePersists == null)
+			{
+				duplicatePersists = new ArrayList<>();
+				duplicates.put(persist.getClass().getName(), duplicatePersists);
+			}
+			if (!duplicatePersists.contains(persist)) duplicatePersists.add(persist);
+			IPersist duplicatePersist = cache.get(name);
+			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
+		}
+		super.addInNameCache(cache, persist);
+	}
+
+	@Override
+	protected void testNameCache(IPersist item, EventType type)
+	{
+		String name = ((ISupportName)item).getName();
+		if (name != null)
+		{
+			switch (type)
+			{
+				case CREATED :
+					ConcurrentMap<String, IPersist> classToList = nameToPersist.get(item.getClass());
+					if (classToList != null && classToList.containsKey(name))
+					{
+						Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+						if (duplicates == null)
+						{
+							duplicates = new HashMap<String, List<IPersist>>();
+							duplicateNames.put(name, duplicates);
+						}
+						List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
+						if (duplicatePersists == null)
+						{
+							duplicatePersists = new ArrayList<>();
+							duplicates.put(item.getClass().getName(), duplicatePersists);
+						}
+						duplicatePersists.add(item);
+						IPersist duplicatePersist = classToList.get(name);
+						if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
+					}
+					break;
+				case REMOVED :
+					if (duplicateNames.containsKey(name))
+					{
+						Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+						if (duplicates != null)
+						{
+							List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
+							if (duplicatePersists != null)
+							{
+								duplicatePersists.remove(item);
+							}
+							if (duplicatePersists != null && duplicatePersists.size() <= 1)
+							{
+								duplicates.remove(item.getClass().getName());
+							}
+							if (duplicates.size() == 0)
+							{
+								duplicateNames.remove(name);
+							}
+						}
+					}
+					break;
+				case UPDATED :
+					//maybe new name and duplicate is fixed?
+					for (String oldName : duplicateNames.keySet())
+					{
+						Map<String, List<IPersist>> duplicates = duplicateNames.get(oldName);
+						List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
+						if (duplicatePersists != null && duplicatePersists.contains(item) && !oldName.equals(name))
+						{
+							duplicatePersists.remove(item);
+							if (duplicatePersists != null && duplicatePersists.size() <= 1)
+							{
+								duplicates.remove(item.getClass().getName());
+							}
+							break;
+						}
+					}
+					// maybe new name and is duplicated ?
+					ConcurrentMap<String, IPersist> classToList2 = nameToPersist.get(item.getClass());
+					if (classToList2 != null && classToList2.containsKey(name))
+					{
+						Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+						if (duplicates == null)
+						{
+							duplicates = new HashMap<String, List<IPersist>>();
+							duplicateNames.put(name, duplicates);
+						}
+						List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
+						if (duplicatePersists == null)
+						{
+							duplicatePersists = new ArrayList<>();
+							duplicates.put(item.getClass().getName(), duplicatePersists);
+						}
+						if (!duplicatePersists.contains(item)) duplicatePersists.add(item);
+						IPersist duplicatePersist = classToList2.get(name);
+						if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
+					}
+			}
+		}
+		super.testNameCache(item, type);
+	}
+
+	@Override
+	protected void testDatasourceCache(IPersist item)
+	{
+		String ds = null;
+		if (item instanceof TableNode || item.getParent() instanceof TableNode)
+		{
+			ds = item instanceof TableNode ? ((TableNode)item).getDataSource() : ((TableNode)item.getParent()).getDataSource();
+			// remove all items of the datasource, it will be recreated
+			for (String name : duplicateNames.keySet())
+			{
+				Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+				Iterator<String> it = duplicates.keySet().iterator();
+				while (it.hasNext())
+				{
+					String className = it.next();
+					if (className.startsWith(ds))
+					{
+						it.remove();
+					}
+				}
+			}
+		}
+		super.testDatasourceCache(item);
+		if (item instanceof TableNode || item.getParent() instanceof TableNode)
+		{
+			initDatasourceCache(ds);
+		}
+	}
+
+	@Override
+	protected void addInDatasourceCache(ConcurrentMap<String, IPersist> cache, IPersist persist)
+	{
+		String name = ((ISupportName)persist).getName();
+		if (cache.containsKey(name))
+		{
+			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+			if (duplicates == null)
+			{
+				duplicates = new HashMap<String, List<IPersist>>();
+				duplicateNames.put(name, duplicates);
+			}
+			String datasource = ((TableNode)persist).getDataSource();
+			List<IPersist> duplicatePersists = duplicates.get(datasource + "_" + persist.getClass().getName());
+			if (duplicatePersists == null)
+			{
+				duplicatePersists = new ArrayList<>();
+				duplicates.put(datasource + "_" + persist.getClass().getName(), duplicatePersists);
+			}
+			if (!duplicatePersists.contains(persist)) duplicatePersists.add(persist);
+			IPersist duplicatePersist = cache.get(name);
+			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
+		}
+		super.addInDatasourceCache(cache, persist);
+	}
+
+	@Override
+	protected void addInScopeCache(Map<String, ISupportScope> cache, ISupportScope persist)
+	{
+		String name = persist.getName();
+		if (cache.containsKey(name))
+		{
+			String scope = persist.getScopeName();
+			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+			if (duplicates == null)
+			{
+				duplicates = new HashMap<String, List<IPersist>>();
+				duplicateNames.put(name, duplicates);
+			}
+			List<IPersist> duplicatePersists = duplicates.get(ISupportScope.class.getName() + "_" + scope);
+			if (duplicatePersists == null)
+			{
+				duplicatePersists = new ArrayList<>();
+				duplicates.put(ISupportScope.class.getName() + "_" + scope, duplicatePersists);
+			}
+			if (!duplicatePersists.contains(persist)) duplicatePersists.add((IPersist)persist);
+			ISupportScope duplicatePersist = cache.get(name);
+			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add((IPersist)duplicatePersist);
+		}
+		super.addInScopeCache(cache, persist);
+	}
+
+	@Override
+	protected void cleanScopeCache()
+	{
+		super.cleanScopeCache();
+		for (String name : duplicateNames.keySet())
+		{
+			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+			Iterator<String> it = duplicates.keySet().iterator();
+			while (it.hasNext())
+			{
+				String className = it.next();
+				if (className.startsWith(ISupportScope.class.getName()))
+				{
+					it.remove();
+				}
+			}
+		}
+	}
+
+	public Map<String, Map<String, List<IPersist>>> getDuplicateNamesList()
+	{
+		initNameCache(Form.class);
+		initNameCache(ValueList.class);
+		initNameCache(Media.class);
+		initNameCache(Relation.class);
+		initDatasourceCache(null);
+		getGlobalScopeCache();
+		return duplicateNames;
 	}
 }

@@ -82,7 +82,6 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 	private IProject project;
 	private Solution editingSolution;// working copy for editing
 	private FlattenedSolution editingFlattenedSolution;
-	private FlattenedSolution flattenedSolution;
 
 	private final HashMap<File, String> deserializeExceptions = new HashMap<File, String>();
 
@@ -588,58 +587,6 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 		return getEditingFlattenedSolution(true);
 	}
 
-	public FlattenedSolution getFlattenedSolution()
-	{
-		try
-		{
-			if (flattenedSolution == null)
-			{
-				if (getSolution() == null) return null;
-				flattenedSolution = new DeveloperFlattenedSolution(true); // flattened form cache will be flushed by ServoyModel when persists change.model
-			}
-			if (flattenedSolution.getSolution() == null)
-			{
-				IApplicationServer as = ApplicationServerRegistry.getService(IApplicationServer.class);
-				// new or flattened solution was reset
-				flattenedSolution.setSolution(getEditingSolution().getSolutionMetaData(), false, true, new AbstractActiveSolutionHandler(as)
-				{
-					@Override
-					public IRepository getRepository()
-					{
-						return ApplicationServerRegistry.get().getDeveloperRepository();
-					}
-
-					@Override
-					protected Solution loadSolution(RootObjectMetaData solutionDef) throws RemoteException, RepositoryException
-					{
-						ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionDef.getName());
-						if (servoyProject != null)
-						{
-							return servoyProject.getSolution();
-						}
-						return null;
-					}
-
-					@Override
-					protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
-						throws RemoteException, RepositoryException
-					{
-						return loadSolution(loginSolutionDef);
-					}
-				});
-			}
-		}
-		catch (RemoteException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-		}
-		return flattenedSolution;
-	}
-
 	public synchronized void resetFlattenedSolution(boolean loadMainSolution)
 	{
 		if (this.editingFlattenedSolution != null)
@@ -648,11 +595,6 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 			// do not set editingFlattenedSolution to null, in several places a reference is kept (like in FormLabelProvider)
 			// make sure the editing flattened solution is filled ok, otherwise references to it cannot use it.
 			getEditingFlattenedSolution(loadMainSolution);
-		}
-		if (this.flattenedSolution != null)
-		{
-			flattenedSolution.close(null);
-			this.flattenedSolution = null;
 		}
 	}
 

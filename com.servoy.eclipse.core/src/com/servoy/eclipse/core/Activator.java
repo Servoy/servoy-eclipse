@@ -104,6 +104,7 @@ import com.servoy.eclipse.core.util.RadioButtonsDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
+import com.servoy.eclipse.model.builder.BuilderDependencies;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
@@ -755,6 +756,7 @@ public class Activator extends Plugin
 				{
 					public void activeProjectChanged(final ServoyProject project)
 					{
+						BuilderDependencies.getInstance().clear();
 						if (getDesignClient() != null)
 						{
 							getDesignClient().refreshI18NMessages();
