@@ -17,14 +17,24 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.sql.PreparedStatement;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -34,19 +44,27 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -62,8 +80,10 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.CryptUtils;
@@ -72,6 +92,7 @@ import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
 import com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher;
+import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 
 public class ImportSolutionWizard extends Wizard implements IImportWizard
 {
@@ -125,11 +146,13 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean activateSolution = true;
 	private boolean reportImportFail;
 	private boolean shouldSkipModulesImport = false;
+	private final HashMap<String, Integer> existingSolutionAction = new HashMap<String, Integer>();
 	private boolean allowDataModelChanges = false;
 	private boolean importSampleData = false;
 	private boolean allowSQLKeywords;
 	private boolean createMissingServer = false;
 	private String isMissingServer;
+	private boolean shouldOverwriteModule = false;
 
 	private static String getInitialImportPath()
 	{
@@ -171,6 +194,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	public boolean shouldSkipModulesImport()
 	{
 		return shouldSkipModulesImport;
+	}
+
+	public void setOverwriteModule(boolean overwrite)
+	{
+		this.shouldOverwriteModule = overwrite;
+	}
+
+	public boolean shouldOverwriteModule()
+	{
+		return shouldOverwriteModule;
 	}
 
 	protected String getFirstPageTitle()
@@ -247,6 +280,11 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					@Override
 					public int askStyleAlreadyExistsAction(String name)
 					{
+						if (existingSolutionAction.containsKey(name)) return existingSolutionAction.get(name).intValue();
+						if (ImportSolutionWizard.this.shouldOverwriteModule())
+						{
+							return OVERWRITE_ACTION;
+						}
 						if (ImportSolutionWizard.this.shouldSkipModulesImport())
 						{
 							return SKIP_ACTION;
@@ -511,6 +549,63 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 	public class ImportSolutionWizardPage extends WizardPage implements IValidator
 	{
+		private class SolutionImportActionsDialog extends MessageDialog
+		{
+			private final Map<String, String> workspaceVersions;
+			private final JSONObject versions;
+
+			private SolutionImportActionsDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType,
+				String[] dialogButtonLabels, int defaultIndex, Map<String, String> workspaceVersions, JSONObject versions)
+			{
+				super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, defaultIndex);
+				this.workspaceVersions = workspaceVersions;
+				this.versions = versions;
+			}
+
+			@Override
+			protected Control createCustomArea(Composite parent)
+			{
+				Composite composite = new Composite(parent, SWT.NONE);
+				Color backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+				composite.setBackground(backgroundColor);
+				GridLayout gridLayout = new GridLayout();
+				gridLayout.numColumns = 4;
+				composite.setLayout(gridLayout);
+				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+				GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+				FontDescriptor descriptor = FontDescriptor.createFrom(parent.getFont());
+				descriptor = descriptor.setStyle(SWT.BOLD);
+				Font font = descriptor.createFont(getShell().getDisplay());
+
+				addLabel(composite, backgroundColor, gd, "Module", font);
+				addLabel(composite, backgroundColor, gd, "Workspace Version", font);
+				addLabel(composite, backgroundColor, gd, "Import Version", font);
+				addLabel(composite, backgroundColor, gd, "Action Taken", font);
+
+				for (String name : workspaceVersions.keySet())
+				{
+					addLabel(composite, backgroundColor, gd, name, null);
+					addLabel(composite, backgroundColor, gd, workspaceVersions.get(name), null);
+					addLabel(composite, backgroundColor, gd, versions.optString(name, "-"), null);
+					addLabel(composite, backgroundColor, gd,
+						existingSolutionAction.get(name).intValue() == IXMLImportUserChannel.OVERWRITE_ACTION ? "Overwrite" : "Skip import",
+						null);
+				}
+				getShell().layout(true, true);
+				return super.createCustomArea(parent);
+			}
+
+			protected void addLabel(Composite composite, Color backgroundColor, GridData gd, String text, Font font)
+			{
+				Label l = new Label(composite, SWT.NONE);
+				l.setBackground(backgroundColor);
+				l.setLayoutData(gd);
+				if (font != null) l.setFont(font);
+				l.setText(text);
+			}
+		}
+
 		private ResourcesProjectChooserComposite resourceProjectComposite;
 		private Text filePath;
 		private Button browseButton;
@@ -673,6 +768,15 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 				importMessageDetails = "Could not import solution: " + page.getErrorMessage();
 				return false;
 			}
+
+			if (!canOverwiteModules(file))
+			{
+				Display.getDefault().asyncExec(() -> {
+					if (!getShell().isDisposed()) getShell().close();
+				});
+				return false;
+			}
+
 			final String resourcesProjectName = page.getNewName();
 			final ServoyResourcesProject existingProject = page.getResourcesProject();
 			final boolean isCleanImport = page.isCleanImport();
@@ -684,6 +788,59 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			return true;
 		}
 
+		@SuppressWarnings("boxing")
+		private boolean canOverwiteModules(File file)
+		{
+			try (ZipFile zipFile = new ZipFile(file))
+			{
+				ZipEntry entry = zipFile.getEntry("export/versions.json");
+				if (entry == null) return true; //versions file missing, import as usually
+				try (InputStream is = zipFile.getInputStream(entry))
+				{
+					String content = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+					JSONObject versions = new JSONObject(content);
+					IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+					boolean showDialog = false;
+					Map<String, String> workspaceVersions = new TreeMap<>(NameComparator.INSTANCE);
+					for (String name : versions.keySet())
+					{
+						if (servoyModel.getServoyProject(name) != null)
+						{
+							Solution sol = servoyModel.getServoyProject(name).getSolution();
+							if (sol != null)
+							{
+								workspaceVersions.put(name, !Strings.isEmpty(sol.getVersion()) ? sol.getVersion() : "-");
+								if (!versions.optString(name, "").equals(sol.getVersion()))
+								{
+									existingSolutionAction.put(name, IXMLImportUserChannel.OVERWRITE_ACTION);
+									showDialog = true; //we only show the dialog if we have solutions to overwrite
+								}
+								else
+								{
+									//if the version is the same, then we skip
+									existingSolutionAction.put(name, IXMLImportUserChannel.SKIP_ACTION);
+								}
+							}
+						}
+					}
+					if (showDialog)
+					{
+						final MessageDialog dialog = new SolutionImportActionsDialog(getShell(), "Existing modules in the workspace", null,
+							"The following actions will be taken on import for the existing solutions/modules:", MessageDialog.WARNING,
+							new String[] { "Ok", "Cancel import" }, 0, workspaceVersions, versions);
+						int result = dialog.open();
+						return result == 0;
+					}
+					return true;
+				}
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+			}
+
+			return false;
+		}
 
 		public String validate()
 		{

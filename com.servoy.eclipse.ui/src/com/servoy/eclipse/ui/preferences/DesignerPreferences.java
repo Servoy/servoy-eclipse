@@ -107,7 +107,6 @@ public class DesignerPreferences
 	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
 	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
 	public static final String ENCAPSULATION_TYPE = "encapsulationType";
-	public static final String SKIP_FUNCTION_BODY_PARSING = "skipFunctionBodyParsing";
 	public static final String USE_CHROMIUM_BROWSER = "useChromiumBrowser";
 	public static final String USE_CONTEXT_MENU_TUTORIALS = "useContextMenuTutorials";
 	public static final String UUD_ARRAY_TYPE = "uuidArrayType";
@@ -166,8 +165,6 @@ public class DesignerPreferences
 
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final int WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT = 300; // 5 min (in hundreds of milliseconds); can be overridden via 'servoy.test.solution-load.timeout' system property
-
-	public static final boolean SKIP_FUNCTION_BODY_PARSING_DEFAULT = true;
 
 	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = false;
 
@@ -864,22 +861,6 @@ public class DesignerPreferences
 	public void setContextMenuTutorials(boolean contextMenuTutorials)
 	{
 		setProperty(USE_CONTEXT_MENU_TUTORIALS, contextMenuTutorials);
-	}
-
-	/**
-	 *
-	 */
-	public boolean skipFunctionBodyWhenParsingJS()
-	{
-		return getProperty(SKIP_FUNCTION_BODY_PARSING, SKIP_FUNCTION_BODY_PARSING_DEFAULT);
-	}
-
-	/**
-	 * @param skip
-	 */
-	public void setSkipFunctionBodyWhenParsingJS(boolean skip)
-	{
-		setProperty(SKIP_FUNCTION_BODY_PARSING, skip);
 	}
 
 	public void setPrimaryKeyUuidType(PrimaryKeyType type)

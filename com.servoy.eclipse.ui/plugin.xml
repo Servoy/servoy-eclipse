@@ -72,7 +72,8 @@
          <view
                id="com.servoy.eclipse.ui.views.TutorialView"
                relationship="stack"
-               relative="org.eclipse.ui.views.ContentOutline">
+               relative="org.eclipse.help.ui.HelpView"
+               visible="false">
          </view>
       </perspectiveExtension>
       <perspectiveExtension

@@ -44,6 +44,7 @@ import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -143,9 +144,8 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		Label mainSolution = new Label(comp, SWT.NONE);
 		mainSolution.setText("Solution version");
 		Text mainSolutionVersion = new Text(comp, SWT.BORDER);
-		GridData gd = new GridData(SWT.LEFT, SWT.BEGINNING, true, false);
-		gd.horizontalIndent = 10;
-		gd.widthHint = 150;
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.widthHint = 200;
 		mainSolutionVersion.setLayoutData(gd);
 		mainSolutionVersion.setText(exportSolutionWizard.getActiveSolution().getVersion() != null ? exportSolutionWizard.getActiveSolution().getVersion() : "");
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -160,7 +160,6 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		warnLabel.setImage(Activator.getDefault().loadImageFromBundle("warning.png"));
 		warnLabel.setToolTipText("Please set a version for the main solution.");
 		warnLabel.setVisible(Strings.isEmpty(mainSolutionVersion.getText()));
-		warnLabel.setLayoutData(gd);
 
 		protectWithPasswordButton = new Button(composite, SWT.CHECK);
 		protectWithPasswordButton.setText("Protect solution with password");
@@ -296,6 +295,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 			repository.updateRootObject(editingSolution);
 			warnLabel.setVisible(Strings.isEmpty(mainSolutionVersion.getText()));
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
+			PersistPropertySource.refreshPropertiesView();
 		}
 		catch (RepositoryException ex)
 		{

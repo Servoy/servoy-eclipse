@@ -246,6 +246,7 @@ import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.RuntimeComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TitleStringPropertyType;
@@ -508,6 +509,9 @@ public class TypeCreator extends TypeCache
 	@Override
 	protected Type createType(String context, String typeName)
 	{
+		// if there is no active solution yet, then don't try to make any types.
+		if (ServoyModelFinder.getServoyModel().getActiveProject() == null) return null;
+
 		if (BASE_TYPES.contains(typeName) || typeName.startsWith("Array<")) return null;
 		if (!initialized) initalize();
 		Type type = null;
@@ -728,6 +732,7 @@ public class TypeCreator extends TypeCache
 				{
 					creator.flush();
 				}
+				ValueCollectionProvider.clear();
 				servoyStaticTypeSystem.reset();
 				clear(null);
 				flushCache();
@@ -1325,6 +1330,7 @@ public class TypeCreator extends TypeCache
 		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE ||
 			type == TitleStringPropertyType.NG_INSTANCE) return getTypeRef(context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
+		if (RuntimeComponentPropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, "Component");
 		if (FoundsetPropertyType.TYPE_NAME.equals(type.getName()))
 		{
 			Type recordType = TypeInfoModelFactory.eINSTANCE.createType();
@@ -2018,7 +2024,6 @@ public class TypeCreator extends TypeCache
 			clear(bucket);
 		}
 		relationCache.clear();
-		ValueCollectionProvider.clear();
 	}
 
 //	final Set<String> staticTypes = Collections.synchronizedSet(new TreeSet<String>());

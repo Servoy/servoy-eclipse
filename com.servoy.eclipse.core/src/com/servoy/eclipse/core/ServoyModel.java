@@ -2735,7 +2735,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		// TODO refresh modules when solution type was changed
 		List<IPersist> strayCats = new ArrayList<IPersist>();
 		String oldModules = solution.getModulesNames();
-		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false);
+		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false, true);
 
 		// see if modules were changed
 		String newModules = solution.getModulesNames();

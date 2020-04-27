@@ -27,13 +27,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.dltk.ui.editor.IReconcile;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.osgi.framework.BundleContext;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -81,11 +80,9 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			try
 			{
 				IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-				if (editor instanceof ITextEditor)
+				if (editor instanceof IReconcile)
 				{
-					IDocument document = ((ITextEditor)editor).getDocumentProvider().getDocument(((ITextEditor)editor).getEditorInput());
-					if (document != null) document.replace(0, 0, "");
-					((ITextEditor)editor).doRevertToSaved();
+					((IReconcile)editor).reconcile();
 				}
 			}
 			catch (Exception e)
