@@ -123,6 +123,11 @@ public class BuilderDependencies
 		return namedFoundsets != null;
 	}
 
+	public void initialize()
+	{
+		namedFoundsets = new HashMap<String, List<Form>>();
+	}
+
 	public void removeForm(Form form)
 	{
 		if (formDependencies != null)

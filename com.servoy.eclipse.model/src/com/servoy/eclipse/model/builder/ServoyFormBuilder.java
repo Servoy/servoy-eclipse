@@ -2315,6 +2315,7 @@ public class ServoyFormBuilder
 			markerResource.deleteMarkers(ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.PARAMETERS_MISMATCH, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.INVALID_DATAPROVIDERID, true, IResource.DEPTH_INFINITE);
+			markerResource.deleteMarkers(ServoyBuilder.INVALID_EVENT_METHOD, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.HIDDEN_TABLE_STILL_IN_USE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.INVALID_SORT_OPTION, true, IResource.DEPTH_INFINITE);
@@ -2344,6 +2345,7 @@ public class ServoyFormBuilder
 		try
 		{
 			markerResource.deleteMarkers(ServoyBuilder.RESERVED_WINDOW_OBJECT_USAGE_TYPE, true, IResource.DEPTH_INFINITE);
+			markerResource.deleteMarkers(ServoyBuilder.PROJECT_FORM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 		}
 		catch (CoreException e)
 		{

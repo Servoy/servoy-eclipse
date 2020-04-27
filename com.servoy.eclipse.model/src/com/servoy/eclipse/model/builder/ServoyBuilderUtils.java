@@ -93,33 +93,36 @@ public class ServoyBuilderUtils
 				checkServiceSolutionMustAuthenticate(servoyModel, servoyProject.getSolution(), project);
 				ServoyBuilder.checkPersistDuplicateName();
 				ServoyBuilder.checkPersistDuplicateUUID();
-				String formName = file.getName().substring(0, file.getName().length() - SolutionSerializer.JS_FILE_EXTENSION.length());
+				String formName = file.getName().substring(0, file.getName().length() - file.getFileExtension().length() - 1);
 				Form form = fs.getForm(formName);
-				List<Form> affectedForms = new ArrayList<Form>();
-				affectedForms.add(form);
-				ServoyFormBuilder.deleteMarkers(form);
-				BuilderDependencies.getInstance().removeForm(form);
-				Iterator<Form> it = fs.getForms(false);
-				while (it.hasNext())
+				if (form != null)
 				{
-					Form currentForm = it.next();
-					Form parentForm = currentForm.getExtendsForm();
-					while (parentForm != null)
+					List<Form> affectedForms = new ArrayList<Form>();
+					affectedForms.add(form);
+					ServoyFormBuilder.deleteMarkers(form);
+					BuilderDependencies.getInstance().removeForm(form);
+					Iterator<Form> it = fs.getForms(false);
+					while (it.hasNext())
 					{
-						if (parentForm == form)
+						Form currentForm = it.next();
+						Form parentForm = currentForm.getExtendsForm();
+						while (parentForm != null)
 						{
-							affectedForms.add(currentForm);
-							ServoyFormBuilder.deleteMarkers(currentForm);
-							BuilderDependencies.getInstance().removeForm(currentForm);
+							if (parentForm == form)
+							{
+								affectedForms.add(currentForm);
+								ServoyFormBuilder.deleteMarkers(currentForm);
+								BuilderDependencies.getInstance().removeForm(currentForm);
+							}
+							parentForm = parentForm.getExtendsForm();
 						}
-						parentForm = parentForm.getExtendsForm();
 					}
-				}
-				Set<UUID> methodsParsed = new HashSet<UUID>();
-				Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
-				for (Form currentForm : affectedForms)
-				{
-					ServoyFormBuilder.addFormMarkers(servoyProject, currentForm, methodsParsed, formsAbstractChecked);
+					Set<UUID> methodsParsed = new HashSet<UUID>();
+					Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
+					for (Form currentForm : affectedForms)
+					{
+						ServoyFormBuilder.addFormMarkers(servoyProject, currentForm, methodsParsed, formsAbstractChecked);
+					}
 				}
 				return true;
 			}

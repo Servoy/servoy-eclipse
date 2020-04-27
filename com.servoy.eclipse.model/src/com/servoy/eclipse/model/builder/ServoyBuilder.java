@@ -704,6 +704,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (!BuilderDependencies.getInstance().isInitialized() && servoyModel.getActiveProject() != null)
 		{
 			// cache is empty we need a full build on active solution
+			BuilderDependencies.getInstance().initialize();
 			fullBuild(servoyModel.getActiveProject().getProject(), progressMonitor);
 		}
 		else if (kind == FULL_BUILD)
