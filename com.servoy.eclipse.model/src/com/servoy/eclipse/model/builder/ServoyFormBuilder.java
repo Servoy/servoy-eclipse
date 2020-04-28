@@ -256,6 +256,11 @@ public class ServoyFormBuilder
 								IPersist foundPersist = fs.searchPersist(((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository())
 									.getUUIDForElementId(element_id, element_id, -1, -1, null));
 
+								if (foundPersist instanceof Form)
+								{
+									BuilderDependencies.getInstance().addDependency(form, (Form)foundPersist);
+								}
+
 								ServoyBuilderUtils.addNullReferenceMarker(markerResource, o, foundPersist, context, element);
 								ServoyBuilderUtils.addNotAccessibleMethodMarkers(markerResource, o, foundPersist, context, element, fs);
 								ServoyBuilderUtils.addMethodParseErrorMarkers(markerResource, o, foundPersist, context, element, methodsParsed,
@@ -324,6 +329,7 @@ public class ServoyFormBuilder
 								Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
 								Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 								if (frm == null) continue;
+								BuilderDependencies.getInstance().addDependency(form, frm);
 								if (pd.getConfig() instanceof ComponentTypeConfig)
 								{
 									checkForListFormComponent(markerResource, frm, o, fs);
@@ -2308,33 +2314,36 @@ public class ServoyFormBuilder
 		IResource markerResource = ServoyBuilderUtils.getPersistResource(form);
 		try
 		{
-			markerResource.deleteMarkers(ServoyBuilder.PROJECT_FORM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.EVENT_METHOD_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.MULTIPLE_METHODS_ON_SAME_ELEMENT, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.PARAMETERS_MISMATCH, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.INVALID_DATAPROVIDERID, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.INVALID_EVENT_METHOD, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.HIDDEN_TABLE_STILL_IN_USE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.INVALID_SORT_OPTION, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.FORM_DUPLICATE_PART_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.UNRESOLVED_RELATION_UUID, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.MEDIA_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.MISSING_SPEC, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_SPEC, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.OBSOLETE_ELEMENT, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_PROPERTY_USAGE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.MISSING_STYLE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.NAMED_FOUNDSET_DATASOURCE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.DUPLICATE_SIBLING_UUID, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.METHOD_OVERRIDE, true, IResource.DEPTH_INFINITE);
+			if (markerResource.exists())
+			{
+				markerResource.deleteMarkers(ServoyBuilder.PROJECT_FORM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.EVENT_METHOD_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.MULTIPLE_METHODS_ON_SAME_ELEMENT, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.PARAMETERS_MISMATCH, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.INVALID_DATAPROVIDERID, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.INVALID_EVENT_METHOD, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.HIDDEN_TABLE_STILL_IN_USE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.INVALID_SORT_OPTION, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.FORM_DUPLICATE_PART_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.UNRESOLVED_RELATION_UUID, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.MEDIA_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.MISSING_SPEC, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_SPEC, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.OBSOLETE_ELEMENT, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_PROPERTY_USAGE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.MISSING_STYLE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.NAMED_FOUNDSET_DATASOURCE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.DUPLICATE_SIBLING_UUID, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.METHOD_OVERRIDE, true, IResource.DEPTH_INFINITE);
+			}
 		}
 		catch (CoreException e)
 		{
@@ -2344,8 +2353,11 @@ public class ServoyFormBuilder
 			.getFile(new Path(SolutionSerializer.getScriptPath(form, false)));
 		try
 		{
-			markerResource.deleteMarkers(ServoyBuilder.RESERVED_WINDOW_OBJECT_USAGE_TYPE, true, IResource.DEPTH_INFINITE);
-			markerResource.deleteMarkers(ServoyBuilder.PROJECT_FORM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+			if (markerResource.exists())
+			{
+				markerResource.deleteMarkers(ServoyBuilder.RESERVED_WINDOW_OBJECT_USAGE_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.PROJECT_FORM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+			}
 		}
 		catch (CoreException e)
 		{

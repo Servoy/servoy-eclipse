@@ -40,7 +40,9 @@ public class BuilderDependencies
 	private Map<Media, List<Form>> mediaToForms;
 	private Map<ValueList, List<Form>> valuelistToForms;
 	private Map<Relation, List<IPersist>> relationToPersists;
+	// formDependencies is a helper cache for fast lookup, both persists of the dependency are needed as key
 	private Map<Form, List<IPersist>> formDependencies;
+	private Map<Form, List<Form>> formToFormsDependencies;
 	private Map<String, List<IPersist>> scopeToPersists;
 
 	private BuilderDependencies()
@@ -71,6 +73,7 @@ public class BuilderDependencies
 		valuelistToForms = null;
 		relationToPersists = null;
 		scopeToPersists = null;
+		formToFormsDependencies = null;
 	}
 
 	public void addNamedFoundsetDependency(String namedFoundset, Form form)
@@ -151,6 +154,11 @@ public class BuilderDependencies
 					{
 						List<IPersist> dependencyPersists = relationToPersists.get(persist);
 						if (dependencyPersists != null) dependencyPersists.remove(form);
+					}
+					else if (persist instanceof Form)
+					{
+						List<Form> dependencyForms = formToFormsDependencies.get(persist);
+						if (dependencyForms != null) dependencyForms.remove(form);
 					}
 				}
 			}
@@ -276,9 +284,45 @@ public class BuilderDependencies
 		}
 	}
 
+	public void addDependency(Form source, Form destination)
+	{
+		if (formToFormsDependencies == null)
+		{
+			formToFormsDependencies = new HashMap<>();
+		}
+		List<Form> dependecyForms = formToFormsDependencies.get(destination);
+		if (dependecyForms == null)
+		{
+			dependecyForms = new ArrayList<Form>();
+			formToFormsDependencies.put(destination, dependecyForms);
+		}
+		if (!dependecyForms.contains(source)) dependecyForms.add(source);
+
+		if (formDependencies == null)
+		{
+			formDependencies = new HashMap<>();
+		}
+		List<IPersist> dependecyPersists = formDependencies.get(source);
+		if (dependecyPersists == null)
+		{
+			dependecyPersists = new ArrayList<IPersist>();
+			formDependencies.put(source, dependecyPersists);
+		}
+		if (!dependecyPersists.contains(destination)) dependecyPersists.add(destination);
+	}
+
 	public void removeScopeDependencies(String scopeName)
 	{
 		if (scopeToPersists != null) scopeToPersists.remove(scopeName);
+	}
+
+	public List<Form> getFormDependencies(Form form)
+	{
+		if (formToFormsDependencies != null)
+		{
+			return formToFormsDependencies.get(form);
+		}
+		return null;
 	}
 
 	public List<IPersist> getScopeDependency(String scopeName)

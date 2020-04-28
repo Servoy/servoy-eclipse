@@ -98,6 +98,16 @@ public class ServoyBuilderUtils
 				if (form != null)
 				{
 					List<Form> affectedForms = new ArrayList<Form>();
+					List<Form> formDependencies = BuilderDependencies.getInstance().getFormDependencies(form);
+					if (formDependencies != null)
+					{
+						affectedForms.addAll(formDependencies);
+						for (Form dependency : formDependencies.toArray(new Form[0]))
+						{
+							ServoyFormBuilder.deleteMarkers(dependency);
+							BuilderDependencies.getInstance().removeForm(dependency);
+						}
+					}
 					affectedForms.add(form);
 					ServoyFormBuilder.deleteMarkers(form);
 					BuilderDependencies.getInstance().removeForm(form);
@@ -123,8 +133,9 @@ public class ServoyBuilderUtils
 					{
 						ServoyFormBuilder.addFormMarkers(servoyProject, currentForm, methodsParsed, formsAbstractChecked);
 					}
+					return true;
 				}
-				return true;
+
 			}
 			if (folder.getName().equals(SolutionSerializer.MEDIAS_DIR) &&
 				servoyModel.isSolutionActive(project.getName()))
