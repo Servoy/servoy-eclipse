@@ -3,19 +3,31 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Renderer2 } fr
 import { ServoyService } from './servoy.service';
 import { AllServiceService } from './allservices.service';
 import { FormService } from './form.service';
+import { I18NProvider } from "./servoy_public";
+import { WebsocketService } from '../sablo/websocket.service';
 
 @Component({
   selector: 'servoy-main',
   templateUrl: './main.component.html'
 })
 
-export class MainComponent {
+export class MainComponent implements OnInit {
   title = 'Servoy NGClient';
+  i18n_reconnecting_feedback: string;
 
-  constructor(public servoyService: ServoyService, 
+  constructor(private servoyService: ServoyService, 
           private allService: AllServiceService, 
+          private i18nProvider: I18NProvider, 
+          public websocketService: WebsocketService,
           private formservice: FormService) { 
     this.servoyService.connect();
+  }
+  
+  ngOnInit() {
+      this.i18nProvider.getI18NMessages(
+              "servoy.ngclient.reconnecting").then((val)=> {
+                this.i18n_reconnecting_feedback = val["servoy.ngclient.reconnecting"];
+      });
   }
 
   public get mainForm() {

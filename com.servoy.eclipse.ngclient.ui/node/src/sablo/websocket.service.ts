@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 
-import { Subscription,interval} from "rxjs";
+import { Subscription,interval, Subject} from "rxjs";
 
 
 import { ReconnectingWebSocket, WebsocketCustomEvent } from './io/reconnecting.websocket';
@@ -19,6 +19,7 @@ export class WebsocketService {
     private connectionArguments = {};
     private lastServerMessageNumber = null;
     private log: LoggerService;
+    public reconnectingEmitter = new Subject<boolean>();
 
     constructor( private windowRef: WindowRefService, private services: ServicesService, private converterService: ConverterService, private logFactory: LoggerFactory ) {
         this.log = logFactory.getLogger("WebsocketService");
@@ -165,8 +166,9 @@ export class WebsocketService {
         this.lastServerMessageNumber = num;
     }
     
-    public isReconnecting() {
-        return this.wsSession.isReconnecting();
+
+    public isConnected() {
+        return this.wsSession.isConnected();
     }
 }
 
@@ -212,6 +214,7 @@ export class WebsocketSession {
             me.stopHeartbeat();
             if ( me.connected != 'CLOSED' ) {
                 me.connected = 'RECONNECTING';
+                this.websocketService.reconnectingEmitter.next(true);
                 this.log.spam(this.log.buildMessage(() =>("sbl * Connection mode (onclose receidev while not CLOSED): ... RECONNECTING (" + new Date().getTime() + ")")));
             }
             for ( var handler in me.onCloseHandlers ) {

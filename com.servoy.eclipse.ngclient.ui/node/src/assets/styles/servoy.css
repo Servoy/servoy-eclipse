@@ -106,8 +106,8 @@ body {
 }
 .svy-reconnecting
 {
-	background:lightgray;
-	opacity:.75;
+  background:lightgray;
+  opacity: 0.75;
 }
 
 #mktipmsg {
