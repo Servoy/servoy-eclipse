@@ -1493,6 +1493,53 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							{
 								ServoyLog.logError(e);
 							}
+
+
+							// add listeners to initial server list
+							String[] array = serverManager.getServerNames(true, true, true, true);
+							for (String server_name : array)
+							{
+								IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
+								if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()))
+								{
+									IFolder serverInformationFolder = dataModelManager.getDBIFileContainer(server.getName());
+									if (serverInformationFolder.exists())
+									{
+										try
+										{
+											serverInformationFolder.accept((IResource resource) -> {
+												String extension = resource.getFileExtension();
+												if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
+												{
+													String tableName = resource.getName().substring(0,
+														resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+													IFile file = dataModelManager.getDBIFile(server.getName(), tableName);
+													if (file.exists())
+													{
+														try
+														{
+															InputStream is = file.getContents(true);
+															String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+															Utils.closeInputStream(is);
+															DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, false);
+														}
+														catch (CoreException e)
+														{
+															ServoyLog.logError(e);
+														}
+													}
+												}
+												return true;
+											});
+										}
+										catch (Exception e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+								}
+							}
+
 						}
 						else
 						{
@@ -3431,55 +3478,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				triggerOutstandingPostChangeEvents();
 			}
 		});
-		if (dataModelManager != null)
-		{
-			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
-
-			// add listeners to initial server list
-			String[] array = serverManager.getServerNames(true, true, true, true);
-			for (String server_name : array)
-			{
-				IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
-				if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()))
-				{
-					IFolder serverInformationFolder = dataModelManager.getDBIFileContainer(server.getName());
-					if (serverInformationFolder.exists())
-					{
-						try
-						{
-							serverInformationFolder.accept((IResource resource) -> {
-								String extension = resource.getFileExtension();
-								if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
-								{
-									String tableName = resource.getName().substring(0,
-										resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-									IFile file = dataModelManager.getDBIFile(server.getName(), tableName);
-									if (file.exists())
-									{
-										try
-										{
-											InputStream is = file.getContents(true);
-											String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-											Utils.closeInputStream(is);
-											DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, false);
-										}
-										catch (CoreException e)
-										{
-											ServoyLog.logError(e);
-										}
-									}
-								}
-								return true;
-							});
-						}
-						catch (Exception e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
-				}
-			}
-		}
 	}
 
 	/**
