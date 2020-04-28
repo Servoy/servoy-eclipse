@@ -191,4 +191,8 @@ export class SabloService {
         changes[propertyName] = this.converterService.convertClientObject(value);
         this.wsSession.sendMessageObject({ servicedatapush: serviceName, changes: changes });
     }
+
+    public addIncomingMessageHandlingDoneTask(func: () => any) {
+        this.wsSession.addIncomingMessageHandlingDoneTask(func);
+     } 
 }

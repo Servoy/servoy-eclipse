@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service'
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
 import { ChangeListener, ViewportChangeEvent } from '../../sablo/spectypes.service'
+import { SabloService } from '../../sablo/sablo.service';
 import { ViewportService, IViewportConversion } from '../services/viewport.service';
 import { FoundsetChangeEvent, Foundset } from '../converters/foundset_converter';
 
@@ -21,7 +22,7 @@ export class FoundsetLinkedConverter implements IConverter {
      
     private log: LoggerService;
 
-    constructor(private converterService: ConverterService, private viewportService: ViewportService, logFactory:LoggerFactory) {
+    constructor(private converterService: ConverterService, private sabloService: SabloService, private viewportService: ViewportService, logFactory:LoggerFactory) {
         this.log = logFactory.getLogger("FoundsetLinkedPropertyValue");
     }
     
@@ -68,15 +69,17 @@ export class FoundsetLinkedConverter implements IConverter {
                     const singleValue = serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] !== undefined ? serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] : serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE_UPDATE];
                     internalState.singleValueState = new SingleValueState(this, propertyContext, conversionInfo);
                     wholeViewport = internalState.handleSingleValue(singleValue);
-                    const fs: Foundset = internalState.forFoundset();
-                    fs.addChangeListener((event: FoundsetChangeEvent) => {
-                        if (event.viewPortSizeChanged) {
-                            if (event.viewPortSizeChanged.newValue === internalState.singleValueState.viewPortSize) return;
-                            internalState.singleValueState.viewPortSize = event.viewPortSizeChanged.newValue;
-                            if (event.viewPortSizeChanged.newValue == undefined)  internalState.singleValueState.viewPortSize = 0;
-                            wholeViewport = internalState.singleValueState.generateWholeViewportFromOneValue(singleValue)
-                            internalState.singleValueState.updateWholeViewport(newValue, internalState, wholeViewport);
-                        }
+                    this.sabloService.addIncomingMessageHandlingDoneTask(() => {
+                        const fs: Foundset = internalState.forFoundset();
+                        fs.addChangeListener((event: FoundsetChangeEvent) => {
+                            if (event.viewPortSizeChanged) {
+                                if (event.viewPortSizeChanged.newValue === internalState.singleValueState.viewPortSize) return;
+                                internalState.singleValueState.viewPortSize = event.viewPortSizeChanged.newValue;
+                                if (event.viewPortSizeChanged.newValue == undefined) internalState.singleValueState.viewPortSize = 0;
+                                wholeViewport = internalState.singleValueState.generateWholeViewportFromOneValue(singleValue)
+                                internalState.singleValueState.updateWholeViewport(newValue, internalState, wholeViewport);
+                            }
+                        });
                     });
 
                 } else if (serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE] !== undefined) {

@@ -36,7 +36,7 @@ describe('FoundsetLinked Converter', () => {
         loggerFactory = TestBed.get( LoggerFactory );
         converterService = TestBed.get( ConverterService );
         converterService.registerCustomPropertyHandler( "foundset", new FoundsetConverter( converterService, sabloService, sabloDeferHelper, viewportService, loggerFactory) );
-        converterService.registerCustomPropertyHandler( "fsLinked", new FoundsetLinkedConverter( converterService, viewportService, loggerFactory) );
+        converterService.registerCustomPropertyHandler( "fsLinked", new FoundsetLinkedConverter( converterService, sabloService, viewportService, loggerFactory) );
         changeNotified = false;
 
         var angularEquality = (first, second) => {
