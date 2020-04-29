@@ -13,12 +13,15 @@ import { DOCUMENT, PlatformLocation } from "@angular/common";
 import { ApplicationService } from "./application.service";
 import { Router, NavigationStart } from "@angular/router";
 import { ServoyApi } from "../servoy_api";
+import { SessionStorageService } from "angular-web-storage";
+import { WebsocketService } from "../../sablo/websocket.service";
 
 @Injectable()
 export class WindowService {
      
     private instances: any = {}
     private renderer: Renderer2;
+    private windowCounter: number;
 
     constructor(private formService:FormService,
         public servoyService:ServoyService,
@@ -27,19 +30,48 @@ export class WindowService {
         private _applicationRef: ApplicationRef,
         private _injector: Injector,
         public localStorageService: LocalStorageService,
+        public sessionStorageService: SessionStorageService,
         private titleService: Title,
         public sabloService: SabloService,
         private bsWindowManager: BSWindowManager, 
         private rendererFactory: RendererFactory2,
         private appService: ApplicationService,
         private platformLocation: PlatformLocation, 
+        private webSocketService: WebsocketService,
         @Inject(DOCUMENT) private document: any) {
         
         this.renderer = rendererFactory.createRenderer(null, null);
         this.platformLocation.onPopState((event) => {
             this.formService.goToForm(this.platformLocation.hash.replace('#', ''));
         });
-
+        
+        this.windowCounter = 0;
+        this.restoreDialogs();
+    }
+    
+    private restoreDialogs() {
+        const window0 = this.sessionStorageService.get('window0');
+        if (window0 && window0.showForm) {
+            let isConnected = false;
+            // wait until the server is connected
+            let interval = setInterval(() => {
+                if (this.webSocketService.isConnected()) {
+                    clearInterval(interval);
+                    let counter = 0;
+                    while(this.sessionStorageService.get('window' + counter)) {
+                        let window = this.sessionStorageService.get('window' + counter);
+                        // server call for getting form's data (send data from server to client)
+                        // call a couple of methods that will create and display the window
+                        this.create(window.name, window.type);
+                        this.switchForm(window.name, window.switchForm, window.navigatorForm);
+                        this.setTitle(window.name, window.title);
+                        this.show(window.name, window.showForm, window.showTitle);
+//                        this.sabloService.callService( "$windowService", "touchForm", { name: window.showForm }, true );
+                        counter++;
+                }
+                }
+            }, 1000);
+        }
     }
     
     public updateController(formName,formStructure) {
@@ -49,12 +81,24 @@ export class WindowService {
     
 
     public create(name: string, type: number) {
+        this.sessionStorageService.set('window' + this.windowCounter, {
+            name: name,
+            type: type
+        });
         if(!this.instances[name]) {
             this.instances[name] = new SvyWindow(name, type, this);
         }
     }
 
     public show(name: string, form: string, title: string) {
+        const currentWindow = 'window' + this.windowCounter;
+        if (this.sessionStorageService.get(currentWindow)) {
+            let window = this.sessionStorageService.get(currentWindow);
+            window.showForm = form;
+            window.showTitle = title;
+            this.sessionStorageService.set(currentWindow, window);
+            this.windowCounter++;
+        }
         let instance = this.instances[name];
         if ( this.instances[name] ) {
             instance.title = title;
@@ -164,6 +208,15 @@ export class WindowService {
     }
 
     public hide(name: string) {
+        let winCounter = 0;
+        while(this.sessionStorageService.get('window' + winCounter)) {
+            let window = this.sessionStorageService.get('window' + winCounter);
+            if (window.name == name) {
+                this.sessionStorageService.remove('window' + winCounter);
+                this.windowCounter--;
+            } 
+            winCounter++;
+        } 
         let instance = this.instances[name];
         if (instance) {
             instance.hide();
@@ -184,6 +237,14 @@ export class WindowService {
     }
 
     public setTitle(name: string, title: string ) {
+        const currentWindow = 'window' + this.windowCounter;
+        if (title && this.sessionStorageService.get(currentWindow)) {
+            let window = this.sessionStorageService.get(currentWindow);
+            if (!window.title) {
+                window.title = title;
+                this.sessionStorageService.set(currentWindow, window);
+            }
+        }
         if ( this.instances[name] && this.instances[name].type != WINDOW_TYPE_WINDOW ) {
             this.instances[name].title = title;
         } else {
@@ -290,6 +351,15 @@ export class WindowService {
     }
 
     public switchForm(name,form,navigatorForm) {
+        const currentWindow = 'window' + this.windowCounter;
+        if (this.sessionStorageService.get(currentWindow)) {
+            let window = this.sessionStorageService.get(currentWindow);
+            if (!window.switchForm) {
+                window.switchForm = form;
+                window.navigatorForm = navigatorForm;
+                this.sessionStorageService.set(currentWindow, window);
+            }
+        }
         if(this.instances[name] && this.instances[name].type != WINDOW_TYPE_WINDOW) {
             this.instances[name].form = form;
             this.instances[name].navigatorForm = navigatorForm;
