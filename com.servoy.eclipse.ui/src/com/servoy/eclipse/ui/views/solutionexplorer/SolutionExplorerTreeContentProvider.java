@@ -1958,7 +1958,6 @@ public class SolutionExplorerTreeContentProvider
 				getServerImage(server_name, serverObj));
 			serverNodes.add(node);
 			node.parent = serversNode;
-			//handleServerNode(serverObj, node);
 		}
 
 		serversNode.children = serverNodes.toArray(new PlatformSimpleUserNode[serverNodes.size()]);
