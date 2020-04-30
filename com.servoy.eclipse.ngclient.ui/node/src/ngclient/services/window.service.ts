@@ -2,90 +2,95 @@ import { Injectable, ComponentFactoryResolver, Injector, ApplicationRef, Rendere
 import { Title } from '@angular/platform-browser';
 
 import { FormService } from '../form.service';
-import { ServoyService } from '../servoy.service'
+import { ServoyService } from '../servoy.service';
 import { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindow } from './bootstrap-window/bswindow.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LocalStorageService } from 'angular-web-storage';
 import { SabloService } from '../../sablo/sablo.service';
-import { DOCUMENT, PlatformLocation } from "@angular/common";
-import { ApplicationService } from "./application.service";
-import { Router, NavigationStart } from "@angular/router";
-import { ServoyApi } from "../servoy_api";
-import { SessionStorageService } from "angular-web-storage";
-import { WebsocketService } from "../../sablo/websocket.service";
+import { DOCUMENT, PlatformLocation } from '@angular/common';
+import { ApplicationService } from './application.service';
+import { Router, NavigationStart } from '@angular/router';
+import { ServoyApi } from '../servoy_api';
+import { SessionStorageService } from 'angular-web-storage';
+import { WebsocketService } from '../../sablo/websocket.service';
 
 @Injectable()
 export class WindowService {
-     
-    private instances: any = {}
+    public static readonly WINDOW_TYPE_DIALOG = 0;
+    public static readonly WINDOW_TYPE_MODAL_DIALOG = 1;
+    public static readonly WINDOW_TYPE_WINDOW = 2;
+
+
+    private instances: any = {};
     private renderer: Renderer2;
     private windowCounter: number;
+    private dialogsRestored = false;
 
-    constructor(private formService:FormService,
-        public servoyService:ServoyService,
+    constructor(private formService: FormService,
+        public servoyService: ServoyService,
         private windowRefService: WindowRefService,
-        private componentFactoryResolver:ComponentFactoryResolver,
+        private componentFactoryResolver: ComponentFactoryResolver,
         private _applicationRef: ApplicationRef,
         private _injector: Injector,
         public localStorageService: LocalStorageService,
         public sessionStorageService: SessionStorageService,
         private titleService: Title,
         public sabloService: SabloService,
-        private bsWindowManager: BSWindowManager, 
+        private bsWindowManager: BSWindowManager,
         private rendererFactory: RendererFactory2,
         private appService: ApplicationService,
-        private platformLocation: PlatformLocation, 
+        private platformLocation: PlatformLocation,
         private webSocketService: WebsocketService,
         @Inject(DOCUMENT) private document: any) {
-        
+
         this.renderer = rendererFactory.createRenderer(null, null);
         this.platformLocation.onPopState((event) => {
             this.formService.goToForm(this.platformLocation.hash.replace('#', ''));
         });
-        
+
         this.windowCounter = 0;
-        this.restoreDialogs();
     }
-    
+
     private restoreDialogs() {
         const window0 = this.sessionStorageService.get('window0');
         if (window0 && window0.showForm) {
-            let isConnected = false;
+            const isConnected = false;
             // wait until the server is connected
-            let interval = setInterval(() => {
+            const interval = setInterval(() => {
                 if (this.webSocketService.isConnected()) {
                     clearInterval(interval);
                     let counter = 0;
-                    while(this.sessionStorageService.get('window' + counter)) {
-                        let window = this.sessionStorageService.get('window' + counter);
+                    while (this.sessionStorageService.get('window' + counter)) {
+                        const window = this.sessionStorageService.get('window' + counter);
                         // server call for getting form's data (send data from server to client)
                         // call a couple of methods that will create and display the window
                         this.create(window.name, window.type);
                         this.switchForm(window.name, window.switchForm, window.navigatorForm);
                         this.setTitle(window.name, window.title);
-                        this.show(window.name, window.showForm, window.showTitle);
-//                        this.sabloService.callService( "$windowService", "touchForm", { name: window.showForm }, true );
+                        this.sabloService.callService('$windowService', 'touchForm', { name: window.showForm }, false).then( () => {
+                          this.show(window.name, window.showForm, window.showTitle);
+                        });
                         counter++;
                 }
                 }
             }, 1000);
         }
     }
-    
-    public updateController(formName,formStructure) {
-        var formState = JSON.parse(formStructure)[formName];
+
+    public updateController(formName, formStructure) {
+        const formState = JSON.parse(formStructure)[formName];
         this.formService.createFormCache(formName, formState);
     }
-    
+
 
     public create(name: string, type: number) {
         this.sessionStorageService.set('window' + this.windowCounter, {
             name: name,
             type: type
         });
-        if(!this.instances[name]) {
+        if (!this.instances[name]) {
             this.instances[name] = new SvyWindow(name, type, this);
         }
     }
@@ -93,13 +98,13 @@ export class WindowService {
     public show(name: string, form: string, title: string) {
         const currentWindow = 'window' + this.windowCounter;
         if (this.sessionStorageService.get(currentWindow)) {
-            let window = this.sessionStorageService.get(currentWindow);
+            const window = this.sessionStorageService.get(currentWindow);
             window.showForm = form;
             window.showTitle = title;
             this.sessionStorageService.set(currentWindow, window);
             this.windowCounter++;
         }
-        let instance = this.instances[name];
+        const instance = this.instances[name];
         if ( this.instances[name] ) {
             instance.title = title;
             if ( instance.bsWindowInstance ) {
@@ -107,11 +112,11 @@ export class WindowService {
                 return;
             }
 
-            if([...this.document.getElementsByClassName('svy-window')].length < 1) {
-                const customEvent = new CustomEvent("disableTabseq", {
+            if ([...this.document.getElementsByClassName('svy-window')].length < 1) {
+                const customEvent = new CustomEvent('disableTabseq', {
                     bubbles: true
                   });
-                this.document.getElementById("mainForm").dispatchEvent(customEvent);
+                this.document.getElementById('mainForm').dispatchEvent(customEvent);
             }
 
             if ( instance.storeBounds ) {
@@ -121,11 +126,11 @@ export class WindowService {
                         this.servoyService.getSolutionSettings().solutionName + name + '.storedBounds.size');
             }
 
-            //resolve initial bounds
+            // resolve initial bounds
             let location = null;
             let size = instance.form.size;
             if ( instance.initialBounds ) {
-                let bounds = instance.initialBounds;
+                const bounds = instance.initialBounds;
                 if (bounds.x > -1 && bounds.y > -1) {
                     location = {
                         x: bounds.x,
@@ -133,7 +138,7 @@ export class WindowService {
                     };
                 }
                 if  (bounds.width > 0 && bounds.height > 0) {
-                    size = { width: bounds.width, height: bounds.height }
+                    size = { width: bounds.width, height: bounds.height };
                 }
             }
             if ( instance.location ) {
@@ -142,7 +147,7 @@ export class WindowService {
             if ( instance.size ) {
                 size = instance.size;
             }
-            //-1 means default size and location(center)
+            // -1 means default size and location(center)
             let formSize = size;
             if ( !formSize || ( formSize.width === -1 && formSize.height === -1 ) )
                 formSize = instance.form.size;
@@ -150,9 +155,9 @@ export class WindowService {
             const windowWidth = this.windowRefService.nativeWindow.document.documentElement.clientWidth;
             const windowHeight = this.windowRefService.nativeWindow.document.documentElement.clientHeight;
 
-            //this can happen in case of responsive forms
-            if ( formSize.width == 0 ) formSize.width = windowWidth / 2;
-            if ( formSize.height == 0 ) formSize.height = windowHeight / 2;
+            // this can happen in case of responsive forms
+            if ( formSize.width === 0 ) formSize.width = windowWidth / 2;
+            if ( formSize.height === 0 ) formSize.height = windowHeight / 2;
 
 
             if ( !location || ( location.x < 0 && location.y < 0 ) ) location = this.centerWindow( formSize );
@@ -167,30 +172,30 @@ export class WindowService {
                     size.height = windowHeight;
                 }
             }
-            //convert servoy x,y to library top , left
-            let loc = { left: location.x, top: location.y }
+            // convert servoy x,y to library top , left
+            const loc = { left: location.x, top: location.y };
 
-            //create the bs window instance
+            // create the bs window instance
             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(DialogWindowComponent);
             const dialogWindowComponent = componentFactory.create(this._injector);
             dialogWindowComponent.instance.setWindow(instance);
             this._applicationRef.attachView(dialogWindowComponent.hostView);
-            
-            let opt = {
+
+            const opt = {
                 id: instance.name,
                 fromElement: dialogWindowComponent.location.nativeElement.childNodes[0],
                 title: instance.title,
                 resizable: !!instance.resizable,
                 location: loc,
                 size: size,
-                isModal: instance.type == WINDOW_TYPE_MODAL_DIALOG
+                isModal: instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG
             };
             instance.bsWindowInstance = this.bsWindowManager.createWindow(opt);
-            
-            instance.bsWindowInstance.element.addEventListener( 'bswin.resize', (event, size) => { instance.onResize(event, size) } );
-            instance.bsWindowInstance.element.addEventListener( 'bswin.move', (event, location) => { instance.onResize(event, location) } );
+
+            instance.bsWindowInstance.element.addEventListener( 'bswin.resize', (event, size) => { instance.onResize(event, size); } );
+            instance.bsWindowInstance.element.addEventListener( 'bswin.move', (event, location) => { instance.onResize(event, location); } );
             instance.bsWindowInstance.element.addEventListener( 'bswin.active', (event) => {
-                const customEvent = new CustomEvent(event.detail.active ? "enableTabseq" : "disableTabseq", {
+                const customEvent = new CustomEvent(event.detail.active ? 'enableTabseq' : 'disableTabseq', {
                     bubbles: true
                   });
                 event.target.dispatchEvent(customEvent);
@@ -198,39 +203,39 @@ export class WindowService {
             [...this.document.getElementsByClassName('window-header')][0].focus();
             instance.bsWindowInstance.setActive( true );
             // init the size of the dialog
-            let width = instance.bsWindowInstance.element.getBoundingClientRect().width;
-            let height = instance.bsWindowInstance.element.getBoundingClientRect().height;
+            const width = instance.bsWindowInstance.element.getBoundingClientRect().width;
+            const height = instance.bsWindowInstance.element.getBoundingClientRect().height;
             if ( width > 0 && height > 0 ) {
-                var dialogSize = { width: width, height: height };
-                this.sabloService.callService( "$windowService", "resize", { name: instance.name, size: dialogSize }, true );
+                const dialogSize = { width: width, height: height };
+                this.sabloService.callService( '$windowService', 'resize', { name: instance.name, size: dialogSize }, true );
             }
         }
     }
 
     public hide(name: string) {
         let winCounter = 0;
-        while(this.sessionStorageService.get('window' + winCounter)) {
-            let window = this.sessionStorageService.get('window' + winCounter);
-            if (window.name == name) {
+        while (this.sessionStorageService.get('window' + winCounter)) {
+            const window = this.sessionStorageService.get('window' + winCounter);
+            if (window.name === name) {
                 this.sessionStorageService.remove('window' + winCounter);
                 this.windowCounter--;
-            } 
+            }
             winCounter++;
-        } 
-        let instance = this.instances[name];
+        }
+        const instance = this.instances[name];
         if (instance) {
             instance.hide();
-            if([...this.document.getElementsByClassName('svy-window')].length < 1) {
-                const customEvent = new CustomEvent("enableTabseq", {
+            if ([...this.document.getElementsByClassName('svy-window')].length < 1) {
+                const customEvent = new CustomEvent('enableTabseq', {
                     bubbles: true
                   });
-                this.document.getElementById("mainForm").dispatchEvent(customEvent);
+                this.document.getElementById('mainForm').dispatchEvent(customEvent);
             }
         }
     }
 
     public destroy(name: string ) {
-        let instance = this.instances[name];
+        const instance = this.instances[name];
         if ( instance ) {
             delete this.instances[name];
         }
@@ -239,13 +244,13 @@ export class WindowService {
     public setTitle(name: string, title: string ) {
         const currentWindow = 'window' + this.windowCounter;
         if (title && this.sessionStorageService.get(currentWindow)) {
-            let window = this.sessionStorageService.get(currentWindow);
+            const window = this.sessionStorageService.get(currentWindow);
             if (!window.title) {
                 window.title = title;
                 this.sessionStorageService.set(currentWindow, window);
             }
         }
-        if ( this.instances[name] && this.instances[name].type != WINDOW_TYPE_WINDOW ) {
+        if ( this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW ) {
             this.instances[name].title = title;
         } else {
             this.titleService.setTitle(title);
@@ -267,7 +272,7 @@ export class WindowService {
     public resetBounds(name: string ) {
         if ( this.instances[name] ) {
             this.instances[name].storeBounds = false;
-            this.instances[name].clearBounds()
+            this.instances[name].clearBounds();
         }
     }
 
@@ -286,9 +291,8 @@ export class WindowService {
     public getSize(name: string ) {
         if ( this.instances[name] && this.instances[name].bsWindowInstance ) {
             return this.instances[name].getSize();
-        }
-        else {
-            return { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight }
+        } else {
+            return { width: this.windowRefService.nativeWindow.innerWidth, height: this.windowRefService.nativeWindow.innerHeight };
         }
     }
 
@@ -335,11 +339,11 @@ export class WindowService {
     }
 
     centerWindow( formSize ) {
-        //var body = $( 'body' );
+        // var body = $( 'body' );
         const windowWidth = this.windowRefService.nativeWindow.document.documentElement.clientWidth;
         const windowHeight = this.windowRefService.nativeWindow.document.documentElement.clientHeight;
-        var top, left;
-            //bodyTop = body.position().top + parseInt( body.css( 'paddingTop' ), 10 );
+        let top, left;
+            // bodyTop = body.position().top + parseInt( body.css( 'paddingTop' ), 10 );
         left = ( windowWidth / 2 ) - ( formSize.width / 2 );
         top = ( windowHeight / 2 ) - ( formSize.height / 2 );
         // if ( top < bodyTop ) {
@@ -347,81 +351,81 @@ export class WindowService {
         // }
         if ( left < 0 ) left = 0;
         if ( top < 0 ) top = 0;
-        return { x: left, y: top }
+        return { x: left, y: top };
     }
 
-    public switchForm(name,form,navigatorForm) {
+    public switchForm(name, form, navigatorForm) {
         const currentWindow = 'window' + this.windowCounter;
         if (this.sessionStorageService.get(currentWindow)) {
-            let window = this.sessionStorageService.get(currentWindow);
+            const window = this.sessionStorageService.get(currentWindow);
             if (!window.switchForm) {
                 window.switchForm = form;
                 window.navigatorForm = navigatorForm;
                 this.sessionStorageService.set(currentWindow, window);
             }
         }
-        if(this.instances[name] && this.instances[name].type != WINDOW_TYPE_WINDOW) {
+        if (this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW) {
             this.instances[name].form = form;
             this.instances[name].navigatorForm = navigatorForm;
         }
-        this.servoyService.loaded().then( () => {       
+        this.servoyService.loaded().then( () => {
             // if first show of this form in browser window then request initial data (dataproviders and such)
             this.formService.formWillShow(form.name, false); // false because form was already made visible server-side
-            if (navigatorForm && navigatorForm.name && navigatorForm.name.lastIndexOf("default_navigator_container.html") == -1) {
+            if (navigatorForm && navigatorForm.name && navigatorForm.name.lastIndexOf('default_navigator_container.html') === -1) {
                 // if first show of this form in browser window then request initial data (dataproviders and such)
                 this.formService.formWillShow(navigatorForm.name, false); // false because form was already made visible server-side
             }
-    
-            if (this.servoyService.getSolutionSettings().windowName == name) { // main window form switch
+
+            if (this.servoyService.getSolutionSettings().windowName === name) { // main window form switch
                     this.servoyService.getSolutionSettings().mainForm = form;
                     this.servoyService.getSolutionSettings().navigatorForm = navigatorForm;
-                    if (this.appService.getUIProperty("servoy.ngclient.formbased_browser_history") !== false) {
+                    if (this.appService.getUIProperty('servoy.ngclient.formbased_browser_history') !== false) {
                         this.windowRefService.nativeWindow.location.hash = form.name;
                         this.formService.goToForm(form.name);
                     }
             }
-            let formCache = this.formService.getFormCacheByName(form.name);
-            if (formCache)
+            const formCache = this.formService.getFormCacheByName(form.name);
+            if (formCache) {
+                formCache.navigatorForm = navigatorForm;
+            }
+            if (!this.dialogsRestored)
             {
-                formCache.navigatorForm = navigatorForm; 
-            }    
+              this.dialogsRestored = true;
+              this.restoreDialogs();
+            }
         });
     }
 
-   public reload(){
+   public reload() {
        window.location.reload(true);
    }
-   
-   public destroyController(formName:string){
+
+   public destroyController(formName: string) {
        this.formService.destroyFormCache(formName);
    }
 }
 
-const WINDOW_TYPE_DIALOG = 0;
-const WINDOW_TYPE_MODAL_DIALOG = 1;
-const WINDOW_TYPE_WINDOW = 2;
-
 export class SvyWindow {
-    
+
     name: string;
     type: number;
-    title: string = "";
-    opacity: number = 1;
-    undecorated: boolean = false;
+    title = '';
+    opacity = 1;
+    undecorated = false;
     cssClassName: string = null;
     size: any = null;
     location: any = null;
     navigatorForm: any = null;
     form: any = null;
     initialBounds: any = null;
-    resizable: boolean = false;
-    transparent: boolean = false;
-    storeBounds: boolean = false;
+    resizable = false;
+    transparent = false;
+    storeBounds = false;
     bsWindowInstance: BSWindow = null;  // bootstrap-window instance , available only after creation
 
     windowService: WindowService;
 
-    constructor(name: string, type:number, windowService: WindowService){
+    constructor(name: string, type: number, windowService: WindowService) {
         this.name = name;
         this.type = type;
         this.windowService = windowService;
@@ -433,7 +437,7 @@ export class SvyWindow {
             delete this.location;
             delete this.size;
         }
-        delete this.bsWindowInstance
+        delete this.bsWindowInstance;
     }
 
     setLocation( location ) {
@@ -463,14 +467,14 @@ export class SvyWindow {
         this.size = size;
         if ( this.storeBounds ) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.size', this.size );
-        this.windowService.sabloService.callService( "$windowService", "resize", { name: this.name, size: this.size }, true );
+        this.windowService.sabloService.callService( '$windowService', 'resize', { name: this.name, size: this.size }, true );
     }
 
     onMove( event, location ) {
         this.location = { x: location.left, y: location.top };
         if ( this.storeBounds ) this.windowService.localStorageService.set(
             this.windowService.servoyService.getSolutionSettings().solutionName + this.name + '.storedBounds.location', this.location );
-        this.windowService.sabloService.callService( "$windowService", "move", { name: this.name, location: this.location }, true );
+        this.windowService.sabloService.callService( '$windowService', 'move', { name: this.name, location: this.location }, true );
     }
 
     clearBounds() {
