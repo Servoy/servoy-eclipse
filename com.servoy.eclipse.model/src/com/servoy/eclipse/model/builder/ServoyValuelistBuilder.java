@@ -62,19 +62,19 @@ import com.servoy.j2db.util.UUID;
  */
 public class ServoyValuelistBuilder
 {
-	public static void addValuelistMarkers(IProject project, IFile file)
+	public static boolean addValuelistMarkers(IProject project, IFile file)
 	{
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		FlattenedSolution fs = servoyModel.getFlattenedSolution();
-		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
-
-		ServoyBuilder.checkPersistDuplicateName();
-		ServoyBuilder.checkPersistDuplicateUUID();
-
-
 		String valuelistName = file.getName().substring(0, file.getName().length() - SolutionSerializer.VALUELIST_FILE_EXTENSION.length());
 		ValueList valuelist = fs.getValueList(valuelistName);
+		if (valuelist == null) return false;
+
+		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
+		ServoyBuilder.checkPersistDuplicateName();
+		ServoyBuilder.checkPersistDuplicateUUID();
 		addValuelistMarkers(servoyProject, valuelist, fs);
+		return true;
 	}
 
 	public static void addValuelistMarkers(ServoyProject servoyProject, ValueList valuelist, FlattenedSolution fs)

@@ -120,7 +120,7 @@ public class ServoyBuilderUtils
 						{
 							if (parentForm == form)
 							{
-								affectedForms.add(currentForm);
+								if (!affectedForms.contains(currentForm)) affectedForms.add(currentForm);
 								ServoyFormBuilder.deleteMarkers(currentForm);
 								BuilderDependencies.getInstance().removeForm(currentForm);
 							}
@@ -140,20 +140,17 @@ public class ServoyBuilderUtils
 			if (folder.getName().equals(SolutionSerializer.MEDIAS_DIR) &&
 				servoyModel.isSolutionActive(project.getName()))
 			{
-				ServoyMediaBuilder.addMediaMarkers(project, file);
-				return true;
+				return ServoyMediaBuilder.addMediaMarkers(project, file);
 			}
 			if (folder.getName().equals(SolutionSerializer.VALUELISTS_DIR) &&
 				servoyModel.isSolutionActive(project.getName()))
 			{
-				ServoyValuelistBuilder.addValuelistMarkers(project, file);
-				return true;
+				return ServoyValuelistBuilder.addValuelistMarkers(project, file);
 			}
 			if (folder.getName().equals(SolutionSerializer.RELATIONS_DIR) &&
 				servoyModel.isSolutionActive(project.getName()))
 			{
-				ServoyRelationBuilder.addRelationMarkers(project, file);
-				return true;
+				return ServoyRelationBuilder.addRelationMarkers(project, file);
 			}
 		}
 		if (resources.size() == 2 && resources.get(0) instanceof IProject && resources.get(1) instanceof IFile &&

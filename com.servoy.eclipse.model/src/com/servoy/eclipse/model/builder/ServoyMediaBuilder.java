@@ -49,35 +49,39 @@ import com.servoy.j2db.util.UUID;
  */
 public class ServoyMediaBuilder
 {
-	public static void addMediaMarkers(IProject project, IFile file)
+	public static boolean addMediaMarkers(IProject project, IFile file)
 	{
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		FlattenedSolution fs = servoyModel.getFlattenedSolution();
+
+		String mediaName = file.getName();
+		Media media = fs.getMedia(mediaName);
+		if (media == null)
+		{
+			return false;
+		}
 		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
 
 		ServoyBuilder.checkPersistDuplicateName();
 		ServoyBuilder.checkPersistDuplicateUUID();
 
 
-		String mediaName = file.getName();
-		Media media = fs.getMedia(mediaName);
-		if (media != null)
-		{
-			deleteMarkers(media);
-			checkMedia(media);
+		deleteMarkers(media);
+		checkMedia(media);
 
-			List<Form> forms = BuilderDependencies.getInstance().getMediaDependencies(media);
-			if (forms != null)
+		List<Form> forms = BuilderDependencies.getInstance().getMediaDependencies(media);
+		if (forms != null)
+		{
+			Set<UUID> methodsParsed = new HashSet<UUID>();
+			Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
+			for (Form form : forms)
 			{
-				Set<UUID> methodsParsed = new HashSet<UUID>();
-				Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
-				for (Form form : forms)
-				{
-					ServoyFormBuilder.deleteMarkers(form);
-					ServoyFormBuilder.addFormMarkers(servoyProject, form, methodsParsed, formsAbstractChecked);
-				}
+				ServoyFormBuilder.deleteMarkers(form);
+				ServoyFormBuilder.addFormMarkers(servoyProject, form, methodsParsed, formsAbstractChecked);
 			}
 		}
+
+		return true;
 	}
 
 	public static void checkMedia(Media media)

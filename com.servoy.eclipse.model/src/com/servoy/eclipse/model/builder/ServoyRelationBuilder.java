@@ -63,43 +63,46 @@ import com.servoy.j2db.util.UUID;
  */
 public class ServoyRelationBuilder
 {
-	public static void addRelationMarkers(IProject project, IFile file)
+	public static boolean addRelationMarkers(IProject project, IFile file)
 	{
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		FlattenedSolution fs = servoyModel.getFlattenedSolution();
+		String relationName = file.getName().substring(0, file.getName().length() - SolutionSerializer.RELATION_FILE_EXTENSION.length());
+		Relation relation = fs.getRelation(relationName);
+		if (relation == null)
+		{
+			return false;
+		}
+
 		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
 
 		ServoyBuilder.checkPersistDuplicateName();
 		ServoyBuilder.checkPersistDuplicateUUID();
 
 
-		String relationName = file.getName().substring(0, file.getName().length() - SolutionSerializer.RELATION_FILE_EXTENSION.length());
-		Relation relation = fs.getRelation(relationName);
-		if (relation != null)
-		{
-			deleteMarkers(relation);
-			checkRelation(relation);
+		deleteMarkers(relation);
+		checkRelation(relation);
 
-			List<IPersist> dependencies = BuilderDependencies.getInstance().getRelationDependencies(relation);
-			if (dependencies != null)
+		List<IPersist> dependencies = BuilderDependencies.getInstance().getRelationDependencies(relation);
+		if (dependencies != null)
+		{
+			Set<UUID> methodsParsed = new HashSet<UUID>();
+			Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
+			for (IPersist persist : dependencies)
 			{
-				Set<UUID> methodsParsed = new HashSet<UUID>();
-				Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
-				for (IPersist persist : dependencies)
+				if (persist instanceof Form)
 				{
-					if (persist instanceof Form)
-					{
-						ServoyFormBuilder.deleteMarkers((Form)persist);
-						ServoyFormBuilder.addFormMarkers(servoyProject, (Form)persist, methodsParsed, formsAbstractChecked);
-					}
-					if (persist instanceof ValueList)
-					{
-						ServoyValuelistBuilder.deleteMarkers((ValueList)persist);
-						ServoyValuelistBuilder.addValuelistMarkers(servoyProject, (ValueList)persist, fs);
-					}
+					ServoyFormBuilder.deleteMarkers((Form)persist);
+					ServoyFormBuilder.addFormMarkers(servoyProject, (Form)persist, methodsParsed, formsAbstractChecked);
+				}
+				if (persist instanceof ValueList)
+				{
+					ServoyValuelistBuilder.deleteMarkers((ValueList)persist);
+					ServoyValuelistBuilder.addValuelistMarkers(servoyProject, (ValueList)persist, fs);
 				}
 			}
 		}
+		return true;
 	}
 
 	public static void deleteMarkers(Relation relation)

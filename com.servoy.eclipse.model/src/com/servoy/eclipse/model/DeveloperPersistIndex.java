@@ -309,90 +309,93 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	@Override
 	protected void testNameCache(IPersist item, EventType type)
 	{
-		String name = ((ISupportName)item).getName();
-		if (name != null)
+		if (item instanceof ISupportName)
 		{
-			switch (type)
+			String name = ((ISupportName)item).getName();
+			if (name != null)
 			{
-				case CREATED :
-					ConcurrentMap<String, IPersist> classToList = nameToPersist.get(item.getClass());
-					if (classToList != null && classToList.containsKey(name))
-					{
-						Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-						if (duplicates == null)
+				switch (type)
+				{
+					case CREATED :
+						ConcurrentMap<String, IPersist> classToList = nameToPersist.get(item.getClass());
+						if (classToList != null && classToList.containsKey(name))
 						{
-							duplicates = new HashMap<String, List<IPersist>>();
-							duplicateNames.put(name, duplicates);
-						}
-						List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
-						if (duplicatePersists == null)
-						{
-							duplicatePersists = new ArrayList<>();
-							duplicates.put(item.getClass().getName(), duplicatePersists);
-						}
-						duplicatePersists.add(item);
-						IPersist duplicatePersist = classToList.get(name);
-						if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
-					}
-					break;
-				case REMOVED :
-					if (duplicateNames.containsKey(name))
-					{
-						Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-						if (duplicates != null)
-						{
+							Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+							if (duplicates == null)
+							{
+								duplicates = new HashMap<String, List<IPersist>>();
+								duplicateNames.put(name, duplicates);
+							}
 							List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
-							if (duplicatePersists != null)
+							if (duplicatePersists == null)
+							{
+								duplicatePersists = new ArrayList<>();
+								duplicates.put(item.getClass().getName(), duplicatePersists);
+							}
+							duplicatePersists.add(item);
+							IPersist duplicatePersist = classToList.get(name);
+							if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
+						}
+						break;
+					case REMOVED :
+						if (duplicateNames.containsKey(name))
+						{
+							Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+							if (duplicates != null)
+							{
+								List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
+								if (duplicatePersists != null)
+								{
+									duplicatePersists.remove(item);
+								}
+								if (duplicatePersists != null && duplicatePersists.size() <= 1)
+								{
+									duplicates.remove(item.getClass().getName());
+								}
+								if (duplicates.size() == 0)
+								{
+									duplicateNames.remove(name);
+								}
+							}
+						}
+						break;
+					case UPDATED :
+						//maybe new name and duplicate is fixed?
+						for (String oldName : duplicateNames.keySet())
+						{
+							Map<String, List<IPersist>> duplicates = duplicateNames.get(oldName);
+							List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
+							if (duplicatePersists != null && duplicatePersists.contains(item) && !oldName.equals(name))
 							{
 								duplicatePersists.remove(item);
-							}
-							if (duplicatePersists != null && duplicatePersists.size() <= 1)
-							{
-								duplicates.remove(item.getClass().getName());
-							}
-							if (duplicates.size() == 0)
-							{
-								duplicateNames.remove(name);
+								if (duplicatePersists != null && duplicatePersists.size() <= 1)
+								{
+									duplicates.remove(item.getClass().getName());
+								}
+								break;
 							}
 						}
-					}
-					break;
-				case UPDATED :
-					//maybe new name and duplicate is fixed?
-					for (String oldName : duplicateNames.keySet())
-					{
-						Map<String, List<IPersist>> duplicates = duplicateNames.get(oldName);
-						List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
-						if (duplicatePersists != null && duplicatePersists.contains(item) && !oldName.equals(name))
+						// maybe new name and is duplicated ?
+						ConcurrentMap<String, IPersist> classToList2 = nameToPersist.get(item.getClass());
+						if (classToList2 != null && classToList2.containsKey(name))
 						{
-							duplicatePersists.remove(item);
-							if (duplicatePersists != null && duplicatePersists.size() <= 1)
+							Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+							if (duplicates == null)
 							{
-								duplicates.remove(item.getClass().getName());
+								duplicates = new HashMap<String, List<IPersist>>();
+								duplicateNames.put(name, duplicates);
 							}
-							break;
+							List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
+							if (duplicatePersists == null)
+							{
+								duplicatePersists = new ArrayList<>();
+								duplicates.put(item.getClass().getName(), duplicatePersists);
+							}
+							if (!duplicatePersists.contains(item)) duplicatePersists.add(item);
+							IPersist duplicatePersist = classToList2.get(name);
+							if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
 						}
-					}
-					// maybe new name and is duplicated ?
-					ConcurrentMap<String, IPersist> classToList2 = nameToPersist.get(item.getClass());
-					if (classToList2 != null && classToList2.containsKey(name))
-					{
-						Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-						if (duplicates == null)
-						{
-							duplicates = new HashMap<String, List<IPersist>>();
-							duplicateNames.put(name, duplicates);
-						}
-						List<IPersist> duplicatePersists = duplicates.get(item.getClass().getName());
-						if (duplicatePersists == null)
-						{
-							duplicatePersists = new ArrayList<>();
-							duplicates.put(item.getClass().getName(), duplicatePersists);
-						}
-						if (!duplicatePersists.contains(item)) duplicatePersists.add(item);
-						IPersist duplicatePersist = classToList2.get(name);
-						if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
-					}
+				}
 			}
 		}
 		super.testNameCache(item, type);

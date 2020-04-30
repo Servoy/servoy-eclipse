@@ -238,11 +238,6 @@ public class ServoyFormBuilder
 							continue;
 						}
 
-						if (!BaseComponent.isEventOrCommandProperty(element.getName()))
-						{
-							// only a method reference could have changed
-							continue;
-						}
 						// Get default property value as an object.
 						final int typeId = element.getTypeID();
 
