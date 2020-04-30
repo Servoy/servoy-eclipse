@@ -22,10 +22,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -39,9 +39,10 @@ import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.search.internal.ui.SearchPlugin;
 import org.eclipse.search.internal.ui.SearchPreferencePage;
 import org.eclipse.swt.SWT;
@@ -49,6 +50,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -226,26 +228,22 @@ public class Activator extends AbstractUIPlugin
 									@Override
 									public void run()
 									{
-										Iterator<Entry<String, Set<String>>> iterator = processedPackages.entrySet().iterator();
-										while (iterator.hasNext())
+										Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+										List<String> input = processedPackages.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+										final ListSelectionDialog lsd = new ListSelectionDialog(active, input, new ArrayContentProvider(), new LabelProvider(),
+											"The following packages are missing from the imported solution(s), please select those you want to download using Servoy Package Manager.");
+										lsd.setBlockOnOpen(true);
+										int pressedButton = lsd.open();
+										if (pressedButton == 0)
 										{
-											Entry<String, Set<String>> entry = iterator.next();
-											String automaticDownloadPackage = entry.getKey();
-											String mods = String.join(",", entry.getValue());
-											Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-											final MessageDialog dialog = new MessageDialog(active, "Missing package '" + automaticDownloadPackage + "'", null,
-												"Missing package '" + automaticDownloadPackage + "' was detected in solution(s): " + mods +
-													". Do you want to try to download it using Servoy Package Manager?",
-												MessageDialog.QUESTION, new String[] { "Automatic install", "Skip" }, 0);
-											dialog.setBlockOnOpen(true);
-											int pressedButton = dialog.open();
-											if (pressedButton == 0)
+											List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
+												IAutomaticImportWPMPackages.EXTENSION_ID);
+											if (defaultImports != null && defaultImports.size() > 0)
 											{
-												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
-													IAutomaticImportWPMPackages.EXTENSION_ID);
-												if (defaultImports != null && defaultImports.size() > 0)
+												Object[] result = lsd.getResult();
+												for (Object o : result)
 												{
-													defaultImports.get(0).importPackage(automaticDownloadPackage);
+													defaultImports.get(0).importPackage((String)o);
 												}
 											}
 										}
