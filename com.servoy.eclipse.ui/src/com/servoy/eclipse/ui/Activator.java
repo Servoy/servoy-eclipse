@@ -232,6 +232,7 @@ public class Activator extends AbstractUIPlugin
 										List<String> input = processedPackages.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
 										final ListSelectionDialog lsd = new ListSelectionDialog(active, input, new ArrayContentProvider(), new LabelProvider(),
 											"The following packages are missing from the imported solution(s), please select those you want to download using Servoy Package Manager.");
+										lsd.setInitialElementSelections(input);
 										lsd.setBlockOnOpen(true);
 										int pressedButton = lsd.open();
 										if (pressedButton == 0)
