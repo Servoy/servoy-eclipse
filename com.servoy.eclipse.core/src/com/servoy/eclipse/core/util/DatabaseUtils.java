@@ -88,6 +88,10 @@ public final class DatabaseUtils
 		{
 			return "Table name does not match dbi file name for " + tableName;
 		}
+		if (tableInfo.columnInfoDefSet.size() == 0)
+		{
+			return "Table " + tableName + " does not have any columns";
+		}
 		final StringBuffer problems = new StringBuffer();
 
 		// create table
