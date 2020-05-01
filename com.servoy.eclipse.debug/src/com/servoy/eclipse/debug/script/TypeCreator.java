@@ -4678,6 +4678,7 @@ public class TypeCreator extends TypeCache
 			if (spec != null)
 			{
 				IPropertyType< ? > iPropertyType = spec.getDeclaredCustomObjectTypes().get(typeNames[1]);
+				if (iPropertyType == null) return null;
 
 				Type type = TypeInfoModelFactory.eINSTANCE.createType();
 				type.setName(CUSTOM_TYPE + '<' + iPropertyType.getName() + '>');
