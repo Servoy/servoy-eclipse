@@ -26,7 +26,7 @@ export class WindowService {
     private instances: any = {};
     private renderer: Renderer2;
     private windowCounter: number;
-    private dialogsRestored = false;
+    private windowsRestored = false;
 
     constructor(private formService: FormService,
         public servoyService: ServoyService,
@@ -53,7 +53,7 @@ export class WindowService {
         this.windowCounter = 0;
     }
 
-    private restoreDialogs() {
+    private restoreWindows() {
         const window0 = this.sessionStorageService.get('window0');
         if (window0 && window0.showForm) {
             const isConnected = false;
@@ -62,6 +62,7 @@ export class WindowService {
                 if (this.webSocketService.isConnected()) {
                     clearInterval(interval);
                     let counter = 0;
+                    let windowCounterReset = false;
                     while (this.sessionStorageService.get('window' + counter)) {
                         const window = this.sessionStorageService.get('window' + counter);
                         // server call for getting form's data (send data from server to client)
@@ -70,9 +71,16 @@ export class WindowService {
                         this.switchForm(window.name, window.switchForm, window.navigatorForm);
                         this.setTitle(window.name, window.title);
                         this.sabloService.callService('$windowService', 'touchForm', { name: window.showForm }, false).then( () => {
+                          // in order to show all the windows the counter must be reset 
+                          if (this.windowsRestored && !windowCounterReset) {
+                              this.windowCounter = 0;
+                              windowCounterReset = true;
+                          }
                           this.show(window.name, window.showForm, window.showTitle);
+                          this.windowCounter++;
                         });
                         counter++;
+                        this.windowCounter++;
                 }
                 }
             }, 1000);
@@ -84,24 +92,26 @@ export class WindowService {
         this.formService.createFormCache(formName, formState);
     }
 
-
     public create(name: string, type: number) {
-        this.sessionStorageService.set('window' + this.windowCounter, {
-            name: name,
-            type: type
-        });
+        const storedWindow = this.sessionStorageService.get('window' + this.windowCounter);
+        if (!storedWindow || storedWindow.name != name) {
+            this.sessionStorageService.set('window' + this.windowCounter, { 
+                name: name,
+                type: type 
+            });
+        }
         if (!this.instances[name]) {
             this.instances[name] = new SvyWindow(name, type, this);
         }
     }
-
-    public show(name: string, form: string, title: string) {
+  
+    public show(name: string, form: string, title: string) { 
         const currentWindow = 'window' + this.windowCounter;
-        if (this.sessionStorageService.get(currentWindow)) {
-            const window = this.sessionStorageService.get(currentWindow);
-            window.showForm = form;
-            window.showTitle = title;
-            this.sessionStorageService.set(currentWindow, window);
+        const storedWindow = this.sessionStorageService.get(currentWindow)
+        if (storedWindow && !storedWindow.showForm) {
+            storedWindow.showForm = form;
+            storedWindow.showTitle = title;
+            this.sessionStorageService.set(currentWindow, storedWindow);
             this.windowCounter++;
         }
         const instance = this.instances[name];
@@ -243,12 +253,10 @@ export class WindowService {
 
     public setTitle(name: string, title: string ) {
         const currentWindow = 'window' + this.windowCounter;
-        if (title && this.sessionStorageService.get(currentWindow)) {
-            const window = this.sessionStorageService.get(currentWindow);
-            if (!window.title) {
-                window.title = title;
-                this.sessionStorageService.set(currentWindow, window);
-            }
+        const storedWindow = this.sessionStorageService.get(currentWindow);
+        if (title && storedWindow && !storedWindow.title) {
+            storedWindow.title = title;
+            this.sessionStorageService.set(currentWindow, storedWindow);
         }
         if ( this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW ) {
             this.instances[name].title = title;
@@ -356,13 +364,11 @@ export class WindowService {
 
     public switchForm(name, form, navigatorForm) {
         const currentWindow = 'window' + this.windowCounter;
-        if (this.sessionStorageService.get(currentWindow)) {
-            const window = this.sessionStorageService.get(currentWindow);
-            if (!window.switchForm) {
-                window.switchForm = form;
-                window.navigatorForm = navigatorForm;
-                this.sessionStorageService.set(currentWindow, window);
-            }
+        const storedWindow = this.sessionStorageService.get(currentWindow);
+        if (storedWindow && !storedWindow.switchForm) {
+            storedWindow.switchForm = form;
+            storedWindow.navigatorForm = navigatorForm;
+            this.sessionStorageService.set(currentWindow, storedWindow);
         }
         if (this.instances[name] && this.instances[name].type !== WindowService.WINDOW_TYPE_WINDOW) {
             this.instances[name].form = form;
@@ -388,10 +394,10 @@ export class WindowService {
             if (formCache) {
                 formCache.navigatorForm = navigatorForm;
             }
-            if (!this.dialogsRestored)
+            if (!this.windowsRestored)
             {
-              this.dialogsRestored = true;
-              this.restoreDialogs();
+              this.windowsRestored = true;
+              this.restoreWindows();
             }
         });
     }
