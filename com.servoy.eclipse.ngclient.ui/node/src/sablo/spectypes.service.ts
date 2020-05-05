@@ -297,7 +297,7 @@ export interface IFoundset {
      * If push to server is allowed for this foundset then the changes will be sent to the server, othwerwise the changes are ignored.
      * @param index is the row index (relative to the viewport) where the data change occurred
      * @param columnID the name of the column
-     * @param newValue the new value (if undefined the change is ignored)
+     * @param newValue the new value
      * @param oldValue the old value, is optional; the change is ignored if the oldValue is the same as the newValue
      */
     columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any)
@@ -305,9 +305,9 @@ export interface IFoundset {
 
 export interface ViewportChangeEvent {
     // the following keys appear if each of these got updated from server; the names of those
-    // constants suggest what it was that changed; oldValue and newValue are the values for what changed
+    // keys suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
-    viewportRowsCompletelyChanged:  { oldValue: object[], newValue: object[] },
+    viewportRowsCompletelyChanged?:  { oldValue: object[], newValue: object[] },
 
     // if we received add/remove/change operations on a set of rows from the viewport, this key
     // will be set; as seen below, it contains "updates" which is an array that holds a sequence of
@@ -316,7 +316,7 @@ export interface ViewportChangeEvent {
     // all the "startIndex" and "endIndex" values below are relative to the viewport's state after all
     // previous updates in the array were already processed (so they are NOT relative to the initial state);
     // indexes are 0 based
-    viewportRowsUpdated: {updates: ViewportRowUpdates}
+    viewportRowsUpdated?: ViewportRowUpdates
 }
 
 export type ChangeListener = (changeEvent: ViewportChangeEvent) => void;

@@ -42,12 +42,12 @@ export class FoundsetConverter implements IConverter {
 
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
         const hasListeners = (currentClientValue && currentClientValue.state.changeListeners.length > 0);
-        const notificationParamForListeners: FoundsetChangeEvent = hasListeners ?  new FoundsetChangeEvent() : undefined;
+        const notificationParamForListeners: FoundsetChangeEvent = hasListeners ?  {} : undefined;
 
         // see if this is an update or whole value and handle it
         if (!serverJSONValue) {
             newValue = undefined; // set it to nothing
-            if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue : currentClientValue, newValue : serverJSONValue };
+            if (hasListeners) notificationParamForListeners.fullValueChanged = { oldValue : currentClientValue, newValue : newValue };
             const oldInternalState = currentClientValue ? currentClientValue.state : undefined; // internal state
             if (oldInternalState) this.sabloDeferHelper.cancelAll(oldInternalState);
 
@@ -152,7 +152,7 @@ export class FoundsetConverter implements IConverter {
 
                     if (hasListeners) {
                         const upd : ViewportRowUpdates = viewPortUpdate[FoundsetConverter.UPDATE_PREFIX + FoundsetConverter.ROWS];
-                        notificationParamForListeners.viewportRowsUpdated = { updates : upd }; // viewPortUpdate[UPDATE_PREFIX + ROWS] was already prepared for listeners by viewportService.updateViewportGranularly
+                        notificationParamForListeners.viewportRowsUpdated = upd ; // viewPortUpdate[UPDATE_PREFIX + ROWS] was already prepared for listeners by viewportService.updateViewportGranularly
                     }
                 }
             }
@@ -429,7 +429,8 @@ export class Foundset implements IFoundset {
 
     public columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any) {
         if (this.state.push_to_server === undefined) return;
-        if (newValue !== undefined && this.viewPort.rows)  {
+        if (this.viewPort.rows && newValue !== oldValue)  {
+            if (newValue === undefined) newValue = null;
             this.viewportService.queueChange(this.viewPort.rows, this.state, this.state.push_to_server, index, columnID, newValue, oldValue);
         }
     }
@@ -491,31 +492,24 @@ class FoundsetState implements IDeferedState, IViewportConversion {
     }
 }
 
-export class FoundsetChangeEvent implements ViewportChangeEvent {
+export interface FoundsetChangeEvent extends ViewportChangeEvent {
     // if value was non-null and had a listener attached before, and a full value update was
     // received from server, this key is set; if newValue is non-null, it will automatically get the old
     // value's listeners registered to itself
     // NOTE: it might be easier to rely just on a shallow $watch of the foundset value (to catch even the
     // null to non-null scenario that you still need) and not use NOTIFY_FULL_VALUE_CHANGED at all
-    fullValueChanged: { oldValue: Foundset, newValue: object };
+    fullValueChanged?: { oldValue: Foundset, newValue: Foundset };
 
     // the following keys appear if each of these got updated from server; the names of those
-    // constants suggest what it was that changed; oldValue and newValue are the values for what changed
+    // keys suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
-    serverFoundsetSizeChanged: { oldValue: number, newValue: number };
-    hasMoreRowsChanged:  { oldValue: boolean, newValue: boolean };
-    multiSelectChanged:  { oldValue: boolean, newValue: boolean };
-    columnFormatsChanged:  { oldValue: Record<string, object>, newValue: Record<string, object> };
-    sortColumnsChanged:  { oldValue: string, newValue: string };
-    selectedRowIndexesChanged:  { oldValue: number[], newValue: number[] };
-    viewPortStartIndexChanged:  { oldValue: number, newValue: number };
-    viewPortSizeChanged :  { oldValue: number, newValue: number };
-    viewportRowsCompletelyChanged: {
-    oldValue: ViewPortRow[];
-        // not updates - so whole thing receive
-        // conversion to server in case it is sent to handler or server side internalAPI calls as argument of type "foundsetRef"
-        newValue: ViewPortRow[];
-    };
-    viewportRowsUpdated: {updates: ViewportRowUpdates};
-    userSetSelection: boolean;
+    serverFoundsetSizeChanged?: { oldValue: number, newValue: number };
+    hasMoreRowsChanged?:  { oldValue: boolean, newValue: boolean };
+    multiSelectChanged?:  { oldValue: boolean, newValue: boolean };
+    columnFormatsChanged?:  { oldValue: Record<string, object>, newValue: Record<string, object> };
+    sortColumnsChanged?:  { oldValue: string, newValue: string };
+    selectedRowIndexesChanged?:  { oldValue: number[], newValue: number[] };
+    viewPortStartIndexChanged?:  { oldValue: number, newValue: number };
+    viewPortSizeChanged?:  { oldValue: number, newValue: number };
+    userSetSelection?: boolean;
 }
