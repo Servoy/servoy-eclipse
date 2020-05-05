@@ -69,19 +69,20 @@ export class FoundsetLinkedConverter implements IConverter {
                     const singleValue = serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] !== undefined ? serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] : serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE_UPDATE];
                     internalState.singleValueState = new SingleValueState(this, propertyContext, conversionInfo);
                     wholeViewport = internalState.handleSingleValue(singleValue);
-                    this.sabloService.addIncomingMessageHandlingDoneTask(() => {
-                        const fs: Foundset = internalState.forFoundset();
-                        fs.addChangeListener((event: FoundsetChangeEvent) => {
-                            if (event.viewPortSizeChanged) {
-                                if (event.viewPortSizeChanged.newValue === internalState.singleValueState.viewPortSize) return;
-                                internalState.singleValueState.viewPortSize = event.viewPortSizeChanged.newValue;
-                                if (event.viewPortSizeChanged.newValue == undefined) internalState.singleValueState.viewPortSize = 0;
-                                wholeViewport = internalState.singleValueState.generateWholeViewportFromOneValue(singleValue)
-                                internalState.singleValueState.updateWholeViewport(newValue, internalState, wholeViewport);
-                            }
+                    if (internalState.viewportSizeChangedListener === undefined) {
+                        this.sabloService.addIncomingMessageHandlingDoneTask(() => {
+                            const fs: Foundset = internalState.forFoundset();
+                            internalState.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
+                                if (event.viewPortSizeChanged || event.fullValueChanged) {
+                                    if (event.viewPortSizeChanged.newValue === internalState.singleValueState.viewPortSize) return;
+                                    internalState.singleValueState.viewPortSize = this.converterService.getInDepthProperty(internalState.forFoundset(), "viewPort", "size");
+                                    if (event.viewPortSizeChanged.newValue == undefined) internalState.singleValueState.viewPortSize = 0;
+                                    wholeViewport = internalState.singleValueState.generateWholeViewportFromOneValue(singleValue)
+                                    internalState.singleValueState.updateWholeViewport(newValue, internalState, wholeViewport);
+                                }
+                            });
                         });
-                    });
-
+                    }
                 } else if (serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE] !== undefined) {
                     internalState.singleValueState = undefined;
                     internalState.recordLinked = true;
@@ -105,13 +106,12 @@ export class FoundsetLinkedConverter implements IConverter {
     public updateWholeViewport(propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport: any[], conversionInfos: any[], propertyContext: PropertyContext){
         let rows = propValue.viewportService.updateWholeViewport([], internalState, wholeViewport, conversionInfos, propertyContext);
         
-        // updateWholeViewport probably changed "rows" reference to value of "wholeViewport"...
         // update current value reference because that is what is present in the model
         propValue.splice(0, propValue.length);
         for (let tz = 0; tz < rows.length; tz++) propValue.push(rows[tz]);
         
         if (propValue && internalState && internalState.changeListeners.length > 0) {
-            let notificationParamForListeners : ViewportChangeEvent;
+            let notificationParamForListeners : ViewportChangeEvent = {};
             notificationParamForListeners.viewportRowsCompletelyChanged = { oldValue: propValue, newValue: propValue }; // should we not set oldValue here? old one has changed into new one so basically we do not have old content anymore...
             
             this.log.spam("svy foundset linked * firing change listener: full viewport changed...");
@@ -154,9 +154,10 @@ export class FoundsetLinked extends Array<Object> {
 
     public dataChanged(index: number, newValue: any, oldValue?: any) {
         if (this.state.push_to_server == undefined) return; //we ignore all changes
-
-        if (newValue !== undefined) {
-            if (this.state.singleValueState && newValue !== oldValue) {
+        
+        if (newValue !== oldValue) {
+            if (newValue === undefined) newValue = null;
+            if (this.state.singleValueState) {
                 let wholeViewport =  this.state.handleSingleValue(newValue);	
                 if (wholeViewport !== undefined) this.state.singleValueState.updateWholeViewport(this, this.state, wholeViewport);				
             }
@@ -176,6 +177,7 @@ class FoundsetLinkedState implements IViewportConversion {
     forFoundset: () => Foundset;
     recordLinked: boolean = false;
     push_to_server: boolean = undefined;// value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
+    viewportSizeChangedListener: () => void;
     
     constructor(private converterService: ConverterService) {}
     
@@ -214,7 +216,6 @@ class FoundsetLinkedState implements IViewportConversion {
         // this gets called for values that are not actually record linked, and we 'fake' a viewport containing the same value on each row in the array
         this.recordLinked = false;
         this.singleValueState.viewPortSize = this.converterService.getInDepthProperty(this.forFoundset(), "viewPort", "size");
-        // *** END
         
         return this.singleValueState.generateWholeViewportFromOneValue(singleValue);
     }
