@@ -154,15 +154,13 @@ export class FoundsetLinked extends Array<Object> {
 
     public dataChanged(index: number, newValue: any, oldValue?: any) {
         if (this.state.push_to_server == undefined) return; //we ignore all changes
-        
-        if (newValue !== oldValue) {
-            if (newValue === undefined) newValue = null;
-            if (this.state.singleValueState) {
-                let wholeViewport =  this.state.handleSingleValue(newValue);	
-                if (wholeViewport !== undefined) this.state.singleValueState.updateWholeViewport(this, this.state, wholeViewport);				
-            }
-            this.viewportService.queueChange(this, this.state, this.state.push_to_server, index, null, newValue, oldValue);
+
+        if (newValue === undefined) newValue = null;
+        if (this.state.singleValueState) {
+            let wholeViewport = this.state.handleSingleValue(newValue);
+            if (wholeViewport !== undefined) this.state.singleValueState.updateWholeViewport(this, this.state, wholeViewport);
         }
+        this.viewportService.queueChange(this, this.state, this.state.push_to_server, index, null, newValue, oldValue);
     }
 }
 
