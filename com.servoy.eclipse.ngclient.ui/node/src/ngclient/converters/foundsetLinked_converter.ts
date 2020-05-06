@@ -74,9 +74,10 @@ export class FoundsetLinkedConverter implements IConverter {
                             const fs: Foundset = internalState.forFoundset();
                             internalState.viewportSizeChangedListener = fs.addChangeListener((event: FoundsetChangeEvent) => {
                                 if (event.viewPortSizeChanged || event.fullValueChanged) {
-                                    if (event.viewPortSizeChanged.newValue === internalState.singleValueState.viewPortSize) return;
-                                    internalState.singleValueState.viewPortSize = this.converterService.getInDepthProperty(internalState.forFoundset(), "viewPort", "size");
-                                    if (event.viewPortSizeChanged.newValue == undefined) internalState.singleValueState.viewPortSize = 0;
+                                    const newSize = this.converterService.getInDepthProperty(internalState.forFoundset(), "viewPort", "size");
+                                    if (newSize === internalState.singleValueState.viewPortSize) return;
+                                    internalState.singleValueState.viewPortSize = newSize;
+                                    if (newSize == undefined) internalState.singleValueState.viewPortSize = 0;
                                     wholeViewport = internalState.singleValueState.generateWholeViewportFromOneValue(singleValue)
                                     internalState.singleValueState.updateWholeViewport(newValue, internalState, wholeViewport);
                                 }
