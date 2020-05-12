@@ -81,7 +81,7 @@
 		version='1.5.1.v20170627'>
 		<category name="bundles" />
 	</bundle>
-	<bundle id='org.sweetlemonade.eclipse.json' version='1.0.4'>
+	<bundle id='org.sweetlemonade.eclipse.json' version='1.0.5'>
 		<category name="bundles" />
 	</bundle>
 	<bundle id='org.apache.james.apache-mime4j' version='0.6'>
