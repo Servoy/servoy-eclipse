@@ -625,6 +625,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.setAllowDataModelChanges(true);
 		importSolutionWizard.setImportSampleData(true);
 		importSolutionWizard.shouldAllowSQLKeywords(true);
+		importSolutionWizard.showFinishDialog(false);
 
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);

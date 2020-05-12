@@ -152,6 +152,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean createMissingServer = false;
 	private String isMissingServer;
 	private boolean shouldOverwriteModule = false;
+	private boolean showFinishDialog = true;
 
 	private static String getInitialImportPath()
 	{
@@ -903,11 +904,18 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 	protected void showDetailsDialog(String title, String description, Status status)
 	{
+		if (!showFinishDialog) return;
+
 		Display.getDefault().asyncExec(() -> {
 			MultiStatus info = new MultiStatus(Activator.PLUGIN_ID, 1,
 				status.getSeverity() == IStatus.INFO ? description : status.getMessage(), null);
 			info.add(status);
 			ErrorDialog.openError(getShell(), title, status.getSeverity() == IStatus.INFO ? null : description, info);
 		});
+	}
+
+	public void showFinishDialog(boolean show)
+	{
+		this.showFinishDialog = show;
 	}
 }
