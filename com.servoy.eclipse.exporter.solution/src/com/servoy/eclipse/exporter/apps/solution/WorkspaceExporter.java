@@ -47,7 +47,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
-import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
+import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 /**
@@ -78,11 +78,11 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 
 		if (solution != null)
 		{
-			ITableDefinitionsManager tableDefManager = null;
+			ITableDefinitionsAndSecurityBasedOnWorkspaceFiles tableDefManager = null;
 			IMetadataDefManager metadataDefManager = null;
 			if (configuration.shouldExportUsingDbiFileInfoOnly())
 			{
-				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers;
+				Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> defManagers;
 				try
 				{
 					defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(solution, configuration.shouldExportModules(),

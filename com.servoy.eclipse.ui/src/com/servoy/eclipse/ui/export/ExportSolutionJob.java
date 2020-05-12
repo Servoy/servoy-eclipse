@@ -59,7 +59,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
-import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
+import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 /**
@@ -105,11 +105,11 @@ final public class ExportSolutionJob extends WorkspaceJob
 
 		try
 		{
-			ITableDefinitionsManager tableDefManager = null;
+			ITableDefinitionsAndSecurityBasedOnWorkspaceFiles tableDefManager = null;
 			IMetadataDefManager metadataDefManager = null;
 			if (dbDown || exportModel.isExportUsingDbiFileInfoOnly())
 			{
-				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(activeSolution,
+				Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(activeSolution,
 					exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
 					exportModel.isExportMetaData());
 				if (defManagers != null)

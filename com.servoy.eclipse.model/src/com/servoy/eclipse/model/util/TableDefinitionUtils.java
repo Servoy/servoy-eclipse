@@ -47,12 +47,13 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.SecurityInfo;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
-import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
+import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
 import com.servoy.j2db.util.xmlxport.MetadataDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -62,7 +63,7 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  */
 public class TableDefinitionUtils
 {
-	public static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(IServerInternal server)
+	public static Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> getTableDefinitionsFromDBI(IServerInternal server)
 		throws CoreException, JSONException, IOException
 	{
 		final Map<String, List<String>> neededServersTables = new HashMap<String, List<String>>();
@@ -71,7 +72,8 @@ public class TableDefinitionUtils
 		return getTableDefinitionsFromDBI(neededServersTables, true, true);
 	}
 
-	private static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(Map<String, List<String>> neededServersTables,
+	private static Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> getTableDefinitionsFromDBI(
+		Map<String, List<String>> neededServersTables,
 		final boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
 	{
 		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
@@ -142,13 +144,14 @@ public class TableDefinitionUtils
 			serverTableDefs.put(serverName, tableDefs);
 		}
 
-		ITableDefinitionsManager tableDefManager = null;
+		ITableDefinitionsAndSecurityBasedOnWorkspaceFiles tableDefManager = null;
 		IMetadataDefManager metadataDefManager = null;
 
 		// D. make use of tabledef info and metadata for the managers
-		tableDefManager = new ITableDefinitionsManager()
+		tableDefManager = new ITableDefinitionsAndSecurityBasedOnWorkspaceFiles()
 		{
 			private Map<String, List<TableDef>> serverTableDefsMap = new HashMap<String, List<TableDef>>();
+			private DBSecurityDefinitionsBasedOnFiles dBSecurityDefinitionsBasedOnFiles;
 
 			public void setServerTableDefs(Map<String, List<TableDef>> serverTableDefsMap)
 			{
@@ -159,6 +162,14 @@ public class TableDefinitionUtils
 			{
 				return this.serverTableDefsMap;
 			}
+
+			@Override
+			public List<SecurityInfo> getDatabaseSecurityInfoByGroup(String groupName)
+			{
+				if (dBSecurityDefinitionsBasedOnFiles == null) dBSecurityDefinitionsBasedOnFiles = new DBSecurityDefinitionsBasedOnFiles(this);
+				return dBSecurityDefinitionsBasedOnFiles.getDatabaseSecurityInfoByGroup(groupName);
+			}
+
 		};
 		tableDefManager.setServerTableDefs(serverTableDefs);
 
@@ -178,10 +189,11 @@ public class TableDefinitionUtils
 		};
 		metadataDefManager.setMetadataDefsList(metadataDefs);
 
-		return new Pair<ITableDefinitionsManager, IMetadataDefManager>(tableDefManager, metadataDefManager);
+		return new Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager>(tableDefManager, metadataDefManager);
 	}
 
-	public static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(Solution activeSolution, boolean exportReferencedModules,
+	public static Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> getTableDefinitionsFromDBI(Solution activeSolution,
+		boolean exportReferencedModules,
 		boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
 	{
 		// A. get only the needed servers (and tables)
