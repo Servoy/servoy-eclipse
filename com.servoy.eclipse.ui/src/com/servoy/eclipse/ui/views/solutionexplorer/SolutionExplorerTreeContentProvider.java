@@ -449,7 +449,7 @@ public class SolutionExplorerTreeContentProvider
 
 	private SpecProviderState getComponentsSpecProviderState()
 	{
-		if (componentsSpecProviderState == null)
+		if (componentsSpecProviderState == null && WebComponentSpecProvider.isLoaded())
 		{
 			componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 		}
@@ -463,7 +463,7 @@ public class SolutionExplorerTreeContentProvider
 
 	private SpecProviderState getServicesSpecProviderState()
 	{
-		if (servicesSpecProviderState == null)
+		if (servicesSpecProviderState == null && WebServiceSpecProvider.isLoaded())
 		{
 			servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 		}
