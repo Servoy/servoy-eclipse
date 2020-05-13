@@ -2060,7 +2060,15 @@ public class SolutionExplorerTreeContentProvider
 					ServoyLog.logError(e);
 				}
 
-				node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
+				if (serverObj instanceof MemServer)
+				{
+					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.INMEMORY_DATASOURCE, nodes);
+
+				}
+				else
+				{
+					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
+				}
 				if (node.children.length == 1) node.children = new SimpleUserNode[0];// it contained only the procedures node we added above, no need to show it
 				view.refreshTreeNodeFromModel(node);
 			});
