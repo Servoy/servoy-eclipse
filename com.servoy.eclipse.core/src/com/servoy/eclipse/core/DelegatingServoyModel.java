@@ -122,7 +122,7 @@ public class DelegatingServoyModel implements IDeveloperServoyModel
 	 */
 	public void buildActiveProjectsInJob()
 	{
-		realModel.buildActiveProjectsInJob();
+		realModel.addDoneListener(() -> realModel.buildActiveProjectsInJob());
 	}
 
 	/**
