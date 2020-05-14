@@ -449,7 +449,7 @@ public class SolutionExplorerTreeContentProvider
 
 	private SpecProviderState getComponentsSpecProviderState()
 	{
-		if (componentsSpecProviderState == null)
+		if (componentsSpecProviderState == null && WebComponentSpecProvider.isLoaded())
 		{
 			componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 		}
@@ -463,7 +463,7 @@ public class SolutionExplorerTreeContentProvider
 
 	private SpecProviderState getServicesSpecProviderState()
 	{
-		if (servicesSpecProviderState == null)
+		if (servicesSpecProviderState == null && WebServiceSpecProvider.isLoaded())
 		{
 			servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 		}
@@ -1958,7 +1958,6 @@ public class SolutionExplorerTreeContentProvider
 				getServerImage(server_name, serverObj));
 			serverNodes.add(node);
 			node.parent = serversNode;
-			handleServerViewsNode(serverObj, node);
 		}
 
 		serversNode.children = serverNodes.toArray(new PlatformSimpleUserNode[serverNodes.size()]);
@@ -1980,18 +1979,8 @@ public class SolutionExplorerTreeContentProvider
 		else
 		{
 			IServerInternal server = (IServerInternal)serverNode.getRealObject();
-			PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES, null,
-				"This node list the stored procedures of server that have this property enabled (see server editor)", server,
-				uiActivator.loadImageFromBundle("function.png"));
-			storedProceduresDataSources.parent = serverNode;
-
-			ArrayList<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
-			list.add(storedProceduresDataSources);
-			serverNode.children = SolutionExplorerListContentProvider.createTables(server, type, list);
-
-
+			handleServerNode(server, serverNode);
 		}
-
 
 		for (Object node : serverNode.children)
 		{
@@ -2041,47 +2030,56 @@ public class SolutionExplorerTreeContentProvider
 		return result[0];
 	}
 
-	private void handleServerViewsNode(IServerInternal serverObj, PlatformSimpleUserNode node)
+	private void handleServerNode(IServerInternal serverObj, PlatformSimpleUserNode node)
 	{
 		if (serverObj.getConfig().isEnabled() && serverObj.isValid())
 		{
-			List<String> views = null;
-			try
-			{
-				views = serverObj.getViewNames(true);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-			if (views != null && views.size() > 0)
-			{
-				if (node.children == null || node.children.length == 0)
-				{
-					PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES,
-						null, "This node list the stored procedures of server that have this property enabled (see server editor)", serverObj,
-						uiActivator.loadImageFromBundle("function.png"));
-					storedProceduresDataSources.parent = node;
+			Job job = Job.create("Background loading of tables for server " + serverObj.getName(), (ICoreRunnable)monitor -> {
 
-					PlatformSimpleUserNode viewNode = new PlatformSimpleUserNode("Views", UserNodeType.VIEWS, "", "Views", serverObj,
-						PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
-					ArrayList<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
-					nodes.add(storedProceduresDataSources);
-					nodes.add(viewNode);
-					Job job = Job.create("Background loading of tables for server "+serverObj.getName(), (ICoreRunnable)monitor -> {
-						node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
-						view.refreshTreeNodeFromModel(node);
-					});
-					job.setSystem(true);
-					job.setPriority(Job.LONG);
-					job.schedule();
-					viewNode.parent = node;
+				ArrayList<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+
+				PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES,
+					null, "This node list the stored procedures of server that have this property enabled (see server editor)", serverObj,
+					uiActivator.loadImageFromBundle("function.png"));
+				storedProceduresDataSources.parent = node;
+				nodes.add(storedProceduresDataSources);
+
+				try
+				{
+					List<String> views = serverObj.getViewNames(true);
+					if (views != null && views.size() > 0)
+					{
+						PlatformSimpleUserNode viewNode = new PlatformSimpleUserNode("Views", UserNodeType.VIEWS, "", "Views", serverObj,
+							PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
+						viewNode.parent = node;
+						nodes.add(viewNode);
+					}
 				}
-			}
-			else
-			{
-				node.children = null;
-			}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+
+				if (serverObj instanceof MemServer)
+				{
+					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.INMEMORY_DATASOURCE, nodes);
+
+				}
+				else
+				{
+					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
+				}
+				if (node.children.length == 1) node.children = new SimpleUserNode[0];// it contained only the procedures node we added above, no need to show it
+				view.refreshTreeNodeFromModel(node);
+			});
+			job.setSystem(true);
+			job.setPriority(Job.LONG);
+			job.schedule();
+			node.children = new UserNode[] { new UserNode("Loading...", UserNodeType.LOADING) };
+		}
+		else
+		{
+			node.children = null;
 		}
 	}
 
@@ -3556,7 +3554,7 @@ public class SolutionExplorerTreeContentProvider
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)findChildNode(servers, server.getName());
 		if (node != null)
 		{
-			handleServerViewsNode(server, node);
+			handleServerNode(server, node);
 			view.refreshTreeNodeFromModel(node);
 		}
 	}

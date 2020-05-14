@@ -358,10 +358,10 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						infos.clear();
 						for (String columnName : table.getColumnNames())
 						{
-							setSecurityInfo(infos, columnName, access, false);
+							setSecurityInfo(infos, columnName, access);
 						}
 					}
-					if (table.getColumnNames().length == 0) setSecurityInfo(infos, TABLE_PERMISSION_KEY, access, false); // if a new table is created and a sec file already exists for it, remember permission even if no columns are available for it yet...
+					if (table.getColumnNames().length == 0) setSecurityInfo(infos, TABLE_PERMISSION_KEY, access); // if a new table is created and a sec file already exists for it, remember permission even if no columns are available for it yet...
 				}
 			}
 			if (changed)
@@ -455,7 +455,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 *
 	 * @return true if the identifier existed and was replaced; false if the info was just added.
 	 */
-	protected boolean setSecurityInfo(List<SecurityInfo> securityInfo, String element_uid, int accessMask, boolean formElement)
+	protected boolean setSecurityInfo(List<SecurityInfo> securityInfo, String element_uid, int accessMask)
 	{
 		boolean replaced = false;
 		Iterator<SecurityInfo> it = securityInfo.iterator();
@@ -1116,6 +1116,12 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
+	public static IFile getTableSecFile(String serverName, String tableName, IProject resourcesProject)
+	{
+		IPath path = new Path(DataModelManager.getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
+		return resourcesProject.getFile(path);
+	}
+
 	/**
 	 * Reads the security info for the given table from the resources project.<BR>
 	 * Missing groups that are in the table security info file will be added to the group list. Groups with invalid names will be removed from this table's
@@ -1126,8 +1132,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 */
 	protected void readSecurityInfo(String serverName, String tableName) throws RepositoryException
 	{
-		IPath path = new Path(DataModelManager.getRelativeServerPath(serverName) + IPath.SEPARATOR + getFileName(tableName));
-		IFile file = resourcesProject.getFile(path);
+		IFile file = getTableSecFile(serverName, tableName, resourcesProject);
 		lastReadResource = file;
 
 		try
@@ -1196,9 +1201,9 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				{
 					for (String columnName : table.getColumnNames())
 					{
-						setSecurityInfo(tableInfoForGroup, columnName, element.access, false);
+						setSecurityInfo(tableInfoForGroup, columnName, element.access);
 					}
-					if (table.getColumnNames().length == 0) setSecurityInfo(tableInfoForGroup, TABLE_PERMISSION_KEY, element.access, false); // if a new table is created and a sec file already exists for it, remember permission even if no columns are available for it yet...
+					if (table.getColumnNames().length == 0) setSecurityInfo(tableInfoForGroup, TABLE_PERMISSION_KEY, element.access); // if a new table is created and a sec file already exists for it, remember permission even if no columns are available for it yet...
 				} // else it is ok not to load it in memory - because it will not be written...
 				if (groupPermissions.size() > 1 || (!TABLE_PERMISSION_KEY.equals(element.element_uid)))
 				{
@@ -1308,7 +1313,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				{
 					if (isElementChildOfForm(element.element_uid, form))
 					{
-						boolean replaced = setSecurityInfo(formInfoForGroup, element.element_uid, element.access, true);
+						boolean replaced = setSecurityInfo(formInfoForGroup, element.element_uid, element.access);
 						if (replaced)
 						{
 							// this cannot happen with current structure of JSON file and the in-mem structures that are read (having more entries with same key in a JSON obj)
@@ -1903,7 +1908,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				securityInfo = new SortedList<SecurityInfo>();
 				gsi.formSecurity.put(formUuid, securityInfo);
 			}
-			setSecurityInfo(securityInfo, elementUUID.toString(), accessMask.intValue(), true);
+			setSecurityInfo(securityInfo, elementUUID.toString(), accessMask.intValue());
 		}
 		else
 		{
@@ -1931,7 +1936,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				securityInfo = new SortedList<SecurityInfo>();
 				gsi.tableSecurity.put(Utils.getDotQualitfied(connectionName, tableName), securityInfo);
 			}
-			setSecurityInfo(securityInfo, columnName, accessMask.intValue(), false);
+			setSecurityInfo(securityInfo, columnName, accessMask.intValue());
 			if (writeMode == WRITE_MODE_AUTOMATIC)
 			{
 				writeSecurityInfo(connectionName, tableName, false);

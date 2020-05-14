@@ -36,7 +36,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
-import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
+import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
@@ -51,7 +51,7 @@ public class DBITableLoader implements ITableLoader
 	{
 		try
 		{
-			Pair<ITableDefinitionsManager, IMetadataDefManager> tablesDefinitionManager = TableDefinitionUtils.getTableDefinitionsFromDBI(server);
+			Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> tablesDefinitionManager = TableDefinitionUtils.getTableDefinitionsFromDBI(server);
 
 			for (Entry<String, List<TableDef>> entry : tablesDefinitionManager.getLeft().getServerTableDefs().entrySet())
 			{
@@ -108,4 +108,5 @@ public class DBITableLoader implements ITableLoader
 			}
 		}
 	}
+
 }

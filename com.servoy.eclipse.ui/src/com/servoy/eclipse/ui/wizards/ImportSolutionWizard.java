@@ -31,12 +31,15 @@ import java.util.zip.ZipFile;
 
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -66,6 +69,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.IValidator;
@@ -97,8 +101,6 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 public class ImportSolutionWizard extends Wizard implements IImportWizard
 {
 	private ImportSolutionWizardPage page;
-	private FinishPage finishPage;
-	private String importMessageDetails;
 	private String titleText;
 
 	public ImportSolutionWizard()
@@ -114,14 +116,13 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	@Override
 	public boolean performFinish()
 	{
-		return true;
+		return doSolutionImport();
 	}
 
 	@Override
 	public boolean canFinish()
 	{
-		if (finishPage.canFinish()) return true;
-		return false;
+		return page.canFinish();
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -129,14 +130,12 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Import solution wizard");
 		page = new ImportSolutionWizardPage(this, "Import solution");
-		finishPage = new FinishPage("Solution imported");
 	}
 
 	@Override
 	public void addPages()
 	{
 		addPage(page);
-		addPage(finishPage);
 	}
 
 	public static String initialPath = getInitialImportPath();
@@ -153,6 +152,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	private boolean createMissingServer = false;
 	private String isMissingServer;
 	private boolean shouldOverwriteModule = false;
+	private boolean showFinishDialog = true;
 
 	private static String getInitialImportPath()
 	{
@@ -414,6 +414,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					}
 				};
 				IApplicationServerSingleton as = ApplicationServerRegistry.get();
+				String title = "Solution imported";
+				String description = null;
+				Status status = null;
 				try
 				{
 					IXMLImportEngine importEngine = as.createXMLImportEngine(fileDecryption(file),
@@ -431,20 +434,21 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						isCleanImport, projectLocation, reportImportFail);
 					if (rootObjects != null)
 					{
-						String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";
-						if (doActivateSolution) detail += " and activated";
-						detail += ".";
-						importMessageDetails = detail;
+						title = "Solution imported";
+						description = "Solution '" + rootObjects[0].getName() + "' imported";
+						if (doActivateSolution) description += " and activated";
+						description += ".";
+						status = new Status(IStatus.INFO, Activator.PLUGIN_ID, userChannel.getAllImportantMSGes(), null);
 					}
 				}
 				catch (final RepositoryException ex)
 				{
-					finishPage.setTitle("Solution not imported");
+					title = "Solution not imported";
 					if (ex.hasErrorCode(ServoyException.InternalCodes.OPERATION_CANCELLED))
 					{
 						// Don't show an error message if the import was canceled.
-						finishPage.setErrorMessage("Import cancelled");
-						importMessageDetails = "Import solution was cancelled";
+						description = "Import cancelled";
+						status = new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Solution import was cancelled.", null);
 					}
 					else
 					{
@@ -453,8 +457,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 						{
 							ServoyLog.logError(ex);
 						}
-						finishPage.setErrorMessage("Import failed");
-						importMessageDetails = "Could not import solution: " + ex.getMessage();
+						description = "Import failed";
+						status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not import solution: " + ex.getMessage(), null);
 					}
 				}
 				catch (final Exception ex)
@@ -464,11 +468,11 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					if (ex.getMessage() != null) msg += ex.getMessage();
 					else msg += ". Check the log for more details.";
 					final String mymsg = msg;
-					finishPage.setErrorMessage("Import failed");
-					finishPage.setTitle("Solution not imported");
-					importMessageDetails = "Could not import solution: " + mymsg;
+					description = "Import failed";
+					title = "Solution not imported";
+					status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not import solution: " + mymsg, ex);
 				}
-
+				showDetailsDialog(title, description, status);
 			}
 		};
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -624,6 +628,11 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			setDescription("A solution (can be with modules) will be imported into the workspace using the selected import options.");
 		}
 
+		public boolean canFinish()
+		{
+			return validate() == null;
+		}
+
 		public void createControl(Composite parent)
 		{
 			Composite topLevel = new Composite(parent, SWT.NONE);
@@ -743,50 +752,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			resourceProjectComposite.setLayoutData(formData);
 		}
 
-		private boolean doSolutionImport()
-		{
-			importMessageDetails = "";
-			final File file = new File(page.getPath());
-			if (!file.exists() || !file.isFile())
-			{
-				finishPage.setErrorMessage("Import failed");
-				finishPage.setTitle("Solution not imported");
-				importMessageDetails = "Could not import solution: Invalid file";
-				return false;
-			}
-			if (!file.canRead())
-			{
-				finishPage.setErrorMessage("Import failed");
-				finishPage.setTitle("Solution not imported");
-				importMessageDetails = "Could not import solution: File cannot be read";
-				return false;
-			}
-			if (page.getErrorMessage() != null)
-			{
-				finishPage.setErrorMessage("Import failed");
-				finishPage.setTitle("Solution not imported");
-				importMessageDetails = "Could not import solution: " + page.getErrorMessage();
-				return false;
-			}
-
-			if (!canOverwiteModules(file))
-			{
-				Display.getDefault().asyncExec(() -> {
-					if (!getShell().isDisposed()) getShell().close();
-				});
-				return false;
-			}
-
-			final String resourcesProjectName = page.getNewName();
-			final ServoyResourcesProject existingProject = page.getResourcesProject();
-			final boolean isCleanImport = page.isCleanImport();
-			final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
-			final boolean doActivateSolution = page.getActivateSolution();
-			doImport(file, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
-				projectLocationComposite.getProjectLocation(), getContainer(), null);
-
-			return true;
-		}
 
 		@SuppressWarnings("boxing")
 		private boolean canOverwiteModules(File file)
@@ -887,23 +852,70 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		@Override
 		public boolean canFlipToNextPage()
 		{
-			return validate() == null;
-		}
-
-		@Override
-		public IWizardPage getNextPage()
-		{
-			if (canFlipToNextPage())
-			{
-				doSolutionImport();
-				finishPage.setTextMessage(importMessageDetails != null ? importMessageDetails : "");
-			}
-			return finishPage;
+			return false;
 		}
 	}
 
 	public String isMissingServer()
 	{
 		return isMissingServer;
+	}
+
+	private boolean doSolutionImport()
+	{
+		final File file = new File(page.getPath());
+		if (!file.exists() || !file.isFile())
+		{
+			showDetailsDialog("Solution not imported", "Import failed",
+				new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not import solution: Invalid file", null));
+			return false;
+		}
+		if (!file.canRead())
+		{
+			showDetailsDialog("Solution not imported", "Import failed",
+				new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not import solution: File cannot be read", null));
+			return false;
+		}
+		if (page.getErrorMessage() != null)
+		{
+			showDetailsDialog("Solution not imported", "Import failed",
+				new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not import solution: " + page.getErrorMessage(), null));
+			return false;
+		}
+
+		if (!page.canOverwiteModules(file))
+		{
+			Display.getDefault().asyncExec(() -> {
+				if (!getShell().isDisposed()) getShell().close();
+			});
+			return false;
+		}
+
+		final String resourcesProjectName = page.getNewName();
+		final ServoyResourcesProject existingProject = page.getResourcesProject();
+		final boolean isCleanImport = page.isCleanImport();
+		final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
+		final boolean doActivateSolution = page.getActivateSolution();
+		doImport(file, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
+			page.projectLocationComposite.getProjectLocation(), getContainer(), null);
+
+		return true;
+	}
+
+	protected void showDetailsDialog(String title, String description, Status status)
+	{
+		if (!showFinishDialog) return;
+
+		Display.getDefault().asyncExec(() -> {
+			MultiStatus info = new MultiStatus(Activator.PLUGIN_ID, 1,
+				status.getSeverity() == IStatus.INFO ? description : status.getMessage(), null);
+			info.add(status);
+			ErrorDialog.openError(getShell(), title, status.getSeverity() == IStatus.INFO ? null : description, info);
+		});
+	}
+
+	public void showFinishDialog(boolean show)
+	{
+		this.showFinishDialog = show;
 	}
 }
