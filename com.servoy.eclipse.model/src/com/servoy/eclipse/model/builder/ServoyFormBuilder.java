@@ -301,7 +301,7 @@ public class ServoyFormBuilder
 					throw new RuntimeException(e);
 				}
 
-				addWebComponentMissingHandlers(markerResource, fs, o);
+				addWebComponentMissingHandlers(markerResource, fs, o, form);
 
 				if (((AbstractBase)o).getRuntimeProperty(
 					SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
@@ -1544,7 +1544,7 @@ public class ServoyFormBuilder
 		});
 	}
 
-	public static void addWebComponentMissingHandlers(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o)
+	public static void addWebComponentMissingHandlers(IResource markerResource, FlattenedSolution flattenedSolution, IPersist o, Form form)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -1560,7 +1560,7 @@ public class ServoyFormBuilder
 						if (scriptMethod == null)
 						{
 							ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
-								o.getAncestor(IRepository.FORMS));
+								form);
 							IMarker marker = ServoyBuilder.addMarker(markerResource, ServoyBuilder.INVALID_EVENT_METHOD, mk.getText(), -1,
 								ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
 								IMarker.PRIORITY_LOW, null, o);
@@ -1575,6 +1575,10 @@ public class ServoyFormBuilder
 									ServoyLog.logError(ex);
 								}
 							}
+						}
+						else
+						{
+							BuilderDependencies.getInstance().addDependency(scriptMethod.getScopeName(), form);
 						}
 					}
 					WebObjectFunctionDefinition handlerDefinition = spec.getHandler(handler);
@@ -1880,7 +1884,7 @@ public class ServoyFormBuilder
 									{
 										BuilderDependencies.getInstance().addDependency(parentForm, valuelist);
 										checkValueListRealValueToDataProviderTypeMatch(project.getProject(), valuelist, dataProvider, elementName, inForm,
-											project.getSolution(), valuelistUUID);
+											o, valuelistUUID);
 									}
 								}
 							}
@@ -1896,7 +1900,7 @@ public class ServoyFormBuilder
 						{
 							BuilderDependencies.getInstance().addDependency(parentForm, valuelist);
 							checkValueListRealValueToDataProviderTypeMatch(project.getProject(), valuelist, dataProvider, elementName, inForm,
-								project.getSolution(),
+								o,
 								valuelist.getUUID());
 						}
 
