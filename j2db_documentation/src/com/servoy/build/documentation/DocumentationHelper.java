@@ -17,6 +17,7 @@ import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.dataprocessing.IFoundSetInternal;
 import com.servoy.j2db.dataprocessing.IRecordInternal;
 import com.servoy.j2db.dataprocessing.Record;
+import com.servoy.j2db.dataprocessing.ViewRecord;
 import com.servoy.j2db.server.shared.IClientInformation;
 import com.servoy.j2db.util.ServoyException;
 
@@ -66,6 +67,8 @@ public class DocumentationHelper
 		rtEquiv.put(FoundSet.class.getCanonicalName(), FoundSet.class.getCanonicalName());
 		rtEquiv.put(IRecordInternal.class.getCanonicalName(), Record.class.getCanonicalName());
 		rtEquiv.put(IRecordInternal[].class.getCanonicalName(), Record[].class.getCanonicalName());
+		rtEquiv.put(IRecordInternal.class.getCanonicalName(), ViewRecord.class.getCanonicalName());
+		rtEquiv.put(IRecordInternal[].class.getCanonicalName(), ViewRecord[].class.getCanonicalName());
 		rtEquiv.put("Object", DOCS_PACKAGE + "Object");
 		rtEquiv.put(Object.class.getCanonicalName(), DOCS_PACKAGE + "Object");
 		rtEquiv.put(Object[].class.getCanonicalName(), DOCS_PACKAGE + "Object[]");

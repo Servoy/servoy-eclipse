@@ -249,13 +249,13 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 				col.getColumn().setImage(uiActivator.loadImageFromBundle(allChecked ? "check_on.png" : "check_off.png"));
 				col.getColumn().setToolTipText(allChecked ? "Deselect all" : "Select all");
 				checkboxTableViewer.setAllChecked(allChecked);
-				validatePage();
+				setPageComplete(validatePage());
 			});
 			final TableColumnLayout layout = new TableColumnLayout();
 			tableContainer.setLayout(layout);
 			layout.setColumnData(col.getColumn(), new ColumnWeightData(15, 50, true));
 			checkboxTableViewer.getTable().setHeaderVisible(true);
-			checkboxTableViewer.addCheckStateListener(e -> validatePage());
+			checkboxTableViewer.addCheckStateListener(e -> setPageComplete(validatePage()));
 		}
 		return tableContainer;
 	}
@@ -280,7 +280,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 	{
 		setMessage(null, NONE);
 		HashMap<String, List<String>> servers = null;
-		if (!wizard.canCreateMissingServers() && !(servers = wizard.searchMissingServers(getSolutionsToImport())).isEmpty())
+		if (!wizard.canCreateMissingServers() && !(servers = NewSolutionWizard.searchMissingServers(getSolutionsToImport())).isEmpty())
 		{
 			StringBuilder message = new StringBuilder();
 			for (String server : servers.keySet())
@@ -290,6 +290,7 @@ public class GenerateSolutionWizardPage extends WizardPage implements ICheckBoxV
 			}
 			message.append("Deselect not needed modules or press Cancel, create the databases and fill in the connection details.");
 			setMessage(message.toString(), WARNING);
+			getWizard().getContainer().updateButtons();
 			return false;
 		}
 
