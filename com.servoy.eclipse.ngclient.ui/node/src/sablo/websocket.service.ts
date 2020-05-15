@@ -9,6 +9,7 @@ import { Deferred } from './util/deferred'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
 import { LoggerService, LogLevel, LoggerFactory } from './logger.service'
+import { LoadingIndicatorService } from "../servoycore/loading-indicator/loading-indicator.service";
 
 @Injectable()
 export class WebsocketService {
@@ -21,7 +22,11 @@ export class WebsocketService {
     private log: LoggerService;
     public reconnectingEmitter = new Subject<boolean>();
 
-    constructor( private windowRef: WindowRefService, private services: ServicesService, private converterService: ConverterService, private logFactory: LoggerFactory ) {
+    constructor( private windowRef: WindowRefService,
+            private services: ServicesService,
+            private converterService: ConverterService,
+            private logFactory: LoggerFactory,
+            private loadingIndicatorService: LoadingIndicatorService ) {
         this.log = logFactory.getLogger("WebsocketService");
     }
 
@@ -89,16 +94,16 @@ export class WebsocketService {
             context: context,
             args: args,
             queryArgs: queryArgs,
-            websocketUri: websocketUri
+            websocketUri: websocketUri 
         }
 
         // When ReconnectingWebSocket gets a function it will call the function to generate the url for each (re)connect.
         const websocket = new ReconnectingWebSocket(() => {
             return this.generateURL( this.connectionArguments['context'], this.connectionArguments['args'],
                 this.connectionArguments['queryArgs'], this.connectionArguments['websocketUri'] );
-        } );
+        } ); 
 
-        this.wsSession = new WebsocketSession( websocket, this, this.services, this.windowRef, this.converterService, this.logFactory);
+        this.wsSession = new WebsocketSession( websocket, this, this.services, this.windowRef, this.converterService, this.logFactory, this.loadingIndicatorService);
         // todo should we just merge $websocket and $services into $sablo that just has all
         // the public api of sablo (like connect, conversions, services)
         //$services.setSession(wsSession);
@@ -194,7 +199,13 @@ export class WebsocketSession {
     private log: LoggerService;
 
 
-    constructor( private websocket: ReconnectingWebSocket, private websocketService: WebsocketService, private services: ServicesService, private windowRef: WindowRefService, private converterService: ConverterService, private logFactory: LoggerFactory ) {
+    constructor( private websocket: ReconnectingWebSocket,
+    		private websocketService: WebsocketService,
+    		private services: ServicesService,
+    		private windowRef: WindowRefService,
+    		private converterService: ConverterService,
+    		private logFactory: LoggerFactory,
+    		private loadingIndicatorService: LoadingIndicatorService) {
         this.log = logFactory.getLogger("WebsocketSession");
         const me = this;
         this.websocket.onopen = ( evt ) => {
@@ -256,7 +267,7 @@ export class WebsocketSession {
             var deferred = new Deferred<any>();
             var cmsgid = this.getNextMessageId()
             this.deferredEvents[cmsgid] = deferred
-            //                $sabloLoadingIndicator.showLoading();
+            this.loadingIndicatorService.showLoading();
             cmd['cmsgid'] = cmsgid
             this.sendMessageObject( cmd )
             return deferred.promise;
@@ -416,12 +427,12 @@ export class WebsocketSession {
                 }
             }
 
-            //            // if the indicator is showing and this object wants a return message then hide the indicator until we send the response
-            //            var hideIndicator = obj && obj.smsgid && $sabloLoadingIndicator.isShowing();
-            //            // if a request to a service is being done then this could be a blocking 
-            //            if (hideIndicator) {
-            //                $sabloLoadingIndicator.hideLoading();
-            //            }
+            // if the indicator is showing and this object wants a return message then hide the indicator until we send the response
+            var hideIndicator = obj && obj.smsgid && this.loadingIndicatorService.isShowing();
+            // if a request to a service is being done then this could be a blocking 
+            if (hideIndicator) {
+                this.loadingIndicatorService.hideLoading();
+            }
 
             // data got back from the server
             if ( obj.cmsgid ) { // response to event
@@ -443,7 +454,7 @@ export class WebsocketSession {
                 else this.log.warn("Response to an unknown handler call dismissed; can happen (normal) if a handler call gets interrupted by a full browser refresh.");
                 delete this.deferredEvents[obj.cmsgid];
                 //                $sabloTestability.testEvents();
-                //                $sabloLoadingIndicator.hideLoading();
+                this.loadingIndicatorService.hideLoading();
             }
 
             // message
@@ -504,9 +515,9 @@ export class WebsocketSession {
                     if ( ret != undefined ) {
                         response['ret'] = this.converterService.convertClientObject( ret );
                     }
-                    //                    if (hideIndicator) {
-                    //                        $sabloLoadingIndicator.showLoading();
-                    //                    }
+                    if (hideIndicator) {
+                        this.loadingIndicatorService.showLoading();
+                    }
                     this.sendMessageObject( response );
                 }, ( reason ) => {
                     //                    if (isPromiseLike(responseValue)) $sabloTestability.decreaseEventLoop();
@@ -518,9 +529,9 @@ export class WebsocketSession {
                         smsgid: obj.smsgid,
                         err: "Error while executing ($q deferred) client side code. Please see browser console for more info. Error: " + reason
                     }
-                    //                    if (hideIndicator) {
-                    //                        $sabloLoadingIndicator.showLoading();
-                    //                    }
+                    if (hideIndicator) {
+                        this.loadingIndicatorService.showLoading();
+                    }
                     this.sendMessageObject( response );
                 } );
             }
@@ -534,9 +545,9 @@ export class WebsocketSession {
                     smsgid: obj.smsgid,
                     err: "Error while executing client side code. Please see browser console for more info. Error: " + e
                 }
-                //                if (hideIndicator) {
-                //                    $sabloLoadingIndicator.showLoading();
-                //                }
+                if (hideIndicator) {
+                    this.loadingIndicatorService.showLoading();
+                }
                 this.sendMessageObject( response );
             }
         } finally {

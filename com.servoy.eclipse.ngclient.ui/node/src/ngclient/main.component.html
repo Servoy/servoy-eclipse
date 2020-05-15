@@ -9,4 +9,5 @@
 <svy-form [name]="mainForm"></svy-form>
 </div> 
 <session-view *ngIf="sessionProblem != null"></session-view>
+<loading-indicator *ngIf="(this.loadingIndicatorService.showLoadingIndicator | async)"></loading-indicator>
 </div> 

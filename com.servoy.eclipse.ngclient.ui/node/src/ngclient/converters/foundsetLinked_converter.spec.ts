@@ -11,6 +11,7 @@ import { SabloDeferHelper} from '../../sablo/defer.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { SessionStorageService } from 'angular-web-storage';
 import { ViewportService} from '../services/viewport.service';
+import { LoadingIndicatorService } from "../../servoycore/loading-indicator/loading-indicator.service";
 
 describe('FoundsetLinked Converter', () => {
     let converterService: ConverterService;
@@ -26,7 +27,8 @@ describe('FoundsetLinked Converter', () => {
     
     beforeEach(() => {
         TestBed.configureTestingModule({
-          providers: [FoundsetLinkedConverter, FoundsetConverter,ConverterService,SabloService,SabloDeferHelper,SpecTypesService,LoggerFactory,WindowRefService,WebsocketService,ServicesService,SessionStorageService, ViewportService]
+          providers: [FoundsetLinkedConverter, FoundsetConverter,ConverterService,SabloService,SabloDeferHelper,SpecTypesService,LoggerFactory,
+                      WindowRefService,WebsocketService,ServicesService,SessionStorageService, ViewportService, LoadingIndicatorService]
         });
   
         sabloService = TestBed.get( SabloService );

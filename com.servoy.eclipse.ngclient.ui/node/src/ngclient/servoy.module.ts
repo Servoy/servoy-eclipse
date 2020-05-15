@@ -22,13 +22,14 @@ import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/com
 
 import { I18NProvider } from './services/i18n_provider.service'
 import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
-import { ErrorBean } from '../servoycore/error-bean/error-bean';
+import { ErrorBean } from '../servoycore/error-bean/error-bean'; 
 import { ServoyCoreSlider } from '../servoycore/slider/slider';
 import { SessionView } from '../servoycore/session-view/session-view';
 import { ViewportService } from './services/viewport.service'
 
 import { ComponentContributor } from './component_contributor.service';
 import { ServoyPublicModule } from './servoy_public.module';
+import { LoadingIndicatorComponent } from "../servoycore/loading-indicator/loading-indicator";
 
 @NgModule( {
     declarations: [
@@ -41,10 +42,11 @@ import { ServoyPublicModule } from './servoy_public.module';
         SessionView,
 		ErrorBean,
         ServoyCoreSlider,
-        DialogWindowComponent
-    ],
+        DialogWindowComponent,
+        LoadingIndicatorComponent
+    ], 
     imports: [
-        BrowserModule,
+        BrowserModule, 
         NgbModule,
         FormsModule,
         SabloModule,
@@ -53,7 +55,8 @@ import { ServoyPublicModule } from './servoy_public.module';
         HttpClientModule,
         ServoyPublicModule
     ],
-    providers: [FormService, ServoyService, I18NProvider, UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe, ComponentContributor, ViewportService],
+    providers: [FormService, ServoyService, I18NProvider, UpperCasePipe,LowerCasePipe,
+                DatePipe, DecimalPipe, ComponentContributor, ViewportService],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent],
     schemas: [

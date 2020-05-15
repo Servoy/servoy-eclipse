@@ -17,6 +17,7 @@ import { NGUtilsService } from '../servoy_ng_only_services/ngutils/ngutils.servi
 import { TypesRegisterService } from '../servoydefault/types_register.service';
 import { BSWindow } from "./services/bootstrap-window/bswindow.service";
 import { BSWindowManager } from "./services/bootstrap-window/bswindow_manager.service";
+import { LoadingIndicatorService } from "../servoycore/loading-indicator/loading-indicator.service";
 // generated services end
 
 
@@ -30,6 +31,7 @@ export class AllServiceService implements ServiceProvider {
     constructor( private services: ServicesService,
         private $applicationService: ApplicationService,
         private $windowService: WindowService,
+        private $sabloLoadingIndicator: LoadingIndicatorService,
         private $sessionService: SessionService,
         // generated services start
         private ngclientutils: NGUtilsService,

@@ -16,6 +16,7 @@ import { LoggerFactory } from '../../sablo/logger.service'
 import { ServicesService } from '../../sablo/services.service'
 import { ServoyService } from "../../ngclient/servoy.service";
 import { PlatformLocation } from '@angular/common';
+import { LoadingIndicatorService } from "../../servoycore/loading-indicator/loading-indicator.service";
 
 describe('NGUtilsService', () => {
   let windowRef: any;
@@ -31,7 +32,7 @@ describe('NGUtilsService', () => {
     TestBed.configureTestingModule({
       providers: [NGUtilsService, {provide: WindowRefService, useFactory:()=> windowRef }, 
                   ServiceChangeHandler, SabloService, WebsocketService, SessionStorageService, 
-                  ConverterService, LoggerFactory, ServicesService, 
+                  ConverterService, LoggerFactory, ServicesService, LoadingIndicatorService,
                   {provide: ServoyService, useFactory:()=> servoyServiceRef},
                   {provide: PlatformLocation, useValue: platformLocation}]
     });

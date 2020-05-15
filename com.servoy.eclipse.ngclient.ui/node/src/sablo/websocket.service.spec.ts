@@ -6,6 +6,7 @@ import {WindowRefService} from './util/windowref.service'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
 import { LoggerFactory } from './logger.service'
+import { LoadingIndicatorService } from "../servoycore/loading-indicator/loading-indicator.service";
 
 describe('WebsocketService', () => {
     let windowRef;
@@ -15,13 +16,15 @@ describe('WebsocketService', () => {
       window["Web" + "Socket"] = WebSocketMock;
       
       windowRef =  {nativeWindow:{}}
-     const servicesService = jasmine.createSpyObj('ServicesService', ['callServiceApi','updateServiceScopes']);
+      const servicesService = jasmine.createSpyObj('ServicesService', ['callServiceApi','updateServiceScopes']);
       const converterService = jasmine.createSpyObj('ConverterService', ['convertFromServerToClient','convertFromClientToServer','convertClientObject']);
-    TestBed.configureTestingModule({
+      const loadingIndicatorService = jasmine.createSpyObj('SabloLoadingIndicator', ['showLoading', 'hideLoading', 'isShowing']);
+      TestBed.configureTestingModule({
       providers: [WebsocketService, 
                   {provide: WindowRefService, useFactory:()=>windowRef},
                   {provide: ServicesService, useFactory:()=>servicesService },
-                  {provide: ConverterService, useFactory:()=>converterService }, LoggerFactory]
+                  {provide: ConverterService, useFactory:()=>converterService },
+                  {provide: LoadingIndicatorService, useFactory:() => loadingIndicatorService},LoggerFactory]
     });
   });
   

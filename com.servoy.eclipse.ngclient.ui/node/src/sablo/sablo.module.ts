@@ -15,6 +15,7 @@ import { LoggerFactory } from './logger.service'
 import { SpecTypesService } from './spectypes.service'
 import { SabloDeferHelper} from './defer.service';
 import { SabloTabseq } from './util/sablotabseq.directive';
+import { LoadingIndicatorService } from "../servoycore/loading-indicator/loading-indicator.service";
 
 @NgModule( {
     declarations: [TrustAsHtmlPipe, SabloTabseq
@@ -28,6 +29,7 @@ import { SabloTabseq } from './util/sablotabseq.directive';
         ServicesService,
         WebsocketService,
         WindowRefService,
+        LoadingIndicatorService,
         LoggerFactory,
         SabloDeferHelper,
         ServiceChangeHandler],

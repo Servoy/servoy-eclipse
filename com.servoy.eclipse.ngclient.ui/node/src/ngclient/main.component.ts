@@ -5,6 +5,7 @@ import { AllServiceService } from './allservices.service';
 import { FormService } from './form.service';
 import { I18NProvider } from "./servoy_public";
 import { WebsocketService } from '../sablo/websocket.service';
+import { LoadingIndicatorService } from "../servoycore/loading-indicator/loading-indicator.service";
 
 @Component({
   selector: 'servoy-main',
@@ -18,8 +19,9 @@ export class MainComponent implements OnInit {
   constructor(private servoyService: ServoyService, 
           private allService: AllServiceService, 
           private i18nProvider: I18NProvider, 
+          private formservice: FormService,
           public websocketService: WebsocketService,
-          private formservice: FormService) { 
+          public loadingIndicatorService: LoadingIndicatorService) { 
     this.servoyService.connect();
   }
   

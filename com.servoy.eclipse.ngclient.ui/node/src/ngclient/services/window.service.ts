@@ -15,6 +15,7 @@ import { Router, NavigationStart } from '@angular/router';
 import { ServoyApi } from '../servoy_api';
 import { SessionStorageService } from 'angular-web-storage';
 import { WebsocketService } from '../../sablo/websocket.service';
+import { LoadingIndicatorService } from "../../servoycore/loading-indicator/loading-indicator.service";
 
 @Injectable()
 export class WindowService {
@@ -43,6 +44,7 @@ export class WindowService {
         private appService: ApplicationService,
         private platformLocation: PlatformLocation,
         private webSocketService: WebsocketService,
+        private sabloLoadingIndicatorService: LoadingIndicatorService,
         @Inject(DOCUMENT) private document: any) {
 
         this.renderer = rendererFactory.createRenderer(null, null);
@@ -200,6 +202,20 @@ export class WindowService {
                 size: size,
                 isModal: instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG
             };
+            
+            // test if it is modal dialog, then the request blocks on the server and we should hide the loading.
+            if (instance.type === WindowService.WINDOW_TYPE_MODAL_DIALOG && this.sabloLoadingIndicatorService.isShowing()) {
+                instance['loadingIndicatorIsHidden'] = 0;
+                // as long as the indicator says it is still showing call hide loading to
+                // get the loading counter really to 0
+                // this happens a second modal dialog is showing in the hide of another...
+                // then the stack on the server can't rewind, because it is still in the stack of the first dialog
+                while ( this.sabloLoadingIndicatorService.isShowing() ) {
+                    instance['loadingIndicatorIsHidden']++;
+                    this.sabloLoadingIndicatorService.hideLoading();
+                }
+            }
+            
             instance.bsWindowInstance = this.bsWindowManager.createWindow(opt);
 
             instance.bsWindowInstance.element.addEventListener( 'bswin.resize', (event, size) => { instance.onResize(event, size); } );
@@ -234,6 +250,13 @@ export class WindowService {
         }
         const instance = this.instances[name];
         if (instance) {
+            if ( instance['loadingIndicatorIsHidden'] ) {
+                var counter = instance['loadingIndicatorIsHidden'];
+                delete instance['loadingIndicatorIsHidden'];
+                while ( counter-- > 0 ) {
+                    this.sabloLoadingIndicatorService.showLoading();
+                }
+            }
             instance.hide();
             if ([...this.document.getElementsByClassName('svy-window')].length < 1) {
                 const customEvent = new CustomEvent('enableTabseq', {

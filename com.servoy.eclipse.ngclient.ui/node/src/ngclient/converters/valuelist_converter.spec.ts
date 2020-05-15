@@ -10,6 +10,7 @@ import { SabloDeferHelper} from '../../sablo/defer.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { SessionStorageService } from 'angular-web-storage';
 import { IValuelist } from '../../sablo/spectypes.service';
+import { LoadingIndicatorService } from "../../servoycore/loading-indicator/loading-indicator.service";
 
 describe('ValuelistConverter', () => {
 
@@ -23,7 +24,7 @@ describe('ValuelistConverter', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ValuelistConverter, ConverterService, SabloService, SabloDeferHelper, SpecTypesService, LoggerFactory, WindowRefService, WebsocketService, ServicesService, SessionStorageService]
+      providers: [ValuelistConverter, ConverterService, SabloService, SabloDeferHelper, SpecTypesService, LoggerFactory, WindowRefService, WebsocketService, ServicesService, SessionStorageService, LoadingIndicatorService]
     });
 
     const sabloService: SabloService = TestBed.get( SabloService );
