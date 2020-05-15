@@ -35,6 +35,7 @@ import com.servoy.j2db.persistence.ValueList;
  */
 public class BuilderDependencies
 {
+	// the cache contains real persists, not editing ones
 	private final static BuilderDependencies me = new BuilderDependencies();
 	private Map<String, List<Form>> namedFoundsets;
 	private Map<Media, List<Form>> mediaToForms;

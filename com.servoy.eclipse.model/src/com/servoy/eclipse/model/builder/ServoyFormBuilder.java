@@ -576,7 +576,7 @@ public class ServoyFormBuilder
 						Relation r = formFlattenedSolution.getRelation(form.getGlobalRelationNamedFoundset());
 						if (r != null)
 						{
-							BuilderDependencies.getInstance().addDependency(form, r);
+							BuilderDependencies.getInstance().addDependency(form, fs.getRelation(r.getName()));
 						}
 						if (r == null)
 						{
@@ -604,7 +604,8 @@ public class ServoyFormBuilder
 						{
 							for (Form defineForm : forms)
 							{
-								if (!Utils.equalObjects(form.getDataSource(), defineForm.getDataSource()))
+								if (Utils.equalObjects(namedFoundset, defineForm.getNamedFoundSet()) &&
+									!Utils.equalObjects(form.getDataSource(), defineForm.getDataSource()))
 								{
 									ServoyMarker mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
 										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), form.getName(), form.getDataSource(),
@@ -622,6 +623,9 @@ public class ServoyFormBuilder
 									ServoyBuilder.addMarker(defineFormFile, mk.getType(), mk.getText(), -1,
 										ServoyBuilder.FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
 										defineForm);
+
+									BuilderDependencies.getInstance().addDependency(form, defineForm);
+									BuilderDependencies.getInstance().addDependency(defineForm, form);
 								}
 							}
 						}
@@ -632,131 +636,6 @@ public class ServoyFormBuilder
 					}
 
 					addFormVariablesHideTableColumn(markerResource, form, table);
-
-					if (o instanceof ScriptMethod)
-					{
-						ScriptMethod scriptMethod = (ScriptMethod)o;
-						if (scriptMethod.getDeclaration() != null && scriptMethod.getDeclaration().contains(SolutionSerializer.OVERRIDEKEY) &&
-							PersistHelper.getOverridenMethod(scriptMethod) == null)
-						{
-							ServoyMarker mk = MarkerMessages.MethodOverrideProblem.fill(scriptMethod.getName(), ((Form)scriptMethod.getParent()).getName());
-							IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.METHOD_OVERRIDE_PROBLEM,
-								IMarker.PRIORITY_NORMAL, null, o);
-							try
-							{
-								marker.setAttribute("Uuid", scriptMethod.getUUID().toString());
-								marker.setAttribute("SolutionName", scriptMethod.getRootObject().getName());
-							}
-							catch (CoreException e)
-							{
-								Debug.error(e);
-							}
-
-						}
-					}
-
-					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
-						((ISupportName)o).getName() != null)
-					{
-						Set<IPersist> duplicates = formElementsByName.get(((ISupportName)o).getName());
-						if (duplicates != null)
-						{
-							for (IPersist duplicatePersist : duplicates)
-							{
-								UUID wrongOverrideUUID = null;
-								if (duplicatePersist instanceof IFormElement && ((IFormElement)duplicatePersist).getExtendsID() == o.getID())
-								{
-									wrongOverrideUUID = duplicatePersist.getUUID();
-								}
-								else if (o instanceof IFormElement && ((IFormElement)o).getExtendsID() == duplicatePersist.getID())
-								{
-									wrongOverrideUUID = o.getUUID();
-								}
-								if (wrongOverrideUUID != null)
-								{
-									ServoyMarker mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), form.getName());
-									IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
-										ServoyBuilder.DUPLICATION_DUPLICATE_OVERRIDE_FOUND,
-										IMarker.PRIORITY_NORMAL, null, duplicatePersist);
-									try
-									{
-										marker.setAttribute("Uuid", wrongOverrideUUID.toString());
-										marker.setAttribute("SolutionName", servoyProject.getSolution().getName());
-									}
-									catch (CoreException e)
-									{
-										ServoyLog.logError(e);
-									}
-
-									mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), form.getName());
-									marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
-										ServoyBuilder.DUPLICATION_DUPLICATE_OVERRIDE_FOUND, IMarker.PRIORITY_NORMAL,
-										null, o);
-									try
-									{
-										marker.setAttribute("Uuid", wrongOverrideUUID.toString());
-										marker.setAttribute("SolutionName", servoyProject.getSolution().getName());
-									}
-									catch (CoreException e)
-									{
-										ServoyLog.logError(e);
-									}
-								}
-								else
-								{
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(),
-										form.getName());
-									ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND,
-										IMarker.PRIORITY_NORMAL, null,
-										duplicatePersist);
-
-									mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), form.getName());
-									ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND,
-										IMarker.PRIORITY_NORMAL, null, o);
-								}
-							}
-						}
-						else
-						{
-							duplicates = new HashSet<IPersist>();
-							duplicates.add(o);
-						}
-						formElementsByName.put(((ISupportName)o).getName(), duplicates);
-					}
-					if (o instanceof IScriptElement)
-					{
-						Set<IPersist> duplicates = formScriptProviderByName.get(((IScriptElement)o).getName());
-						if (duplicates != null)
-						{
-							String type = "method";
-							String otherChildsType = "method";
-							for (IPersist duplicatePersist : duplicates)
-							{
-								int lineNumber = ((IScriptElement)o).getLineNumberOffset();
-								if (o instanceof ScriptVariable)
-								{
-									otherChildsType = "variable";
-								}
-								if (duplicatePersist instanceof ScriptVariable)
-								{
-									type = "variable";
-								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(type, ((IScriptElement)o).getName(), form.getName());
-								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), lineNumber,
-									ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
-
-								mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, ((IScriptElement)o).getName(), form.getName());
-								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), lineNumber,
-									ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, duplicatePersist);
-							}
-						}
-						else
-						{
-							duplicates = new HashSet<IPersist>();
-							duplicates.add(o);
-						}
-						formScriptProviderByName.put(((IScriptElement)o).getName(), duplicates);
-					}
 
 					if (form.getExtendsID() > 0 && formFlattenedSolution != null)
 					{
@@ -933,6 +812,131 @@ public class ServoyFormBuilder
 						}
 					}
 				}
+				if (o instanceof ScriptMethod)
+				{
+					ScriptMethod scriptMethod = (ScriptMethod)o;
+					if (scriptMethod.getDeclaration() != null && scriptMethod.getDeclaration().contains(SolutionSerializer.OVERRIDEKEY) &&
+						PersistHelper.getOverridenMethod(scriptMethod) == null)
+					{
+						ServoyMarker mk = MarkerMessages.MethodOverrideProblem.fill(scriptMethod.getName(), ((Form)scriptMethod.getParent()).getName());
+						IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.METHOD_OVERRIDE_PROBLEM,
+							IMarker.PRIORITY_NORMAL, null, o);
+						try
+						{
+							marker.setAttribute("Uuid", scriptMethod.getUUID().toString());
+							marker.setAttribute("SolutionName", scriptMethod.getRootObject().getName());
+						}
+						catch (CoreException e)
+						{
+							Debug.error(e);
+						}
+
+					}
+				}
+
+				if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
+					((ISupportName)o).getName() != null)
+				{
+					Set<IPersist> duplicates = formElementsByName.get(((ISupportName)o).getName());
+					if (duplicates != null)
+					{
+						for (IPersist duplicatePersist : duplicates)
+						{
+							UUID wrongOverrideUUID = null;
+							if (duplicatePersist instanceof IFormElement && ((IFormElement)duplicatePersist).getExtendsID() == o.getID())
+							{
+								wrongOverrideUUID = duplicatePersist.getUUID();
+							}
+							else if (o instanceof IFormElement && ((IFormElement)o).getExtendsID() == duplicatePersist.getID())
+							{
+								wrongOverrideUUID = o.getUUID();
+							}
+							if (wrongOverrideUUID != null)
+							{
+								ServoyMarker mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), form.getName());
+								IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.DUPLICATION_DUPLICATE_OVERRIDE_FOUND,
+									IMarker.PRIORITY_NORMAL, null, duplicatePersist);
+								try
+								{
+									marker.setAttribute("Uuid", wrongOverrideUUID.toString());
+									marker.setAttribute("SolutionName", servoyProject.getSolution().getName());
+								}
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
+								}
+
+								mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), form.getName());
+								marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1,
+									ServoyBuilder.DUPLICATION_DUPLICATE_OVERRIDE_FOUND, IMarker.PRIORITY_NORMAL,
+									null, o);
+								try
+								{
+									marker.setAttribute("Uuid", wrongOverrideUUID.toString());
+									marker.setAttribute("SolutionName", servoyProject.getSolution().getName());
+								}
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
+								}
+							}
+							else
+							{
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(),
+									form.getName());
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND,
+									IMarker.PRIORITY_NORMAL, null,
+									duplicatePersist);
+
+								mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), form.getName());
+								ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND,
+									IMarker.PRIORITY_NORMAL, null, o);
+							}
+						}
+					}
+					else
+					{
+						duplicates = new HashSet<IPersist>();
+						duplicates.add(o);
+					}
+					formElementsByName.put(((ISupportName)o).getName(), duplicates);
+				}
+				if (o instanceof IScriptElement)
+				{
+					Set<IPersist> duplicates = formScriptProviderByName.get(((IScriptElement)o).getName());
+					if (duplicates != null)
+					{
+						String type = "method";
+						String otherChildsType = "method";
+						for (IPersist duplicatePersist : duplicates)
+						{
+							int lineNumber = ((IScriptElement)o).getLineNumberOffset();
+							if (o instanceof ScriptVariable)
+							{
+								otherChildsType = "variable";
+							}
+							if (duplicatePersist instanceof ScriptVariable)
+							{
+								type = "variable";
+							}
+							ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(type, ((IScriptElement)o).getName(), form.getName());
+							ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), lineNumber,
+								ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
+
+							lineNumber = ((IScriptElement)duplicatePersist).getLineNumberOffset();
+							mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, ((IScriptElement)o).getName(), form.getName());
+							ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), lineNumber,
+								ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, duplicatePersist);
+						}
+					}
+					else
+					{
+						duplicates = new HashSet<IPersist>();
+						duplicates.add(o);
+					}
+					formScriptProviderByName.put(((IScriptElement)o).getName(), duplicates);
+				}
 				if (o instanceof Tab)
 				{
 					Tab tab = (Tab)o;
@@ -1005,7 +1009,7 @@ public class ServoyFormBuilder
 									ServoyBuilder.addEncapsulationMarker(markerResource, servoyProject.getProject(), tab, r, (Form)context);
 									if (r != null)
 									{
-										BuilderDependencies.getInstance().addDependency(form, r);
+										BuilderDependencies.getInstance().addDependency(form, fs.getRelation(r.getName()));
 									}
 								}
 							}
@@ -1016,7 +1020,7 @@ public class ServoyFormBuilder
 						Media media = tabFlattenedSolution.getMedia(tab.getImageMediaID());
 						if (media != null)
 						{
-							BuilderDependencies.getInstance().addDependency(form, media);
+							BuilderDependencies.getInstance().addDependency(form, fs.getMedia(media.getID()));
 							ImageIcon mediaImageIcon = new ImageIcon(media.getMediaData());
 							if (mediaImageIcon.getIconWidth() > 20 || mediaImageIcon.getIconHeight() > 20)
 							{
@@ -1058,7 +1062,8 @@ public class ServoyFormBuilder
 						ValueList vl = fieldFlattenedSolution.getValueList(field.getValuelistID());
 						if (vl != null)
 						{
-							BuilderDependencies.getInstance().addDependency(form, vl);
+							// always add as reference the normal persist, not editing one
+							BuilderDependencies.getInstance().addDependency(form, fs.getValueList(field.getValuelistID()));
 							if (type == Field.COMBOBOX && field.getEditable() && !SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()))
 							{
 
@@ -1116,7 +1121,7 @@ public class ServoyFormBuilder
 									ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
 									if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES)
 									{
-										BuilderDependencies.getInstance().addDependency(form, fallback);
+										BuilderDependencies.getInstance().addDependency(form, fs.getValueList(vl.getFallbackValueListID()));
 										ITable table = null;
 										try
 										{
@@ -1166,7 +1171,6 @@ public class ServoyFormBuilder
 							}
 							else
 							{
-								Form form = (Form)o.getAncestor(IRepository.FORMS);
 								parentDataSource = form.getDataSource();
 								parentString = "form \"" + form.getName() + "\"";
 							}
@@ -1208,7 +1212,7 @@ public class ServoyFormBuilder
 									if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES &&
 										fallback.getRelationName() != null)
 									{
-										BuilderDependencies.getInstance().addDependency(form, fallback);
+										BuilderDependencies.getInstance().addDependency(form, fs.getValueList(vl.getFallbackValueListID()));
 										String[] parts = fallback.getRelationName().split("\\.");
 										Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
 										if (relation != null && !relation.isGlobal() && !relation.isLiteral() &&
@@ -1331,7 +1335,7 @@ public class ServoyFormBuilder
 							for (Relation r : relations)
 							{
 								ServoyBuilder.addEncapsulationMarker(markerResource, servoyProject.getProject(), portal, r, (Form)context);
-								if (r != null) BuilderDependencies.getInstance().addDependency(form, r);
+								if (r != null) BuilderDependencies.getInstance().addDependency(form, fs.getRelation(r.getName()));
 							}
 						}
 					}
@@ -1735,7 +1739,8 @@ public class ServoyFormBuilder
 										{
 											for (Relation r : relationSequence)
 											{
-												if (r != null) BuilderDependencies.getInstance().addDependency(context, r);
+												if (r != null) BuilderDependencies.getInstance().addDependency(context,
+													ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelation(r.getName()));
 											}
 										}
 									}
@@ -2091,7 +2096,8 @@ public class ServoyFormBuilder
 						{
 							for (Relation r : relations)
 							{
-								if (r != null) BuilderDependencies.getInstance().addDependency(context, r);
+								if (r != null) BuilderDependencies.getInstance().addDependency(context,
+									ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelation(r.getName()));
 							}
 						}
 					}
@@ -2136,7 +2142,8 @@ public class ServoyFormBuilder
 							for (Relation r : relations)
 							{
 								ServoyBuilder.addEncapsulationMarker(markerResource, project.getProject(), o, r, (Form)context);
-								if (r != null) BuilderDependencies.getInstance().addDependency(context, r);
+								if (r != null) BuilderDependencies.getInstance().addDependency(context,
+									ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelation(r.getName()));
 							}
 						}
 					}
@@ -2230,7 +2237,8 @@ public class ServoyFormBuilder
 							dataProvider = getDataProvider(persistFlattenedSolution, id, r.getPrimaryServerName(), r.getPrimaryTableName());
 							if (dataProvider == null)
 								dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignServerName(), r.getForeignTableName());
-							if (r != null) BuilderDependencies.getInstance().addDependency(component.getAncestor(IRepository.FORMS), r);
+							if (r != null) BuilderDependencies.getInstance().addDependency(component.getAncestor(IRepository.FORMS),
+								ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelation(r.getName()));
 						}
 					}
 					if (dataProvider != null) break;
@@ -2342,6 +2350,8 @@ public class ServoyFormBuilder
 				markerResource.deleteMarkers(ServoyBuilder.NAMED_FOUNDSET_DATASOURCE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.DUPLICATE_SIBLING_UUID, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.METHOD_OVERRIDE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.WRONG_OVERRIDE_PARENT, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.DUPLICATE_NAME_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 			}
 		}
 		catch (CoreException e)

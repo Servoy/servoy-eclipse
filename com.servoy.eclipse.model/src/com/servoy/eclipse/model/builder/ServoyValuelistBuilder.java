@@ -188,7 +188,8 @@ public class ServoyValuelistBuilder
 						}
 						else
 						{
-							BuilderDependencies.getInstance().addDependency(vl, relation);
+							BuilderDependencies.getInstance().addDependency(vl,
+								ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelation(relation.getName()));
 							dataSource = relation.getForeignDataSource();
 						}
 					}
