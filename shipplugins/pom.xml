@@ -190,6 +190,19 @@
 			<artifactId>javax.transaction</artifactId>
 			<version>1.1.0</version>
 		</dependency>
+		
+		<!-- Needed for Hibernate -->
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>javax.persistence</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<version>3.3.2.Final</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>com.servoy</groupId>
 			<artifactId>javax.websocket</artifactId>

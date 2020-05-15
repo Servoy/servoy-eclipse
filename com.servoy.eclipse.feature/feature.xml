@@ -504,6 +504,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          unpack="false"/>
 
    <plugin
+         id="javax.persistence"
+         download-size="0"
+         install-size="0"
+         version="2.2.0"
+         unpack="false"/>
+
+   <plugin
          id="org.sweetlemonade.eclipse.json"
          download-size="0"
          install-size="0"
