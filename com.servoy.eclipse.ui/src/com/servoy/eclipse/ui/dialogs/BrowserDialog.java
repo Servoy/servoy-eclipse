@@ -228,7 +228,7 @@ public class BrowserDialog extends Dialog
 										String resourceProjectName = project == null ? getNewResourceProjectName() : null;
 
 										importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
-											monitor);
+											monitor, false, false);
 										if (importSolutionWizard.isMissingServer() != null)
 										{
 											showTutorial[0] = introURL.getParameter("createDBConn");
