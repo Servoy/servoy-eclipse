@@ -27,9 +27,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
@@ -90,20 +88,15 @@ public class ServoyMediaBuilder
 		{
 			Pair<String, String> path = SolutionSerializer.getFilePath(media, false);
 			ServoyMarker mk = MarkerMessages.MediaTIFF.fill(path.getLeft() + path.getRight());
-			ServoyBuilder.addMarker(getMediaResource(media), mk.getType(), mk.getText(), -1, ServoyBuilder.MEDIA_TIFF, IMarker.PRIORITY_NORMAL, null, media);
+			ServoyBuilder.addMarker(ServoyBuilderUtils.getPersistResource(media), mk.getType(), mk.getText(), -1, ServoyBuilder.MEDIA_TIFF,
+				IMarker.PRIORITY_NORMAL, null, media);
 		}
 	}
 
-	public static IResource getMediaResource(Media media)
-	{
-		Pair<String, String> mediaFilePath = SolutionSerializer.getFilePath(media, false);
-		return ResourcesPlugin.getWorkspace().getRoot()
-			.getFile(new Path(mediaFilePath.getLeft() + mediaFilePath.getRight()));
-	}
 
 	public static void deleteMarkers(Media media)
 	{
-		IResource markerResource = getMediaResource(media);
+		IResource markerResource = ServoyBuilderUtils.getPersistResource(media);
 		try
 		{
 			markerResource.deleteMarkers(ServoyBuilder.MEDIA_MARKER_TYPE, true, IResource.DEPTH_INFINITE);

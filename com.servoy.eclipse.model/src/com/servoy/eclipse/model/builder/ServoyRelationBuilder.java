@@ -79,7 +79,11 @@ public class ServoyRelationBuilder
 		ServoyBuilder.checkPersistDuplicateName();
 		ServoyBuilder.checkPersistDuplicateUUID();
 
+		return addRelationMarkers(servoyProject, relation);
+	}
 
+	public static boolean addRelationMarkers(ServoyProject servoyProject, Relation relation)
+	{
 		deleteMarkers(relation);
 		checkRelation(relation);
 
@@ -98,7 +102,7 @@ public class ServoyRelationBuilder
 				if (persist instanceof ValueList)
 				{
 					ServoyValuelistBuilder.deleteMarkers((ValueList)persist);
-					ServoyValuelistBuilder.addValuelistMarkers(servoyProject, (ValueList)persist, fs);
+					ServoyValuelistBuilder.addValuelistMarkers(servoyProject, (ValueList)persist, ServoyModelFinder.getServoyModel().getFlattenedSolution());
 				}
 			}
 		}
@@ -112,6 +116,7 @@ public class ServoyRelationBuilder
 		{
 			markerResource.deleteMarkers(ServoyBuilder.PROJECT_RELATION_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
+			markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.HIDDEN_TABLE_STILL_IN_USE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.INVALID_SORT_OPTION, true, IResource.DEPTH_INFINITE);
 		}
@@ -308,6 +313,8 @@ public class ServoyRelationBuilder
 								IMarker.PRIORITY_NORMAL,
 								null, element);
 						}
+						if (dataProvider instanceof ScriptVariable)
+							BuilderDependencies.getInstance().addDependency(((ScriptVariable)dataProvider).getScopeName(), element);
 					}
 					else
 					{

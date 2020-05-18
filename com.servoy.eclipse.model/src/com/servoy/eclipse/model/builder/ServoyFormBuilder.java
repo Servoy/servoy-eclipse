@@ -1224,6 +1224,7 @@ public class ServoyFormBuilder
 												IMarker.PRIORITY_NORMAL,
 												null, field);
 										}
+										if (relation != null) BuilderDependencies.getInstance().addDependency(form, fs.getRelation(relation.getName()));
 									}
 								}
 							}
@@ -2352,6 +2353,7 @@ public class ServoyFormBuilder
 				markerResource.deleteMarkers(ServoyBuilder.METHOD_OVERRIDE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.WRONG_OVERRIDE_PARENT, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.DUPLICATE_NAME_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.SUPERFORM_PROBLEM_TYPE, true, IResource.DEPTH_INFINITE);
 			}
 		}
 		catch (CoreException e)

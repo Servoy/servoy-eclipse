@@ -108,6 +108,7 @@ public class ServoyValuelistBuilder
 		{
 			markerResource.deleteMarkers(ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
+			markerResource.deleteMarkers(ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.HIDDEN_TABLE_STILL_IN_USE, true, IResource.DEPTH_INFINITE);
 			markerResource.deleteMarkers(ServoyBuilder.INVALID_SORT_OPTION, true, IResource.DEPTH_INFINITE);
 		}

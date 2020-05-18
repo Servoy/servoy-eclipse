@@ -51,6 +51,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
@@ -181,6 +182,10 @@ public class ServoyBuilderUtils
 					if (persist instanceof ValueList)
 					{
 						ServoyValuelistBuilder.addValuelistMarkers(servoyProject, (ValueList)persist, servoyModel.getFlattenedSolution());
+					}
+					if (persist instanceof Relation)
+					{
+						ServoyRelationBuilder.addRelationMarkers(servoyProject, (Relation)persist);
 					}
 				}
 			}
