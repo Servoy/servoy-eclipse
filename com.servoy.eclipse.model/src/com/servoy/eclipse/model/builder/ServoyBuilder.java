@@ -703,9 +703,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 		if (!BuilderDependencies.getInstance().isInitialized() && servoyModel.getActiveProject() != null)
 		{
-			// cache is empty we need a full build on active solution
+			// cache is empty we need a full build on all active solutions
+			// this will also delete all markers and create them on accurate file
 			BuilderDependencies.getInstance().initialize();
-			fullBuild(servoyModel.getActiveProject().getProject(), progressMonitor);
+			for (ServoyProject project : servoyModel.getModulesOfActiveProject())
+			{
+				fullBuild(project.getProject(), progressMonitor);
+			}
 		}
 		else if (kind == FULL_BUILD)
 		{
@@ -715,31 +719,34 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			try
 			{
-				boolean needFullBuild = false;
-				for (IProject p : monitoredProjects)
+				//with the new incremental build we should try to only build what is really changed
+				//with old implementation we were building the main solution as well when a module was changed
+
+//				boolean needFullBuild = false;
+//				for (IProject p : monitoredProjects)
+//				{
+//					if (p.exists() && p.isOpen())
+//					{
+//						IResourceDelta delta = getDelta(p);
+//						if (delta != null)
+//						{
+//							needFullBuild = needFullBuild || delta.getAffectedChildren().length > 0;
+//							incrementalBuild(delta, progressMonitor);
+//						}
+//					} // should we generate a problem marker otherwise?
+//				}
+//				if (needFullBuild)
+//				{
+//					fullBuild(getProject(), progressMonitor);
+//				}
+//				else
+//				{
+				IResourceDelta delta = getDelta(getProject());
+				if (delta != null)
 				{
-					if (p.exists() && p.isOpen())
-					{
-						IResourceDelta delta = getDelta(p);
-						if (delta != null)
-						{
-							needFullBuild = needFullBuild || delta.getAffectedChildren().length > 0;
-							incrementalBuild(delta, progressMonitor);
-						}
-					} // should we generate a problem marker otherwise?
+					incrementalBuild(delta, progressMonitor);
 				}
-				if (needFullBuild)
-				{
-					fullBuild(getProject(), progressMonitor);
-				}
-				else
-				{
-					IResourceDelta delta = getDelta(getProject());
-					if (delta != null)
-					{
-						incrementalBuild(delta, progressMonitor);
-					}
-				}
+//				}
 			}
 			catch (Exception e)
 			{
@@ -773,15 +780,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			else if (resource instanceof IProject)
 			{
 				IProject project = (IProject)resource;
-				if (!project.exists() || (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID) && project == getProject()))
+				if (!project.exists() || (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID)))
 				{
 					// a project that this builder in interested in was deleted (so a module or the resources proj.)
 					// or something has changed in this builder's solution project
-					checkServoyProject(getProject(), componentsSpecProviderState);
-					checkSpecs(getProject(), componentsSpecProviderState);
-					checkModules(getProject());
-					checkResourcesForServoyProject(getProject());
-					checkResourcesForModules(getProject());
+					checkServoyProject(project, componentsSpecProviderState);
+					checkSpecs(project, componentsSpecProviderState);
+					checkModules(project);
+					checkResourcesForServoyProject(project);
+					checkResourcesForModules(project);
 					if (project.exists())
 					{
 						if (servoyModel.isSolutionActive(project.getName()))
