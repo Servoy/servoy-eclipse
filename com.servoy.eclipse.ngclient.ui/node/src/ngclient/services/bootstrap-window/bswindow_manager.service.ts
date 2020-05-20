@@ -35,8 +35,10 @@ export class BSWindowManager {
     }
 
     destroyWindow(window_handle) {
-        var _this = this;
-        this.removeModal(window_handle);
+        var _this = this; 
+        if (window_handle.options.isModal) {
+            this.removeModal(window_handle);
+        }
         Array.prototype.forEach.call(this.windows, function(window, index){
             if (window === window_handle) {
                 _this.windows.splice(index, 1);
