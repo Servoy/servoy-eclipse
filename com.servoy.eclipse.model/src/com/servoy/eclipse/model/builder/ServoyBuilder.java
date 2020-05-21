@@ -719,34 +719,36 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			try
 			{
-				//with the new incremental build we should try to only build what is really changed
-				//with old implementation we were building the main solution as well when a module was changed
-
-//				boolean needFullBuild = false;
-//				for (IProject p : monitoredProjects)
-//				{
-//					if (p.exists() && p.isOpen())
-//					{
-//						IResourceDelta delta = getDelta(p);
-//						if (delta != null)
-//						{
-//							needFullBuild = needFullBuild || delta.getAffectedChildren().length > 0;
-//							incrementalBuild(delta, progressMonitor);
-//						}
-//					} // should we generate a problem marker otherwise?
-//				}
-//				if (needFullBuild)
-//				{
-//					fullBuild(getProject(), progressMonitor);
-//				}
-//				else
-//				{
-				IResourceDelta delta = getDelta(getProject());
-				if (delta != null)
+				boolean needFullBuild = false;
+				for (IProject p : monitoredProjects)
 				{
-					incrementalBuild(delta, progressMonitor);
+					if (p.exists() && p.isOpen() && !needFullBuild)
+					{
+						IResourceDelta delta = getDelta(p);
+						if (delta != null)
+						{
+							ServoyDeltaVisitor visitor = new ServoyDeltaVisitor();
+							delta.accept(visitor);
+							if (visitor.resources.size() > 0 && !ServoyBuilderUtils.canBuildIncremental(visitor.resources))
+							{
+								// if a module/resources project is changed and we cannot handle the change via the new incremental build we have to fully build the main project in order to make sure all markers are fine
+								needFullBuild = true;
+							}
+						}
+					}
 				}
-//				}
+				if (needFullBuild)
+				{
+					fullBuild(getProject(), progressMonitor);
+				}
+				else
+				{
+					IResourceDelta delta = getDelta(getProject());
+					if (delta != null)
+					{
+						incrementalBuild(delta, progressMonitor);
+					}
+				}
 			}
 			catch (Exception e)
 			{
@@ -1202,7 +1204,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		// this is a special case
 		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-		final Map<String, Map<Integer, Set<Pair<String, ISupportChilds>>>> duplicationMap = new HashMap<String, Map<Integer, Set<Pair<String, ISupportChilds>>>>();
 		if (modules != null)
 		{
 			for (ServoyProject module : modules)

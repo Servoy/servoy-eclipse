@@ -72,6 +72,32 @@ import com.servoy.j2db.util.keyword.Ident;
 public class ServoyBuilderUtils
 {
 
+	public static boolean canBuildIncremental(List<IResource> resources)
+	{
+		if (resources.size() == 3 && resources.get(0) instanceof IProject && resources.get(1) instanceof IFolder && resources.get(2) instanceof IFile)
+		{
+			IFolder folder = (IFolder)resources.get(1);
+			IFile file = (IFile)resources.get(2);
+			if (folder.getName().equals(SolutionSerializer.FORMS_DIR) &&
+				(file.getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT) ||
+					file.getName().endsWith(SolutionSerializer.FORM_FILE_EXTENSION)))
+			{
+				return true;
+			}
+			if (folder.getName().equals(SolutionSerializer.MEDIAS_DIR) || folder.getName().equals(SolutionSerializer.VALUELISTS_DIR) ||
+				folder.getName().equals(SolutionSerializer.RELATIONS_DIR))
+			{
+				return true;
+			}
+		}
+		if (resources.size() == 2 && resources.get(0) instanceof IProject && resources.get(1) instanceof IFile &&
+			resources.get(1).getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
+		{
+			return true;
+		}
+		return false;
+	}
+
 	public static boolean checkIncrementalBuild(List<IResource> resources)
 	{
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
