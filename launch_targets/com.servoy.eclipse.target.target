@@ -12,7 +12,7 @@
 		    <repository location="http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.201908130254"/>
+		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.202005172227"/>
 		    <repository location="http://dl.maketechnology.io/chromium-cef/rls/repository"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -44,7 +44,7 @@
 		    <unit id="org.jsoup" version="1.13.1"/>
 		    <unit id="org.maven.ide.eclipse.grouplayout" version="1.1.0.201005260935"/>
 		    <unit id="org.skyscreamer.jsonassert" version="1.5.1.v20170627"/>
-		    <unit id="org.sweetlemonade.eclipse.json" version="1.0.4"/>
+		    <unit id="org.sweetlemonade.eclipse.json" version="1.0.5"/>
 		    <unit id="org.yaml.snakeyaml" version="1.26.0"/>
 		    <unit id="sj.jsonschemavalidation" version="2.0.1"/>
 		    <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>

@@ -119,7 +119,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 			ForkJoinPool pool = new ForkJoinPool();
 			ConcurrentMap<String, String> checked = new ConcurrentHashMap<String, String>();
 			checked.put(sol.getName(), sol.getName());
-			pool.execute(() -> loadAllModules(sol, pool, checked));
+			loadAllModules(sol, pool, checked);
 			pool.awaitQuiescence(15, TimeUnit.MINUTES);
 			pool.shutdown();
 		}
@@ -137,30 +137,22 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		{
 			if (checked.putIfAbsent(name, name) == null)
 			{
-				try
+				if (!isSolutionLoaded(name))
 				{
-					if (!isSolutionLoaded(name))
-					{
-						RootObjectMetaData rootObjectMetaData = getRootObjectMetaData(name, IRepository.SOLUTIONS);
-						if (rootObjectMetaData != null)
+					pool.execute(() -> {
+						try
 						{
-							Solution module = (Solution)loadRootObject(rootObjectMetaData, rootObjectMetaData.getActiveRelease());
-							AbstractRepository.lock();
-							try
+							Solution module = (Solution)getRootObject(name, IRepository.SOLUTIONS, 0);
+							if (module != null)
 							{
-								if (!isSolutionLoaded(name)) cacheRootObject(module);
+								loadAllModules(module, pool, checked);
 							}
-							finally
-							{
-								AbstractRepository.unlock();
-							}
-							pool.execute(() -> loadAllModules(module, pool, checked));
 						}
-					}
-				}
-				catch (RepositoryException e)
-				{
-					Debug.error(e);
+						catch (RepositoryException e)
+						{
+							Debug.error(e);
+						}
+					});
 				}
 			}
 		}

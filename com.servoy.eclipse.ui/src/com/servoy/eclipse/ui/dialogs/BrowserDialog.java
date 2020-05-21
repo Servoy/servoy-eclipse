@@ -79,6 +79,8 @@ public class BrowserDialog extends Dialog
 	private Browser browser;
 	private Shell shell;
 	private boolean showSkipNextTime;
+	private static final int MIN_WIDTH = 900;
+	private static final int MIN_HEIGHT = 600;
 
 	/**
 	 * @param parentShell
@@ -94,11 +96,13 @@ public class BrowserDialog extends Dialog
 	public Object open()
 	{
 		Rectangle size = getParent().getBounds();
-		Dimension newSize = new Dimension((int)(size.width / 1.5), (int)(size.height / 1.4));
+		int newWidth = (size.width / 1.5) < MIN_WIDTH ? MIN_WIDTH : (int)(size.width / 1.5);
+		int newHeight = (size.height / 1.4) < MIN_HEIGHT ? MIN_HEIGHT : (int)(size.height / 1.4);
+		Dimension newSize = new Dimension(newWidth, newHeight);
 
 		int locationX, locationY;
-		locationX = (size.width - (int)(size.width / 1.5)) / 2 + size.x;
-		locationY = (size.height - (int)(size.height / 1.4)) / 2 + size.y;
+		locationX = (size.width - newWidth) / 2 + size.x;
+		locationY = (size.height - newHeight) / 2 + size.y;
 
 		return this.open(new Point(locationX, locationY), newSize);
 	}
@@ -224,7 +228,7 @@ public class BrowserDialog extends Dialog
 										String resourceProjectName = project == null ? getNewResourceProjectName() : null;
 
 										importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
-											monitor);
+											monitor, false, false);
 										if (importSolutionWizard.isMissingServer() != null)
 										{
 											showTutorial[0] = introURL.getParameter("createDBConn");

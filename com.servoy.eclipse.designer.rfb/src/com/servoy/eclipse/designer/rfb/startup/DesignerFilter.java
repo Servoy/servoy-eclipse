@@ -64,6 +64,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -77,8 +78,10 @@ import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Filter for designer editor
@@ -108,7 +111,7 @@ public class DesignerFilter implements Filter
 			String formName = request.getParameter("formName");
 			if (uri != null && uri.endsWith("palette"))
 			{
-				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+				SpecProviderState specProvider = WebComponentSpecProvider.getSpecProviderState();
 
 				((HttpServletResponse)servletResponse).setContentType("application/json");
 
@@ -116,36 +119,57 @@ public class DesignerFilter implements Filter
 
 				try
 				{
-					JSONWriter jsonWriter = new JSONWriter(servletResponse.getWriter());
+					FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+					Form form = fl.getForm(formName);
+
+					boolean skipDefault = true;
+					if (!form.isResponsiveLayout())
+					{
+						Iterator<IFormElement> elements = form.getFormElementsSortedByFormIndex();
+						while (elements.hasNext() && skipDefault)
+						{
+							skipDefault = skipDefault && (elements.next() instanceof WebComponent);
+						}
+					}
+
+					TreeMap<String, Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>> componentCategories = new TreeMap<>();
+					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications()
+						.entrySet())
+					{
+						PackageSpecification<WebObjectSpecification> value = entry.getValue();
+						for (WebObjectSpecification spec : value.getSpecifications().values())
+						{
+							String categoryName = spec.getCategoryName();
+							if (Utils.stringIsEmpty(categoryName))
+							{
+								if (IGNORE_PACKAGE_LIST.contains(value.getPackageName())) continue;
+								// filter deprecated servoydefault
+								if (skipDefault && value.getPackageName().equals("servoydefault")) continue;
+								categoryName = value.getPackageDisplayname();
+							}
+							Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>> pair = componentCategories.get(categoryName);
+							if (pair == null)
+							{
+								List<WebObjectSpecification> list = new ArrayList<>();
+								pair = new Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>(value, list);
+								componentCategories.put(categoryName, pair);
+							}
+							pair.getRight().add(spec);
+						}
+					}
+
+					StringWriter sw = new StringWriter();
+					JSONWriter jsonWriter = new JSONWriter(sw); //servletResponse.getWriter());
 					jsonWriter.array();
 
 					// Step 1: create a list with all keys containing first the layout and then the component packages
 					List<String> orderedKeys = new ArrayList<String>();
 					orderedKeys.add("Templates");
-					orderedKeys.addAll(componentsSpecProviderState.getLayoutSpecifications().keySet());
+					orderedKeys.addAll(specProvider.getLayoutSpecifications().keySet());
 
-					// Create a list with a default sort where the default components are always first
-
-					List<String> componentPackages = new ArrayList<String>();
-					for (String key : componentsSpecProviderState.getWebObjectSpecifications().keySet())
+					for (String category : componentCategories.keySet())
 					{
-						if (IGNORE_PACKAGE_LIST.contains(key)) continue;
-						componentPackages.add(key);
-					}
-					Collections.sort(componentPackages, new Comparator<String>()
-					{
-						@Override
-						public int compare(String pkg1, String pkg2)
-						{
-							if (pkg1.equals("servoydefault")) return -1;
-							if (pkg2.equals("servoydefault")) return 1;
-							return pkg1.compareTo(pkg2);
-						}
-					});
-
-					for (int i = 0; i < componentPackages.size(); i++)
-					{
-						if (!orderedKeys.contains(componentPackages.get(i))) orderedKeys.add(componentPackages.get(i));
+						if (!orderedKeys.contains(category)) orderedKeys.add(category);
 					}
 
 					IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode("com.servoy.eclipse.designer.rfb");
@@ -191,14 +215,15 @@ public class DesignerFilter implements Filter
 					List<JSONObject> formComponents = null;
 					for (String key : orderedKeys)
 					{
+						Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>> componentCategory = componentCategories.get(key);
 						boolean startedArray = false;
-						JSONObject categories = new JSONObject(); // categorised items (components/layouts can have "category" : "categoryName" in their spec)
-						if (componentsSpecProviderState.getLayoutSpecifications().containsKey(key))
+						JSONObject categories = new JSONObject(); // categorised layout items, categories for components are already in the orderedKeys..
+						if (specProvider.getLayoutSpecifications().containsKey(key))
 						{
 							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
 							if (!"Absolute-Layout".equals(layoutType))
 							{
-								PackageSpecification<WebLayoutSpecification> pkg = componentsSpecProviderState.getLayoutSpecifications().get(key);
+								PackageSpecification<WebLayoutSpecification> pkg = specProvider.getLayoutSpecifications().get(key);
 								jsonWriter.object();
 								jsonWriter.key("packageName").value(pkg.getPackageName());
 								jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
@@ -207,13 +232,11 @@ public class DesignerFilter implements Filter
 								startedArray = true;
 							}
 						}
-						else if (componentsSpecProviderState.getWebObjectSpecifications().containsKey(key) && ("servoydefault".equals(key) ||
-							isAccesibleInLayoutType(componentsSpecProviderState.getWebObjectSpecifications().get(key), layoutType)))
+						else if (componentCategory != null && isAccesibleInLayoutType(componentCategory.getLeft(), layoutType))
 						{
-							PackageSpecification<WebObjectSpecification> pkg = componentsSpecProviderState.getWebObjectSpecifications().get(key);
 							jsonWriter.object();
-							jsonWriter.key("packageName").value(pkg.getPackageName());
-							jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
+							jsonWriter.key("packageName").value(key);
+							jsonWriter.key("packageDisplayname").value(key);
 							jsonWriter.key("components");
 							jsonWriter.array();
 							startedArray = true;
@@ -224,8 +247,6 @@ public class DesignerFilter implements Filter
 								IRepository.TEMPLATES);
 							if (templates.size() > 0)
 							{
-								FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
-								Form form = fl.getForm(formName);
 								String layout = form.getUseCssPosition().booleanValue() ? Template.LAYOUT_TYPE_CSS_POSITION : layoutType;
 
 								jsonWriter.object();
@@ -269,9 +290,9 @@ public class DesignerFilter implements Filter
 								jsonWriter.endObject();
 							}
 						}
-						if (startedArray && componentsSpecProviderState.getLayoutSpecifications().containsKey(key))
+						if (startedArray && specProvider.getLayoutSpecifications().containsKey(key))
 						{
-							PackageSpecification<WebLayoutSpecification> entry = componentsSpecProviderState.getLayoutSpecifications().get(key);
+							PackageSpecification<WebLayoutSpecification> entry = specProvider.getLayoutSpecifications().get(key);
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
 								if (spec.isDeprecated()) continue;
@@ -332,31 +353,9 @@ public class DesignerFilter implements Filter
 								else jsonWriter.value(layoutJson);
 							}
 						}
-						if (startedArray && componentsSpecProviderState.getWebObjectSpecifications().containsKey(key))
+						if (startedArray && componentCategory != null)
 						{
-							PackageSpecification<WebObjectSpecification> pkg = componentsSpecProviderState.getWebObjectSpecifications().get(key);
-							Collection<WebObjectSpecification> webComponentSpecsCollection = null;
-							if ("servoydefault".equals(key) && "Responsive-Layout".equals(layoutType))
-							{
-								// make sure form component is visible in responsive mode
-								webComponentSpecsCollection = new ArrayList<WebObjectSpecification>();
-								webComponentSpecsCollection.add(
-									componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecification("servoycore-formcomponent"));
-								webComponentSpecsCollection.add(componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecification(
-									"servoycore-listformcomponent"));
-							}
-							else
-							{
-								webComponentSpecsCollection = pkg.getSpecifications().values();
-								if ("servoydefault".equals(key))
-								{
-									ArrayList<WebObjectSpecification> webComponentSpecsCollectionEx = new ArrayList<WebObjectSpecification>(
-										webComponentSpecsCollection);
-									webComponentSpecsCollectionEx.addAll(
-										componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecifications().values());
-									webComponentSpecsCollection = webComponentSpecsCollectionEx;
-								}
-							}
+							Collection<WebObjectSpecification> webComponentSpecsCollection = componentCategory.getRight();
 							for (WebObjectSpecification spec : webComponentSpecsCollection)
 							{
 								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()) && !spec.isDeprecated())
@@ -365,8 +364,7 @@ public class DesignerFilter implements Filter
 									componentJson.put("name", spec.getName());
 									componentJson.put("componentType", "component");
 									componentJson.put("displayName", spec.getDisplayName());
-									FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
-									Form form = fl.getForm(formName);
+
 									Map<String, Object> model = new HashMap<String, Object>();
 									if (form.isResponsiveLayout())
 									{
@@ -427,11 +425,7 @@ public class DesignerFilter implements Filter
 											componentJson.put("properties", getFormComponentPropertyNames(spec));
 										}
 									}
-									if (componentJson.has("category"))
-									{
-										categories.append(componentJson.getString("category"), componentJson);
-									}
-									else jsonWriter.value(componentJson);
+									jsonWriter.value(componentJson);
 								}
 							}
 						}
@@ -449,6 +443,7 @@ public class DesignerFilter implements Filter
 						jsonWriter.endObject();
 					}
 					jsonWriter.endArray();
+					servletResponse.getWriter().write(sw.toString());
 				}
 				catch (JSONException ex)
 				{
