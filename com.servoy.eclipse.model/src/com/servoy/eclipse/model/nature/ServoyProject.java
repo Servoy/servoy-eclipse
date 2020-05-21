@@ -587,7 +587,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 		return getEditingFlattenedSolution(true);
 	}
 
-	public synchronized void resetEditingFlattenedSolution(boolean loadMainSolution)
+	public synchronized void resetFlattenedSolution(boolean loadMainSolution)
 	{
 		if (this.editingFlattenedSolution != null)
 		{

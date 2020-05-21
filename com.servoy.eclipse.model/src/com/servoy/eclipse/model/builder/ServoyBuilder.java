@@ -16,30 +16,21 @@
  */
 package com.servoy.eclipse.model.builder;
 
-import java.awt.Point;
-import java.awt.print.PageFormat;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 
-import javax.swing.ImageIcon;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -65,31 +56,23 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
-import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
-import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.ICustomType;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.servoy.base.persistence.IBaseColumn;
-import com.servoy.base.persistence.IMobileProperties;
-import com.servoy.base.persistence.PersistUtils;
-import com.servoy.base.persistence.constants.IValueListConstants;
-import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.Activator;
+import com.servoy.eclipse.model.DeveloperFlattenedSolution;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
-import com.servoy.eclipse.model.inmemory.AbstractMemTable;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -102,35 +85,23 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.FormController;
-import com.servoy.j2db.IForm;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.component.ComponentFactory;
-import com.servoy.j2db.dataprocessing.DBValueList;
 import com.servoy.j2db.dataprocessing.IColumnConverter;
 import com.servoy.j2db.dataprocessing.IColumnValidator;
-import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptor;
 import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
-import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.CSSPositionUtils;
-import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
-import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
-import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -147,17 +118,11 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportMedia;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.ISupportScope;
-import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LayoutContainer;
-import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Media;
-import com.servoy.j2db.persistence.MethodArgument;
-import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -170,43 +135,21 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.server.ngclient.FormElement;
-import com.servoy.j2db.server.ngclient.FormElementHelper;
-import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
-import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
-import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
-import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
-import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
-import com.servoy.j2db.server.ngclient.property.ValueListConfig;
-import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
-import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
-import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.FormatParser;
 import com.servoy.j2db.util.FormatParser.ParsedFormat;
-import com.servoy.j2db.util.IntHashMap;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
-import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
 import com.servoy.j2db.util.ScopesUtils;
-import com.servoy.j2db.util.ServoyException;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
-import com.servoy.j2db.util.keyword.Ident;
 
 /**
  * Builds Servoy projects. Adds problem markers where needed.
@@ -218,30 +161,17 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	public static int exceptionCount = 0;
 
-	private static final int LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM = 3;
-	private static final int LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM = 20;
+	public static final int LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM = 3;
+	public static final int LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM = 20;
 
 	class ServoyDeltaVisitor implements IResourceDeltaVisitor
 	{
+		final List<IResource> resources = new ArrayList<IResource>();
+
 		public boolean visit(IResourceDelta delta) throws CoreException
 		{
 			IResource resource = delta.getResource();
-			switch (delta.getKind())
-			{
-				case IResourceDelta.ADDED :
-					// handle added resource
-					checkResource(resource);
-					break;
-				case IResourceDelta.REMOVED :
-					// handle removed resource
-					checkResource(resource);
-					break;
-				case IResourceDelta.CHANGED :
-					// handle changed resource
-					checkResource(resource);
-					break;
-			}
-			//return true to continue visiting children.
+			resources.add(resource);
 			return true;
 		}
 	}
@@ -357,6 +287,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String PARAMETERS_MISMATCH = _PREFIX + ".parametersMismatch";
 	public static final String WRONG_OVERRIDE_PARENT = _PREFIX + ".wrongOverridePosition";
 	public static final String INVALID_TABLE_NO_PRIMARY_KEY_TYPE = _PREFIX + ".invalidTableNoPrimaryKey";
+	public static final String SERVICE_MUST_AUTHENTICATE_MARKER_TYPE = _PREFIX + ".serviceMustAuthenticateProblem";
+	public static final String NAMED_FOUNDSET_DATASOURCE = _PREFIX + ".namedFoundsetDatasourceProblem";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -769,9 +701,19 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			monitoredProjects = referencedProjects;
 		}
-		if (kind == FULL_BUILD)
+		if (!BuilderDependencies.getInstance().isInitialized() && servoyModel.getActiveProject() != null)
 		{
-			fullBuild(progressMonitor);
+			// cache is empty we need a full build on all active solutions
+			// this will also delete all markers and create them on accurate file
+			BuilderDependencies.getInstance().initialize();
+			for (ServoyProject project : servoyModel.getModulesOfActiveProject())
+			{
+				fullBuild(project.getProject(), progressMonitor);
+			}
+		}
+		else if (kind == FULL_BUILD)
+		{
+			fullBuild(getProject(), progressMonitor);
 		}
 		else
 		{
@@ -780,19 +722,24 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				boolean needFullBuild = false;
 				for (IProject p : monitoredProjects)
 				{
-					if (p.exists() && p.isOpen())
+					if (p.exists() && p.isOpen() && !needFullBuild)
 					{
 						IResourceDelta delta = getDelta(p);
 						if (delta != null)
 						{
-							needFullBuild = needFullBuild || delta.getAffectedChildren().length > 0;
-							incrementalBuild(delta, progressMonitor);
+							ServoyDeltaVisitor visitor = new ServoyDeltaVisitor();
+							delta.accept(visitor);
+							if (visitor.resources.size() > 0 && !ServoyBuilderUtils.canBuildIncremental(visitor.resources))
+							{
+								// if a module/resources project is changed and we cannot handle the change via the new incremental build we have to fully build the main project in order to make sure all markers are fine
+								needFullBuild = true;
+							}
 						}
-					} // should we generate a problem marker otherwise?
+					}
 				}
 				if (needFullBuild)
 				{
-					fullBuild(progressMonitor);
+					fullBuild(getProject(), progressMonitor);
 				}
 				else
 				{
@@ -815,6 +762,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	protected void clean(IProgressMonitor progressMonitor) throws CoreException
 	{
 		getProject().deleteMarkers(SERVOY_BUILDER_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+		BuilderDependencies.getInstance().clear();
 	}
 
 	void checkResource(IResource resource)
@@ -834,15 +782,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			else if (resource instanceof IProject)
 			{
 				IProject project = (IProject)resource;
-				if (!project.exists() || (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID) && project == getProject()))
+				if (!project.exists() || (project.isOpen() && project.hasNature(ServoyProject.NATURE_ID)))
 				{
 					// a project that this builder in interested in was deleted (so a module or the resources proj.)
 					// or something has changed in this builder's solution project
-					checkServoyProject(getProject(), componentsSpecProviderState);
-					checkSpecs(getProject(), componentsSpecProviderState);
-					checkModules(getProject());
-					checkResourcesForServoyProject(getProject());
-					checkResourcesForModules(getProject());
+					checkServoyProject(project, componentsSpecProviderState);
+					checkSpecs(project, componentsSpecProviderState);
+					checkModules(project);
+					checkResourcesForServoyProject(project);
+					checkResourcesForModules(project);
 					if (project.exists())
 					{
 						if (servoyModel.isSolutionActive(project.getName()))
@@ -932,7 +880,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					deleteMarkers(module.getProject(), MISSING_SPEC);
 					deleteMarkers(module.getProject(), DEPRECATED_SPEC);
-					deleteMarkers(module.getProject(), PARAMETERS_MISMATCH);
 					module.getSolution().acceptVisitor(new IPersistVisitor()
 					{
 
@@ -948,7 +895,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void checkSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
+	public static void checkSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
 	{
 		if (o instanceof WebComponent)
 		{
@@ -961,7 +908,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					String[] webcomponentNameAndSpec = typeName.split("-");
 					ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", webcomponentNameAndSpec[webcomponentNameAndSpec.length - 1],
 						webcomponentNameAndSpec[0]);
-					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+					IMarker marker = addMarker(ServoyBuilderUtils.getPersistResource(o.getAncestor(IRepository.FORMS)), mk.getType(), mk.getText(), -1,
+						MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
 					try
 					{
 						if (marker != null) marker.setAttribute("packageName", webcomponentNameAndSpec[0]);
@@ -984,7 +932,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill(typeName,
 						"web component" + (((WebComponent)o).getName() != null ? " with name '" + ((WebComponent)o).getName() + "'" : "'"),
 						spec.getDeprecatedMessage());
-					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+					IMarker marker = addMarker(ServoyBuilderUtils.getPersistResource(o.getAncestor(IRepository.FORMS)), mk.getType(), mk.getText(), -1,
 						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
 					try
 					{
@@ -995,20 +943,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					catch (CoreException e)
 					{
 						ServoyLog.logError(e);
-					}
-				}
-			}
-			else
-			{
-				Collection<WebObjectFunctionDefinition> handlers = spec.getHandlers().values();
-				for (WebObjectFunctionDefinition handler : handlers)
-				{
-					List<Object> instanceMethodArguments = ((WebComponent)o).getFlattenedMethodArguments(handler.getName());
-					if (instanceMethodArguments != null && instanceMethodArguments.size() > 0 &&
-						handler.getParameters().size() >= instanceMethodArguments.size())
-					{
-						ServoyMarker mk = MarkerMessages.Parameters_Mismatch.fill(((WebComponent)o).getName(), handler.getName());
-						addMarker(project, mk.getType(), mk.getText(), -1, PARAMETERS_MISMATCH_SEVERITY, IMarker.PRIORITY_NORMAL, null, o);
 					}
 				}
 			}
@@ -1024,7 +958,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			if (spec == null)
 			{
 				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout", ((LayoutContainer)o).getSpecName(), ((LayoutContainer)o).getPackageName());
-				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				IMarker marker = addMarker(ServoyBuilderUtils.getPersistResource(o.getAncestor(IRepository.FORMS)), mk.getType(), mk.getText(), -1,
+					MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
 				try
 				{
 					marker.setAttribute("packageName", ((LayoutContainer)o).getPackageName());
@@ -1040,7 +975,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 				{
 					ServoyMarker mk = MarkerMessages.DeprecatedSpecification.fill(((LayoutContainer)o).getSpecName(), "layout", spec.getDeprecatedMessage());
-					IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1,
+					IMarker marker = addMarker(ServoyBuilderUtils.getPersistResource(o.getAncestor(IRepository.FORMS)), mk.getType(), mk.getText(), -1,
 						getTranslatedSeverity(customSeverity, DEPRECATED_SPECIFICATION.getRight()), IMarker.PRIORITY_NORMAL, null, o);
 					try
 					{
@@ -1166,8 +1101,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void checkDuplicateScopes(IFile scriptFile)
+	public static void checkDuplicateScopes(IFile scriptFile)
 	{
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
 		if (!servoyModel.isSolutionActive(scriptFile.getProject().getName())) return;
 
 		if (scriptFile.getParent() == scriptFile.getProject() && scriptFile.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
@@ -1180,7 +1116,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				deleteMarkers(scriptFile, DUPLICATE_SCOPE_NAME_MARKER_TYPE);
 			}
-			List<Pair<String, IRootObject>> scopes = getServoyModel().getFlattenedSolution().getAllScopes();
+			List<Pair<String, IRootObject>> scopes = servoyModel.getFlattenedSolution().getAllScopes();
 			for (Pair<String, IRootObject> scope : scopes)
 			{
 				if (scope.getLeft().toLowerCase().equals(lowerCaseScopeName) && !scope.getRight().getName().equals(scriptFile.getProject().getName()))
@@ -1188,7 +1124,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					String otherFile = scope.getRight().getName() + '/' + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION;
 					IFile file = scriptFile.getWorkspace().getRoot().getFile(Path.fromPortableString(otherFile));
 					if (scriptFile.exists() &&
-						!isParentImportHook(getServoyModel().getServoyProject(scriptFile.getProject().getName()).getSolution(), (Solution)scope.getRight()))
+						!isParentImportHook(servoyModel.getServoyProject(scriptFile.getProject().getName()).getSolution(), (Solution)scope.getRight()))
 					{
 						// duplicate found
 						ServoyMarker mk = MarkerMessages.DuplicateScopeFound.fill(scope.getLeft(), scope.getRight().getName());
@@ -1211,489 +1147,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private static final Integer METHOD_DUPLICATION = Integer.valueOf(1);
-	private static final Integer FORM_DUPLICATION = Integer.valueOf(2);
-	private static final Integer RELATION_DUPLICATION = Integer.valueOf(3);
-	private static final Integer VALUELIST_DUPLICATION = Integer.valueOf(4);
-	private static final Integer MEDIA_DUPLICATION = Integer.valueOf(5);
-	private static final Integer TABLE_CALCULATION_DUPLICATION = Integer.valueOf(6);
-	private static final Integer TABLE_AGREGATION_DUPLICATION = Integer.valueOf(7);
-	private static final Integer TABLE_SCRIPT_METHOD_DUPLICATION = Integer.valueOf(8);
-
-	private void addDuplicatePersist(final IPersist persist, Map<String, Map<Integer, Set<Pair<String, ISupportChilds>>>> duplicationMap,
-		final IProject project)
-	{
-		if (persist instanceof IScriptProvider || persist instanceof ScriptVariable)
-		{
-			String name = ((ISupportName)persist).getName();
-			if (name != null)
-			{
-				String scopeName = null;
-				if (persist instanceof ISupportScope && persist.getParent() instanceof Solution)
-				{
-					scopeName = ((ISupportScope)persist).getScopeName();
-					if (scopeName == null) scopeName = ScriptVariable.GLOBAL_SCOPE;
-				}
-				List<Pair<String, ISupportChilds>> duplicatedParents = new ArrayList<Pair<String, ISupportChilds>>(3);
-				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
-				if (persistSet == null)
-				{
-					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
-					duplicationMap.put(name, persistSet);
-				}
-				Set<Pair<String, ISupportChilds>> parentScopeSet = persistSet.get(METHOD_DUPLICATION);
-				Pair<String, ISupportChilds> scopedParent = new Pair<String, ISupportChilds>(scopeName, persist.getParent());
-				if (parentScopeSet != null && parentScopeSet.contains(scopedParent))
-				{
-					duplicatedParents.add(scopedParent);
-				}
-				else if (parentScopeSet != null && persist.getParent() instanceof Solution)
-				{
-					for (Pair<String, ISupportChilds> supportChilds : parentScopeSet)
-					{
-						if (supportChilds.getRight() instanceof Solution && (scopeName == null || scopeName.equals(supportChilds.getLeft())))
-						{
-							duplicatedParents.add(supportChilds);
-						}
-					}
-				}
-
-				for (Pair<String, ISupportChilds> duplicatedParent : duplicatedParents)
-				{
-					String duplicateParentsName = "";
-					if (duplicatedParent.getRight() instanceof ISupportName)
-					{
-						duplicateParentsName = ((ISupportName)duplicatedParent.getRight()).getName();
-					}
-					if (duplicatedParent.getLeft() != null)
-					{
-						duplicateParentsName += '.' + duplicatedParent.getLeft();
-					}
-					String parentsName = "";
-					if (persist.getParent() instanceof ISupportName)
-					{
-						parentsName = ((ISupportName)persist.getParent()).getName();
-					}
-					if (scopeName != null)
-					{
-						parentsName += '.' + scopeName;
-					}
-					String type = "method";
-					if (persist instanceof ScriptVariable)
-					{
-						type = "variable";
-					}
-					String otherChildsType = "method";
-					for (IPersist child : Utils.iterate(duplicatedParent.getRight().getAllObjects()))
-					{
-						if ((child instanceof IScriptProvider || child instanceof ScriptVariable) && ((ISupportName)child).getName().equals(name) &&
-							!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight().getRootObject()))
-						{
-							int lineNumber;
-							if (child instanceof IScriptElement)
-							{
-								if (child instanceof ScriptVariable)
-								{
-									otherChildsType = "variable";
-								}
-								lineNumber = ((IScriptElement)child).getLineNumberOffset();
-							}
-							else lineNumber = 0;
-//							if (persist instanceof ScriptVariable && otherChildsType.equals("variable") && !duplicateParentsName.equals(parentsName))
-//							{
-//								severity = IMarker.SEVERITY_WARNING;
-//							}
-							ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(type, name, parentsName);
-							addMarker(project, mk.getType(), mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-								child);
-							break;
-						}
-					}
-					if (!isParentImportHook((Solution)persist.getRootObject(), (Solution)duplicatedParent.getRight().getRootObject()))
-					{
-						int lineNumber;
-						if (persist instanceof IScriptElement)
-						{
-							if (persist instanceof ScriptVariable)
-							{
-								otherChildsType = "variable";
-							}
-							lineNumber = ((IScriptElement)persist).getLineNumberOffset();
-						}
-						else lineNumber = 0;
-						ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, name, duplicateParentsName);
-						addMarker(project, mk.getType(), mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
-					}
-
-				}
-				Set<Pair<String, ISupportChilds>> parents = parentScopeSet;
-				if (parents == null)
-				{
-					parents = new HashSet<Pair<String, ISupportChilds>>();
-					persistSet.put(METHOD_DUPLICATION, parents);
-				}
-				parents.add(new Pair<String, ISupportChilds>(scopeName, persist.getParent()));
-			}
-		}
-		//Table entities
-		/*
-		 * private static final Integer TABLE_CALCULATION_DUPLICATION = Integer.valueOf(6); private static final Integer TABLE_AGREGATION_DUPLICATION =
-		 * Integer.valueOf(7); private static final Integer TABLE_SCRIPT_METHOD_DUPLICATION = Integer.valueOf(8);
-		 */
-		if (persist.getParent() instanceof TableNode)
-		{
-			String entityName = ((ISupportName)persist).getName();
-			String dataSource = ((TableNode)persist.getParent()).getDataSource();
-
-			if (entityName != null && dataSource != null)
-			{
-				String entityName_plus_dataSource = entityName + '~' + dataSource;
-				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(entityName_plus_dataSource);
-				if (persistSet == null)
-				{
-					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
-					duplicationMap.put(entityName_plus_dataSource, persistSet);
-					if (persist instanceof IScriptProvider || persist instanceof ScriptVariable)
-					{
-						String name = ((ISupportName)persist).getName();
-						duplicationMap.remove(name);
-					}
-				}
-
-				Integer type = TABLE_CALCULATION_DUPLICATION; // ScriptCalculation
-				if (persist instanceof AggregateVariable)
-				{
-					type = TABLE_AGREGATION_DUPLICATION;
-				}
-				else if (persist instanceof ScriptMethod)
-				{
-					type = TABLE_SCRIPT_METHOD_DUPLICATION;
-				}
-				Set<Pair<String, ISupportChilds>> parentSet = persistSet.get(type);
-				if (parentSet != null)
-				{
-					String parentsName = "";
-					if (persist.getParent().getParent() instanceof ISupportName)
-					{
-						parentsName = ((ISupportName)persist.getParent().getParent()).getName();
-					}
-					for (Pair<String, ISupportChilds> parent : parentSet)
-					{
-						if (parent.getRight() instanceof TableNode)
-						{
-							TableNode tableNode = (TableNode)parent.getRight();
-
-							if (persist instanceof ScriptCalculation)
-							{
-								ScriptCalculation duplicateScriptCalculation = tableNode.getScriptCalculation(entityName);
-								if (dataSource.equals(tableNode.getDataSource()))
-								{
-									if (duplicateScriptCalculation != null)
-									{
-										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table calculation", entityName,
-											parentsName + "   on table  " + tableNode.getDataSource());
-										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-											duplicateScriptCalculation);
-									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table calculation ", entityName,
-										tableNode.getParent() + "  on table  " + tableNode.getDataSource());
-									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										persist);
-								}
-
-							}
-							else if (persist instanceof AggregateVariable)
-							{
-								AggregateVariable duplicateAggregate = tableNode.getAggregateVariable(entityName);
-								if (dataSource.equals(tableNode.getDataSource()))
-								{
-									if (duplicateAggregate != null)
-									{
-										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("aggregate variable", entityName,
-											parentsName + "   on table  " + tableNode.getDataSource());
-										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-											duplicateAggregate);
-									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("aggregate variable", entityName,
-										tableNode.getParent() + "  on table  " + tableNode.getDataSource());
-									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										persist);
-								}
-							}
-							else if (persist instanceof ScriptMethod)
-							{
-								ScriptMethod duplicateFoundSetMethod = tableNode.getFoundsetMethod(entityName);
-								if (dataSource.equals(tableNode.getDataSource()))
-								{
-									if (duplicateFoundSetMethod != null)
-									{
-										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table method", entityName,
-											parentsName + "   on table  " + tableNode.getDataSource());
-										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-											duplicateFoundSetMethod);
-									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table method", entityName,
-										tableNode.getParent() + "  on table  " + tableNode.getDataSource());
-									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										persist);
-								}
-							}
-						}
-					}
-				}
-				Set<Pair<String, ISupportChilds>> parents = parentSet;
-				if (parents == null)
-				{
-					parents = new HashSet<Pair<String, ISupportChilds>>();
-					persistSet.put(type, parents);
-				}
-				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
-
-			}
-
-
-			/*
-			 * ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(otherChildsType, name, duplicateParentsName); addMarker(project, mk.getType(),
-			 * mk.getText(), lineNumber, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
-			 */
-
-		}
-		if (persist instanceof Form)
-		{
-			final String name = ((ISupportName)persist).getName();
-			if (name != null)
-			{
-				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
-				if (persistSet == null)
-				{
-					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
-					duplicationMap.put(name, persistSet);
-				}
-				Set<Pair<String, ISupportChilds>> parentSet = persistSet.get(FORM_DUPLICATION);
-				if (parentSet != null)
-				{
-					String parentsName = "";
-					if (persist.getParent() instanceof ISupportName)
-					{
-						parentsName = ((ISupportName)persist.getParent()).getName();
-					}
-					for (Pair<String, ISupportChilds> parent : parentSet)
-					{
-						if (parent.getRight() instanceof Solution)
-						{
-							Solution solution = (Solution)parent.getRight();
-							Form duplicateForm = solution.getForm(name);
-							if (duplicateForm != null)
-							{
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form", name, parentsName);
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-									duplicateForm);
-							}
-							ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form", name, solution.getName());
-							addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
-						}
-					}
-				}
-				Set<Pair<String, ISupportChilds>> parents = parentSet;
-				if (parents == null)
-				{
-					parents = new HashSet<Pair<String, ISupportChilds>>();
-					persistSet.put(FORM_DUPLICATION, parents);
-				}
-				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
-			}
-			persist.acceptVisitor(new IPersistVisitor()
-			{
-				public Object visit(IPersist o)
-				{
-					if (o instanceof ScriptMethod)
-					{
-						ScriptMethod scriptMethod = (ScriptMethod)o;
-						if (scriptMethod.getDeclaration() != null && scriptMethod.getDeclaration().contains(SolutionSerializer.OVERRIDEKEY) &&
-							PersistHelper.getOverridenMethod(scriptMethod) == null)
-						{
-							ServoyMarker mk = MarkerMessages.MethodOverrideProblem.fill(scriptMethod.getName(), ((Form)scriptMethod.getParent()).getName());
-							IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, METHOD_OVERRIDE_PROBLEM, IMarker.PRIORITY_NORMAL, null, o);
-							try
-							{
-								marker.setAttribute("Uuid", scriptMethod.getUUID().toString());
-								marker.setAttribute("SolutionName", scriptMethod.getRootObject().getName());
-							}
-							catch (CoreException e)
-							{
-								Debug.error(e);
-							}
-
-						}
-					}
-					if (o instanceof AbstractContainer) return IPersistVisitor.CONTINUE_TRAVERSAL;
-					else return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-				}
-			});
-			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			final Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
-			flattenedForm.acceptVisitor(new IPersistVisitor()
-			{
-				public Object visit(IPersist o)
-				{
-					String namess = flattenedForm.getName();
-					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
-						((ISupportName)o).getName() != null)
-					{
-						Set<IPersist> duplicates = formElementsByName.get(((ISupportName)o).getName());
-						if (duplicates != null)
-						{
-							for (IPersist duplicatePersist : duplicates)
-							{
-								UUID wrongOverrideUUID = null;
-								if (duplicatePersist instanceof IFormElement && ((IFormElement)duplicatePersist).getExtendsID() == o.getID())
-								{
-									wrongOverrideUUID = duplicatePersist.getUUID();
-								}
-								else if (o instanceof IFormElement && ((IFormElement)o).getExtendsID() == duplicatePersist.getID())
-								{
-									wrongOverrideUUID = o.getUUID();
-								}
-								if (wrongOverrideUUID != null)
-								{
-									ServoyMarker mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), ((Form)persist).getName());
-									IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_OVERRIDE_FOUND,
-										IMarker.PRIORITY_NORMAL, null, duplicatePersist);
-									try
-									{
-										marker.setAttribute("Uuid", wrongOverrideUUID.toString());
-										marker.setAttribute("SolutionName", project.getName());
-									}
-									catch (CoreException e)
-									{
-										ServoyLog.logError(e);
-									}
-
-									mk = MarkerMessages.DuplicateOverrideFound.fill(((ISupportName)o).getName(), ((Form)persist).getName());
-									marker = addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_OVERRIDE_FOUND, IMarker.PRIORITY_NORMAL,
-										null, o);
-									try
-									{
-										marker.setAttribute("Uuid", wrongOverrideUUID.toString());
-										marker.setAttribute("SolutionName", project.getName());
-									}
-									catch (CoreException e)
-									{
-										ServoyLog.logError(e);
-									}
-								}
-								else
-								{
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(),
-										((Form)persist).getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										duplicatePersist);
-
-									mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
-								}
-							}
-						}
-						else
-						{
-							duplicates = new HashSet<IPersist>();
-							duplicates.add(o);
-						}
-						formElementsByName.put(((ISupportName)o).getName(), duplicates);
-					}
-					if (o instanceof AbstractContainer) return IPersistVisitor.CONTINUE_TRAVERSAL;
-					else return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-				}
-			});
-		}
-		if (persist instanceof Relation || persist instanceof ValueList || persist instanceof Media)
-		{
-			String name = ((ISupportName)persist).getName();
-			if (name != null)
-			{
-				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
-				if (persistSet == null)
-				{
-					persistSet = new HashMap<Integer, Set<Pair<String, ISupportChilds>>>();
-					duplicationMap.put(name, persistSet);
-				}
-				Integer type = RELATION_DUPLICATION;
-				if (persist instanceof ValueList)
-				{
-					type = VALUELIST_DUPLICATION;
-				}
-				else if (persist instanceof Media)
-				{
-					type = MEDIA_DUPLICATION;
-				}
-				Set<Pair<String, ISupportChilds>> parentSet = persistSet.get(type);
-				if (parentSet != null)
-				{
-					String parentsName = "";
-					if (persist.getParent() instanceof ISupportName)
-					{
-						parentsName = ((ISupportName)persist.getParent()).getName();
-					}
-					for (Pair<String, ISupportChilds> parent : parentSet)
-					{
-						if (parent.getRight() instanceof Solution)
-						{
-							Solution solution = (Solution)parent.getRight();
-							if (persist instanceof Relation)
-							{
-								Relation duplicateRelation = solution.getRelation(name);
-								if (!((Relation)persist).contentEquals(duplicateRelation))
-								{
-									if (duplicateRelation != null)
-									{
-										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, parentsName);
-										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-											duplicateRelation);
-									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, solution.getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										persist);
-								}
-							}
-							else if (persist instanceof ValueList)
-							{
-								ValueList duplicateValuelist = solution.getValueList(name);
-								if (duplicateValuelist != null)
-								{
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, parentsName);
-									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										duplicateValuelist);
-								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, solution.getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
-							}
-							else if (persist instanceof Media)
-							{
-								Media duplicateMedia = solution.getMedia(name);
-								if (duplicateMedia != null)
-								{
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, parentsName);
-									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
-										duplicateMedia);
-								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, solution.getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
-							}
-						}
-					}
-				}
-				Set<Pair<String, ISupportChilds>> parents = parentSet;
-				if (parents == null)
-				{
-					parents = new HashSet<Pair<String, ISupportChilds>>();
-					persistSet.put(type, parents);
-				}
-				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
-			}
-		}
-	}
-
-	private boolean isParentImportHook(Solution persistParent, Solution dupParent)
+	private static boolean isParentImportHook(Solution persistParent, Solution dupParent)
 	{
 		if (!dupParent.equals(persistParent) &&
 			(persistParent.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || persistParent.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK))
@@ -1703,11 +1157,53 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return false;
 	}
 
-	private void checkPersistDuplication()
+	public static void checkPersistDuplicateUUID()
+	{
+		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+		if (modules != null)
+		{
+			for (ServoyProject module : modules)
+			{
+				deleteMarkers(module.getProject(), DUPLICATE_UUID);
+			}
+		}
+		IProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject().getProject();
+		FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		if (fs instanceof DeveloperFlattenedSolution)
+		{
+			Map<UUID, List<IPersist>> duplicates = ((DeveloperFlattenedSolution)fs).getDuplicateUUIDList();
+			if (duplicates != null)
+			{
+				for (UUID uuid : duplicates.keySet())
+				{
+					List<IPersist> lst = duplicates.get(uuid);
+					if (lst.size() >= 2)
+					{
+						IPersist p = lst.get(0);
+						IPersist other = lst.get(1);
+						// for now only add it on both if there is 1, just skip the rest.
+						if (lst.size() == 1)
+						{
+							ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
+								SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
+							addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
+								IMarker.PRIORITY_HIGH, null, other);
+						}
+						ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
+							SolutionSerializer.getRelativePath(other, false) + SolutionSerializer.getFileName(other, false));
+						addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE, IMarker.PRIORITY_HIGH,
+							null, p);
+					}
+				}
+			}
+		}
+
+	}
+
+	public static void checkPersistDuplicateName()
 	{
 		// this is a special case
-		ServoyProject[] modules = getServoyModel().getModulesOfActiveProject();
-		final Map<String, Map<Integer, Set<Pair<String, ISupportChilds>>>> duplicationMap = new HashMap<String, Map<Integer, Set<Pair<String, ISupportChilds>>>>();
+		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 		if (modules != null)
 		{
 			for (ServoyProject module : modules)
@@ -1716,22 +1212,97 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				deleteMarkers(module.getProject(), DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
 				deleteMarkers(module.getProject(), WRONG_OVERRIDE_PARENT);
 			}
-			for (final ServoyProject module : modules)
+			FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+			IProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject().getProject();
+			if (fs instanceof DeveloperFlattenedSolution)
 			{
-				module.getSolution().acceptVisitor(new IPersistVisitor()
+				Map<String, Map<String, List<IPersist>>> duplicates = ((DeveloperFlattenedSolution)fs).getDuplicateNamesList();
+				if (duplicates != null)
 				{
-					public Object visit(IPersist o)
+					for (String name : duplicates.keySet())
 					{
-						addDuplicatePersist(o, duplicationMap, module.getProject());
-						return CONTINUE_TRAVERSAL;
-					}
+						Map<String, List<IPersist>> duplicateMap = duplicates.get(name);
+						for (String key : duplicateMap.keySet())
+						{
+							List<IPersist> lst = duplicateMap.get(key);
+							if (lst.size() >= 2)
+							{
+								for (IPersist persist : lst)
+								{
+									if (persist instanceof Relation)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, persist.getRootObject().getName());
+										addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL,
+											null,
+											persist);
+									}
+									else if (persist instanceof ValueList)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, persist.getRootObject().getName());
+										addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL,
+											null, persist);
+									}
+									else if (persist instanceof Media)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, persist.getRootObject().getName());
+										addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL,
+											null, persist);
+									}
+									else if (persist instanceof Form)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form", name, persist.getRootObject().getName());
+										addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL,
+											null, persist);
+									}
+									else if (persist instanceof ScriptCalculation)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table calculation ", ((ScriptCalculation)persist).getName(),
+											persist.getRootObject().getName() + "  on table  " + ((TableNode)persist.getParent()).getDataSource());
+										addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL,
+											null,
+											persist);
 
-				});
+									}
+									else if (persist instanceof AggregateVariable)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("aggregate variable", ((AggregateVariable)persist).getName(),
+											persist.getRootObject().getName() + "  on table  " + ((TableNode)persist.getParent()).getDataSource());
+										addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL,
+											null,
+											persist);
+									}
+									else if (persist instanceof ScriptMethod && persist.getParent() instanceof TableNode)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table method", ((ScriptMethod)persist).getName(),
+											persist.getRootObject().getName() + "  on table  " + ((TableNode)persist.getParent()).getDataSource());
+										addMarker(activeProject, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL,
+											null,
+											persist);
+									}
+									else if (persist instanceof IScriptElement)
+									{
+										String type = "method";
+										if (persist instanceof ScriptVariable)
+										{
+											type = "variable";
+										}
+										int lineNumber = ((IScriptElement)persist).getLineNumberOffset();
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(type, ((IScriptElement)persist).getName(),
+											persist.getRootObject().getName() + "." + ((IScriptElement)persist).getScopeName());
+										ServoyBuilder.addMarker(activeProject, mk.getType(), mk.getText(), lineNumber,
+											ServoyBuilder.DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
+
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 
-	private void addDeprecatedRelationWarningIfNeeded(IPersist persist, String relationsString, IProject project, String message,
+	private static void addDeprecatedRelationWarningIfNeeded(IPersist persist, String relationsString, IResource markerResource, String message,
 		FlattenedSolution flattenedSolution)
 	{
 		if (relationsString != null)
@@ -1746,14 +1317,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					relation = flattenedSolution.getRelation(r);
 					if (relation != null)
 					{
-						addDeprecatedElementWarningIfNeeded(persist, relation, project, message.replace("{r}", relation.getName()));
+						addDeprecatedElementWarningIfNeeded(persist, relation, markerResource, message.replace("{r}", relation.getName()));
 					}
 				}
 			}
 		}
 	}
 
-	private void addDeprecatedElementWarningIfNeeded(IPersist persist, ISupportDeprecated deprecatedPersist, IProject project, String message)
+	private static void addDeprecatedElementWarningIfNeeded(IPersist persist, ISupportDeprecated deprecatedPersist, IResource markerResource, String message)
 	{
 		if (deprecatedPersist != null)
 		{
@@ -1761,7 +1332,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 			if (deprecatedInfo != null)
 			{
-				addMarker(project, DEPRECATED_ELEMENT_USAGE, message + " " + deprecatedInfo, -1, DEPRECATED_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL,
+				addMarker(markerResource, DEPRECATED_ELEMENT_USAGE, message + " " + deprecatedInfo, -1, DEPRECATED_ELEMENT_USAGE_PROBLEM,
+					IMarker.PRIORITY_NORMAL,
 					null, persist);
 			}
 		}
@@ -1770,7 +1342,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	/*
 	 * Checks usage of deprecated Form/Relation/Valuelist/Media inside elements properties
 	 */
-	private void checkDeprecatedElementUsage(IPersist persist, IProject project, FlattenedSolution flattenedSolution)
+	public static void checkDeprecatedElementUsage(IPersist persist, IResource markerResource, FlattenedSolution flattenedSolution)
 	{
 		String elementName = null;
 		if (persist instanceof ISupportName) elementName = ((ISupportName)persist).getName();
@@ -1782,7 +1354,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			Form firstForm = flattenedSolution.getForm(((Solution)persist).getFirstFormID());
 			if (firstForm != null)
 			{
-				addDeprecatedElementWarningIfNeeded(persist, firstForm, project,
+				addDeprecatedElementWarningIfNeeded(persist, firstForm, markerResource,
 					"Solution \"" + elementName + "\" has a deprecated first form \"" + firstForm.getName() + "\".");
 			}
 		}
@@ -1821,7 +1393,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						message += extendsFormLayoutType + " form '" + extendsForm.getName() + "'.";
 
-						IMarker marker = addMarker(project, SUPERFORM_PROBLEM_TYPE, message, -1, SUPERFORM_PROBLEM, IMarker.PRIORITY_NORMAL, null, persist);
+						IMarker marker = addMarker(markerResource, SUPERFORM_PROBLEM_TYPE, message, -1, SUPERFORM_PROBLEM, IMarker.PRIORITY_NORMAL, null,
+							persist);
 						try
 						{
 							marker.setAttribute("Uuid", form.getUUID().toString());
@@ -1835,14 +1408,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 
 				// check form extends of a deprecated form
-				addDeprecatedElementWarningIfNeeded(persist, extendsForm, project,
+				addDeprecatedElementWarningIfNeeded(persist, extendsForm, markerResource,
 					"Form \"" + elementName + "\" extends a deprecated form \"" + extendsForm.getName() + "\".");
 			}
 
 			String initialSort = form.getInitialSort();
 			if (initialSort != null)
 			{
-				addDeprecatedRelationWarningIfNeeded(persist, initialSort, project,
+				addDeprecatedRelationWarningIfNeeded(persist, initialSort, markerResource,
 					"Form \"" + elementName + "\" has a deprecated relation \"{r}\" as initial sort.", flattenedSolution);
 			}
 		}
@@ -1860,14 +1433,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				tabForm = flattenedSolution.getForm(tab.getContainsFormID());
 				if (tabForm != null)
 				{
-					addDeprecatedElementWarningIfNeeded(persist, tabForm, project,
+					addDeprecatedElementWarningIfNeeded(persist, tabForm, markerResource,
 						"Element \"" + elementName + "\" contains a deprecated form \"" + tabForm.getName() + "\".");
 				}
 				// check usage of deprecated relation for a tab
 				tabRelationName = tab.getRelationName();
 				if (tabRelationName != null)
 				{
-					addDeprecatedRelationWarningIfNeeded(persist, tabRelationName, project,
+					addDeprecatedRelationWarningIfNeeded(persist, tabRelationName, markerResource,
 						"Element \"" + elementName + "\" has a deprecated relation \"{r}\".", flattenedSolution);
 				}
 			}
@@ -1878,7 +1451,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			ValueList valuelist = flattenedSolution.getValueList(((Field)persist).getValuelistID());
 			if (valuelist != null)
 			{
-				addDeprecatedElementWarningIfNeeded(persist, valuelist, project,
+				addDeprecatedElementWarningIfNeeded(persist, valuelist, markerResource,
 					"Field \"" + elementName + "\" has a deprecated valuelist \"" + valuelist.getName() + "\".");
 			}
 		}
@@ -1888,12 +1461,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			ValueList fallbackValuelist = flattenedSolution.getValueList(((ValueList)persist).getFallbackValueListID());
 			if (fallbackValuelist != null)
 			{
-				addDeprecatedElementWarningIfNeeded(persist, fallbackValuelist, project,
+				addDeprecatedElementWarningIfNeeded(persist, fallbackValuelist, markerResource,
 					"Valuelist \"" + elementName + "\" has a deprecated fallback valuelist \"" + fallbackValuelist.getName() + "\".");
 				if (fallbackValuelist.getFallbackValueListID() > 0)
 				{
 					ServoyMarker mk = MarkerMessages.ValuelistFallbackOfFallbackFound.fill(((ValueList)persist).getName(), fallbackValuelist.getName());
-					addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_WITH_FALLBACK_OF_FALLBACK, IMarker.PRIORITY_HIGH, null, persist);
+					addMarker(markerResource, mk.getType(), mk.getText(), -1, VALUELIST_WITH_FALLBACK_OF_FALLBACK, IMarker.PRIORITY_HIGH, null, persist);
 				}
 			}
 
@@ -1901,14 +1474,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String relationName = ((ValueList)persist).getRelationName();
 			if (relationName != null)
 			{
-				addDeprecatedRelationWarningIfNeeded(persist, relationName, project, "Valuelist \"" + elementName + "\" has a deprecated relation \"{r}\".",
+				addDeprecatedRelationWarningIfNeeded(persist, relationName, markerResource,
+					"Valuelist \"" + elementName + "\" has a deprecated relation \"{r}\".",
 					flattenedSolution);
 			}
 
 			String sortOptions = ((ValueList)persist).getSortOptions();
 			if (sortOptions != null)
 			{
-				addDeprecatedRelationWarningIfNeeded(persist, sortOptions, project,
+				addDeprecatedRelationWarningIfNeeded(persist, sortOptions, markerResource,
 					"Valuelist \"" + elementName + "\" has a deprecated relation \"{r}\" as sort option.", flattenedSolution);
 			}
 		}
@@ -1918,7 +1492,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String relationName = ((Portal)persist).getRelationName();
 			if (relationName != null)
 			{
-				addDeprecatedRelationWarningIfNeeded(persist, relationName, project, "Portal \"" + elementName + "\" has a deprecated relation \"{r}\".",
+				addDeprecatedRelationWarningIfNeeded(persist, relationName, markerResource, "Portal \"" + elementName + "\" has a deprecated relation \"{r}\".",
 					flattenedSolution);
 			}
 		}
@@ -1927,7 +1501,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String initialSort = ((Relation)persist).getInitialSort();
 			if (initialSort != null)
 			{
-				addDeprecatedRelationWarningIfNeeded(persist, initialSort, project,
+				addDeprecatedRelationWarningIfNeeded(persist, initialSort, markerResource,
 					"Relation \"" + elementName + "\" has a deprecated relation \"{r}\" as initial sort.", flattenedSolution);
 			}
 		}
@@ -1938,7 +1512,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			Media media = flattenedSolution.getMedia(((ISupportMedia)persist).getImageMediaID());
 			if (media != null)
 			{
-				addDeprecatedElementWarningIfNeeded(persist, media, project,
+				addDeprecatedElementWarningIfNeeded(persist, media, markerResource,
 					"Element \"" + elementName + "\" has a deprecated image media \"" + media.getName() + "\".");
 			}
 		}
@@ -1948,13 +1522,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			String dataProviderID = ((ISupportDataProviderID)persist).getDataProviderID();
 			if (dataProviderID != null)
 			{
-				addDeprecatedRelationWarningIfNeeded(persist, dataProviderID, project,
+				addDeprecatedRelationWarningIfNeeded(persist, dataProviderID, markerResource,
 					"Element \"" + elementName + "\" has a dataprovider with a deprecated relation \"{r}\".", flattenedSolution);
 			}
 		}
 	}
 
-	private void checkDeprecatedPropertyUsage(IPersist persist, IProject project)
+	public static void checkDeprecatedPropertyUsage(IPersist persist, IResource markerResource, IProject project)
 	{
 		if (persist instanceof Solution)
 		{
@@ -1968,7 +1542,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (solution.getLoginSolutionName() != null)
 					{
 						// login form will be ignored
-						addDeprecatedPropertyUsageMarker(persist, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
 							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
 							"Solution '" + solution.getName() + "' has a loginForm property set which is overridden by the loginSolutionName property.");
 					}
@@ -1976,7 +1550,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						solution.getSolutionType() != SolutionMetaData.NG_CLIENT_ONLY)
 					{
 						// loginForm is deprecated
-						addDeprecatedPropertyUsageMarker(persist, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
+						addDeprecatedPropertyUsageMarker(persist, markerResource, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
 							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
 							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
 					}
@@ -2006,7 +1580,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				try
 				{
 					//only rowBGColorCalculation deprecated property usage marker is error by default
-					addDeprecatedPropertyUsageMarker(persist, project, new Pair<String, ProblemSeverity>("deprecatedPropertyUsage", ProblemSeverity.ERROR),
+					addDeprecatedPropertyUsageMarker(persist, markerResource, project,
+						new Pair<String, ProblemSeverity>("deprecatedPropertyUsage", ProblemSeverity.ERROR),
 						StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName(), type + " '" + ((ISupportName)persist).getName() +
 							"' has rowBGColorCalculation property set which is deprecated, use CSS (odd/even/selected) or onRender event instead.");
 				}
@@ -2018,12 +1593,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void addDeprecatedPropertyUsageMarker(IPersist persist, IProject project, Pair<String, ProblemSeverity> serverityPair, String propertyName,
+	private static void addDeprecatedPropertyUsageMarker(IPersist persist, IResource markerResource, IProject project,
+		Pair<String, ProblemSeverity> serverityPair,
+		String propertyName,
 		String message) throws CoreException
 	{
 		if (message != null)
 		{
-			IMarker marker = addMarker(project, DEPRECATED_PROPERTY_USAGE, message, -1, serverityPair, IMarker.PRIORITY_NORMAL, null, persist);
+			IMarker marker = addMarker(markerResource, DEPRECATED_PROPERTY_USAGE, message, -1, serverityPair, IMarker.PRIORITY_NORMAL, null, persist);
 			if (marker != null)
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
@@ -2070,7 +1647,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void checkDuplicateUUID(IPersist persist, IProject project)
+	public static void checkDuplicateUUID(IPersist persist, IProject project)
 	{
 		boolean found = false;
 
@@ -2111,7 +1688,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						IFile fileForLocation = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(
 							Path.fromPortableString(persistFile.replace('\\', '/')));
 						ServoyMarker mk = MarkerMessages.UUIDDuplicate.fill(persist.getUUID());
-						addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE, IMarker.PRIORITY_HIGH, fileForLocation.toString(),
+						addMarker(ResourcesPlugin.getWorkspace().getRoot()
+							.getFile(new Path(pathPair.getLeft() + pathPair.getRight())), mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
+							IMarker.PRIORITY_HIGH, fileForLocation.toString(),
 							persist);
 						break; // only 1 marker has to be set for this persist.
 					}
@@ -2176,6 +1755,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, METHOD_OVERRIDE);
 		deleteMarkers(project, DEPRECATED_SPEC);
 		deleteMarkers(project, PARAMETERS_MISMATCH);
+		deleteMarkers(project, NAMED_FOUNDSET_DATASOURCE);
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -2213,42 +1793,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				addDeserializeProblemMarkersIfNeeded(servoyProject);
 				refreshDBIMarkers();
-				checkPersistDuplication();
+				checkPersistDuplicateName();
+				checkPersistDuplicateUUID();
 				checkServers(project);
 				checkDataSources(project);
 
 				final Solution solution = servoyProject.getSolution();
-				if (servoyModel.getActiveProject().getSolution().getName().equals(solution.getName()))
-				{
-					//skipping modules when checking for web service solutions
-					if (solution.getMustAuthenticate())
-					{
-						//check if solution is used as web service
-						Iterator<Form> formsIt = Solution.getForms(solution.getAllObjectsAsList(), null, false);
-						boolean isServiceSolution = false;
-						while (formsIt.hasNext() && !isServiceSolution)
-						{
-							Iterator<ScriptMethod> methodIt = formsIt.next().getScriptMethods(false);
-							while (methodIt.hasNext())
-							{
-								String methodName = methodIt.next().getName();
-								if (methodName.equals("ws_read") || methodName.equals("ws_create") || methodName.equals("ws_delete") ||
-									methodName.equals("ws_update") || methodName.equals("ws_authenticate") || methodName.equals("ws_response_headers"))
-								{
-									isServiceSolution = true;
-									break;
-								}
-							}
-						}
-						if (isServiceSolution)
-						{
-							//create warning marker
-							ServoyMarker mk = MarkerMessages.SolutionUsedAsWebServiceMustAuthenticateProblem.fill(solution.getName());
-							addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM, IMarker.PRIORITY_HIGH,
-								null, solution);
-						}
-					}
-				}
+
+				ServoyBuilderUtils.checkServiceSolutionMustAuthenticate(servoyModel, solution, project);
 
 				if (!servoyModel.shouldBeModuleOfActiveSolution(solution.getName()) &&
 					solution.getSolutionMetaData().getFileVersion() > AbstractRepository.repository_version)
@@ -2256,19 +1808,40 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					ServoyMarker mk = MarkerMessages.SolutionWithHigherFileVersion.fill("Solution", solution.getName());
 					addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_WITH_HIGHER_FILE_VERSION, IMarker.PRIORITY_HIGH, null, null);
 				}
+				final ServoyProject[] modules = getSolutionModules(servoyProject);
+				if (modules != null)
+				{
+					for (ServoyProject module : modules)
+					{
+						if (module.getSolution() != null && !module.equals(servoyProject))
+						{
+							final IProject moduleProject = ResourcesPlugin.getWorkspace().getRoot().getProject(
+								module.getSolution().getName());
+							deleteMarkers(moduleProject, SOLUTION_PROBLEM_MARKER_TYPE);
 
+							if (module.getSolutionMetaData().getFileVersion() > AbstractRepository.repository_version)
+							{
+								ServoyMarker mk = MarkerMessages.SolutionWithHigherFileVersion.fill("Module",
+									module.getSolution().getName());
+								addMarker(moduleProject, mk.getType(), mk.getText(), -1, SOLUTION_WITH_HIGHER_FILE_VERSION,
+									IMarker.PRIORITY_HIGH, null, null);
+							}
+						}
+					}
+				}
 				solution.acceptVisitor(new IPersistVisitor()
 				{
-					private final ServoyProject[] modules = getSolutionModules(servoyProject);
 					private final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
-					private IntHashMap<IPersist> elementIdPersistMap = null;
-					private final Map<UUID, List<IPersist>> theMakeSureNoDuplicateUUIDsAreFound = new HashMap<UUID, List<IPersist>>();
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
 					private final Set<UUID> methodsParsed = new HashSet<UUID>();
-					private final Map<String, Form> namedFoundsets = new HashMap<String, Form>();
 
 					public Object visit(final IPersist o)
 					{
+						if (o instanceof Form)
+						{
+							ServoyFormBuilder.addFormMarkers(servoyProject, (Form)o, methodsParsed, formsAbstractChecked);
+							return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+						}
 						checkCancel();
 
 						IPersist context = o.getAncestor(IRepository.FORMS);
@@ -2310,406 +1883,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									final int element_id = Utils.getAsInteger(property_value);
 									if (element_id > 0)
 									{
-										if (elementIdPersistMap == null)
-										{
-											missingServers.clear();
-											goodServers.clear();
-											elementIdPersistMap = new IntHashMap<IPersist>();
-											solution.acceptVisitor(new IPersistVisitor()
-											{
-												public Object visit(IPersist p)
-												{
-													// uuid is inherited as it is in json, thus generating duplicate uuids; we should fix inheritance
-													if (p instanceof ChildWebComponent) return IPersistVisitor.CONTINUE_TRAVERSAL;
-													elementIdPersistMap.put(p.getID(), p);
-													if (p instanceof Form && ((Form)p).getNamedFoundSet() != null &&
-														((Form)p).getNamedFoundSet().startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
-													{
-														namedFoundsets.put(((Form)p).getNamedFoundSet(), (Form)p);
-													}
-													List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
-													if (lst == null)
-													{
-														lst = new ArrayList<IPersist>(3);
-														lst.add(p);
-														theMakeSureNoDuplicateUUIDsAreFound.put(p.getUUID(), lst);
+										final IPersist foundPersist = flattenedSolution
+											.searchPersist(((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository())
+												.getUUIDForElementId(element_id, element_id, -1, -1, null));
+										ServoyBuilderUtils.addNullReferenceMarker(project, o, foundPersist, context, element);
+										ServoyBuilderUtils.addNotAccessibleMethodMarkers(project, o, foundPersist, context, element, flattenedSolution);
+										ServoyBuilderUtils.addMethodParseErrorMarkers(project, o, foundPersist, context, element, methodsParsed,
+											methodsReferences);
 
-														if (((AbstractBase)p).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
-														{
-															checkDuplicateUUID(p, project);
-														}
-													}
-													else
-													{
-														IPersist other = lst.get(0);
-
-														// for now only add it on both if there is 1, just skip the rest.
-														if (lst.size() == 1)
-														{
-															ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
-																SolutionSerializer.getRelativePath(p, false) + SolutionSerializer.getFileName(p, false));
-															addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
-																IMarker.PRIORITY_HIGH, null, other);
-														}
-														ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
-															SolutionSerializer.getRelativePath(other, false) + SolutionSerializer.getFileName(other, false));
-														addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE, IMarker.PRIORITY_HIGH,
-															null, p);
-													}
-													return IPersistVisitor.CONTINUE_TRAVERSAL;
-												}
-											});
-											if (modules != null)
-											{
-												for (ServoyProject module : modules)
-												{
-													if (module.getSolution() != null && !module.equals(servoyProject))
-													{
-														final IProject moduleProject = ResourcesPlugin.getWorkspace().getRoot().getProject(
-															module.getSolution().getName());
-														deleteMarkers(moduleProject, DUPLICATE_UUID);
-														deleteMarkers(moduleProject, DUPLICATE_SIBLING_UUID);
-														deleteMarkers(moduleProject, SOLUTION_PROBLEM_MARKER_TYPE);
-
-														if (module.getSolutionMetaData().getFileVersion() > AbstractRepository.repository_version)
-														{
-															ServoyMarker mk = MarkerMessages.SolutionWithHigherFileVersion.fill("Module",
-																module.getSolution().getName());
-															addMarker(moduleProject, mk.getType(), mk.getText(), -1, SOLUTION_WITH_HIGHER_FILE_VERSION,
-																IMarker.PRIORITY_HIGH, null, null);
-														}
-
-														module.getSolution().acceptVisitor(new IPersistVisitor()
-														{
-															public Object visit(IPersist p)
-															{
-																elementIdPersistMap.put(p.getID(), p);
-																if (p instanceof Form && ((Form)p).getNamedFoundSet() != null &&
-																	((Form)p).getNamedFoundSet().startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
-																{
-																	namedFoundsets.put(((Form)p).getNamedFoundSet(), (Form)p);
-																}
-																List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
-																if (lst == null)
-																{
-																	lst = new ArrayList<IPersist>(3);
-																	lst.add(p);
-																	theMakeSureNoDuplicateUUIDsAreFound.put(p.getUUID(), lst);
-																	if (((AbstractBase)p).getRuntimeProperty(
-																		SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
-																	{
-																		checkDuplicateUUID(p, moduleProject);
-																	}
-																}
-																else
-																{
-																	IPersist other = lst.get(0);
-
-																	// for now only add it on both if there is 1, just skip the rest.
-																	if (lst.size() == 1)
-																	{
-																		ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(other.getUUID(),
-																			SolutionSerializer.getRelativePath(p, false) +
-																				SolutionSerializer.getFileName(p, false));
-																		addMarker(moduleProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
-																			IMarker.PRIORITY_HIGH, null, other);
-																	}
-																	ServoyMarker mk = MarkerMessages.UUIDDuplicateIn.fill(p.getUUID(),
-																		SolutionSerializer.getRelativePath(other, false) +
-																			SolutionSerializer.getFileName(other, false));
-																	addMarker(moduleProject, mk.getType(), mk.getText(), -1, DUPLICATION_UUID_DUPLICATE,
-																		IMarker.PRIORITY_HIGH, null, p);
-																}
-																return IPersistVisitor.CONTINUE_TRAVERSAL;
-															}
-														});
-													}
-												}
-											}
-										}
-										final IPersist foundPersist = elementIdPersistMap.get(element_id);
-										if (foundPersist == null && !element.getName().equals(StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName()))
-										{
-											String elementName = null;
-											String inForm = null;
-											if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
-												elementName = ((ISupportName)o).getName();
-											if (context instanceof Form) inForm = ((Form)context).getName();
-											ServoyMarker mk;
-											Pair<String, ProblemSeverity> problemPair;
-											boolean addMarker = true;
-											if (elementName == null)
-											{
-												if (inForm == null)
-												{
-													mk = MarkerMessages.PropertyTargetNotFound.fill(element.getName());
-													problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
-												}
-												else
-												{
-													mk = MarkerMessages.PropertyInFormTargetNotFound.fill(element.getName(), inForm);
-													problemPair = FORM_PROPERTY_TARGET_NOT_FOUND;
-												}
-											}
-											else
-											{
-												if (inForm == null)
-												{
-													mk = MarkerMessages.PropertyOnElementTargetNotFound.fill(element.getName(), elementName);
-													problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
-													IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null,
-														o);
-													marker.setAttribute("Uuid", o.getUUID().toString());
-													marker.setAttribute("SolutionName", elementName);
-													marker.setAttribute("PropertyName", element.getName());
-													marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(element.getName(), o.getClass()));
-													addMarker = false;
-												}
-												else
-												{
-													mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(element.getName(), elementName, inForm);
-													problemPair = FORM_PROPERTY_TARGET_NOT_FOUND;
-												}
-											}
-											if (BaseComponent.isEventProperty(element.getName()) || BaseComponent.isCommandProperty(element.getName()))
-											{
-												// TODO: this is a place where the same marker appears in more than one category...
-												IMarker marker = addMarker(project,
-													BaseComponent.isEventProperty(element.getName()) ? INVALID_EVENT_METHOD : INVALID_COMMAND_METHOD,
-													mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null, o);
-												if (marker != null)
-												{
-													marker.setAttribute("EventName", element.getName());
-													if (context instanceof Form)
-													{
-														marker.setAttribute("DataSource", ((Form)context).getDataSource());
-														marker.setAttribute("ContextTypeId", context.getTypeID());
-													}
-													if (context instanceof TableNode)
-													{
-														marker.setAttribute("DataSource", ((TableNode)context).getDataSource());
-														marker.setAttribute("ContextTypeId", context.getTypeID());
-													}
-												}
-											}
-											else if (addMarker)
-											{
-												addMarker(project, mk.getType(), mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null, o);
-											}
-										}
-										else if (foundPersist instanceof ScriptMethod && context != null)
-										{
-											ScriptMethod scriptMethod = (ScriptMethod)foundPersist;
-											if (scriptMethod.getParent() != context && scriptMethod.isPrivate())
-											{
-												String elementName = null;
-												String inForm = null;
-												if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
-													elementName = ((ISupportName)o).getName();
-												if (context instanceof Form) inForm = ((Form)context).getName();
-												ServoyMarker mk;
-												Pair<String, ProblemSeverity> problemPair;
-												String prefix = "";
-												if (scriptMethod.getScopeName() != null)
-												{
-													prefix = scriptMethod.getScopeName() + '.';
-												}
-												else if (scriptMethod.getParent() instanceof TableNode)
-												{
-													prefix = ((TableNode)scriptMethod.getParent()).getDataSource() + '/';
-												}
-												if (elementName == null)
-												{
-													if (inForm == null)
-													{
-														mk = MarkerMessages.PropertyTargetNotAccessible.fill(element.getName(),
-															prefix + scriptMethod.getName());
-														problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
-													}
-													else
-													{
-														mk = MarkerMessages.PropertyInFormTargetNotAccessible.fill(element.getName(), inForm,
-															prefix + scriptMethod.getName());
-														problemPair = FORM_PROPERTY_TARGET_NOT_FOUND;
-													}
-												}
-												else
-												{
-													if (inForm == null)
-													{
-														mk = MarkerMessages.PropertyOnElementTargetNotAccessible.fill(element.getName(), elementName,
-															prefix + scriptMethod.getName());
-														problemPair = SOLUTION_PROPERTY_TARGET_NOT_FOUND;
-													}
-													else
-													{
-														mk = MarkerMessages.PropertyOnElementInFormTargetNotAccessible.fill(element.getName(), elementName,
-															inForm, prefix + scriptMethod.getName());
-														problemPair = FORM_PROPERTY_TARGET_NOT_FOUND;
-													}
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, problemPair, IMarker.PRIORITY_LOW, null, o);
-											}
-											else if (context instanceof Form)
-											{
-												Form parentForm = (Form)context;
-												Form methodForm = (Form)scriptMethod.getAncestor(IRepository.FORMS);
-												if (methodForm != null &&
-													!ServoyBuilder.getPersistFlattenedSolution(parentForm, flattenedSolution).getFormHierarchy(
-														parentForm).contains(methodForm))
-												{
-													ServoyMarker mk;
-													if (!(o instanceof ISupportName) || o instanceof Form || ((ISupportName)o).getName() == null)
-													{
-														mk = MarkerMessages.FormPropertyMethodNotAccessible.fill(element.getName(), parentForm.getName(),
-															methodForm.getName());
-													}
-													else
-													{
-														mk = MarkerMessages.FormPropertyOnElementMethodNotAccessible.fill(element.getName(),
-															((ISupportName)o).getName(), parentForm.getName(), methodForm.getName());
-													}
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_PROPERTY_METHOD_NOT_ACCESIBLE, IMarker.PRIORITY_LOW,
-														null, o);
-												}
-												else if (scriptMethod.isDeprecated())
-												{
-													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
-														"form " + parentForm.getName(), element.getName());
-													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-														IMarker.PRIORITY_NORMAL, null, o);
-												}
-
-											}
-											else if (scriptMethod.isDeprecated())
-											{
-												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
-													"solution " + project.getName(), element.getName());
-												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-													IMarker.PRIORITY_NORMAL, null, o);
-											}
-										}
-										else if (foundPersist instanceof Form)
+										if (foundPersist instanceof Form)
 										{
 											if (!StaticContentSpecLoader.PROPERTY_EXTENDSID.getPropertyName().equals(element.getName()) &&
-												!formCanBeInstantiated(((Form)foundPersist),
+												!ServoyBuilderUtils.formCanBeInstantiated(((Form)foundPersist),
 													ServoyBuilder.getPersistFlattenedSolution(foundPersist, flattenedSolution), formsAbstractChecked))
 											{
 												ServoyMarker mk = MarkerMessages.PropertyFormCannotBeInstantiated.fill(element.getName());
 												addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED,
 													IMarker.PRIORITY_LOW, null, o);
-											}
-										}
-										else if (context instanceof Form && foundPersist instanceof ISupportEncapsulation)
-										{
-											addEncapsulationMarker(project, o, foundPersist, (Form)context);
-										}
-										if (context instanceof Form && ((Form)context).isFormComponent().booleanValue() &&
-											BaseComponent.isEventOrCommandProperty(element.getName()) &&
-											((Form)context).getFlattenedPropertiesMap().containsKey(element.getName()))
-										{
-											ServoyMarker mk = MarkerMessages.FormReferenceInvalidProperty.fill(((Form)context).getName(), element.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_REFERENCE_INVALID_PROPERTY, IMarker.PRIORITY_NORMAL, null,
-												context);
-										}
-										if (BaseComponent.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
-											(foundPersist instanceof ScriptMethod) && !methodsParsed.contains(foundPersist.getUUID()))
-										{
-											methodsParsed.add(foundPersist.getUUID());
-											parseEventMethod(project, (ScriptMethod)foundPersist, element.getName());
-										}
-										if ((foundPersist instanceof ScriptMethod) &&
-											(BaseComponent.isEventProperty(element.getName()) || BaseComponent.isCommandProperty(element.getName())))
-										{
-											if (methodsReferences.containsKey(foundPersist))
-											{
-												if (methodsReferences.get(foundPersist).booleanValue())
-												{
-													String elementName = "";
-													ServoyMarker mk = null;
-													Pair<String, ProblemSeverity> problemSeverity = null;
-													if (o instanceof ISupportName)
-													{
-														elementName = ((ISupportName)o).getName();
-														if (elementName == null || "".equals(elementName)) elementName = "<no name>";
-														mk = MarkerMessages.PropertyMultipleMethodsOnSameElement.fill(elementName);
-														problemSeverity = FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT;
-													}
-													else if (o instanceof TableNode)
-													{
-														elementName = ((TableNode)o).getTableName();
-														mk = MarkerMessages.PropertyMultipleMethodsOnSameTable.fill(elementName);
-														problemSeverity = PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE;
-													}
-													methodsReferences.put(foundPersist, Boolean.FALSE);
-													addMarker(project, mk.getType(), mk.getText(), -1, problemSeverity, IMarker.PRIORITY_LOW, null, o);
-												}
-											}
-											else
-											{
-												methodsReferences.put(foundPersist, Boolean.TRUE);
-											}
-											if (o instanceof AbstractBase)
-											{
-												Pair<List<String>, List<Object>> instanceParameters = ((AbstractBase)o).getFlattenedMethodParameters(
-													element.getName());
-												MethodArgument[] methodArguments = ((ScriptMethod)foundPersist).getRuntimeProperty(
-													IScriptProvider.METHOD_ARGUMENTS);
-												if (instanceParameters != null && instanceParameters.getRight() != null)
-												{
-													boolean signatureMismatch = false;
-													if (instanceParameters.getLeft() != null)
-													{
-														// check for parameter name differences
-														for (int i = 0; i < instanceParameters.getLeft().size(); i++)
-														{
-															String name = instanceParameters.getLeft().get(i);
-															if (i >= methodArguments.length)
-															{
-																signatureMismatch = true;
-																break;
-															}
-															else if (!name.equals(methodArguments[i].getName()))
-															{
-																signatureMismatch = true;
-																break;
-															}
-														}
-													}
-													if (instanceParameters.getRight().size() > methodArguments.length)
-													{
-														signatureMismatch = true;
-													}
-													// add marker if signature mismach
-													if (signatureMismatch)
-													{
-														String handlerName = element.getName().substring(0, (element.getName().indexOf("MethodID") > 0
-															? element.getName().indexOf("MethodID") : element.getName().length()));
-
-														String functionDefinitionName = ((ScriptMethod)foundPersist).getName();
-														if (((ScriptMethod)foundPersist).getScopeName() != null)
-														{
-															functionDefinitionName = ((ScriptMethod)foundPersist).getScopeName() + "." + functionDefinitionName;
-														}
-														else
-														{
-															functionDefinitionName = "forms." +
-																((ISupportName)((ScriptMethod)foundPersist).getParent()).getName() + "." +
-																functionDefinitionName;
-														}
-
-														String componentName = "";
-														if (o instanceof ISupportName && ((ISupportName)o).getName() != null &&
-															((ISupportName)o).getName().length() > 1)
-														{
-															componentName = " \"" + ((ISupportName)o).getName() + "\"";
-														}
-														ServoyMarker mk = MarkerMessages.EventHandlerSignatureMismatch.fill(functionDefinitionName, handlerName,
-															RepositoryHelper.getObjectTypeName(o.getTypeID()), componentName);
-														addMarker(project, mk.getType(), mk.getText(), -1, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH,
-															IMarker.PRIORITY_LOW, null, o);
-													}
-												}
 											}
 										}
 									}
@@ -2720,252 +1910,35 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							throw new RuntimeException(e);
 						}
+
+						if (((AbstractBase)o).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID) != null)
+						{
+							checkDuplicateUUID(o, project);
+						}
 						checkCancel();
 						addMissingServer(o, missingServers, goodServers);
 						checkCancel();
 						if (o instanceof ValueList && (!missingServers.containsKey(((ValueList)o).getServerName())))
 						{
 							ValueList vl = (ValueList)o;
-							addMarkers(project, checkValuelist(vl, ServoyBuilder.getPersistFlattenedSolution(vl, flattenedSolution),
+							addMarkers(project, ServoyValuelistBuilder.checkValuelist(vl, ServoyBuilder.getPersistFlattenedSolution(vl, flattenedSolution),
 								ApplicationServerRegistry.get().getServerManager(), false), vl);
 						}
 						checkCancel();
-						if (o instanceof WebComponent)
+						if (o instanceof Relation)
 						{
-							WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
-							if (spec != null && spec.getHandlers() != null)
+							Relation relation = (Relation)o;
+							if (!missingServers.containsKey(relation.getPrimaryServerName()) && !missingServers.containsKey(relation.getForeignServerName()))
 							{
-								for (String handler : spec.getHandlers().keySet())
-								{
-									UUID uuid = Utils.getAsUUID(((WebComponent)o).getProperty(handler), false);
-									if (uuid != null)
-									{
-										ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(uuid.toString());
-										if (scriptMethod == null)
-										{
-											ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
-												o.getAncestor(IRepository.FORMS));
-											IMarker marker = addMarker(project, INVALID_EVENT_METHOD, mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND,
-												IMarker.PRIORITY_LOW, null, o);
-											if (marker != null)
-											{
-												try
-												{
-													marker.setAttribute("EventName", handler);
-												}
-												catch (Exception ex)
-												{
-													ServoyLog.logError(ex);
-												}
-											}
-										}
-									}
-								}
-							}
-							if (spec != null)
-							{
-								Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
-								if (properties.size() > 0)
-								{
-									FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((WebComponent)o, flattenedSolution, null, true);
-									Form form = (Form)o.getAncestor(IRepository.FORMS);
-									for (PropertyDescription pd : properties)
-									{
-										String datasource = null;
-										Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
-										Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
-										if (frm == null) continue;
-										if (pd.getConfig() instanceof ComponentTypeConfig)
-										{
-											checkForListFormComponent(frm, o);
-											String forFoundsetName = ((ComponentTypeConfig)pd.getConfig()).forFoundset;
-											String foundsetValue = null;
-											if (((WebComponent)o).hasProperty(forFoundsetName))
-											{
-												Object foundsetJson = ((WebComponent)o).getProperty(forFoundsetName);
-												if (foundsetJson instanceof JSONObject)
-												{
-													foundsetValue = (String)((JSONObject)foundsetJson).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
-												}
-											}
-											if (foundsetValue != null)
-											{
-												if (DataSourceUtils.isDatasourceUri(foundsetValue))
-												{
-													datasource = foundsetValue;
-												}
-												else if (foundsetValue.equals(""))
-												{
-													datasource = form.getDataSource();
-												}
-												else
-												{
-													Relation[] relations = flattenedSolution.getRelationSequence(foundsetValue);
-													if (relations != null && relations.length > 0)
-													{
-														datasource = relations[relations.length - 1].getForeignDataSource();
-													}
-													else
-													{
-														IFoundSet foundset;
-														try
-														{
-															foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(
-																foundsetValue);
-															if (foundset != null)
-															{
-																datasource = foundset.getDataSource();
-															}
-														}
-														catch (ServoyException e)
-														{
-															ServoyLog.logError(e);
-														}
-													}
-												}
-												if (frm.getDataSource() != null && !Utils.equalObjects(datasource, frm.getDataSource()))
-												{
-													ServoyMarker mk = MarkerMessages.FormComponentForFoundsetInvalidDataSource.fill(((WebComponent)o).getName(),
-														pd.getName(), frm.getName(), forFoundsetName);
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE,
-														IMarker.PRIORITY_NORMAL, null, o);
-												}
-											}
-										}
-										else if (frm.getDataSource() != null && !Utils.equalObjects(form.getDataSource(), frm.getDataSource()))
-										{
-											ServoyMarker mk = MarkerMessages.FormComponentInvalidDataSource.fill(((WebComponent)o).getName(), pd.getName(),
-												frm.getName(), form.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_INVALID_DATASOURCE, IMarker.PRIORITY_NORMAL, null,
-												o);
-										}
-
-										FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd,
-											(JSONObject)propertyValue, frm, flattenedSolution);
-										for (FormElement element : cache.getFormComponentElements())
-										{
-											checkDataProviders(element.getPersistIfAvailable(), context, datasource);
-										}
-									}
-								}
+								ServoyRelationBuilder.checkRelation(relation);
 							}
 						}
 						checkCancel();
 						if (o instanceof Media)
 						{
-							Media oMedia = (Media)o;
-							if (oMedia.getName().toLowerCase().endsWith(".tiff") || oMedia.getName().toLowerCase().endsWith(".tif"))
-							{
-								Pair<String, String> path = SolutionSerializer.getFilePath(oMedia, false);
-								ServoyMarker mk = MarkerMessages.MediaTIFF.fill(path.getLeft() + path.getRight());
-								addMarker(project, mk.getType(), mk.getText(), -1, MEDIA_TIFF, IMarker.PRIORITY_NORMAL, null, oMedia);
-							}
+							ServoyMediaBuilder.checkMedia((Media)o);
 						}
 						checkCancel();
-						checkDataProviders(o, context, null);
-						checkCancel();
-						if (o instanceof IFormElement)
-						{
-							String name = ((ISupportName)o).getName();
-							if (name != null && name.startsWith(ComponentFactory.WEB_ID_PREFIX))
-							{
-								ServoyMarker mk = MarkerMessages.ElementNameReservedPrefixIdentifier.fill(name, ComponentFactory.WEB_ID_PREFIX);
-								addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_ELEMENT_NAME_RESERVED_PREFIX_IDENTIFIER, IMarker.PRIORITY_NORMAL,
-									null, o);
-							}
-						}
-						if (o instanceof BaseComponent && ((BaseComponent)o).getVisible())
-						{
-							// check if not outside form
-							Form form = (Form)o.getAncestor(IRepository.FORMS);
-							form = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(form);
-							if (form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) == null)
-							{
-								Point location = CSSPositionUtils.getLocation((BaseComponent)o);
-								if (location != null)
-								{
-									boolean outsideForm = false;
-									Iterator<com.servoy.j2db.persistence.Part> parts = form.getParts();
-									while (parts.hasNext())
-									{
-										com.servoy.j2db.persistence.Part part = parts.next();
-										int startPos = form.getPartStartYPos(part.getID());
-										int endPos = part.getHeight();
-										if (startPos <= location.y && endPos > location.y)
-										{
-											// found the part
-											int height = CSSPositionUtils.getSize((BaseComponent)o).height;
-											if (location.y + height > endPos)
-											{
-												String elementName = null;
-												String inForm = null;
-												String partName = com.servoy.j2db.persistence.Part.getDisplayName(part.getPartType());
-												if (o instanceof ISupportName && ((ISupportName)o).getName() != null) elementName = ((ISupportName)o).getName();
-												inForm = form.getName();
-												if (elementName == null)
-												{
-													elementName = o.getUUID().toString();
-												}
-												ServoyMarker mk = MarkerMessages.FormNamedElementOutsideBoundsOfPart.fill(elementName, inForm, partName);
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_ELEMENT_OUTSIDE_BOUNDS, IMarker.PRIORITY_LOW, null, o);
-											}
-											int width = form.getWidth();
-											if (PersistUtils.isHeaderPart(part.getPartType()) || PersistUtils.isFooterPart(part.getPartType()))
-											{
-												String defaultPageFormat = form.getDefaultPageFormat();
-												PageFormat currentPageFormat = null;
-												try
-												{
-													currentPageFormat = PersistHelper.createPageFormat(defaultPageFormat);
-													if (currentPageFormat == null)
-													{
-														defaultPageFormat = Settings.getInstance().getProperty("pageformat");
-														currentPageFormat = PersistHelper.createPageFormat(defaultPageFormat);
-													}
-													if (currentPageFormat == null)
-													{
-														currentPageFormat = new PageFormat();
-													}
-												}
-												catch (NoSuchElementException e)
-												{
-													ServoyLog.logWarning("Could not parse page format '" + defaultPageFormat + '\'', null);
-												}
-												if (currentPageFormat != null)
-												{
-													int w = (int)(currentPageFormat.getImageableWidth() * (form.getPaperPrintScale() / 100d));
-													if (width < w)
-													{
-														width = w;
-													}
-												}
-											}
-											if (width < location.x + CSSPositionUtils.getSize((BaseComponent)o).width)
-											{
-												outsideForm = true;
-											}
-											break;
-										}
-									}
-									if (location.y > form.getSize().height && form.getParts().hasNext())
-									{
-										outsideForm = true;
-									}
-									if (outsideForm)
-									{
-										String elementName = null;
-										if (o instanceof ISupportName && ((ISupportName)o).getName() != null) elementName = ((ISupportName)o).getName();
-										ServoyMarker mk;
-										if (elementName == null)
-										{
-											elementName = o.getUUID().toString();
-										}
-										mk = MarkerMessages.FormNamedElementOutsideBoundsOfForm.fill(elementName, form.getName());
-										addMarker(project, mk.getType(), mk.getText(), -1, FORM_ELEMENT_OUTSIDE_BOUNDS, IMarker.PRIORITY_LOW, null, o);
-									}
-								}
-							}
-						}
 						if (o instanceof ISupportName && !(o instanceof Media))
 						{
 							String name = ((ISupportName)o).getName();
@@ -3012,281 +1985,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						if (o instanceof Form)
-						{
-							Form form = (Form)o;
-							FlattenedSolution formFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(form, flattenedSolution);
-							ITable table = null;
-							String path = form.getSerializableRuntimeProperty(IScriptProvider.FILENAME);
-							if (path != null && !path.endsWith(SolutionSerializer.getFileName(form, false)))
-							{
-								ServoyMarker mk = MarkerMessages.FormFileNameInconsistent.fill(form.getName(), path);
-								addMarker(project, mk.getType(), mk.getText(), -1, FORM_FILE_NAME_INCONSISTENT, IMarker.PRIORITY_NORMAL, null, form);
-							}
-							if (!missingServers.containsKey(form.getServerName()))
-							{
-								try
-								{
-									table = formFlattenedSolution.getTable(form.getDataSource());
-
-									if (table == null && form.getDataSource() != null)
-									{
-										ServoyMarker mk = MarkerMessages.FormTableNotAccessible.fill(form.getName(), form.getTableName());
-										addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
-									}
-									else if (table != null && !(table instanceof AbstractMemTable) && table.getRowIdentColumnsCount() == 0)
-									{
-										ServoyMarker mk = MarkerMessages.FormTableNoPK.fill(form.getName(), form.getTableName());
-										addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
-									}
-									else if (table != null && form.getInitialSort() != null)
-									{
-										addMarkers(project, checkSortOptions(table, form.getInitialSort(), form, formFlattenedSolution), form);
-									}
-									if (table != null && table.isMarkedAsHiddenInDeveloper())
-									{
-										ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "form ", form.getName());
-										addMarker(project, mk.getType(), mk.getText(), -1, INVALID_TABLE_REFERENCE, IMarker.PRIORITY_LOW, null, form);
-									}
-								}
-								catch (Exception e)
-								{
-									exceptionCount++;
-									if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
-									ServoyMarker mk = MarkerMessages.FormTableNotAccessible.fill(form.getName(), form.getTableName());
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
-								}
-							}
-
-							// if form uses global relation named foundset, check to see that it is valid
-							String namedFoundset = form.getNamedFoundSet();
-							if (namedFoundset != null && !namedFoundset.equals(Form.NAMED_FOUNDSET_EMPTY) &&
-								!namedFoundset.equals(Form.NAMED_FOUNDSET_SEPARATE) && !namedFoundset.startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
-							{
-								// it must be a global relation then
-								Relation r = formFlattenedSolution.getRelation(form.getGlobalRelationNamedFoundset());
-								if (r == null)
-								{
-									// what is this then?
-									ServoyMarker mk = MarkerMessages.PropertyInFormTargetNotFound.fill("namedFoundset", form.getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, form);
-								}
-								else if (!r.isGlobal() ||
-									!Solution.areDataSourcesCompatible(solution.getRepository(), form.getDataSource(), r.getForeignDataSource()))
-								{
-									// wrong kind of relation
-									ServoyMarker mk = MarkerMessages.FormNamedFoundsetIncorrectValue.fill(form.getName(),
-										" The relation must be global and it's foreign data source must match the form's datasource.");
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_FOUNDSET_INCORRECT_VALUE, IMarker.PRIORITY_NORMAL, null, form);
-								}
-							}
-							if (namedFoundset != null && namedFoundset.startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
-							{
-								if (namedFoundsets.containsKey(namedFoundset) &&
-									!Utils.equalObjects(form.getDataSource(), namedFoundsets.get(namedFoundset).getDataSource()))
-								{
-									Form defineForm = namedFoundsets.get(namedFoundset);
-									ServoyMarker mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
-										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), form.getName(), form.getDataSource(),
-										defineForm.getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
-										form);
-
-									mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
-										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), defineForm.getName(), defineForm.getDataSource(),
-										form.getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
-										defineForm);
-								}
-							}
-							try
-							{
-								if (table != null)
-								{
-									Iterator<ScriptVariable> iterator = form.getScriptVariables(false);
-									while (iterator.hasNext())
-									{
-										ScriptVariable var = iterator.next();
-										if (table.getColumn(var.getName()) != null)
-										{
-											ServoyMarker mk = MarkerMessages.FormVariableTableCol.fill(form.getName(), var.getName(), form.getTableName());
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_VARIABLE_TYPE_COL, IMarker.PRIORITY_NORMAL, null, var);
-										}
-									}
-								}
-							}
-							catch (Exception ex)
-							{
-								exceptionCount++;
-								if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(ex);
-							}
-
-							if (form.getExtendsID() > 0 && formFlattenedSolution != null)
-							{
-								Form superForm = formFlattenedSolution.getForm(form.getExtendsID());
-								if (superForm != null)
-								{
-									if (form.getDataSource() != null && superForm.getDataSource() != null &&
-										!form.getDataSource().equals(superForm.getDataSource()))
-									{
-										ServoyMarker mk = MarkerMessages.FormDerivedFormDifferentTable.fill(form.getName(), superForm.getName());
-										addMarker(project, mk.getType(), mk.getText(), -1, FORM_DERIVED_FORM_DIFFERENT_TABLE, IMarker.PRIORITY_NORMAL, null,
-											form);
-									}
-
-									List<Integer> forms = new ArrayList<Integer>();
-									forms.add(Integer.valueOf(form.getID()));
-									forms.add(Integer.valueOf(superForm.getID()));
-									while (superForm != null)
-									{
-										if (superForm.getExtendsID() > 0)
-										{
-											superForm = formFlattenedSolution.getForm(superForm.getExtendsID());
-											if (superForm != null)
-											{
-												if (forms.contains(Integer.valueOf(superForm.getID())))
-												{
-													// a cycle detected
-													ServoyMarker mk = MarkerMessages.FormExtendsCycle.fill(form.getName());
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_EXTENDS_CYCLE, IMarker.PRIORITY_LOW, null, form);
-													break;
-												}
-												else
-												{
-													forms.add(Integer.valueOf(superForm.getID()));
-												}
-											}
-										}
-										else
-										{
-											superForm = null;
-										}
-									}
-								}
-								else
-								{
-									//superForm not found
-									ServoyMarker mk = MarkerMessages.FormExtendsFormElementNotFound.fill(form.getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_EXTENDS_FORM_ELEMENT_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-										form);
-								}
-
-							}
-							// check for duplicate parts
-							Map<Integer, Boolean> parts = new HashMap<Integer, Boolean>();
-							Iterator<com.servoy.j2db.persistence.Part> it = form.getParts();
-							while (it.hasNext())
-							{
-								com.servoy.j2db.persistence.Part part = it.next();
-								if (!PersistHelper.isOverrideElement(part))
-								{
-									if (!part.canBeMoved() && parts.containsKey(Integer.valueOf(part.getPartType())))
-									{
-										if (parts.get(Integer.valueOf(part.getPartType())) != null &&
-											parts.get(Integer.valueOf(part.getPartType())).booleanValue())
-										{
-											ServoyMarker mk = MarkerMessages.FormDuplicatePart.fill(form.getName(),
-												com.servoy.j2db.persistence.Part.getDisplayName(part.getPartType()));
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_DUPLICATE_PART, IMarker.PRIORITY_NORMAL, null, part);
-											parts.put(Integer.valueOf(part.getPartType()), Boolean.FALSE);
-										}
-									}
-									else
-									{
-										parts.put(Integer.valueOf(part.getPartType()), Boolean.TRUE);
-									}
-								}
-							}
-
-							// check to see if there are too many portals/tab panels for an acceptable slow WAN SC deployment
-							int portalAndTabPanelCount = 0;
-							// check to see if there are too many columns in a table view form (that could result in poor WC performance when selecting rows for example)
-							int fieldCount = 0;
-							boolean isTableView = (form.getView() == FormController.LOCKED_TABLE_VIEW || form.getView() == FormController.TABLE_VIEW);
-							// also check tab sequences
-							Map<Integer, Boolean> tabSequences = new HashMap<Integer, Boolean>();
-							Iterator<IPersist> iterator = form.getAllObjects();
-							while (iterator.hasNext())
-							{
-								IPersist persist = iterator.next();
-								if (persist.getTypeID() == IRepository.TABPANELS || persist.getTypeID() == IRepository.PORTALS) portalAndTabPanelCount++;
-								else if (isTableView && persist instanceof IFormElement &&
-									(persist.getTypeID() == IRepository.FIELDS ||
-										(persist.getTypeID() == IRepository.GRAPHICALCOMPONENTS && ((GraphicalComponent)persist).getLabelFor() == null) ||
-										persist.getTypeID() == IRepository.BEANS || persist.getTypeID() == IRepository.SHAPES) &&
-									form.getPartAt(((IFormElement)persist).getLocation().y) != null &&
-									form.getPartAt(((IFormElement)persist).getLocation().y).getPartType() == Part.BODY) fieldCount++;
-
-								if (persist instanceof ISupportTabSeq && ((ISupportTabSeq)persist).getTabSeq() > 0)
-								{
-									int tabSeq = ((ISupportTabSeq)persist).getTabSeq();
-									if (tabSequences.containsKey(Integer.valueOf(tabSeq)))
-									{
-										String name = persist.getUUID().toString();
-										if (persist instanceof ISupportName && ((ISupportName)persist).getName() != null)
-										{
-											name = ((ISupportName)persist).getName();
-										}
-										ServoyMarker mk = MarkerMessages.FormNamedElementDuplicateTabSequence.fill(form.getName(), name);
-										addMarker(project, mk.getType(), mk.getText(), -1, FORM_ELEMENT_DUPLICATE_TAB_SEQUENCE, IMarker.PRIORITY_NORMAL, null,
-											persist);
-									}
-									else
-									{
-										tabSequences.put(Integer.valueOf(tabSeq), null);
-									}
-								}
-								else if (persist instanceof TabPanel && ((TabPanel)persist).getTabSeq() < 0)
-								{
-									ServoyMarker mk = MarkerMessages.FormTabPanelTabSequenceNotSet.fill(form.getName(), ((TabPanel)persist).getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, TAB_SEQUENCE_NOT_SET, IMarker.PRIORITY_NORMAL, null, persist);
-								}
-							}
-							if (portalAndTabPanelCount > LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM)
-							{
-								ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
-									String.valueOf(LIMIT_FOR_PORTAL_TABPANEL_COUNT_ON_FORM), "portals/tab panels", "");
-								addMarker(project, mk.getType(), mk.getText(), -1, LEVEL_PERFORMANCE_TABS_PORTALS, IMarker.PRIORITY_NORMAL, null, form);
-							}
-							if (fieldCount > LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM)
-							{
-								ServoyMarker mk = MarkerMessages.FormHasTooManyThingsAndProbablyLowPerformance.fill(
-									String.valueOf(LIMIT_FOR_FIELD_COUNT_ON_TABLEVIEW_FORM), "columns", " table view");
-								addMarker(project, mk.getType(), mk.getText(), -1, LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW, IMarker.PRIORITY_NORMAL, null, form);
-							}
-
-							if (form.getRowBGColorCalculation() != null)
-							{
-								ScriptMethod scriptMethod = null;
-								boolean unresolved = true;
-								Pair<String, String> scope = ScopesUtils.getVariableScope(form.getRowBGColorCalculation());
-								if (scope.getLeft() != null)
-								{
-									scriptMethod = formFlattenedSolution.getScriptMethod(scope.getLeft(), scope.getRight());
-								}
-								if (scriptMethod == null)
-								{
-									if (table != null)
-									{
-										ScriptCalculation calc = formFlattenedSolution.getScriptCalculation(form.getRowBGColorCalculation(), table);
-										if (calc != null)
-										{
-											unresolved = false;
-										}
-									}
-								}
-								else
-								{
-									unresolved = false;
-								}
-								if (unresolved)
-								{
-									ServoyMarker mk = MarkerMessages.FormRowBGCalcTargetNotFound.fill(form.getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, form);
-								}
-							}
-						}
-						checkCancel();
 						if (o instanceof ScriptCalculation)
 						{
 							ScriptCalculation calc = (ScriptCalculation)o;
@@ -3327,457 +2025,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 						checkCancel();
-						if (o instanceof Tab)
-						{
-							Tab tab = (Tab)o;
-							FlattenedSolution tabFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(tab, flattenedSolution);
-							if (tab.getRelationName() != null)
-							{
-								Relation[] relations = tabFlattenedSolution.getRelationSequence(tab.getRelationName());
-								if (relations == null)
-								{
-									if (Utils.getAsUUID(tab.getRelationName(), false) != null)
-									{
-										// relation name was not resolved from uuid to relation name during import
-										ServoyMarker mk = MarkerMessages.FormRelatedTabUnsolvedUuid.fill(tab.getRelationName());
-										IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, FORM_RELATED_TAB_UNSOLVED_UUID,
-											IMarker.PRIORITY_NORMAL, null, tab);
-										if (marker != null)
-										{
-											try
-											{
-												marker.setAttribute("Uuid", o.getUUID().toString());
-												marker.setAttribute("SolutionName", ((Solution)tab.getAncestor(IRepository.SOLUTIONS)).getName());
-												marker.setAttribute("PropertyName", "relationName");
-												marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName("relationName", o.getClass()));
-											}
-											catch (Exception e)
-											{
-												ServoyLog.logError(e);
-											}
-										}
-									}
-									else
-									{
-										ServoyMarker mk = MarkerMessages.FormRelatedTabUnsolvedRelation.fill(tab.getRelationName());
-										addMarker(project, mk.getType(), mk.getText(), -1, FORM_RELATED_TAB_UNSOLVED_RELATION, IMarker.PRIORITY_NORMAL, null,
-											tab);
-									}
-								}
-								else
-								{
-									Relation relation = relations[0];
-									if (!relation.isGlobal() && relation.getPrimaryDataSource() != null)
-									{
-										if (context instanceof Form && (!relation.getPrimaryDataSource().equals(((Form)context).getDataSource())))
-										{
-											ServoyMarker mk = MarkerMessages.FormRelatedTabDifferentTable.fill(((Form)context).getName(), relation.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_RELATED_TAB_DIFFERENT_TABLE, IMarker.PRIORITY_NORMAL, null,
-												tab);
-										}
-									}
-									relation = relations[relations.length - 1];
-									if (!relation.isGlobal() && relation.getForeignDataSource() != null)
-									{
-										Form form = tabFlattenedSolution.getForm(tab.getContainsFormID());
-										if (form != null && !relation.getForeignDataSource().equals(form.getDataSource()))
-										{
-											ServoyMarker mk = MarkerMessages.FormRelatedTabDifferentTable.fill(form.getName(), relation.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_RELATED_TAB_DIFFERENT_TABLE, IMarker.PRIORITY_NORMAL, null,
-												tab);
-										}
-									}
-									if (context instanceof Form)
-									{
-										for (Relation r : relations)
-										{
-											addEncapsulationMarker(project, tab, r, (Form)context);
-										}
-									}
-								}
-							}
-							if (tab.getImageMediaID() > 0)
-							{
-								Media media = tabFlattenedSolution.getMedia(tab.getImageMediaID());
-								if (media != null)
-								{
-									ImageIcon mediaImageIcon = new ImageIcon(media.getMediaData());
-									if (mediaImageIcon.getIconWidth() > 20 || mediaImageIcon.getIconHeight() > 20)
-									{
-										String formName = ((Form)tab.getAncestor(IRepository.FORMS)).getName();
-										String tabPanelName = ((TabPanel)tab.getAncestor(IRepository.TABPANELS)).getName();
-										String tabName = tab.getName();
-
-										ServoyMarker mk = MarkerMessages.FormTabPanelTabImageTooLarge.fill(tabName != null ? tabName : "",
-											tabPanelName != null ? tabPanelName : "", formName != null ? formName : "");
-										addMarker(project, mk.getType(), mk.getText(), -1, FORM_TABPANEL_TAB_IMAGE_TOO_LARGE, IMarker.PRIORITY_NORMAL, null,
-											tab);
-									}
-								}
-							}
-						}
-						checkCancel();
-						if (o instanceof Field)
-						{
-							Field field = (Field)o;
-							FlattenedSolution fieldFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(field, flattenedSolution);
-							int type = field.getDisplayType();
-							String fieldName = field.getName();
-							if (fieldName == null)
-							{
-								fieldName = field.getUUID().toString();
-							}
-							if (field.getValuelistID() > 0)
-							{
-								ValueList vl = fieldFlattenedSolution.getValueList(field.getValuelistID());
-								if (vl != null)
-								{
-									if (type == Field.COMBOBOX && field.getEditable() && !SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()))
-									{
-
-										boolean showWarning = false;
-										if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
-											vl.getReturnDataProviders() != vl.getShowDataProviders())
-										{
-											showWarning = true;
-										}
-										if (vl.getValueListType() == IValueListConstants.CUSTOM_VALUES && vl.getCustomValues() != null &&
-											vl.getCustomValues().contains("|"))
-										{
-											showWarning = true;
-										}
-										if (showWarning)
-										{
-											ServoyMarker mk = MarkerMessages.FormEditableNamedComboboxCustomValuelist.fill(fieldName);
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST, IMarker.PRIORITY_NORMAL,
-												null, field);
-										}
-									}
-									if (type == Field.TEXT_FIELD || type == Field.TYPE_AHEAD)
-									{
-										boolean vlWithUnstoredCalcError = false;
-										if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES)
-										{
-											ITable table = null;
-											try
-											{
-												if (vl.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
-												{
-													table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(vl.getDataSource());
-												}
-												else if (vl.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES && vl.getRelationName() != null)
-												{
-													Relation[] relations = fieldFlattenedSolution.getRelationSequence(vl.getRelationName());
-													if (relations != null)
-													{
-														table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
-															relations[relations.length - 1].getForeignDataSource());
-													}
-												}
-											}
-											catch (Exception e)
-											{
-												ServoyLog.logError(e);
-											}
-											vlWithUnstoredCalcError = /**/isUnstoredCalc(vl.getDataProviderID1(), table, fieldFlattenedSolution) || //
-												isUnstoredCalc(vl.getDataProviderID2(), table, fieldFlattenedSolution) || //
-												isUnstoredCalc(vl.getDataProviderID3(), table, fieldFlattenedSolution);
-										}
-										if (!vlWithUnstoredCalcError && vl.getFallbackValueListID() > 0)
-										{
-											ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
-											if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES)
-											{
-												ITable table = null;
-												try
-												{
-													if (fallback.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
-													{
-														table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
-															fallback.getDataSource());
-													}
-													else if (fallback.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES &&
-														fallback.getRelationName() != null)
-													{
-														Relation[] relations = fieldFlattenedSolution.getRelationSequence(fallback.getRelationName());
-														if (relations != null)
-														{
-															table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
-																relations[relations.length - 1].getForeignDataSource());
-														}
-													}
-												}
-												catch (Exception e)
-												{
-													ServoyLog.logError(e);
-												}
-												vlWithUnstoredCalcError = /**/isUnstoredCalc(fallback.getDataProviderID1(), table, fieldFlattenedSolution) || //
-													isUnstoredCalc(fallback.getDataProviderID2(), table, fieldFlattenedSolution) || //
-													isUnstoredCalc(fallback.getDataProviderID3(), table, fieldFlattenedSolution);
-											}
-										}
-										if (vlWithUnstoredCalcError)
-										{
-											ServoyMarker mk = MarkerMessages.FormTypeAheadNamedUnstoredCalculation.fill(fieldName);
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_TYPEAHEAD_UNSTORED_CALCULATION, IMarker.PRIORITY_NORMAL,
-												null, field);
-										}
-									}
-									String parentDataSource = null;
-									String parentString = null;
-									if (field.getParent() instanceof Portal)
-									{
-										Relation[] relations = fieldFlattenedSolution.getRelationSequence(((Portal)field.getParent()).getRelationName());
-										if (relations != null && relations.length > 0)
-										{
-											parentDataSource = relations[relations.length - 1].getForeignDataSource();
-										}
-										parentString = "portal \"" + ((Portal)field.getParent()).getName() + "\"";
-									}
-									else
-									{
-										Form form = (Form)o.getAncestor(IRepository.FORMS);
-										parentDataSource = form.getDataSource();
-										parentString = "form \"" + form.getName() + "\"";
-									}
-									if (parentDataSource != null)
-									{
-										if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES && vl.getRelationName() != null)
-										{
-											String[] parts = vl.getRelationName().split("\\.");
-											Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
-											if (relation != null && !relation.isGlobal())
-											{
-												boolean addMarker = !relation.getPrimaryDataSource().equals(parentDataSource);
-												if (addMarker && field.getDataProviderID() != null)
-												{
-													int index = field.getDataProviderID().lastIndexOf('.');
-													if (index > 0)
-													{
-														Relation[] dpRelations = fieldFlattenedSolution.getRelationSequence(
-															field.getDataProviderID().substring(0, index));
-														if (dpRelations != null && dpRelations.length > 0 &&
-															dpRelations[dpRelations.length - 1].getForeignDataSource().equals(relation.getPrimaryDataSource()))
-														{
-															addMarker = false;
-														}
-													}
-												}
-												if (addMarker)
-												{
-													ServoyMarker mk = MarkerMessages.FormNamedFieldRelatedValuelist.fill(fieldName, vl.getName(), parentString);
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL,
-														null, field);
-												}
-											}
-										}
-										if (vl.getFallbackValueListID() > 0)
-										{
-											ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
-											if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES &&
-												fallback.getRelationName() != null)
-											{
-												String[] parts = fallback.getRelationName().split("\\.");
-												Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
-												if (relation != null && !relation.isGlobal() && !relation.isLiteral() &&
-													!relation.getPrimaryDataSource().equals(parentDataSource))
-												{
-													ServoyMarker mk = MarkerMessages.FormNamedFieldFallbackRelatedValuelist.fill(fieldName, vl.getName(),
-														fallback.getName(), parentString);
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL,
-														null, field);
-												}
-											}
-										}
-									}
-									if (vl.getRelationName() != null)
-									{
-										Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
-										if (relations != null && context instanceof Form)
-										{
-											for (Relation r : relations)
-											{
-												addEncapsulationMarker(project, field, r, (Form)context);
-											}
-										}
-									}
-								}
-							}
-							else if (type == Field.LIST_BOX || type == Field.MULTISELECT_LISTBOX || type == Field.SPINNER)
-							{
-								// these types of fields MUST have a valuelist
-								Form form = (Form)o.getAncestor(IRepository.FORMS);
-								ServoyMarker mk = MarkerMessages.RequiredPropertyMissingOnElement.fill("valuelist", fieldName, form.getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, FORM_REQUIRED_PROPERTY_MISSING, IMarker.PRIORITY_NORMAL, null, field);
-							}
-						}
-						checkCancel();
-						if (o instanceof Portal && ((Portal)o).getRelationName() != null)
-						{
-							Portal portal = (Portal)o;
-							FlattenedSolution portalFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(portal, flattenedSolution);
-							Relation[] relations = portalFlattenedSolution.getRelationSequence(portal.getRelationName());
-							if (relations == null)
-							{
-								ServoyMarker mk;
-								if (portal.getName() != null)
-								{
-									mk = MarkerMessages.FormPortalNamedInvalidRelationName.fill(portal.getName());
-								}
-								else
-								{
-									mk = MarkerMessages.FormPortalUnnamedInvalidRelationName;
-								}
-								addMarker(project, mk.getType(), mk.getText(), -1, FORM_PORTAL_INVALID_RELATION_NAME, IMarker.PRIORITY_NORMAL, null, o);
-							}
-							else
-							{
-								for (IPersist child : portal.getAllObjectsAsList())
-								{
-									if (child instanceof ISupportDataProviderID)
-									{
-										try
-										{
-											String id = ((ISupportDataProviderID)child).getDataProviderID();
-											if (id != null)
-											{
-												int indx = id.lastIndexOf('.');
-												if (indx > 0)
-												{
-													String rel_name = id.substring(0, indx);
-													if (!rel_name.startsWith(portal.getRelationName()))
-													{
-														ServoyMarker mk;
-														String elementName = null;
-														if (child instanceof ISupportName && ((ISupportName)child).getName() != null)
-														{
-															elementName = ((ISupportName)child).getName();
-														}
-														if (portal.getName() != null)
-														{
-															if (elementName != null)
-															{
-																mk = MarkerMessages.FormPortalNamedElementNamedMismatchedRelation.fill(elementName,
-																	portal.getName(), rel_name, portal.getRelationName());
-															}
-															else
-															{
-																mk = MarkerMessages.FormPortalNamedElementUnnamedMismatchedRelation.fill(portal.getName(),
-																	rel_name, portal.getRelationName());
-															}
-														}
-														else
-														{
-															if (elementName != null)
-															{
-																mk = MarkerMessages.FormPortalUnnamedElementNamedMismatchedRelation.fill(elementName, rel_name,
-																	portal.getRelationName());
-															}
-															else
-															{
-																mk = MarkerMessages.FormPortalUnnamedElementUnnamedMismatchedRelation.fill(rel_name,
-																	portal.getRelationName());
-															}
-														}
-														addMarker(project, mk.getType(), mk.getText(), -1, FORM_PORTAL_INVALID_RELATION_NAME,
-															IMarker.PRIORITY_NORMAL, null, child);
-													}
-												}
-											}
-										}
-										catch (Exception ex)
-										{
-											ServoyLog.logError(ex);
-										}
-									}
-								}
-								if (context instanceof Form)
-								{
-									for (Relation r : relations)
-									{
-										addEncapsulationMarker(project, portal, r, (Form)context);
-									}
-								}
-							}
-						}
-						checkCancel();
-						if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getLabelFor() != null &&
-							!"".equals(((GraphicalComponent)o).getLabelFor()))
-						{
-							IPersist parent = null;
-							if (o.getParent() instanceof Form)
-							{
-								parent = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getFlattenedForm(o);
-							}
-							else if (o.getParent() instanceof Portal)
-							{
-								parent = new FlattenedPortal((Portal)o.getParent());
-							}
-							if (parent != null)
-							{
-								final IPersist finalParent = parent;
-								Object labelFor = parent.acceptVisitor(new IPersistVisitor()
-								{
-									public Object visit(IPersist persist)
-									{
-										if (persist instanceof ISupportName && ((GraphicalComponent)o).getLabelFor().equals(((ISupportName)persist).getName()))
-											return persist;
-										if (persist == finalParent)
-										{
-											return IPersistVisitor.CONTINUE_TRAVERSAL;
-										}
-										else
-										{
-											return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-										}
-									}
-								});
-								if (labelFor == null)
-								{
-									ServoyMarker mk = MarkerMessages.FormLabelForElementNotFound.fill(((Form)o.getAncestor(IRepository.FORMS)).getName(),
-										((GraphicalComponent)o).getLabelFor());
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_LABEL_FOR_ELEMENT_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, o);
-								}
-							}
-						}
-						if (o instanceof GraphicalComponent && ((GraphicalComponent)o).getRolloverImageMediaID() > 0 &&
-							((GraphicalComponent)o).getImageMediaID() <= 0)
-						{
-							ServoyMarker mk = MarkerMessages.ImageMediaNotSet.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
-							addMarker(project, mk.getType(), mk.getText(), -1, IMAGE_MEDIA_NOT_SET, IMarker.PRIORITY_NORMAL, null, o);
-						}
-						if (o instanceof GraphicalComponent &&
-							(((GraphicalComponent)o).getRolloverImageMediaID() > 0 || ((GraphicalComponent)o).getRolloverCursor() > 0))
-						{
-							ServoyProject activeProject = getServoyModel().getActiveProject();
-							if (activeProject != null && (activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY ||
-								activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SOLUTION))
-							{
-								Form parentForm = (Form)context;
-								if (parentForm != null &&
-									(parentForm.getView() == FormController.LOCKED_TABLE_VIEW || parentForm.getView() == FormController.LOCKED_LIST_VIEW ||
-										parentForm.getView() == FormController.TABLE_VIEW || parentForm.getView() == IForm.LIST_VIEW))
-								{
-									Part part = parentForm.getPartAt(((GraphicalComponent)o).getLocation().y);
-									if (part != null && part.getPartType() == Part.BODY)
-									{
-										ServoyMarker mk = MarkerMessages.RolloverImageAndCursorNotWorking.fill();
-										addMarker(project, mk.getType(), mk.getText(), -1, ROLLOVER_NOT_WORKING, IMarker.PRIORITY_NORMAL, null, o);
-									}
-								}
-							}
-
-						}
-						checkCancel();
-						checkSpecs(o, project, componentsSpecProviderState);
-						checkCancel();
-						if (o.getTypeID() == IRepository.SHAPES)
-						{
-							ServoyMarker mk = MarkerMessages.ObsoleteElement.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
-							addMarker(project, mk.getType(), mk.getText(), -1, FORM_OBSOLETE_ELEMENT, IMarker.PRIORITY_NORMAL, null, o);
-						}
 						checkDeprecatedElementUsage(o, project, flattenedSolution);
-						checkDeprecatedPropertyUsage(o, project);
+						checkDeprecatedPropertyUsage(o, project, project);
 						ISupportChilds parent = o.getParent();
 						if (o.getTypeID() == IRepository.SOLUTIONS && parent != null)
 						{
@@ -3862,13 +2111,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							addBadStructureMarker(o, servoyProject, project);
 						}
 
-						if (context instanceof Form && ((Form)context).isFormComponent().booleanValue() && o instanceof IScriptElement)
-						{
-							ServoyMarker mk = MarkerMessages.FormReferenceInvalidScript.fill(((Form)context).getName(), ((IScriptElement)o).getName());
-							addMarker(project, mk.getType(), mk.getText(), ((IScriptElement)o).getLineNumberOffset(), FORM_REFERENCE_INVALID_SCRIPT,
-								IMarker.PRIORITY_NORMAL, null, o);
-						}
-
 						if (!(o instanceof IScriptElement) &&
 							!Utils.getAsBoolean(((AbstractBase)o).getRuntimeProperty(SolutionDeserializer.POSSIBLE_DUPLICATE_UUID)))
 						{
@@ -3876,696 +2118,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							// debugging engine needs this info for scriptproviders !!
 							((AbstractBase)o).setSerializableRuntimeProperty(IScriptProvider.FILENAME, null);
 						}
-						if (o instanceof ScriptVariable && servoyModel.getFlattenedSolution().getSolution().getSolutionType() == SolutionMetaData.MOBILE &&
-							Ident.checkIfReservedBrowserWindowObjectWord(((ScriptVariable)o).getName()))
-						{
-							Pair<String, String> pathPair = SolutionSerializer.getFilePath(o, false);
-							String path = ((AbstractBase)o).getSerializableRuntimeProperty(IScriptProvider.FILENAME);
-							IResource file = project;
-							if (path != null && !"".equals(path))
-							{
-								file = getEclipseResourceFromJavaIO(new java.io.File(path), project);
-								if (file != null) path = file.getProjectRelativePath().toString();
-							}
-							if (path == null || "".equals(path)) path = pathPair.getRight();
+						ServoyBuilderUtils.addMobileReservedWordsVariable(project, o);
 
-							ServoyMarker mk = MarkerMessages.ReservedWindowObjectProperty.fill(((ScriptVariable)o).getName());
-
-							addMarker(file, mk.getType(), mk.getText(), -1, RESERVED_WINDOW_OBJECT_PROPERTY, IMarker.PRIORITY_NORMAL, path, o);
-						}
-						if (o instanceof AbstractBase &&
-							Boolean.TRUE.equals(((AbstractBase)o).getCustomMobileProperty(IMobileProperties.HEADER_LEFT_BUTTON.propertyName)))
-						{
-							IPersist parentForm = o.getAncestor(IRepository.FORMS);
-							if (parentForm != null && ((Form)parentForm).getNavigatorID() != Form.NAVIGATOR_NONE)
-							{
-								ServoyMarker mk = MarkerMessages.MobileFormNavigatorOverlapsHeaderButton.fill();
-								addMarker(project, mk.getType(), mk.getText(), -1, MOBILE_NAVIGATOR_OVERLAPS_HEADER_BUTTON, IMarker.PRIORITY_NORMAL, null, o);
-							}
-						}
-						if (o instanceof ISupportExtendsID && PersistHelper.isOverrideOrphanElement((ISupportExtendsID)o))
-						{
-							IPersist parentForm = o.getAncestor(IRepository.FORMS);
-							ServoyMarker mk = MarkerMessages.ElementExtendsDeletedElement.fill(parentForm);
-							addMarker(project, mk.getType(), mk.getText(), -1, ELEMENT_EXTENDS_DELETED_ELEMENT, IMarker.PRIORITY_NORMAL, null, o);
-						}
 						checkCancel();
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}
-
-					private void checkForListFormComponent(Form form, IPersist listFormComponent)
-					{
-						form.acceptVisitor(new IPersistVisitor()
-						{
-							@Override
-							public Object visit(IPersist o)
-							{
-								if (o instanceof WebComponent)
-								{
-									WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
-									if (spec != null)
-									{
-										Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
-										if (properties.size() > 0)
-										{
-											FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((WebComponent)o, flattenedSolution, null,
-												true);
-											boolean hasComponentTypeConfig = false; // has forFoundset
-											Form frm = null;
-											for (PropertyDescription pd : properties)
-											{
-												Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
-												frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, flattenedSolution);
-												if (frm == null) continue;
-												if (pd.getConfig() instanceof ComponentTypeConfig)
-												{
-													hasComponentTypeConfig = true;
-													break;
-												}
-											}
-											if (hasComponentTypeConfig)
-											{
-												ServoyMarker mk = MarkerMessages.FormComponentNestedList.fill(listFormComponent, o);
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_COMPONENT_NESTED_LIST, IMarker.PRIORITY_NORMAL, null,
-													listFormComponent);
-											}
-											else if (frm != null)
-											{
-												checkForListFormComponent(frm, listFormComponent);
-											}
-										}
-									}
-								}
-								return IPersistVisitor.CONTINUE_TRAVERSAL;
-							}
-						});
-					}
-
-					private void checkDataProviders(final IPersist o, IPersist context, String datasource)
-					{
-						String id = null;
-						if (o instanceof ISupportDataProviderID)
-						{
-							id = ((ISupportDataProviderID)o).getDataProviderID();
-						}
-						else if (o instanceof WebComponent || o instanceof WebCustomType)
-						{
-							Collection<PropertyDescription> dpProperties = new ArrayList<PropertyDescription>();
-
-							if (o instanceof WebComponent)
-							{
-								WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
-								if (spec != null)
-								{
-									dpProperties.addAll(spec.getProperties().values());
-								}
-							}
-							else
-							{
-								WebCustomType customType = (WebCustomType)o;
-								WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
-								WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(parent.getTypeName());
-								if (parentSpec != null)
-								{
-									PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
-										customType.getTypeName())).getCustomJSONTypeDefinition();
-									if (cpd != null)
-									{
-										dpProperties.addAll(cpd.getProperties().values());
-									}
-								}
-							}
-
-							for (PropertyDescription pd : dpProperties)
-							{
-								if (pd.getType() instanceof DataproviderPropertyType || pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > ||
-									pd.getType() instanceof FoundsetPropertyType)
-								{
-
-									Object propertyValue = ((IBasicWebObject)o).getProperty(pd.getName());
-									if (propertyValue != null)
-									{
-										if ((pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > &&
-											((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof TagStringPropertyType))
-										{
-											TagStringPropertyType wrappedPd = (TagStringPropertyType)((FoundsetLinkedConfig)pd.getConfig())
-												.getWrappedPropertyDescription().getType();
-											TargetDataLinks links = wrappedPd.getDataLinks((String)propertyValue, pd, flattenedSolution,
-												new FormElement((IFormElement)o.getParent(), flattenedSolution, new PropertyPath(), true));
-											if (!TargetDataLinks.NOT_LINKED_TO_DATA.equals(links))
-											{
-												for (String dp : links.dataProviderIDs)
-												{
-													checkDataProvider(o, context, dp, pd, datasource);
-												}
-											}
-											continue;
-										}
-										else if (pd.getType() instanceof FoundsetPropertyType)
-										{
-											if (propertyValue instanceof JSONObject)
-											{
-												JSONObject val = (JSONObject)propertyValue;
-												FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
-
-												//first check if the foundset is valid
-												boolean invalid = false;
-												String fs = val.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-												if (!"".equals(fs)) //Form foundset, no need to check
-												{
-													if (DataSourceUtils.isDatasourceUri(fs))
-													{
-														ITable table = persistFlattenedSolution.getTable(fs);
-														invalid = table == null;
-														if (table != null && context instanceof Form)
-														{
-															Form form = (Form)context;
-															Iterator<ScriptVariable> iterator = form.getScriptVariables(false);
-															while (iterator.hasNext())
-															{
-																ScriptVariable var = iterator.next();
-																if (table.getColumn(var.getName()) != null)
-																{
-																	ServoyMarker mk = MarkerMessages.FormVariableTableColFromComponent.fill(form.getName(),
-																		var.getName(), table.getName(),
-																		((ISupportName)o).getName() != null ? ((ISupportName)o).getName() : "", pd.getName());
-																	addMarker(project, mk.getType(), mk.getText(), -1, FORM_VARIABLE_TYPE_COL,
-																		IMarker.PRIORITY_NORMAL, null, o);
-																}
-															}
-														}
-													}
-													else
-													{
-														invalid = persistFlattenedSolution.getRelationSequence(fs) == null;
-														if (invalid)
-														{
-															IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
-															try
-															{
-																if (serviceProvider != null &&
-																	serviceProvider.getFoundSetManager().getNamedFoundSet(fs) != null)
-																{
-																	invalid = false;
-																}
-															}
-															catch (ServoyException e)
-															{
-																ServoyLog.logError(e);
-															}
-														}
-													}
-													if (invalid)
-													{
-														String comp_name = ((ISupportName)o).getName() != null ? ((ISupportName)o).getName() : "";
-														ServoyMarker mk = MarkerMessages.ComponentInvalidFoundset.fill(fs, comp_name);
-														addMarker(project, mk.getType(), mk.getText(), -1, COMPONENT_FOUNDSET_INVALID, IMarker.PRIORITY_NORMAL,
-															null, o);
-														continue;
-													}
-												}
-												if (val.has("dataproviders"))
-												{
-													JSONObject dataproviders = val.getJSONObject("dataproviders");
-													for (String dp : dataproviders.keySet())
-													{
-														checkDataProvider(o, context, dataproviders.optString(dp), pd, datasource);
-													}
-												}
-											}
-										}
-										else if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > &&
-											pd.getConfig() instanceof FoundsetLinkedConfig &&
-											(((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof ValueListPropertyType))
-										{
-											continue;
-										}
-										else
-										{
-											checkDataProvider(o, context, (String)propertyValue, pd, datasource);
-										}
-									}
-								}
-							}
-
-						}
-						checkDataProvider(o, context, id, null, datasource);
-
-					}
-
-					private void checkDataProvider(final IPersist o, IPersist context, String id, PropertyDescription pd, String datasource)
-					{
-						try
-						{
-							if (id != null && !"".equals(id))
-							{
-								if (!(context instanceof Form))
-								{
-									ServoyLog.logError("Could not find parent form for element " + o, null);
-								}
-								else
-								{
-									Form parentForm = (Form)context;
-									if (!missingServers.containsKey(parentForm.getServerName()))
-									{
-										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(context, flattenedSolution);
-										IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
-											servoyModel.getDataSourceManager().getDataSource(datasource != null ? datasource : parentForm.getDataSource()), id);
-										if (dataProvider == null)
-										{
-											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(context);
-											if (flattenedForm != null)
-											{
-												dataProvider = flattenedForm.getScriptVariable(id);
-											}
-										}
-										if (dataProvider == null)
-										{
-											try
-											{
-												dataProvider = persistFlattenedSolution.getGlobalDataProvider(id, false);
-											}
-											catch (Exception e)
-											{
-												exceptionCount++;
-												if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
-											}
-										}
-										if (dataProvider == null && o.getParent() instanceof WebComponent)
-										{
-											WebComponent parent = (WebComponent)o.getParent();
-											dataProvider = checkComponentDataproviders(id, persistFlattenedSolution, parent);
-										}
-										if (dataProvider == null && o instanceof WebComponent)
-										{
-											dataProvider = checkComponentDataproviders(id, persistFlattenedSolution, (WebComponent)o);
-										}
-
-										String elementName = null;
-										String inForm = null;
-										if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
-										{
-											elementName = ((ISupportName)o).getName();
-										}
-										inForm = parentForm.getName();
-
-
-										// check for valuelist type matching dataprovider type in web components
-										if ((o instanceof WebComponent || o instanceof WebCustomType) && dataProvider != null)
-										{
-											Collection<PropertyDescription> dpProperties = new ArrayList<PropertyDescription>();
-
-											if (o instanceof WebComponent)
-											{
-												WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(
-													((WebComponent)o).getTypeName());
-												if (spec != null)
-												{
-													dpProperties.addAll(spec.getProperties().values());
-												}
-											}
-											else
-											{
-												WebCustomType customType = (WebCustomType)o;
-												WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
-												WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(
-													parent.getTypeName());
-												if (parentSpec != null)
-												{
-													PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
-														customType.getTypeName())).getCustomJSONTypeDefinition();
-													if (cpd != null)
-													{
-														dpProperties.addAll(cpd.getProperties().values());
-													}
-												}
-											}
-
-											for (PropertyDescription pd1 : dpProperties)
-											{
-												if (pd1.getType() instanceof ValueListPropertyType &&
-													pd.getName().equals(((ValueListConfig)pd1.getConfig()).getFor()))
-												{
-													Object valuelistUUID = ((AbstractBase)o).getProperty(pd1.getName());
-													if (valuelistUUID != null)
-													{
-														ValueList valuelist = (ValueList)flattenedSolution.searchPersist(valuelistUUID.toString());
-														if (valuelist != null)
-														{
-															checkValueListRealValueToDataProviderTypeMatch(valuelist, dataProvider, elementName, inForm,
-																solution, valuelistUUID);
-														}
-													}
-												}
-											}
-
-										}
-										if ((o instanceof Field || o instanceof GraphicalComponent) && dataProvider != null)
-										{
-											// check for valuelist type matching dataprovider type
-											int valuelistID = o instanceof Field ? ((Field)o).getValuelistID() : ((GraphicalComponent)o).getValuelistID();
-											ValueList valuelist = persistFlattenedSolution.getValueList(valuelistID);
-											if (valuelist != null)
-											{
-												checkValueListRealValueToDataProviderTypeMatch(valuelist, dataProvider, elementName, inForm, solution,
-													valuelist.getUUID());
-											}
-
-											String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
-											if (o instanceof Field && ((Field)o).getDisplayType() != Field.TEXT_FIELD &&
-												((Field)o).getDisplayType() != Field.TYPE_AHEAD && ((Field)o).getDisplayType() != Field.CALENDAR)
-											{
-												format = null;
-											}
-											if (format != null && format.length() > 0)
-											{
-												ParsedFormat parsedFormat = FormatParser.parseFormatProperty(format);
-												int dataType = getDataType(project, dataProvider, parsedFormat, o);
-												if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:"))
-												{
-													try
-													{
-														if (dataType == IColumnTypes.DATETIME)
-														{
-															new SimpleDateFormat(parsedFormat.getDisplayFormat());
-															if (parsedFormat.getEditFormat() != null) new SimpleDateFormat(parsedFormat.getEditFormat());
-														}
-														else if (dataType == IColumnTypes.INTEGER || dataType == IColumnTypes.NUMBER)
-														{
-															new DecimalFormat(parsedFormat.getDisplayFormat(),
-																RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
-															if (parsedFormat.getEditFormat() != null) new DecimalFormat(parsedFormat.getEditFormat(),
-																RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
-														}
-													}
-													catch (Exception ex)
-													{
-														Debug.trace(ex);
-
-														ServoyMarker mk;
-														if (elementName == null)
-														{
-															mk = MarkerMessages.FormFormatInvalid.fill(inForm, parsedFormat.getFormatString());
-														}
-														else
-														{
-															mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm,
-																parsedFormat.getFormatString());
-														}
-														addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL, null,
-															o);
-													}
-												}
-											}
-										}
-										if (o instanceof Field &&
-											(((Field)o).getDisplayType() == Field.TYPE_AHEAD || ((Field)o).getDisplayType() == Field.TEXT_FIELD) &&
-											((Field)o).getValuelistID() > 0 && ((Field)o).getFormat() != null)
-										{
-											boolean showWarning = false;
-											ValueList vl = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getValueList(
-												((Field)o).getValuelistID());
-											if (vl != null && vl.getValueListType() == IValueListConstants.CUSTOM_VALUES && vl.getCustomValues() != null &&
-												(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
-											{
-												showWarning = true;
-											}
-											if (vl != null && vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
-												vl.getReturnDataProviders() != vl.getShowDataProviders())
-											{
-												showWarning = true;
-											}
-											if (showWarning)
-											{
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormFormatIncompatible.fill(inForm);
-												}
-												else
-												{
-													mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL, null, o);
-											}
-
-										}
-										if (o instanceof Field && dataProvider != null)
-										{
-											Field field = (Field)o;
-											if (field.getEditable() &&
-												(field.getDisplayType() == Field.HTML_AREA || field.getDisplayType() == Field.RTF_AREA) &&
-												dataProvider.getColumnWrapper() != null && dataProvider.getColumnWrapper().getColumn() instanceof Column)
-											{
-												Column column = (Column)dataProvider.getColumnWrapper().getColumn();
-												if (column.getLength() < MIN_FIELD_LENGTH && column.getLength() > 0)
-												{
-													ServoyMarker mk = MarkerMessages.FormColumnLengthTooSmall.fill(elementName != null ? elementName : "",
-														inForm);
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_COLUMN_LENGTH_TOO_SMALL, IMarker.PRIORITY_NORMAL,
-														null, o);
-												}
-											}
-											if (((dataProvider instanceof ScriptVariable &&
-												((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA &&
-												((ScriptVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-												(dataProvider instanceof AggregateVariable &&
-													((AggregateVariable)dataProvider).getType() == IColumnTypes.MEDIA &&
-													((AggregateVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-												(dataProvider instanceof ScriptCalculation &&
-													((ScriptCalculation)dataProvider).getType() == IColumnTypes.MEDIA &&
-													((ScriptCalculation)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-												(dataProvider instanceof Column &&
-													Column.mapToDefaultType(((Column)dataProvider).getType()) == IColumnTypes.MEDIA) &&
-													((Column)dataProvider).getColumnInfo() != null &&
-													((Column)dataProvider).getColumnInfo().getConverterName() == null) &&
-												field.getDisplayType() != Field.IMAGE_MEDIA)
-											{
-												ServoyMarker mk = MarkerMessages.FormIncompatibleElementType.fill(
-													elementName != null ? elementName : field.getUUID(), inForm);
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INCOMPATIBLE_ELEMENT_TYPE, IMarker.PRIORITY_NORMAL,
-													null, o);
-											}
-											if (dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
-											{
-												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName(),
-													"form " + inForm, "dataProvider");
-												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-													IMarker.PRIORITY_NORMAL, null, o);
-											}
-											else if (dataProvider instanceof ScriptCalculation && ((ScriptCalculation)dataProvider).isDeprecated())
-											{
-												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
-													((ScriptCalculation)dataProvider).getName(), "form " + inForm, "dataProvider");
-												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-													IMarker.PRIORITY_NORMAL, null, o);
-											}
-										}
-
-										if (dataProvider == null && (parentForm.getDataSource() != null || ScopesUtils.isVariableScope(id)))
-										{
-											ServoyMarker mk;
-											if (elementName == null)
-											{
-												mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
-											}
-											else
-											{
-												mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
-											}
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
-										}
-
-										boolean checkIfDataproviderIsBasedOnFormTable = true;
-										if (o instanceof IBasicWebObject && pd != null)
-										{
-											String foundsetSelector = getWebBaseObjectPropertyFoundsetSelector((IBasicWebObject)o, pd);
-											if (!"".equals(foundsetSelector))
-											{
-												// it is not form foundset based
-												checkIfDataproviderIsBasedOnFormTable = false;
-											}
-										}
-
-										if (checkIfDataproviderIsBasedOnFormTable && parentForm.getDataSource() != null &&
-											dataProvider instanceof ColumnWrapper)
-										{
-											Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
-											if (relations != null && !relations[0].isGlobal() &&
-												!parentForm.getDataSource().equals(relations[0].getPrimaryDataSource()))
-											{
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormDataproviderNotBasedOnFormTable.fill(inForm, id);
-												}
-												else
-												{
-													mk = MarkerMessages.FormDataproviderOnElementNotBasedOnFormTable.fill(elementName, inForm, id);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
-											}
-										}
-										if (dataProvider instanceof AggregateVariable && o instanceof Field && ((Field)o).getEditable())
-										{
-											ServoyMarker mk;
-											if (elementName == null)
-											{
-												mk = MarkerMessages.FormDataproviderAggregateNotEditable.fill(inForm, id);
-											}
-											else
-											{
-												mk = MarkerMessages.FormDataproviderOnElementAggregateNotEditable.fill(elementName, inForm, id);
-											}
-											addMarker(project, mk.getType(), mk.getText(), -1, FORM_DATAPROVIDER_AGGREGATE_NOT_EDITABLE, IMarker.PRIORITY_LOW,
-												null, o);
-										}
-										if (dataProvider != null && dataProvider instanceof Column && ((Column)dataProvider).getColumnInfo() != null)
-										{
-											if (((Column)dataProvider).getColumnInfo().isExcluded())
-											{
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
-												}
-												else
-												{
-													mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
-											}
-										}
-										if (dataProvider instanceof ColumnWrapper)
-										{
-											Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
-											if (relations != null)
-											{
-												for (Relation r : relations)
-												{
-													addEncapsulationMarker(project, o, r, (Form)context);
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-						catch (
-
-						Exception e)
-
-						{
-							exceptionCount++;
-							if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
-						}
-					}
-
-					private void checkValueListRealValueToDataProviderTypeMatch(ValueList valuelist, IDataProvider dataProvider, String elementName,
-						String inForm, IPersist o, Object valuelistUUID) throws CoreException
-					{
-						int realValueType = valuelist.getRealValueType();
-						if (realValueType != 0 && realValueType != dataProvider.getDataProviderType())
-						{
-							boolean isValidNumberVariable = dataProvider instanceof ScriptVariable &&
-								((realValueType == IColumnTypes.INTEGER && dataProvider.getDataProviderType() == IColumnTypes.NUMBER) ||
-									(realValueType == IColumnTypes.NUMBER && dataProvider.getDataProviderType() == IColumnTypes.INTEGER));
-
-							if (!isValidNumberVariable)
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-									elementName != null ? elementName : "", inForm);
-								IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
-									IMarker.PRIORITY_NORMAL, null, o);
-								marker.setAttribute("Uuid", valuelistUUID.toString());
-								marker.setAttribute("SolutionName", valuelist.getRootObject().getName());
-							}
-						}
-					}
-
-					private String getWebBaseObjectPropertyFoundsetSelector(IBasicWebObject webObject, PropertyDescription pd)
-					{
-						if (pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? >)
-						{
-							String forFoundset = ((FoundsetLinkedConfig)pd.getConfig()).getForFoundsetName();
-							IBasicWebObject parent = webObject;
-							while (parent.getParent() instanceof IBasicWebObject)
-							{
-								parent = (IBasicWebObject)parent.getParent();
-							}
-							Object forFoundsetValue = parent.getProperty(forFoundset);
-							if (forFoundsetValue instanceof JSONObject)
-							{
-								return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-							}
-						}
-						return "";
-					}
-
-					private IDataProvider checkComponentDataproviders(String id, FlattenedSolution persistFlattenedSolution, WebComponent component)
-						throws RepositoryException
-					{
-						IDataProvider dataProvider = null;
-						WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(component.getTypeName());
-						if (spec != null)
-						{
-							Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);
-							for (PropertyDescription pd : fsPD)
-							{
-								Object relatedFS = component.getProperty(pd.getName());
-								if (relatedFS instanceof JSONObject)
-								{
-									String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-									if ("".equals(fs)) //Form foundset
-									{
-										Form f = (Form)component.getAncestor(IRepository.FORMS);
-										fs = f.getDataSource();
-									}
-									if (fs == null) break;
-									if (DataSourceUtils.isDatasourceUri(fs))
-									{
-										ITable table = persistFlattenedSolution.getTable(fs);
-										if (table != null)
-										{
-											dataProvider = persistFlattenedSolution.getDataProviderForTable(table, id);
-										}
-									}
-									else
-									{
-										Relation[] relations = persistFlattenedSolution.getRelationSequence(fs);
-										if (relations != null)
-										{
-											Relation r = relations[relations.length - 1];
-											dataProvider = getDataProvider(persistFlattenedSolution, id, r.getPrimaryServerName(), r.getPrimaryTableName());
-											if (dataProvider == null)
-												dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignServerName(), r.getForeignTableName());
-										}
-									}
-									if (dataProvider != null) break;
-								}
-							}
-						}
-						return dataProvider;
-					}
-
-					private IDataProvider getDataProvider(FlattenedSolution fs, String id, String serverName, String tableName) throws RepositoryException
-					{
-						IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
-						if (server != null)
-						{
-							ITable table = server.getTable(tableName);
-							if (table != null)
-							{
-								return fs.getDataProviderForTable(table, id);
-							}
-						}
-						return null;
-					}
 				});
-
-				checkRelations(project, missingServers);
 				checkCancel();
-				checkStyles(project);
 				checkI18n(project);
 				checkLoginSolution(project);
 			}
@@ -4635,443 +2194,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			default :
 				return IMarker.SEVERITY_INFO; // should never happen
 		}
-	}
-
-	private boolean formCanBeInstantiated(Form form, FlattenedSolution flattenedSolution, Map<Form, Boolean> checked)
-	{
-		Boolean canBeInstantiated = checked.get(form);
-		if (canBeInstantiated == null)
-		{
-			canBeInstantiated = Boolean.valueOf(flattenedSolution.formCanBeInstantiated(form));
-			checked.put(form, canBeInstantiated);
-		}
-		return canBeInstantiated.booleanValue();
-	}
-
-	/**
-	 * Checks the state of a valueList, and is able to automatically correct a few problems - but with the possibility of loosing info.
-	 *
-	 * @param vl the valueList to be checked.
-	 * @param flattenedSolution the flattened solution used to get relations if needed.
-	 * @param sm the server manager to use.
-	 * @param fixIfPossible if this is true, it will try to fix a few problems, but be careful - some invalid info in the valueList will probably be lost.
-	 * @return a list of problems. Each element in the list represents a problem, and is a 3 object array like [ (int)severity, (String)problemMessage,
-	 *         (String)fixDescription ]. "fixDescription" is the description of the fix that would be applied if fixIfPossible is true; null if no fix would be
-	 *         applied.
-	 */
-	public static List<Problem> checkValuelist(ValueList vl, FlattenedSolution flattenedSolution, IServerManagerInternal sm, boolean fixIfPossible)
-	{
-		List<Problem> problems = new ArrayList<Problem>();
-		try
-		{
-			if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES)
-			{
-				if (vl.getCustomValues() != null)
-				{
-					String customSeverity = getSeverity(VALUELIST_DB_WITH_CUSTOM_VALUES.getLeft(), VALUELIST_DB_WITH_CUSTOM_VALUES.getRight().name(), vl);
-					if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-					{
-						// this is not a custom valuelist
-						ServoyMarker marker = MarkerMessages.ValuelistDBWithCustomValues.fill(vl.getName());
-						problems.add(new Problem(marker.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_WITH_CUSTOM_VALUES.getRight()),
-							marker.getText(), marker.getFix()));
-					}
-					if (fixIfPossible) vl.setCustomValues(null);
-				}
-				String dataSource = null;
-				ITable table = null;
-				if (vl.getRelationName() != null)
-				{
-					// vl. based on relation; make sure table name/server name are not specified
-					if (vl.getTableName() != null || vl.getServerName() != null)
-					{
-						String customSeverity = getSeverity(VALUELIST_RELATION_WITH_DATASOURCE.getLeft(), VALUELIST_RELATION_WITH_DATASOURCE.getRight().name(),
-							vl);
-						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-						{
-							ServoyMarker mk = MarkerMessages.ValuelistRelationWithDatasource.fill(vl.getName());
-							problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_RELATION_WITH_DATASOURCE.getRight()),
-								mk.getText(), mk.getFix()));
-						}
-						if (fixIfPossible) vl.setDataSource(null);
-					}
-					String[] parts = vl.getRelationName().split("\\.");
-					for (String relName : parts)
-					{
-						Relation relation = flattenedSolution.getRelation(relName);
-						if (relation == null)
-						{
-							String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistRelationNotFound.fill(vl.getName(), relName);
-								problems.add(
-									new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-							}
-						}
-						else
-						{
-							dataSource = relation.getForeignDataSource();
-						}
-					}
-					if (dataSource != null)
-					{
-						// check if the relations match up (check foreign/primary tables)
-						if (flattenedSolution.getRelationSequence(vl.getRelationName()) == null)
-						{
-							String customSeverity = getSeverity(VALUELIST_RELATION_SEQUENCE_INCONSISTENT.getLeft(),
-								VALUELIST_RELATION_SEQUENCE_INCONSISTENT.getRight().name(), vl);
-							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistRelationSequenceInconsistent.fill(vl.getName(), vl.getRelationName());
-								problems.add(new Problem(mk.getType(),
-									getTranslatedSeverity(customSeverity, VALUELIST_RELATION_SEQUENCE_INCONSISTENT.getRight()), mk.getText()));
-							}
-						}
-					}
-				}
-				else if (vl.getDataSource() != null)
-				{
-					// this is table based...
-					dataSource = vl.getDataSource();
-				}
-				else
-				{
-					String customSeverity = getSeverity(VALUELIST_DB_NOT_TABLE_OR_RELATION.getLeft(), VALUELIST_DB_NOT_TABLE_OR_RELATION.getRight().name(), vl);
-					if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-					{
-						ServoyMarker mk = MarkerMessages.ValuelistDBNotTableOrRelation.fill(vl.getName());
-						problems.add(
-							new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_NOT_TABLE_OR_RELATION.getRight()), mk.getText()));
-					}
-				}
-				if (dataSource != null)
-				{
-					String inmemDataSourceName = DataSourceUtils.getInmemDataSourceName(dataSource);
-					if (inmemDataSourceName != null)
-					{
-					}
-					else
-					{
-						String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
-						if (stn == null || (stn != null && (stn.length == 0 || (stn.length > 0 && stn[0] == null))))
-						{
-							String customSeverity = getSeverity(VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getLeft(),
-								VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getRight().name(), vl);
-							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistDBMalformedTableDefinition.fill(vl.getName(), dataSource);
-								problems.add(new Problem(mk.getType(),
-									getTranslatedSeverity(customSeverity, VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getRight()), mk.getText()));
-							}
-						}
-						else
-						{
-							IServerInternal server = (IServerInternal)sm.getServer(stn[0]);
-							if (server != null)
-							{
-								if (!server.getName().equals(stn[0]))
-								{
-									String customSeverity = getSeverity(VALUELIST_DB_SERVER_DUPLICATE.getLeft(),
-										VALUELIST_DB_SERVER_DUPLICATE.getRight().name(), vl);
-									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-									{
-										ServoyMarker mk = MarkerMessages.ValuelistDBServerDuplicate.fill(vl.getName(), stn[0]);
-										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_SERVER_DUPLICATE.getRight()),
-											mk.getText()));
-									}
-								}
-								table = server.getTable(stn[1]);
-								if (table == null)
-								{
-									String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-									{
-										ServoyMarker mk = MarkerMessages.ValuelistDBTableNotAccessible.fill(vl.getName(), stn[1]);
-										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()),
-											mk.getText()));
-									}
-								}
-								else if (table.isMarkedAsHiddenInDeveloper())
-								{
-									String customSeverity = getSeverity(INVALID_TABLE_REFERENCE.getLeft(), INVALID_TABLE_REFERENCE.getRight().name(), vl);
-									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-									{
-										ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "valuelist ", vl.getName());
-										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, INVALID_TABLE_REFERENCE.getRight()),
-											IMarker.PRIORITY_LOW, mk.getText(), null));
-									}
-								}
-								else if (table.getRowIdentColumnsCount() == 0 && !(table instanceof MemTable))
-								{
-									String customSeverity = getSeverity(VALUELIST_DB_TABLE_NO_PK.getLeft(), VALUELIST_DB_TABLE_NO_PK.getRight().name(), vl);
-									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-									{
-										ServoyMarker mk = MarkerMessages.ValuelistDBTableNoPk.fill(vl.getName(), stn[1]);
-										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_TABLE_NO_PK.getRight()),
-											IMarker.PRIORITY_LOW, mk.getText(), null));
-									}
-								}
-							} // server not found is reported elsewhere
-						}
-					}
-				}
-				if (table != null)
-				{
-					if (vl.getDataProviderID1() != null && !"".equals(vl.getDataProviderID1()))
-					{
-						Column column = table.getColumn(vl.getDataProviderID1());
-						if (column == null)
-						{
-							if (flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table) == null)
-							{
-								String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-								{
-									ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID1(), table.getName());
-									problems.add(
-										new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-								}
-							}
-							else if (flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table).isDeprecated())
-							{
-								String customSeverity = getSeverity(DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getLeft(),
-									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-								{
-									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
-										flattenedSolution.getScriptCalculation(vl.getDataProviderID1(), table).getName(), "valuelist " + vl.getName(),
-										"Related value");
-									problems.add(new Problem(mk.getType(),
-										getTranslatedSeverity(customSeverity, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
-								}
-							}
-						}
-						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
-						{
-							String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID1(), table.getName());
-								problems.add(
-									new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-							}
-						}
-					}
-					if (vl.getDataProviderID2() != null && !vl.getDataProviderID2().equals(vl.getDataProviderID1()) && !"".equals(vl.getDataProviderID2()))
-					{
-						Column column = table.getColumn(vl.getDataProviderID2());
-						if (column == null)
-						{
-							if (flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table) == null)
-							{
-								String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-								{
-									ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID2(), table.getName());
-									problems.add(
-										new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-								}
-							}
-							else if (flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table).isDeprecated())
-							{
-								String customSeverity = getSeverity(DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getLeft(),
-									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-								{
-									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
-										flattenedSolution.getScriptCalculation(vl.getDataProviderID2(), table).getName(), "valuelist " + vl.getName(),
-										"Related value");
-									problems.add(new Problem(mk.getType(),
-										getTranslatedSeverity(customSeverity, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
-								}
-							}
-						}
-						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
-						{
-							String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID2(), table.getName());
-								problems.add(
-									new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-							}
-						}
-					}
-					if (vl.getDataProviderID3() != null && !vl.getDataProviderID3().equals(vl.getDataProviderID1()) &&
-						!vl.getDataProviderID3().equals(vl.getDataProviderID2()) && !"".equals(vl.getDataProviderID3()))
-					{
-						Column column = table.getColumn(vl.getDataProviderID3());
-						if (column == null)
-						{
-							if (flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table) == null)
-							{
-								String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-								{
-									ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID3(), table.getName());
-									problems.add(
-										new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-								}
-							}
-							else if (flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table).isDeprecated())
-							{
-								String customSeverity = getSeverity(DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getLeft(),
-									DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-								{
-									ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
-										flattenedSolution.getScriptCalculation(vl.getDataProviderID3(), table).getName(), "valuelist " + vl.getName(),
-										"Related value");
-									problems.add(new Problem(mk.getType(),
-										getTranslatedSeverity(customSeverity, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()), mk.getText()));
-								}
-							}
-						}
-						else if (column.getColumnInfo() != null && column.getColumnInfo().isExcluded())
-						{
-							String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), vl.getDataProviderID3(), table.getName());
-								problems.add(
-									new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-							}
-						}
-					}
-					if (vl.getUseTableFilter() && vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
-						vl.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
-					{
-						Column column = table.getColumn(DBValueList.NAME_COLUMN);
-						if (column == null)
-						{
-							String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-							{
-								ServoyMarker mk = MarkerMessages.ValuelistDBDatasourceNotFound.fill(vl.getName(), DBValueList.NAME_COLUMN, table.getName());
-								problems.add(
-									new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-							}
-						}
-					}
-
-					if (vl.getSortOptions() != null)
-					{
-						List<Problem> sortProblems = checkSortOptions(table, vl.getSortOptions(), vl, flattenedSolution);
-						if (sortProblems != null)
-						{
-							problems.addAll(sortProblems);
-						}
-					}
-				}
-			}
-			else if (vl.getValueListType() == IValueListConstants.CUSTOM_VALUES || vl.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES)
-			{
-				// custom value list; make sure it does not specify table/server/relation
-				if (vl.getTableName() != null || vl.getServerName() != null || vl.getRelationName() != null)
-				{
-					String customSeverity = getSeverity(VALUELIST_CUSTOM_VALUES_WITH_DB_INFO.getLeft(), VALUELIST_CUSTOM_VALUES_WITH_DB_INFO.getRight().name(),
-						vl);
-					if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-					{
-						ServoyMarker marker = MarkerMessages.ValuelistCustomValuesWithDBInfo.fill(vl.getName());
-						problems.add(new Problem(marker.getType(), getTranslatedSeverity(customSeverity, VALUELIST_CUSTOM_VALUES_WITH_DB_INFO.getRight()),
-							marker.getText(), marker.getFix()));
-					}
-					if (fixIfPossible)
-					{
-						vl.setDataSource(null);
-						vl.setRelationName(null);
-					}
-				}
-				if (vl.getValueListType() == IValueListConstants.GLOBAL_METHOD_VALUES)
-				{
-					ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(vl.getCustomValues());
-					if (scriptMethod == null)
-					{
-						String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-						{
-							ServoyMarker mk = MarkerMessages.ValuelistGlobalMethodNotFound.fill(vl.getName());
-							problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-						}
-					}
-					else if (scriptMethod.getParent() != vl.getParent() && scriptMethod.isPrivate())
-					{
-						String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-						{
-							ServoyMarker mk = MarkerMessages.ValuelistGlobalMethodNotAccessible.fill(vl.getName());
-							problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
-						}
-					}
-					else if (scriptMethod.isDeprecated())
-					{
-						String customSeverity = getSeverity(DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getLeft(),
-							DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight().name(), vl);
-						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-						{
-							ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedFunction.fill(scriptMethod.getDisplayName() + "()",
-								"valuelist " + vl.getName(), "Global method");
-							problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM.getRight()),
-								mk.getText()));
-						}
-					}
-				}
-				if (vl.getValueListType() == IValueListConstants.CUSTOM_VALUES)
-				{
-					String values = vl.getCustomValues();
-					boolean invalidValues = false;
-					if (values != null && values.contains("|"))
-					{
-						StringTokenizer tk = new StringTokenizer(values.trim(), "\r\n");
-						while (tk.hasMoreTokens())
-						{
-							String line = tk.nextToken();
-							if (!line.contains("|"))
-							{
-								invalidValues = true;
-								break;
-							}
-						}
-					}
-					if (invalidValues)
-					{
-						String customSeverity = getSeverity(VALUELIST_INVALID_CUSTOM_VALUES.getLeft(), VALUELIST_INVALID_CUSTOM_VALUES.getRight().name(), vl);
-						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-						{
-							ServoyMarker mk = MarkerMessages.ValuelistInvalidCustomValues.fill(vl.getName());
-							problems.add(
-								new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_INVALID_CUSTOM_VALUES.getRight()), mk.getText()));
-						}
-					}
-				}
-			}
-			else
-			{
-				String customSeverity = getSeverity(VALUELIST_TYPE_UNKNOWN.getLeft(), VALUELIST_TYPE_UNKNOWN.getRight().name(), vl);
-				if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-				{
-					ServoyMarker mk = MarkerMessages.ValuelistTypeUnknown.fill(vl.getName(), vl.getValueListType());
-					problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_TYPE_UNKNOWN.getRight()), mk.getText()));
-				}
-				if (fixIfPossible) vl.setValueListType(IValueListConstants.CUSTOM_VALUES);
-			}
-		}
-		catch (Exception ex)
-		{
-			exceptionCount++;
-			if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(ex);
-			String customSeverity = getSeverity(VALUELIST_GENERIC_ERROR.getLeft(), VALUELIST_GENERIC_ERROR.getRight().name(), vl);
-			if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-			{
-				ServoyMarker mk;
-				if (ex.getMessage() != null) mk = MarkerMessages.ValuelistGenericErrorWithDetails.fill(vl.getName(), ex.getMessage());
-				else mk = MarkerMessages.ValuelistGenericError.fill(vl.getName());
-				problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_GENERIC_ERROR.getRight()), mk.getText()));
-			}
-		}
-		return problems;
 	}
 
 	public static ServoyProject[] getSolutionModules(ServoyProject project)
@@ -5267,39 +2389,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ServoyLog.logWarning(mk.getText(), null);
 	}
 
-	private void parseEventMethod(final IProject project, final ScriptMethod eventMethod, final String eventName)
-	{
-		if (eventMethod != null && (eventMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS) == null ||
-			eventMethod.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS).length == 0) && eventMethod.getDeclaration().contains("arguments"))
-		{
-			int offset = ScriptingUtils.getArgumentsUsage(eventMethod.getDeclaration());
-			if (offset >= 0)
-			{
-				ServoyMarker mk = MarkerMessages.MethodEventParameters;
-				IMarker marker = addMarker(project, mk.getType(), mk.getText(), eventMethod.getLineNumberOffset() + offset, METHOD_EVENT_PARAMETERS,
-					IMarker.PRIORITY_NORMAL, null, eventMethod);
-				if (marker != null)
-				{
-					try
-					{
-						marker.setAttribute("EventName", eventName);
-					}
-					catch (Exception ex)
-					{
-						ServoyLog.logError(ex);
-					}
-				}
-			}
-		}
-	}
-
-	private boolean skipEventMethod(String name)
-	{
-		if ("onOpenMethodID".equals(name)) return true;
-		return false;
-	}
-
-	private IResource getEclipseResourceFromJavaIO(File javaIOFile, IProject project)
+	public static IResource getEclipseResourceFromJavaIO(File javaIOFile, IProject project)
 	{
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IPath location = Path.fromOSString(javaIOFile.getAbsolutePath());
@@ -5334,7 +2424,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		addMarker(project, mk.getType(), mk.getText(), -1, SOLUTION_BAD_STRUCTURE, IMarker.PRIORITY_LOW, path, o);
 	}
 
-	private ServoyProject getServoyProject(IProject project)
+	private static ServoyProject getServoyProject(IProject project)
 	{
 		ServoyProject sp = null;
 		try
@@ -5744,154 +2834,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void checkStyles(final IProject project)
-	{
-		deleteMarkers(project, MISSING_STYLE);
-		ServoyProject servoyProject = getServoyModel().getServoyProject(project.getName());
-		final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
-		if (servoyProject != null)
-		{
-			Iterator<Form> it = servoyProject.getSolution().getForms(null, false);
-			while (it.hasNext())
-			{
-				final Form form = it.next();
-				String styleName = form.getStyleName();
-				if (styleName == null && form.getExtendsID() > 0)
-				{
-					List<Form> forms = flattenedSolution.getFormHierarchy(form);
-					for (Form parentForm : forms)
-					{
-						if (parentForm.getStyleName() != null)
-						{
-							styleName = parentForm.getStyleName();
-							break;
-						}
-					}
-				}
-				if (styleName != null)
-				{
-					if (!"_servoy_mobile".equals(styleName)) // internal style for mobile
-					{
-						Style style = null;
-						try
-						{
-							style = (Style)ApplicationServerRegistry.get().getDeveloperRepository().getActiveRootObject(styleName, IRepository.STYLES);
-						}
-						catch (Exception ex)
-						{
-							ServoyLog.logError(ex);
-						}
-						if (style == null)
-						{
-							ServoyMarker mk = MarkerMessages.StyleNotFound.fill(styleName, form.getName());
-							IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, form);
-							if (marker != null)
-							{
-								try
-								{
-									marker.setAttribute("clearStyle", true);
-								}
-								catch (CoreException e)
-								{
-									ServoyLog.logError(e);
-								}
-							}
-							continue;
-						}
-						if (PersistHelper.getOrderedStyleSheets(servoyProject.getEditingFlattenedSolution()).size() == 0)
-						{
-							form.acceptVisitor(new IPersistVisitor()
-							{
-								public Object visit(IPersist o)
-								{
-									if (o instanceof BaseComponent || o instanceof Form || o instanceof Part)
-									{
-										String styleClass = null;
-										if (o instanceof BaseComponent) styleClass = ((BaseComponent)o).getStyleClass();
-										else if (o instanceof Form) styleClass = ((Form)o).getStyleClass();
-										else if (o instanceof Part) styleClass = ((Part)o).getStyleClass();
-										if (styleClass != null)
-										{
-											List<String> styleClasses = Arrays.asList(ModelUtils.getStyleClasses(flattenedSolution, form, o,
-												StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o)).getLeft());
-											if (!styleClasses.contains(styleClass))
-											{
-												ServoyMarker mk = MarkerMessages.StyleFormClassNotFound.fill(styleClass, form.getName());
-												IMarker marker = null;
-												if (o instanceof Part)
-												{
-													mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, Part.getDisplayName(((Part)o).getPartType()),
-														form.getName());
-													marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL,
-														null, o);
-												}
-												else if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
-												{
-													mk = MarkerMessages.StyleElementClassNotFound.fill(styleClass, ((ISupportName)o).getName(), form.getName());
-													marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL,
-														null, o);
-												}
-												else marker = addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NOT_FOUND, IMarker.PRIORITY_NORMAL,
-													null, o);
-												for (String currentClass : styleClasses)
-												{
-													if (currentClass.equalsIgnoreCase(styleClass))
-													{
-														try
-														{
-															marker.setAttribute("styleClass", currentClass);
-														}
-														catch (CoreException e)
-														{
-															ServoyLog.logError(e);
-														}
-														break;
-													}
-												}
-											}
-										}
-									}
-									return IPersistVisitor.CONTINUE_TRAVERSAL;
-								}
-							});
-						}
-					}
-				}
-				else
-				{
-					if (PersistHelper.getOrderedStyleSheets(servoyProject.getEditingFlattenedSolution()).size() == 0)
-					{
-						form.acceptVisitor(new IPersistVisitor()
-						{
-
-							public Object visit(IPersist o)
-							{
-								if (o instanceof BaseComponent || o instanceof Form)
-								{
-									String styleClass = null;
-									if (o instanceof BaseComponent) styleClass = ((BaseComponent)o).getStyleClass();
-									else if (o instanceof Form) styleClass = ((Form)o).getStyleClass();
-									if (styleClass != null)
-									{
-										ServoyMarker mk = MarkerMessages.StyleFormClassNoStyle.fill(styleClass, form.getName());
-										if (o instanceof ISupportName && !(o instanceof Form) && (((ISupportName)o).getName() != null))
-										{
-											mk = MarkerMessages.StyleElementClassNoStyle.fill(styleClass, ((ISupportName)o).getName(), form.getName());
-											addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NO_STYLE, IMarker.PRIORITY_NORMAL, null, o);
-										}
-										else addMarker(project, mk.getType(), mk.getText(), -1, STYLE_CLASS_NO_STYLE, IMarker.PRIORITY_NORMAL, null, o);
-									}
-								}
-								return IPersistVisitor.CONTINUE_TRAVERSAL;
-							}
-
-						});
-					}
-				}
-			}
-		}
-	}
-
 	private void checkLoginSolution(IProject project)
 	{
 		ServoyProject servoyProject = getServoyModel().getServoyProject(project.getName());
@@ -5921,7 +2863,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									String message = "Form '" + form.getName() +
 										"' is part of a login solution and it must not have the datasource property set; its current datasource is : '" +
 										form.getDataSource() + "'";
-									IMarker marker = addMarker(prj, FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, message, -1,
+									IMarker marker = addMarker(ServoyBuilderUtils.getPersistResource(form), FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, message, -1,
 										LOGIN_FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, IMarker.PRIORITY_HIGH, null, form);
 									if (marker != null)
 									{
@@ -5949,7 +2891,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private static List<Problem> checkSortOptions(ITable table, String sortOptions, IPersist persist, FlattenedSolution flattenedSolution)
+	public static List<Problem> checkSortOptions(ITable table, String sortOptions, IPersist persist, FlattenedSolution flattenedSolution)
 	{
 		if (persist == null || sortOptions == null) return null;
 		List<Problem> problems = new ArrayList<Problem>();
@@ -6049,296 +2991,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 		}
 		return problems;
-	}
-
-	private void checkRelations(IProject project, Map<String, IPersist> missingServers)
-	{
-		ServoyProject servoyProject = getServoyModel().getServoyProject(project.getName());
-		if (servoyProject != null)
-		{
-			ServoyMarker mk = null;
-
-			IDataSourceManager dsm = servoyModel.getDataSourceManager();
-			Iterator<Relation> it = servoyProject.getSolution().getRelations(false);
-			while (it.hasNext())
-			{
-				checkCancel();
-				Relation element = it.next();
-				String primaryServerName = null;
-				String primaryTableName = null;
-				String foreignServerName = null;
-				String foreignTableName = null;
-
-				String[] snt = DataSourceUtils.getDBServernameTablename(element.getPrimaryDataSource());
-				if (snt != null)
-				{
-					primaryServerName = snt[0];
-					primaryTableName = snt[1];
-				}
-				else
-				{
-					primaryTableName = DataSourceUtils.getInmemDataSourceName(element.getPrimaryDataSource());
-					if (primaryTableName != null)
-					{
-						primaryServerName = DataSourceUtils.INMEM_DATASOURCE;
-					}
-					else if ((primaryServerName = DataSourceUtils.getViewDataSourceName(element.getForeignDataSource())) != null)
-					{
-						primaryServerName = DataSourceUtils.VIEW_DATASOURCE;
-					}
-					else continue; // just skip this relation, unknown datasource
-				}
-
-				snt = DataSourceUtils.getDBServernameTablename(element.getForeignDataSource());
-				if (snt != null)
-				{
-					foreignServerName = snt[0];
-					foreignTableName = snt[1];
-				}
-				else
-				{
-					foreignTableName = DataSourceUtils.getInmemDataSourceName(element.getForeignDataSource());
-					if (foreignTableName != null)
-					{
-						foreignServerName = DataSourceUtils.INMEM_DATASOURCE;
-					}
-					else if ((foreignTableName = DataSourceUtils.getViewDataSourceName(element.getForeignDataSource())) != null)
-					{
-						foreignServerName = DataSourceUtils.VIEW_DATASOURCE;
-					}
-					else continue; // just skip this relation, unknown datasource
-				}
-
-				if (!missingServers.containsKey(primaryServerName) && !missingServers.containsKey(foreignServerName))
-				{
-					FlattenedSolution relationFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(element, getServoyModel().getFlattenedSolution());
-					element.setValid(true);//if is reload
-					try
-					{
-						IServerInternal pserver = dsm.getServer(element.getPrimaryDataSource());
-						if (pserver == null)
-						{
-							mk = MarkerMessages.RelationPrimaryServerWithProblems.fill(element.getName(), primaryServerName);
-							element.setValid(false);
-							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_PRIMARY_SERVER_WITH_PROBLEMS, IMarker.PRIORITY_NORMAL, null, element);
-							continue;
-						}
-						else
-						{
-							if (!pserver.getName().equals(primaryServerName))
-							{
-								mk = MarkerMessages.RelationPrimaryServerDuplicate.fill(element.getName(), primaryServerName);
-								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_SERVER_DUPLICATE, IMarker.PRIORITY_NORMAL, null, element);
-							}
-						}
-						ITable ptable = pserver.getTable(primaryTableName);
-						boolean usingHiddenTableInPrimary = false;
-						if (ptable == null)
-						{
-							mk = MarkerMessages.RelationPrimaryTableNotFound.fill(element.getName(), primaryTableName, primaryServerName);
-							element.setValid(false);
-							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_TABLE_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, element);
-							continue;
-						}
-						else
-						{
-							if (ptable.isMarkedAsHiddenInDeveloper())
-							{
-								usingHiddenTableInPrimary = true;
-								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ptable.getDataSource(), "relation ", element.getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, INVALID_TABLE_REFERENCE, IMarker.PRIORITY_LOW, null, element);
-							}
-							if (ptable.getRowIdentColumnsCount() == 0 && !(ptable instanceof MemTable))
-							{
-								mk = MarkerMessages.RelationPrimaryTableWithoutPK.fill(element.getName(), primaryTableName, primaryServerName);
-								element.setValid(false);
-								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_TABLE_WITHOUT_PK, IMarker.PRIORITY_NORMAL, null, element);
-								continue;
-							}
-						}
-
-						IServerInternal fserver = dsm.getServer(element.getForeignDataSource());
-						if (fserver == null)
-						{
-							mk = MarkerMessages.RelationForeignServerWithProblems.fill(element.getName(), foreignServerName);
-							element.setValid(false);
-							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_FOREIGN_SERVER_WITH_PROBLEMS, IMarker.PRIORITY_NORMAL, null, element);
-							continue;
-						}
-						else if (!fserver.getName().equals(foreignServerName))
-						{
-							mk = MarkerMessages.RelationForeignServerDuplicate.fill(element.getName(), foreignServerName);
-							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_SERVER_DUPLICATE, IMarker.PRIORITY_NORMAL, null, element);
-						}
-
-						ITable ftable = fserver.getTable(foreignTableName);
-						if (ftable == null)
-						{
-							mk = MarkerMessages.RelationForeignTableNotFound.fill(element.getName(), foreignTableName, foreignServerName);
-							element.setValid(false);
-							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_TABLE_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, element);
-							continue;
-						}
-						else
-						{
-							if (!usingHiddenTableInPrimary && ftable.isMarkedAsHiddenInDeveloper())
-							{
-								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ftable.getDataSource(), "relation ", element.getName());
-								addMarker(project, mk.getType(), mk.getText(), -1, INVALID_TABLE_REFERENCE, IMarker.PRIORITY_LOW, null, element);
-							}
-							if (ftable.getRowIdentColumnsCount() == 0 && !(ftable instanceof MemTable))
-							{
-								mk = MarkerMessages.RelationForeignTableWithoutPK.fill(element.getName(), foreignTableName, foreignServerName);
-								element.setValid(false);
-								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_TABLE_WITHOUT_PK, IMarker.PRIORITY_NORMAL, null, element);
-								continue;
-							}
-						}
-						if (!element.isParentRef() && element.getItemCount() == 0)
-						{
-							mk = MarkerMessages.RelationEmpty.fill(element.getName());
-							element.setValid(false);
-							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_EMPTY, IMarker.PRIORITY_NORMAL, null, element);
-							continue;
-						}
-						if (element.getInitialSort() != null)
-						{
-							addMarkers(project, checkSortOptions(ftable, element.getInitialSort(), element, relationFlattenedSolution), element);
-						}
-						Iterator<RelationItem> items = element.getObjects(IRepository.RELATION_ITEMS);
-						boolean errorsFound = false;
-						while (items.hasNext())
-						{
-							RelationItem item = items.next();
-							String primaryDataProvider = item.getPrimaryDataProviderID();
-							String foreignColumn = item.getForeignColumnName();
-							IDataProvider dataProvider = null;
-							IDataProvider column = null;
-							if (primaryDataProvider == null || "".equals(primaryDataProvider))
-							{
-								mk = MarkerMessages.RelationItemNoPrimaryDataprovider.fill(element.getName());
-								errorsFound = true;
-								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-									element);
-							}
-							else if (!primaryDataProvider.startsWith(LiteralDataprovider.LITERAL_PREFIX))
-							{
-								if (ScopesUtils.isVariableScope(primaryDataProvider))
-								{
-									dataProvider = relationFlattenedSolution.getGlobalDataProvider(primaryDataProvider, true);
-									if (dataProvider != null && dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
-									{
-										mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName(),
-											"relation " + element.getName(), "primary key");
-										addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL,
-											null, element);
-									}
-								}
-								else
-								{
-									dataProvider = relationFlattenedSolution.getDataProviderForTable(ptable, primaryDataProvider);
-								}
-								if (dataProvider == null)
-								{
-									boolean isHiddenEnumProperty = ScopesUtils.isVariableScope(primaryDataProvider) &&
-										primaryDataProvider.split("\\.").length > 3;
-									if (!isHiddenEnumProperty)
-									{
-										mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
-										errorsFound = true;
-										addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-											element);
-									}
-								}
-								else
-								{
-									if (dataProvider instanceof ScriptCalculation)
-									{
-										ScriptCalculation calc = (ScriptCalculation)dataProvider;
-										if (calc.isDeprecated())
-										{
-											mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(calc.getName(), "relation " + element.getName(),
-												"primary key");
-											addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM, IMarker.PRIORITY_NORMAL,
-												null, element);
-										}
-									}
-								}
-							}
-							if (foreignColumn == null || "".equals(foreignColumn))
-							{
-								mk = MarkerMessages.RelationItemNoForeignDataprovider.fill(element.getName());
-								errorsFound = true;
-								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-									element);
-							}
-							else
-							{
-								column = relationFlattenedSolution.getDataProviderForTable(ftable, foreignColumn);
-								if (column == null)
-								{
-									mk = MarkerMessages.RelationItemForeignDataproviderNotFound.fill(element.getName(), foreignColumn);
-									errorsFound = true;
-									addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-										element);
-								}
-							}
-							if (dataProvider != null && column != null && dataProvider instanceof Column && column instanceof Column &&
-								((Column)dataProvider).getColumnInfo() != null && ((Column)column).getColumnInfo() != null)
-							{
-								boolean primaryColumnUuidFlag = ((Column)dataProvider).getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN);
-								boolean foreignColumnUuidFlag = ((Column)column).getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN);
-								if ((primaryColumnUuidFlag && !foreignColumnUuidFlag) || (!primaryColumnUuidFlag && foreignColumnUuidFlag))
-								{
-									if (!(((Column)dataProvider).getTable() instanceof MemTable) && !(((Column)column).getTable() instanceof MemTable))
-									{
-										// for memtable flag cannot be set, ignore then
-										mk = MarkerMessages.RelationItemUUIDProblem.fill(element.getName(), primaryDataProvider, foreignColumn);
-										errorsFound = true;
-										addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_UUID_PROBLEM, IMarker.PRIORITY_NORMAL, null, element);
-									}
-								}
-								if (((Column)dataProvider).getColumnInfo().isExcluded())
-								{
-									mk = MarkerMessages.RelationItemPrimaryDataproviderNotFound.fill(element.getName(), primaryDataProvider);
-									addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-										element);
-								}
-								if (((Column)column).getColumnInfo().isExcluded())
-								{
-									mk = MarkerMessages.RelationItemForeignDataproviderNotFound.fill(element.getName(), foreignColumn);
-									addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_DATAPROVIDER_NOT_FOUND, IMarker.PRIORITY_NORMAL, null,
-										element);
-								}
-							}
-						}
-						if (errorsFound)
-						{
-							element.setValid(false);
-							continue;
-						}
-						if (getServoyModel().getActiveProject() == servoyProject)
-						{
-							String typeMismatchWarning = element.checkKeyTypes(relationFlattenedSolution);
-							if (typeMismatchWarning != null)
-							{
-								mk = MarkerMessages.RelationItemTypeProblem.fill(element.getName(), typeMismatchWarning);
-								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_TYPE_PROBLEM, IMarker.PRIORITY_LOW, null, element);
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						exceptionCount++;
-						if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(ex);
-						element.setValid(false);
-						if (ex.getMessage() != null) mk = MarkerMessages.RelationGenericErrorWithDetails.fill(element.getName(), ex.getMessage());
-						else mk = MarkerMessages.RelationGenericError.fill(element.getName());
-						addMarker(project, mk.getType(), mk.getText(), -1, RELATION_GENERIC_ERROR, IMarker.PRIORITY_NORMAL, null, element);
-					}
-				}
-			}
-		}
 	}
 
 	private void checkResourcesForServoyProject(IProject project)
@@ -6741,12 +3393,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return parserFactory.newSAXParser();
 	}
 
-	protected void fullBuild(final IProgressMonitor progressMonitor)
+	protected void fullBuild(IProject project, final IProgressMonitor progressMonitor)
 	{
 		try
 		{
 			this.monitor = progressMonitor;
-			getProject().accept(new ServoyResourceVisitor());
+			project.accept(new ServoyResourceVisitor());
 			this.monitor = null;
 		}
 		catch (CoreException e)
@@ -6759,7 +3411,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		// the visitor does the work.
 		this.monitor = progressMonitor;
-		delta.accept(new ServoyDeltaVisitor());
+
+		ServoyDeltaVisitor visitor = new ServoyDeltaVisitor();
+		delta.accept(visitor);
+		if (!ServoyBuilderUtils.checkIncrementalBuild(visitor.resources))
+		{
+			for (IResource resource : visitor.resources)
+			{
+				checkResource(resource);
+			}
+		}
 		this.monitor = null;
 	}
 
@@ -6790,7 +3451,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	private int getDataType(IResource resource, IDataProvider dataProvider, ParsedFormat parsedFormat, IPersist persist) throws IOException
+	public static int getDataType(IResource resource, IDataProvider dataProvider, ParsedFormat parsedFormat, IPersist persist) throws IOException
 	{
 		int dataType = dataProvider.getDataProviderType();
 		IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
@@ -6816,7 +3477,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (propertyDescriptor != null && propertyDescriptor.getType() == IPropertyDescriptor.GLOBAL_METHOD)
 						{
 							String methodName = parsedFormat.getUIConverterProperties().get(key);
-							ScriptMethod scriptMethod = getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
+							ScriptMethod scriptMethod = ServoyModelFinder.getServoyModel().getFlattenedSolution().getScriptMethod(null, methodName);
 							if (scriptMethod == null)
 							{
 								Form form = (Form)persist.getAncestor(IRepository.FORMS);
@@ -6909,18 +3570,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return false;
 	}
 
-	private boolean isUnstoredCalc(String dpid, ITable table, FlattenedSolution flattenedSolution)
-	{
-		return table != null && dpid != null && flattenedSolution.getScriptCalculation(dpid, table) != null && table.getColumn(dpid) == null;
-	}
-
-	private static FlattenedSolution getPersistFlattenedSolution(IPersist persist, FlattenedSolution fallbackFlattenedSolution)
+	public static FlattenedSolution getPersistFlattenedSolution(IPersist persist, FlattenedSolution fallbackFlattenedSolution)
 	{
 		FlattenedSolution persistFlattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
 		return persistFlattenedSolution != null ? persistFlattenedSolution : fallbackFlattenedSolution;
 	}
 
-	private void addEncapsulationMarker(IProject project, IPersist persist, IPersist foundPersist, Form context)
+	public static void addEncapsulationMarker(IResource markerResource, IProject project, IPersist persist, IPersist foundPersist, Form context)
 	{
 		if (foundPersist instanceof ISupportEncapsulation)
 		{
@@ -6930,7 +3586,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				ServoyMarker mk = MarkerMessages.NonAccessibleFormInModuleUsedInParentSolutionForm.fill(
 					RepositoryHelper.getObjectTypeName(foundPersist.getTypeID()), ((ISupportName)foundPersist).getName(),
 					foundPersist.getRootObject().getName(), getServoyProject(project).getSolution().getName(), context.getName());
-				addMarker(project, mk.getType(), mk.getText(), -1, NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION, IMarker.PRIORITY_LOW, null,
+				addMarker(markerResource, mk.getType(), mk.getText(), -1, NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION, IMarker.PRIORITY_LOW, null,
 					persist);
 			}
 		}

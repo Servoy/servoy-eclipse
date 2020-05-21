@@ -180,7 +180,7 @@ public class MarkerMessages
 	 * This means that a solution is used as a web service, and has mustAuthenticate property checked.
 	 */
 	public static ServoyMarker SolutionUsedAsWebServiceMustAuthenticateProblem = new ServoyMarker(
-		"Solution \"{0}\" has mustAuthenticate property checked while used as a web service.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE);
+		"Solution \"{0}\" has mustAuthenticate property checked while used as a web service.", ServoyBuilder.SERVICE_MUST_AUTHENTICATE_MARKER_TYPE);
 
 	/**
 	 * This means that two or more scopes have the same name. This can create various kinds of conflicts and should be avoided.
@@ -230,7 +230,7 @@ public class MarkerMessages
 		ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
 	public static ServoyMarker ValuelistDataproviderTypeMismatch = new ServoyMarker(
 		"Valuelist \"{0}\" real value type does not match the dataProvider type of element \"{1}\" in form \"{2}\"",
-		ServoyBuilder.PROJECT_VALUELIST_MARKER_TYPE);
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker StyleNotFound = new ServoyMarker("Style \"{0}\" used in form \"{1}\" does not exist.", ServoyBuilder.MISSING_STYLE);
 	public static ServoyMarker StyleFormClassNotFound = new ServoyMarker("Style class \"{0}\" used in form \"{1}\" does not exist.",
@@ -309,7 +309,7 @@ public class MarkerMessages
 
 	public static ServoyMarker NamedFoundsetDatasourceNotMatching = new ServoyMarker(
 		"Named foundset \"{0}\" used on form \"{1}\" from datasource \"{2}\" does not match its usage from form \"{3}\". Datasources should match.",
-		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+		ServoyBuilder.NAMED_FOUNDSET_DATASOURCE);
 
 	/**
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
@@ -368,10 +368,10 @@ public class MarkerMessages
 		"Editable combobox \"{0}\" has attached a valuelist that contains real values. This is not supported.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker FormNamedFieldRelatedValuelist = new ServoyMarker(
-		"Field \"{0}\" has attached a related valuelist \"{1}\" that doesn''t have the same datasource as {2} .", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+		"Field \"{0}\" has attached a related valuelist \"{1}\" that doesn't have the same datasource as {2} .", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker FormNamedFieldFallbackRelatedValuelist = new ServoyMarker(
-		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but doesn''t have the same datasource as {3}.",
+		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but doesn't have the same datasource as {3}.",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker ComponentInvalidFoundset = new ServoyMarker("Unresolved foundset \"{0}\" for component \"{1}\"",
@@ -616,7 +616,7 @@ public class MarkerMessages
 	public static ServoyMarker ElementNameInvalidIdentifier = new ServoyMarker("Element has name \"{0}\" which is not a valid identifier.",
 		ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE);
 	public static ServoyMarker ElementNameReservedPrefixIdentifier = new ServoyMarker(
-		"Element has name \"{0}\" which starts with the Servoy reserved \"{1}\" prefix.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE);
+		"Element has name \"{0}\" which starts with the Servoy reserved \"{1}\" prefix.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker RelationPrimaryTableNotFound = new ServoyMarker(
 		"Relation \"{0}\" is referring to a primary table \"{1}\" which does not exist on server \"{2}\".", ServoyBuilder.PROJECT_RELATION_MARKER_TYPE);
