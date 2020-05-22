@@ -484,7 +484,11 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
         
         return collection.filter(function(elm) {
           return properties.some(function(prop) {
-        	  var comparator = String($parse(prop)(elm)).toLowerCase();
+        	  if (prop == "keywords" && elm.keywords && elm.keywords.length > 0) {
+    			  var comparator = String($parse(prop)(elm)).replace(',', ' ').toLowerCase();
+        	  } else {
+        		  var comparator = String($parse(prop)(elm)).toLowerCase();
+        	  }
               var found = strict ? comparator === search : comparator.indexOf(search) >= 0;
               if (!found)
               { 
