@@ -8,6 +8,7 @@ import { DecimalkeyconverterDirective } from './utils/decimalkeyconverter.direct
 import { FormatFilterPipe } from './format/format.pipe'
 import { StartEditDirective } from './utils/startedit.directive'
 import { ImageMediaIdDirective } from './utils/imagemediaid.directive';
+import { AutosaveDirective } from './utils/autosave.directive';
 
 @NgModule({
     declarations: [ TooltipDirective,
@@ -17,7 +18,8 @@ import { ImageMediaIdDirective } from './utils/imagemediaid.directive';
                     DecimalkeyconverterDirective,
                     FormatFilterPipe,
                     StartEditDirective,
-                    ImageMediaIdDirective
+                    ImageMediaIdDirective,
+                    AutosaveDirective
                   ],
     imports: [],
     exports: [TooltipDirective,
@@ -27,7 +29,8 @@ import { ImageMediaIdDirective } from './utils/imagemediaid.directive';
               DecimalkeyconverterDirective,
               FormatFilterPipe,
               StartEditDirective,
-              ImageMediaIdDirective
+              ImageMediaIdDirective,
+              AutosaveDirective
              ],
     providers: [ TooltipService ]
   })
