@@ -102,6 +102,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -121,6 +122,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -1086,5 +1088,19 @@ public class EditorUtil
 			}
 		}
 		return dirtyParts;
+	}
+
+	public static boolean hideDefaultComponents(Form form)
+	{
+		boolean hideDefault = !PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.show.default.package");
+		if (form != null && !form.isResponsiveLayout() && hideDefault)
+		{
+			Iterator<IFormElement> elements = form.getFormElementsSortedByFormIndex();
+			while (elements.hasNext() && hideDefault)
+			{
+				hideDefault = hideDefault && (elements.next() instanceof WebComponent);
+			}
+		}
+		return hideDefault;
 	}
 }

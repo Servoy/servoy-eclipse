@@ -55,5 +55,4 @@ public class RFBDesignerUtils
 			(rootPropConfigObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)rootPropConfigObject).opt(FormElement.DROPPABLE)) &&
 				PropertyUtils.isCustomJSONObjectProperty(type));
 	}
-
 }

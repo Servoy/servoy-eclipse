@@ -78,6 +78,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							    
 			var formName = $webSocket.getURLParameter("f");
 			var formLayout = $webSocket.getURLParameter("l");
+			var hideDefault = $webSocket.getURLParameter("hd");
 			var cssPosition = $webSocket.getURLParameter("p");
 			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
 			var formHeight = parseInt($webSocket.getURLParameter("h"), 10);
@@ -713,6 +714,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			
 			$scope.isCSSPositionFormLayout = function() {
 				return formLayout == "csspos";
+			}
+			$scope.hideDefault = function() {
+				return hideDefault == "true";
 			}
 			
 			$scope.refreshEditorContent = function() {
