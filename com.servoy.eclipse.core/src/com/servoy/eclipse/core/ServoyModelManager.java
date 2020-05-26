@@ -60,33 +60,26 @@ public class ServoyModelManager
 	{
 		if (initializedCalled.compareAndSet(false, true))
 		{
-			Job servoyModelCreator = new Job("Creating servoy model")
-			{
-				@Override
-				protected IStatus run(IProgressMonitor monitor)
+			Activator.getDefault().addPostgressCheckedCallback(() -> {
+				Job servoyModelCreator = new Job("Creating servoy model")
 				{
-					// create servoy model in the display thread.
-//					Runnable run = new Runnable()
-//					{
-//						public void run()
-//						{
-					servoyModel.initialize();
-					// notify the client debug handler that servoy model has been initialized.
-					// on the mac the debug smart client must wait until the swt main thread is not busy,
-					// otherwise the smart client frame will not paint.
-					if (ApplicationServerRegistry.get().getDebugClientHandler() != null)
+					@Override
+					protected IStatus run(IProgressMonitor monitor)
 					{
-						ApplicationServerRegistry.get().getDebugClientHandler().flagModelInitialised();
+						servoyModel.initialize();
+						// notify the client debug handler that servoy model has been initialized.
+						// on the mac the debug smart client must wait until the swt main thread is not busy,
+						// otherwise the smart client frame will not paint.
+						if (ApplicationServerRegistry.get().getDebugClientHandler() != null)
+						{
+							ApplicationServerRegistry.get().getDebugClientHandler().flagModelInitialised();
+						}
+						return Status.OK_STATUS;
 					}
-//
-//						}
-//					};
-//					Display.getDefault().asyncExec(run);
-					return Status.OK_STATUS;
-				}
-			};
-			servoyModelCreator.setSystem(false);
-			servoyModelCreator.schedule();
+				};
+				servoyModelCreator.setSystem(false);
+				servoyModelCreator.schedule();
+			});
 		}
 		if (servoyModel.isFlattenedSolutionLoaded()) return servoyModel;
 		return delegating;

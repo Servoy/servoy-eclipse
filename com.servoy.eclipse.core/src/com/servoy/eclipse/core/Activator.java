@@ -188,7 +188,7 @@ public class Activator extends Plugin
 
 	private volatile boolean isPostgresInstallChecked = false;
 
-	private Runnable postgressCheckedNotify;
+	private final List<Runnable> postgressCheckedNotify = new ArrayList<Runnable>(3);
 
 
 	@Override
@@ -1242,20 +1242,18 @@ public class Activator extends Plugin
 	void setPostgresChecked()
 	{
 		isPostgresInstallChecked = true;
-		if (this.postgressCheckedNotify != null) this.postgressCheckedNotify.run();
+		this.postgressCheckedNotify.stream().forEach(runnable -> runnable.run());
+		this.postgressCheckedNotify.clear();
 	}
 
 	/**
-	 * return immediatly true when postgres installation is already checked or created
-	 * if that didn't happen yet it will return false and the runnable will be called when this happens.
+	 * Will call the runnable when postgresql check is done, can be immediate
 	 * @param toNotify
-	 * @return
 	 */
-	public boolean isPostgresChecked(Runnable toNotify)
+	public void addPostgressCheckedCallback(Runnable toNotify)
 	{
-		if (isPostgresInstallChecked) return true;
-		this.postgressCheckedNotify = toNotify;
-		return false;
+		if (isPostgresInstallChecked) toNotify.run();
+		else this.postgressCheckedNotify.add(toNotify);
 	}
 
 	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, boolean lts, ActionListener listener) throws Exception
