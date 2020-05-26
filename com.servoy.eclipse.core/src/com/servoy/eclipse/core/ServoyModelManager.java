@@ -60,6 +60,7 @@ public class ServoyModelManager
 	{
 		if (initializedCalled.compareAndSet(false, true))
 		{
+			servoyModel.installServerConfigSyncer();
 			Activator.getDefault().addPostgressCheckedCallback(() -> {
 				Job servoyModelCreator = new Job("Creating servoy model")
 				{

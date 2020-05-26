@@ -1242,8 +1242,14 @@ public class Activator extends Plugin
 	void setPostgresChecked()
 	{
 		isPostgresInstallChecked = true;
-		this.postgressCheckedNotify.stream().forEach(runnable -> runnable.run());
-		this.postgressCheckedNotify.clear();
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				postgressCheckedNotify.stream().forEach(runnable -> runnable.run());
+				postgressCheckedNotify.clear();
+			}
+		});
 	}
 
 	/**

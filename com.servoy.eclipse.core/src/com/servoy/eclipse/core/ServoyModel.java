@@ -294,8 +294,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
 
-		// when server configurations change we want to update the servers in Serclipse.
-		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(serverConfigSyncer);
+		installServerConfigSyncer();
 
 		// project update listener
 		addActiveProjectListener(new IActiveProjectListener()
@@ -740,6 +739,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		addActiveProjectListener(backgroundTableLoader);
 		backgroundTableLoader.startLoadingOfServers();
+	}
+
+	void installServerConfigSyncer()
+	{
+		// when server configurations change we want to update the servers in Serclipse.
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(serverConfigSyncer);
 	}
 
 	/**
