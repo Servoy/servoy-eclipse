@@ -494,7 +494,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	private static ValueCollectionCacheItem getFromScriptCache(IResource resource)
 	{
 		SoftReference<ValueCollectionCacheItem> sr = scriptCache.get(resource);
-		return sr != null && sr.get().get() != null ? sr.get() : null;
+		return sr != null && sr.get() != null ? sr.get() : null;
 	}
 
 	private static final ThreadLocal<Boolean> fullGlobalScope = new ThreadLocal<Boolean>()
