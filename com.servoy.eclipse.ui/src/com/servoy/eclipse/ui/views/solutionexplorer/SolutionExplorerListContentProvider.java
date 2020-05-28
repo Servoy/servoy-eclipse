@@ -1922,6 +1922,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			extractApiDocs(spec);
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			List<String> ids = new ArrayList<String>();
+			List<String> sortedProperties = new SortedList<String>();
 			for (PropertyDescription pd : properties.values())
 			{
 				if (pd.isDeprecated() || WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
@@ -1929,9 +1930,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					// skip deprecated, design and private properties
 					continue;
 				}
-				ids.add(pd.getName());
+				sortedProperties.add(pd.getName());
 			}
-			ids.addAll(spec.getApiFunctions().keySet());
+			ids.addAll(sortedProperties);
+			ids.addAll(new SortedList<String>(spec.getApiFunctions().keySet()));
 			if (ids != null)
 			{
 				List<SimpleUserNode> serviceIds = new ArrayList<SimpleUserNode>();
