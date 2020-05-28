@@ -143,7 +143,7 @@
 		{
 			"description": "Array of keywords used for component search",
 			"type": "array"
-		},
+		}
 		"icon": 
 		{
 			"description": "The icon that is displayed in the designer",
