@@ -294,8 +294,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
 
-		// when server configurations change we want to update the servers in Serclipse.
-		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(serverConfigSyncer);
+		installServerConfigSyncer();
 
 		// project update listener
 		addActiveProjectListener(new IActiveProjectListener()
@@ -740,6 +739,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		addActiveProjectListener(backgroundTableLoader);
 		backgroundTableLoader.startLoadingOfServers();
+	}
+
+	void installServerConfigSyncer()
+	{
+		// when server configurations change we want to update the servers in Serclipse.
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(serverConfigSyncer);
 	}
 
 	/**
@@ -1699,7 +1704,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	{
 		for (ServoyProject p : getModulesOfActiveProject())
 		{
-			p.resetEditingFlattenedSolution(true);
+			p.resetFlattenedSolution(true);
 		}
 	}
 
@@ -2297,7 +2302,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						// a project was deleted, closed, or it does not have Servoy nature; see if it is was part of the repository and if so, remove it
 						if (getServoyProject(resource.getName()) != null)
 						{
-							getServoyProject(resource.getName()).resetEditingFlattenedSolution(false);
+							getServoyProject(resource.getName()).resetFlattenedSolution(false);
 							refreshServoyProjects();
 						}
 						boolean isLoaded = eclipseRepository.isSolutionMetaDataLoaded(resource.getName());

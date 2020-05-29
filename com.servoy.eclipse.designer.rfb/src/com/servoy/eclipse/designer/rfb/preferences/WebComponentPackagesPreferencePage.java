@@ -54,6 +54,10 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 			if (packageName.equals("servoycore")) continue;//we do not allow disabling the core package
 			addField(new BooleanFieldEditor("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, displayName, getFieldEditorParent()));
 		}
+		addField(
+			new BooleanFieldEditor("com.servoy.eclipse.designer.rfb.show.default.package",
+				"Show always default/legacy servoy components in designer (if enabled above)",
+				getFieldEditorParent()));
 	}
 
 }

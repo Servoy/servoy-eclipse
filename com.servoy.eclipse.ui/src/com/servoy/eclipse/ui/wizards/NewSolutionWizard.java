@@ -337,11 +337,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			}
 		};
 
-		Map<String, Pair<String, InputStream>> toImportSolutions = new HashMap<>();
+		Map<String, SolutionPackageInstallInfo> toImportSolutions = new HashMap<>();
 		for (String name : solutions)
 		{
 			Pair<String, InputStream> solution = NewSolutionWizardDefaultPackages.getInstance().getPackage(name);
-			toImportSolutions.put(name, solution);
+			toImportSolutions.put(name, new SolutionPackageInstallInfo(solution.getLeft(), solution.getRight(), false, false));
 		}
 		IRunnableWithProgress importSolutionsRunnable = importSolutions(toImportSolutions, jobName, configPage.getNewSolutionName(), false, false);
 
@@ -419,7 +419,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	public static IRunnableWithProgress importSolutions(final Map<String, Pair<String, InputStream>> solutions, final String jobName, String newSolutionName,
+	public static IRunnableWithProgress importSolutions(final Map<String, SolutionPackageInstallInfo> solutions, final String jobName, String newSolutionName,
 		boolean activateSolution, boolean overwriteModules)
 	{
 		Set<String> missingServerNames = searchMissingServers(solutions.keySet()).keySet();
@@ -603,8 +603,9 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		dialogSettings.put(getSettingsPrefix() + GenerateSolutionWizardPage.SHOULD_ADD_DEFAULT_THEME_SETTING, configPage.shouldAddDefaultTheme());
 	}
 
-	public static void importSolution(Pair<String, InputStream> packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
-		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules) throws IOException
+	public static void importSolution(SolutionPackageInstallInfo packageInfo, final String name, final String targetSolution, IProgressMonitor monitor,
+		boolean reportImportFail, boolean shouldAskOverwrite, boolean activateSolution, boolean overwriteModules)
+		throws IOException
 	{
 		if (name.equals(targetSolution)) return; // import solution and target can't be the same
 		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
@@ -614,7 +615,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		}
 		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
 		{
-			Utils.streamCopy(packageInfo.getRight(), fos);
+			Utils.streamCopy(packageInfo.data, fos);
 		}
 
 
@@ -632,10 +633,21 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		importSolutionWizard.shouldAllowSQLKeywords(true);
 		importSolutionWizard.showFinishDialog(false);
 
+		String newResourceProjectName = null;
 		ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
-		importSolutionWizard.doImport(importSolutionFile, null, project, false, false, false, null, null, monitor);
+		if (project == null && packageInfo.forceActivateResourcesProject)
+		{
+			newResourceProjectName = "resources";
+			int counter = 1;
+			while (ServoyModel.getWorkspace().getRoot().getProject(newResourceProjectName).exists())
+			{
+				newResourceProjectName = "resources" + counter++;
+			}
+		}
+		importSolutionWizard.doImport(importSolutionFile, newResourceProjectName, project, false, false, false, null, null,
+			monitor, packageInfo.forceActivateResourcesProject, packageInfo.keepResourcesProjectOpen);
 		// write the wpm version into the new solution project
-		String solutionVersion = packageInfo.getLeft();
+		String solutionVersion = packageInfo.version;
 		if (solutionVersion.length() > 0)
 		{
 			ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
@@ -790,4 +802,19 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			.orElse(null);
 	}
 
+	public static class SolutionPackageInstallInfo
+	{
+		public String version;
+		public InputStream data;
+		public boolean forceActivateResourcesProject;
+		public boolean keepResourcesProjectOpen;
+
+		public SolutionPackageInstallInfo(String version, InputStream data, boolean forceActivateResourcesProject, boolean keepResourcesProjectOpen)
+		{
+			this.version = version;
+			this.data = data;
+			this.forceActivateResourcesProject = forceActivateResourcesProject;
+			this.keepResourcesProjectOpen = keepResourcesProjectOpen;
+		}
+	}
 }

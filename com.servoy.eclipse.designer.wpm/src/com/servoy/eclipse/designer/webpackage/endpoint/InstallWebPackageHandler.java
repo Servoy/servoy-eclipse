@@ -23,6 +23,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +51,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
+import com.servoy.eclipse.ui.wizards.NewSolutionWizard.SolutionPackageInstallInfo;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
@@ -83,7 +86,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 		final boolean isMainSolutionInstall = "Solution-Main".equals(pck.getString("packageType"));
 		final String selectedSolution = isMainSolutionInstall ? pck.getString("name") : pck.optString("activeSolution", null) != null
 			? pck.optString("activeSolution", null) : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
-		Map<String, Pair<String, InputStream>> solutionsWithDependencies = new HashMap<String, Pair<String, InputStream>>();
+		Map<String, SolutionPackageInstallInfo> solutionsWithDependencies = new LinkedHashMap<String, SolutionPackageInstallInfo>();
 		Map<String, Pair<String, InputStream>> webpackagesWithDependencies = new HashMap<String, Pair<String, InputStream>>();
 		Map<String, String> packagesInstalledResources = new HashMap<String, String>();
 		getPackageWithDependencies(pck, selectedVersion, selectedSolution, solutionsWithDependencies, webpackagesWithDependencies, packagesInstalledResources,
@@ -92,20 +95,29 @@ public class InstallWebPackageHandler implements IDeveloperService
 		final Boolean installingSolutions = new Boolean(solutionsWithDependencies.size() > 0);
 		if (installingSolutions.booleanValue())
 		{
+			if (isMainSolutionInstall)
+			{
+				// last solution/module in list should not keep the import project's resources project open
+				Iterator<SolutionPackageInstallInfo> solutionsWithDependenciesIte = solutionsWithDependencies.values().iterator();
+				SolutionPackageInstallInfo lastSolutionPackageInstallInfo = null;
+				while (solutionsWithDependenciesIte.hasNext())
+				{
+					lastSolutionPackageInstallInfo = solutionsWithDependenciesIte.next();
+				}
+				lastSolutionPackageInstallInfo.keepResourcesProjectOpen = false;
+			}
 			Display.getDefault().asyncExec(new Runnable()
 			{
 				public void run()
 				{
-					IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutionsWithDependencies, "Import solution",
-						isMainSolutionInstall ? null : selectedSolution, false, true);
 					try
 					{
+						IRunnableWithProgress importSolutionsRunnable = NewSolutionWizard.importSolutions(solutionsWithDependencies, "Import solution",
+							isMainSolutionInstall ? null : selectedSolution, false, true);
+
 						IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
 						progressService.run(true, false, importSolutionsRunnable);
-						if (!isMainSolutionInstall)
-						{
-							NewSolutionWizard.addAsModule(pck.getString("name"), selectedSolution, null);
-						}
+						if (!isMainSolutionInstall) NewSolutionWizard.addAsModule(pck.getString("name"), selectedSolution, null);
 					}
 					catch (Exception e)
 					{
@@ -148,7 +160,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 	}
 
 	private static void getPackageWithDependencies(JSONObject pck, String selectedVersion, String selectedSolution,
-		Map<String, Pair<String, InputStream>> solutionsWithDependencies, Map<String, Pair<String, InputStream>> webpackagesWithDependencies,
+		Map<String, SolutionPackageInstallInfo> solutionsWithDependencies, Map<String, Pair<String, InputStream>> webpackagesWithDependencies,
 		Map<String, String> packagesInstalledResources, List<String> installActions, boolean isMainSolutionInstall)
 		throws IOException
 	{
@@ -176,7 +188,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 			URLConnection conn = url.openConnection();
 			if ("Solution".equals(packageType) || "Solution-Main".equals(packageType))
 			{
-				solutionsWithDependencies.put(packageName, new Pair<String, InputStream>(pckVersion, conn.getInputStream()));
+				solutionsWithDependencies.put(packageName,
+					new SolutionPackageInstallInfo(pckVersion, conn.getInputStream(), "Solution-Main".equals(packageType), true));
 			}
 			else
 			{

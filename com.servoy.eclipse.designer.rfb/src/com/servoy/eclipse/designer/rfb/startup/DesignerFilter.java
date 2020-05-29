@@ -62,9 +62,9 @@ import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -122,15 +122,7 @@ public class DesignerFilter implements Filter
 					FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
 					Form form = fl.getForm(formName);
 
-					boolean skipDefault = true;
-					if (!form.isResponsiveLayout())
-					{
-						Iterator<IFormElement> elements = form.getFormElementsSortedByFormIndex();
-						while (elements.hasNext() && skipDefault)
-						{
-							skipDefault = skipDefault && (elements.next() instanceof WebComponent);
-						}
-					}
+					boolean skipDefault = EditorUtil.hideDefaultComponents(form);
 
 					TreeMap<String, Pair<PackageSpecification<WebObjectSpecification>, List<WebObjectSpecification>>> componentCategories = new TreeMap<>();
 					for (Entry<String, PackageSpecification<WebObjectSpecification>> entry : specProvider.getWebObjectSpecifications()
@@ -364,6 +356,7 @@ public class DesignerFilter implements Filter
 									componentJson.put("name", spec.getName());
 									componentJson.put("componentType", "component");
 									componentJson.put("displayName", spec.getDisplayName());
+									componentJson.put("keywords", spec.getKeywords());
 
 									Map<String, Object> model = new HashMap<String, Object>();
 									if (form.isResponsiveLayout())
