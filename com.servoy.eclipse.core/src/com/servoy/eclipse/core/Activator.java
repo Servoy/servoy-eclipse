@@ -368,19 +368,15 @@ public class Activator extends Plugin
 									}
 								}
 							}
-							try
-							{
-								if (eclipsePref.getBoolean("firstRun", true))
-								{
-									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(MainConceptsPageBrowserEditor.INPUT,
-										MainConceptsPageBrowserEditor.MAINCONCEPTSPAGE_BROWSER_EDITOR_ID);
-									eclipsePref.putBoolean("firstRun", false);
-								}
-							}
-							catch (Exception e)
-							{
-								ServoyLog.logError("Failed to open browser editor.", e);
-							}
+							/*
+							 * for now disable the main concepts page, we first need to have content.
+							 */
+							/*
+							 * try { if (eclipsePref.getBoolean("firstRun", true)) {
+							 * PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(MainConceptsPageBrowserEditor.INPUT,
+							 * MainConceptsPageBrowserEditor.MAINCONCEPTSPAGE_BROWSER_EDITOR_ID); eclipsePref.putBoolean("firstRun", false); } } catch
+							 * (Exception e) { ServoyLog.logError("Failed to open browser editor.", e); }
+							 */
 						}
 					});
 				}
