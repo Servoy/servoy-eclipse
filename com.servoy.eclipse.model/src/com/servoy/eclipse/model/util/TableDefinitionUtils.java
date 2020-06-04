@@ -282,7 +282,7 @@ public class TableDefinitionUtils
 	 * @param includeI18NData
 	 * @return
 	 */
-	private static Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
+	public static Map<String, List<String>> getNeededServerTables(Solution mainActiveSolution, boolean includeModules, boolean includeI18NData)
 	{
 		DataSourceCollectorVisitor collector = new DataSourceCollectorVisitor();
 		//IF NO SOLUTION SPECIFFIED GET ALL TABLES FROM ALL SERVERS
@@ -340,14 +340,16 @@ public class TableDefinitionUtils
 		return neededServersTablesMap;
 	}
 
-	public static boolean isDatabaseDownErrorMakrer(IMarker marker)
+	private static boolean shouldIgnoreDatabaseDownErrorMarker(IMarker marker)
 	{
 		try
 		{
 			if (marker.getAttribute(IMarker.SEVERITY) != null && marker.getAttribute(IMarker.SEVERITY).equals(IMarker.SEVERITY_ERROR) &&
 				ServoyBuilder.MISSING_SERVER.equals(marker.getType()))
 			{
-				return true;
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager()
+					.getServer((String)marker.getAttribute("missingServer"), false, false);
+				return server != null && server.getConfig().isEnabled(); //if the server is not present in the servoy.properties file or if it is disabled, we don't want to skip this marker
 			}
 		}
 		catch (Exception ex)
@@ -358,10 +360,12 @@ public class TableDefinitionUtils
 	}
 
 	/**
-	 *
-	 * @return true if the database is down (servers or tables are inaccessible)
+	 * Checks if there are db error markers that can be ignored on export (due to db not started).
+	 * For a db marker to be ignored, the server must be present in the servoy.properties file and it must be enabled.
+	 * Otherwise it cannot be ignored on export.
+	 * @return true if the database is down
 	 */
-	public static boolean hasDbDownErrorMarkers(String[] projects)
+	public static boolean hasDbDownErrorMarkersToIgnore(String[] projects)
 	{
 		if (projects != null && projects.length > 0)
 		{
@@ -377,7 +381,7 @@ public class TableDefinitionUtils
 						for (IMarker marker : markers)
 						{
 							// db down errors = missing server (what other cases?)
-							if (isDatabaseDownErrorMakrer(marker))
+							if (shouldIgnoreDatabaseDownErrorMarker(marker))
 							{
 								return true;
 							}
