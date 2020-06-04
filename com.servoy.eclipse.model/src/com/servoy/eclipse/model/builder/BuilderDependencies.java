@@ -45,6 +45,7 @@ public class BuilderDependencies
 	private Map<Form, List<IPersist>> formDependencies;
 	private Map<Form, List<Form>> formToFormsDependencies;
 	private Map<String, List<IPersist>> scopeToPersists;
+	private Map<String, List<IPersist>> datasourceToPersists;
 
 	private BuilderDependencies()
 	{
@@ -75,6 +76,7 @@ public class BuilderDependencies
 		relationToPersists = null;
 		scopeToPersists = null;
 		formToFormsDependencies = null;
+		datasourceToPersists = null;
 	}
 
 	public void addNamedFoundsetDependency(String namedFoundset, Form form)
@@ -171,6 +173,24 @@ public class BuilderDependencies
 			{
 				String scopeName = it.next();
 				List<IPersist> persists = scopeToPersists.get(scopeName);
+				if (persists != null && persists.contains(form))
+				{
+					persists.remove(form);
+				}
+				if (persists == null || persists.size() == 0)
+				{
+					it.remove();
+				}
+			}
+		}
+
+		if (datasourceToPersists != null)
+		{
+			Iterator<String> it = datasourceToPersists.keySet().iterator();
+			while (it.hasNext())
+			{
+				String datasource = it.next();
+				List<IPersist> persists = datasourceToPersists.get(datasource);
 				if (persists != null && persists.contains(form))
 				{
 					persists.remove(form);
@@ -285,6 +305,24 @@ public class BuilderDependencies
 		}
 	}
 
+	public void addDatasourceDependency(String datasource, IPersist persist)
+	{
+		if (datasource != null)
+		{
+			if (datasourceToPersists == null)
+			{
+				datasourceToPersists = new HashMap<String, List<IPersist>>();
+			}
+			List<IPersist> persists = datasourceToPersists.get(datasource);
+			if (persists == null)
+			{
+				persists = new ArrayList<IPersist>();
+				datasourceToPersists.put(datasource, persists);
+			}
+			if (!persists.contains(persist)) persists.add(persist);
+		}
+	}
+
 	public void addDependency(Form source, Form destination)
 	{
 		if (formToFormsDependencies == null)
@@ -317,6 +355,11 @@ public class BuilderDependencies
 		if (scopeToPersists != null) scopeToPersists.remove(scopeName);
 	}
 
+	public void removeDatasourceDependencies(String datasource)
+	{
+		if (datasourceToPersists != null) datasourceToPersists.remove(datasource);
+	}
+
 	public List<Form> getFormDependencies(Form form)
 	{
 		if (formToFormsDependencies != null)
@@ -331,6 +374,15 @@ public class BuilderDependencies
 		if (scopeToPersists != null)
 		{
 			return scopeToPersists.get(scopeName);
+		}
+		return null;
+	}
+
+	public List<IPersist> getDatasourceDependency(String datasource)
+	{
+		if (datasourceToPersists != null)
+		{
+			return datasourceToPersists.get(datasource);
 		}
 		return null;
 	}

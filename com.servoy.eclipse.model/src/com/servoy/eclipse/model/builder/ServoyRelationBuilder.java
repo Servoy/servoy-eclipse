@@ -177,6 +177,9 @@ public class ServoyRelationBuilder
 			else return; // just skip this relation, unknown datasource
 		}
 
+		BuilderDependencies.getInstance().addDatasourceDependency(element.getPrimaryDataSource(), element);
+		BuilderDependencies.getInstance().addDatasourceDependency(element.getForeignDataSource(), element);
+
 		FlattenedSolution relationFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(element,
 			ServoyModelFinder.getServoyModel().getFlattenedSolution());
 		element.setValid(true);//if is reload

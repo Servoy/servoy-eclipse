@@ -231,6 +231,7 @@ public class ServoyValuelistBuilder
 				}
 				if (dataSource != null)
 				{
+					BuilderDependencies.getInstance().addDatasourceDependency(dataSource, vl);
 					String inmemDataSourceName = DataSourceUtils.getInmemDataSourceName(dataSource);
 					if (inmemDataSourceName != null)
 					{

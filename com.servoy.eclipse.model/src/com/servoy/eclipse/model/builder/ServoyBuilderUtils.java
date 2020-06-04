@@ -40,6 +40,7 @@ import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -92,6 +93,12 @@ public class ServoyBuilderUtils
 		}
 		if (resources.size() == 2 && resources.get(0) instanceof IProject && resources.get(1) instanceof IFile &&
 			resources.get(1).getFileExtension().equals(SolutionSerializer.JS_FILE_EXTENSION_WITHOUT_DOT))
+		{
+			return true;
+		}
+		if (resources.size() == 4 && resources.get(0) instanceof IProject && resources.get(1) instanceof IFolder &&
+			resources.get(1).getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) && resources.get(2) instanceof IFolder &&
+			resources.get(3) instanceof IFile)
 		{
 			return true;
 		}
@@ -216,6 +223,43 @@ public class ServoyBuilderUtils
 				}
 			}
 			return true;
+		}
+		if (resources.size() == 4 && resources.get(0) instanceof IProject && resources.get(1) instanceof IFolder &&
+			resources.get(1).getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) && resources.get(2) instanceof IFolder &&
+			resources.get(3) instanceof IFile)
+		{
+			String datasource = ResourcesUtils.getParentDatasource((IFile)resources.get(3));
+			if (datasource != null)
+			{
+				List<IPersist> persists = BuilderDependencies.getInstance().getDatasourceDependency(datasource);
+				BuilderDependencies.getInstance().removeDatasourceDependencies(datasource);
+				ServoyBuilder.checkPersistDuplicateName();
+				ServoyBuilder.checkPersistDuplicateUUID();
+
+				if (persists != null)
+				{
+					Set<UUID> methodsParsed = new HashSet<UUID>();
+					Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
+					for (IPersist persist : persists)
+					{
+						ServoyProject servoyProject = servoyModel.getServoyProject(persist.getRootObject().getName());
+						if (persist instanceof Form)
+						{
+							ServoyFormBuilder.deleteMarkers((Form)persist);
+							ServoyFormBuilder.addFormMarkers(servoyProject, (Form)persist, methodsParsed, formsAbstractChecked);
+						}
+						if (persist instanceof ValueList)
+						{
+							ServoyValuelistBuilder.addValuelistMarkers(servoyProject, (ValueList)persist, servoyModel.getFlattenedSolution());
+						}
+						if (persist instanceof Relation)
+						{
+							ServoyRelationBuilder.addRelationMarkers(servoyProject, (Relation)persist);
+						}
+					}
+				}
+				return true;
+			}
 		}
 		return false;
 	}

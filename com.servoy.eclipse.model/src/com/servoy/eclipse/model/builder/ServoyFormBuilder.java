@@ -211,6 +211,8 @@ public class ServoyFormBuilder
 			}
 		}
 
+		BuilderDependencies.getInstance().addDatasourceDependency(form.getDataSource(), form);
+
 		Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
 		Map<String, Set<IPersist>> formScriptProviderByName = new HashMap<String, Set<IPersist>>();
 
@@ -392,6 +394,9 @@ public class ServoyFormBuilder
 										null,
 										o);
 								}
+
+								BuilderDependencies.getInstance().addDatasourceDependency(datasource, form);
+								BuilderDependencies.getInstance().addDatasourceDependency(frm.getDataSource(), form);
 
 								FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd,
 									(JSONObject)propertyValue, frm, fs);

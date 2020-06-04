@@ -720,6 +720,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			try
 			{
 				boolean needFullBuild = false;
+				IResourceDelta resourcesProjectDelta = null;
 				for (IProject p : monitoredProjects)
 				{
 					if (p.exists() && p.isOpen() && !needFullBuild)
@@ -734,6 +735,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								// if a module/resources project is changed and we cannot handle the change via the new incremental build we have to fully build the main project in order to make sure all markers are fine
 								needFullBuild = true;
 							}
+							else if (visitor.resources.size() > 0 && p.hasNature(ServoyResourcesProject.NATURE_ID))
+							{
+								resourcesProjectDelta = delta;
+							}
 						}
 					}
 				}
@@ -747,6 +752,15 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (delta != null)
 					{
 						incrementalBuild(delta, progressMonitor);
+					}
+					// servoy builder is not called on resources project, so, if we can do an incremental build, do it when main active project is checked
+					if (resourcesProjectDelta != null)
+					{
+						ServoyProject activeProject = getServoyModel().getActiveProject();
+						if (activeProject != null && activeProject.getProject().getName().equals(getProject().getName()))
+						{
+							incrementalBuild(resourcesProjectDelta, progressMonitor);
+						}
 					}
 				}
 			}
