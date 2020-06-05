@@ -284,7 +284,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	@Override
 	public boolean isExportReferencedWebPackages()
 	{
-		return false;//TODO check why the cmd line file exporter does not export web packages
+		return false;
 	}
 
 	@Override
