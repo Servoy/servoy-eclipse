@@ -22,7 +22,7 @@
 	    </location>
 	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.201908130254"/>
+		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.202005172227"/>
 		    <repository location="http://dl.maketechnology.io/chromium-cef/rls/repository"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
