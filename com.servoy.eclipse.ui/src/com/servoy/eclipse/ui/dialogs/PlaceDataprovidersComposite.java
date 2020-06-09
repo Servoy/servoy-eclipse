@@ -223,6 +223,34 @@ public class PlaceDataprovidersComposite extends Composite
 			mainPref.put(MEDIA_PROPERTY, "bootstrapcomponents-imagemedia");
 			preferences.put("_", mainPref);
 		}
+		else
+		{
+			Form form = persistContext != null && persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
+			boolean skipDefault = EditorUtil.hideDefaultComponents(form);
+			if (skipDefault)
+			{
+				if ("servoydefault-textfield".equals(mainPref.optString(TEXT_PROPERTY)))
+				{
+					mainPref.put(TEXT_PROPERTY, "bootstrapcomponents-textbox");
+				}
+				if ("servoydefault-textfield".equals(mainPref.optString(INTEGER_PROPERTY)))
+				{
+					mainPref.put(INTEGER_PROPERTY, "bootstrapcomponents-textbox");
+				}
+				if ("servoydefault-textfield".equals(mainPref.optString(NUMBER_PROPERTY)))
+				{
+					mainPref.put(NUMBER_PROPERTY, "servoydefault-textfield");
+				}
+				if ("servoydefault-calendar".equals(mainPref.optString(DATETIME_PROPERTY)))
+				{
+					mainPref.put(DATETIME_PROPERTY, "bootstrapcomponents-textbox");
+				}
+				if ("servoydefault-imagemedia".equals(mainPref.optString(MEDIA_PROPERTY)))
+				{
+					mainPref.put(MEDIA_PROPERTY, "bootstrapcomponents-textbox");
+				}
+			}
+		}
 		currentSelection = mainPref;
 		configurationSelection = "_";
 
