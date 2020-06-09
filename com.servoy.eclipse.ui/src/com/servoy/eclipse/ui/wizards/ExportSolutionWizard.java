@@ -304,7 +304,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 			new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		if (hasErrs == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			activeSolutionDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkers(
+			activeSolutionDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(
 				new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		}
 		else
@@ -378,7 +378,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 	public void addPages()
 	{
 		modulesSelectionPage = new ModulesSelectionPage(this);
-		if (activeSolutionDbDownErrors)
+		if (activeSolutionDbDownErrors && !exportModel.isExportUsingDbiFileInfoOnly())
 		{
 			exportConfirmationPage = new ExportConfirmationPage();
 			addPage(exportConfirmationPage);

@@ -132,4 +132,17 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 
 		return wscontents;
 	}
+
+	@Override
+	public void displayWarningMessage(String title, String message)
+	{
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), title,
+					message);
+			}
+		});
+	}
 }

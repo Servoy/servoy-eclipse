@@ -116,7 +116,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		projectProblemsType = BuilderUtils.getMarkers(exportSolutionWizard.getModel().getModulesToExport());
 		if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			moduleDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkers(exportSolutionWizard.getModel().getModulesToExport());
+			moduleDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(exportSolutionWizard.getModel().getModulesToExport());
 		}
 		else
 		{
@@ -247,7 +247,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			ServoyProject moduleProject = servoyModel.getServoyProject(module);
 			if (moduleProject == null)
 			{
-				Debug.error("Module '"+module+"' project was not found, cannot export it.");
+				Debug.error("Module '" + module + "' project was not found, cannot export it.");
 				continue;
 			}
 			Button moduleCheck = new Button(composite, SWT.CHECK);

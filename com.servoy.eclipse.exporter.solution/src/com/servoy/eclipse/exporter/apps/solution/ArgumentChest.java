@@ -19,29 +19,37 @@ package com.servoy.eclipse.exporter.apps.solution;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.ILogLevel;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
 /**
  * Stores and provides the export-relevant arguments the product was started with.
  * @author acostescu
  */
-public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUserChannel
+public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUserChannel, IExportSolutionModel
 {
 	private static final String FILE_EXTENSION = ".servoy";
 
@@ -150,42 +158,18 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		// @formatter:on
 	}
 
-	public boolean shouldExportMetaData()
-	{
-		return metadataSource != META_DATA_NONE;
-	}
-
-	public boolean shouldExportSampleData()
-	{
-		return exportSampleData;
-	}
-
 	public int getNumberOfSampleDataExported()
 	{
 		return sampleDataCount;
 	}
 
-	public boolean shouldExportI18NData()
-	{
-		return exportI18N;
-	}
-
-	public boolean shouldExportUsers()
-	{
-		return exportUsers;
-	}
-
-	public boolean shouldExportModules()
-	{
-		return exportModules;
-	}
-
-	public boolean shouldProtectWithPassword()
-	{
-		return protectionPassword != null;
-	}
-
 	// IXMLExportUserChannel methods:
+
+	@Override
+	public void displayWarningMessage(String title, String message)
+	{
+		System.out.println("WARNING: " + title + " " + message);
+	}
 
 	public boolean getExportAllTablesFromReferencedServers()
 	{
@@ -261,14 +245,139 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return wscontents;
 	}
 
-	public String getExportFileName(String solutionName)
-	{
-		File f = new File(getExportFilePath(), solutionName + FILE_EXTENSION);
-		return f.getAbsolutePath();
-	}
-
 	public String getImportOptionsFile()
 	{
 		return importOptionsFile;
+	}
+
+	public boolean isDBMetaDataExport()
+	{
+		return metadataSource == META_DATA_DB || metadataSource == META_DATA_BOTH;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.export.IExportSolutionModel#getFileName()
+	 */
+	@Override
+	public String getFileName()
+	{
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		if (activeProject == null || activeProject.getSolution() == null) return null;
+		File f = new File(getExportFilePath(), activeProject.getSolution().getName() + FILE_EXTENSION);
+		return f.getAbsolutePath();
+	}
+
+	@Override
+	public boolean isProtectWithPassword()
+	{
+		return protectionPassword != null;
+	}
+
+	@Override
+	public boolean isExportReferencedModules()
+	{
+		return exportModules;
+	}
+
+	@Override
+	public boolean isExportReferencedWebPackages()
+	{
+		return false;
+	}
+
+	@Override
+	public boolean isExportMetaData()
+	{
+		return metadataSource != META_DATA_NONE;
+	}
+
+	@Override
+	public boolean isExportSampleData()
+	{
+		return exportSampleData;
+	}
+
+	@Override
+	public boolean isExportI18NData()
+	{
+		return exportI18N;
+	}
+
+	@Override
+	public boolean isExportUsers()
+	{
+		return exportUsers;
+	}
+
+	@Override
+	public String[] getModulesToExport()
+	{
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		Solution solution = activeProject.getSolution();
+		if (isExportReferencedModules())
+		{
+			Map<String, Solution> modules = new HashMap<String, Solution>();
+			try
+			{
+				solution.getReferencedModulesRecursive(modules);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Error on exporting solution.", e);
+				return null;
+			}
+			modules.put(solution.getName(), solution);
+			List<String> exportedModules = getModuleIncludeList(new ArrayList<String>(modules.keySet()));
+			exportedModules.add(0, solution.getName());
+			return exportedModules.toArray(new String[exportedModules.size()]);
+		}
+		else
+		{
+			return new String[] { solution.getName() };
+		}
+	}
+
+	@Override
+	public String getPassword()
+	{
+		return protectionPassword;
+	}
+
+	@Override
+	public boolean isExportAllTablesFromReferencedServers()
+	{
+		return exportAllTablesFromReferencedServers;
+	}
+
+	@Override
+	public boolean isCheckMetadataTables()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean isExportUsingDbiFileInfoOnly()
+	{
+		return super.shouldExportUsingDbiFileInfoOnly();
+	}
+
+	@Override
+	public boolean useImportSettings()
+	{
+		return true;
+	}
+
+	@Override
+	public JSONObject getImportSettings()
+	{
+		JSONObject importSettings = null;
+		if (getImportOptionsFile() != null)
+		{
+			String importSettingsString = Utils.getTXTFileContent(new File(getImportOptionsFile()), Charset.forName("UTF8"));
+			importSettings = new JSONObject(importSettingsString);
+		}
+		return importSettings;
 	}
 }

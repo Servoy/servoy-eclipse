@@ -414,7 +414,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			{
 				modules[i] = modulesOfActiveProject[i].getProject().getName();
 			}
-			refreshDBIDownFlag(exportModel.isExportActiveSolution() && TableDefinitionUtils.hasDbDownErrorMarkers(modules));
+			refreshDBIDownFlag(exportModel.isExportActiveSolution() && TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(modules));
 		}
 		else
 		{

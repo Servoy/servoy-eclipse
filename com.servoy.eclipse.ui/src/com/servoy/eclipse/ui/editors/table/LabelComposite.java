@@ -18,8 +18,9 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * @author Diana
@@ -28,7 +29,7 @@ import org.eclipse.swt.widgets.Label;
 public class LabelComposite extends Composite
 {
 
-	private final Label label;
+	private final CLabel label;
 
 	/**
 	 * @param parent
@@ -37,7 +38,8 @@ public class LabelComposite extends Composite
 	public LabelComposite(Composite parent, int style, String labelString)
 	{
 		super(parent, style);
-		this.label = new Label(this, SWT.NONE);
+		this.setLayout(new FillLayout(SWT.CENTER));
+		this.label = new CLabel(this, SWT.CENTER);
 		this.label.setText(labelString);
 		this.label.pack();
 	}
