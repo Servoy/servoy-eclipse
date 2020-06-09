@@ -20,7 +20,6 @@
 		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.201910241820"/>
 		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2019.12/"/>
 	    </location>
-	    <location path="${project_loc:/launch_targets}/libs_extra" type="Directory"/>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.202005172227"/>
 		    <repository location="http://dl.maketechnology.io/chromium-cef/rls/repository"/>
@@ -65,10 +64,6 @@
 		    <unit id="org.objectweb.asm.util.source" version="7.1.0.v20190412-2143"/>
 		    <unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
 		    <unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/technology/m2e/releases/"/>
-		    <unit id="org.eclipse.m2e.feature.feature.group" version="1.13.0.20190716-1624"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/eclipse/updates/4.14/"/>
