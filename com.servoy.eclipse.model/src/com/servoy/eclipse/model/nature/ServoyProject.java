@@ -584,6 +584,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 		return editingFlattenedSolution;
 	}
 
+	// Only use for hook solutions
 	public FlattenedSolution getFlattenedSolution()
 	{
 		try
