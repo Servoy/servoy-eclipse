@@ -65,12 +65,12 @@ public class ServoyValuelistBuilder
 	public static boolean addValuelistMarkers(IProject project, IFile file)
 	{
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
-		FlattenedSolution fs = servoyModel.getFlattenedSolution();
+		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
+		FlattenedSolution fs = ServoyBuilderUtils.getReferenceFlattenedSolution(servoyProject.getSolution());
 		String valuelistName = file.getName().substring(0, file.getName().length() - SolutionSerializer.VALUELIST_FILE_EXTENSION.length());
 		ValueList valuelist = fs.getValueList(valuelistName);
 		if (valuelist == null) return false;
 
-		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
 		ServoyBuilder.checkPersistDuplicateName();
 		ServoyBuilder.checkPersistDuplicateUUID();
 		addValuelistMarkers(servoyProject, valuelist, fs);

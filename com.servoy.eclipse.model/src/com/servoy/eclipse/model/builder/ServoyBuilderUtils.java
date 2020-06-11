@@ -115,7 +115,7 @@ public class ServoyBuilderUtils
 				// get form
 				// get child forms
 				ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
-				FlattenedSolution fs = servoyModel.getFlattenedSolution();
+				FlattenedSolution fs = getReferenceFlattenedSolution(servoyProject.getSolution());
 
 				checkServiceSolutionMustAuthenticate(servoyModel, servoyProject.getSolution(), project);
 				ServoyBuilder.checkPersistDuplicateName();
@@ -621,5 +621,19 @@ public class ServoyBuilderUtils
 		Pair<String, String> formFilePath = SolutionSerializer.getFilePath(persist, false);
 		return ResourcesPlugin.getWorkspace().getRoot()
 			.getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+	}
+
+	public static FlattenedSolution getReferenceFlattenedSolution(Solution solution)
+	{
+		if (SolutionMetaData.isImportHook(solution.getSolutionMetaData()))
+		{
+			// we have to build a FS for hooks
+			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
+			if (servoyProject != null)
+			{
+				return servoyProject.getFlattenedSolution();
+			}
+		}
+		return ServoyModelFinder.getServoyModel().getFlattenedSolution();
 	}
 }

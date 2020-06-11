@@ -66,15 +66,14 @@ public class ServoyRelationBuilder
 	public static boolean addRelationMarkers(IProject project, IFile file)
 	{
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
-		FlattenedSolution fs = servoyModel.getFlattenedSolution();
+		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
+		FlattenedSolution fs = ServoyBuilderUtils.getReferenceFlattenedSolution(servoyProject.getSolution());
 		String relationName = file.getName().substring(0, file.getName().length() - SolutionSerializer.RELATION_FILE_EXTENSION.length());
 		Relation relation = fs.getRelation(relationName);
 		if (relation == null)
 		{
 			return false;
 		}
-
-		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
 
 		ServoyBuilder.checkPersistDuplicateName();
 		ServoyBuilder.checkPersistDuplicateUUID();

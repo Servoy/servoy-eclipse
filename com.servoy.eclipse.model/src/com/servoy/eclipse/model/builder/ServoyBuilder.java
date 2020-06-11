@@ -1829,9 +1829,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
+				final FlattenedSolution flattenedSolution = ServoyBuilderUtils.getReferenceFlattenedSolution(solution);
 				solution.acceptVisitor(new IPersistVisitor()
 				{
-					private final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
 					private final Set<UUID> methodsParsed = new HashSet<UUID>();
 

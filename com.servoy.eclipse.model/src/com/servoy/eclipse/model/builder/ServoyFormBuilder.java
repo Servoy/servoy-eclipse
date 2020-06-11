@@ -152,7 +152,7 @@ public class ServoyFormBuilder
 	{
 		IPersist context = form;
 		IResource markerResource = ServoyBuilderUtils.getPersistResource(form);
-		FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		FlattenedSolution fs = ServoyBuilderUtils.getReferenceFlattenedSolution(servoyProject.getSolution());
 
 		String styleName = form.getStyleName();
 		if (styleName != null && !"_servoy_mobile".equals(styleName))// internal style for mobile
