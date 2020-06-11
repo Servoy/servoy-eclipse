@@ -584,7 +584,14 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>,
 		return editingFlattenedSolution;
 	}
 
-	// Only use for hook solutions
+	/**
+	 * This should only be called if you really need to none editing flattened solution of this specific Project (solution)
+	 * Normally you would use ServoyModel.getFlattenedSolution() instead.
+	 * So only if you need to by pass this, for example you need to he FS onyl for the HookModule then call this.
+	 * Because this will result in a FS being cached for this specific solution, we should avoid doing that over all modules a solution has.
+	 *
+	 * @return The FlattenedSolution for this specific Project/Solution
+	 */
 	public FlattenedSolution getFlattenedSolution()
 	{
 		try
