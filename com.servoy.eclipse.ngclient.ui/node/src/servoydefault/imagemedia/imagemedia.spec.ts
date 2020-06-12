@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { SabloModule } from '../../sablo/sablo.module'
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
@@ -29,25 +29,25 @@ describe("ServoyDefaultImageMedia", () => {
   let applicationService: any;
   let servoyApi : any;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ ServoyDefaultImageMedia, UploadDirective],
-      imports: [SabloModule, ServoyPublicModule],
-      providers: [FormattingService,TooltipService, ApplicationService, ServoyService, I18NProvider, SvyUtilsService, {provide: ServoyApi, useValue: servoyApi}, ViewportService], 
-    })
-    .compileComponents();
-  }));
-  
   beforeEach(() => {
-    fixture = TestBed.createComponent(ServoyDefaultImageMedia);
-    component = fixture.componentInstance;
+
     applicationService = jasmine.createSpyObj("ApplicationService", ["showFileOpenDialog"]);
     servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml", "getFormname"]); 
+    
+    TestBed.configureTestingModule({
+        declarations: [ ServoyDefaultImageMedia, UploadDirective],
+        imports: [SabloModule, ServoyPublicModule],
+        providers: [FormattingService,TooltipService, { provide: ApplicationService, useValue: applicationService}, ServoyService, I18NProvider, SvyUtilsService, {provide: ServoyApi, useValue: servoyApi}, ViewportService], 
+      })
+      .compileComponents();
+    
+    fixture = TestBed.createComponent(ServoyDefaultImageMedia);
+    component = fixture.componentInstance;
     component.servoyApi = servoyApi as ServoyApi;
     component.enabled = true; 
-    component.editable = true;
+    component.editable = true; 
     fixture.detectChanges();
-  });
+  }); 
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -58,20 +58,28 @@ describe("ServoyDefaultImageMedia", () => {
   });
 
   it ('should delete the current uploaded file/image', () => {
-    component.imageURL = "servoydefault/imagemedia/res/images/notemptymedia.gif";
-    component.deleteMedia();
+    component.imageURL = "servoydefault/imagemedia/res/images/notemptymedia.gif"
+    imgUpload = fixture.debugElement.queryAll(By.css('.imgdelete'));
+    imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
+    fixture.detectChanges();
     expect(component.dataProviderID).toBeNull();
     expect(component.imageURL).toEqual('servoydefault/imagemedia/res/images/empty.gif');
   });
 
-  // TODO: fix this test
-  xit('should call the upload service', () => {
-    imgUpload = fixture.debugElement.queryAll(By.css('img'));
-    console.log(imgUpload);
-    // try to open
-    imgUpload[1].triggerEventHandler('click', null);
+  it('should call the upload service', () => {
+    imgUpload = fixture.debugElement.queryAll(By.css('.imgupload'));
+    imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
     fixture.detectChanges();
     expect(applicationService.showFileOpenDialog).toHaveBeenCalled();
   });
+  
+  it('should download file', () => {
+      component.imageURL = "servoydefault/imagemedia/res/images/notemptymedia.gif";
+      let spy = spyOn(component, "downloadMedia");
+      imgUpload = fixture.debugElement.queryAll(By.css('.imgdownload'));
+      imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
+      fixture.detectChanges();
+      expect(spy).toHaveBeenCalled();
+    });
 });
 

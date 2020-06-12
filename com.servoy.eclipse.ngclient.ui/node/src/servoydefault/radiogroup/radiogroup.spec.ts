@@ -1,20 +1,40 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { ServoyDefaultRadiogroup } from './radiogroup';
 import { SabloModule } from "../../sablo/sablo.module";
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 import { FormsModule } from "@angular/forms";
 import { FormattingService, TooltipService } from "../../ngclient/servoy_public";
+import { IValuelist } from "../../sablo/spectypes.service";
+import { By } from "@angular/platform-browser";
+import { NotNullOrEmptyPipe } from "../../ngclient/pipes/pipes";
+import { DebugElement } from "@angular/core";
+
+const mockData = [
+                  {
+                    realValue: 3,
+                    displayValue: 'Bucharest'
+                  },
+                  {
+                    realValue: 1,
+                    displayValue: 'Timisoara'
+                  },
+                  {
+                    realValue: 2,
+                    displayValue: 'Amsterdam'
+                  },
+                ] as IValuelist;
 
 describe('ServoyDefaultRadiogroup', () => {
   let component: ServoyDefaultRadiogroup;
   let fixture: ComponentFixture<ServoyDefaultRadiogroup>;
+  let input: DebugElement;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultRadiogroup],
       imports: [SabloModule, FormsModule, ServoyPublicModule],
-      providers: [FormattingService, TooltipService]
+      providers: [NotNullOrEmptyPipe, FormattingService, TooltipService]
     })
     .compileComponents();
   }));
@@ -23,10 +43,34 @@ describe('ServoyDefaultRadiogroup', () => {
     fixture = TestBed.createComponent(ServoyDefaultRadiogroup);
     component = fixture.componentInstance;
     component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+    component.valuelistID = mockData;
+    component.enabled = true;
+    component.editable = true;
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  
+  it('should click change value', () => {
+      input = fixture.debugElement.query(By.css('input'));
+      expect(input.nativeElement.checked).toBeFalsy(); // default state
+      input.nativeElement.dispatchEvent(new Event('click'));
+      fixture.detectChanges();
+      expect(input.nativeElement.checked).toBeTruthy(); // state after click
+    });
+   
+  it('should call itemClicked', () => {
+      input = fixture.debugElement.query(By.css('input'));
+      spyOn(component, "itemClicked");
+      input.nativeElement.dispatchEvent(new Event('click'));
+      fixture.detectChanges();
+      expect(component.itemClicked).toHaveBeenCalled();
+  });
+  
+  it ('should be enabled', () => { 
+      input = fixture.debugElement.query(By.css('input'));
+      expect(input.nativeElement.disabled).toBe(false);
+  })
 });
