@@ -33,7 +33,6 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -178,9 +177,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String dataSource = (String)marker.getAttribute("DataSource");
 				int contextTypeId = marker.getAttribute("ContextTypeId", -1);
 
-				BaseSetPropertyQuickFix quickfix = type.equals(ServoyBuilder.INVALID_EVENT_METHOD) && contextTypeId == IRepository.FORMS
-					? new SetPropertyQuickFix(solName, uuid, eventName, eventName, MethodWithArguments.METHOD_NONE)
-					: new ClearPropertyQuickFix(solName, uuid, eventName, eventName);
+				BaseSetPropertyQuickFix quickfix = new ClearPropertyQuickFix(solName, uuid, eventName, eventName);
 				quickfix.setLabel("Clear property " + quickfix.getDisplayName());
 				resolutions.add(quickfix);
 				if (contextTypeId == IRepository.FORMS)
