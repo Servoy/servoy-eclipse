@@ -31,7 +31,6 @@ describe('ServoyDefaultListBox', () => {
   let component: ServoyDefaultListBox;
   let fixture: ComponentFixture<ServoyDefaultListBox>;
   let debugEl: DebugElement;
-  let element: HTMLElement;
   let servoyApi;
 
   beforeEach(async(() => {
@@ -57,8 +56,6 @@ describe('ServoyDefaultListBox', () => {
     component = fixture.componentInstance;
     component.servoyApi =  servoyApi as ServoyApi;
     debugEl = fixture.debugElement;
-    element = debugEl.nativeElement;
-    fixture.detectChanges();
 
     // set some default values
     component.valuelistID = mockDataValueList;
@@ -76,19 +73,16 @@ describe('ServoyDefaultListBox', () => {
     expect(component.multiselectListbox).toBeFalse();
   });
 
-  it('should show `Bucuresti Timisoara Cluj` as options', async(() => {
-    fixture.whenStable().then(() => {
+  it('should show `Bucuresti Timisoara Cluj` as options', () => {
       const options = debugEl.queryAll(By.css('select option'));
       expect(options[0].nativeElement.text).toBe('Bucuresti');
       expect(options[1].nativeElement.text).toBe('Timisoara');
       expect(options[2].nativeElement.text).toBe('Cluj');
-    });
-  }));
+  });
 
   it('should call update method', () => {
     spyOn(component, 'update');
     const select = debugEl.query(By.css('select')).nativeElement;
-    select.value = select.options[0].value;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     expect(component.update).toHaveBeenCalled();
@@ -99,7 +93,6 @@ describe('ServoyDefaultListBox', () => {
     fixture.detectChanges();
     spyOn(component, 'multiUpdate');
     const select = debugEl.query(By.css('select')).nativeElement;
-    select.values = [select.options[0].value, select.options[1].value];
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     expect(component.multiUpdate).toHaveBeenCalled();
@@ -112,37 +105,34 @@ describe('ServoyDefaultListBox', () => {
     fixture.detectChanges();
     expect(component.dataProviderID).toEqual(1);
   });
-
-  // TODO : update test
-  xit('should have as selectedValues: Bucuresti & Timisoara', () => {
+ 
+  it('should test selectedValues', () => {
     component.multiselectListbox = true;
-    spyOn(component, 'ngOnChanges');
-    fixture.detectChanges();
     const select = debugEl.query(By.css('select')).nativeElement;
-    select.values = [select.options[0].value, select.options[1].value];
-    select.dispatchEvent(new Event('change'));
+    component.dataProviderID = "test1\ntest2"
+        component.ngOnChanges({
+            dataProviderID: new SimpleChange(null, component.dataProviderID, true)
+        });
     fixture.detectChanges();
-    expect(component.ngOnChanges).toHaveBeenCalled();
-    expect(component.selectedValues).toEqual(['0: 1', '1: 2']);
+    expect(component.selectedValues[0]).toEqual('test1');
+    expect(component.selectedValues[1]).toEqual('test2');
   });
 
-  // TODO : update test
-  it('should call ngOnChanges', fakeAsync(() => {
+  it('should call ngOnChanges', async() => {
     fixture.whenStable().then(() => {
       component.multiselectListbox = true;
-      fixture.detectChanges();
-      const changes = {dataProviderID: new SimpleChange(1, 2, false)};
       spyOn(component, 'ngOnChanges');
-      component.ngOnChanges(changes);
+      component.ngOnChanges({dataProviderID: new SimpleChange(1, 2, false)});
       fixture.detectChanges();
       expect(component.ngOnChanges).toHaveBeenCalled();
     });
-  }));
+  });
 
-  xit( 'should render markupid ', () => {
+  it( 'should render markupid ', () => {
     component.servoyApi.getMarkupId.and.returnValue( 'myid');
+    const select = debugEl.query(By.css('select')).nativeElement;
     fixture.detectChanges();
-    expect(element.id).toBe('myid');
+    expect(select.id).toBe('myid');
   });
 
   it( 'should have called servoyApi.getMarkupId', () => {

@@ -6,6 +6,7 @@ import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 import { ServoyDefaultHTMLView } from './htmlview';
 
 import { FormattingService, TooltipService } from '../../ngclient/servoy_public'
+import { By } from "@angular/platform-browser";
 
 describe("ServoyDefaultHTMLView", () => {
   let component: ServoyDefaultHTMLView;
@@ -29,5 +30,24 @@ describe("ServoyDefaultHTMLView", () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+  
+  it( 'should render markupid ', () => {
+      component.servoyApi.getMarkupId.and.returnValue( 'myid');
+      const div = fixture.debugElement.query(By.css('div')).nativeElement;
+      fixture.detectChanges();
+      expect(div.id).toBe('myid');
+    });
+
+  it( 'should have called servoyApi.getMarkupId', () => {
+      expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
+  });
+  
+  it ('should test innerhtml', () => {
+      component.dataProviderID = "<p>some text herre</p>";
+      fixture.detectChanges();
+      const spanEl = fixture.debugElement.query(By.css('span'));
+      expect(spanEl.nativeElement.innerHTML = "<p>some text herre</p>");
+      expect(component.servoyApi.trustAsHtml).toHaveBeenCalled();
   });
 });
