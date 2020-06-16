@@ -50,15 +50,14 @@ public class ServoyMediaBuilder
 	public static boolean addMediaMarkers(IProject project, IFile file)
 	{
 		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
-		FlattenedSolution fs = servoyModel.getFlattenedSolution();
-
+		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
+		FlattenedSolution fs = ServoyBuilderUtils.getReferenceFlattenedSolution(servoyProject.getSolution());
 		String mediaName = file.getName();
 		Media media = fs.getMedia(mediaName);
 		if (media == null)
 		{
 			return false;
 		}
-		ServoyProject servoyProject = servoyModel.getServoyProject(project.getName());
 
 		ServoyBuilder.checkPersistDuplicateName();
 		ServoyBuilder.checkPersistDuplicateUUID();

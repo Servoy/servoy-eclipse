@@ -152,7 +152,7 @@ public class ServoyFormBuilder
 	{
 		IPersist context = form;
 		IResource markerResource = ServoyBuilderUtils.getPersistResource(form);
-		FlattenedSolution fs = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		FlattenedSolution fs = ServoyBuilderUtils.getReferenceFlattenedSolution(servoyProject.getSolution());
 
 		String styleName = form.getStyleName();
 		if (styleName != null && !"_servoy_mobile".equals(styleName))// internal style for mobile
@@ -2177,8 +2177,9 @@ public class ServoyFormBuilder
 
 			if (!isValidNumberVariable)
 			{
+
 				ServoyMarker mk = MarkerMessages.ValuelistDataproviderTypeMismatch.fill(valuelist.getName(),
-					elementName != null ? elementName : "", inForm);
+					elementName != null ? elementName : "UNNAMED", inForm);
 				IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), -1, ServoyBuilder.VALUELIST_DATAPROVIDER_TYPE_MISMATCH,
 					IMarker.PRIORITY_NORMAL, null, o);
 				marker.setAttribute("Uuid", valuelistUUID.toString());

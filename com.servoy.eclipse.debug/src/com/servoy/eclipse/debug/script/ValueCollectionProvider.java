@@ -453,12 +453,20 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		try
 		{
 			Deque<Set<IFile>> stack = depedencyStack.get();
+			item = getFromScriptCache(file);
+			if (item == null && stack.size() > 0)
+			{
+				if (stack.stream().anyMatch(set -> set.contains(file)))
+				{
+					// this is a circulair references from the beginning (very likely getTopCollection()), can't be resolved.
+					return null;
+				}
+			}
 			Set<IFile> current = stack.peek();
 			if (current != null)
 			{
 				current.add(file);
 			}
-			item = getFromScriptCache(file);
 			if (item == null)
 			{
 				// its starting, setup the stack for generating the new Set of files.

@@ -1843,9 +1843,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
+				final FlattenedSolution flattenedSolution = ServoyBuilderUtils.getReferenceFlattenedSolution(solution);
 				solution.acceptVisitor(new IPersistVisitor()
 				{
-					private final FlattenedSolution flattenedSolution = getServoyModel().getFlattenedSolution();
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
 					private final Set<UUID> methodsParsed = new HashSet<UUID>();
 
@@ -3270,7 +3270,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("Name", type.equals(ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE) ? "element" : ((ISupportName)persist).getName());
-				marker.setAttribute("SolutionName", resource.getName());
+				marker.setAttribute("SolutionName", resource.getProject().getName());
 			}
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||
 				type.equals(INVALID_SORT_OPTION) || type.equals(EVENT_METHOD_MARKER_TYPE) || type.equals(PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE) ||
@@ -3279,7 +3279,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				type.equals(FORM_DUPLICATE_PART_MARKER_TYPE))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
-				marker.setAttribute("SolutionName", resource.getName());
+				marker.setAttribute("SolutionName", resource.getProject().getName());
 				if (elementName != null) marker.setAttribute("Name", elementName);
 				if (type.equals(INVALID_DATAPROVIDERID) && persist instanceof ISupportDataProviderID)
 				{
