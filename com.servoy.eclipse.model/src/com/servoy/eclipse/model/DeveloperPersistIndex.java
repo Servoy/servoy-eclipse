@@ -408,23 +408,26 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 		if (item instanceof TableNode || item.getParent() instanceof TableNode)
 		{
 			ds = item instanceof TableNode ? ((TableNode)item).getDataSource() : ((TableNode)item.getParent()).getDataSource();
-			// remove all items of the datasource, it will be recreated
-			for (String name : duplicateNames.keySet())
+			if (ds != null)
 			{
-				Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-				Iterator<String> it = duplicates.keySet().iterator();
-				while (it.hasNext())
+				// remove all items of the datasource, it will be recreated
+				for (String name : duplicateNames.keySet())
 				{
-					String className = it.next();
-					if (className.startsWith(ds))
+					Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+					Iterator<String> it = duplicates.keySet().iterator();
+					while (it.hasNext())
 					{
-						it.remove();
+						String className = it.next();
+						if (className.startsWith(ds))
+						{
+							it.remove();
+						}
 					}
 				}
 			}
 		}
 		super.testDatasourceCache(item);
-		if (item instanceof TableNode || item.getParent() instanceof TableNode)
+		if (ds != null && (item instanceof TableNode || item.getParent() instanceof TableNode))
 		{
 			initDatasourceCache(ds);
 		}
