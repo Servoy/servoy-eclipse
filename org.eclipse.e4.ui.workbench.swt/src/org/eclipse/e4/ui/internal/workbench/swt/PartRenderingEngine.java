@@ -328,7 +328,8 @@ public class PartRenderingEngine implements IPresentationEngine {
 				// it's 'globally visible' and, if so, remove all other
 				// 'local' placeholders referencing the same element.
 				int newLocation = modelService.getElementLocation(added);
-				if (newLocation == EModelService.IN_SHARED_AREA || newLocation == EModelService.OUTSIDE_PERSPECTIVE) {
+				if (added instanceof MPlaceholder && (newLocation == EModelService.IN_SHARED_AREA
+						|| newLocation == EModelService.OUTSIDE_PERSPECTIVE)) {
 					MWindow topWin = modelService.getTopLevelWindowFor(added);
 					modelService.hideLocalPlaceholders(topWin, null);
 				}
