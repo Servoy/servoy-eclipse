@@ -19,7 +19,7 @@
 	</parent>
   <groupId>com.servoy</groupId>
   <artifactId>org.eclipse.e4.ui.workbench.swt</artifactId>
-  <version>0.14.900.v20200213-1442</version>
+  <version>0.14.1200.v20200529-1321</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>
