@@ -247,7 +247,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			ServoyProject moduleProject = servoyModel.getServoyProject(module);
 			if (moduleProject == null)
 			{
-				Debug.error("Module '"+module+"' project was not found, cannot export it.");
+				Debug.error("Module '" + module + "' project was not found, cannot export it.");
 				continue;
 			}
 			Button moduleCheck = new Button(composite, SWT.CHECK);
@@ -269,7 +269,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			}
 			version.setText(v == null ? "" : v);
 			version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			version.addListener(SWT.FocusOut, event -> {
+			version.addModifyListener(event -> {
 				setSolutionVersion(servoyModel, module, version.getText(), true);
 				handleEvent(null);
 				label.setVisible(Strings.isEmpty(version.getText()));
