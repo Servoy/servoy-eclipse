@@ -17,9 +17,13 @@
 
 package com.servoy.eclipse.designer.webpackage;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -43,6 +47,7 @@ import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.notification.INotification;
 import com.servoy.eclipse.notification.NotificationPopUpUI;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizardDefaultPackages;
 import com.servoy.j2db.util.Pair;
 
@@ -115,6 +120,18 @@ public class Startup implements IStartup
 								new Pair<String, String>(packageReader.getPackageDisplayname(), packageReader.getVersion()));
 						}
 
+						File SPMNotifications = new File(Activator.getDefault().getStateLocation().toFile(), "SPMNotifications");
+						if (!SPMNotifications.exists()) SPMNotifications.mkdir();
+						File solutionSPMNotifications = new File(SPMNotifications, servoyProject.getProject().getName());
+						Properties solutionSPMNotificationsVersions = new Properties();
+						if (solutionSPMNotifications.exists())
+						{
+							try (InputStreamReader is = new InputStreamReader(solutionSPMNotifications.toURI().toURL().openStream()))
+							{
+								solutionSPMNotificationsVersions.load(is);
+							}
+						}
+
 						StringBuilder updatedPackagesNames = new StringBuilder();
 						Set<String> projectPackagesNames = projectPackages.keySet();
 						List<JSONObject> remotePackages = GetAllInstalledPackages.getRemotePackages();
@@ -132,11 +149,16 @@ public class Startup implements IStartup
 										if (latestRelease != null)
 										{
 											String version = latestRelease.optString("version");
-
-											if (version != null && version.compareTo(projectPackages.get(name).getRight()) > 0)
+											String projectVersion = projectPackages.get(name).getRight();
+											if (version != null && version.compareTo(projectVersion) > 0)
 											{
-												updatedPackagesNames.append(projectPackages.get(name).getLeft()).append(" - ")
-													.append(projectPackages.get(name).getRight()).append(" -> ").append(version).append('\n');
+												String alreadyNotifiedVersion = solutionSPMNotificationsVersions.getProperty(name);
+												if (alreadyNotifiedVersion == null || !alreadyNotifiedVersion.equals(version))
+												{
+													updatedPackagesNames.append(projectPackages.get(name).getLeft()).append(" - ")
+														.append(projectVersion).append(" -> ").append(version).append('\n');
+													solutionSPMNotificationsVersions.setProperty(name, version);
+												}
 											}
 										}
 									}
@@ -184,6 +206,25 @@ public class Startup implements IStartup
 									notificationPopUpUI.open();
 								}
 							});
+						}
+
+						// save shown versions
+						try (FileOutputStream fos = new FileOutputStream(solutionSPMNotifications))
+						{
+							solutionSPMNotificationsVersions.store(fos, "SPM notifications last shown versions");
+						}
+
+						// remove saved notifications for already deleted projects
+						for (File file : SPMNotifications.listFiles())
+						{
+							if (file.isFile())
+							{
+								ServoyProject p = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(file.getName());
+								if (p == null)
+								{
+									file.delete();
+								}
+							}
 						}
 					}
 					catch (Exception ex)
