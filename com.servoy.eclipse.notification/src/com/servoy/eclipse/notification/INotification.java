@@ -31,5 +31,7 @@ public interface INotification
 	
 	String getLink();
 	
+	boolean isCommand();
+	
 	Date getDate();
 }

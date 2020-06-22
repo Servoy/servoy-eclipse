@@ -269,7 +269,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 			}
 			version.setText(v == null ? "" : v);
 			version.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			version.addListener(SWT.FocusOut, event -> {
+			version.addModifyListener(event -> {
 				setSolutionVersion(servoyModel, module, version.getText(), true);
 				handleEvent(null);
 				label.setVisible(Strings.isEmpty(version.getText()));

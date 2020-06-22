@@ -825,7 +825,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				{
 					writer.key(fe.getName());
 				}
-				fe.propertiesAsTemplateJSON(writer, new FormElementContext(fe));
+				fe.propertiesAsTemplateJSON(writer,
+					new FormElementContext(fe, new ServoyDataConverterContext(ServoyModelFinder.getServoyModel().getFlattenedSolution(),
+						ServoyModelFinder.getServoyModel().getMessagesManager()), null));
 
 				Collection<PropertyDescription> properties = fe.getProperties(FormComponentPropertyType.INSTANCE);
 				if (properties.size() > 0)

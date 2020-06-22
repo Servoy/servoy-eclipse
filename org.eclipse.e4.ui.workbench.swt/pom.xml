@@ -15,11 +15,11 @@
  	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2020.6.0.3581_rc2</version>
+		<version>2020.9.0.3600_rc</version>
 	</parent>
   <groupId>com.servoy</groupId>
   <artifactId>org.eclipse.e4.ui.workbench.swt</artifactId>
-  <version>0.14.900.v20200213-1442</version>
+  <version>0.14.1000.v20200514-1625</version>
   <packaging>eclipse-plugin</packaging>
 
   <properties>

@@ -50,28 +50,22 @@
 		    <unit id="slf4j.api" version="1.8.0.beta3-SNAPSHOT"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20190827152740/repository"/>
-		    <unit id="org.objectweb.asm.util" version="7.1.0.v20190412-2143"/>
-		    <unit id="org.objectweb.asm.util.source" version="7.1.0.v20190412-2143"/>
-		    <unit id="org.apache.commons.codec" version="1.10.0.v20180409-1845"/>
-		    <unit id="org.apache.commons.codec.source" version="1.10.0.v20180409-1845"/>
+		    <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository"/>
+		    <unit id="org.objectweb.asm.util" version="8.0.1.v20200420-1007"/>
+		    <unit id="org.objectweb.asm.util.source" version="8.0.1.v20200420-1007"/>
+		    <unit id="org.apache.commons.codec" version="1.13.0.v20200108-0001"/>
+		    <unit id="org.apache.commons.codec.source" version="1.13.0.v20200108-0001"/>
+			<unit id="org.assertj" version="3.14.0.v20200120-1926"/>
+			<unit id="org.assertj.source" version="3.14.0.v20200120-1926"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://download.eclipse.org/eclipse/updates/4.15/R-4.15-202003050155"/>
-		    <unit id="org.eclipse.sdk.ide" version="4.15.0.I20200305-0155"/>
-		    <unit id="org.eclipse.equinox.executable" version="3.8.700.v20200207-2156"/>
-		    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.700.v20200207-2156"/>
+		    <repository location="https://download.eclipse.org/eclipse/updates/4.16/"/>
+		    <unit id="org.eclipse.sdk.ide" version="4.16.0.I20200604-0540"/>
+		    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.800.v20200514-1529"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/modeling/emf/emf/builds/release/2.21"/>
 		    <unit id="org.eclipse.emf.feature.group" version="2.21.0.v20200205-0529"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/egit/updates/"/>
-		    <unit id="org.eclipse.egit.feature.group" version="5.7.0.202003110725-r"/>
-		    <unit id="org.eclipse.jgit.feature.group" version="5.7.0.202003110725-r"/>
-		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.7.0.202003110725-r"/>
-		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.7.0.202003110725-r"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository"/>
@@ -82,6 +76,13 @@
 		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2020.06/"/>
 		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202004231014"/>
 		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202004231017"/>
+	    </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <repository location="http://download.eclipse.org/egit/updates"/>
+		    <unit id="org.eclipse.egit.feature.group" version="5.8.0.202006091008-r"/>
+		    <unit id="org.eclipse.jgit.feature.group" version="5.8.0.202006091008-r"/>
+		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.8.0.202006091008-r"/>
+		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.8.0.202006091008-r"/>
 	    </location>
     </locations>
 </target>
