@@ -1,19 +1,15 @@
 import { Injectable, Inject } from '@angular/core';
 import { SabloService } from "../../sablo/sablo.service";
 import { DOCUMENT } from '@angular/common';
+import { FormService } from '../form.service';
 
 @Injectable()
 export class SvyUtilsService {
     
-    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document: Document) {}
+    constructor(private sabloService: SabloService, @Inject(DOCUMENT) private document: Document, private formservice: FormService) {}
     
     public createJSEvent(event:KeyboardEvent, eventType:string, contextFilter?:string, contextFilterElement?:any) {
-        let targetEl = event.srcElement as Element
-// TODO check        if (event.target)
-//            targetEl = event.target;
-//        else if (event.srcElement)
-//            targetEl = event.srcElement;
-//        
+        let targetEl = event.target as Element
         let form;
         let parent = targetEl;
         let targetElNameChain = new Array();
@@ -32,12 +28,7 @@ export class SvyUtilsService {
                 targetElNameChain.push(parent.getAttribute("ng-reflect-name"));
             parent = parent.parentElement;
         }
-// TODO       if (!form || form == 'MainController') {
-//            // form not found, search for an active dialog
-//            var formInDialog = $('.svy-dialog.window.active').find("svy-formload").attr("formname");
-//            if (formInDialog)
-//                form = formInDialog;
-//        }
+
         if (!contextMatch)
             return null;
         var jsEvent = { svyType: 'JSEvent', eventType: eventType, "timestamp": new Date().getTime() };
@@ -45,19 +36,17 @@ export class SvyUtilsService {
         jsEvent['modifiers'] = modifiers;
         jsEvent['x'] = event['pageX'];//TODO check
         jsEvent['y'] = event['pageY'];
-        if (form != 'MainController') {
-            jsEvent['formName'] = form;
-//TODO            var formScope = angular.element(parent).scope();
-//            for (var i = 0; i < targetElNameChain.length; i++) {
-//                if (formScope['model'][targetElNameChain[i]]) {
-//                    jsEvent['elementName'] = targetElNameChain[i];
-//                    break;
-//                }
-//            }
-            if (contextFilterElement && (contextFilterElement != jsEvent['elementName'])) {
-                return null;
+        jsEvent['formName'] = form;
+        for (var i = 0; i < targetElNameChain.length; i++) {
+            if (this.formservice.getFormCacheByName(form).getComponent(targetElNameChain[i])) {
+                jsEvent['elementName'] = targetElNameChain[i];
+                break;
             }
         }
+        if (contextFilterElement && (contextFilterElement != jsEvent['elementName'])) {
+            return null;
+        }
+
         return jsEvent;
     }
     
