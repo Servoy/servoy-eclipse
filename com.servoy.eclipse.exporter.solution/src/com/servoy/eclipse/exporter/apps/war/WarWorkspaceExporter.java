@@ -218,7 +218,9 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				public boolean accept(File d, String name)
 				{
 					boolean accept = fileNames != null ? !fileNames.contains(name.toLowerCase()) : true;
-					return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
+
+					return accept &&
+						(name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip") || (new File(d.getPath(), name).isDirectory()));
 				}
 			});
 			if (list == null || list.length == 0) return Collections.emptyList();
@@ -232,7 +234,8 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				public boolean accept(File d, String name)
 				{
 					boolean accept = fileNames != null ? fileNames.contains(name.toLowerCase()) : true;
-					return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
+					return accept &&
+						(name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip") || (new File(d.getPath(), name).isDirectory()));
 				}
 			});
 			if (list == null || list.length == 0) return Collections.emptyList();
