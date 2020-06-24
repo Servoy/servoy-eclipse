@@ -620,7 +620,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				@Override
 				public void run()
 				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshPalette();
+					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
 				}
 			});
 		}
