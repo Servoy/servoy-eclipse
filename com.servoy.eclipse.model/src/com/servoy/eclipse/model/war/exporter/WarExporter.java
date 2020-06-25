@@ -145,7 +145,7 @@ public class WarExporter
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"org.apache.commons.lang3_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
 
-	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
+	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 
 	private final IWarExportModel exportModel;
 	private SpecProviderState componentsSpecProviderState;
