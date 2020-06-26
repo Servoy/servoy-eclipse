@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>servoy.com</groupId>
 	<artifactId>shiplibs</artifactId>
-	<version>2020.6.0.3580_rc</version>
+	<version>2020.9.0.3600_rc</version>
 	<name>Servoy shiplibs</name>
 
 	<packaging>eclipse-repository</packaging>
