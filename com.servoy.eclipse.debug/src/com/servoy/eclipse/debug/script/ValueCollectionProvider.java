@@ -453,12 +453,20 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		try
 		{
 			Deque<Set<IFile>> stack = depedencyStack.get();
+			item = getFromScriptCache(file);
+			if (item == null && stack.size() > 0)
+			{
+				if (stack.stream().anyMatch(set -> set.contains(file)))
+				{
+					// this is a circulair references from the beginning (very likely getTopCollection()), can't be resolved.
+					return null;
+				}
+			}
 			Set<IFile> current = stack.peek();
 			if (current != null)
 			{
 				current.add(file);
 			}
-			item = getFromScriptCache(file);
 			if (item == null)
 			{
 				// its starting, setup the stack for generating the new Set of files.
@@ -494,7 +502,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	private static ValueCollectionCacheItem getFromScriptCache(IResource resource)
 	{
 		SoftReference<ValueCollectionCacheItem> sr = scriptCache.get(resource);
-		return sr != null && sr.get().get() != null ? sr.get() : null;
+		return sr != null && sr.get() != null && sr.get().get() != null ? sr.get() : null;
 	}
 
 	private static final ThreadLocal<Boolean> fullGlobalScope = new ThreadLocal<Boolean>()

@@ -130,18 +130,20 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
-		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport)
+		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
+		final boolean forceActivateResourceProject, final boolean keepResourceProjectOpen)
 		throws RepositoryException
 	{
 		return importFromJarFile(importEngine, x11handler, userChannel, repository, newResourcesProjectName, resourcesProject, m, activateSolution, cleanImport,
-			null, false);
+			null, false, forceActivateResourceProject, keepResourceProjectOpen);
 	}
 
 
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
-		final String projectLocation, final boolean reportImportFail) throws RepositoryException
+		final String projectLocation, final boolean reportImportFail, final boolean forceActivateResourcesProject, final boolean keepResourcesProjectOpen)
+		throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
 		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -202,7 +204,10 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					{
 						try
 						{
-							if (dummySolProject[0] != null) dummySolProject[0].delete(true, true, null); // dummy did it's job - to activate correct resources project, now we must remove it
+							if (dummySolProject[0] != null && !keepResourcesProjectOpen)
+							{
+								dummySolProject[0].delete(true, true, null); // dummy did it's job - to activate correct resources project, now we must remove it
+							}
 						}
 						finally
 						{
@@ -336,17 +341,10 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					}
 					finally
 					{
-						try
+						synchronized (finishedFlag)
 						{
-							if (job == null && dummySolProject[0] != null) dummySolProject[0].delete(true, true, null);
-						}
-						finally
-						{
-							synchronized (finishedFlag)
-							{
-								finishedFlag[0] = job == null;
-								if (finishedFlag[0] == true) finishedFlag.notify();
-							}
+							finishedFlag[0] = job == null;
+							if (finishedFlag[0] == true) finishedFlag.notify();
 						}
 					}
 					if (job != null) job.schedule();
@@ -357,7 +355,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 			importJob3.setUser(false);
 			importJob3.setSystem(true);
 
-			if (!activateSolution)
+			if (!activateSolution && !forceActivateResourcesProject)
 			{
 				importJob3.schedule();
 			}

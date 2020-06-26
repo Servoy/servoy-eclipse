@@ -265,7 +265,8 @@ public class Activator extends AbstractUIPlugin
 
 			}
 		});
-		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> showLoginAndStart());
+		ServoyModelManager.getServoyModelManager().getServoyModel()
+			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
 	}
 
 	/**
@@ -273,62 +274,59 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public void showLoginAndStart()
 	{
-		if (com.servoy.eclipse.core.Activator.getDefault().isPostgresChecked(() -> showLoginAndStart()))
+		Runnable runnable = new Runnable()
 		{
-			Runnable runnable = new Runnable()
+			@Override
+			public void run()
 			{
-				@Override
-				public void run()
+				Shell activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+				if (activeShell == null)
 				{
-					Shell activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+					Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
+					for (int i = shells.length; --i >= 0;)
+					{
+						if (shells[i].getParent() == null && shells[i].isVisible())
+						{
+							activeShell = shells[i];
+							break;
+						}
+					}
 					if (activeShell == null)
 					{
-						Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
-						for (int i = shells.length; --i >= 0;)
-						{
-							if (shells[i].getParent() == null && shells[i].isVisible())
-							{
-								activeShell = shells[i];
-								break;
-							}
-						}
-						if (activeShell == null)
-						{
-							Display.getDefault().asyncExec(this);
-							return;
-						}
-					}
-					while (activeShell.getParent() instanceof Shell && activeShell.getParent().isVisible())
-					{
-						activeShell = (Shell)activeShell.getParent();
-					}
-					//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
-					String username = null;
-					try
-					{
-						username = SecurePreferencesFactory.getDefault()
-							.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
-							.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
-					}
-					catch (StorageException e)
-					{
-						ServoyLog.logError(e);
-					}
-					String loginToken = new ServoyLoginDialog(activeShell).doLogin();
-					if (loginToken != null)
-					{
-						// only show if first login or is not disabled from preferences
-						if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
-						{
-							BrowserDialog dialog = new BrowserDialog(activeShell,
-								TUTORIALS_URL + loginToken, true, true);
-							dialog.open();
-						}
+						Display.getDefault().asyncExec(this);
+						return;
 					}
 				}
-			};
-			Display.getDefault().asyncExec(runnable);
-		}
+				while (activeShell.getParent() instanceof Shell && activeShell.getParent().isVisible())
+				{
+					activeShell = (Shell)activeShell.getParent();
+				}
+				//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
+				String username = null;
+				try
+				{
+					username = SecurePreferencesFactory.getDefault()
+						.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
+						.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
+				}
+				catch (StorageException e)
+				{
+					ServoyLog.logError(e);
+				}
+				String loginToken = new ServoyLoginDialog(activeShell).doLogin();
+				if (loginToken != null)
+				{
+					// only show if first login or is not disabled from preferences
+					if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
+					{
+						BrowserDialog dialog = new BrowserDialog(activeShell,
+							TUTORIALS_URL + loginToken, true, true);
+						dialog.open();
+					}
+				}
+			}
+		};
+		Display.getDefault().asyncExec(runnable);
 	}
 
 	@Override

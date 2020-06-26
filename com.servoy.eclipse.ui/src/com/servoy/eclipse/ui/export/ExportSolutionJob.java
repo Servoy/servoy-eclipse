@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
@@ -45,21 +46,10 @@ import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.ui.wizards.ExportSolutionModel;
-import com.servoy.j2db.ClientVersion;
-import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IApplicationServerSingleton;
-import com.servoy.j2db.server.shared.IUserManager;
-import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
-import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
-import com.servoy.j2db.util.xmlxport.ITableDefinitionsAndSecurityBasedOnWorkspaceFiles;
-import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 /**
  * @author jcompagner
@@ -94,63 +84,18 @@ final public class ExportSolutionJob extends WorkspaceJob
 		if (exportModel.getModulesToExport() != null) totalDuration = (int)(1.42 * exportModel.getModulesToExport().length); // make the main export be 70% of the time, leave the rest for sample data
 		monitor.beginTask("Exporting solution", totalDuration);
 
-		AbstractRepository rep = (AbstractRepository)ApplicationServerRegistry.get().getDeveloperRepository();
-
-		final IApplicationServerSingleton as = ApplicationServerRegistry.get();
-		IUserManager sm = as.getUserManager();
-		EclipseExportUserChannel eeuc = new EclipseExportUserChannel(exportModel, monitor);
-		EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(workspace);
-		IXMLExporter exporter = as.createXMLExporter(rep, sm, eeuc, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
-
 		try
 		{
-			ITableDefinitionsAndSecurityBasedOnWorkspaceFiles tableDefManager = null;
-			IMetadataDefManager metadataDefManager = null;
-			if (dbDown || exportModel.isExportUsingDbiFileInfoOnly())
-			{
-				Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(activeSolution,
-					exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
-					exportModel.isExportMetaData());
-				if (defManagers != null)
-				{
-					tableDefManager = defManagers.getLeft();
-					metadataDefManager = defManagers.getRight();
-				}
-			}
-			final String[] warningMessage = new String[] { "" };
-			if (exportModel.isExportSampleData() && dbDown)
-			{
-				warningMessage[0] = "Skipping sample data export, solution or module has non accesible database.";
-			}
-			if (exportModel.isExportMetaData() && dbDown)
-			{
-				warningMessage[0] = warningMessage[0] + "\nSkipping metadata export, solution or module has non accesible database.";
-			}
-			if (!"".equals(warningMessage[0]))
-			{
-				Display.getDefault().syncExec(new Runnable()
-				{
-					public void run()
-					{
-						MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Export solution from database files (database server not accesible)",
-							warningMessage[0]);
-					}
-				});
-			}
-
 			File exportFile = new File(exportModel.getFileName());
-			exporter.exportSolutionToFile(activeSolution, exportFile, ClientVersion.getVersion(), ClientVersion.getReleaseNumber(),
-				exportModel.isExportMetaData() && !dbDown, exportModel.isExportSampleData() && !dbDown, exportModel.getNumberOfSampleDataExported(),
-				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
-				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null,
-				exportModel.isExportReferencedWebPackages() ? getModulesWebPackages() : null, true);
+			SolutionExporter.exportSolutionToFile(activeSolution, exportFile, exportModel, new EclipseExportI18NHelper(workspace),
+				new EclipseExportUserChannel(exportModel, monitor),
+				exportModel.isExportReferencedWebPackages() ? getModulesWebPackages() : null, dbDown, true, exportSolution, monitor);
 
 			if (exportModel.isSaveImportSettingsToDisk() && exportModel.useImportSettings())
 			{
 				Utils.writeTXTFile(new File(exportFile.getParent(), exportFile.getName() + "_import_settings.json"),
 					exportModel.getImportSettings().toString());
 			}
-
 			monitor.done();
 
 			if (dbDown)

@@ -70,6 +70,7 @@ import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
@@ -241,11 +242,12 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			layout = newLayout;
 			formName = flattenedForm.getName();
 			extendsId = flattenedForm.getExtendsID();
+			boolean hideDefault = EditorUtil.hideDefaultComponents(form);
 			Dimension formSize = flattenedForm.getSize();
 			if (isCSSPositionContainer) formSize = showedContainer.getSize();
 			final String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
 				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
-				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() +
+				"&clientnr=" + editorKey.getClientnr() + "&c_clientnr=" + clientKey.getClientnr() + "&hd=" + hideDefault +
 				(showedContainer != null ? ("&cont=" + showedContainer.getID()) : "");
 			final Runnable runnable = new Runnable()
 			{
@@ -618,7 +620,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				@Override
 				public void run()
 				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshPalette();
+					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
 				}
 			});
 		}

@@ -1,4 +1,4 @@
-<li ng-repeat="item in items | filterByNested:['displayName','propertyName']:searchText  | orderBy:'displayName'" style="position:relative;">
+<li ng-repeat="item in items | filterByNested:['displayName','keywords','propertyName']:searchText  | orderBy:'displayName'" style="position:relative;">
     <div uib-accordion-group is-disabled="!item.properties" is-open="item.isOpen || searchText" ng-click="item.isOpen=!item.isOpen" ng-attr-style="{{item.properties ? 'margin-left:-19px' : ''}}">    
 		<uib-accordion-heading> 
 			<span class="palette-heading" title="Drag component {{item.displayName}} to form to add it"  ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName,null,item.componentTagName)"

@@ -249,7 +249,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	 * @param doActivateSolution
 	 */
 	public void doImport(final File file, final String resourcesProjectName, final ServoyResourcesProject existingProject, final boolean isCleanImport,
-		final boolean doDisplayDataModelChanges, final boolean doActivateSolution, String projectLocation, IRunnableContext context, IProgressMonitor mon)
+		final boolean doDisplayDataModelChanges, final boolean doActivateSolution, String projectLocation, IRunnableContext context, IProgressMonitor mon,
+		final boolean forceActivateResourcesProject, final boolean keepResourcesProjectOpen)
 	{
 		IRunnableWithProgress runnable = new IRunnableWithProgress()
 		{
@@ -431,7 +432,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
 						(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), resourcesProjectName, existingProject, monitor,
 						doActivateSolution,
-						isCleanImport, projectLocation, reportImportFail);
+						isCleanImport, projectLocation, reportImportFail, forceActivateResourcesProject, keepResourcesProjectOpen);
 					if (rootObjects != null)
 					{
 						title = "Solution imported";
@@ -897,7 +898,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		final boolean doDisplayDataModelChanges = page.getDisplayDataModelChange();
 		final boolean doActivateSolution = page.getActivateSolution();
 		doImport(file, resourcesProjectName, existingProject, isCleanImport, doDisplayDataModelChanges, doActivateSolution,
-			page.projectLocationComposite.getProjectLocation(), getContainer(), null);
+			page.projectLocationComposite.getProjectLocation(), getContainer(), null, false, false);
 
 		return true;
 	}

@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.help.IContextProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -67,6 +66,7 @@ import com.servoy.eclipse.ui.editors.table.ColumnComposite;
 import com.servoy.eclipse.ui.editors.table.DataComposite;
 import com.servoy.eclipse.ui.editors.table.EventsComposite;
 import com.servoy.eclipse.ui.editors.table.FoundsetMethodsComposite;
+import com.servoy.eclipse.ui.editors.table.LabelComposite;
 import com.servoy.eclipse.ui.editors.table.PropertiesComposite;
 import com.servoy.eclipse.ui.editors.table.SecurityComposite;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -154,7 +154,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	{
 		if (delayedLoad)
 		{
-			setPageText(addPage(new Composite(getContainer(), SWT.NONE)), "Loading Solution");
+			//when there is no solution activated, the table editor cannot be opened
+			LabelComposite labelComposite = new LabelComposite(getContainer(), SWT.NONE, "A solution must first be activated, to be able to show the editor!");
+			setPageText(addPage(labelComposite), "Loading Solution");
 			return;
 		}
 		createColumnPage();
@@ -714,6 +716,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		}
 		else
 		{
+
 			delayedLoad = true;
 		}
 	}

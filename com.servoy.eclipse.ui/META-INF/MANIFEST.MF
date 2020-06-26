@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 2020.6.0.3580_rc
+Bundle-Version: 2020.9.0.3600_rc
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -101,7 +101,8 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.views.properties,
  com.servoy.eclipse.ui.views.solutionexplorer,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
- com.servoy.eclipse.ui.wizards
+ com.servoy.eclipse.ui.wizards,
+ com.servoy.eclipse.ui.wizards.exportsolution.pages
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.servoy.eclipse.ui

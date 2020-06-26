@@ -104,6 +104,7 @@ import com.servoy.eclipse.core.util.RadioButtonsDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
+import com.servoy.eclipse.model.builder.BuilderDependencies;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
@@ -187,7 +188,7 @@ public class Activator extends Plugin
 
 	private volatile boolean isPostgresInstallChecked = false;
 
-	private Runnable postgressCheckedNotify;
+	private final List<Runnable> postgressCheckedNotify = new ArrayList<Runnable>(3);
 
 
 	@Override
@@ -367,19 +368,15 @@ public class Activator extends Plugin
 									}
 								}
 							}
-							try
-							{
-								if (eclipsePref.getBoolean("firstRun", true))
-								{
-									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(MainConceptsPageBrowserEditor.INPUT,
-										MainConceptsPageBrowserEditor.MAINCONCEPTSPAGE_BROWSER_EDITOR_ID);
-									eclipsePref.putBoolean("firstRun", false);
-								}
-							}
-							catch (Exception e)
-							{
-								ServoyLog.logError("Failed to open browser editor.", e);
-							}
+							/*
+							 * for now disable the main concepts page, we first need to have content.
+							 */
+							/*
+							 * try { if (eclipsePref.getBoolean("firstRun", true)) {
+							 * PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(MainConceptsPageBrowserEditor.INPUT,
+							 * MainConceptsPageBrowserEditor.MAINCONCEPTSPAGE_BROWSER_EDITOR_ID); eclipsePref.putBoolean("firstRun", false); } } catch
+							 * (Exception e) { ServoyLog.logError("Failed to open browser editor.", e); }
+							 */
 						}
 					});
 				}
@@ -755,6 +752,7 @@ public class Activator extends Plugin
 				{
 					public void activeProjectChanged(final ServoyProject project)
 					{
+						BuilderDependencies.getInstance().clear();
 						if (getDesignClient() != null)
 						{
 							getDesignClient().refreshI18NMessages();
@@ -1240,20 +1238,24 @@ public class Activator extends Plugin
 	void setPostgresChecked()
 	{
 		isPostgresInstallChecked = true;
-		if (this.postgressCheckedNotify != null) this.postgressCheckedNotify.run();
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				postgressCheckedNotify.stream().forEach(runnable -> runnable.run());
+				postgressCheckedNotify.clear();
+			}
+		});
 	}
 
 	/**
-	 * return immediatly true when postgres installation is already checked or created
-	 * if that didn't happen yet it will return false and the runnable will be called when this happens.
+	 * Will call the runnable when postgresql check is done, can be immediate
 	 * @param toNotify
-	 * @return
 	 */
-	public boolean isPostgresChecked(Runnable toNotify)
+	public void addPostgressCheckedCallback(Runnable toNotify)
 	{
-		if (isPostgresInstallChecked) return true;
-		this.postgressCheckedNotify = toNotify;
-		return false;
+		if (isPostgresInstallChecked) toNotify.run();
+		else this.postgressCheckedNotify.add(toNotify);
 	}
 
 	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, boolean lts, ActionListener listener) throws Exception

@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.intro.IIntroSite;
 import org.eclipse.ui.intro.config.IIntroAction;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.XMLEclipseWorkspaceImportHandlerVersions11AndHigher;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -82,14 +81,17 @@ public class ImportSampleAction implements IIntroAction
 								try
 								{
 									IXMLImportEngine importEngine = as.createXMLImportEngine(sampleSolution,
-										(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), as.getDataServer(), as.getClientId(), userChannel);
+										(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), as.getDataServer(), as.getClientId(),
+										userChannel);
 
 									IXMLImportHandlerVersions11AndHigher x11handler = as.createXMLInMemoryImportHandler(importEngine.getVersionInfo(),
-										as.getDataServer(), as.getClientId(), userChannel, (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository());
+										as.getDataServer(), as.getClientId(), userChannel,
+										(EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository());
 
 									IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler,
 										userChannel, (EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository(), "resources",
-										ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), monitor, true, false);
+										ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), monitor, true, false, false,
+										false);
 									if (rootObjects != null && rootObjects.length > 0)
 									{
 										Display.getDefault().asyncExec(new Runnable()

@@ -458,7 +458,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(QBFactory.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBFunction.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBGroupBy.class.getSimpleName(), new QueryBuilderCreator());
-		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderCreator());
+		addScopeType(QBJoin.class.getSimpleName(), new QueryBuilderJoinCreator());
 		addScopeType(QBJoins.class.getSimpleName(), new QueryBuilderJoinsCreator());
 		addScopeType(QBLogicalCondition.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBWhereCondition.class.getSimpleName(), new QueryBuilderCreator());
@@ -2679,6 +2679,7 @@ public class TypeCreator extends TypeCache
 				return TypeCreator.clone(member, TypeUtil.arrayOf(Record.JS_RECORD + '<' + config + '>'));
 			}
 			if (memberType.getName().equals(Record.JS_RECORD) || QUERY_BUILDER_CLASSES.containsKey(memberType.getName()) ||
+				memberType.getName().equals(QBJoin.class.getSimpleName()) ||
 				memberType.getName().equals(FoundSet.JS_FOUNDSET) || memberType.getName().equals(DBDataSourceServer.class.getSimpleName()) ||
 				memberType.getName().equals(ViewFoundSet.class.getSimpleName()) || memberType.getName().equals(ViewRecord.class.getSimpleName()))
 			{
@@ -3324,7 +3325,7 @@ public class TypeCreator extends TypeCache
 		addClass(QBFactory.class);
 		addClass(QBFunction.class);
 		addClass(QBGroupBy.class);
-		addClass(QBJoin.class);
+//		addClass(QBJoin.class); Handled separately
 		addClass(QBJoins.class);
 		addClass(QBLogicalCondition.class);
 		addClass(QBWhereCondition.class);
@@ -3367,7 +3368,7 @@ public class TypeCreator extends TypeCache
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
-				Member overridden = createOverrideMember(member, context, config);
+				Member overridden = createMember(member, context, config);
 				if (overridden != null)
 				{
 					overwrittenMembers.add(overridden);
@@ -3383,12 +3384,21 @@ public class TypeCreator extends TypeCache
 			return type;
 		}
 
+		protected Member createMember(Member member, String context, String config)
+		{
+			if ("root".equals(member.getName()))
+			{
+				return TypeCreator.clone(member, getTypeRef(context, QBSelect.class.getSimpleName()));
+			}
+			return createOverrideMember(member, context, config);
+		}
+
 		/**
 		 * @param context
 		 * @param fullTypeName
 		 * @return
 		 */
-		private Type createBaseType(String context, String fullTypeName)
+		protected Type createBaseType(String context, String fullTypeName)
 		{
 			Class< ? > cls = QUERY_BUILDER_CLASSES.get(fullTypeName);
 			Type type = TypeCreator.this.createType(context, fullTypeName, cls);
@@ -3411,6 +3421,37 @@ public class TypeCreator extends TypeCache
 			cachedSuperTypeTemplateType = null;
 		}
 
+	}
+
+	private class QueryBuilderJoinCreator extends QueryBuilderCreator
+	{
+		@Override
+		protected Member createMember(Member member, String context, String config)
+		{
+			if ("parent".equals(member.getName()))
+			{
+				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+				if (fs != null)
+				{
+					Relation relation = fs.getRelation(config);
+					if (relation != null)
+					{
+						return super.createMember(member, context, relation.getPrimaryDataSource());
+					}
+				}
+			}
+			return super.createMember(member, context, config);
+		}
+
+		@Override
+		protected Type createBaseType(String context, String fullTypeName)
+		{
+			Class< ? > cls = QBJoin.class;
+			Type type = TypeCreator.this.createType(context, fullTypeName, cls);
+			String superclass = cls.getSuperclass().getSimpleName();
+			type.setSuperType(getType(context, superclass));
+			return type;
+		}
 	}
 
 	private class QueryBuilderColumnsCreator implements IScopeTypeCreator
@@ -3515,7 +3556,7 @@ public class TypeCreator extends TypeCache
 							{
 
 								Property property = createProperty(relation.getName(), true,
-									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
+									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getName() + '>'),
 									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns(fs)), RELATION_IMAGE,
 									relation);
 								property.setVisible(true);

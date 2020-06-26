@@ -112,14 +112,6 @@ public class EditorContentFilter implements Filter
 				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebLayoutSpecification> entry : componentsSpecProviderState.getLayoutSpecifications().values())
 				{
-					if (entry.getCssDesignLibrary() != null)
-					{
-						css.addAll(entry.getCssDesignLibrary());
-					}
-					if (entry.getJsDesignLibrary() != null)
-					{
-						formScripts.addAll(entry.getJsDesignLibrary());
-					}
 					if (entry.getCssClientLibrary() != null)
 					{
 						css.addAll(entry.getCssClientLibrary());
@@ -127,6 +119,14 @@ public class EditorContentFilter implements Filter
 					if (entry.getJsClientLibrary() != null)
 					{
 						formScripts.addAll(entry.getJsClientLibrary());
+					}
+					if (entry.getCssDesignLibrary() != null)
+					{
+						css.addAll(entry.getCssDesignLibrary());
+					}
+					if (entry.getJsDesignLibrary() != null)
+					{
+						formScripts.addAll(entry.getJsDesignLibrary());
 					}
 				}
 				for (PackageSpecification<WebObjectSpecification> entry : componentsSpecProviderState.getWebObjectSpecifications().values())

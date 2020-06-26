@@ -20,7 +20,8 @@ package com.servoy.eclipse.notification;
 import java.net.URL;
 import java.util.ArrayList;
 
-
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -31,10 +32,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.services.IServiceLocator;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.notification.mylyn.AbstractNotificationPopup;
@@ -123,7 +128,16 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 				public void linkActivated(HyperlinkEvent e) {
 					try
 					{
-						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(notification.getLink()));
+						if(notification.isCommand())
+						{
+							Command command = PlatformUI.getWorkbench().getService(ICommandService.class).getCommand(notification.getLink());
+							ExecutionEvent executionEvent = (PlatformUI.getWorkbench().getService(IHandlerService.class)).createExecutionEvent(command, new Event());
+							command.executeWithChecks(executionEvent);							
+						}
+						else
+						{
+							PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(notification.getLink()));
+						}						
 					}
 					catch(Exception ex)
 					{

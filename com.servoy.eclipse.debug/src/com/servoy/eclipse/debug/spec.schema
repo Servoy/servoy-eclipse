@@ -139,6 +139,11 @@
 			"description": "Extra Javascript or CSS libraries that this component uses",
 			"type": "array"
 		},
+		"keywords":
+		{
+			"description": "Array of keywords used for component search",
+			"type": "array"
+		},
 		"icon": 
 		{
 			"description": "The icon that is displayed in the designer",

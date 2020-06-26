@@ -21,7 +21,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
  * Quickfix for properties by assigning a value.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -38,6 +38,7 @@ public class SetPropertyQuickFix extends BaseSetPropertyQuickFix
 	@Override
 	protected void setPropertyValue(IPropertySource propertySource)
 	{
+		//beware set doesn't work for when property was filtered out
 		propertySource.setPropertyValue(getPropertyName(), value);
 	}
 }

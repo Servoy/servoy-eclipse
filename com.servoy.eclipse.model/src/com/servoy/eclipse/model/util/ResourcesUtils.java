@@ -26,9 +26,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IScriptProjectFilenames;
 
+import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.j2db.util.DataSourceUtils;
+
 /**
  * Utility class for eclipse IResource operations.
- * 
+ *
  * @author acostescu
  */
 public class ResourcesUtils
@@ -39,7 +43,7 @@ public class ResourcesUtils
 
 	/**
 	 * Creates the given file, and it's parent containers (if they do not already exist).
-	 * 
+	 *
 	 * @param file the file to be created.
 	 * @param source the content used to fill up the file.
 	 * @param force see {@link IFile#create(InputStream, boolean, org.eclipse.core.runtime.IProgressMonitor)}.
@@ -66,6 +70,62 @@ public class ResourcesUtils
 		{
 			parent.getFolder(new Path("")).create(force, true, null);
 		}
+	}
+
+	public static String getParentDatasource(IFile file)
+	{
+		String serverName;
+		String tableName;
+		String[] segments = file.getProjectRelativePath().segments();
+		// dbi files
+		if (segments.length >= 2 && segments[segments.length - 1].endsWith(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT))
+		{
+			serverName = segments[segments.length - 2];
+			tableName = segments[segments.length - 1].substring(0,
+				segments[segments.length - 1].length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+		}
+		// obj files: datasources: table nodes
+		else if (segments.length >= 3 && segments[segments.length - 3].equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
+			segments[segments.length - 1].endsWith(SolutionSerializer.TABLENODE_FILE_EXTENSION))
+		{
+			serverName = segments[segments.length - 2];
+			tableName = segments[segments.length - 1].substring(0, segments[segments.length - 1].length() - SolutionSerializer.JSON_FILE_EXTENSION_SIZE);
+		}
+		// obj files: datasources: aggregates
+		else if (segments.length >= 4 && segments[segments.length - 4].equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
+			segments[segments.length - 1].endsWith(SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION))
+		{
+			serverName = segments[segments.length - 3];
+			tableName = segments[segments.length - 2];
+		}
+		else if (segments.length >= 3 && segments[segments.length - 3].equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
+			(segments[segments.length - 1].endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) ||
+				segments[segments.length - 1].endsWith(SolutionSerializer.FOUNDSET_POSTFIX)))
+		{
+			serverName = segments[segments.length - 2];
+			String postfix = segments[segments.length - 1].endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) ? SolutionSerializer.CALCULATIONS_POSTFIX
+				: SolutionSerializer.FOUNDSET_POSTFIX;
+			tableName = segments[segments.length - 1].substring(0, segments[segments.length - 1].length() - postfix.length());
+
+		}
+		else
+		{
+			return null;
+		}
+		String dataSource = null;
+		if (DataSourceUtils.INMEM_DATASOURCE.equals(serverName))
+		{
+			dataSource = DataSourceUtils.createInmemDataSource(tableName);
+		}
+		else if (DataSourceUtils.VIEW_DATASOURCE.equals(serverName))
+		{
+			dataSource = DataSourceUtils.createViewDataSource(tableName);
+		}
+		else
+		{
+			dataSource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
+		}
+		return dataSource;
 	}
 
 }
