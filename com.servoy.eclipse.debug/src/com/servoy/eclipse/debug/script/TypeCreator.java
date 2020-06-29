@@ -3556,7 +3556,7 @@ public class TypeCreator extends TypeCache
 							{
 
 								Property property = createProperty(relation.getName(), true,
-									getTypeRef(context, QBJoin.class.getSimpleName() + "" + '<' + relation.getName() + '>'),
+									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getName() + '>'),
 									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns(fs)), RELATION_IMAGE,
 									relation);
 								property.setVisible(true);
