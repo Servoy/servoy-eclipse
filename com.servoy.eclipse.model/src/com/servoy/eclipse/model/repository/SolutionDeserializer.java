@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -93,6 +94,7 @@ import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -202,9 +204,43 @@ public class SolutionDeserializer
 	{
 		if (smd == null) return null;
 
-		Solution solution = (Solution)repository.createRootObject(smd);
-		solution.setChangeHandler(new ChangeHandler(repository));
+		final Solution solution = (Solution)repository.createRootObject(smd);
+		ChangeHandler handler = new ChangeHandler(repository);
+		solution.setChangeHandler(handler);
 
+		handler.addIPersistListener(new IItemChangeListener<IPersist>()
+		{
+
+			@Override
+			public void itemRemoved(IPersist item)
+			{
+				UUID uuid = item.getUUID();
+				HashSet<UUID> solutionUUIDs = alreadyUsedUUID.get(solution.getUUID());
+				if (solutionUUIDs != null)
+				{
+					solutionUUIDs.remove(uuid);
+				}
+				childToContainerUUID.remove(uuid);
+			}
+
+			@Override
+			public void itemCreated(IPersist item)
+			{
+
+			}
+
+			@Override
+			public void itemChanged(Collection<IPersist> items)
+			{
+
+			}
+
+			@Override
+			public void itemChanged(IPersist item)
+			{
+
+			}
+		});
 		HashSet<UUID> solutionUUIDs = getAlreadyUsedUUIDsForSolution(solution.getUUID());
 		solutionUUIDs.clear();
 
