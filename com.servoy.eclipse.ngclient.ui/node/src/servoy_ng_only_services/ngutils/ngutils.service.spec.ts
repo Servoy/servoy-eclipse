@@ -16,7 +16,7 @@ import { LoggerFactory } from '../../sablo/logger.service'
 import { ServicesService } from '../../sablo/services.service'
 import { ServoyService } from "../../ngclient/servoy.service";
 import { PlatformLocation } from '@angular/common';
-import { LoadingIndicatorService } from "../../servoycore/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from "../../sablo/util/loading-indicator/loading-indicator.service";
 
 describe('NGUtilsService', () => {
   let windowRef: any;

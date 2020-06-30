@@ -6,7 +6,7 @@ import {WindowRefService} from './util/windowref.service'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
 import { LoggerFactory } from './logger.service'
-import { LoadingIndicatorService } from "../servoycore/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from "./util/loading-indicator/loading-indicator.service";
 
 describe('WebsocketService', () => {
     let windowRef;

@@ -11,7 +11,7 @@ import { SabloDeferHelper} from '../../sablo/defer.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { SessionStorageService } from 'angular-web-storage';
 import { ViewportService} from '../services/viewport.service';
-import { LoadingIndicatorService } from "../../servoycore/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from "../../sablo/util/loading-indicator/loading-indicator.service";
 
 describe('FoundsetLinked Converter', () => {
     let converterService: ConverterService;

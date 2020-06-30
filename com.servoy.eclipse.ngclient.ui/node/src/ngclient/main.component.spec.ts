@@ -6,7 +6,7 @@ import {AllServiceService} from './allservices.service';
 import { FormService } from './form.service';
 import { I18NProvider } from "./servoy_public";
 import { WebsocketService } from "../sablo/websocket.service";
-import { LoadingIndicatorService } from "../servoycore/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from "../sablo/util/loading-indicator/loading-indicator.service";
 
 describe('MainComponent', () => {
   const servicesService = jasmine.createSpyObj('ServoyService', ['connect']);
