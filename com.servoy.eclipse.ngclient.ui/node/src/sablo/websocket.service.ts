@@ -9,7 +9,7 @@ import { Deferred } from './util/deferred'
 import { ServicesService } from './services.service'
 import { ConverterService } from './converter.service'
 import { LoggerService, LogLevel, LoggerFactory } from './logger.service'
-import { LoadingIndicatorService } from "../servoycore/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from "./util/loading-indicator/loading-indicator.service";
 
 @Injectable()
 export class WebsocketService {

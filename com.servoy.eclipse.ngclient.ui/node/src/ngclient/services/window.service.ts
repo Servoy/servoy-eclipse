@@ -15,7 +15,7 @@ import { Router, NavigationStart } from '@angular/router';
 import { ServoyApi } from '../servoy_api';
 import { SessionStorageService } from 'angular-web-storage';
 import { WebsocketService } from '../../sablo/websocket.service';
-import { LoadingIndicatorService } from "../../servoycore/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from "../../sablo/util/loading-indicator/loading-indicator.service";
 
 @Injectable()
 export class WindowService {

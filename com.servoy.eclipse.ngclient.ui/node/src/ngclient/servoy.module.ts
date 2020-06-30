@@ -29,7 +29,7 @@ import { ViewportService } from './services/viewport.service'
 
 import { ComponentContributor } from './component_contributor.service';
 import { ServoyPublicModule } from './servoy_public.module';
-import { LoadingIndicatorComponent } from "../servoycore/loading-indicator/loading-indicator";
+import { LoadingIndicatorComponent } from "../sablo/util/loading-indicator/loading-indicator";
 
 @NgModule( {
     declarations: [
