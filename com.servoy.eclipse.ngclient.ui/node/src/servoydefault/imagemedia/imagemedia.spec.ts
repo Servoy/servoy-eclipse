@@ -12,6 +12,7 @@ import { ApplicationService } from '../../ngclient/services/application.service'
 import { By } from '@angular/platform-browser';
 import { FileUploadWindowComponent } from '../../ngclient/services/file-upload-window/file-upload-window.component';
 import { ViewportService } from '../../ngclient/services/viewport.service';
+import { FormService } from '../../ngclient/form.service';
 
 @NgModule({
   declarations: [FileUploadWindowComponent],
@@ -37,7 +38,7 @@ describe("ServoyDefaultImageMedia", () => {
     TestBed.configureTestingModule({
         declarations: [ ServoyDefaultImageMedia, UploadDirective],
         imports: [SabloModule, ServoyPublicModule],
-        providers: [FormattingService,TooltipService, { provide: ApplicationService, useValue: applicationService}, ServoyService, I18NProvider, SvyUtilsService, {provide: ServoyApi, useValue: servoyApi}, ViewportService], 
+        providers: [FormattingService,TooltipService, { provide: ApplicationService, useValue: applicationService}, ServoyService, I18NProvider, SvyUtilsService, {provide: ServoyApi, useValue: servoyApi}, ViewportService, FormService], 
       })
       .compileComponents();
     
