@@ -1,9 +1,9 @@
-import { Component, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { Observable, merge, Subject, of } from 'rxjs';
+import { Component, OnInit, Renderer2, ViewChild, SimpleChanges } from '@angular/core';
+import { Observable, merge, Subject, of, Subscriber } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import {NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService } from '../../ngclient/servoy_public';
-import { map, debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
+import { map, debounceTime, distinctUntilChanged, filter, take, switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'servoydefault-typeahead',
@@ -14,10 +14,36 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
   @ViewChild('instance', {static: true}) instance: NgbTypeahead;
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
+  observableValue: Observable<object>;
+
+  private observer: Subscriber<object>;
 
   constructor(renderer: Renderer2,
               formattingService: FormattingService) {
     super(renderer, formattingService);
+    this.observableValue = new Observable(observer => {
+      this.observer = observer;
+      this.getObservableDataprovider().pipe(take(1)).subscribe(
+        displayValue => this.observer.next(displayValue));
+    });
+  }
+
+  scroll($event: any) {
+    if (!this.instance.isPopupOpen()) {
+      return;
+    }
+
+    setTimeout(() => {
+      const popup = document.getElementById(this.instance.popupId),
+        activeElements = popup.getElementsByClassName('active');
+      if (activeElements.length === 1) {
+        const elem = <HTMLElement>activeElements[0];
+        elem.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    });
   }
 
   isEditable() {
@@ -25,13 +51,23 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
   }
 
   formatter = (result: {displayValue: string, realValue: object}) => {
-    console.log(result);
     if (result.displayValue === null) return '';
     if (result.displayValue !== undefined) return result.displayValue;
     return result;
   }
 
-  value = () => {
+  ngOnChanges( changes: SimpleChanges ) {
+    super.ngOnChanges(changes);
+    if (changes['dataProviderID']) {
+      if (this.observer) {
+        this.getObservableDataprovider().pipe(take(1)).subscribe(
+          displayValue => this.observer.next(displayValue));
+      }
+    }
+  }
+
+  getObservableDataprovider(): Observable<any> {
+
     if (this.valuelistID && this.valuelistID.hasRealValues()) {
       const found = this.valuelistID.find(entry => entry.realValue === this.dataProviderID);
       if (found) return of(found.displayValue);
@@ -45,14 +81,11 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
     const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
     const inputFocus$ = this.focus$;
 
-    return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(
-      map(term => (term === '' ? this.valuelistID
-        : this.valuelistID.filter(v => v.displayValue.toLowerCase().indexOf(term.toLowerCase()) > -1)))
-    );
+    return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe( switchMap(term => (term === '' ? of(this.valuelistID)
+    : this.valuelistID.filterList(term))));
   }
 
   valueChanged(value: {displayValue: string, realValue: object}) {
-    console.log(value);
     if (value && value.realValue) this.dataProviderID = value.realValue;
     else if (value) this.dataProviderID = value;
     else this.dataProviderID = null;

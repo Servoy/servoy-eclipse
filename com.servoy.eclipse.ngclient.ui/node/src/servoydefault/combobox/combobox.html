@@ -9,7 +9,7 @@
       container="body"
       editable="false"
       [id]="servoyApi.getMarkupId()"
-      [value]="value() | async | formatFilter:format?.display:format?.type:format"
+      [value]="observableValue | async | formatFilter:format?.display:format?.type:format"
       [svyFormat]="format"
       [svyStartEdit]="'dataProviderID'"
       [hostComponent]="self"
