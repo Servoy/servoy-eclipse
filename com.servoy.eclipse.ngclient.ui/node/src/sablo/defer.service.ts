@@ -36,7 +36,7 @@ export class SabloDeferHelper {
 
         const newMsgID = ++state.currentMsgId;
         const d = new Deferred<any>();
-        state.deferred[newMsgID + ''] = { defer: d, timeoutId : setTimeout(function() {
+        state.deferred[newMsgID + ''] = { defer: d, timeoutId : setTimeout(() => {
             // if nothing comes back for a while do cancel the promise to avoid memory leaks/infinite waiting
                 const defer = this.retrieveDeferForHandling(newMsgID, state);
                 if (defer) {
