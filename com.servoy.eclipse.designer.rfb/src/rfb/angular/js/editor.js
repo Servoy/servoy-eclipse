@@ -1099,6 +1099,29 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							$editorService.keyPressed(objEvent);
 							return false;
 						}
+						// 37 = left
+						if (fixedKeyEvent.keyCode == 37) {
+							// send the ARROW_LEFT key code to the server
+							$editorService.keyPressed(objEvent);
+							return false;
+						}
+						// 38 = up
+						if (fixedKeyEvent.keyCode == 38) {
+							// send the ARROR_UP key code to the server
+							$editorService.keyPressed(objEvent);
+							return false;
+						}// 39 = right
+						if (fixedKeyEvent.keyCode == 39) {
+							// send the ARROR_RIGHT key code to the server
+							$editorService.keyPressed(objEvent);
+							return false;
+						}
+						// 40 = down
+						if (fixedKeyEvent.keyCode == 40) {
+							// send the ARROW_DOWN key code to the server
+							$editorService.keyPressed(objEvent);
+							return false;
+						}
 						// f4 open form hierarchy
 						if (fixedKeyEvent.keyCode == 115) {
 							// send the F4 key code to the server
