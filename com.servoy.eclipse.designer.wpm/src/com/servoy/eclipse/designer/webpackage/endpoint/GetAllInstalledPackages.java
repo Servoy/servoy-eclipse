@@ -397,7 +397,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									@Override
 									public int compare(JSONObject o1, JSONObject o2)
 									{
-										return o2.optString("version", "").compareTo(o1.optString("version", ""));
+										return versionCompare(o2.optString("version", ""), o1.optString("version", ""));
 									}
 								});
 
@@ -463,25 +463,35 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		String[] v1Split = v1.split("\\.");
 		String[] v2Split = v2.split("\\.");
 
+		// make the splits to be the same size, filling missing part with "0"
+		int v1SplitLength = v1Split.length, v2SplitLength = v2Split.length;
+		int maxVersionTags = Math.max(v1SplitLength, v2SplitLength);
+		if (v1SplitLength < maxVersionTags)
+		{
+			v1Split = Arrays.copyOf(v1Split, maxVersionTags);
+			Arrays.fill(v1Split, v1SplitLength, maxVersionTags, "0");
+		}
+		else if (v2SplitLength < maxVersionTags)
+		{
+			v2Split = Arrays.copyOf(v2Split, maxVersionTags);
+			Arrays.fill(v2Split, v2SplitLength, maxVersionTags, "0");
+		}
+
 		for (int i = 0; i < v1Split.length; i++)
 		{
-			if (v2Split.length > i)
+			int cv = 0;
+			try
 			{
-				int cv = 0;
-				try
-				{
-					int v1Nr = Integer.parseInt(v1Split[i]);
-					int v2Nr = Integer.parseInt(v2Split[i]);
-					cv = v1Nr - v2Nr;
-				}
-				catch (NumberFormatException ex)
-				{
-					cv = v1Split[i].compareTo(v2Split[i]);
-				}
-				if (cv == 0) continue;
-				return cv;
+				int v1Nr = Integer.parseInt(v1Split[i]);
+				int v2Nr = Integer.parseInt(v2Split[i]);
+				cv = v1Nr - v2Nr;
 			}
-			else return 1;
+			catch (NumberFormatException ex)
+			{
+				cv = v1Split[i].compareTo(v2Split[i]);
+			}
+			if (cv == 0) continue;
+			return cv;
 		}
 
 		return v1.compareTo(v2);
