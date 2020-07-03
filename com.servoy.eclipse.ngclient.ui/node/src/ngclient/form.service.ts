@@ -246,7 +246,7 @@ export class FormService {
         this.sabloService.callService( 'formService', 'svyPush', dpChange, true );
     }
 
-    public executeEvent( formname: string, beanname: string, handler: string, args: IArguments|Array<any> ) {
+    public executeEvent( formname: string, beanname: string, handler: string, args: IArguments|Array<any> , async?:boolean) {
         this.log.debug(this.log.buildMessage(() => (formname + ',' + beanname + ', executing: ' + handler + ' with values: ' + JSON.stringify( args ) )));
 
         const newargs = this.converterService.getEventArgs( args, handler );
@@ -257,7 +257,7 @@ export class FormService {
         const cmd = { formname: formname, beanname: beanname, event: handler, args: newargs, changes: data };
         //        if (rowId)
         //            cmd['rowId'] = rowId;
-        return this.sabloService.callService( 'formService', 'executeEvent', cmd, false );
+        return this.sabloService.callService( 'formService', 'executeEvent', cmd, async !== undefined ? async : false );
     }
 
     public formWillShow(formname, notifyFormVisibility?, parentForm?, beanName?, relationname?, formIndex?): Promise<boolean> {

@@ -1,7 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms'
-
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { MainComponent } from './main.component';
@@ -30,6 +29,10 @@ import { ViewportService } from './services/viewport.service'
 import { ComponentContributor } from './component_contributor.service';
 import { ServoyPublicModule } from './servoy_public.module';
 import { LoadingIndicatorComponent } from "../sablo/util/loading-indicator/loading-indicator";
+import { ServoyExtraTable } from '../servoyextra/table/table';
+
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { ResizableModule } from 'angular-resizable-element';
 
 @NgModule( {
     declarations: [
@@ -43,7 +46,8 @@ import { LoadingIndicatorComponent } from "../sablo/util/loading-indicator/loadi
 		ErrorBean,
         ServoyCoreSlider,
         DialogWindowComponent,
-        LoadingIndicatorComponent
+        LoadingIndicatorComponent,
+        ServoyExtraTable
     ], 
     imports: [
         BrowserModule, 
@@ -53,7 +57,9 @@ import { LoadingIndicatorComponent } from "../sablo/util/loading-indicator/loadi
 		AllComponentsModule,
         AllServicesModules,
         HttpClientModule,
-        ServoyPublicModule
+        ServoyPublicModule,
+        ResizableModule,
+        ScrollingModule
     ],
     providers: [FormService, ServoyService, I18NProvider, UpperCasePipe,LowerCasePipe,
                 DatePipe, DecimalPipe, ComponentContributor, ViewportService],

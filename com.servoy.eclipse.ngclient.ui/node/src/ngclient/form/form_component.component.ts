@@ -146,7 +146,45 @@ import { ServoyApi } from '../servoy_api'
       <ng-template #servoycoreErrorbean let-state="state"><servoycore-errorbean [error]="state.model.error" [servoyApi]="getServoyApi(state)" [toolTipText]="state.model.toolTipText" #cmp></servoycore-errorbean></ng-template>
       <ng-template #servoycoreSlider let-state="state"><servoycore-slider  [styleClass]="state.model.styleClass" [min]="state.model.min" [max]="state.model.max" [orientation]="state.model.orientation" [step]="state.model.step" [enabled]="state.model.enabled" [toolTipText]="state.model.toolTipText" [visible]="state.model.visible" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [tabSeq]="state.model.tabSeq" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [onCreateMethodID]="getHandler(state,'onCreateMethodID')" [onSlideMethodID]="getHandler(state,'onSlideMethodID')" [onStartMethodID]="getHandler(state,'onStartMethodID')" [onStopMethodID]="getHandler(state,'onStopMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoycore-slider></ng-template>
 
-      <ng-template #servoydefaultTable let-state="state"><servoydefault-table [foundset]="state.model.foundset" [columns]="state.model.columns" #cmp></servoydefault-table></ng-template>
+      <ng-template #servoyextraTable let-state="state">
+        <servoyextra-table [foundset]="state.model.foundset" 
+                        (foundsetChange)="datachange(state.name,'foundset',$event)"
+                        [name]="state.name"
+                        [columns]="state.model.columns" 
+                        [currentPage]="state.model.currentPage"
+                        [pageSize]="state.model.pageSize"
+                        [styleClass]="state.model.styleClass"
+                        [sortStyleClass]="state.model.sortStyleClass"
+                        [selectionClass]="state.model.selectionClass"
+                        [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider"
+                        [tabSeq]="state.model.tabSeq"
+                        [visible]="state.model.visible"
+                        [enableColumnResize]="state.model.enableColumnResize"
+                        [enableSort]="state.model.enableSort"
+                        [responsiveHeight]="state.model.responsiveHeight"
+                        [responsiveDynamicHeight]="state.model.responsiveDynamicHeight"
+                        [minRowHeight]="state.model.minRowHeight"
+                        [sortupClass]="state.model.sortupClass"
+                        [sortdownClass]="state.model.sortdownClass"
+                        [sortColumnIndex]="state.model.sortColumnIndex"
+                        [sortDirection]="state.model.sortDirection"
+                        [lastSelectionFirstElement]="state.model.lastSelectionFirstElement"
+                        [performanceSettings]="state.model.performanceSettings"
+                        [keyCodeSettings]="state.model.keyCodeSettings"
+                        [servoyApi]="getServoyApi(state)"
+                        [servoyAttributes]="state.model.attributes"
+                        [onViewPortChanged]="getHandler(state,'onViewPortChanged')"
+                        [onCellClick]="getHandler(state,'onCellClick')"
+                        [onCellDoubleClick]="getHandler(state,'onCellDoubleClick')"
+                        [onCellRightClick]="getHandler(state,'onCellRightClick')"
+                        [onHeaderClick]="getHandler(state,'onHeaderClick')"
+                        [onHeaderRightClick]="getHandler(state,'onHeaderRightClick')"
+                        [onColumnResize]="getHandler(state,'onColumnResize')"
+                        [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')"
+                        [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')"                      
+        #cmp>
+        </servoyextra-table>
+    </ng-template>
       <!-- component template generate end -->
    `
 })
@@ -180,7 +218,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('servoycoreSlider', { static: true }) readonly servoycoreSlider: TemplateRef<any>;
     @ViewChild('servoycoreErrorbean', { static: true }) readonly servoycoreErrorbean: TemplateRef<any>;
 
-    @ViewChild('servoydefaultTable', { static: true }) readonly servoydefaultTable: TemplateRef<any>;
+    @ViewChild('servoyextraTable', { static: true }) readonly servoyextraTable: TemplateRef<any>;
 
     // component template generate end
 
@@ -277,7 +315,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
             if (item.handlers && item.handlers.indexOf(handler) >= 0) {
                 const me = this;
                 func = function(e) {
-                    me.formservice.executeEvent(me.name, item.name, handler, arguments);
+                   return me.formservice.executeEvent(me.name, item.name, handler, arguments);
                 }
                 itemCache[handler] = func;
             }

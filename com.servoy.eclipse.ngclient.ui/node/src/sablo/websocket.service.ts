@@ -254,7 +254,7 @@ export class WebsocketSession {
         }
     }
     // api
-    public callService( serviceName, methodName, argsObject, async ) {
+    public callService( serviceName: string, methodName: string, argsObject, async: boolean ) : Promise<any> {
         var cmd = {
             service: serviceName,
             methodname: methodName,

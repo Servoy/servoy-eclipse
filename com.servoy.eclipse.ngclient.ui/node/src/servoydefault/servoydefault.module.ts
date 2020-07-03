@@ -40,8 +40,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { UploadDirective } from '../ngclient/utils/upload.directive';
 
-import { ServoyDefaultTable } from './table/table';
-
 @NgModule({
   declarations: [
     ServoyDefaultTextField,
@@ -66,8 +64,7 @@ import { ServoyDefaultTable } from './table/table';
     ServoyDefaultImageMedia,
     BGSplitter,
     BGPane,
-    UploadDirective,
-    ServoyDefaultTable
+    UploadDirective
   ],
   imports: [
     FormsModule,
@@ -100,8 +97,7 @@ import { ServoyDefaultTable } from './table/table';
             ServoyDefaultSpinner,
             ServoyDefaultHTMLView,
             ServoyDefaultListBox,
-            ServoyDefaultImageMedia,
-            ServoyDefaultTable
+            ServoyDefaultImageMedia
 
   ],
   providers: [
