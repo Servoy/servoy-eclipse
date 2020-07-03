@@ -598,10 +598,22 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 			{
 				if (!hidden)
 				{
-					refresh();
+					refreshEntireForm();
 				}
 				else refresh = true;
 			}
+		}
+
+		private void refreshEntireForm()
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+				}
+			});
 		}
 
 		public void formComponentChanged()
@@ -620,7 +632,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 				@Override
 				public void run()
 				{
-					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshPalette();
 				}
 			});
 		}
