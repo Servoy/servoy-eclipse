@@ -62,7 +62,7 @@ public class OpenStartPage implements IWorkbenchWindowActionDelegate
 		{
 			BrowserDialog dialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
 				Activator.TUTORIALS_URL + loginToken, true, false);
-			dialog.open();
+			dialog.open(true);
 		}
 	}
 
