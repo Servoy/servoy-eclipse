@@ -95,7 +95,7 @@ public class KeyPressedHandler implements IServerService
 			else if (keyCode == 37) keyCode = SWT.ARROW_LEFT;
 			else if (keyCode == 39) keyCode = SWT.ARROW_RIGHT;
 			else if (keyCode == 38) keyCode = SWT.ARROW_UP;
-			else if (keyCode == 38) keyCode = SWT.ARROW_DOWN;
+			else if (keyCode == 40) keyCode = SWT.ARROW_DOWN;
 			else if (keyCode == 116)
 			{
 				// refresh the editor
