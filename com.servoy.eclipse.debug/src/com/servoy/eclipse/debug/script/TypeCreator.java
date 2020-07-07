@@ -4401,6 +4401,27 @@ public class TypeCreator extends TypeCache
 							{
 								return new TypeConfig(servoyProject.getEditingFlattenedSolution(), split.length == 1 ? null : split[1]);
 							}
+							else if (split.length == 1)
+							{
+								// relation
+								Relation relation = servoyModel.getFlattenedSolution().getRelation(split[0]);
+								if (relation != null)
+								{
+									try
+									{
+										ITable tbl = getTable(servoyModel.getFlattenedSolution().getSolution().getRepository(),
+											relation.getForeignDataSource());
+										if (tbl != null)
+										{
+											return new TypeConfig(tbl);
+										}
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError(e);
+									}
+								}
+							}
 						}
 					}
 				}
