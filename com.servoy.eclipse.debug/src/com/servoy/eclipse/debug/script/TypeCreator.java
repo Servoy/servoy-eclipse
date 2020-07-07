@@ -231,7 +231,9 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSDimension;
 import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSPoint;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
@@ -428,6 +430,8 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("console", ConsoleObject.class);
 		addAnonymousClassType("CSSPosition", ICSSPosition.class);
 		addAnonymousClassType("ICSSPosition", ICSSPosition.class);
+		addAnonymousClassType("point", JSPoint.class);
+		addAnonymousClassType("dimension", JSDimension.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 
 
