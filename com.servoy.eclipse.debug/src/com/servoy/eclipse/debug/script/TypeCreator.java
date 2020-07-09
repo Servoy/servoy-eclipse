@@ -1386,7 +1386,7 @@ public class TypeCreator extends TypeCache
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(typeName);
-		type.setKind(TypeKind.JAVA);
+		type.setKind(Scriptable.class.isAssignableFrom(cls) ? TypeKind.JAVASCRIPT : TypeKind.JAVA);
 		EList<Member> members = type.getMembers();
 		fill(context, members, cls, typeName);
 
@@ -4977,7 +4977,7 @@ public class TypeCreator extends TypeCache
 		{
 			Type type = TypeInfoModelFactory.eINSTANCE.createType();
 			type.setName(fullTypeName);
-			type.setKind(TypeKind.JAVA);
+			type.setKind(TypeKind.JAVASCRIPT); // this is a record,foundset or forms that are Scriptable so javascript objects.
 			type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 			type.setSuperType(superType);
 			type.getMembers().addAll(members);
@@ -5049,7 +5049,7 @@ public class TypeCreator extends TypeCache
 		type.setAttribute(IMAGE_DESCRIPTOR, imageDescriptor);
 		type.setSuperType(superType);
 		type.setName(fullTypeName);
-		type.setKind(TypeKind.JAVA);
+		type.setKind(TypeKind.JAVASCRIPT); // this is a record,foundset or forms that are Scriptable so javascript objects.
 
 		if (table != null)
 		{
