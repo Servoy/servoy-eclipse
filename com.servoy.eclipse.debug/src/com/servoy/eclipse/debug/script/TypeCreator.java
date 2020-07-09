@@ -1195,11 +1195,15 @@ public class TypeCreator extends TypeCache
 			method.setName(api.getName());
 			if (api.getDocumentation() != null)
 			{
-				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(api.getDocumentation(), STANDARD_ELEMENT_NAME, true));
+				StringBuilder description = new StringBuilder(api.getDocumentation());
+				if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
+				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
+					STANDARD_ELEMENT_NAME, true));
 				method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
 			}
 			else
 			{
+				if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
 				method.setDeprecated(api.isDeprecated());
 			}
 
