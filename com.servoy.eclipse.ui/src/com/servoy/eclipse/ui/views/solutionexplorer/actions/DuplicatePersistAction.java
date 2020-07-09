@@ -188,6 +188,10 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 							{
 								workingSetName[0] = (String)firstElement;
 							}
+							else
+							{
+								workingSetName[0] = null;
+							}
 						}
 					});
 				}
