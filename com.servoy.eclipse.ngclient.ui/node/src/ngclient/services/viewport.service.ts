@@ -7,7 +7,7 @@ import { ColumnRef, ChangeType } from '../../sablo/spectypes.service';
 @Injectable()
 export class ViewportService {
     private static readonly CHANGED_IN_LINKED_PROPERTY = 9;
-    private static readonly ROW_ID_COL_KEY = "_svyRowId";
+    public static readonly ROW_ID_COL_KEY = "_svyRowId";
     
     constructor( private converterService: ConverterService ) {}
     

@@ -30,6 +30,8 @@ import 'numeral/locales';
 
 import * as moment from 'moment';
 import 'moment/min/locales.min';
+import { FormcomponentConverter } from './converters/formcomponent_converter';
+import { ComponentConverter } from './converters/component_converter';
 
 class UIProperties {
   private uiProperties;
@@ -107,6 +109,8 @@ export class ServoyService {
       new FoundsetConverter(converterService, sabloService, sabloDeferHelper, viewportService, logFactory));
     converterService.registerCustomPropertyHandler('fsLinked',
       new FoundsetLinkedConverter(converterService, sabloService, viewportService, logFactory));
+    converterService.registerCustomPropertyHandler('formcomponent', new FormcomponentConverter(converterService));
+    converterService.registerCustomPropertyHandler('component', new ComponentConverter(converterService, viewportService, logFactory));
   }
 
   public connect() {

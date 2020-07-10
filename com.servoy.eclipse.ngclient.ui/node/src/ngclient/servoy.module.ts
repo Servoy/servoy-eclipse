@@ -33,6 +33,7 @@ import { ServoyExtraTable } from '../servoyextra/table/table';
 
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ResizableModule } from 'angular-resizable-element';
+import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
 
 @NgModule( {
     declarations: [
@@ -47,7 +48,8 @@ import { ResizableModule } from 'angular-resizable-element';
         ServoyCoreSlider,
         DialogWindowComponent,
         LoadingIndicatorComponent,
-        ServoyExtraTable
+        ServoyExtraTable,
+        ListFormComponent
     ], 
     imports: [
         BrowserModule, 

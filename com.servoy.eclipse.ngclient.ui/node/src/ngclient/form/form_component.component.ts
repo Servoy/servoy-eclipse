@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule } from '@angular/core';
 
-import { FormService, FormCache, StructureCache, FormComponentCache, ComponentCache } from '../form.service';
+import { FormService, FormCache, StructureCache, FormComponentCache, ComponentCache, ListFormComponentCache } from '../form.service';
 
 import { ServoyService } from '../servoy.service'
 
@@ -185,7 +185,8 @@ import { ServoyApi } from '../servoy_api'
         #cmp>
         </servoyextra-table>
     </ng-template>
-      <!-- component template generate end -->
+    <ng-template #servoycoreListformcomponent let-state="state"><servoycore-listformcomponent [foundset]="state.foundset" #cmp></servoycore-listformcomponent></ng-template>
+    <!-- component template generate end -->
    `
 })
 
@@ -220,6 +221,8 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
 
     @ViewChild('servoyextraTable', { static: true }) readonly servoyextraTable: TemplateRef<any>;
 
+    @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
+
     // component template generate end
 
     @ViewChildren('cmp') readonly components: QueryList<Component>;
@@ -243,7 +246,11 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
             return this.svyResponsiveDiv;
-        } else if (item instanceof FormComponentCache) {
+        }
+        else if (item instanceof ListFormComponentCache) {
+            return this.servoycoreListformcomponent;
+        }
+        else if (item instanceof FormComponentCache ) {
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
         }
         else {

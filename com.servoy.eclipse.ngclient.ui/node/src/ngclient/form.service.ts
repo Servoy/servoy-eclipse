@@ -10,6 +10,7 @@ import { ConverterService } from '../sablo/converter.service';
 import { LoggerService, LoggerFactory} from '../sablo/logger.service';
 
 import { ServoyService, FormSettings } from './servoy.service';
+import { Foundset } from './converters/foundset_converter';
 
 @Injectable()
 export class FormService {
@@ -148,8 +149,13 @@ export class FormService {
                             layout.width = width + 'px';
                         }
                     }
+                    if ( elem.model[ConverterService.TYPES_KEY] != null ) {
+                        this.converterService.convertFromServerToClient( elem.model, elem.model[ConverterService.TYPES_KEY], null, (property: string) => elem.model ? elem.model[property] : elem.model );
+                        //formCache.addConversionInfo( elem.name, elem.model[ConverterService.TYPES_KEY] );
+                    }                    
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
-                    const structure = new FormComponentCache(elem.responsive, elem.position, formComponentProperties);
+                    const structure = elem.model.foundset ?
+                        new ListFormComponentCache(elem.model.foundset, elem.responsive, elem.position, formComponentProperties) : new FormComponentCache(elem.responsive, elem.position, formComponentProperties);
                     this.walkOverChildren(elem.children, formCache, structure);
                     if (parent == null) {
                         formCache.addFormComponent(structure);
@@ -424,11 +430,15 @@ export class PartCache {
 }
 
 export class FormComponentCache {
-    constructor( public readonly responsive: boolean,
+    public items: Array<StructureCache | ComponentCache | FormComponentCache>;
+
+    constructor(
+            public readonly responsive: boolean,
             public readonly layout: { [property: string]: string },
             public readonly formComponentProperties: FormComponentProperties,
-            public readonly items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
-            if ( !this.items ) this.items = [];
+            items?: Array<StructureCache | ComponentCache | FormComponentCache> ) {
+            if ( !items ) this.items = [];
+            else this.items = items;
         }
 
         addChild( child: StructureCache | ComponentCache | FormComponentCache): FormComponentCache {
@@ -442,5 +452,16 @@ export class FormComponentCache {
 export class FormComponentProperties {
     constructor( public readonly classes: Array<string>,
             public readonly layout: { [property: string]: string } ) {
+        }
+}
+
+export class ListFormComponentCache extends FormComponentCache {
+    constructor(
+        public readonly foundset: Foundset,
+        public readonly responsive: boolean,
+        public readonly layout: { [property: string]: string },
+        public readonly formComponentProperties: FormComponentProperties,
+        items?: Array<StructureCache | ComponentCache | FormComponentCache>, ) {
+            super(responsive, layout, formComponentProperties, items);
         }
 }

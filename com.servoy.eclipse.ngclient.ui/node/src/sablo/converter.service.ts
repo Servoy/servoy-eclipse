@@ -201,7 +201,7 @@ export class ConverterService {
         return newargs;
     }
 
-    private static getCombinedPropertyNames( now, prev ) {
+    public static getCombinedPropertyNames( now, prev ) {
         var fulllist = {}
         if ( prev ) {
             var prevNames = Object.getOwnPropertyNames( prev );

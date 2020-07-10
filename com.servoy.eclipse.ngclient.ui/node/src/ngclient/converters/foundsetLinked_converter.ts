@@ -17,7 +17,7 @@ export class FoundsetLinkedConverter implements IConverter {
     private static readonly PROPERTY_CHANGE = "propertyChange";
     private static readonly PUSH_TO_SERVER = "w"; // value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
 
-    private static readonly FOR_FOUNDSET_PROPERTY: string = 'forFoundset';
+    public static readonly FOR_FOUNDSET_PROPERTY: string = 'forFoundset';
     private static readonly ID_FOR_FOUNDSET = "idForFoundset";
      
     private log: LoggerService;
