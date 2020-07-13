@@ -177,6 +177,7 @@ public class LessPropertiesComposite extends Composite
 	private final char[] autoActivationCharacters = new char[] { '@' };
 	private KeyStroke keyStroke;
 	private ArrayList<ExpandableLessPropertiesComposite> categoryComposites;
+	private Text firstText;
 
 	public LessPropertiesComposite(Composite parent, int style, final PropertiesLessEditor editor)
 	{
@@ -313,6 +314,9 @@ public class LessPropertiesComposite extends Composite
 
 		area.cacheChildren(true);
 		sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		Display.getCurrent().asyncExec(() -> {
+			if (firstText != null) firstText.setFocus();
+		});
 	}
 
 	protected void addPropertyEntry(Composite container, Font font, PropertiesLessEditorInput propertiesLessEditorInput, LessPropertyEntry property)
@@ -322,6 +326,10 @@ public class LessPropertiesComposite extends Composite
 		label.setFont(font);
 		label.setText(property.getLabel());
 		final Text txtName = new Text(container, SWT.BORDER);
+		if (firstText == null)
+		{
+			firstText = txtName;
+		}
 
 		Color normalBg = label.getForeground();
 		label.addListener(SWT.MouseUp, e -> {
