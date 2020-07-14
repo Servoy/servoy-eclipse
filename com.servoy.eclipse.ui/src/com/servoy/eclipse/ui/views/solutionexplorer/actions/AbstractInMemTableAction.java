@@ -105,7 +105,16 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 			{
 				final SimpleUserNode node = (SimpleUserNode)selected;
 				final IDataSourceWrapper tableRealObject = (IDataSourceWrapper)node.getRealObject();
-				selection.put(tableRealObject, (IServer)ServoyModelFinder.getServoyModel().getMemServer(tableRealObject.getTableName()));
+				IServer tableServer = null;
+				if (node.getType() == UserNodeType.INMEMORY_DATASOURCE)
+				{
+					tableServer = (IServer)ServoyModelFinder.getServoyModel().getMemServer(tableRealObject.getTableName());
+				}
+				else if (node.getType() == UserNodeType.VIEW_FOUNDSET)
+				{
+					tableServer = (IServer)node.parent.getRealObject();
+				}
+				selection.put(tableRealObject, tableServer);
 				state = (node.getType() == UserNodeType.INMEMORY_DATASOURCE || node.getType() == UserNodeType.VIEW_FOUNDSET);
 			}
 			else if (selected instanceof Pair< ? , ? >)

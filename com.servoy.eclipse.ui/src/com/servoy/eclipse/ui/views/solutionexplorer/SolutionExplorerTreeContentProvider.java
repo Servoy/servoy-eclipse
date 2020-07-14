@@ -1984,7 +1984,7 @@ public class SolutionExplorerTreeContentProvider
 			serverNode.children = SolutionExplorerListContentProvider.createInMemTables(((MemServer)serverNode.getRealObject()).getServoyProject(),
 				includeModules);
 		}
-		if (serverNode.getType() == UserNodeType.VIEW_FOUNDSETS)
+		else if (serverNode.getType() == UserNodeType.VIEW_FOUNDSETS)
 		{
 			serverNode.children = SolutionExplorerListContentProvider.createViewFoundsets(((ViewFoundsetsServer)serverNode.getRealObject()).getServoyProject(),
 				includeModules);
@@ -1994,7 +1994,6 @@ public class SolutionExplorerTreeContentProvider
 			IServerInternal server = (IServerInternal)serverNode.getRealObject();
 			handleServerNode(server, serverNode);
 		}
-
 		for (Object node : serverNode.children)
 		{
 			if (node instanceof SimpleUserNode)
@@ -2072,16 +2071,8 @@ public class SolutionExplorerTreeContentProvider
 				{
 					ServoyLog.logError(e);
 				}
+				node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
 
-				if (serverObj instanceof MemServer)
-				{
-					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.INMEMORY_DATASOURCE, nodes);
-
-				}
-				else
-				{
-					node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
-				}
 				if (node.children.length == 1) node.children = new SimpleUserNode[0];// it contained only the procedures node we added above, no need to show it
 				view.refreshTreeNodeFromModel(node);
 			});
