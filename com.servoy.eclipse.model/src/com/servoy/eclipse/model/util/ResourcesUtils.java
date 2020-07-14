@@ -72,7 +72,7 @@ public class ResourcesUtils
 		}
 	}
 
-	public static String getParentDatasource(IFile file)
+	public static String getParentDatasource(IFile file, boolean tableEditing)
 	{
 		String serverName;
 		String tableName;
@@ -98,7 +98,7 @@ public class ResourcesUtils
 			serverName = segments[segments.length - 3];
 			tableName = segments[segments.length - 2];
 		}
-		else if (segments.length >= 3 && segments[segments.length - 3].equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
+		else if (!tableEditing && segments.length >= 3 && segments[segments.length - 3].equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
 			(segments[segments.length - 1].endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) ||
 				segments[segments.length - 1].endsWith(SolutionSerializer.FOUNDSET_POSTFIX)))
 		{

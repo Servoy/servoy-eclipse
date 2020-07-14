@@ -50,7 +50,7 @@ public class TableEditorInput implements IEditorInput
 	{
 		if (fileEditorInput != null)
 		{
-			String dataSource = ResourcesUtils.getParentDatasource(fileEditorInput.getFile());
+			String dataSource = ResourcesUtils.getParentDatasource(fileEditorInput.getFile(), true);
 			if (dataSource != null)
 			{
 				return new TableEditorInput(dataSource);
