@@ -243,6 +243,7 @@ public class SolutionExplorerTreeContentProvider
 
 	private final PlatformSimpleUserNode modulesOfActiveSolution;
 
+	private final Object servicesSpecProviderLock = new Object();
 	private final Object pluginsLoadLock = new Object();
 	private ArrayList<PlatformSimpleUserNode> loadedJavaPluginNodes;
 
@@ -466,19 +467,25 @@ public class SolutionExplorerTreeContentProvider
 		componentsSpecProviderState = null;
 	}
 
-	private synchronized SpecProviderState getServicesSpecProviderState()
+	private SpecProviderState getServicesSpecProviderState()
 	{
-		if (servicesSpecProviderState == null && WebServiceSpecProvider.isLoaded())
+		synchronized (servicesSpecProviderLock)
 		{
-			servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-		}
+			if (servicesSpecProviderState == null && WebServiceSpecProvider.isLoaded())
+			{
+				servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
+			}
 
-		return servicesSpecProviderState;
+			return servicesSpecProviderState;
+		}
 	}
 
-	private synchronized void resetServicesSpecProviderState()
+	private void resetServicesSpecProviderState()
 	{
-		servicesSpecProviderState = null;
+		synchronized (servicesSpecProviderLock)
+		{
+			servicesSpecProviderState = null;
+		}
 	}
 
 	/**

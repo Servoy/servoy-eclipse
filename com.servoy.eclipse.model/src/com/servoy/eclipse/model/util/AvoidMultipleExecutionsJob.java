@@ -42,10 +42,10 @@ public abstract class AvoidMultipleExecutionsJob extends Job
 		this(name, 100);
 	}
 
-	public AvoidMultipleExecutionsJob(String name, int initialDelay)
+	public AvoidMultipleExecutionsJob(String name, int initialDelayMs)
 	{
 		super(name);
-		this.impl = new AvoidMultipleExecutionsImpl(initialDelay, this);
+		this.impl = new AvoidMultipleExecutionsImpl(initialDelayMs, this);
 	}
 
 	/**

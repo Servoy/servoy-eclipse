@@ -29,12 +29,12 @@ public class AvoidMultipleExecutionsImpl
 {
 
 	private final int[] numberOfWantedRuns = new int[] { 0 };
-	private final int initialDelay;
+	private final int initialDelayMs;
 	private final Job job;
 
-	public AvoidMultipleExecutionsImpl(int initialDelay, Job job)
+	public AvoidMultipleExecutionsImpl(int initialDelayMs, Job job)
 	{
-		this.initialDelay = initialDelay;
+		this.initialDelayMs = initialDelayMs;
 		this.job = job;
 	}
 
@@ -45,7 +45,7 @@ public class AvoidMultipleExecutionsImpl
 			if (numberOfWantedRuns[0] == 0)
 			{
 				numberOfWantedRuns[0] = 1;
-				job.schedule(initialDelay);
+				job.schedule(initialDelayMs);
 			}
 			else
 			{
