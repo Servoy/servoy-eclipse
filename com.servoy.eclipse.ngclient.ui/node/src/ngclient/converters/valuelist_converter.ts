@@ -44,8 +44,8 @@ export class ValuelistConverter implements IConverter {
           }
 
           // caching this value means for this specific valuelist instance that the display value will not be updated if that would be changed on the server end..
-          state.realToDisplayCache = (currentClientValue && currentClientValue[ConverterService.INTERNAL_IMPL]) ?
-            currentClientValue[ConverterService.INTERNAL_IMPL].realToDisplayCache : {};
+          state.realToDisplayCache = (currentClientValue && currentClientValue.state) ?
+            currentClientValue.state.realToDisplayCache : state.realToDisplayCache;
           state.valuelistid = serverJSONValue.valuelistid;
           state.hasRealValues = serverJSONValue.hasRealValues;
           newValue = new Valuelist(this.sabloService, this.sabloDeferHelper, state, serverJSONValue.values);
@@ -53,7 +53,7 @@ export class ValuelistConverter implements IConverter {
       } else if (serverJSONValue[ValuelistConverter.DISPLAYVALUE]) {
         // this is the GETDISPLAYVALUE
         newValue = currentClientValue;
-        state = currentClientValue[ConverterService.INTERNAL_IMPL];
+        state = currentClientValue.state;
         deferredValue = serverJSONValue[ValuelistConverter.DISPLAYVALUE];
       }
 
@@ -70,7 +70,7 @@ export class ValuelistConverter implements IConverter {
       }
     } else {
       newValue = null;
-      const oldInternalState = currentClientValue ? currentClientValue[ConverterService.INTERNAL_IMPL] : undefined; // internal state / $sabloConverters interface
+      const oldInternalState = currentClientValue ? currentClientValue.state : undefined; // internal state / $sabloConverters interface
       if (oldInternalState)
         this.sabloDeferHelper.cancelAll(oldInternalState);
     }
