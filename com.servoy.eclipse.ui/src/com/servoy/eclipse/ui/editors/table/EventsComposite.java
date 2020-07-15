@@ -443,15 +443,18 @@ public class EventsComposite extends Composite
 			{
 				if (tp == EventNodeType.onLoad && !(table instanceof AbstractMemTable) || table instanceof ViewFoundsetTable && tp != EventNodeType.onLoad)
 					continue;
-				Integer property = (Integer)tableNode.getProperty(tp.getProperty().getPropertyName());
-				if (property == null)
+				MethodWithArguments mw = MethodWithArguments.METHOD_DEFAULT;
+				if (tableNode != null)
 				{
-					continue;
+					Integer property = (Integer)tableNode.getProperty(tp.getProperty().getPropertyName());
+					if (property == null)
+					{
+						continue;
+					}
+					mw = new MethodWithArguments(
+						property.intValue(), dsm.getDataSource(tableNode.getDataSource()));
 				}
-				children.add(new EventNode(tp,
-					tableNode == null ? MethodWithArguments.METHOD_DEFAULT : new MethodWithArguments(
-						property.intValue(), dsm.getDataSource(tableNode.getDataSource())),
-					solution, table));
+				children.add(new EventNode(tp, mw, solution, table));
 			}
 		}
 
