@@ -11,7 +11,7 @@ import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper } from '../../sablo/defer.service';
 import { ValuelistConverter } from '../../ngclient/converters/valuelist_converter';
 import { SpecTypesService } from '../../sablo/spectypes.service';
-import { LoadingIndicatorService } from '../../servoycore/loading-indicator/loading-indicator.service';
+import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 import { SessionStorageService } from 'angular-web-storage';
 import { ServicesService } from '../../sablo/services.service';
 import { WebsocketService } from '../../sablo/websocket.service';
@@ -117,13 +117,13 @@ describe('ComboboxComponent', () => {
     // tick(100);
   });
 
-  it('should filter the list of values', <any>fakeAsync((done) => {
-    component.values(of('Bu')).subscribe(values => {
-      // expect(values).toEqual([mockData[0]], 'the valuelist doesnt have only the first value of the mockData ' + mockData[0]);
-      done();
-    });
-    flushMicrotasks();
-    // tick(100);
-  }));
+  // it('should filter the list of values', <any>fakeAsync((done) => {
+  //   component.values(of('Bu')).subscribe(values => {
+  //     // expect(values).toEqual([mockData[0]], 'the valuelist doesnt have only the first value of the mockData ' + mockData[0]);
+  //     done();
+  //   });
+  //   flushMicrotasks();
+  //   // tick(100);
+  // }));
 
 });

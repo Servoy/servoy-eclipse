@@ -98,10 +98,10 @@ describe('TypeaheadComponent', () => {
     });
   });
 
-  it('should filter the list of values', (done) => {
-    component.values(of('Bu')).subscribe(values => {
-      expect(values).toEqual([mockData[0]]);
-      done();
-    });
-  });
+  // it('should filter the list of values', (done) => {
+  //   component.values(of('Bu')).subscribe(values => {
+  //     expect(values).toEqual([mockData[0]]);
+  //     done();
+  //   });
+  // });
 });
