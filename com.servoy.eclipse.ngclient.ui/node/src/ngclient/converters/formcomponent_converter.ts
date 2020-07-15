@@ -1,16 +1,24 @@
 import { IConverter, PropertyContext, ConverterService } from '../../sablo/converter.service';
+import { IFormComponentType, IComponentType } from '../../sablo/spectypes.service';
 
 export class FormcomponentConverter implements IConverter {
 
     constructor( private converterService: ConverterService) {       
     }
 
-    fromServerToClient(serverSentData: Object, currentClientData: Formcomponent, propertyContext: PropertyContext): Formcomponent {
+    fromServerToClient(serverSentData: any, currentClientData: FormComponentType, propertyContext: PropertyContext): IFormComponentType {
         let conversionInfo = null;
         let realValue = currentClientData;
         if ( realValue == null ) {
-            realValue = serverSentData;
-            this.initializeNewValue( realValue );
+            realValue = new FormComponentType(serverSentData.absoluteLayout,
+                serverSentData.childElements,
+                serverSentData.formHeight,
+                serverSentData.formWidth,
+                serverSentData.startName,
+                serverSentData.svy_types,
+                serverSentData.useCssPosition,
+                serverSentData.uuid);
+            this.initializeNewValue(realValue);
         }
         if ( serverSentData[ConverterService.TYPES_KEY] ) {
             conversionInfo = serverSentData[ConverterService.TYPES_KEY];
@@ -84,5 +92,16 @@ export class FormcomponentConverter implements IConverter {
     }
 }
 
-export class Formcomponent {
+export class FormComponentType implements IFormComponentType {
+
+    constructor(
+        public absoluteLayout: boolean,
+        public childElements: IComponentType[],
+        public formHeight: number,
+        public formWidth: number,
+        public startName: string,
+        public svy_types: any[],
+        public useCssPosition: boolean,
+        public uuid: string) {
+        }
 }

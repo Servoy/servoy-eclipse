@@ -10,7 +10,7 @@ import { ConverterService } from '../sablo/converter.service';
 import { LoggerService, LoggerFactory} from '../sablo/logger.service';
 
 import { ServoyService, FormSettings } from './servoy.service';
-import { Foundset } from './converters/foundset_converter';
+import { IFoundset, IFormComponentType } from '../sablo/spectypes.service';
 
 @Injectable()
 export class FormService {
@@ -155,7 +155,7 @@ export class FormService {
                     }                    
                     const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
                     const structure = elem.model.foundset ?
-                        new ListFormComponentCache(elem.model.foundset, elem.responsive, elem.position, formComponentProperties) : new FormComponentCache(elem.responsive, elem.position, formComponentProperties);
+                        new ListFormComponentCache(elem.model.containedForm, elem.model.foundset, elem.responsive, elem.position, formComponentProperties) : new FormComponentCache(elem.responsive, elem.position, formComponentProperties);
                     this.walkOverChildren(elem.children, formCache, structure);
                     if (parent == null) {
                         formCache.addFormComponent(structure);
@@ -457,7 +457,8 @@ export class FormComponentProperties {
 
 export class ListFormComponentCache extends FormComponentCache {
     constructor(
-        public readonly foundset: Foundset,
+        public readonly formComponentType: IFormComponentType,
+        public readonly foundset: IFoundset,
         public readonly responsive: boolean,
         public readonly layout: { [property: string]: string },
         public readonly formComponentProperties: FormComponentProperties,

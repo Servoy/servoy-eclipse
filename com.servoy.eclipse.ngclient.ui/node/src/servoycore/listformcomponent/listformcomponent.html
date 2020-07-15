@@ -1,3 +1,8 @@
 <div>
-	<span>listformcomponent</span>
+	<div *ngFor="let row of foundset.viewPort.rows">
+		<span>row</span>
+		<!--div *ngFor="let item of state.items" [config]="item" class="svy-wrapper" style="position:absolute">
+			<ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
+		</div -->
+	</div>
 </div>

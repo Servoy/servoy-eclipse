@@ -2,7 +2,7 @@ import { IConverter, PropertyContext, ConverterService } from '../../sablo/conve
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 import { ViewportService } from '../services/viewport.service';
 import { FoundsetChangeEvent, FoundsetConverter } from './foundset_converter';
-import { ViewportRowUpdates } from '../../sablo/spectypes.service';
+import { ViewportRowUpdates, IComponentType } from '../../sablo/spectypes.service';
 import { FoundsetLinkedConverter } from './foundsetLinked_converter';
 
 export class ComponentConverter implements IConverter {
@@ -22,7 +22,7 @@ export class ComponentConverter implements IConverter {
         this.log = logFactory.getLogger('ComponentConverter');
     }
 
-    fromServerToClient(serverSentData: any, currentClientData: IComponent, propertyContext: PropertyContext): IComponent {
+    fromServerToClient(serverSentData: any, currentClientData: ComponentType, propertyContext: PropertyContext): IComponentType {
         var newValue = currentClientData;
 
         // see if someone is listening for changes on current value; if so, prepare to fire changes at the end of this method
@@ -84,10 +84,16 @@ export class ComponentConverter implements IConverter {
                 this.log.error("Can't interpret component server update correctly: " + JSON.stringify(serverSentData, undefined, 2));
             }
         } else if (serverSentData == undefined || !serverSentData[ComponentConverter.NO_OP]) {
-            // full contents received
-            newValue = serverSentData;
-
-            if (newValue) {
+            if (serverSentData) {
+                // full contents received
+                newValue = new ComponentType(
+                    serverSentData.componentDirectiveName,
+                    serverSentData.forFoundset,
+                    serverSentData.foundsetConfig,
+                    serverSentData.handlers,
+                    serverSentData.model,
+                    serverSentData.model_vp,
+                    serverSentData.name);
 
                 this.converterService.prepareInternalState(newValue, {});
                 childChangedNotifierGenerator = this.getBeanPropertyChangeNotifierGenerator(newValue);
@@ -167,7 +173,7 @@ export class ComponentConverter implements IConverter {
 
                 // calling applyBeanData initially to make sure any needed conversions are done on model's properties
                 var beanData = serverSentData[ComponentConverter.MODEL_KEY];
-                var beanModel = {};
+                var beanModel: any = {};
                 serverSentData[ComponentConverter.MODEL_KEY] = beanModel;
 
                 // just dummy stuff - currently the parent controls layout, but applyBeanData needs such data...
@@ -387,10 +393,25 @@ export class ComponentConverter implements IConverter {
 
 		return changes;
 	}
-
 }
 
-export interface IComponent {
-    addViewportChangeListener(listener: any);
-    removeViewportChangeListener(listener: any);
+export class ComponentType implements IComponentType {
+
+    constructor(
+        public componentDirectiveName: string,
+        public forFoundset: string,
+        public foundsetConfig: any,
+        public handlers: any,
+        public model: any,
+        public model_vp: any[],
+        public name: string
+        ) {
+        }
+
+    addViewportChangeListener(listener: any) {
+        throw new Error("Method not implemented.");
+    }
+    removeViewportChangeListener(listener: any) {
+        throw new Error("Method not implemented.");
+    }
 }

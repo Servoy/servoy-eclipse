@@ -550,3 +550,11 @@ export type ColumnRef = {
     dp: string;
     value: string;
 }
+
+export interface IFormComponentType {
+}
+
+export interface IComponentType {
+    addViewportChangeListener(listener: any);
+    removeViewportChangeListener(listener: any);
+}
