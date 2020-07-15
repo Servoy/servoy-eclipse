@@ -17,7 +17,7 @@ import { ServoyApi } from '../servoy_api'
                <div *ngFor="let item of part.items" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
                    <ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component or formcomponent -->
                 </div>
-          </div> 
+          </div>
       </div>
       <div *ngIf="!formCache.absolute" [config]="formCache.mainStructure"> <!-- main container div -->
             <ng-template *ngFor="let item of formCache.mainStructure.items" [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>  <!-- component or responsive div  -->
@@ -304,14 +304,14 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         return this.formservice.hasFormCacheEntry(name);
     }
 
-    private datachange(component: string, property: string, value) {
+    datachange(component: string, property: string, value) {
         const model = this.formCache.getComponent(component).model;
         const oldValue = model[property];
         this.formCache.getComponent(component).model[property] = value;
         this.formservice.sendChanges(this.name, component, property, value, oldValue);
     }
 
-    private getHandler(item: ComponentCache, handler: string) {
+    getHandler(item: ComponentCache, handler: string) {
         let itemCache = this.handlerCache[item.name];
         if (itemCache == null) {
             itemCache = {};
@@ -330,7 +330,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         return func;
     }
 
-    private getServoyApi(item: ComponentCache) {
+    getServoyApi(item: ComponentCache) {
         let api = this.servoyApiCache[item.name];
         if (api == null) {
             api = new ServoyApi(item, this.name, this.formCache.absolute, this.formservice, this.servoyService);

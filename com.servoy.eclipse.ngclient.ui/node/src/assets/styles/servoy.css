@@ -34,7 +34,7 @@ body {
     border: 1px solid transparent;
     border-radius: 4px;
   }
-  
+
   .svy-btn-primary {
     color: #fff;
     background-color: #337ab7;
@@ -47,7 +47,7 @@ body {
     background-color: #286090;
     border-color: #204d74;
   }
-  
+
   .svy-btn-success {
     color: #fff;
     background-color: #5cb85c;
@@ -60,7 +60,7 @@ body {
     background-color: #449d44;
     border-color: #398439;
   }
-  
+
   .svy-btn-info {
     color: #fff;
     background-color: #5bc0de;
@@ -73,7 +73,7 @@ body {
     background-color: #31b0d5;
     border-color: #269abc;
   }
-  
+
   .svy-btn-danger {
     color: #fff;
     background-color: #d9534f;
@@ -86,12 +86,12 @@ body {
     background-color: #c9302c;
     border-color: #ac2925;
   }
-  
+
   .svy-btn-block {
     display: block;
     width: 100%;
   }
-  
+
  .svy-overflow-auto {
 	overflow: auto;
 }
@@ -327,4 +327,9 @@ body {
 .bs-callout-success {
 	background-color: #dff0d8;
 	border-color: #d6e9c6;
+}
+
+.dropdown-menu {
+  max-height: 300px;
+  overflow-y: scroll;
 }

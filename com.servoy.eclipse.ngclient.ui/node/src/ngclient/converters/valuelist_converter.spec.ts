@@ -1,16 +1,16 @@
-import { TestBed, inject, tick, fakeAsync } from '@angular/core/testing';
+import { TestBed, inject, tick, fakeAsync, flushMicrotasks } from '@angular/core/testing';
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { LoggerFactory } from '../../sablo/logger.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';
-import { SpecTypesService } from '../../sablo/spectypes.service';
+import { SpecTypesService, instanceOfChangeAwareValue } from '../../sablo/spectypes.service';
 import { ServicesService } from '../../sablo/services.service';
-import { ValuelistConverter, Valuelist } from './valuelist_converter';
+import { ValuelistConverter } from './valuelist_converter';
 import { SabloDeferHelper} from '../../sablo/defer.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { SessionStorageService } from 'angular-web-storage';
 import { IValuelist } from '../../sablo/spectypes.service';
-import { LoadingIndicatorService } from "../../sablo/util/loading-indicator/loading-indicator.service";
+import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 
 describe('ValuelistConverter', () => {
 
@@ -24,7 +24,8 @@ describe('ValuelistConverter', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ValuelistConverter, ConverterService, SabloService, SabloDeferHelper, SpecTypesService, LoggerFactory, WindowRefService, WebsocketService, ServicesService, SessionStorageService, LoadingIndicatorService]
+      providers: [ValuelistConverter, ConverterService, SabloService, SabloDeferHelper, SpecTypesService,
+        LoggerFactory, WindowRefService, WebsocketService, ServicesService, SessionStorageService, LoadingIndicatorService]
     });
 
     const sabloService: SabloService = TestBed.get( SabloService );
@@ -73,33 +74,62 @@ describe('ValuelistConverter', () => {
       expect( val ).toBeDefined();
       expect( val.getDisplayValue).toBeDefined('should have \'getDisplayValue\' function');
 
+      let changeListenerCalled = false;
+
+      if (instanceOfChangeAwareValue(val)) {
+        val.getStateHolder().setChangeListener(() => {
+          changeListenerCalled = true;
+        });
+      } else {
+        fail('should be a change aware value');
+      }
+
       let displayValue;
-      val.getDisplayValue(4).subscribe((val) => {
-          displayValue = val;
+      val.getDisplayValue(4).subscribe((response) => {
+          displayValue = response;
       });
+      expect(changeListenerCalled).toBe(true, 'change listener should be called');
+
+      let clientChange = converterService.convertFromClientToServer(val, 'valuelist');
+      expect(clientChange.getDisplayValue).toBe(4, 'value should be 4');
+
       expect(displayValue).not.toBeDefined( 'display value should not be defined yet.' );
-      tick(100); // wait for the promise to be resolved
+
+      const fromServer = {handledID : {id: clientChange.id, value: true}, getDisplayValue : 'd'};
+      converterService.convertFromServerToClient(fromServer , 'valuelist', val );
+      flushMicrotasks();
+
       expect(displayValue).toBe( 'd', 'display value should be \'d\'' );
 
       // should be resolved right away
-      val.getDisplayValue(4).subscribe((val) => {
-          displayValue = val;
+      displayValue = null;
+      changeListenerCalled = false;
+      val.getDisplayValue(4).subscribe((response) => {
+          displayValue = response;
       });
+      expect(changeListenerCalled).toBe(false, 'change listener should not be called');
       expect(displayValue).toBe( 'd', 'display value should be \'d\'' );
 
-      let errorMessage;
       const realValue = 5;
+      let errorMessage;
       let display;
-      val.getDisplayValue(realValue).subscribe((val) => {
-          display = val;
-      }, (val) => {
-          errorMessage = val;
+      changeListenerCalled = false;
+      val.getDisplayValue(realValue).subscribe((response) => {
+          display = response;
+      }, (response) => {
+          errorMessage = response;
       });
+      expect(changeListenerCalled).toBe(true, 'change listener should be called');
+      clientChange = converterService.convertFromClientToServer(val, 'valuelist');
+      expect(clientChange.getDisplayValue).toBe(5, 'value should be 4');
       expect(display).not.toBeDefined( 'display value should not be defined yet.' );
       expect(errorMessage).not.toBeDefined( 'error message should not be defined yet.' );
-      tick(100); // wait for the promise to be resolved
-      expect(display).not.toBeDefined('display value should not be defined' );
-      expect(errorMessage).toBe('No display value found for ' + realValue);
+
+      const fromServer2 = {handledID : {id: clientChange.id, value: true}, getDisplayValue : realValue};
+      converterService.convertFromServerToClient(fromServer2 , 'valuelist', val );
+      flushMicrotasks();
+      expect(display).toBe(realValue, 'should just return the realvalue');
+      expect(errorMessage).not.toBeDefined('display value should not be defined' );
   }));
 
   it( 'should filter list', <any>fakeAsync(() => {

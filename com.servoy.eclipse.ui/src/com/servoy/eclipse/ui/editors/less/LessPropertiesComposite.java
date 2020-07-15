@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.editors.less;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalListener;
@@ -35,6 +37,8 @@ import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ExpandEvent;
+import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
@@ -47,6 +51,8 @@ import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ExpandBar;
+import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -62,6 +68,40 @@ import com.servoy.j2db.server.ngclient.less.resources.ThemeResourceLoader;
  */
 public class LessPropertiesComposite extends Composite
 {
+
+	public class ExpandableLessPropertiesComposite extends Composite
+	{
+		private final String categoryName;
+
+		public ExpandableLessPropertiesComposite(ExpandBar parent, PropertiesLessEditorInput propertiesLessEditorInput, Font font, String categoryName)
+		{
+			super(parent, SWT.NONE);
+			this.categoryName = categoryName;
+			GridLayout layout = new GridLayout(3, false);
+			layout.marginRight = 5;
+			setLayout(layout);
+			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			for (LessPropertyEntry property : propertiesLessEditorInput.getProperties(categoryName))
+			{
+				addPropertyEntry(this, font, propertiesLessEditorInput, property);
+			}
+			this.pack();
+		}
+
+		public void refresh()
+		{
+			int i = 0;
+			LessPropertyEntry[] properties = ((PropertiesLessEditorInput)editor.getEditorInput()).getProperties(categoryName);
+			for (Control c : getChildren())
+			{
+				if (c instanceof Text)
+				{
+					Text text = (Text)c;
+					text.setText(properties[i++].getValue());
+				}
+			}
+		}
+	}
 
 	private final class LessPropertiesContentProposalListener implements IContentProposalListener
 	{
@@ -84,6 +124,7 @@ public class LessPropertiesComposite extends Composite
 	}
 
 	private static final Pattern pattern = Pattern.compile("[@\\w]([\\w-]*)");
+	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private String getWordAt(String txt, int pos)
 	{
@@ -133,10 +174,23 @@ public class LessPropertiesComposite extends Composite
 	private final ScrolledComposite sc;
 	private final PropertiesLessEditor editor;
 	private final Color backgroundColor;
+	private final char[] autoActivationCharacters = new char[] { '@' };
+	private KeyStroke keyStroke;
+	private ArrayList<ExpandableLessPropertiesComposite> categoryComposites;
+	private Text firstText;
 
 	public LessPropertiesComposite(Composite parent, int style, final PropertiesLessEditor editor)
 	{
 		super(parent, style);
+		try
+		{
+			keyStroke = KeyStroke.getInstance("Ctrl+Space");
+		}
+		catch (ParseException e)
+		{
+			ServoyLog.logError("Problem on theme editor initialization", e);
+		}
+
 		this.editor = editor;
 		this.setLayout(new FillLayout());
 		sc = new ScrolledComposite(parent, SWT.TRANSPARENT | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -155,7 +209,7 @@ public class LessPropertiesComposite extends Composite
 	{
 		area = new CachingChildrenComposite(sc, SWT.TRANSPARENT);
 		sc.setContent(area);
-		GridLayout layout = new GridLayout(3, false);
+		GridLayout layout = new GridLayout(2, false);
 		layout.marginRight = 5;
 		area.setLayout(layout);
 		area.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -211,95 +265,46 @@ public class LessPropertiesComposite extends Composite
 					}
 				}
 			});
-			new Label(area, SWT.NONE);
 
-			char[] autoActivationCharacters = new char[] { '@' };
-			KeyStroke keyStroke = KeyStroke.getInstance("Ctrl+Space");
-
-			for (LessPropertyEntry property : propertiesLessEditorInput.getProperties())
+			categoryComposites = new ArrayList<ExpandableLessPropertiesComposite>();
+			for (String categoryName : propertiesLessEditorInput.getCategories())
 			{
-				Label label = new Label(area, SWT.NONE);
-				label.setBackground(backgroundColor);
-				label.setFont(font);
-				label.setText(property.getLabel());
-				final Text txtName = new Text(area, SWT.BORDER);
-
-				Color normalBg = label.getForeground();
-				label.addListener(SWT.MouseUp, e -> {
-					if (e.button == 3 && property.getDefaultValue() != null)
+				ExpandBar expandBar = new ExpandBar(area, SWT.NONE);
+				expandBar.setBackground(backgroundColor);
+				expandBar.setFont(font);
+				expandBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+				ExpandableLessPropertiesComposite expandComposite = new ExpandableLessPropertiesComposite(expandBar, propertiesLessEditorInput, font,
+					categoryName);
+				categoryComposites.add(expandComposite);
+				expandComposite.setBackground(backgroundColor);
+				ExpandItem collapsableItem = new ExpandItem(expandBar, SWT.NONE, 0);
+				collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+				collapsableItem.setControl(expandComposite);
+				collapsableItem.setText(categoryName + " Properties");
+				collapsableItem.setExpanded(categoryComposites.size() == 1);//expand the first one by default
+				expandBar.addExpandListener(new ExpandListener()
+				{
+					public void itemExpanded(ExpandEvent e)
 					{
-						if (property.getStoredDefault() != null && !property.getStoredDefault().equals(property.getDefaultValue()))
-						{
-							property.setStoredDefault(property.getDefaultValue());
-							this.editor.propertyModified(property);
-						}
-						else
-						{
-							txtName.setText(property.getDefaultValue());
-						}
-						setChanged(property, label, normalBg);
+						collapsableItem.setImage(uiActivator.loadImageFromBundle("collapse_tree.png"));
+						Display.getCurrent().asyncExec(() -> {
+							collapsableItem.setHeight(expandComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+							sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+							sc.layout(true, true);
+						});
+					}
+
+					public void itemCollapsed(ExpandEvent e)
+					{
+						collapsableItem.setImage(uiActivator.loadImageFromBundle("expandall.png"));
+						Display.getCurrent().asyncExec(() -> {
+							collapsableItem.setHeight(0);
+							sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+							sc.layout(true, true);
+						});
 					}
 				});
-
-				setChanged(property, label, normalBg);
-
-				txtName.setText(property.getValue());
-				txtName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-				txtName.addListener(SWT.Modify, e -> {
-					String newVal = txtName.getText().trim();
-					if (!property.getValue().equals(newVal))
-					{
-						property.setValue(newVal);
-						property.setStoredDefault(property.getDefaultValue());
-						editor.propertyModified(property);
-						setChanged(property, label, normalBg);
-					}
-				});
-				txtName.addListener(SWT.FocusOut, e -> {
-					String newVal = txtName.getText().trim();
-					if (newVal.equals(""))
-					{
-						txtName.setText(property.getLastTxtValue());
-					}
-				});
-
-				String[] contentProposals = propertiesLessEditorInput.getContentProposals(property.getType(), property.getName());
-				if (contentProposals != null && contentProposals.length > 0)
-				{
-					LessPropertiesContentProposalProvider proposalProvider = new LessPropertiesContentProposalProvider(contentProposals);
-					ContentProposalAdapter adapter = new ContentProposalAdapter(txtName, new TextContentAdapter(), proposalProvider, keyStroke,
-						autoActivationCharacters);
-					adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
-					adapter.addContentProposalListener(new LessPropertiesContentProposalListener(txtName));
-				}
-
-				if (property.getType() == LessPropertyType.COLOR)
-				{
-					Button editButton = new Button(area, SWT.FLAT);
-					editButton.setBackground(backgroundColor);
-					editButton.setText("Select Color");
-					editButton.addListener(SWT.Selection, e -> {
-						final Display display = editButton.getDisplay();
-						final Shell shell = new Shell(display);
-						Rectangle bounds = editButton.getBounds();
-						shell.setLocation(bounds.x + bounds.width,
-							bounds.y - (sc.getVerticalBar() != null ? sc.getVerticalBar().getSelection() : 0) + bounds.height);
-						ColorDialog dialog = new ColorDialog(shell);
-						//TODO dialog.setRGB(rgb); ?
-						if (dialog.open() != null)
-						{
-							RGB rgb = dialog.getRGB();
-							//TODO insert ?
-							txtName.setText(String.format("#%02x%02x%02x", rgb.red, rgb.green, rgb.blue).toUpperCase());
-						}
-						shell.dispose();
-					});
-				}
-				//TODO add other pickers
-				else
-				{
-					new Label(area, SWT.NONE).setText("");
-				}
+				collapsableItem.setImage(uiActivator.loadImageFromBundle(collapsableItem.getExpanded() ? "collapse_tree.png" : "expandall.png"));
 			}
 		}
 		catch (Exception e)
@@ -309,6 +314,99 @@ public class LessPropertiesComposite extends Composite
 
 		area.cacheChildren(true);
 		sc.setMinSize(area.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		Display.getCurrent().asyncExec(() -> {
+			if (firstText != null) firstText.setFocus();
+		});
+	}
+
+	protected void addPropertyEntry(Composite container, Font font, PropertiesLessEditorInput propertiesLessEditorInput, LessPropertyEntry property)
+	{
+		Label label = new Label(container, SWT.NONE);
+		label.setBackground(backgroundColor);
+		label.setFont(font);
+		label.setText(property.getLabel());
+		final Text txtName = new Text(container, SWT.BORDER);
+		if (firstText == null)
+		{
+			firstText = txtName;
+		}
+
+		Color normalBg = label.getForeground();
+		label.addListener(SWT.MouseUp, e -> {
+			if (e.button == 3 && property.getDefaultValue() != null)
+			{
+				if (property.getStoredDefault() != null && !property.getStoredDefault().equals(property.getDefaultValue()))
+				{
+					property.setStoredDefault(property.getDefaultValue());
+					this.editor.propertyModified(property);
+				}
+				else
+				{
+					txtName.setText(property.getDefaultValue());
+				}
+				setChanged(property, label, normalBg);
+			}
+		});
+
+		setChanged(property, label, normalBg);
+
+		txtName.setText(property.getValue());
+		txtName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		txtName.addListener(SWT.Modify, e -> {
+			String newVal = txtName.getText().trim();
+			if (!property.getValue().equals(newVal))
+			{
+				property.setValue(newVal);
+				property.setStoredDefault(property.getDefaultValue());
+				editor.propertyModified(property);
+				setChanged(property, label, normalBg);
+			}
+		});
+		txtName.addListener(SWT.FocusOut, e -> {
+			String newVal = txtName.getText().trim();
+			if (newVal.equals(""))
+			{
+				txtName.setText(property.getLastTxtValue());
+			}
+		});
+
+		String[] contentProposals = propertiesLessEditorInput.getContentProposals(property.getType(), property.getName());
+		if (contentProposals != null && contentProposals.length > 0)
+		{
+			LessPropertiesContentProposalProvider proposalProvider = new LessPropertiesContentProposalProvider(contentProposals);
+			ContentProposalAdapter adapter = new ContentProposalAdapter(txtName, new TextContentAdapter(), proposalProvider, keyStroke,
+				autoActivationCharacters);
+			adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_IGNORE);
+			adapter.addContentProposalListener(new LessPropertiesContentProposalListener(txtName));
+		}
+
+		if (property.getType() == LessPropertyType.COLOR)
+		{
+			Button editButton = new Button(container, SWT.FLAT);
+			editButton.setBackground(backgroundColor);
+			editButton.setText("Select Color");
+			editButton.addListener(SWT.Selection, e -> {
+				final Display display = editButton.getDisplay();
+				final Shell shell = new Shell(display);
+				Rectangle bounds = editButton.getBounds();
+				shell.setLocation(bounds.x + bounds.width,
+					bounds.y - (sc.getVerticalBar() != null ? sc.getVerticalBar().getSelection() : 0) + bounds.height);
+				ColorDialog dialog = new ColorDialog(shell);
+				//TODO dialog.setRGB(rgb); ?
+				if (dialog.open() != null)
+				{
+					RGB rgb = dialog.getRGB();
+					//TODO insert ?
+					txtName.setText(String.format("#%02x%02x%02x", rgb.red, rgb.green, rgb.blue).toUpperCase());
+				}
+				shell.dispose();
+			});
+		}
+		//TODO add other pickers
+		else
+		{
+			new Label(container, SWT.NONE).setText("");
+		}
 	}
 
 	/**
@@ -344,16 +442,6 @@ public class LessPropertiesComposite extends Composite
 
 	public void refresh()
 	{
-		int i = 0;
-		LessPropertyEntry[] properties = ((PropertiesLessEditorInput)editor.getEditorInput()).getProperties();
-		for (Control c : area.getChildren())
-		{
-			if (c instanceof Text)
-			{
-				Text text = (Text)c;
-				text.setText(properties[i++].getValue());
-			}
-		}
+		categoryComposites.forEach(c -> c.refresh());
 	}
-
 }

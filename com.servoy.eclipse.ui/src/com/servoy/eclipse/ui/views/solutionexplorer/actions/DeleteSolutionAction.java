@@ -101,6 +101,8 @@ public class DeleteSolutionAction extends Action implements ISelectionChangedLis
 					"There are unsaved open editors that would be affected by this delete.\nPlease save or discard changes in these editors first.");
 				return;
 			}
+			//avoid a NPE by closing all the editors before deleting the active solution
+			EditorUtil.getActivePage().closeAllEditors(false);
 		}
 		deleteAction.run();
 		ServoyProject[] activeProjects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();

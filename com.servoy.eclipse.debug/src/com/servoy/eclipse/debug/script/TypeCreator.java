@@ -231,7 +231,9 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSDimension;
 import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSPoint;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
@@ -428,6 +430,8 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("console", ConsoleObject.class);
 		addAnonymousClassType("CSSPosition", ICSSPosition.class);
 		addAnonymousClassType("ICSSPosition", ICSSPosition.class);
+		addAnonymousClassType("point", JSPoint.class);
+		addAnonymousClassType("dimension", JSDimension.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 
 
@@ -1191,11 +1195,15 @@ public class TypeCreator extends TypeCache
 			method.setName(api.getName());
 			if (api.getDocumentation() != null)
 			{
-				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(api.getDocumentation(), STANDARD_ELEMENT_NAME, true));
+				StringBuilder description = new StringBuilder(api.getDocumentation());
+				if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
+				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
+					STANDARD_ELEMENT_NAME, true));
 				method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
 			}
 			else
 			{
+				if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
 				method.setDeprecated(api.isDeprecated());
 			}
 
@@ -4400,6 +4408,27 @@ public class TypeCreator extends TypeCache
 								servoyModel.getFlattenedSolution().getSolution() != null)
 							{
 								return new TypeConfig(servoyProject.getEditingFlattenedSolution(), split.length == 1 ? null : split[1]);
+							}
+							else if (split.length == 1)
+							{
+								// relation
+								Relation relation = servoyModel.getFlattenedSolution().getRelation(split[0]);
+								if (relation != null)
+								{
+									try
+									{
+										ITable tbl = getTable(servoyModel.getFlattenedSolution().getSolution().getRepository(),
+											relation.getForeignDataSource());
+										if (tbl != null)
+										{
+											return new TypeConfig(tbl);
+										}
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError(e);
+									}
+								}
 							}
 						}
 					}

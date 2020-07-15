@@ -31,10 +31,9 @@ describe('ServoyDefaultListBox', () => {
   let component: ServoyDefaultListBox;
   let fixture: ComponentFixture<ServoyDefaultListBox>;
   let debugEl: DebugElement;
-  let servoyApi;
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner']);
 
   beforeEach(async(() => {
-    servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'isInDesigner']);
 
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultListBox],
@@ -54,7 +53,7 @@ describe('ServoyDefaultListBox', () => {
     }).createComponent(ServoyDefaultListBox);
 
     component = fixture.componentInstance;
-    component.servoyApi =  servoyApi as ServoyApi;
+    component.servoyApi =  servoyApi;
     debugEl = fixture.debugElement;
 
     // set some default values
@@ -105,11 +104,11 @@ describe('ServoyDefaultListBox', () => {
     fixture.detectChanges();
     expect(component.dataProviderID).toEqual(1);
   });
- 
+
   it('should test selectedValues', () => {
     component.multiselectListbox = true;
     const select = debugEl.query(By.css('select')).nativeElement;
-    component.dataProviderID = "test1\ntest2"
+    component.dataProviderID = 'test1\ntest2';
         component.ngOnChanges({
             dataProviderID: new SimpleChange(null, component.dataProviderID, true)
         });
@@ -129,7 +128,7 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it( 'should render markupid ', () => {
-    component.servoyApi.getMarkupId.and.returnValue( 'myid');
+    servoyApi.getMarkupId.and.returnValue( 'myid');
     const select = debugEl.query(By.css('select')).nativeElement;
     fixture.detectChanges();
     expect(select.id).toBe('myid');

@@ -362,7 +362,8 @@ public class EventsComposite extends Composite
 			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
 			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
 			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID),
-			onLoad(StaticContentSpecLoader.PROPERTY_ONFOUNDSETLOADMETHODID);
+			onLoad(StaticContentSpecLoader.PROPERTY_ONFOUNDSETLOADMETHODID),
+			onValidate(StaticContentSpecLoader.PROPERTY_ONVALIDATEMETHODID);
 
 			private final TypedProperty<Integer> property;
 
@@ -442,9 +443,14 @@ public class EventsComposite extends Composite
 			{
 				if (tp == EventNodeType.onLoad && !(table instanceof AbstractMemTable) || table instanceof ViewFoundsetTable && tp != EventNodeType.onLoad)
 					continue;
+				Integer property = (Integer)tableNode.getProperty(tp.getProperty().getPropertyName());
+				if (property == null)
+				{
+					continue;
+				}
 				children.add(new EventNode(tp,
 					tableNode == null ? MethodWithArguments.METHOD_DEFAULT : new MethodWithArguments(
-						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), dsm.getDataSource(tableNode.getDataSource())),
+						property.intValue(), dsm.getDataSource(tableNode.getDataSource())),
 					solution, table));
 			}
 		}

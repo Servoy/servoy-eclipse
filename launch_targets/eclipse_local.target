@@ -3,6 +3,6 @@
 <target includeMode="feature" name="eclipse_local">
 	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk18"/>
 	<locations>
-		<location path="C:\temp\eclipse_target2" type="Directory"/>
+		<location path="${workspace_loc}/launchtarget" type="Directory"/>
 	</locations>
 </target>

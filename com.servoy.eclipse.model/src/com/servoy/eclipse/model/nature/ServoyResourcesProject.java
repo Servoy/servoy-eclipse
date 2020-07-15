@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -201,6 +202,19 @@ public class ServoyResourcesProject implements IProjectNature
 			}
 		}
 		return false;
+	}
+
+	public String getWorkingSetOfPersist(String persistName, String[] solutionNames)
+	{
+		if (workingSetPersists != null)
+		{
+			for (Entry<String, List<String>> workingSetMapEntry : workingSetPersists.entrySet())
+			{
+				List<String> names = getFormNames(workingSetMapEntry.getValue(), solutionNames);
+				if (names != null && names.contains(persistName)) return workingSetMapEntry.getKey();
+			}
+		}
+		return null;
 	}
 
 	public List<String> getWorkingSetPersists(String workingSetName, String[] solutionNames)

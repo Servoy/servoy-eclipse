@@ -1,23 +1,36 @@
-angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegistry, $editorService, $selectionUtils, $timeout,$document) {
+angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegistry, $editorService, $selectionUtils, $timeout,$document, EDITOR_CONSTANTS) {
 
     $pluginRegistry.registerPlugin(function(editorScope) {
 
 	var boundsUpdating = false;
 	var highlightDiv = angular.element(document.querySelector('#highlight'))[0];
 	var utils = $selectionUtils.getUtilsForScope(editorScope);
+	var isSendChanges = true;
 
 	function onkeydown(event) {
 		var fixedKeyEvent = editorScope.getFixedKeyEvent(event);
 		if (!$editorService.isInlineEditMode() && fixedKeyEvent.keyCode > 36 && fixedKeyEvent.keyCode < 41) { // cursor key
 			var selection = editorScope.getSelection();
 			if (selection.length > 0) {
+				var ghost = editorScope.getGhost(selection[0].getAttribute("svy-id"));
+				if (selection.length == 1 && (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
+					isSendChanges = false;
+					return true;
+				}
+				if (!editorScope.isAbsoluteFormLayout()) {//responsive form?
+					isSendChanges = false;
+					return true;
+				}
 				boundsUpdating = true;
 				var changeX = 0, changeY = 0, changeW = 0, changeH = 0;
 
 				var magnitude = 1;
-				if (fixedKeyEvent.isAlt) {
+				if ((fixedKeyEvent.isMeta || fixedKeyEvent.isCtrl) && fixedKeyEvent.isAlt) {//combining alt with ctrl / meta it's not processes but passthrough
+					isSendChanges = false;
+					return true;
+				} else if (fixedKeyEvent.isAlt) {
 					magnitude = 20;
-				} else if (fixedKeyEvent.isCtrl) {
+				} else if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta) { //on Mac, Ctrl + arrows does not generate an event
 					magnitude = 10;
 				}
 				var isResize = fixedKeyEvent.isShift;
@@ -77,7 +90,11 @@ angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegist
 					}
 				}
 				editorScope.refreshEditorContent();
+				isSendChanges = true;
 				return false;
+			} else {//nothing selected (responsive form
+				isSendChanges = false;
+				return true;
 			}
 		}
 	}
@@ -117,7 +134,13 @@ angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegist
 	    }
 	    editorScope.sendUpdates = $timeout(function() {
 		editorScope.sendUpdates = null;
-		$editorService.sendChanges(obj);
+		if (isSendChanges) {
+			$editorService.sendChanges(obj);
+		} else {
+			if (event.keyCode > 36 && event.keyCode < 41) {
+				$editorService.keyPressed(event);
+			}
+		}
 
 	    }, 50);
 	}

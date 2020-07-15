@@ -188,6 +188,10 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 							{
 								workingSetName[0] = (String)firstElement;
 							}
+							else
+							{
+								workingSetName[0] = null;
+							}
 						}
 					});
 				}
@@ -213,7 +217,18 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 					}
 				}
 				workingSetNameCombo.setInput(workingSets.toArray());
-				workingSetNameCombo.setSelection(new StructuredSelection(SELECTION_NONE));
+
+				String workingSetOfFormName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject()
+					.getWorkingSetOfPersist(((Form)persist).getName(), solutionNames);
+				if (workingSetOfFormName != null)
+				{
+					workingSetNameCombo.setSelection(new StructuredSelection(workingSetOfFormName));
+					workingSetName[0] = workingSetOfFormName;
+				}
+				else
+				{
+					workingSetNameCombo.setSelection(new StructuredSelection(SELECTION_NONE));
+				}
 			}
 		};
 		dialog.open();

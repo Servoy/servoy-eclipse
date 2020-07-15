@@ -1,10 +1,11 @@
 import { OnInit, AfterViewInit, Input, Renderer2, ElementRef, ViewChild, Directive } from '@angular/core';
 import {ComponentContributor} from '../ngclient/component_contributor.service';
+import { ServoyApi } from './servoy_api';
 
 @Directive()
 export class ServoyBaseComponent implements AfterViewInit, OnInit {
     @Input() name;
-    @Input() servoyApi;
+    @Input() servoyApi: ServoyApi;
     @Input() servoyAttributes;
     
     @ViewChild('element', {static: true}) elementRef:ElementRef;

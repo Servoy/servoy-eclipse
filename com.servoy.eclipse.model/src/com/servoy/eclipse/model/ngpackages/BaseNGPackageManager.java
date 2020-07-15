@@ -130,7 +130,12 @@ public abstract class BaseNGPackageManager
 
 	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		for (ILoadedNGPackagesListener listener : loadedNGPackagesListeners)
+		ArrayList<ILoadedNGPackagesListener> listenersSnapshot;
+		synchronized (loadedNGPackagesListeners) // loadedNGPackagesListeners is a synchronized list already so manual sync on itself is only needed when iterating on it
+		{
+			listenersSnapshot = new ArrayList<>(loadedNGPackagesListeners); // to avoid ConcurrentModificationExceptions while iterating without using synchronized block on the whole iteration (including listener code)
+		}
+		for (ILoadedNGPackagesListener listener : listenersSnapshot)
 		{
 			listener.ngPackagesChanged(changeReason, loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
 		}
@@ -148,7 +153,12 @@ public abstract class BaseNGPackageManager
 
 	public void ngPackageProjectListChanged(boolean activePackageProjectsChanged)
 	{
-		for (IAvailableNGPackageProjectsListener listener : availableNGPackageProjectsListeners)
+		ArrayList<IAvailableNGPackageProjectsListener> listenersSnapshot;
+		synchronized (availableNGPackageProjectsListeners) // availableNGPackageProjectsListeners is a synchronized list already so manual sync on itself is only needed when iterating on it
+		{
+			listenersSnapshot = new ArrayList<>(availableNGPackageProjectsListeners); // to avoid ConcurrentModificationExceptions while iterating without using synchronized block on the whole iteration (including listener code)
+		}
+		for (IAvailableNGPackageProjectsListener listener : listenersSnapshot)
 		{
 			listener.ngPackageProjectListChanged(activePackageProjectsChanged);
 		}

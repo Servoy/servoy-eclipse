@@ -1,16 +1,17 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {SimpleChange} from '@angular/core';
-import { By }              from '@angular/platform-browser';
+import { By } from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
-import { TooltipService, ComponentContributor,} from '../../ngclient/servoy_public'
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
-import { SabloModule } from '../../sablo/sablo.module'
+import { TooltipService, ComponentContributor, ServoyApi} from '../../ngclient/servoy_public';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { SabloModule } from '../../sablo/sablo.module';
 
 describe( 'SvLabel', () => {
     let component: ServoyDefaultLabel;
     let fixture: ComponentFixture<ServoyDefaultLabel>;
     let element;
+    const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml']);
 
     beforeEach( async(() => {
         TestBed.configureTestingModule( {
@@ -25,11 +26,11 @@ describe( 'SvLabel', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent( ServoyDefaultLabel );
         component = fixture.componentInstance;
-        component.servoyApi = jasmine.createSpyObj( "ServoyApi", ["getMarkupId", "trustAsHtml"] );
+        component.servoyApi = servoyApi;
         fixture.detectChanges();
-        
+
         const de = fixture.debugElement.query(By.css('div'));
-        element= de.nativeElement;
+        element = de.nativeElement;
     } );
 
     it( 'should create', () => {
@@ -41,41 +42,41 @@ describe( 'SvLabel', () => {
     } );
 
     it( 'should render html', () => {
-        component.servoyApi.trustAsHtml.and.returnValue( true )
-        component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>'
+        servoyApi.trustAsHtml.and.returnValue( true );
+        component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
         fixture.detectChanges();
-        expect( component.child.nativeElement.children[1].innerHTML ).toBe( component.dataProviderID )
+        expect( component.child.nativeElement.children[1].innerHTML ).toBe( component.dataProviderID );
     } );
     it( 'should not render html', () => {
-        component.servoyApi.trustAsHtml.and.returnValue( false )
-        component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>'
+        servoyApi.trustAsHtml.and.returnValue( false );
+        component.dataProviderID = '<div class="myclass" onclick="javascript:test()">hallo</div>';
         fixture.detectChanges();
-        expect( component.child.nativeElement.children[1].innerHTML ).toBe( '<div class="myclass">hallo</div>' )
+        expect( component.child.nativeElement.children[1].innerHTML ).toBe( '<div class="myclass">hallo</div>' );
     } );
-    
+
     it( 'should render markupid ', () => {
-        component.servoyApi.getMarkupId.and.returnValue( "myid")
+        servoyApi.getMarkupId.and.returnValue( 'myid');
         fixture.detectChanges();
-        expect(element.id).toBe("myid");
+        expect(element.id).toBe('myid');
     } );
-    
+
     it( 'should render mnemonic ', () => {
-        component.text = "label";
-        component.mnemonic = "l";
+        component.text = 'label';
+        component.mnemonic = 'l';
         component.ngOnChanges({
             mnemonic: new SimpleChange(null, 'l', false)
         });
         fixture.detectChanges();
-        
-        expect( component.child.nativeElement.children[1].innerHTML ).toBe('<u>l</u>abel')
-        expect(element.getAttribute("accesskey")).toBe(component.mnemonic);
+
+        expect( component.child.nativeElement.children[1].innerHTML ).toBe('<u>l</u>abel');
+        expect(element.getAttribute('accesskey')).toBe(component.mnemonic);
     } );
-    
+
     it( 'should switch to labelFor', () => {
         component.labelFor = true;
         fixture.detectChanges();
         const de = fixture.debugElement.query(By.css('label'));
-        element= de.nativeElement;
-        expect(element.tagName).toBe("LABEL");
+        element = de.nativeElement;
+        expect(element.tagName).toBe('LABEL');
     } );
 } );

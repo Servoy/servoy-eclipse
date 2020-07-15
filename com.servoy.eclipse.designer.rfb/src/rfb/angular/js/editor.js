@@ -1062,7 +1062,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 				$scope.setContentSizes();
 			})
-
 			$element.on('documentReady.content', function(event, contentDocument) {
 
 				if (!$scope.editorInitialized)
@@ -1095,10 +1094,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 						// 46 = delete
 						if (fixedKeyEvent.keyCode == 46) {
-							// send the DELETE key code to the server
 							$editorService.keyPressed(objEvent);
+							// send the DELETE key code to the server
 							return false;
-						}
+						} 
 						// f4 open form hierarchy
 						if (fixedKeyEvent.keyCode == 115) {
 							// send the F4 key code to the server
@@ -1114,12 +1113,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						return true;
 					});
 					$(document).keydown(function(objEvent) {
-						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
-
-						if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta) {
-							$editorService.keyPressed(objEvent);
-							return false;
-						}
+//						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
+//
+//						if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta) {
+//							$editorService.keyPressed(objEvent);
+//							return false;
+//						}
 						return true;
 					});
 

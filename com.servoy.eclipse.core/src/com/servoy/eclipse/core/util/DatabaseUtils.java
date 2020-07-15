@@ -32,7 +32,6 @@ import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
@@ -151,9 +150,10 @@ public final class DatabaseUtils
 				ColumnInfoDef columnInfoInfo = columnInfoIt.next();
 
 				// Add the column with the appropriate information.
-				IColumn column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
+				Column column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
 					columnInfoInfo.columnType.getLength(), columnInfoInfo.columnType.getScale());
 				column.setDatabasePK((columnInfoInfo.flags & IBaseColumn.PK_COLUMN) != 0);
+				column.setFlags(columnInfoInfo.flags);
 				column.setAllowNull(columnInfoInfo.allowNull);
 
 				// update the auto enter type
