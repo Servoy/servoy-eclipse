@@ -321,7 +321,7 @@ public class Activator extends AbstractUIPlugin
 					{
 						BrowserDialog dialog = new BrowserDialog(activeShell,
 							TUTORIALS_URL + loginToken, true, true);
-						dialog.open();
+						dialog.open(true);
 					}
 				}
 			}

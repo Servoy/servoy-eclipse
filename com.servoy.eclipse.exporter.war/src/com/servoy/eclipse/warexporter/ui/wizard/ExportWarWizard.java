@@ -528,7 +528,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 		StringBuilder sb = new StringBuilder("./war_export.");
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") > -1) sb.append("bat");
-		else sb.append("sh");
+		else if (System.getProperty("os.name", "generic").toLowerCase().indexOf("darwin") > 0) sb.append("macosx.sh");
+		else sb.append("linux.sh");
 
 		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
 

@@ -212,7 +212,7 @@ public class TutorialView extends ViewPart
 					{
 						dialog = new BrowserDialog(parent.getShell(),
 							rowData.optString("gifURL"), false, false);
-						dialog.open(location, size);
+						dialog.open(location, size, false);
 					}
 					else
 					{

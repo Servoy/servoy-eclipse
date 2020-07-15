@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.editors.less;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -77,7 +78,7 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		typesToProperties.get(LessPropertyType.COLOR).add("lighten(@property, 10%)");
 	}
 
-	private LinkedHashMap<String, LessPropertyEntry> properties;
+	private LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> properties;
 	private final Set<LessPropertyEntry> modified = new HashSet<>();
 	private final static Map<LessPropertyType, TreeSet<String>> typesToProperties = new HashMap<>();
 	private final static Pattern lessVariablePattern = Pattern.compile("@([\\w-_]+)\\s*:\\s*(.*);\\s?(?:// default?:(.*))?");
@@ -89,7 +90,8 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		this.properties = loadProperties(content, null);
 	}
 
-	private LinkedHashMap<String, LessPropertyEntry> loadProperties(String text, Map<String, LessPropertyEntry> previousVaues)
+	private LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> loadProperties(String text,
+		LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> previousValues)
 	{
 		// First read in the default properties file for the given version (that is in the text)
 		String defaultThemeProperties;
@@ -106,9 +108,9 @@ public class PropertiesLessEditorInput extends FileEditorInput
 			defaultThemeProperties = ThemeResourceLoader.getThemeProperties(version);
 		}
 
-		LinkedHashMap<String, LessPropertyEntry> props = new LinkedHashMap<>();
-		parseContent(defaultThemeProperties, previousVaues, props);
-		parseContent(text, previousVaues, props);
+		LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> props = new LinkedHashMap<>();
+		parseContent(defaultThemeProperties, previousValues, props);
+		parseContent(text, previousValues, props);
 
 		return props;
 	}
@@ -119,32 +121,46 @@ public class PropertiesLessEditorInput extends FileEditorInput
 	 * @param init
 	 * @param props
 	 */
-	private void parseContent(String text, Map<String, LessPropertyEntry> previousValues, LinkedHashMap<String, LessPropertyEntry> props)
+	private void parseContent(String text, LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> previous,
+		LinkedHashMap<String, LinkedHashMap<String, LessPropertyEntry>> current)
 	{
-		String content = text.replaceAll("/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/", "").trim();
-		Matcher m = lessVariablePattern.matcher(content);
-		while (m.find())
+		String[] categories = text.trim().split("/\\* START");
+		for (String category : categories)
 		{
-			String name = m.group(1);
-			String value = m.group(2);
-			String storedDefaultValue = m.group(3);
-			LessPropertyType type = inferType(name, value);
-			if (previousValues == null)
+			if (category.indexOf("VERSION") > 0 || category.indexOf("*/") == -1) continue;
+			String categoryName = category.substring(0, category.indexOf("*/")).trim();
+			Map<String, LessPropertyEntry> previousValues = previous != null ? previous.get(categoryName) : null;
+			LinkedHashMap<String, LessPropertyEntry> props = current.get(categoryName);
+			if (props == null)
 			{
-				typesToProperties.get(type).add("@" + name);
+				current.put(categoryName, new LinkedHashMap<String, LessPropertyEntry>());
+				props = current.get(categoryName);
 			}
-			if (previousValues != null && previousValues.containsKey(name))
+			String content = category.replaceAll("/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/", "").trim();
+			Matcher m = lessVariablePattern.matcher(content);
+			while (m.find())
 			{
-				LessPropertyEntry lessProp = previousValues.get(name);
-				lessProp.setValue(value);
-				lessProp.resetLastTxtValue();
-				props.put(name, lessProp);
-			}
-			else
-			{
-				LessPropertyEntry lessProp = new LessPropertyEntry(name, value, type, storedDefaultValue);
-				LessPropertyEntry overwrittenValue = props.put(name, lessProp);
-				if (overwrittenValue != null) lessProp.setDefaultValue(overwrittenValue.getValue());
+				String name = m.group(1);
+				String value = m.group(2);
+				String storedDefaultValue = m.group(3);
+				LessPropertyType type = inferType(name, value);
+				if (previousValues == null)
+				{
+					typesToProperties.get(type).add("@" + name);
+				}
+				if (previousValues != null && previousValues.containsKey(name))
+				{
+					LessPropertyEntry lessProp = previousValues.get(name);
+					lessProp.setValue(value);
+					lessProp.resetLastTxtValue();
+					props.put(name, lessProp);
+				}
+				else
+				{
+					LessPropertyEntry lessProp = new LessPropertyEntry(name, value, type, storedDefaultValue);
+					LessPropertyEntry overwrittenValue = props.put(name, lessProp);
+					if (overwrittenValue != null) lessProp.setDefaultValue(overwrittenValue.getValue());
+				}
 			}
 		}
 	}
@@ -277,23 +293,33 @@ public class PropertiesLessEditorInput extends FileEditorInput
 			}
 		}
 
-		for (LessPropertyEntry prop : properties.values())
+		for (String category : properties.keySet())
 		{
-			if (prop.getDefaultValue() != null && !prop.getDefaultValue().equals(prop.getValue()))
+			LinkedHashMap<String, LessPropertyEntry> props = properties.get(category);
+			content.append("/* START ");
+			content.append(category);
+			content.append(" */");
+			for (LessPropertyEntry prop : props.values())
 			{
-				content.append("\n\n");
-				content.append(prop.toString());
-				content.append("; // default:");
-				content.append(prop.getDefaultValue());
+				if (prop.getDefaultValue() != null && !prop.getDefaultValue().equals(prop.getValue()))
+				{
+					content.append("\n\n");
+					content.append(prop.toString());
+					content.append("; // default:");
+					content.append(prop.getDefaultValue());
+				}
+				prop.resetLastTxtValue();
 			}
-			prop.resetLastTxtValue();
 		}
 		return content.toString();
 	}
 
-	public LessPropertyEntry[] getProperties()
+	public LessPropertyEntry[] getProperties(String categoryName)
 	{
-		return properties.values().toArray(new LessPropertyEntry[properties.size()]);
+		if (!properties.containsKey(categoryName)) return new LessPropertyEntry[0];
+
+		Collection<LessPropertyEntry> values = properties.get(categoryName).values();
+		return values.toArray(new LessPropertyEntry[values.size()]);
 	}
 
 
@@ -310,5 +336,8 @@ public class PropertiesLessEditorInput extends FileEditorInput
 		return result.toArray(new String[result.size()]);
 	}
 
-
+	public Set<String> getCategories()
+	{
+		return properties.keySet();
+	}
 }

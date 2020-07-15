@@ -20,6 +20,7 @@ package com.servoy.eclipse.debug.script;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.dltk.javascript.typeinfo.IJavaScriptLikeObject;
 import org.eclipse.dltk.javascript.typeinfo.IRType;
 import org.eclipse.dltk.javascript.typeinfo.IRTypeDeclaration;
 import org.eclipse.dltk.javascript.typeinfo.ITypeSystem;
@@ -31,7 +32,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.Type;
  * @author jcompagner
  *
  */
-public class ServoyDynamicRuntimeType extends RSimpleType
+public class ServoyDynamicRuntimeType extends RSimpleType implements IJavaScriptLikeObject
 {
 	/**
 	 * @param typeSystem
@@ -53,7 +54,7 @@ public class ServoyDynamicRuntimeType extends RSimpleType
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.IRType#isAssignableFrom(org.eclipse.dltk.javascript.typeinfo.IRType)
 	 */
 	@Override

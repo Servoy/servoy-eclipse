@@ -228,7 +228,7 @@ public class ServoyBuilderUtils
 			resources.get(1).getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) && resources.get(2) instanceof IFolder &&
 			resources.get(3) instanceof IFile)
 		{
-			String datasource = ResourcesUtils.getParentDatasource((IFile)resources.get(3));
+			String datasource = ResourcesUtils.getParentDatasource((IFile)resources.get(3), false);
 			if (datasource != null)
 			{
 				List<IPersist> persists = BuilderDependencies.getInstance().getDatasourceDependency(datasource);
