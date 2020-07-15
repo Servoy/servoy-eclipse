@@ -67,6 +67,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -441,8 +442,8 @@ public class EventsComposite extends Composite
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 			for (EventNodeType tp : EventNodeType.values())
 			{
-				if (tp == EventNodeType.onLoad && !(table instanceof AbstractMemTable) || table instanceof ViewFoundsetTable && tp != EventNodeType.onLoad)
-					continue;
+				if (tp == EventNodeType.onLoad && table instanceof Table) continue;
+				if (table instanceof ViewFoundsetTable && !(tp == EventNodeType.onLoad || tp == EventNodeType.onValidate)) continue;
 				MethodWithArguments mw = MethodWithArguments.METHOD_DEFAULT;
 				if (tableNode != null)
 				{
