@@ -12,9 +12,9 @@
 	  </tr>
 	</thead>
 	<tbody>	
-	<cdk-virtual-scroll-viewport itemSize="30" style="height:303px" (scrolledIndexChange)="onScroll()">	
+	<cdk-virtual-scroll-viewport itemSize="25" style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()">	
 		<tr cdk-row *cdkVirtualFor="let row of foundset.viewPort.rows; let r = index" (click)="selectRow(r, $event)"
-		 [ngClass]="{'table-servoyextra-selected': foundset.selectedRowIndexes.indexOf(r) > -1}">
+		[ngClass]="getRowClass(r)">
 		<td cdk-cell *ngFor="let column of columns; let i = index" [className]="'c' + i" 
 			(click)="onCellClick && onCellClick(r, i, foundset.viewPort.rows[r], $event)"
 			(dblclick)="onCellDoubleClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event)"
@@ -24,5 +24,14 @@
 		</tr>
 	</cdk-virtual-scroll-viewport>
 	</tbody>
+	<tfoot>
+		<ngb-pagination *ngIf="showPagination()" class="svy-pagination svy-nomargin"
+		[(page)]="currentPage"
+		[pageSize]="pageSize"
+		[collectionSize]="foundset.serverSize"
+		(pageChange)="modifyPage()"
+		[maxSize]="1" [ellipses]="false">
+	  </ngb-pagination>
+	  </tfoot>
 </table>
 </div>

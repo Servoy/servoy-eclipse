@@ -31,6 +31,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     @Input() servoyApi;
     @Input() minRowHeight: any;
     @Input() enableColumnResize: boolean;
+    @Input() pageSize: number;
+    @Input() rowStyleClassDataprovider: IFoundset;
 
     @Input() onViewPortChanged;
     @Input() onCellClick;
@@ -61,6 +63,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     skipOnce: boolean = false;
     currentSortClass: any[] = [];
     sortClassUpdateTimer: any;
+    currentPage: number = 1;
     changeListener: (change: FoundsetChangeEvent) => void;
 
     constructor(renderer: Renderer2, logFactory: LoggerFactory ) {
@@ -230,8 +233,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         return columnStyle;
     }
     getComponentWidth() {
-        if (this.componentWidth === undefined && this.getNativeElement().parentElement.parentElement.clientWidth != 0) {
-            this.componentWidth = Math.floor(this.getNativeElement().parentElement.parentElement.clientWidth);
+        if (this.componentWidth === undefined && this.getNativeElement().parentElement.parentElement.offsetWidth != 0) {
+            this.componentWidth = Math.floor(this.getNativeElement().parentElement.parentElement.offsetWidth);
         }
         return this.componentWidth;
     }
@@ -426,22 +429,22 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         let tBodyStyle = {};
         let componentWidth = this.getComponentWidth();
         tBodyStyle['width'] = componentWidth + "px";
-        const tbl = this.getNativeElement().getElementsByTagName("table")[0];
         const tblHead = this.getNativeElement().getElementsByTagName("thead")[0];
         if (tblHead.style.display !== 'none') {
             tBodyStyle['top'] = tblHead.offsetHeight + "px";
         }
-        //TODO
-        /*if (this.showPagination()) {
-            var pagination = $element.find("ul:first");
-            if (pagination.get().length > 0) {
-                tBodyStyle.marginBottom = ($(pagination).height() + 2) + "px";
+       if (this.showPagination()) {
+            var pagination = this.getNativeElement().getElementsByTagName('ngb-pagination');
+            if (pagination[0] && pagination[0].children[0]) {
+                tBodyStyle['margin-bottom'] = (pagination[0].children[0].clientHeight + 2) + "px";
+                this.renderer.setStyle(pagination[0].children[0], "margin-bottom", "0");
             }
-        }*/
+        }
 
         for (let p in tBodyStyle) {
             this.renderer.setStyle(tBodyEl, p, tBodyStyle[p]);
         }
+        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", tBodyEl['clientHeight']+"px");
     }
 
 
@@ -450,7 +453,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         if (this.enableSort || this.onHeaderClick) {
             tHeadStyle["cursor"] = "pointer";
         }
-        //TODO tHeadStyle["left"] = tableLeftOffset + "px";
+        tHeadStyle["left"] = -this.getNativeElement().getElementsByTagName("table")[0].scrollLeft() + "px";
         return tHeadStyle;
     }
 
@@ -553,5 +556,25 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         let tbl = this.getNativeElement().getElementsByTagName("table")[0];
         this.skipOnce = mustExecuteOnFocusGainedMethod === false;
         tbl.focus();
+    }
+
+    showPagination() {
+        return this.pageSize && this.foundset && (this.foundset.serverSize > this.pageSize || this.foundset.hasMoreRows);
+
+    }
+
+    modifyPage() {
+        this.viewPort.setRenderedRange({start: this.pageSize*(this.currentPage-1), end: this.pageSize * this.currentPage - 1});
+    }
+
+    getRowClass(idx: number) {
+        let rowClass = "";
+        if (this.foundset.selectedRowIndexes.indexOf(idx) > -1) {
+            rowClass += "table-servoyextra-selected ";
+        }
+        if (this.rowStyleClassDataprovider) {
+            rowClass += this.rowStyleClassDataprovider[idx % this.pageSize];
+        }
+        return rowClass;
     }
 }
