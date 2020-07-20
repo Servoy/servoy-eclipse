@@ -1,0 +1,28 @@
+<div #element
+    class="bts-check"
+    [ngClass]="styleClass"
+    *ngIf="visible">
+    <label>
+        <input
+            type="checkbox"
+            [checked]="selected"
+            [svyTooltip]="toolTipText"
+            [id]="servoyApi.getMarkupId()"
+            [disabled]="!enabled || !editable"
+            [sabloTabseq]="tabSeq"
+            />
+            <span 
+                [textContent]="text"
+                *ngIf="showAs != 'html' && showAs != 'trusted_html'">
+            </span>
+            <span 
+              [innerHtml]="text | htmlFilter | trustAsHtml:servoyApi.isTrustedHTML()"
+              *ngIf="showAs == 'html' || showAs == 'trusted_html'">
+            </span>
+    </label>    
+
+</div>
+
+
+
+

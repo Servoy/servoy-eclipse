@@ -1,0 +1,10 @@
+<img #element
+    class="bts-media"
+    [src]="{{media != null ? media : (dataProviderID != null && dataProviderID.url ? dataProviderID.url : (dataProviderID == null && servoyApi.isInDesigner() ? "bootstrapcomponents/imagemedia/images/media.png" : (dataProviderID == null ? "bootstrapcomponents/imagemedia/images/empty.gif" : dataProviderID)))}}"
+    [id]='servoyApi.getMarkupId()' 
+    [svyTooltip]="toolTipText"
+    [sabloTabseq]="tabSeq"
+    [alt]="alternate"
+    *ngIf="visible"
+    [disabled]="readonly || !enabled"
+/>

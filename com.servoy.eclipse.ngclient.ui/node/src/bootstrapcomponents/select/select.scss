@@ -1,0 +1,20 @@
+.svy-wrapper > * > .bts-select {
+	width: 100%;
+	height: 100%;
+	padding: 1px 5px;
+	color:inherit;
+}
+
+.bts-select[disabled] {
+	cursor: default;
+ 	background-color: #eee;
+ 	opacity: 1;
+}
+
+.bts-select{
+ 	color:inherit;
+ }
+
+.placeholder {
+    color:gray !important;
+}

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { TooltipDirective } from './tooltip/tooltip.directive'
 import { TooltipService } from './tooltip/tooltip.service'
-import { MnemonicletterFilterPipe, NotNullOrEmptyPipe} from './pipes/pipes'
+import { MnemonicletterFilterPipe, NotNullOrEmptyPipe, HtmlFilterPipe} from './pipes/pipes'
 import { SvyFormat } from './format/format.directive'
 import { DecimalkeyconverterDirective } from './utils/decimalkeyconverter.directive'
 import { FormatFilterPipe } from './format/format.pipe'
@@ -14,6 +14,7 @@ import { AutosaveDirective } from './utils/autosave.directive';
     declarations: [ TooltipDirective,
                     MnemonicletterFilterPipe,
                     NotNullOrEmptyPipe,
+                    HtmlFilterPipe,
                     SvyFormat,
                     DecimalkeyconverterDirective,
                     FormatFilterPipe,
@@ -25,6 +26,7 @@ import { AutosaveDirective } from './utils/autosave.directive';
     exports: [TooltipDirective,
               MnemonicletterFilterPipe,
               NotNullOrEmptyPipe,
+              HtmlFilterPipe,
               SvyFormat,
               DecimalkeyconverterDirective,
               FormatFilterPipe,

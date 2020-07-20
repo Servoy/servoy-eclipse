@@ -1,0 +1,14 @@
+.svy-wrapper > * > .bts-check {
+	width: 100%;
+	height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0;
+}
+
+.bts-check label {
+    min-height: 20px;
+    margin-bottom: 0;
+    font-weight: normal;
+    cursor: pointer;
+}

@@ -24,7 +24,6 @@ export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField im
   
   ngOnChanges( changes: SimpleChanges ) {
       for ( let property in changes ) {
-          let change = changes[property];
           switch ( property ) {
               case "dataProviderID":
                   this.setSelectionFromDataprovider()
@@ -58,7 +57,7 @@ export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField im
     event.target.blur();
   }
 
-  attachEventHandlers(element, index){
+  attachEventHandlers(element, index) {
     if(!element)
       element = this.getNativeElement();
 

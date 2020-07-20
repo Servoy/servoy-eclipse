@@ -1,0 +1,14 @@
+.svy-wrapper > * > .bts-datalabel {
+	width : 100%;
+	height: 100%;
+	display: block;
+}
+
+.svy-wrapper > * > .bts-datalabel.default-align {
+	display: flex;
+    align-items: center;
+}
+
+.svy-wrapper > * > .bts-datalabel.default-align > .bts-label-icon {
+	padding: 0 3px;
+}
