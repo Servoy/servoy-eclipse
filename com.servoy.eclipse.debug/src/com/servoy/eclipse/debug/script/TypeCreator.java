@@ -2941,7 +2941,15 @@ public class TypeCreator extends TypeCache
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
-				Member overridden = createOverrideMember(member, context, config);
+				Member overridden = null;
+				if ("foundset".equals(member.getName()))
+				{
+					overridden = TypeCreator.clone(member, getTypeRef(context, "ViewFoundSet<" + config + '>'));
+				}
+				else
+				{
+					overridden = createOverrideMember(member, context, config);
+				}
 				if (overridden != null)
 				{
 					overwrittenMembers.add(overridden);

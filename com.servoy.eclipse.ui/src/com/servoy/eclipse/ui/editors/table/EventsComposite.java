@@ -67,6 +67,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -441,17 +442,20 @@ public class EventsComposite extends Composite
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 			for (EventNodeType tp : EventNodeType.values())
 			{
-				if (tp == EventNodeType.onLoad && !(table instanceof AbstractMemTable) || table instanceof ViewFoundsetTable && tp != EventNodeType.onLoad)
-					continue;
-				Integer property = (Integer)tableNode.getProperty(tp.getProperty().getPropertyName());
-				if (property == null)
+				if (tp == EventNodeType.onLoad && table instanceof Table) continue;
+				if (table instanceof ViewFoundsetTable && !(tp == EventNodeType.onLoad || tp == EventNodeType.onValidate)) continue;
+				MethodWithArguments mw = MethodWithArguments.METHOD_DEFAULT;
+				if (tableNode != null)
 				{
-					continue;
+					Integer property = (Integer)tableNode.getProperty(tp.getProperty().getPropertyName());
+					if (property == null)
+					{
+						continue;
+					}
+					mw = new MethodWithArguments(
+						property.intValue(), dsm.getDataSource(tableNode.getDataSource()));
 				}
-				children.add(new EventNode(tp,
-					tableNode == null ? MethodWithArguments.METHOD_DEFAULT : new MethodWithArguments(
-						property.intValue(), dsm.getDataSource(tableNode.getDataSource())),
-					solution, table));
+				children.add(new EventNode(tp, mw, solution, table));
 			}
 		}
 
