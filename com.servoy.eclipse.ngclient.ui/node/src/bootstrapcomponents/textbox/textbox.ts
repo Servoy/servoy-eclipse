@@ -20,6 +20,9 @@ export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield {
     super(renderer);
   }
 
+  // override otherwise the tests will fail
+  ngOnInit(): void {}
+
   ngOnChanges( changes: SimpleChanges ) {
     if (changes) {
       for ( const property of Object.keys(changes) ) {

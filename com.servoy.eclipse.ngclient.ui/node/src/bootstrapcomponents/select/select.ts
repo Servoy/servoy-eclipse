@@ -8,7 +8,7 @@ import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
   templateUrl: './select.html',
   styleUrls: ['./select.scss']
 })
-export class ServoyBootstrapSelect extends ServoyBootstrapBasefield implements OnInit {
+export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
 
   @ViewChild('element') elementRef: ElementRef;
   
@@ -21,8 +21,7 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield implements O
     super(renderer);
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   ngOnChanges( changes: SimpleChanges ) {
     if (changes) {
