@@ -135,7 +135,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 					{
 						output("#############################################################################");
 						output(
-							"WARNING! For using the exported file in the SERVOY DEVELOPER, please set versions for the following solutions, then re-export.");
+							"WARNING! For using the exported file with SERVOY DEVELOPER, please set versions for the following solutions, then re-export.");
 						exportVersions = false;
 					}
 					output("Missing version: " + module);
