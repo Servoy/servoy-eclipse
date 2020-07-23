@@ -117,7 +117,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		projectProblemsType = BuilderUtils.getMarkers(exportSolutionWizard.getModel().getModulesToExport());
 		if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			moduleDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(exportSolutionWizard.getModel().getModulesToExport());
+			moduleDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportSolutionWizard.getModel().getModulesToExport());
 		}
 		else
 		{

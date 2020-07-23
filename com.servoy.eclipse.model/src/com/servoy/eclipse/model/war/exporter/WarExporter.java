@@ -991,7 +991,7 @@ public class WarExporter
 		{
 			SolutionExporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), exportModel,
 				new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace())), new EclipseExportUserChannel(exportModel, monitor),
-				null, TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(exportModel.getModulesToExport()), false, exportSolution, monitor);
+				null, TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportModel.getModulesToExport()), false, exportSolution);
 			monitor.done();
 		}
 		catch (RepositoryException e)

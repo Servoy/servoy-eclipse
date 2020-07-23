@@ -158,7 +158,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		}
 		else if (BuilderUtils.getMarkers(activeProject) == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			if (TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(exportModel.getModulesToExport()))
+			if (TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportModel.getModulesToExport()))
 			{
 				exportConfirmationPage = new ExportConfirmationPage();
 			}

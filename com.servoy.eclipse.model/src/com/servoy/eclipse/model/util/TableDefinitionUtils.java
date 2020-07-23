@@ -340,7 +340,7 @@ public class TableDefinitionUtils
 		return neededServersTablesMap;
 	}
 
-	private static boolean shouldIgnoreDatabaseDownErrorMarker(IMarker marker)
+	private static boolean isDatabaseDownErrorMarkerThatCouldBeIgnoredOnExport(IMarker marker)
 	{
 		try
 		{
@@ -363,9 +363,9 @@ public class TableDefinitionUtils
 	 * Checks if there are db error markers that can be ignored on export (due to db not started).
 	 * For a db marker to be ignored, the server must be present in the servoy.properties file and it must be enabled.
 	 * Otherwise it cannot be ignored on export.
-	 * @return true if the database is down
+	 * @return true if the database is down but present in .properties file and enabled
 	 */
-	public static boolean hasDbDownErrorMarkersToIgnore(String[] projects)
+	public static boolean hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(String[] projects)
 	{
 		if (projects != null && projects.length > 0)
 		{
@@ -381,7 +381,7 @@ public class TableDefinitionUtils
 						for (IMarker marker : markers)
 						{
 							// db down errors = missing server (what other cases?)
-							if (shouldIgnoreDatabaseDownErrorMarker(marker))
+							if (isDatabaseDownErrorMarkerThatCouldBeIgnoredOnExport(marker))
 							{
 								return true;
 							}

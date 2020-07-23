@@ -304,7 +304,7 @@ public class ExportSolutionWizard extends DirtySaveExportWizard implements IExpo
 			new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		if (hasErrs == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			activeSolutionDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(
+			activeSolutionDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(
 				new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		}
 		else

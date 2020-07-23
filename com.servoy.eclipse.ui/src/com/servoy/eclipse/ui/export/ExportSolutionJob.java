@@ -89,7 +89,7 @@ final public class ExportSolutionJob extends WorkspaceJob
 			File exportFile = new File(exportModel.getFileName());
 			SolutionExporter.exportSolutionToFile(activeSolution, exportFile, exportModel, new EclipseExportI18NHelper(workspace),
 				new EclipseExportUserChannel(exportModel, monitor),
-				exportModel.isExportReferencedWebPackages() ? getModulesWebPackages() : null, dbDown, true, exportSolution, monitor);
+				exportModel.isExportReferencedWebPackages() ? getModulesWebPackages() : null, dbDown, true, exportSolution);
 
 			if (exportModel.isSaveImportSettingsToDisk() && exportModel.useImportSettings())
 			{
