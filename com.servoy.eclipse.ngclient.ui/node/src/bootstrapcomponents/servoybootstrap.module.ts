@@ -26,6 +26,8 @@ import { ServoyBootstrapCalendarinline } from './calendarinline/calendarinline';
 import { DatalistPolyFill } from "./list/lib/purejs-datalist-polyfill/datalist.polyfill";
 import { ShowDisplayValuePipe } from "./lib/showDisplayValue.pipe";
 import { ServoyBootstrapImageMedia } from "./imagemedia/imagemedia";
+import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
+import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 
 @NgModule({
     declarations: [
@@ -53,7 +55,9 @@ import { ServoyBootstrapImageMedia } from "./imagemedia/imagemedia";
       ServoyPublicModule,
       SabloModule,
       CommonModule, 
-      FormsModule
+      FormsModule,
+      OwlDateTimeModule,
+      OwlMomentDateTimeModule
     ], 
     exports: [
       ServoyBootstrapImageMedia,

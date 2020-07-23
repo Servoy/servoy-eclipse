@@ -185,6 +185,7 @@ import { ServoyApi } from '../servoy_api'
         #cmp>
         </servoyextra-table>
     </ng-template>
+    <ng-template #bootstrapcomponentsCalendar let-state="state"><servoybootstrap-calendar  [visible]="state.model.visible" [format]="state.model.format" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [findmode]="state.model.findmode" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [placeholderText]="state.model.placeholderText" [selectOnEnter]="state.model.selectOnEnter" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoybootstrap-calendar></ng-template>
       <!-- component template generate end -->
    `
 })
@@ -220,6 +221,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
 
     @ViewChild('servoyextraTable', { static: true }) readonly servoyextraTable: TemplateRef<any>;
 
+    @ViewChild('bootstrapcomponentsCalendar', { static: true }) readonly bootstrapcomponentsCalendar: TemplateRef<any>;
     // component template generate end
 
     @ViewChildren('cmp') readonly components: QueryList<Component>;

@@ -1,1 +1,10 @@
-<p>calendar works!</p>
+<div class='input-group date'
+	[svyTooltip]="toolTipText"
+    #element>
+    <input [owlDateTime]="datetime"
+    	[sabloTabseq]="tabSeq"
+    	[value]="dataProviderID | formatFilter:format?.display:format?.type:format"
+     	#inputElement/>
+    <span [owlDateTimeTrigger]="datetime" class="input-group-append input-group-text" style="padding:1px;"><span class="far fa-calendar-alt"></span></span>
+    <owl-date-time #datetime ></owl-date-time>
+</div>
