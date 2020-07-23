@@ -81,7 +81,7 @@ public abstract class PersistEditor extends EditorPart implements IPersistChange
 		{
 			return getPersist();
 		}
-		if (adapter.equals(IPropertySourceProvider.class))
+		if (adapter.equals(IPropertySourceProvider.class) && getPersist() != null)
 		{
 			// enable setting stuff via the properties editor
 			return new IPropertySourceProvider()

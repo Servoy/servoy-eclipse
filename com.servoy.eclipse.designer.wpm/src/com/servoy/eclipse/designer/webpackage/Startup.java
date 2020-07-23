@@ -17,14 +17,43 @@
 
 package com.servoy.eclipse.designer.webpackage;
 
-import org.eclipse.ui.IStartup;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IStartup;
+import org.eclipse.ui.PlatformUI;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.sablo.specification.Package.IPackageReader;
+
+import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.webpackage.endpoint.GetAllInstalledPackages;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.notification.INotification;
+import com.servoy.eclipse.notification.NotificationPopUpUI;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizardDefaultPackages;
+import com.servoy.j2db.util.Pair;
 
 /**
- * Used for caching wpm entries and download New Solution Wizard default packages
+ * Used for caching wpm entries, download New Solution Wizard default packages and check for
+ * updated packages in the active solution
  *
  * @author gboros
  *
@@ -38,6 +67,28 @@ public class Startup implements IStartup
 		try
 		{
 			NewSolutionWizardDefaultPackages.getInstance().setup(GetAllInstalledPackages.getRemotePackages());
+			checkForUpdatedPackages(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject());
+			ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener()
+			{
+
+				@Override
+				public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+				{
+					return true;
+				}
+
+				@Override
+				public void activeProjectChanged(ServoyProject activeProject)
+				{
+					checkForUpdatedPackages(activeProject);
+				}
+
+				@Override
+				public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+				{
+				}
+
+			});
 		}
 		catch (Exception ex)
 		{
@@ -45,4 +96,147 @@ public class Startup implements IStartup
 		}
 	}
 
+	private void checkForUpdatedPackages(final ServoyProject servoyProject)
+	{
+		if (servoyProject != null)
+		{
+			Job checkForUpdatedPackagesJob = new Job("Checking for updated packages on '" + servoyProject.getProject().getName() + "'")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					try
+					{
+						BaseNGPackageManager packageManager = ServoyModelFinder.getServoyModel().getNGPackageManager();
+						List<IPackageReader> packageReaders = packageManager.getAllPackageReaders();
+						TreeMap<String, Pair<String, String>> projectPackages = new TreeMap<String, Pair<String, String>>();
+						for (IPackageReader packageReader : packageReaders)
+						{
+							// skip older versions
+							if (projectPackages.containsKey(packageReader.getPackageName()) &&
+								packageReader.getVersion().compareTo(projectPackages.get(packageReader.getPackageName()).getRight()) < 0)
+								continue;
+							projectPackages.put(packageReader.getPackageName(),
+								new Pair<String, String>(packageReader.getPackageDisplayname(), packageReader.getVersion()));
+						}
+
+						File SPMNotifications = new File(Activator.getDefault().getStateLocation().toFile(), "SPMNotifications");
+						if (!SPMNotifications.exists()) SPMNotifications.mkdir();
+						File solutionSPMNotifications = new File(SPMNotifications, servoyProject.getProject().getName());
+						Properties solutionSPMNotificationsVersions = new Properties();
+						if (solutionSPMNotifications.exists())
+						{
+							try (InputStreamReader is = new InputStreamReader(solutionSPMNotifications.toURI().toURL().openStream()))
+							{
+								solutionSPMNotificationsVersions.load(is);
+							}
+						}
+
+						StringBuilder updatedPackagesNames = new StringBuilder();
+						Set<String> projectPackagesNames = projectPackages.keySet();
+						List<JSONObject> remotePackages = GetAllInstalledPackages.getRemotePackages();
+						for (JSONObject p : remotePackages)
+						{
+							String name = p.optString("name");
+							if (name != null)
+							{
+								if (projectPackagesNames.contains(name))
+								{
+									JSONArray releases = p.optJSONArray("releases");
+									if (releases != null && releases.length() > 0)
+									{
+										JSONObject latestRelease = releases.optJSONObject(0);
+										if (latestRelease != null)
+										{
+											String version = latestRelease.optString("version");
+											String projectVersion = projectPackages.get(name).getRight();
+											if (version != null && version.compareTo(projectVersion) > 0)
+											{
+												String alreadyNotifiedVersion = solutionSPMNotificationsVersions.getProperty(name);
+												if (alreadyNotifiedVersion == null || !alreadyNotifiedVersion.equals(version))
+												{
+													updatedPackagesNames.append(projectPackages.get(name).getLeft()).append(" - ")
+														.append(projectVersion).append(" -> ").append(version).append('\n');
+													solutionSPMNotificationsVersions.setProperty(name, version);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+
+						if (updatedPackagesNames.length() > 0)
+						{
+							final ArrayList<INotification> notifications = new ArrayList<INotification>();
+							notifications.add(new INotification()
+							{
+								public String getTitle()
+								{
+									return "Open SPM";
+								}
+
+								public String getDescription()
+								{
+									return "The following packages have updates.\n\n" + updatedPackagesNames + "\nOpen SPM to update them.";
+								}
+
+								public String getLink()
+								{
+									return "com.servoy.eclipse.designer.wpm.open";
+								}
+
+								public Date getDate()
+								{
+									return null;
+								}
+
+								public boolean isCommand()
+								{
+									return true;
+								}
+							});
+
+							PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
+								ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+								if (servoyProject == activeProject)
+								{
+									NotificationPopUpUI notificationPopUpUI = new NotificationPopUpUI(Display.getCurrent(), notifications, null);
+									notificationPopUpUI.setDelayClose(0);
+									notificationPopUpUI.open();
+								}
+							});
+						}
+
+						// save shown versions
+						try (FileOutputStream fos = new FileOutputStream(solutionSPMNotifications))
+						{
+							solutionSPMNotificationsVersions.store(fos, "SPM notifications last shown versions");
+						}
+
+						// remove saved notifications for already deleted projects
+						for (File file : SPMNotifications.listFiles())
+						{
+							if (file.isFile())
+							{
+								ServoyProject p = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(file.getName());
+								if (p == null)
+								{
+									file.delete();
+								}
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+
+					return Status.OK_STATUS;
+				}
+
+			};
+			checkForUpdatedPackagesJob.schedule();
+		}
+	}
 }

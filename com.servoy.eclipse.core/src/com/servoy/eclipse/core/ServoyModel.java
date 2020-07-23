@@ -294,8 +294,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
 
-		// when server configurations change we want to update the servers in Serclipse.
-		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(serverConfigSyncer);
+		installServerConfigSyncer();
 
 		// project update listener
 		addActiveProjectListener(new IActiveProjectListener()
@@ -740,6 +739,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 
 		addActiveProjectListener(backgroundTableLoader);
 		backgroundTableLoader.startLoadingOfServers();
+	}
+
+	void installServerConfigSyncer()
+	{
+		// when server configurations change we want to update the servers in Serclipse.
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(serverConfigSyncer);
 	}
 
 	/**
@@ -1493,6 +1498,53 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 							{
 								ServoyLog.logError(e);
 							}
+
+
+							// add listeners to initial server list
+							String[] array = serverManager.getServerNames(true, true, true, true);
+							for (String server_name : array)
+							{
+								IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
+								if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()))
+								{
+									IFolder serverInformationFolder = dataModelManager.getDBIFileContainer(server.getName());
+									if (serverInformationFolder.exists())
+									{
+										try
+										{
+											serverInformationFolder.accept((IResource resource) -> {
+												String extension = resource.getFileExtension();
+												if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
+												{
+													String tableName = resource.getName().substring(0,
+														resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+													IFile file = dataModelManager.getDBIFile(server.getName(), tableName);
+													if (file.exists())
+													{
+														try
+														{
+															InputStream is = file.getContents(true);
+															String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+															Utils.closeInputStream(is);
+															DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, false);
+														}
+														catch (CoreException e)
+														{
+															ServoyLog.logError(e);
+														}
+													}
+												}
+												return true;
+											});
+										}
+										catch (Exception e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+								}
+							}
+
 						}
 						else
 						{
@@ -1652,7 +1704,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	{
 		for (ServoyProject p : getModulesOfActiveProject())
 		{
-			p.resetEditingFlattenedSolution(true);
+			p.resetFlattenedSolution(true);
 		}
 	}
 
@@ -2250,7 +2302,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						// a project was deleted, closed, or it does not have Servoy nature; see if it is was part of the repository and if so, remove it
 						if (getServoyProject(resource.getName()) != null)
 						{
-							getServoyProject(resource.getName()).resetEditingFlattenedSolution(false);
+							getServoyProject(resource.getName()).resetFlattenedSolution(false);
 							refreshServoyProjects();
 						}
 						boolean isLoaded = eclipseRepository.isSolutionMetaDataLoaded(resource.getName());
@@ -2735,7 +2787,7 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		// TODO refresh modules when solution type was changed
 		List<IPersist> strayCats = new ArrayList<IPersist>();
 		String oldModules = solution.getModulesNames();
-		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false);
+		List<File> nonvistedFiles = sd.updateSolution(project.getLocation().toFile(), solution, changedFiles, strayCats, false, false, true);
 
 		// see if modules were changed
 		String newModules = solution.getModulesNames();
@@ -3431,55 +3483,6 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				triggerOutstandingPostChangeEvents();
 			}
 		});
-		if (dataModelManager != null)
-		{
-			IServerManagerInternal serverManager = ApplicationServerRegistry.get().getServerManager();
-
-			// add listeners to initial server list
-			String[] array = serverManager.getServerNames(true, true, true, true);
-			for (String server_name : array)
-			{
-				IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
-				if (server.getConfig().isInMemDriver() && !IServer.INMEM_SERVER.equals(server.getConfig().getServerName()))
-				{
-					IFolder serverInformationFolder = dataModelManager.getDBIFileContainer(server.getName());
-					if (serverInformationFolder.exists())
-					{
-						try
-						{
-							serverInformationFolder.accept((IResource resource) -> {
-								String extension = resource.getFileExtension();
-								if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
-								{
-									String tableName = resource.getName().substring(0,
-										resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-									IFile file = dataModelManager.getDBIFile(server.getName(), tableName);
-									if (file.exists())
-									{
-										try
-										{
-											InputStream is = file.getContents(true);
-											String dbiFileContent = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-											Utils.closeInputStream(is);
-											DatabaseUtils.createNewTableFromColumnInfo(server, tableName, dbiFileContent, false);
-										}
-										catch (CoreException e)
-										{
-											ServoyLog.logError(e);
-										}
-									}
-								}
-								return true;
-							});
-						}
-						catch (Exception e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
-				}
-			}
-		}
 	}
 
 	/**

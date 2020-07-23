@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 2020.6.0.3580_rc
+Bundle-Version: 2020.9.0.3600_rc
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -67,16 +67,17 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  servoy_ngclient,
- org.apache.commons.io;bundle-version="2.6.0",
- org.maven.ide.eclipse.grouplayout;bundle-version="1.1.0",
+ org.apache.commons.io,
+ org.maven.ide.eclipse.grouplayout,
  org.apache.commons.commons-dbcp2,
  org.eclipse.jface,
  sj.jsonschemavalidation,
- org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
- org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore,
  com.servoy.eclipse.ui.tweaks,
  org.apache.commons.codec,
  org.eclipse.help,
+ org.eclipse.swt.chromium,
  com.servoy.eclipse.ngclient,
  org.eclipse.equinox.security
 Bundle-ActivationPolicy: lazy
@@ -101,6 +102,8 @@ Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.ui.views.properties,
  com.servoy.eclipse.ui.views.solutionexplorer,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
- com.servoy.eclipse.ui.wizards
+ com.servoy.eclipse.ui.wizards,
+ com.servoy.eclipse.ui.wizards.exportsolution.pages
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: com.servoy.eclipse.ui

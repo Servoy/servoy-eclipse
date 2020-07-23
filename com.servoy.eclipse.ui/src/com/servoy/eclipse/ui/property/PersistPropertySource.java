@@ -2207,6 +2207,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					"styleName".equals(id) || "extendsID".equals(id));
 			}
 		}
+		else if (((AbstractBase)persistContext.getPersist()).hasProperty((String)id))
+		{
+			((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
+			ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), false);
+		}
 	}
 
 	public static void adjustPropertyValueAndReset(Object id, IPropertyDescriptor pd, ISetterAwarePropertySource propertySource)
@@ -3243,11 +3248,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 										}
 										else if (persistContext.getPersist() instanceof AbstractContainer)
-									{
-										ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
-											persistContext.getPersist().getID(),
-											new ValidatorSearchContext(persistContext.getPersist(), persistContext.getPersist().getTypeID()), false);
-									}
+										{
+											ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
+												persistContext.getPersist().getID(),
+												new ValidatorSearchContext(persistContext.getPersist(), persistContext.getPersist().getTypeID()), false);
+										}
 									}
 									catch (RepositoryException e)
 									{

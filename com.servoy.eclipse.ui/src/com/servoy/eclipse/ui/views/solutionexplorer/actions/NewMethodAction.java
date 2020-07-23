@@ -381,6 +381,10 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 												argumentType = argumentType.substring(0, argumentType.length() - 2);
 												isArray = true;
 											}
+											if ("int".equals(argumentType))
+											{
+												argumentType = "number";
+											}
 											if (spec.getDeclaredCustomObjectTypes().containsKey(argumentType))
 											{
 												argumentType = "CustomType<" + spec.getName() + "." + argumentType + ">";

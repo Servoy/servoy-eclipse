@@ -18,40 +18,32 @@
 package com.servoy.eclipse.exporter.apps.solution;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.json.JSONObject;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.j2db.ClientVersion;
-import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IApplicationServerSingleton;
-import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
-import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
-import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
-import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 /**
  * Eclipse application that can be used for exporting servoy solutions in .servoy format (that can be used to import solutions afterwards in developer/app. server).
@@ -70,105 +62,124 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 	@Override
 	protected void exportActiveSolution(ArgumentChest configuration)
 	{
-		IApplicationServerSingleton as = ApplicationServerRegistry.get();
-		AbstractRepository rep = (AbstractRepository)as.getDeveloperRepository();
-		IUserManager sm = as.getUserManager();
-
-		EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()));
-		IXMLExporter exporter = as.createXMLExporter(rep, sm, configuration, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
-		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
-		Solution solution = activeProject.getSolution();
-
-		if (solution != null)
-		{
-			ITableDefinitionsManager tableDefManager = null;
-			IMetadataDefManager metadataDefManager = null;
-			if (configuration.shouldExportUsingDbiFileInfoOnly())
-			{
-				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers;
-				try
-				{
-					defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(solution, configuration.shouldExportModules(),
-						configuration.shouldExportI18NData(), configuration.getExportAllTablesFromReferencedServers(), configuration.shouldExportMetaData());
-				}
-				catch (Exception e)
-				{
-					Debug.error(e);
-					exitCode = EXIT_EXPORT_FAILED;
-					outputError("Exception while exporting solution tables from DBI files. EXPORT FAILED for this solution. Check workspace log.");
-					return;
-				}
-				if (defManagers != null)
-				{
-					tableDefManager = defManagers.getLeft();
-					metadataDefManager = defManagers.getRight();
-				}
-			}
-			JSONObject importSettings = null;
-			if (configuration.getImportOptionsFile() != null)
-			{
-				String importSettingsString = Utils.getTXTFileContent(new File(configuration.getImportOptionsFile()), Charset.forName("UTF8"));
-				importSettings = new JSONObject(importSettingsString);
-			}
-			boolean exportVersions = true;
-			try
-			{
-				if (configuration.shouldExportModules())
-				{
-					Map<String, Solution> modules = new HashMap<String, Solution>();
-					solution.getReferencedModulesRecursive(modules);
-					modules.put(solution.getName(), solution);
-					List<String> exportedModules = configuration.getModuleIncludeList(new ArrayList<String>(modules.keySet()));
-					exportedModules.add(0, solution.getName());
-					for (String module : exportedModules)
-					{
-						if (Strings.isEmpty(modules.get(module).getVersion()))
-						{
-							if (exportVersions)
-							{
-								output("#############################################################################");
-								output(
-									"WARNING! For using the exported file in the SERVOY DEVELOPER, please set versions for the following solutions, then re-export.");
-								exportVersions = false;
-							}
-							output("Missing version: " + module);
-						}
-					}
-					if (!exportVersions)
-					{
-						output("You can set the solution versions in the developer properties view.");
-						output("#############################################################################");
-					}
-				}
-			}
-			catch (final RepositoryException e)
-			{
-				ServoyLog.logError("Failed to export solution.", e);
-				outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
-				exitCode = EXIT_EXPORT_FAILED;
-			}
-			if (exitCode == EXIT_EXPORT_FAILED) return;
-
-			try
-			{
-				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
-					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
-					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
-					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager, true, importSettings,
-					null, exportVersions);
-			}
-			catch (final RepositoryException e)
-			{
-				ServoyLog.logError("Failed to export solution.", e);
-				outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
-				exitCode = EXIT_EXPORT_FAILED;
-			}
-		}
-		else
+		IServoyModel servoyModel = ServoyModelFinder.getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+		Solution solution = activeProject != null ? activeProject.getSolution() : null;
+		if (solution == null)
 		{
 			outputError("Solution in project '" + activeProject.getProject().getName() + "' is not valid. EXPORT FAILED for this solution.");
 			exitCode = EXIT_EXPORT_FAILED;
+			return;
 		}
+
+		try
+		{
+			boolean exportVersions = checkExportedSolutionsVersions(configuration, servoyModel);
+			checkDBsForDataExport(configuration, solution);
+			if (exitCode == EXIT_EXPORT_FAILED) return;
+
+			//at this point dbDown is false (to be ignored) when doing the actual export
+			//because we did the checks related to the DB above and in case we have inacessible servers that are used
+			//for sample or db metadata export, the export fails
+			SolutionExporter.exportSolutionToFile(solution, new File(configuration.getFileName()), configuration,
+				new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace())), configuration,
+				null, false, exportVersions, true);
+		}
+		catch (final Exception e)
+		{
+			ServoyLog.logError("Failed to export solution.", e);
+			outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
+			exitCode = EXIT_EXPORT_FAILED;
+		}
+	}
+
+	protected void checkDBsForDataExport(ArgumentChest configuration, Solution solution) throws RepositoryException
+	{
+		if (configuration.isExportSampleData() || //
+			(configuration.isExportMetaData() && configuration.isDBMetaDataExport()))
+		{
+			Set<String> servers = TableDefinitionUtils.getNeededServerTables(solution, configuration.isExportReferencedModules(),
+				configuration.isExportI18NData()).keySet();
+			for (String serverName : servers)
+			{
+				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager()
+					.getServer(serverName, true, false);//if mustBeEnabled is true, it returns null for disabled server
+
+				if (server == null)
+				{
+					markExportAsFailedDueToInaccessibleServer(configuration, serverName, "enabled");
+					continue;
+				}
+				Connection connection = null;
+				try
+				{
+					connection = server.getConnection();
+				}
+				catch (SQLException e)
+				{
+					Debug.error(e);
+					markExportAsFailedDueToInaccessibleServer(configuration, serverName, "valid and started");
+				}
+				finally
+				{
+					Utils.closeConnection(connection);
+				}
+			}
+		}
+	}
+
+	protected void markExportAsFailedDueToInaccessibleServer(ArgumentChest configuration, String serverName, String status)
+	{
+		exitCode = EXIT_EXPORT_FAILED;
+		String exportData = null;
+
+		if (configuration.isExportSampleData())
+		{
+			exportData = "sample data";
+		}
+		if (configuration.isExportMetaData() && configuration.isDBMetaDataExport())
+		{
+			if (exportData != null) exportData += " or ";
+			exportData = "metadata";
+		}
+		outputError("Cannot connect to the DB server '" + serverName +
+			"' to export the " + exportData + ". Make sure it is " + status + ", or try again without exporting the " + exportData + ".");
+	}
+
+	protected boolean checkExportedSolutionsVersions(ArgumentChest configuration, IServoyModel servoyModel)
+	{
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		boolean exportVersions = checkSolutionVersion(servoyModel, true, activeProject.getSolution().getName());
+		String[] exportedModules = configuration.getModulesToExport();
+		if (exportedModules != null)
+		{
+			for (String module : exportedModules)
+			{
+				exportVersions = exportVersions && checkSolutionVersion(servoyModel, exportVersions, module);
+			}
+		}
+		if (!exportVersions)
+		{
+			output("You can set the solution versions in the developer properties view.");
+			output("#############################################################################");
+		}
+		return exportVersions;
+	}
+
+	protected boolean checkSolutionVersion(IServoyModel servoyModel, boolean exportVersions, String module)
+	{
+		if (Strings.isEmpty(servoyModel.getServoyProject(module).getSolution().getVersion()))
+		{
+			if (exportVersions)
+			{
+				output("#############################################################################");
+				output(
+					"WARNING! For using the exported file with SERVOY DEVELOPER, please set versions for the following solutions, then re-export.");
+			}
+			output("Missing version: " + module);
+			return false;
+		}
+		return true;
 	}
 
 

@@ -72,7 +72,8 @@
          <view
                id="com.servoy.eclipse.ui.views.TutorialView"
                relationship="stack"
-               relative="org.eclipse.ui.views.ContentOutline">
+               relative="org.eclipse.help.ui.HelpView"
+               visible="false">
          </view>
       </perspectiveExtension>
       <perspectiveExtension
@@ -366,12 +367,14 @@
 	  		id="com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"
       		name="Servoy Marketplace">
       </editor> -->
+      <!-- main concepts page, disabled for now
       <editor
 	  		class="com.servoy.eclipse.core.MainConceptsPageBrowserEditor"
 	  		icon="icons/servoy_donut16x16.png"
 	  		id="com.servoy.eclipse.core.MainConceptsPageBrowserEditor"
       		name="MainConceptsPage">
       </editor> 
+      -->
       <editor
             class="org.eclipse.wst.sse.ui.StructuredTextEditor"
             default="true"
@@ -634,6 +637,7 @@
                tooltip="Open First Start Guide">
          </action>
       </actionSet>
+        <!-- main concepts page, disabled for now
       <actionSet
             id="com.servoy.eclipse.ui.MainConceptsPage"
             label="MainConceptsPage"
@@ -648,6 +652,7 @@
                tooltip="Open Main Concepts Page">
          </action>
       </actionSet>
+      -->
       <actionSet
             id="com.servoy.eclipse.ui.ServoyAdmin"
             label="Servoy Admin Page"

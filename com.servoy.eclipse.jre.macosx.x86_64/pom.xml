@@ -7,15 +7,15 @@
 <parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2020.6.0.3580_rc</version>
+		<version>2020.9.0.3600_rc</version>
 	</parent>
 
 	<artifactId>com.servoy.eclipse.jre.macosx.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>13.0.1</version>
+	<version>14.0.1</version>
 	
 	<properties>
-		<jre.version>jdk-13.0.1+9-jre</jre.version>
+		<jre.version>jdk-14.0.1+7-jre</jre.version>
 	</properties>
 	
 	<build>
@@ -43,7 +43,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk13-binaries/releases/download/jdk-13.0.1%2B9_openj9-0.17.0/OpenJDK13U-jre_x64_mac_openj9_13.0.1_9_openj9-0.17.0.tar.gz</url>
+							<url>https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7.2_openj9-0.20.0/OpenJDK14U-jre_x64_mac_openj9_14.0.1_7_openj9-0.20.0.tar.gz</url>
 							<outputFileName>${jre.version}.tar.gz</outputFileName>
 						</configuration>
 					</execution>

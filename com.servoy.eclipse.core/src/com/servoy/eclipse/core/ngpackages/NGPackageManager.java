@@ -57,6 +57,7 @@ public class NGPackageManager extends BaseNGPackageManager
 
 	private IActiveProjectListener activeProjectListenerForRegisteringResources;
 	private AvoidMultipleExecutionsJob reloadAllNGPackagesJob;
+	private final Object reloadAllNGPackagesJobLock = new Object();
 
 	public NGPackageManager(IDeveloperServoyModel servoyModel)
 	{
@@ -108,14 +109,15 @@ public class NGPackageManager extends BaseNGPackageManager
 	@Override
 	public void reloadAllNGPackages(final ILoadedNGPackagesListener.CHANGE_REASON changeReason, IProgressMonitor m)
 	{
-		// we need to call it right away if the spec provider is not initalized yet, else we will be to late for certain calls to the spec provider
-		if (WebComponentSpecProvider.getInstance() == null)
+		// we need to call it right away if the spec provider is not initalized yet else we will be to late for certain calls to the spec provider
+		// or if the active solution changes (in which case a job will check for missing packages after activation and ask for auto-import)
+		if (changeReason == ILoadedNGPackagesListener.CHANGE_REASON.ACTIVE_PROJECT_CHANGED || WebComponentSpecProvider.getInstance() == null)
 		{
 			super.reloadAllNGPackages(changeReason, m);
 		}
 		else
 		{
-			synchronized (this)
+			synchronized (reloadAllNGPackagesJobLock)
 			{
 				// do what super does but in a job; this is what code prior to the refactor did as well
 				// do this in such a way that if 100 reloadAllNGPackages calls happen before the actual reload happens/finishes in the job, the reload only occurs once/twice

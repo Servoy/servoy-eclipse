@@ -54,6 +54,7 @@ import com.servoy.eclipse.core.IDeveloperServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -102,8 +103,18 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 			Object selected = it.next();
 			if (selected instanceof SimpleUserNode)
 			{
-				SimpleUserNode node = (SimpleUserNode)selected;
-				selection.put((IDataSourceWrapper)node.getRealObject(), (IServer)node.parent.getRealObject());
+				final SimpleUserNode node = (SimpleUserNode)selected;
+				final IDataSourceWrapper tableRealObject = (IDataSourceWrapper)node.getRealObject();
+				IServer tableServer = null;
+				if (node.getType() == UserNodeType.INMEMORY_DATASOURCE)
+				{
+					tableServer = (IServer)ServoyModelFinder.getServoyModel().getMemServer(tableRealObject.getTableName());
+				}
+				else if (node.getType() == UserNodeType.VIEW_FOUNDSET)
+				{
+					tableServer = (IServer)node.parent.getRealObject();
+				}
+				selection.put(tableRealObject, tableServer);
 				state = (node.getType() == UserNodeType.INMEMORY_DATASOURCE || node.getType() == UserNodeType.VIEW_FOUNDSET);
 			}
 			else if (selected instanceof Pair< ? , ? >)

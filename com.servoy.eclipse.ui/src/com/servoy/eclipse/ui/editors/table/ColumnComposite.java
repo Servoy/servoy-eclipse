@@ -667,7 +667,6 @@ public class ColumnComposite extends Composite
 				id.setSequenceType(defaultFirstColumnSequenceType);
 				id.setFlag(IBaseColumn.UUID_COLUMN, keyType.isUUID());
 				id.setFlag(IBaseColumn.NATIVE_COLUMN, keyType.isNative());
-				id.setNativetypeFlag(keyType.isNative());
 			}
 			catch (RepositoryException e)
 			{

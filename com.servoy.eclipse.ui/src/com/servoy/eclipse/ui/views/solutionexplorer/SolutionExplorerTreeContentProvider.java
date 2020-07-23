@@ -243,7 +243,9 @@ public class SolutionExplorerTreeContentProvider
 
 	private final PlatformSimpleUserNode modulesOfActiveSolution;
 
-	private final Object pluginsBackgroundLoadLock = new Object();
+	private final Object servicesSpecProviderLock = new Object();
+	private final Object pluginsLoadLock = new Object();
+	private ArrayList<PlatformSimpleUserNode> loadedJavaPluginNodes;
 
 	private final List<String> unreachableServers = new ArrayList<String>();
 
@@ -417,10 +419,17 @@ public class SolutionExplorerTreeContentProvider
 		job.setPriority(Job.LONG);
 		job.schedule();
 
+		loadJavaPluginNodesInBackground();
 
-		// we want to load the plugins node in a background low prio job so that it will expand fast
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addAvailableNGPackageProjectsListener(this);
+	}
+
+	private void loadJavaPluginNodesInBackground()
+	{
+		// we want to load (or reload in some cases - for example if ng web services change) the plugins node in a background low prio job so that it will expand fast
 		// when used...
-		job = new Job("Background loading of plugins node")
+		Job job = new Job("Background loading of java plugin nodes for Solution Explorer.")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -435,21 +444,18 @@ public class SolutionExplorerTreeContentProvider
 					{
 					}
 				}
-				addPluginsNodeChildren(plugins);
+				getJavaPluginsNodeChildren(plugins);
 				return Status.OK_STATUS;
 			}
 		};
 		job.setSystem(true);
 		job.setPriority(Job.LONG);
 		job.schedule();
-
-		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
-		ServoyModelFinder.getServoyModel().getNGPackageManager().addAvailableNGPackageProjectsListener(this);
 	}
 
 	private SpecProviderState getComponentsSpecProviderState()
 	{
-		if (componentsSpecProviderState == null)
+		if (componentsSpecProviderState == null && WebComponentSpecProvider.isLoaded())
 		{
 			componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 		}
@@ -463,17 +469,23 @@ public class SolutionExplorerTreeContentProvider
 
 	private SpecProviderState getServicesSpecProviderState()
 	{
-		if (servicesSpecProviderState == null)
+		synchronized (servicesSpecProviderLock)
 		{
-			servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-		}
+			if (servicesSpecProviderState == null && WebServiceSpecProvider.isLoaded())
+			{
+				servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
+			}
 
-		return servicesSpecProviderState;
+			return servicesSpecProviderState;
+		}
 	}
 
 	private void resetServicesSpecProviderState()
 	{
-		servicesSpecProviderState = null;
+		synchronized (servicesSpecProviderLock)
+		{
+			servicesSpecProviderState = null;
+		}
 	}
 
 	/**
@@ -498,6 +510,7 @@ public class SolutionExplorerTreeContentProvider
 		activeSolutionNode = null;
 		allSolutionsNode = null;
 
+		loadedJavaPluginNodes.clear();
 		// dispose the (plugin) images that were allocated in SWT after conversion from Swing
 		for (Image i : pluginImages)
 		{
@@ -1958,7 +1971,6 @@ public class SolutionExplorerTreeContentProvider
 				getServerImage(server_name, serverObj));
 			serverNodes.add(node);
 			node.parent = serversNode;
-			handleServerViewsNode(serverObj, node);
 		}
 
 		serversNode.children = serverNodes.toArray(new PlatformSimpleUserNode[serverNodes.size()]);
@@ -1972,7 +1984,7 @@ public class SolutionExplorerTreeContentProvider
 			serverNode.children = SolutionExplorerListContentProvider.createInMemTables(((MemServer)serverNode.getRealObject()).getServoyProject(),
 				includeModules);
 		}
-		if (serverNode.getType() == UserNodeType.VIEW_FOUNDSETS)
+		else if (serverNode.getType() == UserNodeType.VIEW_FOUNDSETS)
 		{
 			serverNode.children = SolutionExplorerListContentProvider.createViewFoundsets(((ViewFoundsetsServer)serverNode.getRealObject()).getServoyProject(),
 				includeModules);
@@ -1980,19 +1992,8 @@ public class SolutionExplorerTreeContentProvider
 		else
 		{
 			IServerInternal server = (IServerInternal)serverNode.getRealObject();
-			PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES, null,
-				"This node list the stored procedures of server that have this property enabled (see server editor)", server,
-				uiActivator.loadImageFromBundle("function.png"));
-			storedProceduresDataSources.parent = serverNode;
-
-			ArrayList<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
-			list.add(storedProceduresDataSources);
-			serverNode.children = SolutionExplorerListContentProvider.createTables(server, type, list);
-
-
+			handleServerNode(server, serverNode);
 		}
-
-
 		for (Object node : serverNode.children)
 		{
 			if (node instanceof SimpleUserNode)
@@ -2041,154 +2042,183 @@ public class SolutionExplorerTreeContentProvider
 		return result[0];
 	}
 
-	private void handleServerViewsNode(IServerInternal serverObj, PlatformSimpleUserNode node)
+	private void handleServerNode(IServerInternal serverObj, PlatformSimpleUserNode node)
 	{
 		if (serverObj.getConfig().isEnabled() && serverObj.isValid())
 		{
-			List<String> views = null;
-			try
-			{
-				views = serverObj.getViewNames(true);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-			if (views != null && views.size() > 0)
-			{
-				if (node.children == null || node.children.length == 0)
-				{
-					PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES,
-						null, "This node list the stored procedures of server that have this property enabled (see server editor)", serverObj,
-						uiActivator.loadImageFromBundle("function.png"));
-					storedProceduresDataSources.parent = node;
+			Job job = Job.create("Background loading of tables for server " + serverObj.getName(), (ICoreRunnable)monitor -> {
 
-					PlatformSimpleUserNode viewNode = new PlatformSimpleUserNode("Views", UserNodeType.VIEWS, "", "Views", serverObj,
-						PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
-					ArrayList<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
-					nodes.add(storedProceduresDataSources);
-					nodes.add(viewNode);
-					Job job = Job.create("Background loading of tables for server "+serverObj.getName(), (ICoreRunnable)monitor -> {
-						node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
-						view.refreshTreeNodeFromModel(node);
-					});
-					job.setSystem(true);
-					job.setPriority(Job.LONG);
-					job.schedule();
-					viewNode.parent = node;
+				ArrayList<SimpleUserNode> nodes = new ArrayList<SimpleUserNode>();
+
+				PlatformSimpleUserNode storedProceduresDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_procedures, UserNodeType.PROCEDURES,
+					null, "This node list the stored procedures of server that have this property enabled (see server editor)", serverObj,
+					uiActivator.loadImageFromBundle("function.png"));
+				storedProceduresDataSources.parent = node;
+				nodes.add(storedProceduresDataSources);
+
+				try
+				{
+					List<String> views = serverObj.getViewNames(true);
+					if (views != null && views.size() > 0)
+					{
+						PlatformSimpleUserNode viewNode = new PlatformSimpleUserNode("Views", UserNodeType.VIEWS, "", "Views", serverObj,
+							PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
+						viewNode.parent = node;
+						nodes.add(viewNode);
+					}
 				}
-			}
-			else
-			{
-				node.children = null;
-			}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+				node.children = SolutionExplorerListContentProvider.createTables(serverObj, UserNodeType.TABLE, nodes);
+
+				if (node.children.length == 1) node.children = new SimpleUserNode[0];// it contained only the procedures node we added above, no need to show it
+				view.refreshTreeNodeFromModel(node);
+			});
+			job.setSystem(true);
+			job.setPriority(Job.LONG);
+			job.schedule();
+			node.children = new UserNode[] { new UserNode("Loading...", UserNodeType.LOADING) };
+		}
+		else
+		{
+			node.children = null;
 		}
 	}
 
 	private void addPluginsNodeChildren(PlatformSimpleUserNode pluginNode)
 	{
-		synchronized (pluginsBackgroundLoadLock)
+		// java plugins + ng services
+
+		// java plugins that don't change anymore once they were loaded
+		ArrayList<PlatformSimpleUserNode> allPluginNodes = new ArrayList<>(getJavaPluginsNodeChildren(pluginNode));
+
+		// ng services that can change
+		WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
+			getServicesSpecProviderState());
+		Arrays.sort(serviceSpecifications, new Comparator<WebObjectSpecification>()
 		{
-			if (pluginNode.children != null) return;
-
-			ArrayList<PlatformSimpleUserNode> plugins = new ArrayList<PlatformSimpleUserNode>();
-			Iterator<IClientPlugin> it = Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class).iterator();
-			while (it.hasNext())
+			@Override
+			public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
 			{
-				IClientPlugin plugin = it.next();
-				try
+				return o1.getScriptingName().compareTo(o2.getScriptingName());
+			}
+
+		});
+		for (WebObjectSpecification spec : serviceSpecifications)
+		{
+			if (spec.isDeprecated()) continue;
+			if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
+			{
+				Image icon = getIconFromSpec(spec, true);
+				if (icon == null) icon = uiActivator.loadImageFromBundle("plugin.png");
+				PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
+					icon, WebServiceScriptable.class);
+				allPluginNodes.add(node);
+				node.parent = pluginNode;
+			}
+		}
+		pluginNode.children = allPluginNodes.toArray(new PlatformSimpleUserNode[allPluginNodes.size()]);
+
+		// It may happen that the Plugins node was disabled before its children were added.
+		if (pluginNode.isHidden()) pluginNode.hide();
+		else pluginNode.unhide();
+
+		view.refreshTreeNodeFromModel(pluginNode);
+	}
+
+	private ArrayList<PlatformSimpleUserNode> getJavaPluginsNodeChildren(PlatformSimpleUserNode pluginNode)
+	{
+		// we load these in background and keep them to not recreate them each time the ngservices change and require a refresh of the same parent "Plugins" tree node
+		synchronized (pluginsLoadLock)
+		{
+			if (loadedJavaPluginNodes == null)
+			{
+				loadedJavaPluginNodes = new ArrayList<PlatformSimpleUserNode>();
+				Iterator<IClientPlugin> it = Activator.getDefault().getDesignClient().getPluginManager().getPlugins(IClientPlugin.class).iterator();
+				while (it.hasNext())
 				{
-					IScriptable scriptObject = null;
-					Method method = plugin.getClass().getMethod("getScriptObject", (Class[])null);
-					if (method != null)
+					IClientPlugin plugin = it.next();
+					try
 					{
-						scriptObject = (IScriptable)method.invoke(plugin, (Object[])null);
-					}
-					if (scriptObject != null)
-					{
-
-
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, null,
-							scriptObject.getClass())
+						IScriptable scriptObject = null;
+						Method method = plugin.getClass().getMethod("getScriptObject", (Class[])null);
+						if (method != null)
 						{
-							@Override
-							public Image getIcon()
+							scriptObject = (IScriptable)method.invoke(plugin, (Object[])null);
+						}
+						if (scriptObject != null)
+						{
+
+
+							PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, null,
+								scriptObject.getClass())
 							{
-								Image image = super.getIcon();
-								if (image == null)
+								@Override
+								public Image getIcon()
 								{
-									if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
-									{
-										image = ImageDescriptor.createFromURL(((IIconProvider)plugin).getIconUrl()).createImage();
-									}
-									else
-									{
-										Icon icon = plugin.getImage();
-										if (icon != null)
-										{
-											image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay(), 16, 16);
-										}
-									}
-									if (image != null) pluginImages.add(image);//keeping a list so we can dispose them when they are not needed anymore
+									Image image = super.getIcon();
 									if (image == null)
 									{
-										image = uiActivator.loadImageFromBundle("plugin.png");
+										if (plugin instanceof IIconProvider && ((IIconProvider)plugin).getIconUrl() != null)
+										{
+											image = ImageDescriptor.createFromURL(((IIconProvider)plugin).getIconUrl()).createImage();
+										}
+										else
+										{
+											Icon icon = plugin.getImage();
+											if (icon != null)
+											{
+												image = UIUtils.getSWTImageFromSwingIcon(icon, view.getSite().getShell().getDisplay(), 16, 16);
+											}
+										}
+										if (image != null) pluginImages.add(image); // keeping a list so we can dispose them when they are not needed anymore
+										if (image == null)
+										{
+											image = uiActivator.loadImageFromBundle("plugin.png");
+										}
+										setIcon(image);
+										image = super.getIcon();
 									}
-									setIcon(image);
-									image = super.getIcon();
+									return image;
 								}
-								return image;
-							}
-						};
-						if (view.isNonEmptyPlugin(node))
-						{
-							plugins.add(node);
-							node.parent = pluginNode;
-							if (scriptObject instanceof IReturnedTypesProvider)
+							};
+							if (view.isNonEmptyPlugin(node))
 							{
-								Class< ? >[] clss = ((IReturnedTypesProvider)scriptObject).getAllReturnedTypes();
-								addReturnTypeNodesPlaceHolder(node, clss);
+								loadedJavaPluginNodes.add(node);
+								node.parent = pluginNode;
+								if (scriptObject instanceof IReturnedTypesProvider)
+								{
+									Class< ? >[] clss = ((IReturnedTypesProvider)scriptObject).getAllReturnedTypes();
+									addReturnTypeNodesPlaceHolder(node, clss);
+								}
 							}
 						}
 					}
-				}
-				catch (Throwable e)
-				{
-					ServoyLog.logError("Error loading plugin " + plugin.getName() + " exception: ", e);
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName() + " (not loaded!)", UserNodeType.PLUGIN, null, null, e.toString(),
-						null, uiActivator.loadImageFromBundle("warning.png"));
-					plugins.add(node);
-					node.parent = pluginNode;
-				}
-			}
-			WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
-				getServicesSpecProviderState());
-			Arrays.sort(serviceSpecifications, new Comparator<WebObjectSpecification>()
-			{
-				@Override
-				public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
-				{
-					return o1.getScriptingName().compareTo(o2.getScriptingName());
-				}
+					catch (Throwable e)
+					{
+						ServoyLog.logError("Error loading plugin " + plugin.getName() + " exception: ", e);
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName() + " (not loaded!)", UserNodeType.PLUGIN, null, null,
+							e.toString(),
+							null)
+						{
 
-			});
-			for (WebObjectSpecification spec : serviceSpecifications)
-			{
-				if (spec.isDeprecated()) continue;
-				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
-				{
-					Image icon = getIconFromSpec(spec, true);
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
-						icon != null ? icon : uiActivator.loadImageFromBundle("plugin.png"), WebServiceScriptable.class);
-					plugins.add(node);
-					node.parent = pluginNode;
+							@Override
+							public Image getIcon()
+							{
+								// we could give this image directly in constructor but as this call can do a Display.syncExec(...) and the constructor is
+								// called inside a sync block that can happen on a separate load plugins thread - there is a risk of deadlock - so get this image later
+								return uiActivator.loadImageFromBundle("warning.png");
+							}
+
+						};
+						loadedJavaPluginNodes.add(node);
+						node.parent = pluginNode;
+					}
 				}
 			}
-			pluginNode.children = plugins.toArray(new PlatformSimpleUserNode[plugins.size()]);
-			// It may happen that the Plugins node was disabled before its children were added.
-			if (pluginNode.isHidden()) pluginNode.hide();
-			else pluginNode.unhide();
-			view.refreshTreeNodeFromModel(pluginNode);
+			return loadedJavaPluginNodes;
 		}
 	}
 
@@ -3188,8 +3218,7 @@ public class SolutionExplorerTreeContentProvider
 								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_InMemory);
 								if (inMemNode != null)
 								{
-									inMemNode.children = null;
-									view.refreshTreeNodeFromModel(inMemNode);
+									view.refreshTreeNodeFromModel(inMemNode, true);
 								}
 							}
 							else if (DataSourceUtils.getViewDataSourceName(((TableNode)persist).getDataSource()) != null)
@@ -3199,8 +3228,7 @@ public class SolutionExplorerTreeContentProvider
 								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_ViewFoundsets);
 								if (inMemNode != null)
 								{
-									inMemNode.children = null;
-									view.refreshTreeNodeFromModel(inMemNode);
+									view.refreshTreeNodeFromModel(inMemNode, true);
 								}
 							}
 
@@ -3556,7 +3584,7 @@ public class SolutionExplorerTreeContentProvider
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)findChildNode(servers, server.getName());
 		if (node != null)
 		{
-			handleServerViewsNode(server, node);
+			handleServerNode(server, node);
 			view.refreshTreeNodeFromModel(node);
 		}
 	}
@@ -3704,8 +3732,7 @@ public class SolutionExplorerTreeContentProvider
 	{
 		if (nodeToRefresh != null)
 		{
-			nodeToRefresh.children = null;
-			view.refreshTreeNodeFromModel(nodeToRefresh);
+			view.refreshTreeNodeFromModel(nodeToRefresh, true);
 		}
 	}
 

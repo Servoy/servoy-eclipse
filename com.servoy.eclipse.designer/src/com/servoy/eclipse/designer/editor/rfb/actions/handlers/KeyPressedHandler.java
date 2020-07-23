@@ -81,6 +81,7 @@ public class KeyPressedHandler implements IServerService
 		int keyCode = args.optInt("keyCode");
 		boolean isCtrl = args.optBoolean("ctrl");
 		boolean isShift = args.optBoolean("shift");
+		boolean isAlt = args.optBoolean("alt");
 		// if default browser do not handle all actions, eclipse should do that; for chromium handle everything
 		if (new DesignerPreferences().useChromiumBrowser())
 		{
@@ -88,8 +89,13 @@ public class KeyPressedHandler implements IServerService
 			int modifier = 0;
 			if (isCtrl) modifier = SWT.CTRL;
 			if (isShift) modifier = SWT.SHIFT | modifier;
+			if (isAlt) modifier = SWT.ALT | modifier;
 			if (keyCode == 46 || keyCode == 8) keyCode = SWT.DEL;
 			else if (keyCode == 115) keyCode = SWT.F4;
+			else if (keyCode == 37) keyCode = SWT.ARROW_LEFT;
+			else if (keyCode == 39) keyCode = SWT.ARROW_RIGHT;
+			else if (keyCode == 38) keyCode = SWT.ARROW_UP;
+			else if (keyCode == 40) keyCode = SWT.ARROW_DOWN;
 			else if (keyCode == 116)
 			{
 				// refresh the editor

@@ -526,6 +526,11 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 					{
 						return null;
 					}
+
+					public boolean isCommand()
+					{
+						return false;
+					}
 				});
 				NotificationPopUpUI notificationPopUpUI = new NotificationPopUpUI(Display.getCurrent(), notifications, null);
 				notificationPopUpUI.setDelayClose(0);

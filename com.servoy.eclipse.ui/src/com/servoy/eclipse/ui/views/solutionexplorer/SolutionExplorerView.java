@@ -1077,17 +1077,24 @@ public class SolutionExplorerView extends ViewPart
 		runAndKeepTreePaths(runnable);
 	}
 
+	public void refreshTreeNodeFromModel(final SimpleUserNode node)
+	{
+		refreshTreeNodeFromModel(node, false);
+	}
+
 	/**
 	 * Refreshes the specified node from the tree. If the node is null, it refreshes the whole tree.
 	 *
 	 * @param node the node to be refreshed in the tree or null to refresh the whole tree.
 	 */
-	public void refreshTreeNodeFromModel(final SimpleUserNode node)
+	public void refreshTreeNodeFromModel(final SimpleUserNode node, final boolean cleanOldNodeChildren)
 	{
 		Runnable runnable = new Runnable()
 		{
 			public void run()
 			{
+				if (cleanOldNodeChildren) node.children = null;
+
 				if (treeFilter != null && treeFilter.getText() != null && treeFilter.getText().length() > 0)
 				{
 					filter(treeFilter.getText(), null);

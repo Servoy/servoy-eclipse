@@ -57,6 +57,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
 import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
@@ -77,8 +78,11 @@ public class BrowserDialog extends Dialog
 
 	private String url;
 	private Browser browser;
+	private org.eclipse.swt.chromium.Browser chromiumBrowser;
 	private Shell shell;
 	private boolean showSkipNextTime;
+	private static final int MIN_WIDTH = 900;
+	private static final int MIN_HEIGHT = 600;
 
 	/**
 	 * @param parentShell
@@ -93,17 +97,24 @@ public class BrowserDialog extends Dialog
 
 	public Object open()
 	{
-		Rectangle size = getParent().getBounds();
-		Dimension newSize = new Dimension((int)(size.width / 1.5), (int)(size.height / 1.4));
-
-		int locationX, locationY;
-		locationX = (size.width - (int)(size.width / 1.5)) / 2 + size.x;
-		locationY = (size.height - (int)(size.height / 1.4)) / 2 + size.y;
-
-		return this.open(new Point(locationX, locationY), newSize);
+		return this.open(false);
 	}
 
-	public Object open(Point location, Dimension size)
+	public Object open(boolean useChromiumHint)
+	{
+		Rectangle size = getParent().getBounds();
+		int newWidth = (size.width / 1.5) < MIN_WIDTH ? MIN_WIDTH : (int)(size.width / 1.5);
+		int newHeight = (size.height / 1.4) < MIN_HEIGHT ? MIN_HEIGHT : (int)(size.height / 1.4);
+		Dimension newSize = new Dimension(newWidth, newHeight);
+
+		int locationX, locationY;
+		locationX = (size.width - newWidth) / 2 + size.x;
+		locationY = (size.height - newHeight) / 2 + size.y;
+
+		return this.open(new Point(locationX, locationY), newSize, useChromiumHint);
+	}
+
+	public Object open(Point location, Dimension size, boolean useChromiumHint)
 	{
 		Shell parent = getParent();
 		shell = new Shell(parent, SWT.DIALOG_TRIM | getStyle());
@@ -125,8 +136,15 @@ public class BrowserDialog extends Dialog
 		}
 		final Button[] showNextTime = new Button[1];
 		//load html file in textReader
-		browser = new Browser(shell, SWT.NONE);
-		browser.addLocationListener(new LocationListener()
+		if (useChromiumHint && new DesignerPreferences().useChromiumBrowser())
+		{
+			chromiumBrowser = new org.eclipse.swt.chromium.Browser(shell, SWT.NONE);
+		}
+		else
+		{
+			browser = new Browser(shell, SWT.NONE);
+		}
+		LocationListener locationListener = new LocationListener()
 		{
 			@Override
 			public void changing(LocationEvent event)
@@ -224,7 +242,7 @@ public class BrowserDialog extends Dialog
 										String resourceProjectName = project == null ? getNewResourceProjectName() : null;
 
 										importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
-											monitor);
+											monitor, false, false);
 										if (importSolutionWizard.isMissingServer() != null)
 										{
 											showTutorial[0] = introURL.getParameter("createDBConn");
@@ -307,7 +325,14 @@ public class BrowserDialog extends Dialog
 							showNextTime[0].setVisible(false);
 						}
 						Rectangle bounds = parent.getBounds();
-						browser.setSize(bounds.width, bounds.height);
+						if (browser != null)
+						{
+							browser.setSize(bounds.width, bounds.height);
+						}
+						else
+						{
+							chromiumBrowser.setSize(bounds.width, bounds.height);
+						}
 						shell.setBounds(bounds);
 						shell.layout(true, true);
 						return;
@@ -319,7 +344,14 @@ public class BrowserDialog extends Dialog
 						Rectangle bounds = new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
 							(size.height - (int)(size.height / 1.4)) / 2 + size.y, (int)(size.width / 1.5),
 							(int)(size.height / 1.4));
-						browser.setSize(bounds.width, bounds.height);
+						if (browser != null)
+						{
+							browser.setSize(bounds.width, bounds.height);
+						}
+						else
+						{
+							chromiumBrowser.setSize(bounds.width, bounds.height);
+						}
 						shell.setBounds(bounds);
 						shell.layout(true, true);
 						return;
@@ -385,13 +417,29 @@ public class BrowserDialog extends Dialog
 			public void changed(LocationEvent event)
 			{
 			}
-		});
-		browser.setUrl(url);
-		browser.setSize(size.width, size.height);
-
+		};
+		if (browser != null)
+		{
+			browser.addLocationListener(locationListener);
+			browser.setUrl(url);
+			browser.setSize(size.width, size.height);
+		}
+		else
+		{
+			chromiumBrowser.addLocationListener(locationListener);
+			chromiumBrowser.setUrl(url);
+			chromiumBrowser.setSize(size.width, size.height);
+		}
 		if (showSkipNextTime)
 		{
-			browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			if (browser != null)
+			{
+				browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			}
+			else
+			{
+				chromiumBrowser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			}
 			showNextTime[0] = new Button(shell, SWT.CHECK);
 			showNextTime[0].setText("Do not show this dialog anymore");
 			showNextTime[0].setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")));
@@ -407,7 +455,8 @@ public class BrowserDialog extends Dialog
 			showNextTime[0].setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		}
 		shell.setLocation(location);
-		if (Util.isMac())
+		// in chromium i have to set size, else it shows very small
+		if (Util.isMac() || chromiumBrowser != null)
 		{
 			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
 			shell.setSize(rect.width, rect.height);
@@ -440,12 +489,26 @@ public class BrowserDialog extends Dialog
 	public void setUrl(String url)
 	{
 		this.url = url;
-		browser.setUrl(url);
+		if (browser != null)
+		{
+			browser.setUrl(url);
+		}
+		else
+		{
+			chromiumBrowser.setUrl(url);
+		}
 	}
 
 	public void setLocationAndSize(Point location, Dimension size)
 	{
-		browser.setSize(size.width, size.height);
+		if (browser != null)
+		{
+			browser.setSize(size.width, size.height);
+		}
+		else
+		{
+			chromiumBrowser.setSize(size.width, size.height);
+		}
 		shell.setLocation(location);
 		shell.setSize(size.width, size.height);
 	}

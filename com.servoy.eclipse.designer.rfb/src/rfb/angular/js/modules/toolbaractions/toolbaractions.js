@@ -22,6 +22,14 @@ angular.module('toolbaractions', ['toolbar', 'editor'])
 			{
 				btnZoomOut.hide = true;
 			}	
+			if (editorScope.hideDefault()) {
+				btnPlaceImage.hide = true;
+				btnPlacePortal.hide = true;
+				btnPlaceSplitPane.hide = true;
+				btnPlaceTabPanel.hide = true;
+				btnPlaceAccordion.hide = true;
+			}
+
 		} else {
 			btnPlaceField.hide = true;
 			btnPlaceImage.hide = true;

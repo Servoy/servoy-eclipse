@@ -30,6 +30,7 @@ import com.servoy.j2db.ISolutionModelPersistIndex;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
@@ -38,6 +39,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 
@@ -175,5 +177,15 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	public Iterator<Form> getForms(String datasource, boolean sort)
 	{
 		return ((DeveloperPersistIndex)getIndex()).getFormsByDatasource(datasource, true).iterator();
+	}
+
+	public Map<UUID, List<IPersist>> getDuplicateUUIDList()
+	{
+		return ((DeveloperPersistIndex)getIndex()).getDuplicateUUIDList();
+	}
+
+	public Map<String, Map<String, List<IPersist>>> getDuplicateNamesList()
+	{
+		return ((DeveloperPersistIndex)getIndex()).getDuplicateNamesList();
 	}
 }

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -93,6 +94,7 @@ import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -202,13 +204,47 @@ public class SolutionDeserializer
 	{
 		if (smd == null) return null;
 
-		Solution solution = (Solution)repository.createRootObject(smd);
-		solution.setChangeHandler(new ChangeHandler(repository));
+		final Solution solution = (Solution)repository.createRootObject(smd);
+		ChangeHandler handler = new ChangeHandler(repository);
+		solution.setChangeHandler(handler);
 
+		handler.addIPersistListener(new IItemChangeListener<IPersist>()
+		{
+
+			@Override
+			public void itemRemoved(IPersist item)
+			{
+				UUID uuid = item.getUUID();
+				HashSet<UUID> solutionUUIDs = alreadyUsedUUID.get(solution.getUUID());
+				if (solutionUUIDs != null)
+				{
+					solutionUUIDs.remove(uuid);
+				}
+				childToContainerUUID.remove(uuid);
+			}
+
+			@Override
+			public void itemCreated(IPersist item)
+			{
+
+			}
+
+			@Override
+			public void itemChanged(Collection<IPersist> items)
+			{
+
+			}
+
+			@Override
+			public void itemChanged(IPersist item)
+			{
+
+			}
+		});
 		HashSet<UUID> solutionUUIDs = getAlreadyUsedUUIDsForSolution(solution.getUUID());
 		solutionUUIDs.clear();
 
-		updateSolution(projectDir, solution, changedFiles, null, true, useFilesForDirtyMark);
+		updateSolution(projectDir, solution, changedFiles, null, true, useFilesForDirtyMark, false);
 
 		if (!useFilesForDirtyMark)
 		{
@@ -237,7 +273,7 @@ public class SolutionDeserializer
 	 * @throws RepositoryException
 	 */
 	public List<File> updateSolution(File solutionDir, final Solution solution, List<File> changedFiles, List<IPersist> strayCats, boolean readAll,
-		boolean useFilesForDirtyMark) throws RepositoryException
+		boolean useFilesForDirtyMark, boolean shouldReset) throws RepositoryException
 	{
 		if (solution == null) return null;
 		try
@@ -260,8 +296,9 @@ public class SolutionDeserializer
 				changedFilesCopy.addAll(changedFiles);
 			}
 			Map<IPersist, JSONObject> persist_json_map = new HashMap<IPersist, JSONObject>();
-			readObjectFilesFromSolutionDir(solutionDir, solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark);
-			readMediasFromSolutionDir(solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark);
+			readObjectFilesFromSolutionDir(solutionDir, solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark,
+				shouldReset);
+			readMediasFromSolutionDir(solutionDir, solution, persist_json_map, changedFilesCopy, strayCats, readAll, useFilesForDirtyMark, shouldReset);
 			completePersist(persist_json_map, useFilesForDirtyMark);
 			solution.acceptVisitor(new IPersistVisitor()
 			{
@@ -305,7 +342,8 @@ public class SolutionDeserializer
 	}
 
 	private void readObjectFilesFromSolutionDir(File solutionDir, File dir, ISupportChilds parent, Map<IPersist, JSONObject> persist_json_map,
-		List<File> changedFiles, List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark) throws RepositoryException, JSONException
+		List<File> changedFiles, List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark, boolean shouldReset)
+		throws RepositoryException, JSONException
 	{
 		if (dir != null && dir.exists())
 		{
@@ -420,7 +458,7 @@ public class SolutionDeserializer
 				IPersist persist = null;
 				try
 				{
-					persist = deserializePersist(repository, parent, persist_json_map, object, strayCats, file, saved, useFilesForDirtyMark);
+					persist = deserializePersist(repository, parent, persist_json_map, object, strayCats, file, saved, useFilesForDirtyMark, shouldReset);
 				}
 				catch (JSONException e)
 				{
@@ -480,7 +518,7 @@ public class SolutionDeserializer
 								try
 								{
 									persist = deserializePersist(repository, scriptParent, persist_json_map, object, strayCats, jsFile, saved,
-										useFilesForDirtyMark);
+										useFilesForDirtyMark, shouldReset);
 								}
 								catch (JSONException e)
 								{
@@ -538,7 +576,8 @@ public class SolutionDeserializer
 				if (subdirPersist != null || isContainerDir(parent, solutionDir, subdir))
 				{
 					ISupportChilds newParent = (subdirPersist instanceof ISupportChilds) ? (ISupportChilds)subdirPersist : parent;
-					readObjectFilesFromSolutionDir(solutionDir, subdir, newParent, persist_json_map, changedFiles, strayCats, readAll, useFilesForDirtyMark);
+					readObjectFilesFromSolutionDir(solutionDir, subdir, newParent, persist_json_map, changedFiles, strayCats, readAll, useFilesForDirtyMark,
+						shouldReset);
 				}
 			}
 		}
@@ -852,7 +891,7 @@ public class SolutionDeserializer
 	}
 
 	private void readMediasFromSolutionDir(File dir, Solution parent, Map<IPersist, JSONObject> persist_json_map, List<File> changedFiles,
-		List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark) throws RepositoryException
+		List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark, boolean shouldReset) throws RepositoryException
 	{
 		if (dir != null && dir.exists())
 		{
@@ -887,7 +926,7 @@ public class SolutionDeserializer
 							{
 								boolean newMedia = parent.getMedia(name) == null;
 								IPersist persist = deserializePersist(repository, parent, persist_json_map, obj, strayCats, mediasDir, new HashSet<UUID>(0),
-									useFilesForDirtyMark);
+									useFilesForDirtyMark, shouldReset);
 								if (persist instanceof Media)
 								{
 									File mf = new File(mediasDir, name);
@@ -1546,7 +1585,8 @@ public class SolutionDeserializer
 	 * @throws JSONException
 	 */
 	public static IPersist deserializePersist(IDeveloperRepository repository, final ISupportChilds parent, Map<IPersist, JSONObject> persist_json_map,
-		JSONObject obj, final List<IPersist> strayCats, File file, Set<UUID> saved, boolean useFilesForDirtyMark) throws RepositoryException, JSONException
+		JSONObject obj, final List<IPersist> strayCats, File file, Set<UUID> saved, boolean useFilesForDirtyMark, boolean shouldReset)
+		throws RepositoryException, JSONException
 	{
 		if (!obj.has(SolutionSerializer.PROP_TYPEID))
 		{
@@ -1691,7 +1731,7 @@ public class SolutionDeserializer
 						{
 							// scriptUUID wasnt found previously. let this persist that maps with its name use the uuid from the file
 							// so that overwrite and update from a team provider really overwrites it
-							((AbstractBase)persist).resetUUID(uuid);
+							if (shouldReset) ((AbstractBase)persist).resetUUID(uuid);
 							((AbstractBase)persist).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
 						}
 						break;
@@ -1704,7 +1744,7 @@ public class SolutionDeserializer
 				if (persistUUIDNotFound && childToContainerUUID.get(uuid) != null &&
 					!Utils.equalObjects(getContainerUUID(retval), childToContainerUUID.get(uuid)))
 				{
-					((AbstractBase)retval).resetUUID();
+					if (shouldReset) ((AbstractBase)retval).resetUUID();
 				}
 				if (persistUUIDNotFound && solutionUUIDs.contains(uuid))
 				{
@@ -1744,7 +1784,7 @@ public class SolutionDeserializer
 						Utils.getAsBoolean(obj.get(CHANGED_JSON_ATTRIBUTE))) child_obj.put(CHANGED_JSON_ATTRIBUTE, true);
 
 					IPersist newChild = deserializePersist(repository, (ISupportChilds)retval, persist_json_map, child_obj, strayCats, file, saved,
-						useFilesForDirtyMark);
+						useFilesForDirtyMark, shouldReset);
 					if (newChild != null) newChildUUIDs.add(newChild.getUUID());
 				}
 			}

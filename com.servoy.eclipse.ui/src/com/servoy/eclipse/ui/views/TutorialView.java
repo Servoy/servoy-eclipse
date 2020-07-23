@@ -171,6 +171,7 @@ public class TutorialView extends ViewPart
 				@Override
 				public void mouseUp(MouseEvent e)
 				{
+					Point cursorLocation = Display.getCurrent().getCursorLocation();
 					Dimension size = null;
 					try
 					{
@@ -198,7 +199,6 @@ public class TutorialView extends ViewPart
 					{
 						size = new Dimension(300, 300);
 					}
-					Point cursorLocation = Display.getCurrent().getCursorLocation();
 
 					Rectangle bounds = Display.getCurrent().getBounds();
 
@@ -212,7 +212,7 @@ public class TutorialView extends ViewPart
 					{
 						dialog = new BrowserDialog(parent.getShell(),
 							rowData.optString("gifURL"), false, false);
-						dialog.open(location, size);
+						dialog.open(location, size, false);
 					}
 					else
 					{

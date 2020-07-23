@@ -19,29 +19,37 @@ package com.servoy.eclipse.exporter.apps.solution;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.ILogLevel;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
 /**
  * Stores and provides the export-relevant arguments the product was started with.
  * @author acostescu
  */
-public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUserChannel
+public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUserChannel, IExportSolutionModel
 {
 	private static final String FILE_EXTENSION = ".servoy";
 
@@ -122,42 +130,27 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	public String getHelpMessage()
 	{
 		// @formatter:off
-		return "Workspace exporter. Exports workspace solutions into .servoy files.\n"
-			+ super.getHelpMessageCore()
-			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
-			+ "             Usually you will want to use 'ws'.\n"
-			+ "        -sd ... exports sample data. IMPORTANT: all needed DB\n"
-			+ "             servers must already be started\n"
-			+ "        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n"
-			+ "             is also present. Can be 'all' (without the ') in which  case  it will  still be\n"
-			+ "             limited but to a very high number: " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + "\n"
-			+ "             Default: " + IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED + "\n"
-			+ "        -i18n ... exports i18n data\n"
-			+ "        -users ... exports users\n"
-			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
-			+ "             IMPORTANT: all needed DB servers must already be started\n"
-			+ "        -pwd <protection_password> ... protect  the exported  solution with given  password.\n"
-			+ "        -modules [<module1_name> <module2_name> ... <moduleN_name>]\n"
-			+ "             argument  specified in command line. Includes all or part of referenced modules\n"
-			+ "             in export. If only '-modules' is used,  it will export all  referenced modules.\n"
-			+ "             If a list of  modules is also included, it  will export only  modules from this\n"
-			+ "             list, provided they are referenced by exported solution.\n"
-			+ "        -isf <import_options_file> ... path  to import options file.  Default value is null.\n"
-			+ "             If present, will  be added to  export  file as  import_settings.json. This file\n"
-			+ "             should be  taken from a  developer export  (import_settings.json inside .servoy\n"
-			+ "             file).\n"
-			+ getHelpMessageExitCodes();
+		return "Workspace exporter. Exports workspace solutions into .servoy files.\n" + super.getHelpMessageCore() +
+			"        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n" +
+			"             Usually you will want to use 'ws'.\n" + "        -sd ... exports sample data. IMPORTANT: all needed DB\n" +
+			"             servers must already be started\n" +
+			"        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n" +
+			"             is also present. Can be 'all' (without the ') in which  case  it will  still be\n" +
+			"             limited but to a very high number: " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + "\n" + "             Default: " +
+			IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED + "\n" + "        -i18n ... exports i18n data\n" +
+			"        -users ... exports users\n" + "        -tables ... export  all table  information  about  tables from  referenced  servers.\n" +
+			"             IMPORTANT: all needed DB servers must already be started\n" +
+			"        -pwd <protection_password> ... protect  the exported  solution with given  password.\n" +
+			"        -modules [<module1_name> <module2_name> ... <moduleN_name>]\n" +
+			"             argument  specified in command line. Includes all or part of referenced modules\n" +
+			"             in export. If only '-modules' is used,  it will export all  referenced modules.\n" +
+			"             If a list of  modules is also included, it  will export only  modules from this\n" +
+			"             list, provided they are referenced by exported solution.\n" +
+			"        -isf <import_options_file> ... path  to import options file.  Default value is null.\n" +
+			"             If present, will  be added to  export  file as  import_settings.json. This file\n" +
+			"             should be  taken from a  developer export  (import_settings.json inside .servoy\n" + "             file).\n" +
+			getHelpMessageExitCodes();
 		// @formatter:on
-	}
-
-	public boolean shouldExportMetaData()
-	{
-		return metadataSource != META_DATA_NONE;
-	}
-
-	public boolean shouldExportSampleData()
-	{
-		return exportSampleData;
 	}
 
 	public int getNumberOfSampleDataExported()
@@ -165,27 +158,13 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return sampleDataCount;
 	}
 
-	public boolean shouldExportI18NData()
-	{
-		return exportI18N;
-	}
-
-	public boolean shouldExportUsers()
-	{
-		return exportUsers;
-	}
-
-	public boolean shouldExportModules()
-	{
-		return exportModules;
-	}
-
-	public boolean shouldProtectWithPassword()
-	{
-		return protectionPassword != null;
-	}
-
 	// IXMLExportUserChannel methods:
+
+	@Override
+	public void displayWarningMessage(String title, String message)
+	{
+		System.out.println("WARNING: " + title + " " + message);
+	}
 
 	public boolean getExportAllTablesFromReferencedServers()
 	{
@@ -261,14 +240,139 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return wscontents;
 	}
 
-	public String getExportFileName(String solutionName)
-	{
-		File f = new File(getExportFilePath(), solutionName + FILE_EXTENSION);
-		return f.getAbsolutePath();
-	}
-
 	public String getImportOptionsFile()
 	{
 		return importOptionsFile;
+	}
+
+	public boolean isDBMetaDataExport()
+	{
+		return metadataSource == META_DATA_DB || metadataSource == META_DATA_BOTH;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.export.IExportSolutionModel#getFileName()
+	 */
+	@Override
+	public String getFileName()
+	{
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		if (activeProject == null || activeProject.getSolution() == null) return null;
+		File f = new File(getExportFilePath(), activeProject.getSolution().getName() + FILE_EXTENSION);
+		return f.getAbsolutePath();
+	}
+
+	@Override
+	public boolean isProtectWithPassword()
+	{
+		return protectionPassword != null;
+	}
+
+	@Override
+	public boolean isExportReferencedModules()
+	{
+		return exportModules;
+	}
+
+	@Override
+	public boolean isExportReferencedWebPackages()
+	{
+		//web packages are never exported in a cmd line file export
+		return false;
+	}
+
+	@Override
+	public boolean isExportMetaData()
+	{
+		return metadataSource != META_DATA_NONE;
+	}
+
+	@Override
+	public boolean isExportSampleData()
+	{
+		return exportSampleData;
+	}
+
+	@Override
+	public boolean isExportI18NData()
+	{
+		return exportI18N;
+	}
+
+	@Override
+	public boolean isExportUsers()
+	{
+		return exportUsers;
+	}
+
+	@Override
+	public String[] getModulesToExport()
+	{
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		Solution solution = activeProject.getSolution();
+		if (isExportReferencedModules())
+		{
+			Map<String, Solution> modules = new HashMap<String, Solution>();
+			try
+			{
+				solution.getReferencedModulesRecursive(modules);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Error on exporting solution.", e);
+				return null;
+			}
+			List<String> exportedModules = getModuleIncludeList(new ArrayList<String>(modules.keySet()));
+			return exportedModules.toArray(new String[exportedModules.size()]);
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	@Override
+	public String getPassword()
+	{
+		return protectionPassword;
+	}
+
+	@Override
+	public boolean isExportAllTablesFromReferencedServers()
+	{
+		return exportAllTablesFromReferencedServers;
+	}
+
+	@Override
+	public boolean isCheckMetadataTables()
+	{
+		//TODO SVY-15248 add the option to the exporter and use it in getTableMetaData below
+		return true;
+	}
+
+	@Override
+	public boolean isExportUsingDbiFileInfoOnly()
+	{
+		return super.shouldExportUsingDbiFileInfoOnly();
+	}
+
+	@Override
+	public boolean useImportSettings()
+	{
+		return importOptionsFile != null;
+	}
+
+	@Override
+	public JSONObject getImportSettings()
+	{
+		JSONObject importSettings = null;
+		if (getImportOptionsFile() != null)
+		{
+			String importSettingsString = Utils.getTXTFileContent(new File(getImportOptionsFile()), Charset.forName("UTF8"));
+			importSettings = new JSONObject(importSettingsString);
+		}
+		return importSettings;
 	}
 }

@@ -22,10 +22,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -39,9 +39,10 @@ import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.search.internal.ui.SearchPlugin;
 import org.eclipse.search.internal.ui.SearchPreferencePage;
 import org.eclipse.swt.SWT;
@@ -49,6 +50,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -226,26 +228,23 @@ public class Activator extends AbstractUIPlugin
 									@Override
 									public void run()
 									{
-										Iterator<Entry<String, Set<String>>> iterator = processedPackages.entrySet().iterator();
-										while (iterator.hasNext())
+										Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+										List<String> input = processedPackages.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+										final ListSelectionDialog lsd = new ListSelectionDialog(active, input, new ArrayContentProvider(), new LabelProvider(),
+											"The packages listed below are missing from the active solution and it's modules.\nPlease select the ones you want to download using Servoy Package Manager:");
+										lsd.setInitialElementSelections(input);
+										lsd.setBlockOnOpen(true);
+										int pressedButton = lsd.open();
+										if (pressedButton == 0)
 										{
-											Entry<String, Set<String>> entry = iterator.next();
-											String automaticDownloadPackage = entry.getKey();
-											String mods = String.join(",", entry.getValue());
-											Shell active = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-											final MessageDialog dialog = new MessageDialog(active, "Missing package '" + automaticDownloadPackage + "'", null,
-												"Missing package '" + automaticDownloadPackage + "' was detected in solution(s): " + mods +
-													". Do you want to try to download it using Servoy Package Manager?",
-												MessageDialog.QUESTION, new String[] { "Automatic install", "Skip" }, 0);
-											dialog.setBlockOnOpen(true);
-											int pressedButton = dialog.open();
-											if (pressedButton == 0)
+											List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
+												IAutomaticImportWPMPackages.EXTENSION_ID);
+											if (defaultImports != null && defaultImports.size() > 0)
 											{
-												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
-													IAutomaticImportWPMPackages.EXTENSION_ID);
-												if (defaultImports != null && defaultImports.size() > 0)
+												Object[] result = lsd.getResult();
+												for (Object o : result)
 												{
-													defaultImports.get(0).importPackage(automaticDownloadPackage);
+													defaultImports.get(0).importPackage((String)o);
 												}
 											}
 										}
@@ -266,7 +265,8 @@ public class Activator extends AbstractUIPlugin
 
 			}
 		});
-		ServoyModelManager.getServoyModelManager().getServoyModel().addDoneListener(() -> showLoginAndStart());
+		ServoyModelManager.getServoyModelManager().getServoyModel()
+			.addDoneListener(() -> com.servoy.eclipse.core.Activator.getDefault().addPostgressCheckedCallback(() -> showLoginAndStart()));
 	}
 
 	/**
@@ -274,62 +274,59 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public void showLoginAndStart()
 	{
-		if (com.servoy.eclipse.core.Activator.getDefault().isPostgresChecked(() -> showLoginAndStart()))
+		Runnable runnable = new Runnable()
 		{
-			Runnable runnable = new Runnable()
+			@Override
+			public void run()
 			{
-				@Override
-				public void run()
+				Shell activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+				if (activeShell == null)
 				{
-					Shell activeShell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+					Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
+					for (int i = shells.length; --i >= 0;)
+					{
+						if (shells[i].getParent() == null && shells[i].isVisible())
+						{
+							activeShell = shells[i];
+							break;
+						}
+					}
 					if (activeShell == null)
 					{
-						Shell[] shells = PlatformUI.getWorkbench().getDisplay().getShells();
-						for (int i = shells.length; --i >= 0;)
-						{
-							if (shells[i].getParent() == null && shells[i].isVisible())
-							{
-								activeShell = shells[i];
-								break;
-							}
-						}
-						if (activeShell == null)
-						{
-							Display.getDefault().asyncExec(this);
-							return;
-						}
-					}
-					while (activeShell.getParent() instanceof Shell && activeShell.getParent().isVisible())
-					{
-						activeShell = (Shell)activeShell.getParent();
-					}
-					//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
-					String username = null;
-					try
-					{
-						username = SecurePreferencesFactory.getDefault()
-							.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
-							.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
-					}
-					catch (StorageException e)
-					{
-						ServoyLog.logError(e);
-					}
-					String loginToken = new ServoyLoginDialog(activeShell).doLogin();
-					if (loginToken != null)
-					{
-						// only show if first login or is not disabled from preferences
-						if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
-						{
-							BrowserDialog dialog = new BrowserDialog(activeShell,
-								TUTORIALS_URL + loginToken, true, true);
-							dialog.open();
-						}
+						Display.getDefault().asyncExec(this);
+						return;
 					}
 				}
-			};
-			Display.getDefault().asyncExec(runnable);
-		}
+				while (activeShell.getParent() instanceof Shell && activeShell.getParent().isVisible())
+				{
+					activeShell = (Shell)activeShell.getParent();
+				}
+				//new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).clearSavedInfo();
+				String username = null;
+				try
+				{
+					username = SecurePreferencesFactory.getDefault()
+						.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY)
+						.get(ServoyLoginDialog.SERVOY_LOGIN_USERNAME, null);
+				}
+				catch (StorageException e)
+				{
+					ServoyLog.logError(e);
+				}
+				String loginToken = new ServoyLoginDialog(activeShell).doLogin();
+				if (loginToken != null)
+				{
+					// only show if first login or is not disabled from preferences
+					if (username == null || Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")))
+					{
+						BrowserDialog dialog = new BrowserDialog(activeShell,
+							TUTORIALS_URL + loginToken, true, true);
+						dialog.open(true);
+					}
+				}
+			}
+		};
+		Display.getDefault().asyncExec(runnable);
 	}
 
 	@Override

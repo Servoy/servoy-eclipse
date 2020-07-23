@@ -793,7 +793,7 @@ public class ElementFactory
 	{
 		StringBuilder i18nText = new StringBuilder("i18n:");
 		String prefix = configuration.getI18NPrefix();
-		if (prefix != null)
+		if (!Utils.stringIsEmpty(prefix))
 		{
 			i18nText.append(prefix).append('.');
 		}
@@ -1475,7 +1475,7 @@ public class ElementFactory
 					name = (String)object.remove(SolutionSerializer.PROP_NAME);
 				}
 				Map<IPersist, JSONObject> persist_json_map = new HashMap<IPersist, JSONObject>();
-				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false);
+				IPersist persist = SolutionDeserializer.deserializePersist(repository, parent, persist_json_map, object, null, null, null, false, true);
 				for (Map.Entry<IPersist, JSONObject> entry : persist_json_map.entrySet())
 				{
 					SolutionDeserializer.setPersistValues(repository, entry.getKey(),
@@ -1992,14 +1992,13 @@ public class ElementFactory
 			{
 				String i18nPName = labelForProperties.size() > 1 ? name + "_" + pd.getName() : name;
 				if (isLabelFor) i18nPName += "_label";
-				String pLabelText = labelForProperties.size() > 1 ? labelText + "_" + pd.getName() : labelText;
 				if (configuration.isAutomaticI18N())
 				{
-					setI18NText(formElement, pd.getName(), configuration, i18nPName, pLabelText);
+					setI18NText(formElement, pd.getName(), configuration, i18nPName, labelText);
 				}
 				else if (!checkFillText || configuration.isFillText())
 				{
-					((WebComponent)formElement).setProperty(pd.getName(), pLabelText);
+					((WebComponent)formElement).setProperty(pd.getName(), labelText);
 				}
 			}
 		}

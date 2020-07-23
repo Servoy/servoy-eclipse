@@ -119,7 +119,7 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 			ForkJoinPool pool = new ForkJoinPool();
 			ConcurrentMap<String, String> checked = new ConcurrentHashMap<String, String>();
 			checked.put(sol.getName(), sol.getName());
-			pool.execute(() -> loadAllModules(sol, pool, checked));
+			loadAllModules(sol, pool, checked);
 			pool.awaitQuiescence(15, TimeUnit.MINUTES);
 			pool.shutdown();
 		}
@@ -137,30 +137,22 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 		{
 			if (checked.putIfAbsent(name, name) == null)
 			{
-				try
+				if (!isSolutionLoaded(name))
 				{
-					if (!isSolutionLoaded(name))
-					{
-						RootObjectMetaData rootObjectMetaData = getRootObjectMetaData(name, IRepository.SOLUTIONS);
-						if (rootObjectMetaData != null)
+					pool.execute(() -> {
+						try
 						{
-							Solution module = (Solution)loadRootObject(rootObjectMetaData, rootObjectMetaData.getActiveRelease());
-							AbstractRepository.lock();
-							try
+							Solution module = (Solution)getRootObject(name, IRepository.SOLUTIONS, 0);
+							if (module != null)
 							{
-								if (!isSolutionLoaded(name)) cacheRootObject(module);
+								loadAllModules(module, pool, checked);
 							}
-							finally
-							{
-								AbstractRepository.unlock();
-							}
-							pool.execute(() -> loadAllModules(module, pool, checked));
 						}
-					}
-				}
-				catch (RepositoryException e)
-				{
-					Debug.error(e);
+						catch (RepositoryException e)
+						{
+							Debug.error(e);
+						}
+					});
 				}
 			}
 		}
@@ -216,11 +208,14 @@ public class EclipseRepository extends AbstractRepository implements IRepository
 
 	private int last_element_id = Integer.MAX_VALUE / 2;
 
-	public synchronized int getNewElementID(UUID new_uuid) throws RepositoryException
+	public int getNewElementID(UUID new_uuid) throws RepositoryException
 	{
-		int element_id = last_element_id++;
-		if (new_uuid != null) uuid_element_id_map.put(new_uuid, new Integer(element_id));
-		return element_id;
+		synchronized (uuid_element_id_map)
+		{
+			int element_id = last_element_id++;
+			if (new_uuid != null) uuid_element_id_map.put(new_uuid, new Integer(element_id));
+			return element_id;
+		}
 	}
 
 	/*

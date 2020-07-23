@@ -80,8 +80,10 @@ import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentP
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRepository;
@@ -214,17 +216,45 @@ public class PlaceDataprovidersComposite extends Composite
 		if (mainPref == null)
 		{
 			mainPref = new JSONObject();
-			mainPref.put(TEXT_PROPERTY, "servoydefault-textfield");
-			mainPref.put(INTEGER_PROPERTY, "servoydefault-textfield");
-			mainPref.put(NUMBER_PROPERTY, "servoydefault-textfield");
-			mainPref.put(DATETIME_PROPERTY, "servoydefault-calendar");
-			mainPref.put(MEDIA_PROPERTY, "servoydefault-imagemedia");
+			mainPref.put(TEXT_PROPERTY, "bootstrapcomponents-textbox");
+			mainPref.put(INTEGER_PROPERTY, "bootstrapcomponents-textbox");
+			mainPref.put(NUMBER_PROPERTY, "bootstrapcomponents-textbox");
+			mainPref.put(DATETIME_PROPERTY, "bootstrapcomponents-calendar");
+			mainPref.put(MEDIA_PROPERTY, "bootstrapcomponents-imagemedia");
 			preferences.put("_", mainPref);
+		}
+		else
+		{
+			Form form = persistContext != null && persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
+			boolean skipDefault = EditorUtil.hideDefaultComponents(form);
+			if (skipDefault)
+			{
+				if ("servoydefault-textfield".equals(mainPref.optString(TEXT_PROPERTY)))
+				{
+					mainPref.put(TEXT_PROPERTY, "bootstrapcomponents-textbox");
+				}
+				if ("servoydefault-textfield".equals(mainPref.optString(INTEGER_PROPERTY)))
+				{
+					mainPref.put(INTEGER_PROPERTY, "bootstrapcomponents-textbox");
+				}
+				if ("servoydefault-textfield".equals(mainPref.optString(NUMBER_PROPERTY)))
+				{
+					mainPref.put(NUMBER_PROPERTY, "servoydefault-textfield");
+				}
+				if ("servoydefault-calendar".equals(mainPref.optString(DATETIME_PROPERTY)))
+				{
+					mainPref.put(DATETIME_PROPERTY, "bootstrapcomponents-textbox");
+				}
+				if ("servoydefault-imagemedia".equals(mainPref.optString(MEDIA_PROPERTY)))
+				{
+					mainPref.put(MEDIA_PROPERTY, "bootstrapcomponents-textbox");
+				}
+			}
 		}
 		currentSelection = mainPref;
 		configurationSelection = "_";
 
-		final Object[] inputs = getComponentsAndTemplatesInput(true);
+		final Object[] inputs = getComponentsAndTemplatesInput(true, persistContext);
 
 		this.setLayout(new FillLayout());
 		SashForm form = new SashForm(this, SWT.HORIZONTAL);
@@ -289,7 +319,8 @@ public class PlaceDataprovidersComposite extends Composite
 
 		placeWithLabelsButton = createLabelAndCheck(configurationComposite, "Place with labels", PLACE_WITH_LABELS_PROPERTY,
 			"Place a label component together with the field");
-		labelComponentCombo = generateTypeCombo(configurationComposite, "Label Component", getComponentsAndTemplatesInput(false), LABEL_COMPONENT_PROPERTY,
+		labelComponentCombo = generateTypeCombo(configurationComposite, "Label Component", getComponentsAndTemplatesInput(false, persistContext),
+			LABEL_COMPONENT_PROPERTY,
 			"The component/template to use for the label component");
 		labelComponentCombo.getCCombo().setEnabled(placeWithLabelsButton.getSelection());
 		placeWithLabelsButton.addSelectionListener(new SelectionListener()
@@ -387,7 +418,7 @@ public class PlaceDataprovidersComposite extends Composite
 
 		dataproviderTreeViewer = createDataproviderTree(form, persistContext, flattenedSolution, table, dataproviderOptions, inputs);
 
-		tableViewer = createTableViewer(form);
+		tableViewer = createTableViewer(form, persistContext);
 
 
 		tableViewer.setInput(input);
@@ -401,7 +432,7 @@ public class PlaceDataprovidersComposite extends Composite
 		form.setWeights(new int[] { 40, 30, 30 });
 	}
 
-	private TableViewer createTableViewer(SashForm form)
+	private TableViewer createTableViewer(SashForm form, PersistContext persistContext)
 	{
 		final Composite container = new Composite(form, SWT.NONE);
 		// define layout for the viewer
@@ -449,7 +480,7 @@ public class PlaceDataprovidersComposite extends Composite
 
 
 		TableViewerColumn templateViewerColumn = new TableViewerColumn(viewer, templateColumn);
-		templateViewerColumn.setEditingSupport(new TemplateEditingSupport(viewer));
+		templateViewerColumn.setEditingSupport(new TemplateEditingSupport(viewer, persistContext));
 		templateViewerColumn.setLabelProvider(new ColumnLabelProvider()
 		{
 			@Override
@@ -917,9 +948,10 @@ public class PlaceDataprovidersComposite extends Composite
 	}
 
 	/**
+	 * @param persistContext
 	 * @return
 	 */
-	private Object[] getComponentsAndTemplatesInput(boolean filterOnDataProviderProperty)
+	private Object[] getComponentsAndTemplatesInput(boolean filterOnDataProviderProperty, PersistContext persistContext)
 	{
 		ArrayList<Object> specs = new ArrayList<>();
 		List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
@@ -944,9 +976,12 @@ public class PlaceDataprovidersComposite extends Composite
 				}
 			}
 		}
+		Form form = persistContext != null && persistContext.getContext() != null ? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : null;
+
+		boolean skipDefault = EditorUtil.hideDefaultComponents(form);
 		for (PackageSpecification<WebObjectSpecification> pck : WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications().values())
 		{
-			if (pck.getPackageName().equals("servoycore")) continue;
+			if (pck.getPackageName().equals("servoycore") || (skipDefault && pck.getPackageName().equals("servoydefault"))) continue;
 			for (WebObjectSpecification wos : pck.getSpecifications().values())
 			{
 				if (!filterOnDataProviderProperty || wos.getProperties(DataproviderPropertyType.INSTANCE).size() > 0)
@@ -1049,14 +1084,14 @@ public class PlaceDataprovidersComposite extends Composite
 		private final TableViewer viewer;
 		private final ComboBoxViewerCellEditor editor;
 
-		public TemplateEditingSupport(TableViewer viewer)
+		public TemplateEditingSupport(TableViewer viewer, PersistContext persistContext)
 		{
 			super(viewer);
 			this.viewer = viewer;
 			this.editor = new ComboBoxViewerCellEditor(viewer.getTable());
 			editor.setLabelProvider(new TemplateOrWebObjectLabelProvider());
 			editor.setContentProvider(ArrayContentProvider.getInstance());
-			editor.setInput(getComponentsAndTemplatesInput(true));
+			editor.setInput(getComponentsAndTemplatesInput(true, persistContext));
 		}
 
 		@Override

@@ -884,4 +884,26 @@
             type="com.servoy.eclipse.core.builderProblem">
       </super>
    </extension>
+   <extension
+         id="com.servoy.eclipse.core.serviceMustAuthenticateProblem"
+         name="Service must authenticate problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         id="com.servoy.eclipse.core.namedFoundsetDatasourceProblem"
+         name="Named foundset datasource problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
 </plugin>

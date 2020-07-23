@@ -840,6 +840,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	{
 		this.exportedComponents = selectedComponents;
 		exportedComponentPackages = exportedComponents.stream() //
+			.filter(component -> componentsSpecProviderState.getWebObjectSpecification(component) != null) //
 			.map(component -> componentsSpecProviderState.getWebObjectSpecification(component).getPackageName()) //
 			.collect(Collectors.toSet());
 	}
@@ -848,6 +849,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	{
 		this.exportedServices = selectedServices;
 		exportedServicePackages = exportedServices.stream() //
+			.filter(service -> servicesSpecProviderState.getWebObjectSpecification(service) != null) //
 			.map(service -> servicesSpecProviderState.getWebObjectSpecification(service).getPackageName()) //
 			.collect(Collectors.toSet());
 	}

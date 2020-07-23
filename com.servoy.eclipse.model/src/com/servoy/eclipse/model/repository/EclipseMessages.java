@@ -62,6 +62,8 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportText;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.server.headlessclient.AbstractApplication;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -299,6 +301,26 @@ public class EclipseMessages implements ICustomMessageLoader
 				}
 			}
 		}
+	}
+
+	@Override
+	public String getI18nMessage(String i18nDatasource, String key, Locale language)
+	{
+		if (i18nDatasource != null && key != null && key.startsWith("i18n:")) //$NON-NLS-1$
+		{
+			key = key.substring(5);
+			TreeMap<String, I18NUtil.MessageEntry> messages = getDatasourceMessages(i18nDatasource);
+			if (messages != null)
+			{
+				String languageKey = Messages.localeToString(language) + "." + key;
+				if (messages.containsKey(languageKey)) return messages.get(languageKey).getValue();
+				languageKey = "." + key;
+				if (messages.containsKey(languageKey)) return messages.get(languageKey).getValue();
+				String message = AbstractApplication.getDefaultMessage(key, language);
+				if (message != null) return message;
+			}
+		}
+		return key;
 	}
 
 	// write project solution & its modules i18n files to the resource project
@@ -729,7 +751,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				@Override
 				public Object visit(IPersist o)
 				{
-					if (o instanceof ISupportText)
+					if (o instanceof ISupportText || o instanceof WebComponent)
 					{
 						List<Pair<String, String>> componentI18NKeys = componentsI18NKeys.remove(o);
 						if (componentI18NKeys != null) i18nKeysToSave.addAll(componentI18NKeys);

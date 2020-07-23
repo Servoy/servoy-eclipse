@@ -179,6 +179,13 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 		return tables.get(tableName);
 	}
 
+	@Override
+	public ITable createNewTable(IValidateName validator, String nm, boolean testSQL, boolean fireTableAdded) throws RepositoryException
+	{
+		return createNewTable(validator, nm, testSQL);
+	}
+
+
 	protected abstract T createTable(String tableName);
 
 
@@ -1035,6 +1042,17 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 */
 	@Override
 	public void setTableMarkedAsHiddenInDeveloper(String tableName, boolean hiddenInDeveloper)
+	{
+		// TODO Auto-generated method stub
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.persistence.IServerInternal#setTableMarkedAsHiddenInDeveloper(java.lang.String, boolean, boolean)
+	 */
+	@Override
+	public void setTableMarkedAsHiddenInDeveloper(String tableName, boolean hiddenInDeveloper, boolean fireTableHidden)
 	{
 		// TODO Auto-generated method stub
 

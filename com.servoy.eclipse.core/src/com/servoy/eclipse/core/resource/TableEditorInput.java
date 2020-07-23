@@ -23,8 +23,7 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
-import com.servoy.eclipse.model.repository.DataModelManager;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
@@ -51,48 +50,11 @@ public class TableEditorInput implements IEditorInput
 	{
 		if (fileEditorInput != null)
 		{
-			String serverName;
-			String tableName;
-			String[] segments = fileEditorInput.getFile().getProjectRelativePath().segments();
-			// dbi files
-			if (segments.length >= 2 && segments[segments.length - 1].endsWith(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT))
+			String dataSource = ResourcesUtils.getParentDatasource(fileEditorInput.getFile(), true);
+			if (dataSource != null)
 			{
-				serverName = segments[segments.length - 2];
-				tableName = segments[segments.length - 1].substring(0,
-					segments[segments.length - 1].length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+				return new TableEditorInput(dataSource);
 			}
-			// obj files: datasources: table nodes
-			else if (segments.length >= 3 && segments[segments.length - 3].equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
-				segments[segments.length - 1].endsWith(SolutionSerializer.TABLENODE_FILE_EXTENSION))
-			{
-				serverName = segments[segments.length - 2];
-				tableName = segments[segments.length - 1].substring(0, segments[segments.length - 1].length() - SolutionSerializer.JSON_FILE_EXTENSION_SIZE);
-			}
-			// obj files: datasources: aggregates
-			else if (segments.length >= 4 && segments[segments.length - 4].equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
-				segments[segments.length - 1].endsWith(SolutionSerializer.JSON_DEFAULT_FILE_EXTENSION))
-			{
-				serverName = segments[segments.length - 3];
-				tableName = segments[segments.length - 2];
-			}
-			else
-			{
-				return null;
-			}
-			String dataSource = null;
-			if (DataSourceUtils.INMEM_DATASOURCE.equals(serverName))
-			{
-				dataSource = DataSourceUtils.createInmemDataSource(tableName);
-			}
-			else if (DataSourceUtils.VIEW_DATASOURCE.equals(serverName))
-			{
-				dataSource = DataSourceUtils.createViewDataSource(tableName);
-			}
-			else
-			{
-				dataSource = DataSourceUtils.createDBTableDataSource(serverName, tableName);
-			}
-			return new TableEditorInput(dataSource);
 		}
 		// cannot find info for table editor input
 		return null;

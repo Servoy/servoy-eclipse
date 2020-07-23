@@ -197,7 +197,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			if (excluded != null)
 			{
 				//if <none> it will not match anything and return all files
-				return filterFiles(folder, new HashSet<String>(Arrays.asList(excluded.toLowerCase().split(" "))));
+				return getFiles(folder, new HashSet<String>(Arrays.asList(excluded.toLowerCase().split(" "))), true);
 			}
 			if (included != null)
 			{
@@ -207,32 +207,19 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				}
 				names = new HashSet<String>(Arrays.asList(included.toLowerCase().split(" ")));
 			}
-			return getFiles(folder, names);
+			return getFiles(folder, names, false);
 		}
 
-
-		List<String> filterFiles(File dir, final Set<String> fileNames)
+		List<String> getFiles(File dir, final Set<String> fileNames, boolean exclude)
 		{
 			String[] list = dir.list(new FilenameFilter()
 			{
 				public boolean accept(File d, String name)
 				{
-					boolean accept = fileNames != null ? !fileNames.contains(name.toLowerCase()) : true;
-					return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
-				}
-			});
-			if (list == null || list.length == 0) return Collections.emptyList();
-			return Arrays.asList(list);
-		}
+					boolean accept = fileNames != null ? (exclude ? !fileNames.contains(name.toLowerCase()) : fileNames.contains(name.toLowerCase())) : true;
 
-		List<String> getFiles(File dir, final Set<String> fileNames)
-		{
-			String[] list = dir.list(new FilenameFilter()
-			{
-				public boolean accept(File d, String name)
-				{
-					boolean accept = fileNames != null ? fileNames.contains(name.toLowerCase()) : true;
-					return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
+					return accept &&
+						(name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip") || (new File(d.getPath(), name).isDirectory()));
 				}
 			});
 			if (list == null || list.length == 0) return Collections.emptyList();

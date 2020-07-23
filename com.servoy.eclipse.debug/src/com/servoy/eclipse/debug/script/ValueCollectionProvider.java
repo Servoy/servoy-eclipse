@@ -19,13 +19,11 @@ package com.servoy.eclipse.debug.script;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -156,15 +154,16 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 					if (dataSource != null)
 					{
-						List<IFile> files = new ArrayList<IFile>();
 						Iterator<TableNode> tableNodes = editingFlattenedSolution.getTableNodes(dataSource);
 						IValueCollection valueCollection = ValueCollectionFactory.createValueCollection();
 						while (tableNodes.hasNext())
 						{
 							TableNode tableNode = tableNodes.next();
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(tableNode, false)));
-							files.add(file);
-							ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
+							if (file.exists())
+							{
+								ValueCollectionFactory.copyInto(valueCollection, getValueCollection(file));
+							}
 						}
 						return ValueCollectionFactory.shallowCloneValueCollection(valueCollection);
 					}
@@ -254,6 +253,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					String scriptPath = SolutionSerializer.getScriptPath(superForm, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+					while (!file.exists())
+					{
+						// super form without a js file.
+						superForm = fs.getForm(superForm.getExtendsID());
+						if (superForm == null) return formCollection;
+						scriptPath = SolutionSerializer.getScriptPath(superForm, false);
+						file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
+					}
 					Deque<Set<IFile>> stack = depedencyStack.get();
 					Set<IFile> depedencies = stack.peek();
 
@@ -325,8 +332,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		{
 			Set<IFile> files = sr.get().files();
 			// this includes its own so we need to strip that.
-			System.err.println("for: " + resource + ":: " + files);
-			return files.stream().filter(file -> !file.equals(resource)).collect(Collectors.toSet());
+			Set<IFile> collect = files.stream().filter(file -> !file.equals(resource)).collect(Collectors.toSet());
+			return collect;
 		}
 		return Collections.emptyList();
 	}
@@ -338,7 +345,6 @@ public class ValueCollectionProvider implements IMemberEvaluator
 			IFile resource = (IFile)context.getModelElement().getResource();
 			if (resource != null && resource.getName().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 			{
-				System.err.println(" top value of " + resource + "  " + context);
 				// javascript file
 				FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 				if (fs != null)
@@ -447,12 +453,20 @@ public class ValueCollectionProvider implements IMemberEvaluator
 		try
 		{
 			Deque<Set<IFile>> stack = depedencyStack.get();
+			item = getFromScriptCache(file);
+			if (item == null && stack.size() > 0)
+			{
+				if (stack.stream().anyMatch(set -> set.contains(file)))
+				{
+					// this is a circulair references from the beginning (very likely getTopCollection()), can't be resolved.
+					return null;
+				}
+			}
 			Set<IFile> current = stack.peek();
 			if (current != null)
 			{
 				current.add(file);
 			}
-			item = getFromScriptCache(file);
 			if (item == null)
 			{
 				// its starting, setup the stack for generating the new Set of files.
@@ -488,7 +502,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 	private static ValueCollectionCacheItem getFromScriptCache(IResource resource)
 	{
 		SoftReference<ValueCollectionCacheItem> sr = scriptCache.get(resource);
-		return sr != null && sr.get().get() != null ? sr.get() : null;
+		return sr != null && sr.get() != null && sr.get().get() != null ? sr.get() : null;
 	}
 
 	private static final ThreadLocal<Boolean> fullGlobalScope = new ThreadLocal<Boolean>()

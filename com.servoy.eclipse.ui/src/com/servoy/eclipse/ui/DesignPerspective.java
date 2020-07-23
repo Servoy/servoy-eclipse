@@ -47,6 +47,9 @@ public class DesignPerspective implements IPerspectiveFactory
 		left.addView(SolutionExplorerView.PART_ID);
 //		left.addView(IPageLayout.ID_RES_NAV);//move to synchronize perspective only
 
+		IFolderLayout rightmost = layout.createFolder("rightmost", IPageLayout.RIGHT, 0.65f, editorArea);
+		rightmost.addPlaceholder("org.eclipse.help.ui.HelpView");
+
 		IFolderLayout right = layout.createFolder("right", IPageLayout.RIGHT, 0.65f, editorArea);//0.8f
 		right.addView(IPageLayout.ID_OUTLINE);
 		right.addView(IPageLayout.ID_PROP_SHEET);

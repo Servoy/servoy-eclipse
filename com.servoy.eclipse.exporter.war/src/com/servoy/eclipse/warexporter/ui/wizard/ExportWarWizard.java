@@ -53,6 +53,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
@@ -60,6 +61,7 @@ import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.eclipse.ui.wizards.DirtySaveExportWizard;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
+import com.servoy.eclipse.ui.wizards.exportsolution.pages.ExportConfirmationPage;
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
@@ -116,6 +118,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	private DatabaseImportPropertiesPage databaseImportProperties;
 
+	private ExportConfirmationPage exportConfirmationPage;
+
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
@@ -136,26 +140,32 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
-		ServoyProject activeProject;
-		if ((activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()) == null)
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		if (activeProject == null)
 		{
 			createErrorPage("No active Servoy solution project found", "No active Servoy solution project found",
 				"Please activate a Servoy solution project before trying to export");
+			return;
 		}
-		else if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null)
+
+		int solutionType = activeProject.getSolutionMetaData().getSolutionType();
+		isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
+		exportModel = new ExportWarModel(getDialogSettings(), isNGExport);
+		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null)
 		{
 			createErrorPage("No active Resource project found", "No active Resource project found",
 				"Please activate a Resource project before trying to export");
 		}
 		else if (BuilderUtils.getMarkers(activeProject) == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			createErrorPage("Solution with errors", "Solution with errors", "Cannot export solution with errors, please fix them first");
-		}
-		else
-		{
-			int solutionType = activeProject.getSolutionMetaData().getSolutionType();
-			isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
-			exportModel = new ExportWarModel(getDialogSettings(), isNGExport);
+			if (TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportModel.getModulesToExport()))
+			{
+				exportConfirmationPage = new ExportConfirmationPage();
+			}
+			else
+			{
+				createErrorPage("Solution with errors", "Solution with errors", "Cannot export solution with errors, please fix them first");
+			}
 		}
 	}
 
@@ -393,6 +403,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 			fileSelectionPage = new FileSelectionPage(exportModel);
 			databaseImportProperties = new DatabaseImportPropertiesPage(exportModel);
 
+			if (exportConfirmationPage != null) addPage(exportConfirmationPage);
 			addPage(fileSelectionPage);
 			addPage(databaseImportProperties);
 			addPage(nonActiveSolutionPage);
@@ -517,7 +528,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 		StringBuilder sb = new StringBuilder("./war_export.");
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") > -1) sb.append("bat");
-		else sb.append("sh");
+		else if (System.getProperty("os.name", "generic").toLowerCase().indexOf("darwin") > 0) sb.append("macosx.sh");
+		else sb.append("linux.sh");
 
 		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
 

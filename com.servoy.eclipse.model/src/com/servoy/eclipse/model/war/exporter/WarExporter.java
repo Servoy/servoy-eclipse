@@ -96,6 +96,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.export.SolutionExporter;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
@@ -111,7 +112,6 @@ import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
-import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -123,18 +123,12 @@ import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.less.LessCompiler;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IApplicationServerSingleton;
-import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
-import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
-import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
-import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 
 /**
@@ -151,7 +145,7 @@ public class WarExporter
 		"j2db_log4j_" + ClientVersion.getBundleVersionWithPostFix() + ".jar", //
 		"org.apache.commons.lang3_*.jar", "de.inetsoftware.jlessc_*.jar", "com.github.ua-parser.uap-java_*.jar", "org.yaml.snakeyaml_*.jar" };
 
-	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
+	private static final String WRO4J_RUNNER = "wro4j-runner-1.8.0";
 
 	private final IWarExportModel exportModel;
 	private SpecProviderState componentsSpecProviderState;
@@ -993,34 +987,11 @@ public class WarExporter
 		if (exportModel.getModulesToExport() != null) totalDuration = (int)(1.42 * exportModel.getModulesToExport().length); // make the main export be 70% of the time, leave the rest for sample data
 		monitor.beginTask("Exporting solution", totalDuration);
 
-		final IApplicationServerSingleton as = ApplicationServerRegistry.get();
-		AbstractRepository rep = (AbstractRepository)as.getDeveloperRepository();
-
-		IUserManager sm = as.getUserManager();
-		EclipseExportUserChannel eeuc = new EclipseExportUserChannel(exportModel, monitor);
-		EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()));
-		IXMLExporter exporter = as.createXMLExporter(rep, sm, eeuc, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
-
 		try
 		{
-			ITableDefinitionsManager tableDefManager = null;
-			IMetadataDefManager metadataDefManager = null;
-			if (exportModel.isExportUsingDbiFileInfoOnly())
-			{
-				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(activeSolution,
-					exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
-					exportModel.isExportMetaData());
-				if (defManagers != null)
-				{
-					tableDefManager = defManagers.getLeft();
-					metadataDefManager = defManagers.getRight();
-				}
-			}
-			exporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), ClientVersion.getVersion(),
-				ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(), exportModel.getNumberOfSampleDataExported(),
-				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
-				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null, null, false);
-
+			SolutionExporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), exportModel,
+				new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace())), new EclipseExportUserChannel(exportModel, monitor),
+				null, TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportModel.getModulesToExport()), false, exportSolution);
 			monitor.done();
 		}
 		catch (RepositoryException e)

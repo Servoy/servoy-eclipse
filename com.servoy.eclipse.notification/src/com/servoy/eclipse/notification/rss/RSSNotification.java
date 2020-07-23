@@ -60,4 +60,10 @@ public class RSSNotification implements INotification
 	{
 		return rssEntry.getPublishedDate();
 	}
+
+	@Override
+	public boolean isCommand()
+	{
+		return false;
+	}
 }
