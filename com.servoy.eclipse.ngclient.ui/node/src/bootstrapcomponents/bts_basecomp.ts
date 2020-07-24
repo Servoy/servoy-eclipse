@@ -82,7 +82,7 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent implements
     }
 
     ngOnChanges( changes: SimpleChanges ) {
-      if (changes) {
+      if (changes && this.elementRef) {
         for ( const property of Object.keys(changes) ) {
             const change = changes[property];
             switch ( property ) {

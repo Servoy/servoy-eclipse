@@ -7,14 +7,8 @@ export class ServoyBootstrapBaseLabel extends ServoyBootstrapBaseComponent {
     @Input() imageStyleClass;
     @Input() showAs;
 
-    @ViewChild('child', {static: true}) child:ElementRef;
-
     constructor(renderer: Renderer2) {
         super(renderer);
-    }
-
-    public getNativeChild() {
-        return this.child.nativeElement;
     }
 
     isTrustedHTML(): boolean {

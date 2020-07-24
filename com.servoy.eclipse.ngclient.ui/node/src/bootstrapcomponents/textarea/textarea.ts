@@ -11,7 +11,4 @@ export class ServoyBootstrapTextarea extends ServoyBootstrapBasefield {
   constructor(renderer: Renderer2) {
     super(renderer);
   }
-
-  // override otherwise the tests will fail
-  ngOnInit(): void {}
 }

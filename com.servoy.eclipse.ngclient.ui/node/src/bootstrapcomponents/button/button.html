@@ -11,7 +11,8 @@
     [disabled]="!enabled"
     [id]="servoyApi.getMarkupId()"
     [svyTooltip]="toolTipText">
-	<span [ngClass]="imageStyleClass" aria-hidden="true"></span>
+    <span [ngClass]="imageStyleClass" aria-hidden="true"></span>
+    {{text}}
 </button> 
 
 <button 
@@ -28,5 +29,6 @@
     [id]="servoyApi.getMarkupId()"
     [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()"
     [svyTooltip]="toolTipText">
-	<span [ngClass]="imageStyleClass" aria-hidden="true"></span>
+    <span [ngClass]="imageStyleClass" aria-hidden="true"></span>
+    {{text}}
 </button>

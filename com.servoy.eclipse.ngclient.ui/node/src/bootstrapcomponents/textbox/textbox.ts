@@ -20,10 +20,7 @@ export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield {
     super(renderer);
   }
 
-  // override otherwise the tests will fail
-  ngOnInit(): void {}
-
-  attachFocusListeners(nativeElement : any){
+  attachFocusListeners(nativeElement : any) {
     if(this.onFocusGainedMethodID)
         this.renderer.listen( nativeElement, 'focus', ( e ) => {
             this.onFocusGainedMethodID(e);

@@ -44,7 +44,7 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent imple
     }
        
     ngOnChanges( changes: SimpleChanges ) {
-        if (changes) {
+        if (changes && this.elementRef) {
           for ( const property of Object.keys(changes) ) {
               const change = changes[property];
               switch ( property ) {
