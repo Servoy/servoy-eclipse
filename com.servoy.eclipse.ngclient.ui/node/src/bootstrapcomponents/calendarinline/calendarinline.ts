@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Renderer2 } from '@angular/core';
+import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
   selector: 'servoybootstrap-calendarinline',
   templateUrl: './calendarinline.html',
   styleUrls: ['./calendarinline.scss']
 })
-export class ServoyBootstrapCalendarinline implements OnInit {
+export class ServoyBootstrapCalendarinline extends ServoyBootstrapBasefield {
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
+    constructor(renderer: Renderer2) { 
+        super(renderer);
+    }
 
 }

@@ -16,5 +16,13 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
     constructor(renderer: Renderer2) { 
         super(renderer);
     }
+    
+    getFocusElement(): any {
+        return this.inputElementRef.nativeElement;
+    }
+
+    getStyleClassElement(): any {
+        return this.inputElementRef.nativeElement;
+    }
 
 }

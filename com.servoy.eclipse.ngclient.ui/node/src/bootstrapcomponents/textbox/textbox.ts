@@ -1,6 +1,6 @@
 import { Component, OnInit, Renderer2, Input, SimpleChanges } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
-import { PropertyUtils, FormattingService } from '../../ngclient/servoy_public';
+import { FormattingService } from '../../ngclient/servoy_public';
 
 @Component({
   selector: 'servoybootstrap-textbox',
@@ -22,21 +22,6 @@ export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield {
 
   // override otherwise the tests will fail
   ngOnInit(): void {}
-
-  ngOnChanges( changes: SimpleChanges ) {
-    if (changes) {
-      for ( const property of Object.keys(changes) ) {
-          const change = changes[property];
-          switch ( property ) {
-            case 'selectOnEnter': {
-              if ( change.currentValue ) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer);
-              break;
-              }
-          }
-        super.ngOnChanges(changes);
-      }
-    }
-  }
 
   attachFocusListeners(nativeElement : any){
     if(this.onFocusGainedMethodID)

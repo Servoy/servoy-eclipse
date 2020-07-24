@@ -1,10 +1,16 @@
-<div class='input-group date'
+<div class='input-group date bts-calendar'
 	[svyTooltip]="toolTipText"
     #element>
     <input [owlDateTime]="datetime"
+    	class='form-control form-control-sm input-sm svy-padding-xs svy-line-height-normal'
     	[sabloTabseq]="tabSeq"
-    	[value]="dataProviderID | formatFilter:format?.display:format?.type:format"
+    	[ngModel]="dataProviderID"
+    	(change)="update($event.target.value)"
+     	[svyStartEdit]="'dataProviderID'"
+      	[hostComponent]="self"
+      	[disabled]="readOnly || !enabled"
+      	(dateTimeChange)="update($event.value.toDate())"
      	#inputElement/>
     <span [owlDateTimeTrigger]="datetime" class="input-group-append input-group-text" style="padding:1px;"><span class="far fa-calendar-alt"></span></span>
-    <owl-date-time #datetime ></owl-date-time>
+    <owl-date-time #datetime [disabled]="readOnly || !enabled"></owl-date-time>
 </div>

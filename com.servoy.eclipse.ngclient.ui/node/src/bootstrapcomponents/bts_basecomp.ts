@@ -33,6 +33,10 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent implements
         return this.getNativeElement();
     }
 
+    getStyleClassElement(): any {
+        return this.getNativeElement();
+    }
+    
     public requestFocus() {
         this.getFocusElement().focus();
     }
@@ -84,15 +88,15 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent implements
             switch ( property ) {
                 case 'enabled':
                     if ( change.currentValue )
-                        this.renderer.removeAttribute(this.getNativeElement(),  'disabled' );
+                        this.renderer.removeAttribute(this.getFocusElement(),  'disabled' );
                     else
-                        this.renderer.setAttribute(this.getNativeElement(),  'disabled', 'disabled' );
+                        this.renderer.setAttribute(this.getFocusElement(),  'disabled', 'disabled' );
                     break;
                 case 'styleClass':
                     if (change.previousValue)
-                        this.renderer.removeClass(this.getNativeElement(), change.previousValue );
+                        this.renderer.removeClass(this.getStyleClassElement(), change.previousValue );
                     if ( change.currentValue)
-                        this.renderer.addClass( this.getNativeElement(), change.currentValue );
+                        this.renderer.addClass( this.getStyleClassElement(), change.currentValue );
                     break;
                 case 'visible':
                     PropertyUtils.setVisible( this.getNativeElement(), this.renderer , change.currentValue);

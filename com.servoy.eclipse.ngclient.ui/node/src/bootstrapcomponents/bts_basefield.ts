@@ -1,5 +1,6 @@
 import { ServoyBootstrapBaseComponent } from "./bts_basecomp";
 import { Directive, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, Renderer2 } from "@angular/core";
+import { PropertyUtils } from '../ngclient/servoy_public';
 
 @Directive()
 export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent implements OnInit, OnChanges {
@@ -54,9 +55,12 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent imple
                           this.renderer.setAttribute(this.getFocusElement(),  'readonly', 'readonly' );
                       break;
                   case 'placeholderText':
-                      if ( change.currentValue ) this.renderer.setAttribute(this.getNativeElement(),   'placeholder', change.currentValue );
-                      else  this.renderer.removeAttribute(this.getNativeElement(),  'placeholder' );
+                      if ( change.currentValue ) this.renderer.setAttribute(this.getFocusElement(),   'placeholder', change.currentValue );
+                      else  this.renderer.removeAttribute(this.getFocusElement(),  'placeholder' );
                       break;
+                  case 'selectOnEnter': 
+                      if ( change.currentValue ) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer);
+                      break;    
                 }
             }
             super.ngOnChanges(changes);
@@ -93,4 +97,5 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent imple
         }
         return this.dataProviderID;
     }
+    
 }
