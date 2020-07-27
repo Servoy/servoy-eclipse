@@ -69,7 +69,6 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
     }
 
     update( val: string ) {
-      console.log("update:" + val);
         if (!this.findmode && this.format) {
             this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
         } else this.dataProviderID = val;
