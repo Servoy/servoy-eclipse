@@ -181,7 +181,8 @@ import { ServoyApi } from '../servoy_api'
                         [onHeaderRightClick]="getHandler(state,'onHeaderRightClick')"
                         [onColumnResize]="getHandler(state,'onColumnResize')"
                         [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')"
-                        [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')"                      
+                        [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')"  
+                        [absoluteLayout]="formCache.absolute"                                        
         #cmp>
         </servoyextra-table>
     </ng-template>

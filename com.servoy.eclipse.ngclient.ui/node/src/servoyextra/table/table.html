@@ -1,5 +1,5 @@
 <div #element class="tablewrapper" *ngIf="visible">
-<table [id]="'table_'+servoyApi.getMarkupId()" class='svy-table' [ngClass]="styleClass" [sabloTabseq]="tabSeq" tabindex="-1">
+<table [id]="'table_'+servoyApi.getMarkupId()" class='svy-table' [ngClass]="styleClass" [sabloTabseq]="tabSeq">
 	<thead ng-style="getTHeadStyle()">
 	  <tr>
 		<th *ngFor="let column of columns; let i = index" [ngStyle]="getColumnStyle(i)" [ngClass]="getSortStyleClass(i)"
@@ -25,7 +25,7 @@
 	</cdk-virtual-scroll-viewport>
 	</tbody>
 	<tfoot>
-		<ngb-pagination *ngIf="showPagination()" class="svy-pagination svy-nomargin"
+		<ngb-pagination *ngIf="showPagination()" [ngClass]="{'svy-pagination': true, 'svy-nomargin': absoluteLayout} "
 		[(page)]="currentPage"
 		[pageSize]="pageSize"
 		[collectionSize]="foundset.serverSize"

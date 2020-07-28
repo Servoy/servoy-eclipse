@@ -33,6 +33,10 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     @Input() enableColumnResize: boolean;
     @Input() pageSize: number;
     @Input() rowStyleClassDataprovider: IFoundset;
+    @Input() tabSeq;
+    @Input() responsiveHeight;
+    @Input() responsiveDynamicHeight;
+    @Input() absoluteLayout : boolean;
 
     @Input() onViewPortChanged;
     @Input() onCellClick;
@@ -65,23 +69,19 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     sortClassUpdateTimer: any;
     currentPage: number = 1;
     changeListener: (change: FoundsetChangeEvent) => void;
+    rendered: boolean;
 
-    constructor(renderer: Renderer2, logFactory: LoggerFactory ) {
+    constructor(renderer: Renderer2, logFactory: LoggerFactory) {
         super(renderer);
         this.log = logFactory.getLogger('Table');
     }
 
     ngAfterViewInit() {
         super.ngAfterViewInit();
+        this.rendered = true;
 
-        this.calculateTableWidth();
-        const tbody = this.getNativeElement().getElementsByTagName('tbody');
-        if(tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth == 0))) {
-            this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 15;//TODO +2...
-        }
-        else if(tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
-            this.scrollWidth = 0;
-        }
+        this.computeTableWidth();
+        this.computeTableHeight();
        
         this.setColumnsToInitalWidthAndInitAutoColumns();   
         for (let i = 0; i < this.columns.length; i++)
@@ -112,6 +112,51 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                 }
             }
         });
+    }
+
+    private computeTableHeight() {
+        const tbody = this.getNativeElement().getElementsByTagName('tbody');
+        if (tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth == 0))) {
+            this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 15; //TODO +2...
+        }
+        else if (tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
+            this.scrollWidth = 0;
+        }
+
+        if (!this.absoluteLayout) {
+            this.renderer.setStyle(this.getNativeElement(), "position", "relative");
+
+            const pagination = this.getNativeElement().getElementsByTagName('ngb-pagination');
+            let paginationHeight = 0;
+            if (pagination[0] && pagination[0].children[0]) {
+                paginationHeight = pagination[0].children[0].clientHeight;
+            }
+            if (this.columns) {
+                if (this.responsiveDynamicHeight) {
+                    //TODO let h = paginationHeight + this.getNativeElement().clientHeight;
+                    if (this.responsiveHeight === 0) {
+                        //this case does not really work for ng1
+                        this.renderer.setStyle(this.getNativeElement(), "height", "100%");
+                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", "100%");
+                    }
+                    else {
+                        //this doesn't work for cdkVirtualFor because we need to provide it a size to make it display something
+                        //and then it doesn't make sense to set the size based on the computed height because it's the one that we have set previously
+                        this.renderer.setStyle(this.getNativeElement(), "height", (this.responsiveHeight  - paginationHeight) + "px")//TODO h + "px");
+                        this.renderer.setStyle(this.getNativeElement(), "max-height", this.responsiveHeight + "px");
+                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", this.getNativeElement().clientHeight + "px");
+                    }
+                }
+                else if (this.responsiveHeight === 0) {
+                    this.renderer.setStyle(this.getNativeElement(), "height", "100%");
+                    this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", (this.getNativeElement().clientHeight - paginationHeight) + "px");
+                }
+                else {
+                    this.renderer.setStyle(this.getNativeElement(), "height", this.responsiveHeight + "px");
+                    this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", (this.responsiveHeight - paginationHeight) + "px");
+                }
+            }
+        }
     }
 
     ngOnDestroy(): void {
@@ -226,6 +271,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
             if(this.autoColumnPercentage) {
                 columnStyle["width"] = autoColumnPercentage + "%";
             } else {
+                if (!this.autoColumns) this.setColumnsToInitalWidthAndInitAutoColumns();
                 columnStyle["min-width"] = columnStyle["max-width"] = columnStyle["width"] = Math.floor( (this.getComponentWidth() - this.tableWidth - this.scrollWidth) / this.autoColumns.count) + "px";
             }
         }
@@ -233,6 +279,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         return columnStyle;
     }
     getComponentWidth() {
+        if (!this.rendered) return 0;
         if (this.componentWidth === undefined && this.getNativeElement().parentElement.parentElement.offsetWidth != 0) {
             this.componentWidth = Math.floor(this.getNativeElement().parentElement.parentElement.offsetWidth);
         }
@@ -274,7 +321,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         return numberFromPxString;
     }
 
-    calculateTableWidth() {
+    computeTableWidth() {
         this.tableWidth = 0;
         if (this.columns) {
             for (let i = 0; i < this.columns.length; i++) {
@@ -438,6 +485,9 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
             if (pagination[0] && pagination[0].children[0]) {
                 tBodyStyle['margin-bottom'] = (pagination[0].children[0].clientHeight + 2) + "px";
                 this.renderer.setStyle(pagination[0].children[0], "margin-bottom", "0");
+                this.renderer.setStyle(pagination[0].children[0], "position", "absolute");
+                this.renderer.setStyle(pagination[0].children[0], "bottom", "0");
+                this.computeTableHeight();
             }
         }
 
@@ -531,6 +581,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     onScroll(){
         if(!this.viewPort) return;
         if (this.onViewPortChanged) {
+            this.currentPage = this.viewPort.getRenderedRange().start / this.pageSize +1;
             this.onViewPortChanged(this.viewPort.getRenderedRange().start, this.viewPort.getRenderedRange().end);
         }
     }
@@ -564,7 +615,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     }
 
     modifyPage() {
-        this.viewPort.setRenderedRange({start: this.pageSize*(this.currentPage-1), end: this.pageSize * this.currentPage - 1});
+        this.viewPort.setRenderedRange({start: this.pageSize * (this.currentPage - 1), end: this.pageSize * this.currentPage - 1});
     }
 
     getRowClass(idx: number) {
