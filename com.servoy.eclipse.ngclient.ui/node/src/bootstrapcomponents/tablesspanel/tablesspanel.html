@@ -1,17 +1,7 @@
 <div
-    [ngClass]="styleClass"
-    *ngIf="visible && showEditorHint()">
-    <label>
-        <span>
-            Select contained form
-        </span>
-    </label>
-</div>
-<div
     class='bts-tablesspanel'
     [ngStyle]="getContainerStyle()"
     [id]="servoyApi.getMarkupId()"
-    *ngIf="!visible"
     [svyTooltip]="toolTipText"
     [sabloTabseq]="tabSeq"
     [sabloTabseqConfig]="{container: true, reserverGap: 50}"

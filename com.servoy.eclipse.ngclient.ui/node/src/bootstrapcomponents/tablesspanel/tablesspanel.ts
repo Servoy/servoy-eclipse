@@ -60,10 +60,6 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent {
     }
 }
 
-  showEditorHint() {
-    return !this.containedForm && this.elementRef.nativeElement.getAttribute("svy-id") !== null;
-  }
-
   setRealContainedForm(formName: any, relationName: any) {
     if (this.visible) {
       if (this.formWillShowCalled != formName && formName) {
@@ -84,8 +80,10 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent {
   }
 
   getForm() {
+      return this.realContainedForm;
   }
 
   getContainerStyle() {
+      return {position:"relative", minHeight:this.height+"px"};
   }
 }
