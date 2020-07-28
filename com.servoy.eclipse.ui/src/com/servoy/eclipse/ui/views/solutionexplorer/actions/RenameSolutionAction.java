@@ -19,14 +19,17 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
@@ -169,6 +172,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 								if (isActive)
 								{
 									servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+									IWorkingSet[] allWorkingSets = PlatformUI.getWorkbench().getWorkingSetManager().getAllWorkingSets();
 									IJobManager jobManager = Job.getJobManager();
 									try
 									{
@@ -178,28 +182,28 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 										servoyModel = (ServoyModel)servoyModel.refreshServoyProjects();
 										ServoyProject svyProject = activeProject.getEditingSolution().getName().equals(name)
 											? servoyModel.getServoyProject(name) : servoyModel.getServoyProject(activeProject.getProject().getName());
-										IWorkingSet[] allWorkingSets = PlatformUI.getWorkbench().getWorkingSetManager().getAllWorkingSets();
 										if (allWorkingSets != null)
 										{
-
 											for (IWorkingSet ws : allWorkingSets)
 											{
 												if (ServoyModel.SERVOY_WORKING_SET_ID.equals(ws.getId()))
 												{
-
 													List<String> paths = new ArrayList<String>();
 													IAdaptable[] resources = ws.getElements();
 													if (resources != null && resources.length > 0)
 													{
 														for (IAdaptable resource : resources)
 														{
-															paths.add(((IResource)resource).getFullPath().toString());
+															IPath fullPath = ((IResource)resource).getFullPath();
+															IFile file = ServoyModel.getWorkspace().getRoot()
+																.getFile(new Path(name + "/" + fullPath.removeFirstSegments(1).toString()));
+															fullPath = file.getFullPath();
+															paths.add(fullPath.toString());
 														}
 														svyProject.getResourcesProject().addWorkingSet(
 															new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
 															ws.getName(), paths);
 													}
-
 												}
 											}
 										}
