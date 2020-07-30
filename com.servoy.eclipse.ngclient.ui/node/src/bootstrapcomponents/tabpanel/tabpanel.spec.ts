@@ -9,6 +9,7 @@ import { ServoyApi } from '../../ngclient/servoy_public'
 describe('TabpanelComponent', () => {
   let component: ServoyBootstrapTabpanel;
   let fixture: ComponentFixture<ServoyBootstrapTabpanel>;
+  const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml']);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -22,6 +23,7 @@ describe('TabpanelComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapTabpanel);
     component = fixture.componentInstance;
+    component.servoyApi =  servoyApi;
     fixture.detectChanges();
   });
 
