@@ -28,6 +28,7 @@ import { ShowDisplayValuePipe } from "./lib/showDisplayValue.pipe";
 import { ServoyBootstrapImageMedia } from "./imagemedia/imagemedia";
 import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
+import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
     declarations: [
@@ -57,7 +58,8 @@ import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
       CommonModule, 
       FormsModule,
       OwlDateTimeModule,
-      OwlMomentDateTimeModule
+      OwlMomentDateTimeModule,
+      NgbModule
     ], 
     exports: [
       ServoyBootstrapImageMedia,
