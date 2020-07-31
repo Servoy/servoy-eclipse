@@ -1,5 +1,6 @@
 <div #element class="tablewrapper" *ngIf="visible">
-<table [id]="'table_'+servoyApi.getMarkupId()" class='svy-table' [ngClass]="styleClass" [sabloTabseq]="tabSeq">
+<table [id]="'table_'+servoyApi.getMarkupId()" class='svy-table' [ngClass]="styleClass" [sabloTabseq]="tabSeq"
+  (keydown)="keypressed($event)">
 	<thead ng-style="getTHeadStyle()">
 	  <tr>
 		<th *ngFor="let column of columns; let i = index" [ngStyle]="getColumnStyle(i)" [ngClass]="getSortStyleClass(i)"
