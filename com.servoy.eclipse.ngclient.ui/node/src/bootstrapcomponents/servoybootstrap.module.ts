@@ -1,5 +1,7 @@
 
 import { NgModule } from "@angular/core";
+import { ServoyBootstrapBaseComponent } from "./bts_basecomp";
+import { ServoyBootstrapBaseTabPanel } from "./bts_basetabpanel";
 import { ServoyPublicModule } from "../ngclient/servoy_public.module";
 import { SabloModule } from "../sablo/sablo.module";
 import { ServoyBootstrapButton } from "./button/button";
