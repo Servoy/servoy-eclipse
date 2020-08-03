@@ -1,15 +1,9 @@
-<span
+<span #element
     class="bts-label"
-    [ngClass]="['styleClass', 'styleClassExpression']"
+    [ngClass]="imageStyleClass"
     [sabloTabseq]="(onActionMethodID || onDoubleClickMethodID || onRightClickMethodID) ? tabSeq : -2"
-    [disabled]="!enabled" 
     [id]="servoyApi.getMarkupId()"
-    *ngIf="visible">
-    <span 
-        class="bts-label-icon" 
-        [ngClass]="imageStyleClass"
-        *ngIf="imageStyleClass">
-    </span>
+    [hidden]="!visible">
     <ng-container [ngTemplateOutlet]="template"></ng-container>
 </span>
 
@@ -21,7 +15,7 @@
     </span>
     <label 
         class="bts-label-text"
-        for="labelFor"
+        for="{{labelFor}}"
         [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()"
         *ngIf="labelFor && (showAs === 'html' || showAs === 'trusted_html')">
     </label>

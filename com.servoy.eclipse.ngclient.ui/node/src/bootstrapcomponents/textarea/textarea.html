@@ -2,7 +2,7 @@
     [ngClass]="styleClass" 
     class="bts-textarea"
     placeholder="{{placeholderText}}"
-    *ngIf="visible"
+    [hidden]="!visible"
     [disabled]="!enabled"
     [readOnly]="readOnly || !editable"
     [sabloTabseq]="tabSeq"

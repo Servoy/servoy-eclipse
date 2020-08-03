@@ -1,6 +1,5 @@
 
 import { NgModule } from "@angular/core";
-import { ServoyBootstrapBaseComponent } from "./bts_basecomp";
 import { ServoyPublicModule } from "../ngclient/servoy_public.module";
 import { SabloModule } from "../sablo/sablo.module";
 import { ServoyBootstrapButton } from "./button/button";
@@ -9,11 +8,9 @@ import { CommonModule } from "@angular/common";
 import { ServoyBootstrapTextarea } from './textarea/textarea';
 import { FormsModule } from "@angular/forms";
 import { ServoyBootstrapChoicegroup } from './choicegroup/choicegroup';
-import { ServoyBootstrapBasefield } from "./bts_basefield";
 import { ServoyBootstrapCheckbox } from "./checkbox/checkbox";
 import { ServoyBootstrapTextbox } from "./textbox/textbox";
-import { ServoyBootstrapDatalabel } from "./datalabel/datalabel";
-import { ServoyBootstrapBaseLabel } from "./bts_baselabel";
+import { ServoyBootstrapDatalabel, DesignFilterPipe } from "./datalabel/datalabel";
 import { ServoyBootstrapList } from './list/list';
 import { ServoyBootstrapSelect } from './select/select';
 import { ServoyBootstrapAccordion } from './accordion/accordion';
@@ -49,7 +46,8 @@ import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
       ServoyBootstrapCombobox,
       ServoyBootstrapCalendar,
       ServoyBootstrapCalendarinline,
-      ShowDisplayValuePipe
+      ShowDisplayValuePipe,
+      DesignFilterPipe
     ],
     providers: [DatalistPolyFill, ShowDisplayValuePipe],
     imports: [

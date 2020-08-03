@@ -1,14 +1,15 @@
 <div #element
-    class="bts-check"
+    
     [ngClass]="styleClass"
-    *ngIf="visible">
+    [hidden]="!visible"
+    tabindex="1">
     <label>
         <input
             type="checkbox"
             [checked]="selected"
             [svyTooltip]="toolTipText"
             [id]="servoyApi.getMarkupId()"
-            [disabled]="!enabled || !editable"
+            [disabled]="!enabled || readOnly"
             [sabloTabseq]="tabSeq"
             />
             <span 

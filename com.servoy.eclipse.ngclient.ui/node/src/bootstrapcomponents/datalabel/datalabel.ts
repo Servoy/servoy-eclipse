@@ -6,7 +6,7 @@ import { ServoyBootstrapBaseLabel } from "../bts_baselabel";
     templateUrl: './datalabel.html',
     styleUrls: ['./datalabel.scss'] 
 })
-export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel {
+export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel implements AfterViewInit {
 
     @Input() dataProviderID;
     @Input() styleClassExpression;
@@ -15,6 +15,43 @@ export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel {
 
     constructor(renderer: Renderer2) {
         super(renderer);
+    }
+
+    ngAfterViewInit() {
+        super.ngAfterViewInit();
+    }
+
+    attachHandlers() {
+        if ( this.onActionMethodID ) {
+            if (this.onDoubleClickMethodID) {
+                const innerThis: ServoyBootstrapDatalabel = this;
+                this.renderer.listen( this.getNativeElement(), 'click', e => {
+                    if (innerThis.timeoutID) {
+                        window.clearTimeout(innerThis.timeoutID);
+                        innerThis.timeoutID = null;
+                        // double click, do nothing
+                    } else {
+                        innerThis.timeoutID = window.setTimeout(function() {
+                            innerThis.timeoutID = null;
+                            innerThis.onActionMethodID( e );
+                        }, 250); }
+                 });
+            } else {
+                this.renderer.listen( this.getNativeElement(), 'click', e => { 
+                    this.onActionMethodID(e);
+                });
+            }
+        }
+        if ( this.onRightClickMethodID ) {
+          this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { 
+              this.onRightClickMethodID( e ); return false; 
+            });
+        }
+        if ( this.onDoubleClickMethodID ) {
+            this.renderer.listen( this.elementRef.nativeElement, 'dblclick', ( e ) => {
+                this.onDoubleClickMethodID(e);
+            });
+        }
     }
 }
 

@@ -1,10 +1,9 @@
-<span
+<span #element
     class="bts-label"
     [ngClass]="['styleClass', 'styleClassExpression']"
     [sabloTabseq]="(onActionMethodID || onDoubleClickMethodID || onRightClickMethodID) ? tabSeq : -2"
-    [disabled]="!enabled" 
     [id]="servoyApi.getMarkupId()"
-    *ngIf="visible"> 
+    [hidden]="!visible"> 
     <span 
         class="bts-label-icon" 
         [ngClass]="imageStyleClass"

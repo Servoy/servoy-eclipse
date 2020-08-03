@@ -13,18 +13,19 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
   @ViewChild('element') elementRef: ElementRef;
   
   @Input() valuelistID: IValuelist;
-  @Input() multiselect: boolean;
+  @Input() multiselect;
   @Input() selectSize;
   selectedValues: any[];
+
+  ngOnInit() {
+  } 
 
   constructor(renderer: Renderer2, private showDisplayValuePipe: ShowDisplayValuePipe) {
     super(renderer);
   }
 
-  ngOnInit(): void {}
-
   ngOnChanges( changes: SimpleChanges ) {
-    if (changes) {
+    if (changes && this.elementRef) {
       for ( const property of Object.keys(changes) ) {
           const change = changes[property];
           switch ( property ) {
@@ -61,7 +62,7 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
   }
 
   onChange(event) {
-    this.renderer.removeAttribute(this.elementRef, 'placeholder');
+    this.renderer.removeAttribute(this.getNativeElement(), 'placeholder');
     if (this.updateDataprovider() && this.onActionMethodID) {
       this.onActionMethodID(event);
     }
@@ -71,11 +72,13 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
     if (this.valuelistID) {
       let value = null;
       for (let i = 0; i < this.valuelistID.length; i++) {
-        if (this.selectedValues.indexOf(this.valuelistID[i].displayValue) != -1) {
-          if (this.multiselect) {
-            if (value == null) value = [];
-            value.push(this.valuelistID[i].realValue);
-          } else {
+        if (this.multiselect) {
+          if (this.selectedValues.indexOf(this.valuelistID[i].displayValue) != -1) {
+              if (value == null) value = [];
+              value.push(this.valuelistID[i].realValue);
+            } 
+        } else {
+          if (this.dataProviderID == this.valuelistID[i].displayValue) {
             value = this.valuelistID[i].realValue;
           }
         }

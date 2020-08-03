@@ -2,7 +2,7 @@
     <input #element
         type="text"
         [attr.list]="servoyApi.getMarkupId() + '_datalist'"
-        *ngIf="visible"
+        [hidden]="!visible"
         [ngClass]="styleClass"
         (keydown)="onKeydown($event)"
         (blur)="updateDataprovider()"
@@ -12,11 +12,11 @@
         [readOnly]="readOnly || !editable"
         [id]="servoyApi.getMarkupId()"
     />
-    <datalist> [id]="servoyApi.getMarkupId() + '_datalist'"
+    <datalist [id]="servoyApi.getMarkupId() + '_datalist'" > 
         <option 
             *ngFor="let value of valuelistID"
-            [value]="value.realValue | showDisplayValue:valuelistID:true">
-            [selected]="dataProviderID == value.realValue"
+            [value]="value.realValue | showDisplayValue:valuelistID:true"
+            [selected]="dataProviderID == value.realValue">
         </option>
     </datalist>
 </div>

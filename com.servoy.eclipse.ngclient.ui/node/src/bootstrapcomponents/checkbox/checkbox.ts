@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
@@ -7,6 +7,8 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
   styleUrls: ['./checkbox.scss']
 })
 export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield implements AfterViewInit {
+
+  @Input() showAs;
 
   selected: boolean = false;
 
@@ -37,9 +39,6 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield implements
     this.renderer.listen(element, 'click', (e) => {
         this.itemClicked(e);
         if (this.onActionMethodID) this.onActionMethodID(e);
-    });
-    this.renderer.listen(element, 'blur', (e) => {
-      if(this.onFocusLostMethodID) this.onFocusLostMethodID(e);
     });
   }
 

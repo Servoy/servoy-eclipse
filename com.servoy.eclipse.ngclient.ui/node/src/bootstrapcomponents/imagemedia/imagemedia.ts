@@ -22,7 +22,6 @@ export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield implemen
     this.updateImageURL(this.media, this.dataProviderID);
   }
 
-  // not sure if we need this?
   ngOnChanges(changes: SimpleChanges): void {
     if (changes) {
       for ( const property of Object.keys(changes) ) {
@@ -47,9 +46,9 @@ export class ServoyBootstrapImageMedia extends ServoyBootstrapBasefield implemen
     } else if(dataProvider && dataProvider.url) {
       this.imageURL = dataProvider.url
     } else if (!dataProvider && this.servoyApi.isInDesigner()) {
-      this.imageURL = "bootstrapcomponents/imagemedia/images/media.png"
+      this.imageURL = "bootstrapcomponents/imagemedia/media.png"
     } else if (!dataProvider){
-      this.imageURL = "bootstrapcomponents/imagemedia/images/empty.png"
+      this.imageURL = "bootstrapcomponents/imagemedia/images/empty.gif"
     } else {
       this.imageURL = dataProvider;
     }

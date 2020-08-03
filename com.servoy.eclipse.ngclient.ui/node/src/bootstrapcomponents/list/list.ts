@@ -9,7 +9,7 @@ import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
   templateUrl: './list.html',
   styleUrls: ['./list.scss']
 })
-export class ServoyBootstrapList extends ServoyBootstrapBasefield implements AfterViewInit {
+export class ServoyBootstrapList extends ServoyBootstrapBasefield {
 
   @Input() valuelistID: IValuelist;
   @ViewChild('element') elementRef: ElementRef;
@@ -23,6 +23,7 @@ export class ServoyBootstrapList extends ServoyBootstrapBasefield implements Aft
   }
 
   ngAfterViewInit() {
+    super.ngAfterViewInit();
     this.polyFillFakeList = this.datalistPolyfill.apply(this.elementRef.nativeElement);
   }
 
