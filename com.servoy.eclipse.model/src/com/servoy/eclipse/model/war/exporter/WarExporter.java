@@ -1222,6 +1222,12 @@ public class WarExporter
 		File pluginsDir = new File(tmpWarDir, "plugins");
 		pluginsDir.mkdirs();
 		List<String> plugins = exportModel.getPlugins();
+		boolean noConvertorsOrValidators = !plugins.contains("converters.jar") || !plugins.contains("default_validators.jar");
+		if (noConvertorsOrValidators)
+		{
+			// print to system out for the command line exporter.
+			System.out.println("converter.jar or defalut_validators.jar not exported so column converters or validators don't work");
+		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
 		try (Writer fw = new FileWriter(pluginProperties))
 		{
