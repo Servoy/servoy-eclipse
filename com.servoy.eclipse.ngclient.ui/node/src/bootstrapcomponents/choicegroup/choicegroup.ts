@@ -12,6 +12,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield impleme
   @Input() inputType;
   @Input() findmode;
   @Input() valuelistID : IValuelist;
+  @Input() showAs;
   selection: any[] = [];
   allowNullinc = 0;
 
