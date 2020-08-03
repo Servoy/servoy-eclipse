@@ -49,7 +49,7 @@ public class I18NReadFromDBAction extends Action
 
 
 			MessageDialogWithToggle dlg = MessageDialogWithToggle.open(MessageDialog.CONFIRM, UIUtils.getActiveShell(), "Read I18N from DB",
-				"This will insert new and replace exiting keys from the database into the workspace.",
+				"This will insert new and replace existing keys from the database into the workspace.",
 				"Delete keys from workspace that are not in the database", false, null, null, SWT.NONE);
 			if (dlg.getReturnCode() == Window.OK)
 			{
