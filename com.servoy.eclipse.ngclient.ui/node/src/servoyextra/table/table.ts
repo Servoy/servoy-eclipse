@@ -74,7 +74,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     rendered: boolean;
     scrollToSelectionNeeded: boolean = true;
 
-    constructor(renderer: Renderer2, logFactory: LoggerFactory) {
+    constructor(renderer: Renderer2, logFactory: LoggerFactory) { 
         super(renderer);
         this.log = logFactory.getLogger('Table');
     }
@@ -704,8 +704,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                 fs.selectedRowIndexes = [lastVisibleIndex];
                 selectionChanged = (selection != lastVisibleIndex);
                 this.log.spam("svy extra table * keyPressed; scroll on PG DOWN");
-                //const tr : Element = this.getNativeElement().getElementsByTagName('tr')[lastVisibleIndex];
-                //this.viewPort.scrollToOffset(tr.getBoundingClientRect().top);
                 this.viewPort.scrollToIndex(lastVisibleIndex);
             } else if (event.keyCode == 38) { // ARROW UP KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.arrowUp) return;
@@ -749,10 +747,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                 const endIndex = fs.viewPort.size -1;
                 if (fs.selectedRowIndexes[0] != endIndex) {
                     fs.selectedRowIndexes = [endIndex];
-                    const last = this.viewPort._contentWrapper.nativeElement.lastElementChild;
-                    last.scrollIntoView(false);
                     selectionChanged = true;
-                    //this.viewPort.scrollToOffset(this.getNumberFromPxString(this.viewPort._totalContentHeight));
+                    this.viewPort.scrollToIndex(endIndex);
                 }
 
                 if (fs.hasMoreRows){
