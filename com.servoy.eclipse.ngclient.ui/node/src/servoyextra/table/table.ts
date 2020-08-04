@@ -72,6 +72,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     currentPage: number = 1;
     changeListener: (change: FoundsetChangeEvent) => void;
     rendered: boolean;
+    scrollToSelectionNeeded: boolean = true;
 
     constructor(renderer: Renderer2, logFactory: LoggerFactory) {
         super(renderer);
@@ -100,7 +101,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
             }
 
             if (event.selectedRowIndexesChanged) {
-                this.selectedRowIndexesChanged(event.selectedRowIndexesChanged.oldValue);
+               this.selectedRowIndexesChanged(event.selectedRowIndexesChanged.oldValue);
             }
         });
 
@@ -116,7 +117,12 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                 if (this.lastSelectionFirstElement != this.foundset.selectedRowIndexes[0]) {
                     this.log.spam("svy extra table * selectedRowIndexes changed; scrollToSelectionNeeded = true");
                     this.lastSelectionFirstElement = this.foundset.selectedRowIndexes[0];
-                    this.scrollToSelection();
+                    if (this.scrollToSelectionNeeded) {
+                        this.scrollToSelection();
+                    }
+                    else {
+                        this.scrollToSelectionNeeded = true;
+                    }
                 }
             }
         }
@@ -147,6 +153,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     private scrollToSelection() {
         if (this.lastSelectionFirstElement !== -1) {
             this.viewPort.scrollToIndex(this.lastSelectionFirstElement);
+            this.setCurrentPageIfNeeded();
         }
     }
 
@@ -272,40 +279,26 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         }
     }
 
-    private addCellHandlers() {
-        if (this.onCellClick || this.onCellDoubleClick || this.onCellRightClick) {
-            let cells = this.getNativeElement().getElementsByTagName('td');
-            for (let i = 0; i < cells.length; i++) {
-                let rowIdx = i / this.columns.length + 1;
-                let colIdx = i % this.columns.length;
-               if (this.onCellDoubleClick && this.onCellClick) {
-                    const innerThis: ServoyExtraTable = this;
-                    this.renderer.listen(cells[i], 'click', e => {
-                        if (innerThis.lastClicked == i) {
-                            window.clearTimeout(this.timeoutID);
-                            innerThis.lastClicked = -1;
-                            innerThis.timeoutID = null;
-                            innerThis.onCellDoubleClick(rowIdx, colIdx, innerThis.foundset.viewPort.rows[rowIdx], e);
-                        }
-                        else {
-                            innerThis.lastClicked = i;
-                            innerThis.timeoutID = window.setTimeout(() => {
-                                innerThis.timeoutID = null;
-                                innerThis.lastClicked = -1;
-                                innerThis.onCellClick(rowIdx, colIdx, innerThis.foundset.viewPort.rows[rowIdx], e);
-                            }, 250);
-                        }
-                    });
-                }
-                else if (this.onCellClick) {
-                    this.renderer.listen(cells[i], 'click', e => this.onCellClick(rowIdx, colIdx, this.foundset.viewPort.rows[rowIdx], e));
-                }
-                else if (this.onCellDoubleClick) {
-                    this.renderer.listen(cells[i], 'dblclick', e => this.onCellDoubleClick(rowIdx, colIdx, this.foundset.viewPort.rows[rowIdx], e));
-                }
-                if (this.onCellRightClick)
-                    this.renderer.listen(cells[i], 'contextmenu', e => this.onCellRightClick(rowIdx, colIdx, this.foundset.viewPort.rows[rowIdx], e));
+    cellClick(rowIdx: number, colIdx: number, record: any, e: Event) {
+        if (this.onCellDoubleClick && this.onCellClick) {
+            const innerThis: ServoyExtraTable = this;
+            if (innerThis.lastClicked == rowIdx * colIdx) {
+                window.clearTimeout(this.timeoutID);
+                innerThis.lastClicked = -1;
+                innerThis.timeoutID = null;
+                innerThis.onCellDoubleClick(rowIdx, colIdx, record, e);
             }
+            else {
+                innerThis.lastClicked = rowIdx * colIdx;
+                innerThis.timeoutID = window.setTimeout(() => {
+                    innerThis.timeoutID = null;
+                    innerThis.lastClicked = -1;
+                    innerThis.onCellClick(rowIdx, colIdx, record, e);
+                }, 250);
+            }
+        }
+        else if (this.onCellClick) {
+            this.onCellClick(rowIdx, colIdx, this.foundset.viewPort.rows[rowIdx], e);
         }
     }
 
@@ -537,7 +530,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
        if (this.showPagination()) {
             const pagination = this.getNativeElement().getElementsByTagName('ngb-pagination');
             if (pagination[0] && pagination[0].children[0]) {
-                tBodyStyle['margin-bottom'] = (pagination[0].children[0].clientHeight + 2) + "px";
+                tBodyStyle['bottom'] = (pagination[0].children[0].clientHeight + 2) + "px";
                 this.renderer.setStyle(pagination[0].children[0], "margin-bottom", "0");
                 this.renderer.setStyle(pagination[0].children[0], "position", "absolute");
                 this.renderer.setStyle(pagination[0].children[0], "bottom", "0");
@@ -627,16 +620,23 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                 newSelection.push(n);
             }
         }
-
+        this.scrollToSelectionNeeded = false; //we don't need to scroll to selection when we select a record by clicking on it
         this.foundset.requestSelectionUpdate(newSelection);
         this.foundsetChange.emit(this.foundset);
     }
 
     onScroll(){
         if(!this.viewPort) return;
-        if (this.onViewPortChanged) {
-            this.currentPage = this.viewPort.getRenderedRange().start / this.pageSize +1;
+        if (this.onViewPortChanged) 
+        {
+            this.setCurrentPageIfNeeded();
             this.onViewPortChanged(this.viewPort.getRenderedRange().start, this.viewPort.getRenderedRange().end);
+        }
+    }
+
+    private setCurrentPageIfNeeded() {
+        if (this.showPagination()) {
+            this.currentPage = Math.trunc(this.viewPort.measureScrollOffset() / (this.pageSize * this.getNumberFromPxString(this.minRowHeight))) + 1;
         }
     }
 
@@ -667,11 +667,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         return this.pageSize && this.foundset && (this.foundset.serverSize > this.pageSize || this.foundset.hasMoreRows);
     }
 
-    modifyPage(count?:number) {
-        if (count)
-        {
-            this.currentPage += count;
-        }
+    modifyPage() {
         this.viewPort.setRenderedRange({start: this.pageSize * (this.currentPage - 1), end: this.pageSize * this.currentPage - 1});
     }
 
@@ -708,14 +704,17 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                 fs.selectedRowIndexes = [lastVisibleIndex];
                 selectionChanged = (selection != lastVisibleIndex);
                 this.log.spam("svy extra table * keyPressed; scroll on PG DOWN");
+                //const tr : Element = this.getNativeElement().getElementsByTagName('tr')[lastVisibleIndex];
+                //this.viewPort.scrollToOffset(tr.getBoundingClientRect().top);
                 this.viewPort.scrollToIndex(lastVisibleIndex);
             } else if (event.keyCode == 38) { // ARROW UP KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.arrowUp) return;
                 
                 if (selection > 0) {
                     fs.selectedRowIndexes = [selection - 1];
-                    selectionChanged = true;
                     this.viewPort.scrollToIndex(selection - 1);
+                    this.scrollToSelectionNeeded = false;
+                    selectionChanged = true;
                 }
                 event.preventDefault();
             } else if (event.keyCode == 40) { // ARROW DOWN KEY
@@ -724,6 +723,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                 if (selection + 1 < (fs.viewPort.startIndex + fs.viewPort.size)) {
                     fs.selectedRowIndexes = [selection + 1];
                     this.viewPort.scrollToIndex(selection + 1);
+                    this.scrollToSelectionNeeded = false;
                     selectionChanged = true;
                 }
                 event.preventDefault();
@@ -734,41 +734,32 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                 }
             } else if (event.keyCode == 36) { // HOME
                 if (this.keyCodeSettings && !this.keyCodeSettings.home) return;
-
-                let allowedBounds = this.calculateAllowedLoadedDataBounds();
-                if (fs.viewPort.startIndex > allowedBounds.startIdx) { // see if we have the first record loaded
-                    this.loadFirstRecordsIfNeeded(allowedBounds);
+                if (fs.selectedRowIndexes[0] != 0)
+                {
+                    fs.selectedRowIndexes = [0];
+                    this.viewPort.scrollToIndex(0);
+                    selectionChanged = true;
                 }
-                else if (allowedBounds.size > 0) {
-                    if (selection != allowedBounds.startIdx)
-                    {
-                        this.foundset.requestSelectionUpdate([allowedBounds.startIdx]);
-                        this.foundsetChange.emit(this.foundset);
-                    } 
-                    else {
-                        this.viewPort.scrollToIndex(fs.viewPort.startIndex);
-                    }
-                }
-                event.preventDefault()
+                event.preventDefault();
                 event.stopPropagation();
 
             } else if (event.keyCode == 35) { // END
                 if (this.keyCodeSettings && !this.keyCodeSettings.end) return;
 
-                let allowedBounds = this.calculateAllowedLoadedDataBounds();
-                if (fs.viewPort.startIndex + fs.viewPort.size < allowedBounds.startIdx + allowedBounds.size) { // see if we already have the last record loaded or not
-                    this.loadLastRecordsIfNeeded(allowedBounds);
-                } 
-                else if (allowedBounds.size > 0) {
-                    if (selection != allowedBounds.startIdx + allowedBounds.size - 1) {
-                        this.foundset.requestSelectionUpdate([allowedBounds.startIdx + allowedBounds.size - 1]);
-                        this.foundsetChange.emit(this.foundset);
-                    }
-                    else {
-                        this.viewPort.scrollToIndex(fs.viewPort.size - 1);
-                    }
+                const endIndex = fs.viewPort.size -1;
+                if (fs.selectedRowIndexes[0] != endIndex) {
+                    fs.selectedRowIndexes = [endIndex];
+                    const last = this.viewPort._contentWrapper.nativeElement.lastElementChild;
+                    last.scrollIntoView(false);
+                    selectionChanged = true;
+                    //this.viewPort.scrollToOffset(this.getNumberFromPxString(this.viewPort._totalContentHeight));
                 }
 
+                if (fs.hasMoreRows){
+                    //if it has more rows, then load at most one more page if paging is used,  or the remaining records otherwise
+                    this.foundset.loadRecordsAsync(endIndex, this.pageSize > 0 ? Math.min(this.pageSize, this.foundset.serverSize-endIndex) : this.foundset.serverSize-endIndex);
+                    this.foundsetChange.emit(this.foundset);
+                }
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -778,91 +769,4 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
             }
         }
     }
-
-    loadFirstRecordsIfNeeded(allowedBounds: { startIdx: any; size: any; }) {
-        // this can be executed delayed, after pending loads finish, so do check again if we still need to load bottom of foundset
-        if (this.foundset.viewPort.startIndex > allowedBounds.startIdx) {
-            let newLoadPromise = this.foundset.loadRecordsAsync(allowedBounds.startIdx, Math.min(allowedBounds.size, this.getInitialPreferredLoadedSize()));
-            newLoadPromise.then(() => {
-                //runWhenThereIsNoPendingLoadRequest(this.loadFirstRecordsIfNeeded);
-                this.loadFirstRecordsIfNeeded(allowedBounds);
-            });
-            this.foundsetChange.emit(this.foundset);
-            return newLoadPromise;
-        } else if (allowedBounds.size > 0) {
-            this.foundset.requestSelectionUpdate([allowedBounds.startIdx]).then(() => {
-                this.scrollToSelection();
-            });
-        }
-    }
-
-    loadLastRecordsIfNeeded(allowedBounds: { startIdx: any; size: any; }) {
-        // this can be executed delayed, after pending loads finish, so do check again if we still need to load bottom of foundset
-        if (this.foundset.viewPort.startIndex + this.foundset.viewPort.size < allowedBounds.startIdx + allowedBounds.size) {
-            const firstIndexToLoad = Math.max(allowedBounds.startIdx, allowedBounds.startIdx + allowedBounds.size - this.getInitialPreferredLoadedSize());
-            const newLoadPromise = this.foundset.loadRecordsAsync(firstIndexToLoad, allowedBounds.startIdx + allowedBounds.size - firstIndexToLoad);
-            newLoadPromise.then(() => {
-                // just in case server side foundset was not fully loaded and now that we accessed last part of it it already loaded more records
-                //runWhenThereIsNoPendingLoadRequest(this.loadLastRecordsIfNeeded);
-                this.loadLastRecordsIfNeeded(allowedBounds);
-            });
-            this.foundsetChange.emit(this.foundset);
-            return newLoadPromise;
-        } else {
-            this.foundset.requestSelectionUpdate([allowedBounds.startIdx + allowedBounds.size - 1]).then(() => {
-                this.scrollToSelection();
-            });
-        }
-    }
-
-    // this function also adjusts current page if needed (if it's after the foundset size for example)
-    calculateAllowedLoadedDataBounds() {
-        let allowedStart: number;
-        let allowedSize: number;
-
-        let fs = this.foundset;
-        let serverSize = fs.serverSize;
-        if (this.showPagination()) {
-            // paging mode only keeps data for the showing page - at maximum
-            allowedStart = this.pageSize * (this.currentPage - 1);
-            if (!this.foundset.hasMoreRows && allowedStart >= serverSize) {
-                // this page no longer exists; it is after serverSize; adjust current page and that watch on that will request the correct viewport
-                this.setCurrentPage(this.getPageForIndex(serverSize - 1));
-                allowedStart = this.pageSize * (this.currentPage - 1);
-            }
-
-            let newAllowedSize: number;
-            if (allowedStart >= serverSize && this.foundset.hasMoreRows) {
-                newAllowedSize = this.pageSize;
-            }
-            else {
-                newAllowedSize = serverSize - allowedStart;
-            }
-
-            allowedSize = Math.min(this.pageSize, newAllowedSize);
-        } else {
-            // table is not going to show/use pages; so we can think of it as one big page
-            this.setCurrentPage(1); // just to be sure - we are not paging so we are on first "page"
-
-            allowedStart = 0;
-            allowedSize = serverSize;
-        }
-        return { startIdx: allowedStart, size: allowedSize };
-    }
-        
-    setCurrentPage(pageNumber:number) {
-        this.currentPage = pageNumber;
-        this.viewPort.setRenderedRange({start: this.pageSize * (this.currentPage - 1), end: this.pageSize * this.currentPage - 1});
-    }
-
-    getPageForIndex(idx:number) {
-        return Math.floor(Math.max(idx, 0) / this.pageSize) + 1;
-    }
-
-    // this is actually the preferred viewport size that the server will send automatically when foundset data completely changes
-	// it should be maximum pageSize if that is > 0 or (when we implement it) -1 (so auto paging)
-	getInitialPreferredLoadedSize() {
-		let potentialInitialViewportSize = Math.floor(52 * 2.5); //TODo performance settings batchSizeForLoadingMoreRows
-		return (this.pageSize > 0 && this.pageSize < potentialInitialViewportSize) ? this.pageSize : potentialInitialViewportSize;
-	}
 }

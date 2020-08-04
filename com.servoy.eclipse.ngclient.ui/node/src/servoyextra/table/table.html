@@ -3,7 +3,7 @@
   (keydown)="keypressed($event)">
 	<thead ng-style="getTHeadStyle()">
 	  <tr>
-		<th *ngFor="let column of columns; let i = index" [ngStyle]="getColumnStyle(i)" [ngClass]="getSortStyleClass(i)"
+		<th *ngFor="let column of columns; let i = index;" [ngStyle]="getColumnStyle(i)" [ngClass]="getSortStyleClass(i)"
 		 mwlResizable [enableGhostResize]="enableColumnResize" 
 		 [resizeEdges]="{ bottom: false, right: enableColumnResize && i < columns.length-1, top: false, left: enableColumnResize && i > 0 }"
          (resizing)="onResizeEnd($event,i)">
@@ -13,12 +13,15 @@
 	  </tr>
 	</thead>
 	<tbody>	
-	<cdk-virtual-scroll-viewport itemSize="25" style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()">	
-		<tr cdk-row *cdkVirtualFor="let row of foundset.viewPort.rows; let r = index" (click)="selectRow(r, $event)"
+	<cdk-virtual-scroll-viewport style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()" 
+	[itemSize]="getNumberFromPxString(minRowHeight)"
+	[minBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) / 2 : 200" 
+	[maxBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) : 400" >	
+		<tr cdk-row *cdkVirtualFor="let row of foundset.viewPort.rows; let r = index;" (click)="selectRow(r, $event)"
 		[ngClass]="getRowClass(r)">
 		<td cdk-cell *ngFor="let column of columns; let i = index" [className]="'c' + i" 
-			(click)="onCellClick && onCellClick(r, i, foundset.viewPort.rows[r], $event)"
-			(dblclick)="onCellDoubleClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event)"
+			(click)="cellClick(r, i, foundset.viewPort.rows[r], $event)"
+			(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event)"
 			(contextmenu)="onCellRightClick && onCellRightClick(r, i, foundset.viewPort.rows[r], $event)">
 	    	<div [innerHtml]="column.dataprovider[foundset.viewPort.rows.indexOf(row)]"></div>
 		</td>
