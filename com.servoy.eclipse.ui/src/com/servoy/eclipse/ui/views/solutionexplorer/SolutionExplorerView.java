@@ -190,6 +190,7 @@ import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ngclient.ui.CopySourceFolderAction;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.ViewPartHelpContextProvider;
@@ -2796,6 +2797,10 @@ public class SolutionExplorerView extends ViewPart
 			menuManager.add(openCreateRelationTutorialAction);
 			manager.add(menuManager);
 		}
+
+		manager.add(addAsModuleAction);
+
+		manager.add(new CopySourceFolderAction());
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)

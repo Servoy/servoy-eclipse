@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.tukaani.xz,
  javax.servlet,
  org.apache.tomcat,
- org.apache.commons.io
+ org.apache.commons.io,
+ org.eclipse.jface
 Bundle-Activator: com.servoy.eclipse.ngclient.ui.Activator
 Automatic-Module-Name: com.servoy.eclipse.ngclient.ui
 Export-Package: com.servoy.eclipse.ngclient.ui,

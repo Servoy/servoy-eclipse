@@ -44,7 +44,7 @@ public class Activator extends Plugin
 		plugin = this;
 		File stateLocation = Activator.getInstance().getStateLocation().toFile();
 		this.projectFolder = new File(stateLocation, "target");
-		new DistFolderCreatorJob(projectFolder).schedule();
+		new DistFolderCreatorJob(projectFolder, false).schedule();
 //		extractNode();
 //		copyNodeFolder();
 	}

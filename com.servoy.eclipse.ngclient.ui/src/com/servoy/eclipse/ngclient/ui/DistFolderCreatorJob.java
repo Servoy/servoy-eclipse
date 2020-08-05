@@ -38,11 +38,13 @@ import com.servoy.eclipse.model.util.ServoyLog;
 public class DistFolderCreatorJob extends Job
 {
 	private final File nodeFolder;
+	private final boolean includeSource;
 
-	public DistFolderCreatorJob(File nodeFolder)
+	public DistFolderCreatorJob(File nodeFolder, boolean includeSource)
 	{
 		super("Copy distribution folder");
 		this.nodeFolder = nodeFolder;
+		this.includeSource = includeSource;
 	}
 
 	@Override
@@ -54,19 +56,26 @@ public class DistFolderCreatorJob extends Job
 		{
 			File dist = new File(nodeFolder, "dist");
 			if (dist.exists()) FileUtils.deleteDirectory(dist);
+			if (includeSource)
+			{
+				File src = new File(nodeFolder, "src");
+				if (src.exists()) FileUtils.deleteDirectory(src);
+			}
 		}
 		catch (IOException e1)
 		{
 			ServoyLog.logError(e1);
 		}
 
-		Enumeration<URL> entries = Activator.getInstance().getBundle().findEntries("/node/dist", "*", true);
+		String sourceFolder = includeSource ? "/node/" : "/node/dist/";
+		Enumeration<URL> entries = Activator.getInstance().getBundle().findEntries(sourceFolder, "*", true);
 		while (entries.hasMoreElements())
 		{
 			URL entry = entries.nextElement();
 			String filename = entry.getFile();
 			if (filename.startsWith("/node/")) filename = filename.substring("/node".length());
 			else filename = filename.substring("node".length());
+			if (filename.startsWith("/node_modules/") || filename.startsWith("/e2e/")) continue;
 			try
 			{
 				if (filename.endsWith("/"))
