@@ -170,7 +170,7 @@ public class DesignerPreferences
 
 	public static final boolean USE_CONTEXT_MENU_TUTORIALS_DEFAULT = true;
 
-	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_BYTE_ARRAY;
+	public static final PrimaryKeyType ARRAY_UTF8_TYPE_DEFAULT = PrimaryKeyType.UUD_NATIVE;
 
 
 	protected final IEclipsePreferences eclipsePreferences;
