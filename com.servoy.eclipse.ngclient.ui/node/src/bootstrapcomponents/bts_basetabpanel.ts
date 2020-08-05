@@ -1,8 +1,9 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef } from '@angular/core';
+import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef, ContentChild, TemplateRef, Directive } from '@angular/core';
 import { WindowRefService } from '../sablo/util/windowref.service';
 import { ServoyBootstrapBaseComponent } from './bts_basecomp';
 import { BaseCustomObject } from '../sablo/spectypes.service';
 
+@Directive()
 export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
     @Input() onChangeMethodID;
     

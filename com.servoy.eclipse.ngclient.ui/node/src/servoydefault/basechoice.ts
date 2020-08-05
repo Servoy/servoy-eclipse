@@ -1,7 +1,8 @@
-import {AfterViewInit, OnInit, Renderer2, SimpleChanges} from "@angular/core";
+import { AfterViewInit, OnInit, Renderer2, SimpleChanges, Directive } from "@angular/core";
 import {FormattingService, PropertyUtils} from "../ngclient/servoy_public";
 import {ServoyDefaultBaseField} from "./basefield";
 
+@Directive()
 export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements OnInit, AfterViewInit{
   
   selection: any[] = [];
