@@ -806,7 +806,11 @@ public class EditorUtil
 								saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.CANCELED;
 								parts = null;
 							}
-							else parts = null;
+							else
+							{
+								saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.CANCELED;
+								parts = null;
+							}
 						}
 						if (parts != null)
 						{
@@ -821,14 +825,14 @@ public class EditorUtil
 									ServoyLog.logError(ex);
 								}
 							}
-						}
-						if (noOfDirtyEditors > parts.length)
-						{
-							saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.SOME_SAVED;
-						}
-						else
-						{
-							saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.ALL_SAVED;
+							if (noOfDirtyEditors > parts.length)
+							{
+								saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.SOME_SAVED;
+							}
+							else
+							{
+								saveDirtyEditorsOutput[0] = SaveDirtyEditorsOutputEnum.ALL_SAVED;
+							}
 						}
 					}
 				}

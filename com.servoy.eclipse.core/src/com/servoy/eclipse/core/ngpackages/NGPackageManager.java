@@ -57,6 +57,7 @@ public class NGPackageManager extends BaseNGPackageManager
 
 	private IActiveProjectListener activeProjectListenerForRegisteringResources;
 	private AvoidMultipleExecutionsJob reloadAllNGPackagesJob;
+	private final Object reloadAllNGPackagesJobLock = new Object();
 
 	public NGPackageManager(IDeveloperServoyModel servoyModel)
 	{
@@ -116,7 +117,7 @@ public class NGPackageManager extends BaseNGPackageManager
 		}
 		else
 		{
-			synchronized (this)
+			synchronized (reloadAllNGPackagesJobLock)
 			{
 				// do what super does but in a job; this is what code prior to the refactor did as well
 				// do this in such a way that if 100 reloadAllNGPackages calls happen before the actual reload happens/finishes in the job, the reload only occurs once/twice

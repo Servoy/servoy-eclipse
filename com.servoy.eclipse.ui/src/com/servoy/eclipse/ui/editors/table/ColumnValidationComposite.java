@@ -27,10 +27,12 @@ import java.util.Set;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
@@ -47,6 +49,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 public class ColumnValidationComposite extends Composite
@@ -61,13 +64,32 @@ public class ColumnValidationComposite extends Composite
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
 	public ColumnValidationComposite(final TableEditor te, Composite parent, int style)
 	{
 		super(parent, style);
+
+		Button check = new Button(this, SWT.CHECK);
+		check.setText("Only execute validators on validate/save");
+		check.setSelection(Boolean.parseBoolean(Settings.getInstance().getProperty("servoy.execute.column.validators.only.on.validate_and_save", "true")));
+		check.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				Settings.getInstance().setProperty("servoy.execute.column.validators.only.on.validate_and_save", Boolean.toString(check.getSelection()));
+				try
+				{
+					Settings.getInstance().save();
+				}
+				catch (Exception e1)
+				{
+				}
+			}
+		});
 
 		combo = new Combo(this, SWT.READ_ONLY);
 		UIUtils.setDefaultVisibleItemCount(combo);
@@ -108,11 +130,20 @@ public class ColumnValidationComposite extends Composite
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
-					GroupLayout.LEADING, combo, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE)).addContainerGap()));
+				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE)
+					.add(
+						GroupLayout.LEADING, combo, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE)
+					.add(
+						GroupLayout.LEADING, check, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE))
+				.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-				LayoutStyle.RELATED).add(tableContainer, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE).addContainerGap()));
+			groupLayout.createSequentialGroup().addContainerGap().add(check, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(
+					LayoutStyle.RELATED)
+				.add(combo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(
+					LayoutStyle.RELATED)
+				.add(tableContainer, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE).addContainerGap()));
 		setLayout(groupLayout);
 		//
 	}
