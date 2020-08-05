@@ -1588,6 +1588,38 @@ public class ServoyFormBuilder
 						}
 						else
 						{
+							final boolean hasExtendedIds = form.getExtendsID() > 0;
+							Form extendedForm = null;
+							if (hasExtendedIds)
+							{
+								extendedForm = flattenedSolution.getForm(form.getExtendsID());
+								if (extendedForm.getExtendsID() > 0)
+								{
+									addWebComponentMissingHandlers(markerResource, flattenedSolution, o, extendedForm);
+									continue;
+								}
+							}
+							if (form != scriptMethod.getParent() &&
+								!(hasExtendedIds && extendedForm == scriptMethod.getParent()))
+							{
+								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
+									form);
+								IMarker marker = ServoyBuilder.addMarker(markerResource, ServoyBuilder.INVALID_EVENT_METHOD, mk.getText(), -1,
+									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+									IMarker.PRIORITY_LOW, null, o);
+								if (marker != null)
+								{
+									try
+									{
+										marker.setAttribute("EventName", handler);
+									}
+									catch (Exception ex)
+									{
+										ServoyLog.logError(ex);
+									}
+								}
+							}
+
 							BuilderDependencies.getInstance().addDependency(scriptMethod.getScopeName(), form);
 						}
 					}
