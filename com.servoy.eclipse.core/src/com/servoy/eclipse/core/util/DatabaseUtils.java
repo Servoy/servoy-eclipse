@@ -45,6 +45,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -227,34 +228,41 @@ public final class DatabaseUtils
 
 				// Update the column info of this table.
 				ColumnInfo columnInfo = column.getColumnInfo();
-				if (columnInfo != null)
+				boolean newColumnInfoObj = false;
+				if (columnInfo == null)
 				{
-					columnInfo.setAutoEnterType(columnInfoDef.autoEnterType);
-					columnInfo.setAutoEnterSubType(columnInfoDef.autoEnterSubType);
-					columnInfo.setDefaultValue(columnInfoDef.defaultValue);
-					columnInfo.setLookupValue(columnInfoDef.lookupValue);
-					// validation id not implemented yet -- leave alone
-					columnInfo.setTitleText(columnInfoDef.titleText);
-					columnInfo.setDescription(columnInfoDef.description);
-					columnInfo.setConverterProperties(columnInfoDef.converterProperties);
-					columnInfo.setConverterName(columnInfoDef.converterName);
-					columnInfo.setForeignType(columnInfoDef.foreignType);
-					columnInfo.setValidatorProperties(columnInfoDef.validatorProperties);
-					columnInfo.setValidatorName(columnInfoDef.validatorName);
-					columnInfo.setDefaultFormat(columnInfoDef.defaultFormat);
-					columnInfo.setElementTemplateProperties(columnInfoDef.elementTemplateProperties);
-					columnInfo.setDatabaseSequenceName(columnInfoDef.databaseSequenceName);
-					columnInfo.setPreSequenceChars(columnInfoDef.preSequenceChars);
-					columnInfo.setPostSequenceChars(columnInfoDef.postSequenceChars);
-					columnInfo.setSequenceStepSize(columnInfoDef.sequenceStepSize);
-					columnInfo.setDataProviderID(columnInfoDef.dataProviderID);
-					columnInfo.setContainsMetaData(columnInfoDef.containsMetaData);
-					columnInfo.setConfiguredColumnType(columnInfoDef.columnType);
-					columnInfo.setCompatibleColumnTypes(columnInfoDef.compatibleColumnTypes);
-					column.setFlags(columnInfoDef.flags);
-
-					columnInfo.flagChanged();
+					int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
+					columnInfo = new ColumnInfo(element_id, true);
+					newColumnInfoObj = true;
 				}
+
+				columnInfo.setAutoEnterType(columnInfoDef.autoEnterType);
+				columnInfo.setAutoEnterSubType(columnInfoDef.autoEnterSubType);
+				columnInfo.setDefaultValue(columnInfoDef.defaultValue);
+				columnInfo.setLookupValue(columnInfoDef.lookupValue);
+				// validation id not implemented yet -- leave alone
+				columnInfo.setTitleText(columnInfoDef.titleText);
+				columnInfo.setDescription(columnInfoDef.description);
+				columnInfo.setConverterProperties(columnInfoDef.converterProperties);
+				columnInfo.setConverterName(columnInfoDef.converterName);
+				columnInfo.setForeignType(columnInfoDef.foreignType);
+				columnInfo.setValidatorProperties(columnInfoDef.validatorProperties);
+				columnInfo.setValidatorName(columnInfoDef.validatorName);
+				columnInfo.setDefaultFormat(columnInfoDef.defaultFormat);
+				columnInfo.setElementTemplateProperties(columnInfoDef.elementTemplateProperties);
+				columnInfo.setDatabaseSequenceName(columnInfoDef.databaseSequenceName);
+				columnInfo.setPreSequenceChars(columnInfoDef.preSequenceChars);
+				columnInfo.setPostSequenceChars(columnInfoDef.postSequenceChars);
+				columnInfo.setSequenceStepSize(columnInfoDef.sequenceStepSize);
+				columnInfo.setDataProviderID(columnInfoDef.dataProviderID);
+				columnInfo.setContainsMetaData(columnInfoDef.containsMetaData);
+				columnInfo.setConfiguredColumnType(columnInfoDef.columnType);
+				columnInfo.setCompatibleColumnTypes(columnInfoDef.compatibleColumnTypes);
+
+
+				if (newColumnInfoObj) column.setColumnInfo(columnInfo); // it was null before so set it in column now
+				column.setFlags(columnInfoDef.flags);
+				columnInfo.flagChanged();
 			}
 			try
 			{
