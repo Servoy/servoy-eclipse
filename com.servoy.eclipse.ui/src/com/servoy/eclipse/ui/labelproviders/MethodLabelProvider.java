@@ -110,7 +110,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 				{
 					extendedForm = ((Solution)persistContext.getContext().getParent()).getForm(((Form)persistContext.getContext()).getExtendsID());
 					final PersistContext newPersistContext = PersistContext.create(persistContext.getPersist(), extendedForm);
-					if (extendedForm.getExtendsID() > 0)
+					if (extendedForm.getExtendsID() > 0 && persistContext.getContext() != sm.getParent())
 					{
 						return getMethodText(mwa, newPersistContext, showPrefix, showNoneForDefault);
 					}

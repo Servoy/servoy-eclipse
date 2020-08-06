@@ -1593,7 +1593,7 @@ public class ServoyFormBuilder
 							if (hasExtendedIds)
 							{
 								extendedForm = flattenedSolution.getForm(form.getExtendsID());
-								if (extendedForm.getExtendsID() > 0)
+								if (extendedForm.getExtendsID() > 0 && form != scriptMethod.getParent())
 								{
 									addWebComponentMissingHandlers(markerResource, flattenedSolution, o, extendedForm);
 									continue;
