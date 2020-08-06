@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.labelproviders;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
@@ -102,22 +104,10 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		}
 		else
 		{
-			if (persistContext.getContext() instanceof Form)
+			if (persistContext.getContext() instanceof Form && sm.getParent() instanceof Form)
 			{
-				final boolean hasExtendedIds = ((Form)persistContext.getContext()).getExtendsID() > 0;
-				Form extendedForm = null;
-				if (hasExtendedIds)
-				{
-					extendedForm = ((Solution)persistContext.getContext().getParent()).getForm(((Form)persistContext.getContext()).getExtendsID());
-					final PersistContext newPersistContext = PersistContext.create(persistContext.getPersist(), extendedForm);
-					if (extendedForm.getExtendsID() > 0 && persistContext.getContext() != sm.getParent())
-					{
-						return getMethodText(mwa, newPersistContext, showPrefix, showNoneForDefault);
-					}
-				}
-				if ((sm.getParent() instanceof Form &&
-					persistContext.getContext() != sm.getParent() &&
-					!(hasExtendedIds && extendedForm == sm.getParent())))
+				List<Form> hierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy((Form)persistContext.getContext());
+				if (!hierarchy.contains(sm.getParent()))
 				{
 					return Messages.LabelUnresolved;
 				}

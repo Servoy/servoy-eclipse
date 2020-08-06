@@ -1588,34 +1588,26 @@ public class ServoyFormBuilder
 						}
 						else
 						{
-							final boolean hasExtendedIds = form.getExtendsID() > 0;
-							Form extendedForm = null;
-							if (hasExtendedIds)
+							if (scriptMethod.getParent() instanceof Form)
 							{
-								extendedForm = flattenedSolution.getForm(form.getExtendsID());
-								if (extendedForm.getExtendsID() > 0 && form != scriptMethod.getParent())
+								List<Form> hierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy(form);
+								if (!hierarchy.contains(scriptMethod.getParent()))
 								{
-									addWebComponentMissingHandlers(markerResource, flattenedSolution, o, extendedForm);
-									continue;
-								}
-							}
-							if (form != scriptMethod.getParent() &&
-								!(hasExtendedIds && extendedForm == scriptMethod.getParent()))
-							{
-								ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
-									form);
-								IMarker marker = ServoyBuilder.addMarker(markerResource, ServoyBuilder.INVALID_EVENT_METHOD, mk.getText(), -1,
-									ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
-									IMarker.PRIORITY_LOW, null, o);
-								if (marker != null)
-								{
-									try
+									ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
+										form);
+									IMarker marker = ServoyBuilder.addMarker(markerResource, ServoyBuilder.INVALID_EVENT_METHOD, mk.getText(), -1,
+										ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+										IMarker.PRIORITY_LOW, null, o);
+									if (marker != null)
 									{
-										marker.setAttribute("EventName", handler);
-									}
-									catch (Exception ex)
-									{
-										ServoyLog.logError(ex);
+										try
+										{
+											marker.setAttribute("EventName", handler);
+										}
+										catch (Exception ex)
+										{
+											ServoyLog.logError(ex);
+										}
 									}
 								}
 							}
