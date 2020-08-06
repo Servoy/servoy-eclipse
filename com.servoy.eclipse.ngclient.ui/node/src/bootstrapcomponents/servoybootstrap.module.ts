@@ -22,7 +22,6 @@ import { ServoyBootstrapTablesspanel } from './tablesspanel/tablesspanel';
 import { ServoyBootstrapCombobox } from './combobox/combobox';
 import { ServoyBootstrapCalendar } from './calendar/calendar';
 import { ServoyBootstrapCalendarinline } from './calendarinline/calendarinline';
-import { DatalistPolyFill } from "./list/lib/purejs-datalist-polyfill/datalist.polyfill";
 import { ShowDisplayValuePipe } from "./lib/showDisplayValue.pipe";
 import { ServoyBootstrapImageMedia } from "./imagemedia/imagemedia";
 import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
@@ -51,7 +50,7 @@ import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
       ShowDisplayValuePipe,
       DesignFilterPipe
     ],
-    providers: [DatalistPolyFill, ShowDisplayValuePipe],
+    providers: [ShowDisplayValuePipe],
     imports: [
       ServoyPublicModule,
       SabloModule,

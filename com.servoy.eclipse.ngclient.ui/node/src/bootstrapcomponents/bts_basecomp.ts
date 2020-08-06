@@ -57,7 +57,15 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent implements
                         }, 250); }
                  });
             } else {
-                this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
+                if (this.getNativeElement().tagName == 'TEXTAREA' || this.getNativeElement().type == 'text')
+                {
+                    this.renderer.listen( this.getNativeElement(), 'keydown', e => { if (e.keyCode == 13) this.onActionMethodID( e ) }); 
+                }
+                else
+                {
+                    this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
+                }    
+               
             }
         }
         if ( this.onRightClickMethodID ) {

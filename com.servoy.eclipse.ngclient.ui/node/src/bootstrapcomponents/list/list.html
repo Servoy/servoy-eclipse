@@ -2,11 +2,7 @@
     <input #element
         type="text"
         [attr.list]="servoyApi.getMarkupId() + '_datalist'"
-        [hidden]="!visible"
-        [ngClass]="styleClass"
-        (keydown)="onKeydown($event)"
-        (blur)="updateDataprovider()"
-        [disabled]="!enabled"
+        (change)="updateDataprovider()"
         [svyTooltip]="toolTipText"
         [sabloTabseq]="tabSeq"
         [readOnly]="readOnly || !editable"
