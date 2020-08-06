@@ -11,3 +11,8 @@
 	line-height: 0;
 	text-overflow: ellipsis;
 }
+
+/*btn-default was removed in bootstrap 4, is default from spec so add it back*/
+button.btn-default{
+	border-color: #ccc;
+}

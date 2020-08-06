@@ -82,7 +82,7 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent implements
     }
 
     ngOnChanges( changes: SimpleChanges ) {
-      if (changes && this.elementRef) {
+      if (changes) {
         for ( const property of Object.keys(changes) ) {
             const change = changes[property];
             switch ( property ) {
@@ -94,9 +94,15 @@ export class ServoyBootstrapBaseComponent extends ServoyBaseComponent implements
                     break;
                 case 'styleClass':
                     if (change.previousValue)
-                        this.renderer.removeClass(this.getStyleClassElement(), change.previousValue );
+                    {
+                        const array = change.previousValue.split(' ');
+                        array.forEach(element => this.renderer.removeClass(this.getStyleClassElement(), element ));
+                    }    
                     if ( change.currentValue)
-                        this.renderer.addClass( this.getStyleClassElement(), change.currentValue );
+                    {
+                        const array = change.currentValue.split(' ');
+                        array.forEach(element => this.renderer.addClass(this.getStyleClassElement(), element ));
+                    }    
                     break;
                 case 'visible':
                     PropertyUtils.setVisible( this.getNativeElement(), this.renderer , change.currentValue);

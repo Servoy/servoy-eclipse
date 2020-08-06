@@ -1,14 +1,8 @@
-<div #element>
-    <button 
-    type="button" 
+<button
+    #element 
     class="bts-button" 
-    [ngClass]="styleClass"
     *ngIf="showAs !== 'html' && showAs !== 'trusted_html' && visible"
-    (click)="onActionMethodID($event)"
-    (dblclick)="onDoubleClickMethodID($event)"
-    (contextMenu)="onRightClickMethodID($event)"
     [sabloTabseq]="tabSeq"
-    [disabled]="!enabled"
     [id]="servoyApi.getMarkupId()"
     [svyTooltip]="toolTipText">
     <span [ngClass]="imageStyleClass" aria-hidden="true"></span>
@@ -16,19 +10,13 @@
 </button> 
 
 <button 
-    type="button" 
+	#element
     class="bts-button" 
-    [ngClass]="styleClass"
     *ngIf="(showAs === 'html' || showAs === 'trusted_html') && visible"
-    (click)="onActionMethodID($event)"
-    (dblclick)="onDoubleClickMethodID($event)"
-    (contextMenu)="onRightClickMethodID($event)"
     [sabloTabseq]="tabSeq"
-    [disabled]="!enabled"
     [id]="servoyApi.getMarkupId()"
     [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()"
     [svyTooltip]="toolTipText">
     <span [ngClass]="imageStyleClass" aria-hidden="true"></span>
     {{text}}
 </button>
-</div>
