@@ -115,8 +115,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 						return getMethodText(mwa, newPersistContext, showPrefix, showNoneForDefault);
 					}
 				}
-				if ((persistContext.getContext() instanceof Form &&
-					sm.getParent() instanceof Form &&
+				if ((sm.getParent() instanceof Form &&
 					persistContext.getContext() != sm.getParent() &&
 					!(hasExtendedIds && extendedForm == sm.getParent())))
 				{
