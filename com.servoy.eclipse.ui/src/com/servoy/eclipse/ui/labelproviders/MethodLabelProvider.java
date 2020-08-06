@@ -102,24 +102,26 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		}
 		else
 		{
-
-			final boolean hasExtendedIds = ((Form)persistContext.getContext()).getExtendsID() > 0;
-			Form extendedForm = null;
-			if (hasExtendedIds)
+			if (persistContext.getContext() instanceof Form)
 			{
-				extendedForm = ((Solution)persistContext.getContext().getParent()).getForm(((Form)persistContext.getContext()).getExtendsID());
-				final PersistContext newPersistContext = PersistContext.create(persistContext.getPersist(), extendedForm);
-				if (extendedForm.getExtendsID() > 0)
+				final boolean hasExtendedIds = ((Form)persistContext.getContext()).getExtendsID() > 0;
+				Form extendedForm = null;
+				if (hasExtendedIds)
 				{
-					return getMethodText(mwa, newPersistContext, showPrefix, showNoneForDefault);
+					extendedForm = ((Solution)persistContext.getContext().getParent()).getForm(((Form)persistContext.getContext()).getExtendsID());
+					final PersistContext newPersistContext = PersistContext.create(persistContext.getPersist(), extendedForm);
+					if (extendedForm.getExtendsID() > 0)
+					{
+						return getMethodText(mwa, newPersistContext, showPrefix, showNoneForDefault);
+					}
 				}
-			}
-			if ((persistContext.getContext() instanceof Form &&
-				sm.getParent() instanceof Form &&
-				persistContext.getContext() != sm.getParent() &&
-				!(hasExtendedIds && extendedForm == sm.getParent())))
-			{
-				return Messages.LabelUnresolved;
+				if ((persistContext.getContext() instanceof Form &&
+					sm.getParent() instanceof Form &&
+					persistContext.getContext() != sm.getParent() &&
+					!(hasExtendedIds && extendedForm == sm.getParent())))
+				{
+					return Messages.LabelUnresolved;
+				}
 			}
 		}
 		StringBuilder sb = new StringBuilder();
