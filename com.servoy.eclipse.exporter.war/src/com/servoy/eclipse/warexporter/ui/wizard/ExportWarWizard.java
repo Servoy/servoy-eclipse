@@ -81,6 +81,9 @@ import com.servoy.j2db.util.Utils;
 public class ExportWarWizard extends DirtySaveExportWizard implements IExportWizard, IRestoreDefaultWizard, ICopyWarToCommandLineWizard
 {
 
+	private static final String DEFAULT_VALIDATORS_JAR = "default_validators.jar";
+	private static final String CONVERTERS_JAR = "converters.jar";
+
 	private FileSelectionPage fileSelectionPage;
 
 	private DirectorySelectionPage pluginSelectionPage;
@@ -242,23 +245,27 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				return false;
 			}
 		}
+
 		boolean alreadyAsked = getDialogSettings().getBoolean("export.no_validators_or_converters.question");
 		if (!alreadyAsked)
 		{
-			boolean noConvertorsOrValidators = !exportModel.getPlugins().contains("converters.jar") ||
-				!exportModel.getPlugins().contains("default_validators.jar");
+			boolean noConvertorsOrValidators = !exportModel.getPlugins().contains(CONVERTERS_JAR) ||
+				!exportModel.getPlugins().contains(DEFAULT_VALIDATORS_JAR);
 			final boolean[] exportWithoutConvOrVal = new boolean[] { true };
 			if (noConvertorsOrValidators)
 			{
 				Display.getDefault().syncExec(() -> {
-					exportWithoutConvOrVal[0] = MessageDialog.openConfirm(getShell(), "No Column Convertors or Validators are exported",
-						"Are you sure you want to export without 'converters.jar' or 'default_validators.jar' from the plugins?");
+					exportWithoutConvOrVal[0] = MessageDialog.openQuestion(getShell(), "No Column Convertors or Validators are exported",
+						"Are you sure you want to export without 'converters.jar' or 'default_validators.jar' from the plugins? Press 'No' to add them automatically to the current export.");
 				});
 			}
-			if (!exportWithoutConvOrVal[0]) return false;
+			if (!exportWithoutConvOrVal[0])
+			{
+				if (!exportModel.getPlugins().contains(CONVERTERS_JAR)) exportModel.getPlugins().add(CONVERTERS_JAR);
+				if (!exportModel.getPlugins().contains(DEFAULT_VALIDATORS_JAR)) exportModel.getPlugins().add(DEFAULT_VALIDATORS_JAR);
+			}
 			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
-
 
 		exportModel.saveSettings(getDialogSettings());
 		errorFlag = false;
