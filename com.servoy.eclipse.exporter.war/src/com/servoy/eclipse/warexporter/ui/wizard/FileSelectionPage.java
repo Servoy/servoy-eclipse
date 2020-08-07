@@ -423,8 +423,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		enableSolutionExportData();
 
 		setControl(composite);
-
-		this.getWizard().getContainer().getShell().pack();
 	}
 
 	private void applyNrOfExportedSampleDataSpinnerValue()
@@ -664,5 +662,12 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	public void performHelp()
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_main");
+	}
+
+	@Override
+	public void setVisible(boolean visible)
+	{
+		super.setVisible(visible);
+		this.getWizard().getContainer().getShell().pack();
 	}
 }
