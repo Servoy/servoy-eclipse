@@ -1,12 +1,11 @@
-import { Component, Renderer2, AfterViewInit, ViewChild, ElementRef, SimpleChanges, ViewEncapsulation } from '@angular/core';
+import { Component, Renderer2, AfterViewInit, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
 
 import { ServoyBootstrapBaseLabel } from '../bts_baselabel';
  
 @Component( {
     selector: 'servoybootstrap-button',
     templateUrl: './button.html',
-    styleUrls: ['./button.scss'],
-    encapsulation: ViewEncapsulation.None
+    styleUrls: ['./button.scss']
 } )
 export class ServoyBootstrapButton extends ServoyBootstrapBaseLabel implements AfterViewInit {
 

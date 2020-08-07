@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, Renderer2, SimpleChanges,ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef, Renderer2, SimpleChanges } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
@@ -6,8 +6,7 @@ import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
 @Component({
   selector: 'servoybootstrap-select',
   templateUrl: './select.html',
-  styleUrls: ['./select.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./select.scss']
 })
 export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
 

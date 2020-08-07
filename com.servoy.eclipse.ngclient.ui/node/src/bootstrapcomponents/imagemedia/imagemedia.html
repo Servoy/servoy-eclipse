@@ -1,9 +1,7 @@
 <img #element
     class="bts-media"
-    [src]="{{media != null ? media : (dataProviderID != null && dataProviderID.url ? dataProviderID.url : (dataProviderID == null && servoyApi.isInDesigner() ? "bootstrapcomponents/imagemedia/media.png" : (dataProviderID == null ? "bootstrapcomponents/imagemedia/images/empty.gif" : dataProviderID)))}}"
+    [src]="imageURL"
     [id]='servoyApi.getMarkupId()' 
     [svyTooltip]="toolTipText" 
     [sabloTabseq]="tabSeq"
-    [alt]="alternate"
-    [hidden]="!visible"
-/>
+    [alt]="alternate"/>

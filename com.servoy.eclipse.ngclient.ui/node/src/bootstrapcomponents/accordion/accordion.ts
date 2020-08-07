@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef,ViewEncapsulation } from '@angular/core';
+import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef } from '@angular/core';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 
 import { ServoyBootstrapBaseTabPanel,Tab } from '../bts_basetabpanel';
@@ -7,8 +7,7 @@ import { NgbPanelChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 @Component({
   selector: 'servoybootstrap-accordion',
   templateUrl: './accordion.html',
-  styleUrls: ['./accordion.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./accordion.scss']
 })
 export class ServoyBootstrapAccordion extends ServoyBootstrapBaseTabPanel {
 

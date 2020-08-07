@@ -59,7 +59,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield impleme
       if (element === true)
         returnValue += this.valuelistID[index + this.allowNullinc].realValue + '\n' 
     });
-    returnValue.replace(/\n$/, ''); // remove the last \n
+    returnValue = returnValue.replace(/\n$/, ''); // remove the last \n
     if (returnValue === '') returnValue = null;
     return returnValue;
   }
@@ -91,6 +91,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield impleme
     if (this.inputType === 'radio') {
       this.dataProviderID = this.valuelistID[index + this.allowNullinc].realValue;
     } else {
+      this.selection[index] = event.target.checked; 
       let checkedTotal = 0;
       for (let i = 0; i < this.selection.length; i++) {
         if (this.selection[i] == true) checkedTotal++;

@@ -18,7 +18,7 @@
     <option
         *ngFor="let value of valuelistID"
         [value]="value.realValue"
-        [selected]="dataProviderID.split('\n').indexOf(value.realValue) >= 0"
+        [selected]="dataProviderID?.split('\n').indexOf(value.realValue) >= 0"
         [innerHTML]="value.realValue | showDisplayValue:valuelistID">
     </option>
 </select>

@@ -4,7 +4,7 @@
     [hidden]="!visible">
     <label *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;">
         <input type="{{inputType}}"
-            [ngModel]="selection[i]"
+            [checked]="selection[i]"
             [value]="item.realValue"
             (change)="itemClicked($event, i)"
             [disabled]="readOnly || !enabled"
