@@ -392,7 +392,15 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     public callApi(componentName: string, apiName: string, args: object): any {
         let comp = this.components.find(item => item['name'] == componentName);
         let proto = Object.getPrototypeOf(comp)
-        return proto[apiName].apply(comp, args);
+        if (proto[apiName])
+        {
+            return proto[apiName].apply(comp, args); 
+        }
+        else
+        {
+            this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component '+ componentName +' was not found, please check component implementation.')));
+            return null;
+        }    
     }
 }
 
