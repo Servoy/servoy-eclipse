@@ -103,7 +103,8 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		@Override
 		public boolean matchItem(Object item)
 		{
-			boolean b = matches(((ISupportName)item).getName());
+			String name = ((ISupportName)item).getName();
+			boolean b = name != null && matches(name);
 			if (b)
 			{
 				if (item instanceof Table)
