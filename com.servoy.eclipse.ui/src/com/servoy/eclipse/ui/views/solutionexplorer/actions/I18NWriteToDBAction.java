@@ -32,7 +32,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -71,7 +70,7 @@ public class I18NWriteToDBAction extends Action
 			if (i18nServer != null && i18nTable != null)
 			{
 				MessageDialogWithToggle dlg = MessageDialogWithToggle.open(MessageDialog.CONFIRM, UIUtils.getActiveShell(), "Write I18N to DB",
-					"This will insert new and replace exiting keys from the workspace into the database.",
+					"This will insert new and replace existing keys from the workspace into the database.",
 					"Delete keys from database that are not in the workspace", false, null, null, SWT.NONE);
 
 				if (dlg.getReturnCode() == Window.OK) writeI18NToDB(activeProject, dlg.getToggleState());
