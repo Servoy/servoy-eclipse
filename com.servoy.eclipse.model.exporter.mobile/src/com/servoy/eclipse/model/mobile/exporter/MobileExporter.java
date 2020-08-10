@@ -1051,7 +1051,7 @@ public class MobileExporter
 	/**
 	 * By default this is false. If set to true, a unit test - mobile client war will be exported instead of the normal mobile client war.
 	 */
-	public void useTestWar(TestTarget testTarget)
+	public void useTestWar(TestTarget testTarget, boolean spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy)
 	{
 		this.useTestWar = true;
 
@@ -1072,7 +1072,7 @@ public class MobileExporter
 		}
 		else
 		{
-			builder.initializeWithSolution(s, flattenedSolution, testTarget);
+			builder.initializeWithSolution(s, flattenedSolution, testTarget, spamInTestNamesAsFullTreePathsForDumbToolsThatAreUnAwareOfTestSuiteHierarchy);
 		}
 
 		testCode.append("if (typeof(this.__customTestSuiteCodeLoaded) == 'undefined') {\nthis.__customTestSuiteCodeLoaded = 1;\n");

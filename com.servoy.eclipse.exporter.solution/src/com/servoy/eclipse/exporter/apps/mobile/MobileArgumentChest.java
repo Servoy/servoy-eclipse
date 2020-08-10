@@ -34,6 +34,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	private String serverURL;
 	private int syncTimeout;
 	private String serviceSolutionName = null;
+	private boolean useLongTestMethodNames = false;
 
 	public MobileArgumentChest(String[] args)
 	{
@@ -51,6 +52,7 @@ public class MobileArgumentChest extends AbstractArgumentChest
 		serviceSolutionName = parseArg("service_solution", "Service solution was not specified after '-service_solution' argument.", argsMap, false);
 		if (argsMap.containsKey("production")) testing = false;
 		if (argsMap.containsKey("sync_timeout")) parseSyncTimeout(argsMap.get("sync_timeout"));
+		if (argsMap.containsKey("long_test_names")) useLongTestMethodNames = true;
 	}
 
 	private void parseSyncTimeout(String value)
@@ -91,6 +93,10 @@ public class MobileArgumentChest extends AbstractArgumentChest
 			+ "        -service_solution ... name    of    the   service   solution    (default   will   be\n"
 			+ "                              mySolutionName_service).\n"
 			+ "        -sync_timeout <seconds> ... client sync call timeout. Default: " + MobileExporter.DEFAULT_SYNC_TIMEOUT + " sec.\n"
+			+ "        -long_test_names ... only if '-production'  is not set; it will generate 'long' test\n"
+			+ "                           method names that include solution and form/scope name;  this can\n"
+			+ "                           help with  dumb junit tools  that ignore junit test suite nesting\n"
+			+ "                           when showing test results - thus loosing that information.\n"
 			+ getHelpMessageExitCodes();
 		// @formatter:on
 	}
@@ -132,6 +138,11 @@ public class MobileArgumentChest extends AbstractArgumentChest
 	public boolean shouldExportUsingDbiFileInfoOnly()
 	{
 		return true; // mobile exporter doesn't use table info
+	}
+
+	public boolean useLongTestMethodNames()
+	{
+		return useLongTestMethodNames;
 	}
 
 }

@@ -29,8 +29,8 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 
 /**
- * Eclipse application that can be used for exporting servoy solutions in .servoy format (that can be used to import solutions afterwards in developer/app. server). 
- * 
+ * Eclipse application that can be used for exporting servoy solutions in .servoy format (that can be used to import solutions afterwards in developer/app. server).
+ *
  * @author acostescu
  */
 public class MobileWorkspaceExporter extends AbstractWorkspaceExporter<MobileArgumentChest>
@@ -58,7 +58,7 @@ public class MobileWorkspaceExporter extends AbstractWorkspaceExporter<MobileArg
 				exporter.setServerURL(configuration.getServerURL());
 				exporter.setTimeout(configuration.getSyncTimeout());
 				exporter.setServiceSolutionName(configuration.getServiceSolutionName());
-				if (configuration.shouldExportForTesting()) exporter.useTestWar(null);
+				if (configuration.shouldExportForTesting()) exporter.useTestWar(null, configuration.useLongTestMethodNames());
 //			exporter.setSkipConnect(..allow user to specify license and check it..); // TODO a separate case was created for this: SVY-4807
 				try
 				{

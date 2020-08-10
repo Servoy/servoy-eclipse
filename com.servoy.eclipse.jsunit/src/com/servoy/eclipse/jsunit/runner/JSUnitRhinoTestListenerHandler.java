@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import junit.framework.Test;
-import junit.framework.TestResult;
-
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeError;
 import org.mozilla.javascript.NativeJavaObject;
@@ -33,12 +30,15 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
+import junit.framework.Test;
+import junit.framework.TestResult;
+
 /**
  * Class that makes the conversion between JSUnit test result and JUnit test result.
  * It is aware of Rhino details for better interpretation of stack traces for example.
- * 
+ *
  * @author acostescu
- * 
+ *
  */
 public class JSUnitRhinoTestListenerHandler extends JSUnitTestListenerHandler<Object, Object>
 {
@@ -55,7 +55,7 @@ public class JSUnitRhinoTestListenerHandler extends JSUnitTestListenerHandler<Ob
 
 	/**
 	 * @param stackElementFilters a list of regex strings (see {@link String#matches(String)}). If any of these match the file/method name in a stack element of a failure/error, that stack element
-	 * will be ignored. 
+	 * will be ignored.
 	 */
 	public JSUnitRhinoTestListenerHandler(TestResult result, List<Test> testList, boolean useFileInStackQualifiedName, String[] stackElementFilters)
 	{
