@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.json.JSONObject;
@@ -232,22 +233,29 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 					{
 
 						@Override
+						public ASTNode visitPropertyExpression(PropertyExpression node)
+						{
+							String expr = source.substring(node.sourceStart(), node.sourceEnd());
+							if (expr.startsWith("plugins."))
+							{
+								String[] parts = expr.split("\\.");
+								if (parts.length > 1)
+								{
+									WebObjectSpecification serviceSpec = ClientService.getServiceDefinitionFromScriptingName(parts[1]);
+									if (serviceSpec != null) usedServices.add(serviceSpec.getName());
+								}
+							}
+							return super.visitPropertyExpression(node);
+						}
+
+						@Override
 						public ASTNode visitCallExpression(CallExpression node)
 						{
 							if (node.getExpression().getChilds().size() > 0)
 							{
 								ASTNode astNode = node.getExpression().getChilds().get(0);
 								String expr = source.substring(astNode.sourceStart(), astNode.sourceEnd());
-								if (expr.startsWith("plugins."))
-								{
-									String[] parts = expr.split("\\.");
-									if (parts.length > 1)
-									{
-										WebObjectSpecification serviceSpec = ClientService.getServiceDefinitionFromScriptingName(parts[1]);
-										if (serviceSpec != null) usedServices.add(serviceSpec.getName());
-									}
-								}
-								else if (expr.contains("newWebComponent"))
+								if (expr.contains("newWebComponent"))
 								{
 									if (node.getArguments().size() > 1)
 									{
