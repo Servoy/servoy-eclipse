@@ -4669,6 +4669,7 @@ public class TypeCreator extends TypeCache
 			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1) return null;
 			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			String[] typeNames = wcTypeName.split("\\.");
+			if (typeNames.length < 2) return null;
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeNames[0]);
 			if (spec == null)
