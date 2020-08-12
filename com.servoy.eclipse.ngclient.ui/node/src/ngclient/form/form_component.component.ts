@@ -185,7 +185,7 @@ import { ServoyApi } from '../servoy_api'
         #cmp>
         </servoyextra-table>
     </ng-template>
-    <ng-template #servoycoreListformcomponent let-state="state"><servoycore-listformcomponent [foundset]="state.foundset" #cmp></servoycore-listformcomponent></ng-template>
+    <ng-template #servoycoreListformcomponent let-state="state"><servoycore-listformcomponent [parentForm]="self" [listFormComponent]="state" #cmp></servoycore-listformcomponent></ng-template>
     <!-- component template generate end -->
    `
 })
@@ -234,8 +234,10 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     private handlerCache: { [property: string]: { [property: string]: (e) => void } } = {};
     private servoyApiCache: { [property: string]: ServoyApi } = {};
     private log: LoggerService;
+    private self: FormComponent;
 
     constructor(private formservice: FormService, private sabloService: SabloService, private servoyService: ServoyService, private logFactory: LoggerFactory) {
+        this.self = this;
         this.log = logFactory.getLogger('FormComponent');
     }
 

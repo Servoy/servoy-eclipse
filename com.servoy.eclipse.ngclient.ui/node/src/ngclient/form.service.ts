@@ -11,6 +11,8 @@ import { LoggerService, LoggerFactory } from '../sablo/logger.service';
 
 import { ServoyService, FormSettings } from './servoy.service';
 import { instanceOfChangeAwareValue, IChangeAwareValue, IFormComponentType, IFoundset } from '../sablo/spectypes.service';
+import { FormComponentType } from './converters/formcomponent_converter';
+import { Foundset } from './converters/foundset_converter';
 
 
 export class FormCache {
@@ -136,6 +138,7 @@ export class FormComponentCache {
         }
 
         addChild( child: StructureCache | ComponentCache | FormComponentCache): FormComponentCache {
+            if(child instanceof ComponentCache && (child as ComponentCache).type == 'servoycoreNavigator') return null;
             this.items.push( child );
             if ( child instanceof FormComponentCache )
                 return child as FormComponentCache;
@@ -486,8 +489,8 @@ export class FormService {
 
 export class ListFormComponentCache extends FormComponentCache {
     constructor(
-        public readonly formComponentType: IFormComponentType,
-        public readonly foundset: IFoundset,
+        public readonly formComponentType: FormComponentType,
+        public readonly foundset: Foundset,
         public readonly responsive: boolean,
         public readonly layout: { [property: string]: string },
         public readonly formComponentProperties: FormComponentProperties,

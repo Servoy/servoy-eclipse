@@ -1,8 +1,7 @@
-<div>
-	<div *ngFor="let row of foundset.viewPort.rows">
-		<span>row</span>
-		<!--div *ngFor="let item of state.items" [config]="item" class="svy-wrapper" style="position:absolute">
-			<ng-template [ngTemplateOutlet]="getTemplate(item)" [ngTemplateOutletContext]="{ state:item}"></ng-template>
-		</div -->
+<div class="container" [ngClass]='getStyleClasses()'>
+	<div *ngFor="let row of getViewportRows(); let i = index" class="row" [ngStyle]="{'height.px': getRowHeight()}">
+		<div *ngFor="let item of getRowItems()" [config]="item" class="svy-wrapper" style="position:absolute"> <!-- wrapper div -->
+			<ng-template [ngTemplateOutlet]="getRowItemTemplate(item)" [ngTemplateOutletContext]="{ state:getRowItemState(item, i) }"></ng-template>  <!-- component  -->
+		</div>
 	</div>
 </div>

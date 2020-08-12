@@ -1,5 +1,6 @@
 import { IConverter, PropertyContext, ConverterService } from '../../sablo/converter.service';
-import { IFormComponentType, IComponentType } from '../../sablo/spectypes.service';
+import { IFormComponentType } from '../../sablo/spectypes.service';
+import { ComponentType } from './component_converter';
 
 export class FormcomponentConverter implements IConverter {
 
@@ -96,7 +97,7 @@ export class FormComponentType implements IFormComponentType {
 
     constructor(
         public absoluteLayout: boolean,
-        public childElements: IComponentType[],
+        public childElements: ComponentType[],
         public formHeight: number,
         public formWidth: number,
         public startName: string,
