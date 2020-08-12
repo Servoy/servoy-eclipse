@@ -37,7 +37,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit {
      * this should return the main native element (like the first div) 
      */
     public getNativeElement():any {
-        return this.elementRef.nativeElement;
+        return this.elementRef ? this.elementRef.nativeElement : null;
     }
 
    /**

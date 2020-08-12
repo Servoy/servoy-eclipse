@@ -62,22 +62,13 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
                 case 'selectOnEnter':
                     if ( change.currentValue ) PropertyUtils.addSelectOnEnter( this.getFocusElement(), this.renderer );
                     break;
-                case 'enabled':
-                    if ( change.currentValue )
-                        this.renderer.removeAttribute(this.getFocusElement(),  'disabled' );
-                    else
-                        this.renderer.setAttribute(this.getFocusElement(),  'disabled', 'disabled' );
-                    break;
-
             }
         }
       }
       super.ngOnChanges(changes);
-
     }
 
     update( val: string ) {
-      console.log("update:" + val);
         if (!this.findmode && this.format) {
             this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
         } else this.dataProviderID = val;

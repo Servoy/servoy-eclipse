@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 
 import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';
+import { ServoyBootstrapComponentsModule } from "../bootstrapcomponents/servoybootstrap.module";
 
 /**
  * This module should be generated in the developer and when exporting a WAR
@@ -9,10 +10,12 @@ import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.mo
 @NgModule({
   
   imports: [
-    ServoyDefaultComponentsModule,
+    ServoyDefaultComponentsModule, 
+    ServoyBootstrapComponentsModule   
   ],
   exports: [
     ServoyDefaultComponentsModule,
+    ServoyBootstrapComponentsModule 
   ]
 })
 export class AllComponentsModule { }

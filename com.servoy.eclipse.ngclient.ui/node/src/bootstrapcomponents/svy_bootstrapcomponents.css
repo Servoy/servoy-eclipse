@@ -1,0 +1,104 @@
+.svy-wrapper > * > .bts-media {
+	max-width: 100%;
+    max-height: 100%;
+}
+
+.bts-accordion .card-body
+{
+	padding:0px;
+}
+
+.bts-accordion .card-header
+{
+	padding:0px;
+}
+
+.svy-wrapper > * > .bts-button {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top : 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	overflow: hidden;
+	padding: 0 12px;
+	line-height: 0;
+	text-overflow: ellipsis;
+}
+
+.svy-wrapper>*>.bts-textarea {
+	width: 100%;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	resize: none;
+}
+
+.svy-wrapper > * > .bts-select {
+	width: 100%;
+	height: 100%;
+	padding: 1px 5px;
+	color:inherit;
+}
+
+.svy-wrapper > * > .bts-textbox {
+	width: 100%;
+	height: 100%;
+	padding: 1px 5px;
+}
+
+.svy-wrapper > * > .bts-label {
+	width : 100%;
+	height: 100%;
+	display: block;
+}
+
+.svy-wrapper > * > .bts-label.default-align {
+	display: flex;
+    align-items: center;
+}
+
+.svy-wrapper > * > .bts-label.default-align > .bts-label-icon {
+	padding: 0 3px;
+}
+
+.svy-wrapper > * > .bts-datalabel {
+	width : 100%;
+	height: 100%;
+	display: block;
+}
+
+.svy-wrapper > * > .bts-datalabel.default-align {
+	display: flex;
+    align-items: center;
+}
+
+.svy-wrapper > * > .bts-datalabel.default-align > .bts-label-icon {
+	padding: 0 3px;
+}
+
+.svy-wrapper > * > .bts-check {
+	width: 100%;
+	height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0;
+}
+
+.bts-check div {
+    min-height: 20px;
+    margin-bottom: 0;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.svy-wrapper > * > .bts-list {
+	width: 100%;
+	height: 100%;
+}
+
+.svy-wrapper > * > .bts-list input {
+	height: 100%;
+	padding: 0px 5px;
+}

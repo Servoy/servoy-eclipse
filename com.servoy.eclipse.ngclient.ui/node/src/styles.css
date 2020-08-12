@@ -6,4 +6,5 @@
 @import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
 @import "~@danielmoncada/angular-datetime-picker/assets/style/picker.min.css";
 @import "assets/bootstrap-window/bootstrap-window.css";
-@import "assets/styles/servoy.css"
+@import "assets/styles/servoy.css";
+@import "bootstrapcomponents/svy_bootstrapcomponents.css";

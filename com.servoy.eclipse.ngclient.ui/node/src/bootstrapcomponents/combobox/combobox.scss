@@ -1,0 +1,16 @@
+.svy-wrapper > * > .bts-combobox {
+	width: 100%;
+	height: 100%;
+}
+
+.bts-combobox .btn {
+	padding: 1px 5px;
+}
+
+.bts-combobox .ui-select-match > .form-control {
+	height: 34px;
+}
+
+.svy-wrapper > * > .bts-combobox .ui-select-match > .form-control {
+	height: 100%;
+}

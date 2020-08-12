@@ -94,6 +94,8 @@ public abstract class BaseNGPackageManager
 	private final List<IAvailableNGPackageProjectsListener> availableNGPackageProjectsListeners = Collections.synchronizedList(
 		new ArrayList<IAvailableNGPackageProjectsListener>());
 
+	private final Object reloadLock = new Object();
+
 	public BaseNGPackageManager(IServoyModel model)
 	{
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
@@ -201,25 +203,28 @@ public abstract class BaseNGPackageManager
 	 */
 	public void reloadAllNGPackages(CHANGE_REASON changeReason, IProgressMonitor m)
 	{
-		projectNameToContainedPackages.clear();
-		setRemovedPackages();
-		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);//TODO check monitor steps counter
-		Map<String, List<IPackageReader>> allPackageReaders = new HashMap<>();
-		monitor.subTask("Preparing to reload resources project ng packages");
-		collectResourcesProjectNGPackages(monitor.newChild(8), allPackageReaders);
-		monitor.worked(30);
-		monitor.subTask("Preparing to reload referenced ng package projects");
-		collectNGPackageProjects(allPackageReaders, monitor.newChild(8));
-		monitor.worked(30);
-		monitor.subTask("Preparing to reload solution contained binary ng packages");
-		collectSolutionContainedBinaryPackages(allPackageReaders, monitor.newChild(8));
-		monitor.worked(30);
-		monitor.subTask("Reloading NG packages");
-		ResourceProvider.setPackages(allPackageReaders.values());
+		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100); // TODO check monitor steps counter
+		synchronized (reloadLock)
+		{
+			projectNameToContainedPackages.clear();
+			setRemovedPackages();
+			Map<String, List<IPackageReader>> allPackageReaders = new HashMap<>();
+			monitor.subTask("Preparing to reload resources project ng packages");
+			collectResourcesProjectNGPackages(monitor.newChild(8), allPackageReaders);
+			monitor.worked(30);
+			monitor.subTask("Preparing to reload referenced ng package projects");
+			collectNGPackageProjects(allPackageReaders, monitor.newChild(8));
+			monitor.worked(30);
+			monitor.subTask("Preparing to reload solution contained binary ng packages");
+			collectSolutionContainedBinaryPackages(allPackageReaders, monitor.newChild(8));
+			monitor.worked(30);
+			monitor.subTask("Reloading NG packages");
+			ResourceProvider.setPackages(allPackageReaders.values());
 
-		monitor.worked(9);
-		monitor.setTaskName("Announcing ng packages load");
-		resourceChangeListener.clearAnyPendingChangesBecauseFullReloadWasDone(); // in case PRE_CLOSE or PRE_DELETE granular updates are waiting to be applied in resourceChangeListener, remove those as have just been told to do a full reload so those pending changes are obsolete and now out-of-sync with loaded content
+			monitor.worked(9);
+			monitor.setTaskName("Announcing ng packages load");
+			resourceChangeListener.clearAnyPendingChangesBecauseFullReloadWasDone(); // in case PRE_CLOSE or PRE_DELETE granular updates are waiting to be applied in resourceChangeListener, remove those as have just been told to do a full reload so those pending changes are obsolete and now out-of-sync with loaded content
+		}
 		ngPackagesChanged(changeReason, false);
 		monitor.worked(1);
 		monitor.done();

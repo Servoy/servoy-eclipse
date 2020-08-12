@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 8.5.0.3600_b1
+Bundle-Version: 2020.13.0.4000_b1
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -79,7 +79,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.help,
  org.eclipse.swt.chromium,
  com.servoy.eclipse.ngclient,
- org.eclipse.equinox.security
+ org.eclipse.equinox.security,
+ com.servoy.eclipse.ngclient.ui
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets,
  com.servoy.eclipse.cheatsheets.actions,

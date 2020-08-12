@@ -1,0 +1,18 @@
+<input #element
+    [hidden]="!visible"
+    class="bts-textbox"
+    type="{{inputType}}"
+    (change)="update($event.target.value)"
+    [ngClass]="styleClass"
+    [placeholder]="placeholderText"
+    [value]="dataProviderID"
+    [svyFormat]="format"
+    [svyDecimalKeyConverter]="format"
+    [svyStartEdit]="'dataProviderID'"
+    [hostComponent]="self"
+    [svyTooltip]="toolTipText"
+    [sabloTabseq]="tabSeq"
+    [disabled]="!enabled"
+    [readOnly]="readOnly || !editable"
+    [autocomplete]="autocomplete"
+/>

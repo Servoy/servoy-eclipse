@@ -1,0 +1,22 @@
+<span #element
+    class="bts-label"
+    [ngClass]="imageStyleClass"
+    [sabloTabseq]="(onActionMethodID || onDoubleClickMethodID || onRightClickMethodID) ? tabSeq : -2"
+    [id]="servoyApi.getMarkupId()"
+    [hidden]="!visible">
+    <ng-container [ngTemplateOutlet]="template"></ng-container>
+</span>
+
+<ng-template #template>
+    <span
+        class="bts-label-text"
+        [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()"
+        *ngIf="!labelFor && (showAs === 'html' || showAs === 'trusted_html')">
+    </span>
+    <label 
+        class="bts-label-text"
+        for="{{labelFor}}"
+        [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()"
+        *ngIf="labelFor && (showAs === 'html' || showAs === 'trusted_html')">
+    </label>
+</ng-template>

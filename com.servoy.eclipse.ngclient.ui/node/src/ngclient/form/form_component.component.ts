@@ -145,6 +145,7 @@ import { ServoyApi } from '../servoy_api'
 
       <ng-template #servoycoreErrorbean let-state="state"><servoycore-errorbean [error]="state.model.error" [servoyApi]="getServoyApi(state)" [toolTipText]="state.model.toolTipText" #cmp></servoycore-errorbean></ng-template>
       <ng-template #servoycoreSlider let-state="state"><servoycore-slider  [styleClass]="state.model.styleClass" [min]="state.model.min" [max]="state.model.max" [orientation]="state.model.orientation" [step]="state.model.step" [enabled]="state.model.enabled" [toolTipText]="state.model.toolTipText" [visible]="state.model.visible" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [tabSeq]="state.model.tabSeq" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [onCreateMethodID]="getHandler(state,'onCreateMethodID')" [onSlideMethodID]="getHandler(state,'onSlideMethodID')" [onStartMethodID]="getHandler(state,'onStartMethodID')" [onStopMethodID]="getHandler(state,'onStopMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoycore-slider></ng-template>
+      <ng-template #servoycoreListformcomponent let-state="state"><servoycore-listformcomponent [parentForm]="self" [listFormComponent]="state" #cmp></servoycore-listformcomponent></ng-template>
 
       <ng-template #servoyextraTable let-state="state">
         <servoyextra-table [foundset]="state.model.foundset" 
@@ -181,12 +182,52 @@ import { ServoyApi } from '../servoy_api'
                         [onHeaderRightClick]="getHandler(state,'onHeaderRightClick')"
                         [onColumnResize]="getHandler(state,'onColumnResize')"
                         [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')"
-                        [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')"                      
+                        [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')"  
+                        [absoluteLayout]="formCache.absolute"                                        
         #cmp>
         </servoyextra-table>
     </ng-template>
-    <ng-template #servoycoreListformcomponent let-state="state"><servoycore-listformcomponent [parentForm]="self" [listFormComponent]="state" #cmp></servoycore-listformcomponent></ng-template>
-    <!-- component template generate end -->
+    
+    <ng-template #bootstrapcomponentsCalendar let-state="state"><servoybootstrap-calendar  [visible]="state.model.visible" [format]="state.model.format" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [findmode]="state.model.findmode" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [placeholderText]="state.model.placeholderText" [selectOnEnter]="state.model.selectOnEnter" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoybootstrap-calendar></ng-template>
+    <ng-template #bootstrapcomponentsCalendarinline let-state="state"><servoybootstrap-calendarinline  [visible]="state.model.visible" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [toolTipText]="state.model.toolTipText"[onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')"[servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.attributes" [name]="state.name" #cmp></servoybootstrap-calendarinline></ng-template>
+    <ng-template #bootstrapcomponentsButton
+        let-state="state">
+        <servoybootstrap-button  
+            [visible]="state.model.visible" 
+            [showAs]="state.model.showAs" 
+            [imageStyleClass]="state.model.imageStyleClass" 
+            [styleClass]="state.model.styleClass" 
+            [enabled]="state.model.enabled" 
+            [size]="state.model.size" 
+            [cssPosition]="state.model.cssPosition" 
+            [location]="state.model.location" 
+            [servoyAttributes]="state.model.attributes" 
+            [text]="state.model.text" 
+            [tabSeq]="state.model.tabSeq" 
+            [toolTipText]="state.model.toolTipText" 
+            [onDoubleClickMethodID]="getHandler(state,'onDoubleClickMethodID')" 
+            [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" 
+            [onActionMethodID]="getHandler(state,'onActionMethodID')" 
+            [servoyApi]="getServoyApi(state)" 
+            [name]="state.name" 
+            #cmp>
+        </servoybootstrap-button>
+    </ng-template>
+    <ng-template #bootstrapcomponentsTablesspanel let-state="state"><servoybootstrap-tablesspanel  [visible]="state.model.visible" [containedForm]="state.model.containedForm" [styleClass]="state.model.styleClass" [size]="state.model.size" [relationName]="state.model.relationName" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [tabSeq]="state.model.tabSeq" [waitForData]="state.model.waitForData" [height]="state.model.height" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'><svy-form *ngIf="isFormAvailable(name)" [name]="name"></svy-form></ng-template></servoybootstrap-tablesspanel></ng-template>
+    <ng-template #bootstrapcomponentsSelect let-state="state"><servoybootstrap-select  [multiselect]="state.model.multiselect" [selectSize]="state.model.selectSize" [visible]="state.model.visible" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [valuelistID]="state.model.valuelistID" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [placeholderText]="state.model.placeholderText" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-select></ng-template>
+    <ng-template #bootstrapcomponentsList let-state="state"><servoybootstrap-list  [visible]="state.model.visible" [editable]="state.model.editable" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [valuelistID]="state.model.valuelistID" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [placeholderText]="state.model.placeholderText" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-list></ng-template>
+    <ng-template #bootstrapcomponentsTextbox let-state="state"><servoybootstrap-textbox  [visible]="state.model.visible" [autocomplete]="state.model.autocomplete" [editable]="state.model.editable" [format]="state.model.format" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [inputType]="state.model.inputType" (inputTypeChange)="datachange(state.name,'inputType',$event)" [placeholderText]="state.model.placeholderText" [selectOnEnter]="state.model.selectOnEnter" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-textbox></ng-template>
+    <ng-template #bootstrapcomponentsDatalabel let-state="state"><servoybootstrap-datalabel  [showAs]="state.model.showAs" [visible]="state.model.visible" [format]="state.model.format" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" [enabled]="state.model.enabled" [valuelistID]="state.model.valuelistID" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onDoubleClickMethodID]="getHandler(state,'onDoubleClickMethodID')" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-datalabel></ng-template>
+    <ng-template #bootstrapcomponentsImagemedia let-state="state"><servoybootstrap-imagemedia  [media]="state.model.media"  [visible]="state.model.visible" [alternate]="state.model.alternate" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" [enabled]="state.model.enabled" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-imagemedia></ng-template>
+    <ng-template #bootstrapcomponentsLabel let-state="state"><servoybootstrap-label [showAs]="state.model.showAs" [labelFor]="state.model.labelFor" [visible]="state.model.visible" [styleClass]="state.model.styleClass" [enabled]="state.model.enabled" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [text]="state.model.text" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onDoubleClickMethodID]="getHandler(state,'onDoubleClickMethodID')" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-label></ng-template>
+    <ng-template #bootstrapcomponentsTextarea let-state="state"><servoybootstrap-textarea  [visible]="state.model.visible" [editable]="state.model.editable" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [placeholderText]="state.model.placeholderText" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-textarea></ng-template>
+    <ng-template #bootstrapcomponentsCheckbox let-state="state"><servoybootstrap-checkbox  [showAs]="state.model.showAs" [visible]="state.model.visible" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [text]="state.model.text" [tabSeq]="state.model.tabSeq" [selectedValue]="state.model.selectedValue" [toolTipText]="state.model.toolTipText" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-checkbox></ng-template>
+    <ng-template #bootstrapcomponentsChoicegroup let-state="state"><servoybootstrap-choicegroup  [showAs]="state.model.showAs" [visible]="state.model.visible" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [valuelistID]="state.model.valuelistID" [findmode]="state.model.findmode" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [inputType]="state.model.inputType" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-choicegroup></ng-template>
+    <ng-template #bootstrapcomponentsTabpanel let-state="state"><servoybootstrap-tabpanel  [visible]="state.model.visible" [containerStyleClass]="state.model.containerStyleClass" [tabs]="state.model.tabs" [tabIndex]="state.model.tabIndex" (tabIndexChange)="datachange(state.name,'tabIndex',$event)" [styleClass]="state.model.styleClass" [activeTabIndex]="state.model.activeTabIndex" [showTabCloseIcon]="state.model.showTabCloseIcon" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [closeIconStyleClass]="state.model.closeIconStyleClass" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [tabSeq]="state.model.tabSeq" [height]="state.model.height" [onTabClickedMethodID]="getHandler(state,'onTabClickedMethodID')" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [onTabCloseMethodID]="getHandler(state,'onTabCloseMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'><svy-form *ngIf="isFormAvailable(name)" [name]="name"></svy-form></ng-template></servoybootstrap-tabpanel></ng-template>
+    <ng-template #bootstrapcomponentsAccordion let-state="state"><servoybootstrap-accordion  [visible]="state.model.visible" [containerStyleClass]="state.model.containerStyleClass" [tabs]="state.model.tabs" [tabIndex]="state.model.tabIndex" (tabIndexChange)="datachange(state.name,'tabIndex',$event)" [styleClass]="state.model.styleClass" [activeTabIndex]="state.model.activeTabIndex" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [servoyAttributes]="state.model.attributes" [tabSeq]="state.model.tabSeq" [height]="state.model.height" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp><ng-template let-name='name'><svy-form *ngIf="isFormAvailable(name)" [name]="name"></svy-form></ng-template></servoybootstrap-accordion></ng-template>
+
+    <!-- <ng-template #bootstrapcomponentsTypeahead let-state="state"><servoybootstrap-typeahead  [visible]="state.model.visible" [editable]="state.model.editable" [format]="state.model.format" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [valuelistID]="state.model.valuelistID" (valuelistIDChange)="datachange(state.name,'valuelistID',$event)" [size]="state.model.size" [cssPosition]="state.model.cssPosition" [location]="state.model.location" [attributes]="state.model.attributes" [placeholderText]="state.model.placeholderText" [selectOnEnter]="state.model.selectOnEnter" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [name]="state.name" #cmp></servoybootstrap-typeahead></ng-template> -->
+	 <!-- component template generate end -->
    `
 })
 
@@ -218,11 +259,27 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('servoydefaultImagemedia', { static: true }) readonly servoydefaultImagemedia: TemplateRef<any>;
     @ViewChild('servoycoreSlider', { static: true }) readonly servoycoreSlider: TemplateRef<any>;
     @ViewChild('servoycoreErrorbean', { static: true }) readonly servoycoreErrorbean: TemplateRef<any>;
+    @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
 
     @ViewChild('servoyextraTable', { static: true }) readonly servoyextraTable: TemplateRef<any>;
 
-    @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
-
+    @ViewChild('bootstrapcomponentsCalendar', { static: true }) readonly bootstrapcomponentsCalendar: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsCalendarinline', { static: true }) readonly bootstrapcomponentsCalendarinline: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsButton', { static: true }) readonly bootstrapcomponentsButton: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsCombobox', { static: true }) readonly bootstrapcomponentsCombobox: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsCheckbox', { static: true }) readonly bootstrapcomponentsCheckbox: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsChoicegroup', { static: true }) readonly bootstrapcomponentsChoicegroup: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsImagemedia', { static: true }) readonly bootstrapcomponentsImagemedia: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsList', { static: true }) readonly bootstrapcomponentsList: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsTablesspanel', { static: true }) readonly bootstrapcomponentsTablesspanel: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsLabel', { static: true }) readonly bootstrapcomponentsLabel: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsDatalabel', { static: true }) readonly bootstrapcomponentsDatalabel: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsTextarea', { static: true }) readonly bootstrapcomponentsTextarea: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsTextbox', { static: true }) readonly bootstrapcomponentsTextbox: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsSelect', { static: true }) readonly bootstrapcomponentsSelect: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsTabpanel', { static: true }) readonly bootstrapcomponentsTabpanel: TemplateRef<any>;
+    @ViewChild('bootstrapcomponentsAccordion', { static: true }) readonly bootstrapcomponentsAccordion: TemplateRef<any>;
+    // @ViewChild('bootstrapcomponentsTypeahead', { static: true }) readonly bootstrapcomponentsTypeahead: TemplateRef<any>;
     // component template generate end
 
     @ViewChildren('cmp') readonly components: QueryList<Component>;
@@ -344,7 +401,15 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     public callApi(componentName: string, apiName: string, args: object): any {
         let comp = this.components.find(item => item['name'] == componentName);
         let proto = Object.getPrototypeOf(comp)
-        return proto[apiName].apply(comp, args);
+        if (proto[apiName])
+        {
+            return proto[apiName].apply(comp, args); 
+        }
+        else
+        {
+            this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component '+ componentName +' was not found, please check component implementation.')));
+            return null;
+        }    
     }
 }
 

@@ -158,7 +158,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		}
 		else if (BuilderUtils.getMarkers(activeProject) == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			if (TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(exportModel.getModulesToExport()))
+			if (TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportModel.getModulesToExport()))
 			{
 				exportConfirmationPage = new ExportConfirmationPage();
 			}
@@ -242,6 +242,23 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				return false;
 			}
 		}
+		boolean alreadyAsked = getDialogSettings().getBoolean("export.no_validators_or_converters.question");
+		if (!alreadyAsked)
+		{
+			boolean noConvertorsOrValidators = !exportModel.getPlugins().contains("converters.jar") ||
+				!exportModel.getPlugins().contains("default_validators.jar");
+			final boolean[] exportWithoutConvOrVal = new boolean[] { true };
+			if (noConvertorsOrValidators)
+			{
+				Display.getDefault().syncExec(() -> {
+					exportWithoutConvOrVal[0] = MessageDialog.openConfirm(getShell(), "No Column Convertors or Validators are exported",
+						"Are you sure you want to export without 'converters.jar' or 'default_validators.jar' from the plugins?");
+				});
+			}
+			if (!exportWithoutConvOrVal[0]) return false;
+			else getDialogSettings().put("export.no_validators_or_converters.question", true);
+		}
+
 
 		exportModel.saveSettings(getDialogSettings());
 		errorFlag = false;

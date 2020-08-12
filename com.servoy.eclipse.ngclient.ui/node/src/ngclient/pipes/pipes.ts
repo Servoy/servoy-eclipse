@@ -17,3 +17,14 @@ export class NotNullOrEmptyPipe implements PipeTransform {
     });
   }
 }
+
+@Pipe( { name: 'htmlFilter' } )
+export class HtmlFilterPipe implements PipeTransform {
+    transform( input: string): string{
+      if (input && input.indexOf && input.indexOf('<body') >=0 && input.lastIndexOf('</body') >=0)
+      {
+        input = input.substring(input.indexOf('<body')+6,input.lastIndexOf('</body'));
+      }
+      return input;
+    } 
+}
