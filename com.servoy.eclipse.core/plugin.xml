@@ -648,4 +648,18 @@
             label="Servoy Default Theme">
       </theme>
    </extension>
+   <extension
+         point="org.apache.tomcat.serviceprovider">
+      <serviceprovider
+            class="com.servoy.eclipse.core.tomat.ServiceProvider"
+            id="com.servoy.eclipse.core.serviceprovider">
+      </serviceprovider>
+   </extension>
+   <extension
+         point="org.apache.tomcat.tomcatstartedlistener">
+      <tomcatstartedlistener
+            class="com.servoy.eclipse.core.tomat.TomcatStartedListener"
+            id="com.servoy.eclipse.core.tomcatstartedlistener">
+      </tomcatstartedlistener>
+   </extension>
 </plugin>
