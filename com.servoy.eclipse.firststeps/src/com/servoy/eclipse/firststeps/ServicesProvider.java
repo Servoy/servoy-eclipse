@@ -7,10 +7,6 @@ import org.apache.tomcat.starter.IServicesProvider;
 
 public class ServicesProvider implements IServicesProvider
 {
-	public void registerServices()
-	{
-	}
-
 	public Set<Class< ? >> getAnnotatedClasses(String context)
 	{
 		if ("".equals(context))

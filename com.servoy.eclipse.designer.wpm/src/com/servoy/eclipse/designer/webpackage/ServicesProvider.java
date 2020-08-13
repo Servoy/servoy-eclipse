@@ -5,16 +5,11 @@ import java.util.Set;
 
 import org.apache.tomcat.starter.IServicesProvider;
 
-import com.servoy.eclipse.designer.webpackage.WebPackageManagerResourcesServlet;
 import com.servoy.eclipse.designer.webpackage.endpoint.WebPackageManagerEndpoint;
 
 
 public class ServicesProvider implements IServicesProvider
 {
-	public void registerServices()
-	{
-	}
-
 	public Set<Class< ? >> getAnnotatedClasses(String context)
 	{
 		// wpm stuff are only reported for the root context in developer.
