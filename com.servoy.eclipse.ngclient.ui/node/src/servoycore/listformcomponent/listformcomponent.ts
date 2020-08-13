@@ -1,5 +1,5 @@
 import { Component, Input, TemplateRef } from '@angular/core';
-import { ViewPortRow } from '../../sablo/spectypes.service';
+import { ViewPortRow, ViewportChangeEvent } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
 import { ListFormComponentCache, StructureCache, ComponentCache, FormComponentCache } from '../../ngclient/form.service';
 
@@ -13,7 +13,7 @@ export class ListFormComponent {
   @Input() listFormComponent: ListFormComponentCache;
 
   getViewportRows():ViewPortRow[] {
-    return this.listFormComponent.foundset.viewPort.rows;
+    return this.listFormComponent.getFoundset().viewPort.rows;
   }
 
   getStyleClasses(): string[] {
@@ -21,7 +21,7 @@ export class ListFormComponent {
   }
 
   getRowHeight(): number {
-    return this.listFormComponent.formComponentType.formHeight;
+    return this.listFormComponent.getFormComponentType().formHeight;
   }
 
   getRowItems(): Array<StructureCache | ComponentCache | FormComponentCache> {
@@ -35,12 +35,12 @@ export class ListFormComponent {
   getRowItemState(item: StructureCache | ComponentCache | FormComponentCache, rowIndex: number) {
     let rowItem:any = item;
     if(item instanceof ComponentCache) {
-      for(let element of this.listFormComponent.formComponentType.childElements) {
+      for(let element of this.listFormComponent.getFormComponentType().childElements) {
         if(element.name == item.name) {
           rowItem = Object.assign({}, element);
-          if(element.foundsetConfig && element.foundsetConfig['recordBasedProperties'] instanceof Array && rowIndex < rowItem.model_vp.length) {
+          if(element.foundsetConfig && element.foundsetConfig['recordBasedProperties'] instanceof Array && rowIndex < rowItem.modelViewport.length) {
             (element.foundsetConfig['recordBasedProperties'] as Array<string>).forEach((p) => {
-              rowItem.model[p] = rowItem.model_vp[rowIndex][p];
+              rowItem.model[p] = rowItem.modelViewport[rowIndex][p];
             })
           }
           rowItem.handlers = [];

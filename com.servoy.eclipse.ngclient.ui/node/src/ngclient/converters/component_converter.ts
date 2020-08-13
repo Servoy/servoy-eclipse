@@ -403,7 +403,7 @@ export class ComponentType implements IComponentType {
         public foundsetConfig: any,
         public handlers: any,
         public model: any,
-        public model_vp: any[],
+        public modelViewport: any[],
         public name: string
         ) {
         }

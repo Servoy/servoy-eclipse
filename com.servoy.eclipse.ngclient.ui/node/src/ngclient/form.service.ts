@@ -10,7 +10,7 @@ import { ConverterService } from '../sablo/converter.service';
 import { LoggerService, LoggerFactory } from '../sablo/logger.service';
 
 import { ServoyService, FormSettings } from './servoy.service';
-import { instanceOfChangeAwareValue, IChangeAwareValue, IFormComponentType, IFoundset } from '../sablo/spectypes.service';
+import { instanceOfChangeAwareValue, IChangeAwareValue, IFormComponentType, IFoundset, IComponentType } from '../sablo/spectypes.service';
 import { FormComponentType } from './converters/formcomponent_converter';
 import { Foundset } from './converters/foundset_converter';
 
@@ -19,7 +19,7 @@ export class FormCache {
   private componentCache: Map<String, ComponentCache>;
   private _mainStructure: StructureCache;
 
-  private _formComponents: Array<FormComponentCache>;
+  private _formComponents: Map<String, FormComponentCache>;
   private _parts: Array<PartCache>;
   public navigatorForm: FormSettings;
   private conversionInfo = {};
@@ -27,7 +27,7 @@ export class FormCache {
   constructor(readonly formname: string) {
     this.componentCache = new Map();
     this._parts = [];
-    this._formComponents = [];
+    this._formComponents = new Map();
   }
   public add(comp: ComponentCache) {
     this.componentCache.set(comp.name, comp);
@@ -46,10 +46,6 @@ export class FormCache {
     return this._mainStructure;
   }
 
-  get formComponents(): Array<FormComponentCache> {
-    return this._formComponents;
-  }
-
   get absolute(): boolean {
     return this._mainStructure == null;
   }
@@ -58,7 +54,11 @@ export class FormCache {
   }
 
   public addFormComponent(formComponent: FormComponentCache) {
-    this._formComponents.push(formComponent);
+    this._formComponents.set(formComponent.name, formComponent);
+  }
+
+  public getFormComponent(name: string): FormComponentCache {
+    return this._formComponents.get(name);
   }
 
   public getComponent(name: string): ComponentCache {
@@ -88,7 +88,12 @@ export class FormCache {
   }
 }
 
-export class ComponentCache {
+export interface IComponentCache {
+  name: string;
+  model: { [property: string]: any };
+}
+
+export class ComponentCache implements IComponentCache {
   constructor(public readonly name: string,
     public readonly type,
     public readonly model: { [property: string]: any },
@@ -125,10 +130,12 @@ export class PartCache {
   }
 }
 
-export class FormComponentCache {
+export class FormComponentCache implements IComponentCache {
     public items: Array<StructureCache | ComponentCache | FormComponentCache>;
 
     constructor(
+            public readonly name: string,
+            public readonly model: { [property: string]: any },
             public readonly responsive: boolean,
             public readonly layout: { [property: string]: string },
             public readonly formComponentProperties: FormComponentProperties,
@@ -209,7 +216,10 @@ export class FormService {
     const formData = msg.forms[formname];
     // tslint:disable-next-line:forin
     for (const beanname in formData) {
-      const comp = formCache.getComponent(beanname);
+      let comp: IComponentCache = formCache.getComponent(beanname);
+      if(!comp) { // is it a form component?
+        comp = formCache.getFormComponent(beanname);
+      }
       if (!comp) {
         this.log.debug(this.log.buildMessage(() => ('got message for ' + beanname + ' of form ' + formname + ' but that component is not in the cache')));
         continue;
@@ -301,12 +311,11 @@ export class FormService {
           }
           const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
           const structure = elem.model.foundset ?
-            new ListFormComponentCache(elem.model.containedForm, elem.model.foundset, elem.responsive, elem.position, formComponentProperties) : new FormComponentCache(elem.responsive, elem.position, formComponentProperties);
+            new ListFormComponentCache(elem.name, elem.model, elem.responsive, elem.position, formComponentProperties) : new FormComponentCache(elem.name, elem.model, elem.responsive, elem.position, formComponentProperties);
           this.walkOverChildren(elem.children, formCache, structure);
-          if (parent == null) {
-              formCache.addFormComponent(structure);
-          } else {
-              parent.addChild(structure);
+          formCache.addFormComponent(structure);
+          if (parent != null) {
+            parent.addChild(structure);
           }
         } else
           if (elem.part === true) {
@@ -489,12 +498,20 @@ export class FormService {
 
 export class ListFormComponentCache extends FormComponentCache {
     constructor(
-        public readonly formComponentType: FormComponentType,
-        public readonly foundset: Foundset,
+        public readonly name: string,
+        public readonly model: { [property: string]: any },
         public readonly responsive: boolean,
         public readonly layout: { [property: string]: string },
         public readonly formComponentProperties: FormComponentProperties,
         items?: Array<StructureCache | ComponentCache | FormComponentCache>, ) {
-            super(responsive, layout, formComponentProperties, items);
-        }
+            super(name, model, responsive, layout, formComponentProperties, items);
+    }
+
+    public getFormComponentType(): FormComponentType {
+      return this.model.containedForm;
+    }
+
+    public getFoundset(): Foundset {
+      return this.model.foundset;
+    }
 }
