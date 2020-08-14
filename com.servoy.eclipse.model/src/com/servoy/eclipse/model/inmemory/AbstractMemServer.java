@@ -924,7 +924,8 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * @see com.servoy.j2db.persistence.IServerInternal#getSQLQuerySet(com.servoy.j2db.query.ISQLQuery, java.util.ArrayList, int, int, boolean)
 	 */
 	@Override
-	public QuerySet getSQLQuerySet(ISQLQuery sqlQuery, ArrayList<TableFilter> filters, int startRow, int rowsToRetrieve, boolean forceQualifyColumns)
+	public QuerySet getSQLQuerySet(ISQLQuery sqlQuery, ArrayList<TableFilter> filters, int startRow, int rowsToRetrieve, boolean forceQualifyColumns,
+		boolean disableUseArrayForIn)
 		throws RepositoryException
 	{
 		// TODO Auto-generated method stub
