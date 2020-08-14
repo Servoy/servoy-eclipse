@@ -4,6 +4,7 @@ import { ViewportService } from '../services/viewport.service';
 import { FoundsetChangeEvent, FoundsetConverter } from './foundset_converter';
 import { ViewportRowUpdates, IComponentType } from '../../sablo/spectypes.service';
 import { FoundsetLinkedConverter } from './foundsetLinked_converter';
+import { Deferred } from 'sablo/util/deferred';
 
 export class ComponentConverter implements IConverter {
 
@@ -14,8 +15,9 @@ export class ComponentConverter implements IConverter {
 	static readonly MODEL_VIEWPORT = "modelViewport";
 	static readonly PROPERTY_NAME_KEY = "pn";
 	static readonly VALUE_KEY = "v";
-	static readonly NO_OP = "n";
-
+    static readonly NO_OP = "n";
+    static readonly RECORD_BASED_PROPERTIES = "recordBasedProperties";
+    
     private log: LoggerService;
 
     constructor( private converterService: ConverterService, private viewportService: ViewportService, private logFactory:LoggerFactory) {
@@ -108,6 +110,7 @@ export class ComponentConverter implements IConverter {
                     };
                     delete serverSentData[FoundsetLinkedConverter.FOR_FOUNDSET_PROPERTY];
                 }
+                const _this = this;
                 var executeHandler = function(type, args, row, name, model) {
                     // TODO implement $uiBlocker
                     // if ($uiBlocker.shouldBlockDuplicateEvents(name, model, type, row))
@@ -116,18 +119,16 @@ export class ComponentConverter implements IConverter {
                     //     console.log("rejecting execution of: "+type +" on "+name +" row "+row);
                     //     return $q.resolve(null);
                     // }
-                    
-                    // var promiseAndCmsid = this.converterService.createDeferedEvent();
-                    // var newargs = this.converterService.getEventArgs(args,type);
-                    // internalState.requests.push({ handlerExec: {
-                    //     eventType: type,
-                    //     args: newargs,
-                    //     rowId: row,
-                    //     defid: promiseAndCmsid.defid
-                    // }});
-                    // if (internalState.changeNotifier) internalState.changeNotifier();
-                    // promiseAndCmsid.promise.finally(function(){$uiBlocker.eventExecuted(name, model, type, row);});
-                    // return promiseAndCmsid.promise;
+                    const defered =new Deferred<{}> ();
+                    var newargs = _this.converterService.getEventArgs(args,type);
+                    internalState.requests.push({ handlerExec: {
+                        eventType: type,
+                        args: newargs,
+                        rowId: row
+                    }});
+                    if (internalState.changeNotifier) internalState.changeNotifier();
+                    // defered.promise.finally(function(){$uiBlocker.eventExecuted(name, model, type, row);});
+                    return defered.promise;
                 };
 
                 // implement what $sabloConverters need to make this work

@@ -378,12 +378,17 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         }
         let func = itemCache[handler];
         if (func == null) {
-            if (item.handlers && item.handlers.indexOf(handler) >= 0) {
+            if(item.handlers instanceof Array && item.handlers.indexOf(handler) >= 0) {
                 const me = this;
                 func = function(e) {
-                   return me.formservice.executeEvent(me.name, item.name, handler, arguments);
+                return me.formservice.executeEvent(me.name, item.name, handler, arguments);
                 }
                 itemCache[handler] = func;
+            }
+            else if(item.handlers && item.handlers[handler]){
+                func = function(e) {
+                    item.handlers[handler]();
+                }
             }
         }
         return func;
