@@ -8,8 +8,7 @@ import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 @Component( {
     selector: 'servoyextra-table',
-    templateUrl: './table.html',
-    styleUrls: ['./table.css']
+    templateUrl: './table.html'
 } )
 export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewInit, OnDestroy  {
   
