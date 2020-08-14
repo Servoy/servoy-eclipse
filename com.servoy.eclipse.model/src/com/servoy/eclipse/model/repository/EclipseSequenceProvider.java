@@ -104,7 +104,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 
 				QuerySelect select = SQLGenerator.createAggregateSelect(QueryAggregate.MAX, column.getTable(), column);
 
-				QuerySet querySet = tableServer.getSQLQuerySet(select, null, 0, -1, false);
+				QuerySet querySet = tableServer.getSQLQuerySet(select, null, 0, -1, false, false);
 				String maxSeqSelect = querySet.getSelect().getSql();
 
 				// in case one of the debug clients has a transaction started on this server, execute the query inside that transaction
@@ -240,7 +240,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 			connection = tableServer.getUnmanagedConnection();
 
 			QuerySelect select = SQLGenerator.createAggregateSelect(QueryAggregate.MAX, column.getTable(), column);
-			QuerySet querySet = tableServer.getSQLQuerySet(select, null, 0, -1, false);
+			QuerySet querySet = tableServer.getSQLQuerySet(select, null, 0, -1, false, false);
 			String maxSelect = querySet.getSelect().getSql();
 
 
