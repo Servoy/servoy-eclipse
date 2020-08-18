@@ -146,6 +146,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.component.ComponentFactory;
@@ -4015,6 +4016,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	@Override
 	protected BaseNGPackageManager createNGPackageManager()
 	{
+		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
+		for (String packageName : defaultPackageNames)
+		{
+			PlatformUI.getPreferenceStore().setDefault("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, true);
+		}
 		return new NGPackageManager(this);
 	}
 

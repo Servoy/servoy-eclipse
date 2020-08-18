@@ -110,7 +110,6 @@ import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.EclipseRepositoryFactory;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
@@ -382,12 +381,6 @@ public class Activator extends Plugin
 				}
 			}
 		});
-
-		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
-		for (String packageName : defaultPackageNames)
-		{
-			PlatformUI.getPreferenceStore().setDefault("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, true);
-		}
 	}
 
 	private void turnOffExternalToolsActionSet(IWorkbenchWindow workbenchWindow, IPerspectiveDescriptor perspectiveDescriptor, Preferences node)
