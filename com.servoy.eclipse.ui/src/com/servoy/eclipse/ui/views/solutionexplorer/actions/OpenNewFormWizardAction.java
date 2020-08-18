@@ -48,7 +48,7 @@ public class OpenNewFormWizardAction extends OpenWizardAction implements ISelect
 		{
 			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
 			state = (type == UserNodeType.FORMS || type == UserNodeType.TABLE || type == UserNodeType.INMEMORY_DATASOURCE || type == UserNodeType.VIEW ||
-				type == UserNodeType.SOLUTION);
+				type == UserNodeType.SOLUTION || type == UserNodeType.WORKING_SET);
 		}
 		setEnabled(state);
 	}
