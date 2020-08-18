@@ -5113,6 +5113,7 @@ public class TypeCreator extends TypeCache
 				if (Relation.isValid(relation, fs))
 				{
 					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
+					if (table == null) return null;
 					superType = getType(context, superType.getName() + '<' + table.getDataSource() + '>');
 					table = null;
 				}
