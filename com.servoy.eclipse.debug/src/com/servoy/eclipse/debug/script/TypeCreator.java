@@ -4638,6 +4638,7 @@ public class TypeCreator extends TypeCache
 					if (FormTemplateGenerator.isWebcomponentBean(formElement))
 					{
 						WebObjectSpecification spec = FormTemplateGenerator.getWebObjectSpecification(formElement);
+						if (spec == null) continue;
 						String typeName = null;
 						Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
 						if (properties.size() > 0)
