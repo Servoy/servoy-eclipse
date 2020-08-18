@@ -41,6 +41,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.wicket.Request;
 import org.apache.wicket.Response;
 import org.apache.wicket.Session;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -194,6 +196,26 @@ public class Activator extends Plugin
 	public void start(BundleContext context) throws Exception
 	{
 		ModelUtils.assertUINotDisabled(PLUGIN_ID);
+
+		IWorkspaceDescription description = ResourcesPlugin.getWorkspace().getDescription();
+		boolean autoBuilding = description.isAutoBuilding();
+		if (autoBuilding)
+		{
+			description.setAutoBuilding(false);
+			ResourcesPlugin.getWorkspace().setDescription(description);
+			ServoyModelManager.getServoyModelManager().addDoneListener(() -> {
+				IWorkspaceDescription des = ResourcesPlugin.getWorkspace().getDescription();
+				des.setAutoBuilding(true);
+				try
+				{
+					ResourcesPlugin.getWorkspace().setDescription(des);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+			});
+		}
 
 		super.start(context);
 		plugin = this;
