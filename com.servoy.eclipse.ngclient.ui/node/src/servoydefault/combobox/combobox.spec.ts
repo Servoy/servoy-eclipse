@@ -17,8 +17,7 @@ import { ServicesService } from '../../sablo/services.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LoggerFactory } from '../../sablo/logger.service';
-
-
+import { Select2Data } from 'ng-select2-component';
 
 const mockData = [
   {
@@ -33,6 +32,12 @@ const mockData = [
     realValue: 3,
     displayValue: 'Cluj'
   },
+]
+
+const formattedData : Select2Data = [
+    { value: '1', label: 'Bucuresti' },
+    { value: '2', label: 'Timisoara'},
+    { value: '3', label: 'Cluj' }
 ]
 
 function createDefaultValuelist() {
@@ -78,7 +83,7 @@ describe('ComboboxComponent', () => {
     component.ngOnInit();
 
     fixture.detectChanges();
-  });
+  }); 
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -88,42 +93,14 @@ describe('ComboboxComponent', () => {
     expect(component.valuelistID.length).toBe(3);
   });
 
-  it('should set initial dropdown closed', () => {
-    expect(component.instance.isPopupOpen()).toBeFalsy();
+  it('should set initial list of values', () => {
+    expect(component.data.values).toEqual(formattedData.values, 'the valuelist doesn\'t have the values of the formattedData')
   });
 
-  it('should open dropdown on container click', fakeAsync(() => {
-    fixture.detectChanges();
-    component.click$.next('');
-    tick(100);
-    fixture.detectChanges();
-    expect(component.instance.isPopupOpen()).toBeTruthy();
-  }));
-
-
-  it('should open dropdown on container focus', fakeAsync(() => {
-    fixture.detectChanges();
-    component.focus$.next('');
-    tick(100);
-    fixture.detectChanges();
-    expect(component.instance.isPopupOpen()).toBeTruthy();
-  }));
-
-  it('should set initial list of values', (done) => {
-    component.values(of('')).subscribe(values => {
-      // expect(values).toEqual(mockData, 'the valuelist doesn\'t have the values of the mockData');
+  it('should have the default value 3', done => {
+    component.observableValue.subscribe(value => {
+      expect(value).toBe(3); // data provider's value
       done();
     });
-    // tick(100);
   });
-
-  // it('should filter the list of values', <any>fakeAsync((done) => {
-  //   component.values(of('Bu')).subscribe(values => {
-  //     // expect(values).toEqual([mockData[0]], 'the valuelist doesnt have only the first value of the mockData ' + mockData[0]);
-  //     done();
-  //   });
-  //   flushMicrotasks();
-  //   // tick(100);
-  // }));
-
 });

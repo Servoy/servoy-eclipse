@@ -1,28 +1,17 @@
-
-<div class="input-group-append"
-      style="width:100%;height:100%;overflow:hidden"
-      #element>
-  <input
-      type="text"
-      style="width:100%;height:100%;overflow:hidden"
-      class="svy-combobox form-control form-control-sm input-sm svy-padding-xs"
-      container="body"
-      editable="false"
-      [id]="servoyApi.getMarkupId()"
-      [value]="observableValue | async | formatFilter:format?.display:format?.type:format"
-      [svyFormat]="format"
-      [svyStartEdit]="'dataProviderID'"
-      [hostComponent]="self"
-      [svyTooltip]="toolTipText"
-      [sabloTabseq]="tabSeq"
-      [focusFirst]="false"
-      [ngbTypeahead]="values"
-      [resultFormatter]="formatter"
-      [inputFormatter]="formatter"
-      (focus)="focus$.next('')"
-      (click)="click$.next('')"
-      (selectItem)="valueChanged($event.item)"
-      #input
-      #instance="ngbTypeahead"/>
-      <span type="button" class="btn btn-sm dropdown-toggle svy-dropdown-border" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" (click)="getFocusElement().focus()"></span>
-</div>
+<div #element> 
+    <select2  
+        [multiple]="false"
+        style="width:100%;height:100%;overflow:hidden"
+        [data]="data"
+        [id]="servoyApi.getMarkupId()"
+        [svyFormat]="format"
+        [svyStartEdit]="'dataProviderID'"
+        [hostComponent]="self"
+        [svyTooltip]="toolTipText"
+        [sabloTabseq]="tabSeq"
+        [value]="findmode ? observableValue : observableValue | async | formatFilter:format?.display:format?.type:format"
+        (update)="updateValue($event)"
+        [minCountForSearch]="0"
+        > 
+    </select2>
+</div> 

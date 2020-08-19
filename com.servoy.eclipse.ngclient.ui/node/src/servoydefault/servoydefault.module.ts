@@ -39,6 +39,7 @@ import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularEditorModule } from '@kolkov/angular-editor';
 import { UploadDirective } from '../ngclient/utils/upload.directive';
+import { Select2Module } from 'ng-select2-component';
 
 @NgModule({
   declarations: [
@@ -75,7 +76,8 @@ import { UploadDirective } from '../ngclient/utils/upload.directive';
     OwlDateTimeModule,
     OwlMomentDateTimeModule,
     AngularEditorModule,
-    ServoyPublicModule
+    ServoyPublicModule,
+    Select2Module 
   ],
   exports: [
             ServoyDefaultTextField,
