@@ -123,7 +123,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 									{
 										Iterator<TableNode> tableNodes = flatSolution.getTableNodes(table);
 
-										if (tableNodes.hasNext())
+										if (tableNodes != null && tableNodes.hasNext())
 										{
 											if (deleteEACAsker == null)
 											{
