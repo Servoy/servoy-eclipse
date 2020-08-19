@@ -90,4 +90,9 @@ public class ServoyModelManager
 	{
 		return initializedCalled.get();
 	}
+
+	public void addDoneListener(IModelDoneListener listener)
+	{
+		servoyModel.addDoneListener(listener);
+	}
 }

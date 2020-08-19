@@ -11,10 +11,6 @@ import com.servoy.eclipse.designer.rfb.endpoint.EditorEndpoint;
 
 public class ServicesProvider implements IServicesProvider
 {
-	public void registerServices()
-	{
-	}
-
 	public Set<Class< ? >> getAnnotatedClasses(String context)
 	{
 		// rfb stuff are only reported for the root context in developer.

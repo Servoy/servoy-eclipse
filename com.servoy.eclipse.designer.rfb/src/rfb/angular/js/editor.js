@@ -1113,12 +1113,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						return true;
 					});
 					$(document).keydown(function(objEvent) {
-//						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
-//
-//						if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta) {
-//							$editorService.keyPressed(objEvent);
-//							return false;
-//						}
+						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
+
+						if (fixedKeyEvent.isCtrl || fixedKeyEvent.isMeta || fixedKeyEvent.isAlt) {
+							$editorService.keyPressed(objEvent);
+							return false;
+						}
 						return true;
 					});
 

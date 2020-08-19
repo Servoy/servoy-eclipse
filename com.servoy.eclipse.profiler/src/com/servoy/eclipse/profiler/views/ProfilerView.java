@@ -1001,7 +1001,6 @@ public class ProfilerView extends ViewPart
 		methodCallViewer = new TreeViewer(sashForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(methodCallViewer);
 		makeActions();
-		hookContextMenu();
 		hookDoubleClickAction();
 		contributeToActionBars();
 
@@ -1172,6 +1171,25 @@ public class ProfilerView extends ViewPart
 			public String getToolTipText(Object element)
 			{
 				String text = getText(element);
+				if (!text.contains("\n"))
+				{
+					String lower = text.toLowerCase();
+					int fromIndex = lower.indexOf(" from ");
+					if (fromIndex > 0)
+					{
+						text = text.substring(0, fromIndex) + '\n' + text.substring(fromIndex + 1); // one more to replace the space with new line so text is still the same number of chars
+					}
+					int whereIndex = lower.indexOf(" where ");
+					if (whereIndex > 0)
+					{
+						text = text.substring(0, whereIndex) + '\n' + text.substring(whereIndex + 1);
+					}
+					int orderIndex = lower.indexOf(" order by ");
+					if (orderIndex > 0)
+					{
+						text = text.substring(0, orderIndex) + '\n' + text.substring(orderIndex + 1);
+					}
+				}
 				return text;
 			}
 
@@ -1296,6 +1314,8 @@ public class ProfilerView extends ViewPart
 				return true;
 			}
 		});
+		hookContextMenu();
+
 	}
 
 	/**
@@ -1339,6 +1359,37 @@ public class ProfilerView extends ViewPart
 		Menu menu = menuMgr.createContextMenu(methodCallViewer.getControl());
 		methodCallViewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(menuMgr, methodCallViewer);
+
+
+		menuMgr = new MenuManager("#PopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener()
+		{
+			public void menuAboutToShow(IMenuManager manager)
+			{
+				ISelection selection = sqlDataViewer.getSelection();
+				if (!selection.isEmpty() && selection instanceof IStructuredSelection &&
+					((IStructuredSelection)selection).getFirstElement() instanceof DataCallProfileData)
+				{
+					final DataCallProfileData data = (DataCallProfileData)((IStructuredSelection)selection).getFirstElement();
+					Action copyAction = new Action("Copy SQL")
+					{
+						@Override
+						public void run()
+						{
+							Clipboard clipboard = new Clipboard(getSite().getShell().getDisplay());
+							TextTransfer textTransfer = TextTransfer.getInstance();
+							clipboard.setContents(new Object[] { data.getQuery() }, new Transfer[] { textTransfer });
+							clipboard.dispose();
+						}
+					};
+					manager.add(copyAction);
+				}
+			}
+		});
+		menu = menuMgr.createContextMenu(sqlDataViewer.getControl());
+		sqlDataViewer.getControl().setMenu(menu);
+		getSite().registerContextMenu(menuMgr, sqlDataViewer);
 	}
 
 	private void contributeToActionBars()

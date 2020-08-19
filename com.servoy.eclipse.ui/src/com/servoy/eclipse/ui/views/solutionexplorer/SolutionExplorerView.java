@@ -3137,6 +3137,7 @@ public class SolutionExplorerView extends ViewPart
 		NewInMemoryDataSourceAction newViewFS = new NewInMemoryDataSourceAction(this, "Create view foundset", UserNodeType.VIEW_FOUNDSETS);
 		newActionInTreePrimary.registerAction(UserNodeType.VIEW_FOUNDSETS, newViewFS);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
+		newActionInTreePrimary.registerAction(UserNodeType.WORKING_SET, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);

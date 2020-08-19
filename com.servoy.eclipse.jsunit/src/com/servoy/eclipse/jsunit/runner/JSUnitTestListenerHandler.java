@@ -20,18 +20,18 @@ import java.util.List;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.Wrapper;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.Wrapper;
-
 /**
  * Class that makes the conversion between JSUnit test result and JUnit test result.
- * 
+ *
  * @author acostescu
  */
 public abstract class JSUnitTestListenerHandler<T, E>
@@ -52,7 +52,7 @@ public abstract class JSUnitTestListenerHandler<T, E>
 
 	/**
 	 * @param stackElementFilters a list of regex strings (see {@link String#matches(String)}). If any of these match the file/method name in a stack element of a failure/error, that stack element
-	 * will be ignored. 
+	 * will be ignored.
 	 */
 	public JSUnitTestListenerHandler(TestResult result, List<Test> testList, String[] stackElementFilters)
 	{
@@ -197,8 +197,7 @@ public abstract class JSUnitTestListenerHandler<T, E>
 	/**
 	 * Subclasses can override when they need to do something extra.
 	 */
-	protected void testStarted(@SuppressWarnings("unused")
-	Test currentTest)
+	protected void testStarted(@SuppressWarnings("unused") Test currentTest)
 	{
 		// nothing to do here
 	}
@@ -234,6 +233,26 @@ public abstract class JSUnitTestListenerHandler<T, E>
 	public boolean shouldStop()
 	{
 		return result.shouldStop();
+	}
+
+	/**
+	 * Call this only if a special situation occurred when the currently running test should report some kind of error to the "result"
+	 * after which all following tests will be skipped; for example a user stop request or a fatal error;
+	 */
+	public Test popLastStartedTest()
+	{
+		return testStack.pop();
+	}
+
+	/**
+	 * Call this only if a fatal error or user stop caused test execution to halt (no further tests will be conducted).
+	 */
+	public void stopAllStartedSuites()
+	{
+		while (!testStack.isEmpty())
+		{
+			result.endTest(testStack.pop());
+		}
 	}
 
 	protected abstract String getTestObjectName(T test);

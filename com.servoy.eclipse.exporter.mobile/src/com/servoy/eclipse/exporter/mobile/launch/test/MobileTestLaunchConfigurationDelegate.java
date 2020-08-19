@@ -70,7 +70,7 @@ public class MobileTestLaunchConfigurationDelegate extends MobileLaunchConfigura
 		testTarget = JSUnitLaunchConfigurationDelegate.prepareForLaunch(configuration, launch);
 
 		if (monitor != null && monitor.isCanceled()) return;
-		exporter.useTestWar(testTarget);
+		exporter.useTestWar(testTarget, false);
 
 		if (monitor != null && monitor.isCanceled()) return;
 	}

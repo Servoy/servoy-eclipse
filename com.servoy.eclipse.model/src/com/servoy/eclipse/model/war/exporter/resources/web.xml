@@ -6,7 +6,7 @@
                       http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
   version="3.0">
   <!--  this version below should be upped if servoy makes changes to this file! -->
-  <!--  servoy web.xml version:3 -->
+  <!--  servoy web.xml version:4 -->
   <!-- Servoy related servlets -->
   
   <absolute-ordering>
@@ -20,6 +20,15 @@
 		<listener-class>com.servoy.j2db.server.servlets.WarClientServletContextListener</listener-class>
   </listener>  
    
+   <filter>
+       <filter-name>SeparateSessionFilter</filter-name>
+       <filter-class>org.sablo.filter.SeparateSessionFilter</filter-class>
+       <init-param>
+           <param-name>paths</param-name>
+           <param-value>/rfb/:/websocket/:/solutions/:/spec/:/resources/</param-value>
+       </init-param>
+   </filter>
+
 	<servlet>
 		<servlet-name>http-tunnel-servlet</servlet-name>
 		<servlet-class>
@@ -71,6 +80,11 @@
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
+
+  <filter-mapping>
+    <filter-name>SeparateSessionFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
 	<servlet-mapping>
 		<servlet-name>http-tunnel-servlet</servlet-name>

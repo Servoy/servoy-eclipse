@@ -4638,6 +4638,7 @@ public class TypeCreator extends TypeCache
 					if (FormTemplateGenerator.isWebcomponentBean(formElement))
 					{
 						WebObjectSpecification spec = FormTemplateGenerator.getWebObjectSpecification(formElement);
+						if (spec == null) continue;
 						String typeName = null;
 						Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
 						if (properties.size() > 0)
@@ -4747,6 +4748,7 @@ public class TypeCreator extends TypeCache
 			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1) return null;
 			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			String[] typeNames = wcTypeName.split("\\.");
+			if (typeNames.length < 2) return null;
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeNames[0]);
 			if (spec == null)
@@ -5112,6 +5114,7 @@ public class TypeCreator extends TypeCache
 				if (Relation.isValid(relation, fs))
 				{
 					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
+					if (table == null) return null;
 					superType = getType(context, superType.getName() + '<' + table.getDataSource() + '>');
 					table = null;
 				}

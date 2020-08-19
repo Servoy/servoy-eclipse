@@ -24,13 +24,12 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
-
 import org.mozilla.javascript.Scriptable;
 
 import de.berlios.jsunit.JsUnitException;
+import junit.framework.Test;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
 
 /**
  * This class runs a JSUnit testsuite wrapped as a JUnit TestSuite.
@@ -59,7 +58,7 @@ public class JSUnitSuite extends TestSuite
 	/**
 	 * Creates a JUnit test suite that really executes the JSUnit test suite <code>jsSuiteName</code> that can be found in the given <code>jsTestCode</code>.
 	 * JSUnit code and test code will be loaded/interpreted in the provided scope.
-	 * 
+	 *
 	 * @param jsTestCode the JS test code (suites/test cases).
 	 * @param jsSuiteClassName the name of the JS test suite class to execute that is declared in <code>jsTestCode</code>.
 	 * @param testFileName the name of the test file name (used when reporting call stacks.
@@ -83,7 +82,7 @@ public class JSUnitSuite extends TestSuite
 	/**
 	 * Creates a JUnit test suite that really executes the JSUnit test suite <code>jsSuiteName</code> that can be found in the given <code>jsTestCode</code>.
 	 * JSUnit code and test code will be loaded/interpreted in the provided scope.
-	 * 
+	 *
 	 * @param jsTestCode the JS test code (suites/test cases) reader. The reader will be closed after reading.
 	 * @param jsSuiteClassName the name of the JS test suite class to execute that is declared in <code>jsTestCode</code>.
 	 * @param testFileName the name of the test file name (used when reporting call stacks.
@@ -116,7 +115,7 @@ public class JSUnitSuite extends TestSuite
 	 * Prepares a JUnit test suite that really executes the JSUnit test suite <code>jsSuiteName</code> that can be found in the given <code>jsTestCode</code>.
 	 * JSUnit code and test code will be loaded/interpreted in the provided scope.<br>
 	 * This method <b>MUST</b> be called when protected constructor is used!
-	 * 
+	 *
 	 * @param jsTestCode the JS test code (suites/test cases) reader. The reader will be closed after reading.
 	 * @param jsSuiteClassName the name of the JS test suite class to execute that is declared in <code>jsTestCode</code>.
 	 * @param testFileName the name of the test file name (used when reporting call stacks.
@@ -178,7 +177,7 @@ public class JSUnitSuite extends TestSuite
 	/**
 	 * Set this to hide stack elements that match the given filters.
 	 * @param stackElementFilters a list of regex strings (see {@link String#matches(String)}). If any of these match the file/method name in a stack element of a failure/error, that stack element
-	 * will be ignored. 
+	 * will be ignored.
 	 */
 	public void setStackElementFilters(String[] stackElementFilters)
 	{
@@ -188,11 +187,11 @@ public class JSUnitSuite extends TestSuite
 	/**
 	 * Call this if you do not want references to used scopes to prevent garbage collection, but if you still plan to use this test suite
 	 * later. When you do, you MUST call {@link #changeScope(Scriptable, Reader)} to reinitialise the test scope before using the suite again.<BR>
-	 * 
+	 *
 	 * This is useful in some cases where creating the test suite hierarchy is needed before unit tests start running (such as UI/ant reporting).
 	 * After you create the test suite hierarchy, the suite might not be used for a long while, and you might want to free up some memory, which
 	 * will be re-allocated when the test is run.
-	 * 
+	 *
 	 * This method is automatically called after the suite runs.
 	 */
 	protected void releaseScopes()
@@ -237,7 +236,10 @@ public class JSUnitSuite extends TestSuite
 			runner.runSuite(testListener, jsSuiteClassName);
 			if (result.shouldStop())
 			{
-				result.addError(this, new Exception("Unit tests stopped by user..."));
+				Test runningTest = testListener.popLastStartedTest();
+				result.addError(runningTest != null ? runningTest : this,
+					new Exception("Unit tests stopped by user..."));
+				testListener.stopAllStartedSuites();
 			}
 		}
 		catch (RuntimeException e)
@@ -246,14 +248,30 @@ public class JSUnitSuite extends TestSuite
 			// the tools that display results might end up in an un-determined state (for example the jUnit eclipse result view)
 			if (!"Current script terminated".equals(e.getMessage()) && !"Script execution stopped".equals(e.getMessage()))
 			{
-				result.addError(this, e);
+				Test runningTest = testListener.popLastStartedTest();
+				result.addError(runningTest != null ? runningTest : this, e);
 				e.printStackTrace();
 			}
 			else
 			{
 				// else intentional shut down of the javascript engine, probably due to an user action
-				result.addError(this, new Exception("Unit tests stopped by user..."));
+				Test runningTest = testListener.popLastStartedTest();
+				result.addError(runningTest != null ? runningTest : this,
+					new Exception("Unit tests stopped by user..."));
 			}
+			testListener.stopAllStartedSuites();
+		}
+		catch (ThreadDeath e)
+		{ // don't catch ThreadDeath by accident (this is the same as in junit.framework.TestResult.runProtected(Test, Protectable))
+			throw e;
+		}
+		catch (Throwable e)
+		{
+			Test runningTest = testListener.popLastStartedTest();
+			result.addError(runningTest != null ? runningTest : this, new RuntimeException(
+				"A throwable was caught that interrupted normal test flow;\nTHIS WILL STOP ANY OF THE FOLLOWING TESTS FROM BEING RUN, SO YOU ARE PROBABLY SEEING JUST PARTIAL TEST RESULTS\nPlease fix this error in order to allow all jsunit tests to run as expected. It can happen if for example some jar is missing from the classpath, but other causes can appear as well.\nSee \"Caused by\" throwable below:",
+				e));
+			testListener.stopAllStartedSuites();
 		}
 		finally
 		{

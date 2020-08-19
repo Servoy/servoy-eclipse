@@ -17,15 +17,15 @@
 
 package com.servoy.eclipse.jsunit.smart;
 
-import junit.framework.Test;
-import junit.framework.TestResult;
-
 import com.servoy.eclipse.jsunit.runner.ApplicationJSTestSuite;
 import com.servoy.eclipse.jsunit.scriptunit.ScriptUnitTestRunNotifier;
 import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServiceProvider;
 import com.servoy.j2db.J2DBGlobals;
+
+import junit.framework.Test;
+import junit.framework.TestResult;
 
 /**
  * this test suite is used only when running tests from the UI .
@@ -38,7 +38,7 @@ public class SmartClientTestSuite extends ApplicationJSTestSuite
 
 	public SmartClientTestSuite(IApplication application, TestTarget target)
 	{
-		super(application, target);
+		super(application, target, false);
 	}
 
 	@Override

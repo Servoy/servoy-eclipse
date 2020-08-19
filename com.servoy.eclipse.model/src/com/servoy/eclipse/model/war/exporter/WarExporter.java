@@ -1225,7 +1225,7 @@ public class WarExporter
 		if (noConvertorsOrValidators)
 		{
 			// print to system out for the command line exporter.
-			System.out.println("converter.jar or defalut_validators.jar not exported so column converters or validators don't work");
+			System.out.println("converter.jar or default_validators.jar not exported so column converters or validators don't work");
 		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
 		try (Writer fw = new FileWriter(pluginProperties))

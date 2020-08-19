@@ -1863,41 +1863,44 @@ public class SolutionExplorerTreeContentProvider
 			Solution servoySolution = (Solution)realObject;
 			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(servoySolution.getName());
 
-			IProject eclipseProject = servoyProject.getProject();
-
-			List<IProject> allReferencedProjects;
-			if (includeModules)
+			if (servoyProject != null)
 			{
-				try
+				IProject eclipseProject = servoyProject.getProject();
+
+				List<IProject> allReferencedProjects;
+				if (includeModules)
 				{
-					allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
+					try
+					{
+						allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
+					}
+					catch (CoreException e)
+					{
+						Debug.log(e);
+						allReferencedProjects = new ArrayList<IProject>(1);
+						allReferencedProjects.add(eclipseProject);
+					}
 				}
-				catch (CoreException e)
+				else
 				{
-					Debug.log(e);
 					allReferencedProjects = new ArrayList<IProject>(1);
 					allReferencedProjects.add(eclipseProject);
 				}
-			}
-			else
-			{
-				allReferencedProjects = new ArrayList<IProject>(1);
-				allReferencedProjects.add(eclipseProject);
-			}
-			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-			if (activeResourcesProject != null)
-			{
-				allReferencedProjects.remove(activeResourcesProject.getProject());
-			}
-			ArrayList<IPackageReader> packages = new ArrayList<>(Arrays.asList(componentProvider.getAllPackageReaders()));
-			packages.addAll(Arrays.asList(serviceProvider.getAllPackageReaders()));
-
-			for (IPackageReader entry : packages)
-			{
-				IResource resource = getResource(entry);
-				if (resource instanceof IFile && allReferencedProjects.contains(resource.getProject()))
+				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+				if (activeResourcesProject != null)
 				{
-					return true;
+					allReferencedProjects.remove(activeResourcesProject.getProject());
+				}
+				ArrayList<IPackageReader> packages = new ArrayList<>(Arrays.asList(componentProvider.getAllPackageReaders()));
+				packages.addAll(Arrays.asList(serviceProvider.getAllPackageReaders()));
+
+				for (IPackageReader entry : packages)
+				{
+					IResource resource = getResource(entry);
+					if (resource instanceof IFile && allReferencedProjects.contains(resource.getProject()))
+					{
+						return true;
+					}
 				}
 			}
 		}

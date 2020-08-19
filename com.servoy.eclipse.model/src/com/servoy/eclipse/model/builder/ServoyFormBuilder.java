@@ -1588,6 +1588,30 @@ public class ServoyFormBuilder
 						}
 						else
 						{
+							if (scriptMethod.getParent() instanceof Form)
+							{
+								List<Form> hierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy(form);
+								if (!hierarchy.contains(scriptMethod.getParent()))
+								{
+									ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
+										form);
+									IMarker marker = ServoyBuilder.addMarker(markerResource, ServoyBuilder.INVALID_EVENT_METHOD, mk.getText(), -1,
+										ServoyBuilder.FORM_PROPERTY_TARGET_NOT_FOUND,
+										IMarker.PRIORITY_LOW, null, o);
+									if (marker != null)
+									{
+										try
+										{
+											marker.setAttribute("EventName", handler);
+										}
+										catch (Exception ex)
+										{
+											ServoyLog.logError(ex);
+										}
+									}
+								}
+							}
+
 							BuilderDependencies.getInstance().addDependency(scriptMethod.getScopeName(), form);
 						}
 					}

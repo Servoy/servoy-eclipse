@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.labelproviders;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
@@ -100,7 +102,17 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 		{
 			return Messages.LabelUnresolved;
 		}
-
+		else
+		{
+			if (persistContext.getContext() instanceof Form && sm.getParent() instanceof Form)
+			{
+				List<Form> hierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy((Form)persistContext.getContext());
+				if (!hierarchy.contains(sm.getParent()))
+				{
+					return Messages.LabelUnresolved;
+				}
+			}
+		}
 		StringBuilder sb = new StringBuilder();
 		if (showPrefix && sm.getParent() instanceof Solution)
 		{
