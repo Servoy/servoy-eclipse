@@ -197,26 +197,6 @@ public class Activator extends Plugin
 	{
 		ModelUtils.assertUINotDisabled(PLUGIN_ID);
 
-		IWorkspaceDescription description = ResourcesPlugin.getWorkspace().getDescription();
-		boolean autoBuilding = description.isAutoBuilding();
-		if (autoBuilding)
-		{
-			description.setAutoBuilding(false);
-			ResourcesPlugin.getWorkspace().setDescription(description);
-			ServoyModelManager.getServoyModelManager().addDoneListener(() -> {
-				IWorkspaceDescription des = ResourcesPlugin.getWorkspace().getDescription();
-				des.setAutoBuilding(true);
-				try
-				{
-					ResourcesPlugin.getWorkspace().setDescription(des);
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
-			});
-		}
-
 		super.start(context);
 		plugin = this;
 
@@ -403,6 +383,28 @@ public class Activator extends Plugin
 				}
 			}
 		});
+
+		// turn of auto building, don't touch servoy model before IServerStarter because that needs to be first initialized.
+		IWorkspaceDescription description = ResourcesPlugin.getWorkspace().getDescription();
+		boolean autoBuilding = description.isAutoBuilding();
+		if (autoBuilding)
+		{
+			description.setAutoBuilding(false);
+			ResourcesPlugin.getWorkspace().setDescription(description);
+			ServoyModelManager.getServoyModelManager().addDoneListener(() -> {
+				IWorkspaceDescription des = ResourcesPlugin.getWorkspace().getDescription();
+				des.setAutoBuilding(true);
+				try
+				{
+					ResourcesPlugin.getWorkspace().setDescription(des);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+			});
+		}
+
 	}
 
 	private void turnOffExternalToolsActionSet(IWorkbenchWindow workbenchWindow, IPerspectiveDescriptor perspectiveDescriptor, Preferences node)
