@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
@@ -36,6 +38,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
@@ -109,8 +112,16 @@ public class AddFormsToWorkingSet extends Action implements ISelectionChangedLis
 					if (ws != null)
 					{
 						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
-						files.addAll(formsFile);
-						ws.setElements(files.toArray(new IAdaptable[0]));
+						List<String> paths = new ArrayList<String>();
+						for (IAdaptable resource : files)
+						{
+							if (resource instanceof IResource && ((IResource)resource).exists())
+							{
+								paths.add(((IResource)resource).getFullPath().toString());
+							}
+						}
+						ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName).getResourcesProject()
+							.addWorkingSet(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()), ws.getName(), paths);
 					}
 				}
 			}
