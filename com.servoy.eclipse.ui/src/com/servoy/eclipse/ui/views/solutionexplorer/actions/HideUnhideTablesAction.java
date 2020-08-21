@@ -125,7 +125,7 @@ public class HideUnhideTablesAction extends Action implements ISelectionChangedL
 				try
 				{
 					Table t = (Table)s.getTable(tw.getTableName());
-					((IServerInternal)s).setTableMarkedAsHiddenInDeveloper(tw.getTableName(), !t.isMarkedAsHiddenInDeveloper());
+					((IServerInternal)s).setTableMarkedAsHiddenInDeveloper(t, !t.isMarkedAsHiddenInDeveloper());
 					dmm.updateHiddenInDeveloperState(t);
 				}
 				catch (RepositoryException e)

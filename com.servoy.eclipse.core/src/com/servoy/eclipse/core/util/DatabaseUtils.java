@@ -124,7 +124,7 @@ public final class DatabaseUtils
 			};
 			ITable table = server.createNewTable(validator, tableName, false, fireTableCreated);
 			table.setMarkedAsMetaData(Boolean.TRUE.equals(tableInfo.isMetaData));
-			server.setTableMarkedAsHiddenInDeveloper(tableName, tableInfo.hiddenInDeveloper, fireTableCreated);
+			server.setTableMarkedAsHiddenInDeveloper(table, tableInfo.hiddenInDeveloper, fireTableCreated);
 
 			// Warn if the table types are different.
 			if (table.getTableType() != tableInfo.tableType)

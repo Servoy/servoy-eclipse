@@ -248,7 +248,6 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
@@ -2240,7 +2239,7 @@ public class SolutionExplorerView extends ViewPart
 				}
 
 				@Override
-				public void hiddenTableChanged(IServerInternal server, Table table)
+				public void hiddenTableChanged(IServerInternal server, ITable table)
 				{
 					if (table.getTableType() == ITable.VIEW)
 					{
