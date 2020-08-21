@@ -21,6 +21,8 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
     @Input() selectOnEnter;
     @Input() valuelistID: IValuelist;
 
+    storedTooltip: any;
+
     constructor(renderer: Renderer2, public formattingService: FormattingService) {
         super(renderer);
     }
@@ -42,6 +44,26 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
             this.renderer.listen( nativeElement, 'blur', ( e ) => {
                 this.onFocusLostMethodID(e);
             } );
+    }
+
+    onDataChangeCallback(event, returnval) {
+        var stringValue = (typeof returnval === 'string' || returnval instanceof String);
+        if (returnval === false || stringValue) {
+            this.renderer.removeClass(this.elementRef.nativeElement, 'ng-valid');
+            this.renderer.addClass(this.elementRef.nativeElement, 'ng-invalid');
+            if (stringValue) {
+                if (this.storedTooltip === false) { 
+                    this.storedTooltip = this.toolTipText; 
+                }
+                this.toolTipText = returnval;
+            }
+        }
+        else {
+            this.renderer.removeClass(this.elementRef.nativeElement, 'ng-invalid');
+            this.renderer.addClass(this.elementRef.nativeElement, 'ng-valid');
+            if (this.storedTooltip !== false) this.toolTipText = this.storedTooltip;
+            this.storedTooltip = false;
+        }
     }
 
     ngOnChanges( changes: SimpleChanges ) {

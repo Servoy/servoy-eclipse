@@ -1,4 +1,4 @@
-import { OnInit, Input, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild, AfterViewInit, Directive } from '@angular/core';
+import { Input, OnChanges, SimpleChanges, Renderer2, AfterViewInit, Directive } from '@angular/core';
 
 import {PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
 
