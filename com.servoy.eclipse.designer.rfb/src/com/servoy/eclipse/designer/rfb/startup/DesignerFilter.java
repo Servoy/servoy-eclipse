@@ -285,7 +285,7 @@ public class DesignerFilter implements Filter
 										}
 										catch (Exception e)
 										{
-											Debug.error("error parsing " + content, e);
+											Debug.error("error parsing template '" + stringResource + "' with content " + content, e);
 										}
 									}
 								}
