@@ -112,6 +112,7 @@ public class AddFormsToWorkingSet extends Action implements ISelectionChangedLis
 					if (ws != null)
 					{
 						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+						files.addAll(formsFile);
 						List<String> paths = new ArrayList<String>();
 						for (IAdaptable resource : files)
 						{
