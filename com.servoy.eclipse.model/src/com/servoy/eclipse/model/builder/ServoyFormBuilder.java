@@ -2227,6 +2227,14 @@ public class ServoyFormBuilder
 				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
 			}
 		}
+		else if (pd.getType() instanceof FoundsetPropertyType)
+		{
+			Object forFoundsetValue = webObject.getProperty(pd.getName());
+			if (forFoundsetValue instanceof JSONObject)
+			{
+				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+			}
+		}
 		return "";
 	}
 
