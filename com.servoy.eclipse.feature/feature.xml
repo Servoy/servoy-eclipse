@@ -185,7 +185,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.eclipse.dltk.javascript.rhino"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
@@ -199,56 +199,56 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="j2db_tunnel"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
          id="j2db_runtime"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
          id="j2db_log4j"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
          id="j2db_server"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_debug"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_headless_client"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_shared"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_smart_client"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
@@ -283,7 +283,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="servoy_base"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
@@ -325,14 +325,14 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="sablo"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
          id="servoy_ngclient"
          download-size="0"
          install-size="0"
-         version="2020.9.0.3600_rc"
+         version="2020.12.0.3620_rc"
          unpack="false"/>
 
    <plugin
