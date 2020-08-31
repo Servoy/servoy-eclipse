@@ -103,13 +103,13 @@ public class BrowserDialog extends Dialog
 	public Object open(boolean useChromiumHint)
 	{
 		Rectangle size = getParent().getBounds();
-		int newWidth = (size.width / 1.5) < MIN_WIDTH ? MIN_WIDTH : (int)(size.width / 1.5);
-		int newHeight = (size.height / 1.4) < MIN_HEIGHT ? MIN_HEIGHT : (int)(size.height / 1.4);
+		int newWidth = (int)(size.width / 1.5) < MIN_WIDTH ? MIN_WIDTH : (int)(size.width / 1.5);
+		int newHeight = (int)(size.height / 1.4) < MIN_HEIGHT ? MIN_HEIGHT : (int)(size.height / 1.4);
 		Dimension newSize = new Dimension(newWidth, newHeight);
 
 		int locationX, locationY;
-		locationX = (size.width - newWidth) / 2 + size.x;
-		locationY = (size.height - newHeight) / 2 + size.y;
+		locationX = (size.width < newWidth ? size.width : size.width - newWidth) / 2 + size.x;
+		locationY = (size.height < newHeight ? size.height : size.height - newHeight) / 2 + size.y;
 
 		return this.open(new Point(locationX, locationY), newSize, useChromiumHint);
 	}
