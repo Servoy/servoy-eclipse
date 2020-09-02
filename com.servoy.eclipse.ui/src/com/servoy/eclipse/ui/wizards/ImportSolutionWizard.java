@@ -768,6 +768,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 					boolean showDialog = false;
 					Map<String, String> workspaceVersions = new TreeMap<>(NameComparator.INSTANCE);
+					int toImport = 0;
 					for (String name : versions.keySet())
 					{
 						if (servoyModel.getServoyProject(name) != null)
@@ -775,6 +776,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 							Solution sol = servoyModel.getServoyProject(name).getSolution();
 							if (sol != null)
 							{
+								toImport++;
 								workspaceVersions.put(name, !Strings.isEmpty(sol.getVersion()) ? sol.getVersion() : "-");
 								if (!versions.optString(name, "").equals(sol.getVersion()))
 								{
@@ -788,6 +790,14 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 								}
 							}
 						}
+					}
+					if (toImport == existingSolutionAction.values().stream().filter(val -> val == IXMLImportUserChannel.SKIP_ACTION).count())
+					{
+						//they are the same versions as existing, so all are skipped
+						MessageDialog.openInformation(getShell(), "Existing modules in the workspace",
+							"All solutions to be import are already present in the workspace and have exactly the same versions. The solution import will be cancelled.");
+						return false;
+
 					}
 					if (showDialog)
 					{
