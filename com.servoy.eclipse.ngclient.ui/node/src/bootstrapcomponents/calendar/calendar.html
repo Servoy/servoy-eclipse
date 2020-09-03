@@ -11,5 +11,6 @@
      	#inputElement/>
     <span [owlDateTimeTrigger]="datetime" class="input-group-append input-group-text" style="padding:1px;"><span class="far fa-calendar-alt"></span></span>
     <owl-date-time #datetime [disabled]="readOnly || !enabled"></owl-date-time>
-    <input (dateTimeChange)="update($event.value.toDate())" [owlDateTime]="datetime"  [value]="dataProviderID"  style="position:absolute;bottom:0px;width:0px;height:0px;border:0px;padding:0px">
+	<input (dateTimeChange)="update($event.value.toDate())" [owlDateTime]="datetime"  [value]="dataProviderID"  style="position:absolute;bottom:0px;width:0px;height:0px;border:0px;padding:0px"
+		[min]="min" [max]="max" [owlDateTimeFilter]="filter">
 </div>
