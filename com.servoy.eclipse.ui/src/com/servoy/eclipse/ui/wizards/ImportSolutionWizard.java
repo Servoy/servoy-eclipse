@@ -771,12 +771,12 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					int toImport = 0;
 					for (String name : versions.keySet())
 					{
+						toImport++;
 						if (servoyModel.getServoyProject(name) != null)
 						{
 							Solution sol = servoyModel.getServoyProject(name).getSolution();
 							if (sol != null)
 							{
-								toImport++;
 								workspaceVersions.put(name, !Strings.isEmpty(sol.getVersion()) ? sol.getVersion() : "-");
 								if (!versions.optString(name, "").equals(sol.getVersion()))
 								{
@@ -793,10 +793,16 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					}
 					if (toImport == existingSolutionAction.values().stream().filter(val -> val == IXMLImportUserChannel.SKIP_ACTION).count())
 					{
-						//they are the same versions as existing, so all are skipped
-						MessageDialog.openInformation(getShell(), "Existing modules in the workspace",
-							"All solutions to be import are already present in the workspace and have exactly the same versions. The solution import will be cancelled.");
-						return false;
+						//they are the same versions as existing
+						boolean result = MessageDialog.openQuestion(getShell(), "Project already exists in the workspace",
+							"Do you want to fully overwrite the installed sample again?");
+						if (result)
+						{
+							//we clear the map, so all solutions are marked as overwrite
+							existingSolutionAction.clear();
+							setOverwriteModule(true);
+						}
+						return result;
 
 					}
 					if (showDialog)
