@@ -1,41 +1,39 @@
 <div #element class="tablewrapper" *ngIf="visible">
-<table [id]="'table_'+servoyApi.getMarkupId()" class='svy-table' [ngClass]="styleClass" [sabloTabseq]="tabSeq"
-  (keydown)="keypressed($event)">
-	<thead ng-style="getTHeadStyle()">
-	  <tr>
-		<th *ngFor="let column of columns; let i = index;" [ngStyle]="getColumnStyle(i)" [ngClass]="getSortStyleClass(i)"
-		 mwlResizable [enableGhostResize]="enableColumnResize" 
-		 [resizeEdges]="{ bottom: false, right: enableColumnResize && i < columns.length-1, top: false, left: enableColumnResize && i > 0 }"
-         (resizing)="onResizeEnd($event,i)">
-			<div [innerHtml]='column.headerText' class="table-servoyextra-header-label"></div>
-			<span [ngClass]="getSortClass(i)" style="display: table-cell;"></span>
-		</th>
-	  </tr>
-	</thead>
-	<tbody>	
-	<cdk-virtual-scroll-viewport style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()" 
-	[itemSize]="getNumberFromPxString(minRowHeight)"
-	[minBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) / 2 : 200" 
-	[maxBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) : 400" >	
-		<tr cdk-row *cdkVirtualFor="let row of foundset.viewPort.rows; let r = index;" (click)="selectRow(r, $event)"
-		[ngClass]="getRowClass(r)">
-		<td cdk-cell *ngFor="let column of columns; let i = index" [className]="'c' + i" 
-			(click)="cellClick(r, i, foundset.viewPort.rows[r], $event)"
-			(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event)"
-			(contextmenu)="onCellRightClick && onCellRightClick(r, i, foundset.viewPort.rows[r], $event)">
-	    	<div [innerHtml]="column.dataprovider[foundset.viewPort.rows.indexOf(row)]"></div>
-		</td>
-		</tr>
-	</cdk-virtual-scroll-viewport>
-	</tbody>
-	<tfoot>
-		<ngb-pagination *ngIf="showPagination()" [ngClass]="{'svy-pagination': true, 'svy-nomargin': absoluteLayout} "
-		[(page)]="currentPage"
-		[pageSize]="pageSize"
-		[collectionSize]="foundset.serverSize"
-		(pageChange)="modifyPage()"
-		[maxSize]="1" [ellipses]="false">
-	  </ngb-pagination>
-	  </tfoot>
-</table>
+	<table [id]="'table_'+servoyApi.getMarkupId()" class='svy-table' [ngClass]="styleClass" [sabloTabseq]="tabSeq"
+		(keydown)="keypressed($event)">
+		<thead ng-style="getTHeadStyle()">
+			<tr>
+				<th *ngFor="let column of columns; let i = index;" [ngStyle]="getColumnStyle(i)"
+					[ngClass]="getSortStyleClass(i)" mwlResizable [enableGhostResize]="enableColumnResize"
+					[resizeEdges]="{ bottom: false, right: enableColumnResize && i < columns.length-1, top: false, left: enableColumnResize && i > 0 }"
+					(resizing)="onResizeEnd($event,i)">
+					<div [innerHtml]='column.headerText' class="table-servoyextra-header-label"></div>
+					<span [ngClass]="getSortClass(i)" style="display: table-cell;"></span>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<cdk-virtual-scroll-viewport style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()"
+				[itemSize]="getNumberFromPxString(minRowHeight)"
+				[minBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) / 2 : 200"
+				[maxBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) : 400">
+				<tr cdk-row *cdkVirtualFor="let row of foundset.viewPort.rows; let r = index;"
+					(click)="selectRow(r, $event)" [ngClass]="getRowClass(r)">
+					<td cdk-cell *ngFor="let column of columns; let i = index" [className]="'c' + i"
+						(click)="cellClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
+						(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
+						(contextmenu)="onCellRightClick && onCellRightClick(r, i, foundset.viewPort.rows[r], $event, column.id)">
+						<div [innerHtml]="column.dataprovider[foundset.viewPort.rows.indexOf(row)]"></div>
+					</td>
+				</tr>
+			</cdk-virtual-scroll-viewport>
+		</tbody>
+		<tfoot>
+			<ngb-pagination *ngIf="showPagination()"
+				[ngClass]="{'svy-pagination': true, 'svy-nomargin': absoluteLayout} " [(page)]="currentPage"
+				[pageSize]="pageSize" [collectionSize]="foundset.serverSize" (pageChange)="modifyPage()" [maxSize]="1"
+				[ellipses]="false">
+			</ngb-pagination>
+		</tfoot>
+	</table>
 </div>

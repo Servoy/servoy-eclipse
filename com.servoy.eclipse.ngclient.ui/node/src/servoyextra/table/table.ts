@@ -213,7 +213,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
                     this.renderer.listen(headers[i], 'click', e => this.headerClicked(i, e));
                 }
                 if (this.onHeaderRightClick) {
-                    this.renderer.listen(headers[i], 'contextmenu', e => this.onHeaderRightClick(i, this.sortDirection, e));
+                    this.renderer.listen(headers[i], 'contextmenu', e => this.onHeaderRightClick(i, this.sortDirection, e, this.columns[i].id));
                 }
             }
         }
@@ -248,7 +248,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     }
 
     private headerClicked(i: number, event?: Event):  void {
-        this.onHeaderClick(i, this.sortDirection, event)
+        this.onHeaderClick(i, this.sortDirection, event, this.columns[i].id)
             .then((ret: string) => {
                 if (ret === "override")
                     return;
@@ -278,26 +278,26 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         }
     }
 
-    cellClick(rowIdx: number, colIdx: number, record: any, e: Event) {
+    cellClick(rowIdx: number, colIdx: number, record: any, e: Event, columnId:string) {
         if (this.onCellDoubleClick && this.onCellClick) {
             const innerThis: ServoyExtraTable = this;
             if (innerThis.lastClicked == rowIdx * colIdx) {
                 window.clearTimeout(this.timeoutID);
                 innerThis.lastClicked = -1;
                 innerThis.timeoutID = null;
-                innerThis.onCellDoubleClick(rowIdx, colIdx, record, e);
+                innerThis.onCellDoubleClick(rowIdx, colIdx, record, e, columnId);
             }
             else {
                 innerThis.lastClicked = rowIdx * colIdx;
                 innerThis.timeoutID = window.setTimeout(() => {
                     innerThis.timeoutID = null;
                     innerThis.lastClicked = -1;
-                    innerThis.onCellClick(rowIdx, colIdx, record, e);
+                    innerThis.onCellClick(rowIdx, colIdx, record, e, columnId);
                 }, 250);
             }
         }
         else if (this.onCellClick) {
-            this.onCellClick(rowIdx, colIdx, this.foundset.viewPort.rows[rowIdx], e);
+            this.onCellClick(rowIdx, colIdx, this.foundset.viewPort.rows[rowIdx], e, columnId);
         }
     }
 
