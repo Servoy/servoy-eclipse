@@ -23,7 +23,7 @@ public class TomcatStartedListener implements ITomcatStartedListener
 			if (!Utils.stringSafeEquals(uuid, TomcatTesterServlet.UNIQUE_VALUE.toString()))
 			{
 				Display.getDefault().asyncExec(() -> {
-					String message = "Another developer is running this this url: http://localhost:" +
+					String message = "Another developer is running at this url: http://localhost:" +
 						ApplicationServerRegistry.get().getWebServerPort() +
 						"/ please close that one or use different ports in application_server/server/conf/server.xml for one install";
 					if (uuid == null || "".equals(uuid))
