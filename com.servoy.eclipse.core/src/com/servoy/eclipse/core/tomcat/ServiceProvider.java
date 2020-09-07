@@ -1,4 +1,4 @@
-package com.servoy.eclipse.core.tomat;
+package com.servoy.eclipse.core.tomcat;
 
 import java.util.HashSet;
 import java.util.Set;

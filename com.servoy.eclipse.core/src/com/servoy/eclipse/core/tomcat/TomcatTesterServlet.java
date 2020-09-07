@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.core.tomat;
+package com.servoy.eclipse.core.tomcat;
 
 import java.io.IOException;
 import java.util.UUID;
