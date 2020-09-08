@@ -349,7 +349,7 @@ public class TextFilter extends ViewerFilter
 	    if (text == null) {
 			throw new IllegalArgumentException();
 		}
-
+	
 	    int tlen = text.length();
 	    if (start < 0) {
 			start = 0;
@@ -370,12 +370,12 @@ public class TextFilter extends ViewerFilter
 			}
 	        return new Position(x, x + fLength);
 	    }
-
+	
 	    int segCount = fSegments.length;
 	    if (segCount == 0) {
 			return new Position(start, end);
 		}
-
+	
 	    int curPos = start;
 	    int matchStart = -1;
 	    int i;
@@ -431,7 +431,7 @@ public class TextFilter extends ViewerFilter
 		{
 			return (end - start == fLength) && fPattern.regionMatches(fIgnoreCase, 0, text, start, fLength);
 		}
-		int segCount = fSegments.length;
+		int segCount = fSegments == null ? 0 : fSegments.length;
 		if (segCount == 0 && (fHasLeadingStar || fHasTrailingStar))
 		{
 			return true;
