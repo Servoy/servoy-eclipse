@@ -48,6 +48,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.internal.javascript.ti.TypeInferencer2;
+import org.eclipse.dltk.internal.javascript.ti.TypeInferencerVisitor;
 import org.eclipse.dltk.javascript.ast.Argument;
 import org.eclipse.dltk.javascript.ast.ArrayInitializer;
 import org.eclipse.dltk.javascript.ast.BinaryOperation;
@@ -73,6 +76,10 @@ import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTag;
 import org.eclipse.dltk.javascript.parser.jsdoc.JSDocTags;
 import org.eclipse.dltk.javascript.parser.jsdoc.SimpleJSDocParser;
+import org.eclipse.dltk.javascript.typeinference.IValueCollection;
+import org.eclipse.dltk.javascript.typeinference.IValueReference;
+import org.eclipse.dltk.javascript.typeinfo.IRType;
+import org.eclipse.dltk.javascript.typeinfo.JSTypeSet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -145,6 +152,7 @@ public class SolutionDeserializer
 	private static final Map<UUID, UUID> childToContainerUUID = new HashMap<UUID, UUID>(16, 0.9f);
 	private final File jsFile;
 	private final String jsContent;
+	private IValueCollection collection;
 
 	public SolutionDeserializer(IDeveloperRepository repository, ErrorKeeper<File, String> errorKeeper)
 	{
@@ -1423,7 +1431,36 @@ public class SolutionDeserializer
 			for (FunctionStatement function : functions)
 			{
 				String comment = null;
-				if (function.getDocumentation() != null) comment = function.getDocumentation().getText();
+				boolean hasDocs = false;
+				int servoyType = -1;
+				if (function.getDocumentation() != null)
+				{
+					comment = function.getDocumentation().getText();
+					hasDocs = true;
+				}
+
+				if (resource.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) && !hasDocs)
+				{
+					doTypeInferencingIfNeeded(script, resource);
+					IValueReference ref = collection.getChild(function.getName().getName());
+					if (ref != null)
+					{
+						JSTypeSet typeSet = (JSTypeSet)ref.getAttribute("returnTypes");
+						if (typeSet != null)
+						{
+							Iterator<IRType> it = typeSet.iterator();
+							servoyType = IColumnTypes.MEDIA;//default
+							while (it.hasNext() && servoyType == IColumnTypes.MEDIA)
+							{
+								IRType type = it.next();
+								if (type != null)
+								{
+									servoyType = getServoyType(type.getName());
+								}
+							}
+						}
+					}
+				}
 				JSONObject json = null;
 				if (comment != null)
 				{
@@ -1460,6 +1497,10 @@ public class SolutionDeserializer
 				}
 
 				json.put(SolutionSerializer.PROP_NAME, function.getName().getName());
+				if (servoyType != -1)
+				{
+					json.put("type", servoyType);
+				}
 
 				String source = fileContent.substring(function.sourceStart(), function.sourceEnd());
 				if ("".equals(comment) && (source.indexOf(".search") != -1 || source.indexOf("controller.loadAllRecords") != -1))
@@ -1501,6 +1542,7 @@ public class SolutionDeserializer
 				json.put(CHANGED_JSON_ATTRIBUTE, markAsChanged);
 				jsonObjects.add(json);
 			}
+			collection = null;//clear
 			if (jsonObjects.size() > 0)
 			{
 				JSONArray array = new JSONArray();
@@ -1523,6 +1565,21 @@ public class SolutionDeserializer
 			ServoyLog.logWarning("Javascript file '" + file + "' had a parsing error ", e);
 		}
 		return null;
+	}
+
+	protected IValueCollection doTypeInferencingIfNeeded(Script script, final IFile resource)
+	{
+		if (collection == null)
+		{
+			TypeInferencer2 inferencer = new TypeInferencer2();
+			inferencer.setModelElement(DLTKCore.createSourceModuleFrom(resource));
+			inferencer.setDoResolve(true);
+			inferencer.setVisitFunctionBody(true);
+			inferencer.setVisitor(new TypeInferencerVisitor(inferencer, true));
+			inferencer.doInferencing(script);
+			collection = inferencer.getCollection();
+		}
+		return collection;
 	}
 
 	/**

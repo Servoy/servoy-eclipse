@@ -21,7 +21,8 @@ Require-Bundle: servoy_shared,
  org.apache.commons.io,
  org.eclipse.swt,
  org.eclipse.jface,
- com.servoy.eclipse.ngclient
+ com.servoy.eclipse.ngclient,
+ org.eclipse.dltk.javascript.core
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
  com.servoy.eclipse.model.export,
@@ -37,5 +38,6 @@ Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.war.exporter
 Bundle-Activator: com.servoy.eclipse.model.Activator
 Bundle-ActivationPolicy: lazy
-Import-Package: javax.servlet;version="3.1.0"
+Import-Package: javax.servlet;version="3.1.0",
+ org.eclipse.dltk.internal.javascript.ti
 Automatic-Module-Name: com.servoy.eclipse.model
