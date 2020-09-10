@@ -8,7 +8,7 @@ import { ServicesService } from '../../sablo/services.service'
 import { FoundsetConverter, Foundset } from './foundset_converter'
 import { SabloDeferHelper} from '../../sablo/defer.service';
 import { WebsocketService } from '../../sablo/websocket.service';
-import { SessionStorageService } from 'angular-web-storage';
+import { SessionStorageService } from '../../ngclient/services/webstorage/sessionstorage.service';
 import { ViewportService} from '../services/viewport.service';
 import { DateConverter } from './date_converter';
 import { LoadingIndicatorService } from "../../sablo/util/loading-indicator/loading-indicator.service";

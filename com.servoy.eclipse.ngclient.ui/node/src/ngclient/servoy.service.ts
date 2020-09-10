@@ -10,8 +10,7 @@ import { LoggerService, LoggerFactory } from '../sablo/logger.service'
 import { SabloDeferHelper } from '../sablo/defer.service';
 import { Deferred } from '../sablo/util/deferred';
 
-import { SessionStorageService } from 'angular-web-storage';
-
+import { SessionStorageService } from './services/webstorage/sessionstorage.service';
 import { DateConverter } from './converters/date_converter'
 import { JSONObjectConverter } from './converters/json_object_converter'
 import { JSONArrayConverter } from './converters/json_array_converter'

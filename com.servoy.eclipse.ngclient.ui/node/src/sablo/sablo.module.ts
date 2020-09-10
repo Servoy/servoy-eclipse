@@ -1,17 +1,13 @@
 import { NgModule } from '@angular/core';
-import { AngularWebStorageModule } from 'angular-web-storage';
-
+import { WebStorageModule } from '../ngclient/services/webstorage/webstorage.module';
 import { WindowRefService } from './util/windowref.service'
-
 import { TrustAsHtmlPipe } from './pipes/pipes'
-
 import { WebsocketService } from './websocket.service';
 import { ConverterService } from './converter.service'
 import { ServicesService } from './services.service'
 import { SabloService } from './sablo.service'
 import { ServiceChangeHandler } from './util/servicechangehandler'
 import { LoggerFactory } from './logger.service'
-
 import { SpecTypesService } from './spectypes.service'
 import { SabloDeferHelper} from './defer.service';
 import { SabloTabseq } from './util/sablotabseq.directive';
@@ -21,7 +17,7 @@ import { LoadingIndicatorService } from "./util/loading-indicator/loading-indica
     declarations: [TrustAsHtmlPipe, SabloTabseq
     ],
     imports: [
-        AngularWebStorageModule
+        WebStorageModule,
     ],
     providers: [ConverterService,
         SpecTypesService,

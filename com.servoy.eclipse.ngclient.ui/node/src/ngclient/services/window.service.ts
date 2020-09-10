@@ -7,13 +7,13 @@ import { DialogWindowComponent } from './dialog-window/dialog-window.component';
 import { BSWindowManager } from './bootstrap-window/bswindow_manager.service';
 import { BSWindow } from './bootstrap-window/bswindow.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';
-import { LocalStorageService } from 'angular-web-storage';
+import { LocalStorageService } from './webstorage/localstorage.service'; 
+import { SessionStorageService } from './webstorage/sessionstorage.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
 import { Router, NavigationStart } from '@angular/router';
 import { ServoyApi } from '../servoy_api';
-import { SessionStorageService } from 'angular-web-storage';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from "../../sablo/util/loading-indicator/loading-indicator.service";
 

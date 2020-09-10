@@ -1,27 +1,15 @@
 import { Injectable, } from '@angular/core';
-import { SessionStorageService } from 'angular-web-storage';
-
-import { Observable , of} from 'rxjs';
-import {delay} from 'rxjs/operators'
-
-import { Deferred } from './util/deferred'
-import { WindowRefService } from './util/windowref.service'
-
+import { SessionStorageService } from '../ngclient/services/webstorage/sessionstorage.service';
+import { WindowRefService } from './util/windowref.service' 
 import { WebsocketService, WebsocketSession, WebsocketConstants } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service'
 import { LoggerService, LoggerFactory } from './logger.service'
 
-
-
 @Injectable()
 export class SabloService {
 
-    private apiCallDeferredQueue = [];
-    
     private locale = null;
-    
     private wsSession:WebsocketSession;
-        
     private currentServiceCallCallbacks = []
     private currentServiceCallDone;
     private currentServiceCallWaiting = 0

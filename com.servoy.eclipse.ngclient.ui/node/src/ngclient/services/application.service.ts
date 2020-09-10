@@ -3,7 +3,6 @@ import { DOCUMENT } from '@angular/common';
 
 import {ServoyService} from '../servoy.service'
 
-import { LocalStorageService,SessionStorageService } from 'angular-web-storage';
 import {WindowRefService} from '../../sablo/util/windowref.service';
 
 import {SabloService} from '../../sablo/sablo.service';
@@ -11,6 +10,8 @@ import {SabloService} from '../../sablo/sablo.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { DefaultLoginWindowComponent } from './default-login-window/default-login-window.component'
 import { FileUploadWindowComponent } from './file-upload-window/file-upload-window.component'
+import { SessionStorageService} from './webstorage/sessionstorage.service';
+import { LocalStorageService } from './webstorage/localstorage.service';
 
 @Injectable()
 export class ApplicationService {

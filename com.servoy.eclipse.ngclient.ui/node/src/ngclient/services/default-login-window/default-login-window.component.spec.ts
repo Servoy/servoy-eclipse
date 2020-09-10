@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed, fakeAsync , tick} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { LocalStorageService } from 'angular-web-storage';
+import { LocalStorageService } from '../webstorage/localstorage.service';
 
 import { SabloService } from '../../../sablo/sablo.service';
 import { NgbModule ,NgbActiveModal} from '@ng-bootstrap/ng-bootstrap'; 

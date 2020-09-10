@@ -9,7 +9,6 @@ import { WindowService } from './services/window.service'
 import { SessionService } from './services/session.service'
 
 import { KeyListener } from '../keylistener/keylistener.service';
-import { ComponentContributor } from './component_contributor.service';
 import { SvyUtilsService } from './services/utils.service';
 
 // generated services start
@@ -47,8 +46,8 @@ export class AllServiceService implements ServiceProvider {
 }
 
 @NgModule( {
-    providers: [AllServiceService, ApplicationService, WindowService,SvyUtilsService,SessionService,
-                KeyListener,
+    providers: [AllServiceService, ApplicationService, WindowService, SvyUtilsService, SessionService,
+                KeyListener, 
                 // generated services start
                 NGUtilsService, 
                 TypesRegisterService,
