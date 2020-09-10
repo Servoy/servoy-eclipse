@@ -456,7 +456,7 @@ public class BrowserDialog extends Dialog
 		}
 		shell.setLocation(location);
 		// in chromium i have to set size, else it shows very small
-		if (Util.isMac() || chromiumBrowser != null)
+		if (Util.isMac() || Util.isLinux() || chromiumBrowser != null)
 		{
 			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
 			shell.setSize(rect.width, rect.height);
