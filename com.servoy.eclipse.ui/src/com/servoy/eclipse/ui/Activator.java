@@ -274,6 +274,15 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public void showLoginAndStart()
 	{
+		try
+		{
+			//wait some more time for the progress information dialog from solution model to close
+			Thread.sleep(1000);
+		}
+		catch (InterruptedException e)
+		{
+			ServoyLog.logError(e);
+		}
 		Runnable runnable = new Runnable()
 		{
 			@Override
