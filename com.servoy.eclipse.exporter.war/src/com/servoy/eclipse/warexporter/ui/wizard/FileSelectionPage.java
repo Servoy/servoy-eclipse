@@ -668,6 +668,9 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	public void setVisible(boolean visible)
 	{
 		super.setVisible(visible);
-		this.getWizard().getContainer().getShell().pack();
+		if (visible)
+		{
+			this.getWizard().getContainer().getShell().pack();
+		}
 	}
 }

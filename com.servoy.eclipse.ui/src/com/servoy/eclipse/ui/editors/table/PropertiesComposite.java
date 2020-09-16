@@ -31,6 +31,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -153,7 +154,7 @@ public class PropertiesComposite extends Composite
 		boolean canMakeMetaDataColumns = true;
 		for (Column column : table.getRowIdentColumns())
 		{
-			if (column.getColumnInfo() == null || !column.getColumnInfo().hasFlag(Column.UUID_COLUMN))
+			if (column.getColumnInfo() == null || !column.getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN))
 			{
 				canMakeMetaDataColumns = false;
 			}
@@ -219,7 +220,7 @@ public class PropertiesComposite extends Composite
 		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(table.getServerName());
 		if (server != null)
 		{
-			server.setTableMarkedAsHiddenInDeveloper(table.getName(), btnHiddenInDeveloper.getSelection());
+			server.setTableMarkedAsHiddenInDeveloper(table, btnHiddenInDeveloper.getSelection());
 		}
 		else
 		{

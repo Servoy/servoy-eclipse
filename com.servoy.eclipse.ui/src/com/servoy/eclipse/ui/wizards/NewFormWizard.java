@@ -781,7 +781,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 				{
 					if ("-none-".equals(contents)) return Integer.valueOf(Form.NAVIGATOR_NONE);
 					Form form = contents != null ? servoyProject.getEditingFlattenedSolution().getForm(contents.split(" ")[0]) : null;
-					return form != null ? new Integer(form.getID()) : null;
+					if (form != null)
+					{
+						if (servoyProject.getEditingSolution().getAllObjectsAsList().contains(form))
+						{
+							return new Integer(form.getID());
+						}
+					}
+					return null;
 				}
 			};
 			extendsFormViewer.setTitleText("Select super form");

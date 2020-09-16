@@ -87,7 +87,6 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.ISupportExtendsID;
@@ -2228,6 +2227,14 @@ public class ServoyFormBuilder
 				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
 			}
 		}
+		else if (pd.getType() instanceof FoundsetPropertyType)
+		{
+			Object forFoundsetValue = webObject.getProperty(pd.getName());
+			if (forFoundsetValue instanceof JSONObject)
+			{
+				return ((JSONObject)forFoundsetValue).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+			}
+		}
 		return "";
 	}
 
@@ -2265,9 +2272,7 @@ public class ServoyFormBuilder
 						if (relations != null)
 						{
 							Relation r = relations[relations.length - 1];
-							dataProvider = getDataProvider(persistFlattenedSolution, id, r.getPrimaryServerName(), r.getPrimaryTableName());
-							if (dataProvider == null)
-								dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignServerName(), r.getForeignTableName());
+							dataProvider = getDataProvider(persistFlattenedSolution, id, r.getForeignDataSource());
 							if (r != null) BuilderDependencies.getInstance().addDependency(component.getAncestor(IRepository.FORMS),
 								ServoyModelFinder.getServoyModel().getFlattenedSolution().getRelation(r.getName()));
 						}
@@ -2279,16 +2284,12 @@ public class ServoyFormBuilder
 		return dataProvider;
 	}
 
-	private static IDataProvider getDataProvider(FlattenedSolution fs, String id, String serverName, String tableName) throws RepositoryException
+	private static IDataProvider getDataProvider(FlattenedSolution fs, String id, String dataSource) throws RepositoryException
 	{
-		IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
-		if (server != null)
+		ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(dataSource);
+		if (table != null)
 		{
-			ITable table = server.getTable(tableName);
-			if (table != null)
-			{
-				return fs.getDataProviderForTable(table, id);
-			}
+			return fs.getDataProviderForTable(table, id);
 		}
 		return null;
 	}

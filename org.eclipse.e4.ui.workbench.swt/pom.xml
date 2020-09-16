@@ -15,7 +15,7 @@
  	<parent>
 		<groupId>com.servoy</groupId>
 		<artifactId>servoy-eclipse</artifactId>
-		<version>2020.9.0.3600_rc</version>
+		<version>2020.12.0.3620_rc</version>
 	</parent>
   <groupId>com.servoy</groupId>
   <artifactId>org.eclipse.e4.ui.workbench.swt</artifactId>

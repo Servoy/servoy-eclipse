@@ -907,7 +907,7 @@ public class TypeCreator extends TypeCache
 					}
 
 					@Override
-					public void hiddenTableChanged(IServerInternal server, Table table)
+					public void hiddenTableChanged(IServerInternal server, ITable table)
 					{
 						runClearCacheJob();
 					}

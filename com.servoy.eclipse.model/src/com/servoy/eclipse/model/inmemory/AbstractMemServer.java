@@ -1042,7 +1042,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * @see com.servoy.j2db.persistence.IServerInternal#setTableMarkedAsHiddenInDeveloper(java.lang.String, boolean)
 	 */
 	@Override
-	public void setTableMarkedAsHiddenInDeveloper(String tableName, boolean hiddenInDeveloper)
+	public void setTableMarkedAsHiddenInDeveloper(ITable table, boolean hiddenInDeveloper)
 	{
 		// TODO Auto-generated method stub
 	}
@@ -1053,7 +1053,7 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 	 * @see com.servoy.j2db.persistence.IServerInternal#setTableMarkedAsHiddenInDeveloper(java.lang.String, boolean, boolean)
 	 */
 	@Override
-	public void setTableMarkedAsHiddenInDeveloper(String tableName, boolean hiddenInDeveloper, boolean fireTableHidden)
+	public void setTableMarkedAsHiddenInDeveloper(ITable table, boolean hiddenInDeveloper, boolean fireTableHidden)
 	{
 		// TODO Auto-generated method stub
 

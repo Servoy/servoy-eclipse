@@ -103,13 +103,13 @@ public class BrowserDialog extends Dialog
 	public Object open(boolean useChromiumHint)
 	{
 		Rectangle size = getParent().getBounds();
-		int newWidth = (size.width / 1.5) < MIN_WIDTH ? MIN_WIDTH : (int)(size.width / 1.5);
-		int newHeight = (size.height / 1.4) < MIN_HEIGHT ? MIN_HEIGHT : (int)(size.height / 1.4);
+		int newWidth = (int)(size.width / 1.5) < MIN_WIDTH ? MIN_WIDTH : (int)(size.width / 1.5);
+		int newHeight = (int)(size.height / 1.4) < MIN_HEIGHT ? MIN_HEIGHT : (int)(size.height / 1.4);
 		Dimension newSize = new Dimension(newWidth, newHeight);
 
 		int locationX, locationY;
-		locationX = (size.width - newWidth) / 2 + size.x;
-		locationY = (size.height - newHeight) / 2 + size.y;
+		locationX = (size.width < newWidth ? size.width : size.width - newWidth) / 2 + size.x;
+		locationY = (size.height < newHeight ? size.height : size.height - newHeight) / 2 + size.y;
 
 		return this.open(new Point(locationX, locationY), newSize, useChromiumHint);
 	}
@@ -192,10 +192,19 @@ public class BrowserDialog extends Dialog
 							String[] urlParts = importSample.split("/");
 							if (urlParts.length >= 1)
 							{
-								final String solutionName = urlParts[urlParts.length - 1].replace(".servoy", "");
+								final String solutionName = urlParts[urlParts.length - 1].substring(0, urlParts[urlParts.length - 1].indexOf("."));
 								ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
 								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-								if (sp == null)
+								boolean[] overwrite = new boolean[] { false };
+								if (sp != null)
+								{
+									Display.getDefault().syncExec(() -> {
+
+										overwrite[0] = UIUtils.askConfirmation(Display.getDefault().getActiveShell(), "Sample already exists in the workspace",
+											"Do you want to fully overwrite the installed sample again?");
+									});
+								}
+								if (sp == null || overwrite[0])
 								{
 									if (Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
 										.filter(
@@ -236,6 +245,7 @@ public class BrowserDialog extends Dialog
 										importSolutionWizard.setImportSampleData(true);
 										importSolutionWizard.shouldAllowSQLKeywords(true);
 										importSolutionWizard.shouldCreateMissingServer(true);
+										importSolutionWizard.setOverwriteModule(overwrite[0]);
 
 										ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel()
 											.getActiveResourcesProject();
@@ -456,7 +466,7 @@ public class BrowserDialog extends Dialog
 		}
 		shell.setLocation(location);
 		// in chromium i have to set size, else it shows very small
-		if (Util.isMac() || chromiumBrowser != null)
+		if (Util.isMac() || Util.isLinux() || chromiumBrowser != null)
 		{
 			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
 			shell.setSize(rect.width, rect.height);

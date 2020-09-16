@@ -39,7 +39,8 @@ public class WarExportProvider implements IExportSolutionWizardProvider
 		if (activeProject != null && (activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SOLUTION ||
 			activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SMART_CLIENT_ONLY ||
 			activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.WEB_CLIENT_ONLY ||
-			activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY))
+			activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY ||
+			activeProject.getSolutionMetaData().getSolutionType() == SolutionMetaData.SERVICE))
 		{
 			return new OpenWizardAction(ExportWarWizard.class, AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "$nl$/icons/war_export.png"),
 				"War Export");
