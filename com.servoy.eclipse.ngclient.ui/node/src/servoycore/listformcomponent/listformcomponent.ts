@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef } from '@angular/core';
+import { Component, Input, TemplateRef,ViewChild, ElementRef, AfterViewInit, Renderer2 } from '@angular/core';
 import { ViewPortRow } from '../../sablo/spectypes.service';
 import { FormComponent } from '../../ngclient/form/form_component.component';
 import { ListFormComponentCache, StructureCache, ComponentCache, FormComponentCache } from '../../ngclient/form.service';
@@ -10,10 +10,27 @@ import { ComponentConverter } from 'ngclient/converters/component_converter';
   templateUrl: './listformcomponent.html',
   styleUrls: ['./listformcomponent.css']
 })
-export class ListFormComponent {
+export class ListFormComponent implements AfterViewInit {
   @Input() parentForm: FormComponent;
   @Input() listFormComponent: ListFormComponentCache;
-
+  @Input() responsivePageSize : number;
+  @Input() pageLayout : string;
+  
+  @ViewChild('element', {static: true}) elementRef:ElementRef;
+  @ViewChild('firstelement', {static: true}) elementFirstRef:ElementRef;
+  @ViewChild('leftelement', {static: true}) elementLeftRef:ElementRef;
+  @ViewChild('rightelement', {static: true}) elementRightRef:ElementRef;
+  
+  page :number = 0;
+  numberOfCells: number = 0;
+  
+  constructor(protected readonly renderer: Renderer2) {
+  }
+  
+  ngAfterViewInit() {
+      this.calculateCells();
+  }
+  
   getViewportRows():ViewPortRow[] {
     return this.listFormComponent.getFoundset().viewPort.rows;
   }
@@ -26,10 +43,37 @@ export class ListFormComponent {
     return this.listFormComponent.getFormComponentType().formHeight;
   }
 
+  getRowWidth(): string {
+      if (this.pageLayout == 'listview')
+      {
+          return "100%";
+      }    
+      return this.listFormComponent.getFormComponentType().formWidth+'px';
+  }
+  
   getRowItems(): Array<StructureCache | ComponentCache | FormComponentCache> {
     return this.listFormComponent.items
   }
 
+  moveLeft(){
+      if (this.page > 0) {
+          this.page--;
+          this.calculateCells();
+      }
+  }
+  
+  moveRight(){
+      this.page++;
+      this.calculateCells();
+  }
+  
+  firstPage(){
+      if (this.page != 0) {
+          this.page = 0;
+          this.calculateCells();
+      } 
+  }
+  
   getRowItemTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
     return this.parentForm.getTemplate(item);
   }
@@ -56,5 +100,38 @@ export class ListFormComponent {
       }
     }
     return rowItem;
+  }
+  
+  calculateCells(){
+      this.numberOfCells = this.responsivePageSize;
+      if (this.numberOfCells <= 0 ) {
+          let parentWidth = this.elementRef.nativeElement.offsetWidth;
+          let parentHeight = this.elementRef.nativeElement.offsetHeight;
+          const height = this.listFormComponent.getFormComponentType().formHeight;
+          const width = this.listFormComponent.getFormComponentType().formWidth;
+          const numberOfColumns =  (this.pageLayout == 'listview') ? 1 : Math.floor(parentWidth/width);
+          const numberOfRows = Math.floor(parentHeight/height);
+          this.numberOfCells  = numberOfRows * numberOfColumns;
+          // always just render 1
+          if (this.numberOfCells < 1) this.numberOfCells = 1;
+      }
+      const startIndex = this.page * this.numberOfCells;
+      let foundset = this.listFormComponent.getFoundset();
+      if (foundset.viewPort.startIndex != startIndex) {
+          foundset.loadRecordsAsync(startIndex, this.numberOfCells);
+      } else {
+          if (this.numberOfCells > foundset.viewPort.rows.length && foundset.viewPort.startIndex + foundset.viewPort.size < foundset.serverSize) {
+              foundset.loadExtraRecordsAsync(Math.min(this.numberOfCells - foundset.viewPort.rows.length, foundset.serverSize - foundset.viewPort.startIndex - foundset.viewPort.size));
+          }
+          else if (foundset.viewPort.size > this.numberOfCells) {
+              // the (initial) viewport  is bigger then the numberOfCells we have created rows for, adjust the viewport to be smaller.
+              foundset.loadLessRecordsAsync(this.numberOfCells - foundset.viewPort.size);
+          }
+      }
+      this.renderer.setStyle(  this.elementFirstRef.nativeElement, 'visibility' , this.page > 0 ? 'visible' : 'hidden' );
+      this.renderer.setStyle(  this.elementLeftRef.nativeElement, 'visibility' , this.page > 0 ? 'visible' : 'hidden' );
+      let hasMorePages = foundset.hasMoreRows || (foundset.serverSize - (this.page * this.numberOfCells + Math.min(this.numberOfCells, foundset.viewPort.rows.length))) > 0 ;
+      this.renderer.setStyle(  this.elementRightRef.nativeElement, 'visibility' , hasMorePages ? 'visible' : 'hidden' );
+      foundset.setPreferredViewportSize(this.numberOfCells);
   }
 }

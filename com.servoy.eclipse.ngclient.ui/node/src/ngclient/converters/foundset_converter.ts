@@ -313,7 +313,7 @@ export class Foundset implements IFoundset {
     return this.state.deferred[requestID].defer.promise;
   }
 
-  public loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet: boolean): Promise<any> {
+  public loadLessRecordsAsync(negativeOrPositiveCount: number, dontNotifyYet?: boolean): Promise<any> {
     this.log.spam(this.log.buildMessage(() => ('svy foundset * loadLessRecordsAsync requested with (' + negativeOrPositiveCount + ', ' + dontNotifyYet + ')')));
     if (isNaN(negativeOrPositiveCount)) throw new Error('loadLessRecordsAsync: lessrecords is not a number (' + negativeOrPositiveCount + ')');
 
