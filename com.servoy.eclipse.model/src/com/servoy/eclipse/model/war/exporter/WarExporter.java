@@ -244,7 +244,7 @@ public class WarExporter
 		{
 			// just always copy the nglibs to it even if it is just puur smart client
 			// the log4j libs are always needed.
-			copyNGLibs(targetLibDir);
+			copyNGLibs(targetLibDir, exportModel.isNGExport());
 		}
 		catch (IOException e)
 		{
@@ -719,10 +719,11 @@ public class WarExporter
 	/**
 	 * Add all NG_LIBS to the war.
 	 * @param targetLibDir
+	 * @param includeNGClientLib
 	 * @throws ExportException
 	 * @throws IOException
 	 */
-	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
+	private void copyNGLibs(File targetLibDir, boolean includeNGClientLib) throws ExportException, IOException
 	{
 		if (pluginFiles.isEmpty())
 		{
@@ -731,6 +732,7 @@ public class WarExporter
 		}
 		for (File file : pluginFiles)
 		{
+			if (!includeNGClientLib && file.getName().toLowerCase().startsWith("servoy_ngclient_")) continue;
 			copyFile(file, new File(targetLibDir, file.getName()));
 		}
 	}
@@ -1007,7 +1009,8 @@ public class WarExporter
 			IMetadataDefManager metadataDefManager = null;
 			if (exportModel.isExportUsingDbiFileInfoOnly())
 			{
-				Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(activeSolution,
+				Pair<ITableDefinitionsAndSecurityBasedOnWorkspaceFiles, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(
+					activeSolution,
 					exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
 					exportModel.isExportMetaData());
 				if (defManagers != null)
