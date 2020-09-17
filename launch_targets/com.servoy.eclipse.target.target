@@ -79,10 +79,10 @@
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/egit/updates"/>
-		    <unit id="org.eclipse.egit.feature.group" version="5.8.1.202007141445-r"/>
-		    <unit id="org.eclipse.jgit.feature.group" version="5.8.1.202007141445-r"/>
-		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.8.1.202007141445-r"/>
-		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.8.1.202007141445-r"/>
+		    <unit id="org.eclipse.egit.feature.group" version="5.9.0.202009080501-r"/>
+		    <unit id="org.eclipse.jgit.feature.group" version="5.9.0.202009080501-r"/>
+		    <unit id="org.eclipse.jgit.http.apache.feature.group" version="5.9.0.202009080501-r"/>
+		    <unit id="org.eclipse.jgit.lfs.feature.group" version="5.9.0.202009080501-r"/>
 	    </location>
     </locations>
 </target>
