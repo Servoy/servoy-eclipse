@@ -97,7 +97,7 @@ public class DeprecatedSpecQuickFix extends WorkbenchMarkerResolution
 							.collect(Collectors.toCollection(ArrayList::new));
 
 						Map<String, Object> propertyValues = !deprecated.isEmpty()
-							? deprecated.stream()
+							? deprecated.stream().filter(pd -> webComponent.getProperty(pd.getName()) != null)
 								.collect(Collectors.toMap(pd -> (String)pd.getTag("replacement"), pd -> webComponent.getProperty(pd.getName())))
 							: Collections.EMPTY_MAP;
 
