@@ -1239,10 +1239,10 @@ public class TypeCreator extends TypeCache
 				if (paramType == null)
 				{
 					paramType = getTypeRef(null, paramDesc.getType().getName());
-					if (PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
-					{
-						paramType = TypeUtil.arrayOf(paramType);
-					}
+				}
+				if (paramType != null && PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
+				{
+					paramType = TypeUtil.arrayOf(paramType);
 				}
 				param.setType(paramType);
 				parameters.add(param);
