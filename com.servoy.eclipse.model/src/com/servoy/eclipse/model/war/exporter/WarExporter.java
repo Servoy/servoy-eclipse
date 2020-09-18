@@ -1024,15 +1024,7 @@ public class WarExporter
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() || !exportModel.getUpgradedLicenses().isEmpty() ||
-				(exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0))
-			{
-				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
-			}
-			else
-			{
-				copyPropertiesFileToWar(tmpWarDir, sourceFile);
-			}
+			changeAndWritePropertiesFile(tmpWarDir, sourceFile);
 		}
 	}
 
@@ -1344,11 +1336,10 @@ public class WarExporter
 
 	private void changeAndWritePropertiesFile(File tmpWarDir, File sourceFile) throws ExportException
 	{
-		try (FileInputStream fis = new FileInputStream(sourceFile);
-			FileOutputStream fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties")))
+		try (FileOutputStream fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties")))
 		{
-			Properties properties = new SortedProperties();
-			properties.load(fis);
+			Settings properties = Settings.getInstance();
+			properties.loadFromFile(sourceFile);
 
 			if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
 			{
@@ -1428,29 +1419,6 @@ public class WarExporter
 		catch (IOException e)
 		{
 			throw new ExportException("Failed to overwrite properties file", e);
-		}
-	}
-
-	private void copyPropertiesFileToWar(File tmpWarDir, File sourceFile) throws ExportException
-	{
-		File destFile = new File(tmpWarDir, "WEB-INF/servoy.properties");
-		try
-		{
-			if (destFile.createNewFile())
-			{
-				try (FileInputStream fis = new FileInputStream(sourceFile);
-					FileOutputStream fos = new FileOutputStream(destFile);
-					FileChannel sourceChannel = fis.getChannel();
-					FileChannel destinationChannel = fos.getChannel())
-				{
-					// Copy source file to destination file
-					destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			throw new ExportException("Couldn't copy the servoy properties file", e);
 		}
 	}
 
