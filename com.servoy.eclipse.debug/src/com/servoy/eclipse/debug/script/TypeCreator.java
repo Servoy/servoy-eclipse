@@ -231,7 +231,9 @@ import com.servoy.j2db.scripting.IScriptable;
 import com.servoy.j2db.scripting.ITypedScriptObject;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.scripting.JSApplication;
+import com.servoy.j2db.scripting.JSDimension;
 import com.servoy.j2db.scripting.JSI18N;
+import com.servoy.j2db.scripting.JSPoint;
 import com.servoy.j2db.scripting.JSSecurity;
 import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
@@ -428,6 +430,8 @@ public class TypeCreator extends TypeCache
 		addAnonymousClassType("console", ConsoleObject.class);
 		addAnonymousClassType("CSSPosition", ICSSPosition.class);
 		addAnonymousClassType("ICSSPosition", ICSSPosition.class);
+		addAnonymousClassType("point", JSPoint.class);
+		addAnonymousClassType("dimension", JSDimension.class);
 		ElementResolver.registerConstantType("JSSecurity", "JSSecurity");
 
 
@@ -903,7 +907,7 @@ public class TypeCreator extends TypeCache
 					}
 
 					@Override
-					public void hiddenTableChanged(IServerInternal server, Table table)
+					public void hiddenTableChanged(IServerInternal server, ITable table)
 					{
 						runClearCacheJob();
 					}
@@ -1191,11 +1195,15 @@ public class TypeCreator extends TypeCache
 			method.setName(api.getName());
 			if (api.getDocumentation() != null)
 			{
-				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(api.getDocumentation(), STANDARD_ELEMENT_NAME, true));
+				StringBuilder description = new StringBuilder(api.getDocumentation());
+				if (!api.getDocumentation().contains("@deprecated")) description.append(api.getDeprecatedMessage());
+				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(description.toString(),
+					STANDARD_ELEMENT_NAME, true));
 				method.setDeprecated(api.isDeprecated() || api.getDocumentation().contains("@deprecated"));
 			}
 			else
 			{
+				if (!"".equals(api.getDeprecatedMessage())) method.setDescription(api.getDeprecatedMessage());
 				method.setDeprecated(api.isDeprecated());
 			}
 
@@ -2933,7 +2941,15 @@ public class TypeCreator extends TypeCache
 			List<Member> overwrittenMembers = new ArrayList<Member>();
 			for (Member member : members)
 			{
-				Member overridden = createOverrideMember(member, context, config);
+				Member overridden = null;
+				if ("foundset".equals(member.getName()))
+				{
+					overridden = TypeCreator.clone(member, getTypeRef(context, "ViewFoundSet<" + config + '>'));
+				}
+				else
+				{
+					overridden = createOverrideMember(member, context, config);
+				}
 				if (overridden != null)
 				{
 					overwrittenMembers.add(overridden);
@@ -4401,6 +4417,27 @@ public class TypeCreator extends TypeCache
 							{
 								return new TypeConfig(servoyProject.getEditingFlattenedSolution(), split.length == 1 ? null : split[1]);
 							}
+							else if (split.length == 1)
+							{
+								// relation
+								Relation relation = servoyModel.getFlattenedSolution().getRelation(split[0]);
+								if (relation != null)
+								{
+									try
+									{
+										ITable tbl = getTable(servoyModel.getFlattenedSolution().getSolution().getRepository(),
+											relation.getForeignDataSource());
+										if (tbl != null)
+										{
+											return new TypeConfig(tbl);
+										}
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError(e);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -4601,6 +4638,7 @@ public class TypeCreator extends TypeCache
 					if (FormTemplateGenerator.isWebcomponentBean(formElement))
 					{
 						WebObjectSpecification spec = FormTemplateGenerator.getWebObjectSpecification(formElement);
+						if (spec == null) continue;
 						String typeName = null;
 						Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
 						if (properties.size() > 0)
@@ -4710,6 +4748,7 @@ public class TypeCreator extends TypeCache
 			if (fullTypeName.indexOf('<') == -1 && fullTypeName.indexOf('.') == -1) return null;
 			String wcTypeName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
 			String[] typeNames = wcTypeName.split("\\.");
+			if (typeNames.length < 2) return null;
 			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(typeNames[0]);
 			if (spec == null)
@@ -5075,6 +5114,7 @@ public class TypeCreator extends TypeCache
 				if (Relation.isValid(relation, fs))
 				{
 					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
+					if (table == null) return null;
 					superType = getType(context, superType.getName() + '<' + table.getDataSource() + '>');
 					table = null;
 				}

@@ -32,7 +32,6 @@ import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
@@ -46,6 +45,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -124,7 +124,7 @@ public final class DatabaseUtils
 			};
 			ITable table = server.createNewTable(validator, tableName, false, fireTableCreated);
 			table.setMarkedAsMetaData(Boolean.TRUE.equals(tableInfo.isMetaData));
-			server.setTableMarkedAsHiddenInDeveloper(tableName, tableInfo.hiddenInDeveloper, fireTableCreated);
+			server.setTableMarkedAsHiddenInDeveloper(table, tableInfo.hiddenInDeveloper, fireTableCreated);
 
 			// Warn if the table types are different.
 			if (table.getTableType() != tableInfo.tableType)
@@ -151,9 +151,10 @@ public final class DatabaseUtils
 				ColumnInfoDef columnInfoInfo = columnInfoIt.next();
 
 				// Add the column with the appropriate information.
-				IColumn column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
+				Column column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
 					columnInfoInfo.columnType.getLength(), columnInfoInfo.columnType.getScale());
 				column.setDatabasePK((columnInfoInfo.flags & IBaseColumn.PK_COLUMN) != 0);
+				column.setFlags(columnInfoInfo.flags);
 				column.setAllowNull(columnInfoInfo.allowNull);
 
 				// update the auto enter type
@@ -227,34 +228,41 @@ public final class DatabaseUtils
 
 				// Update the column info of this table.
 				ColumnInfo columnInfo = column.getColumnInfo();
-				if (columnInfo != null)
+				boolean newColumnInfoObj = false;
+				if (columnInfo == null)
 				{
-					columnInfo.setAutoEnterType(columnInfoDef.autoEnterType);
-					columnInfo.setAutoEnterSubType(columnInfoDef.autoEnterSubType);
-					columnInfo.setDefaultValue(columnInfoDef.defaultValue);
-					columnInfo.setLookupValue(columnInfoDef.lookupValue);
-					// validation id not implemented yet -- leave alone
-					columnInfo.setTitleText(columnInfoDef.titleText);
-					columnInfo.setDescription(columnInfoDef.description);
-					columnInfo.setConverterProperties(columnInfoDef.converterProperties);
-					columnInfo.setConverterName(columnInfoDef.converterName);
-					columnInfo.setForeignType(columnInfoDef.foreignType);
-					columnInfo.setValidatorProperties(columnInfoDef.validatorProperties);
-					columnInfo.setValidatorName(columnInfoDef.validatorName);
-					columnInfo.setDefaultFormat(columnInfoDef.defaultFormat);
-					columnInfo.setElementTemplateProperties(columnInfoDef.elementTemplateProperties);
-					columnInfo.setDatabaseSequenceName(columnInfoDef.databaseSequenceName);
-					columnInfo.setPreSequenceChars(columnInfoDef.preSequenceChars);
-					columnInfo.setPostSequenceChars(columnInfoDef.postSequenceChars);
-					columnInfo.setSequenceStepSize(columnInfoDef.sequenceStepSize);
-					columnInfo.setDataProviderID(columnInfoDef.dataProviderID);
-					columnInfo.setContainsMetaData(columnInfoDef.containsMetaData);
-					columnInfo.setConfiguredColumnType(columnInfoDef.columnType);
-					columnInfo.setCompatibleColumnTypes(columnInfoDef.compatibleColumnTypes);
-					column.setFlags(columnInfoDef.flags);
-
-					columnInfo.flagChanged();
+					int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
+					columnInfo = new ColumnInfo(element_id, true);
+					newColumnInfoObj = true;
 				}
+
+				columnInfo.setAutoEnterType(columnInfoDef.autoEnterType);
+				columnInfo.setAutoEnterSubType(columnInfoDef.autoEnterSubType);
+				columnInfo.setDefaultValue(columnInfoDef.defaultValue);
+				columnInfo.setLookupValue(columnInfoDef.lookupValue);
+				// validation id not implemented yet -- leave alone
+				columnInfo.setTitleText(columnInfoDef.titleText);
+				columnInfo.setDescription(columnInfoDef.description);
+				columnInfo.setConverterProperties(columnInfoDef.converterProperties);
+				columnInfo.setConverterName(columnInfoDef.converterName);
+				columnInfo.setForeignType(columnInfoDef.foreignType);
+				columnInfo.setValidatorProperties(columnInfoDef.validatorProperties);
+				columnInfo.setValidatorName(columnInfoDef.validatorName);
+				columnInfo.setDefaultFormat(columnInfoDef.defaultFormat);
+				columnInfo.setElementTemplateProperties(columnInfoDef.elementTemplateProperties);
+				columnInfo.setDatabaseSequenceName(columnInfoDef.databaseSequenceName);
+				columnInfo.setPreSequenceChars(columnInfoDef.preSequenceChars);
+				columnInfo.setPostSequenceChars(columnInfoDef.postSequenceChars);
+				columnInfo.setSequenceStepSize(columnInfoDef.sequenceStepSize);
+				columnInfo.setDataProviderID(columnInfoDef.dataProviderID);
+				columnInfo.setContainsMetaData(columnInfoDef.containsMetaData);
+				columnInfo.setConfiguredColumnType(columnInfoDef.columnType);
+				columnInfo.setCompatibleColumnTypes(columnInfoDef.compatibleColumnTypes);
+
+
+				if (newColumnInfoObj) column.setColumnInfo(columnInfo); // it was null before so set it in column now
+				column.setFlags(columnInfoDef.flags);
+				columnInfo.flagChanged();
 			}
 			try
 			{

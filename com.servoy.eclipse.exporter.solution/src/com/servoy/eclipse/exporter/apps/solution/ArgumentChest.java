@@ -130,31 +130,27 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	public String getHelpMessage()
 	{
 		// @formatter:off
-		return "Workspace exporter. Exports workspace solutions into .servoy files.\n"
-			+ super.getHelpMessageCore()
-			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
-			+ "             Usually you will want to use 'ws'.\n"
-			+ "        -sd ... exports sample data. IMPORTANT: all needed DB\n"
-			+ "             servers must already be started\n"
-			+ "        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n"
-			+ "             is also present. Can be 'all' (without the ') in which  case  it will  still be\n"
-			+ "             limited but to a very high number: " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + "\n"
-			+ "             Default: " + IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED + "\n"
-			+ "        -i18n ... exports i18n data\n"
-			+ "        -users ... exports users\n"
-			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
-			+ "             IMPORTANT: all needed DB servers must already be started\n"
-			+ "        -pwd <protection_password> ... protect  the exported  solution with given  password.\n"
-			+ "        -modules [<module1_name> <module2_name> ... <moduleN_name>]\n"
-			+ "             argument  specified in command line. Includes all or part of referenced modules\n"
-			+ "             in export. If only '-modules' is used,  it will export all  referenced modules.\n"
-			+ "             If a list of  modules is also included, it  will export only  modules from this\n"
-			+ "             list, provided they are referenced by exported solution.\n"
-			+ "        -isf <import_options_file> ... path  to import options file.  Default value is null.\n"
-			+ "             If present, will  be added to  export  file as  import_settings.json. This file\n"
-			+ "             should be  taken from a  developer export  (import_settings.json inside .servoy\n"
-			+ "             file).\n"
-			+ getHelpMessageExitCodes();
+		return "Workspace exporter. Exports workspace solutions into .servoy files.\n" + super.getHelpMessageCore() +
+			"        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n" +
+			"             Usually you will want to use 'ws'.\n" + "        -sd ... exports sample data. IMPORTANT: all needed DB\n" +
+			"             servers must already be started\n" +
+			"        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n" +
+			"             is also present. Can be 'all' (without the ') in which  case  it will  still be\n" +
+			"             limited but to a very high number: " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + "\n" + "             Default: " +
+			IExportSolutionModel.DEFAULT_NUMBER_OF_SAMPLE_DATA_ROWS_IF_DATA_IS_EXPORTED + "\n" + "        -i18n ... exports i18n data\n" +
+			"        -users ... exports users\n" + "        -tables ... export  all table  information  about  tables from  referenced  servers.\n" +
+			"             IMPORTANT: all needed DB servers must already be started\n" +
+			"        -pwd <protection_password> ... protect  the exported  solution with given  password.\n" +
+			"        -modules [<module1_name> <module2_name> ... <moduleN_name>]\n" +
+			"             argument  specified in command line. Includes all or part of referenced modules\n" +
+			"             in export. If only '-modules' is used,  it will export all  referenced modules.\n" +
+			"             If a list of  modules is also included, it  will export only  modules from this\n" +
+			"             list, provided they are referenced by exported solution.\n" +
+			"        -isf <import_options_file> ... path  to import options file.  Default value is null.\n" +
+			"             If present, will  be added to  export  file as  import_settings.json. This file\n" +
+			"             should be  taken from a  developer export  (import_settings.json inside .servoy\n" +
+			"             file).\n" +
+			getHelpMessageExitCodes();
 		// @formatter:on
 	}
 
@@ -284,6 +280,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	@Override
 	public boolean isExportReferencedWebPackages()
 	{
+		//web packages are never exported in a cmd line file export
 		return false;
 	}
 
@@ -328,14 +325,12 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 				ServoyLog.logError("Error on exporting solution.", e);
 				return null;
 			}
-			modules.put(solution.getName(), solution);
 			List<String> exportedModules = getModuleIncludeList(new ArrayList<String>(modules.keySet()));
-			exportedModules.add(0, solution.getName());
 			return exportedModules.toArray(new String[exportedModules.size()]);
 		}
 		else
 		{
-			return new String[] { solution.getName() };
+			return null;
 		}
 	}
 
@@ -354,6 +349,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	@Override
 	public boolean isCheckMetadataTables()
 	{
+		//TODO SVY-15248 add the option to the exporter and use it in getTableMetaData below
 		return true;
 	}
 
@@ -366,7 +362,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	@Override
 	public boolean useImportSettings()
 	{
-		return true;
+		return importOptionsFile != null;
 	}
 
 	@Override

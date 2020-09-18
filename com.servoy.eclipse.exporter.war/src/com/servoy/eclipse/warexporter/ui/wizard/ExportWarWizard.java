@@ -81,6 +81,9 @@ import com.servoy.j2db.util.Utils;
 public class ExportWarWizard extends DirtySaveExportWizard implements IExportWizard, IRestoreDefaultWizard, ICopyWarToCommandLineWizard
 {
 
+	private static final String DEFAULT_VALIDATORS_JAR = "default_validators.jar";
+	private static final String CONVERTERS_JAR = "converters.jar";
+
 	private FileSelectionPage fileSelectionPage;
 
 	private DirectorySelectionPage pluginSelectionPage;
@@ -158,7 +161,7 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 		}
 		else if (BuilderUtils.getMarkers(activeProject) == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			if (TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(exportModel.getModulesToExport()))
+			if (TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportModel.getModulesToExport()))
 			{
 				exportConfirmationPage = new ExportConfirmationPage();
 			}
@@ -241,6 +244,27 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 				licenseConfigurationPage.setErrorMessage("License " + code + " is not valid and cannot be auto upgraded.");
 				return false;
 			}
+		}
+
+		boolean alreadyAsked = getDialogSettings().getBoolean("export.no_validators_or_converters.question");
+		if (!alreadyAsked)
+		{
+			boolean noConvertorsOrValidators = !exportModel.getPlugins().contains(CONVERTERS_JAR) ||
+				!exportModel.getPlugins().contains(DEFAULT_VALIDATORS_JAR);
+			final boolean[] exportWithoutConvOrVal = new boolean[] { true };
+			if (noConvertorsOrValidators)
+			{
+				Display.getDefault().syncExec(() -> {
+					exportWithoutConvOrVal[0] = MessageDialog.openQuestion(getShell(), "No Column Convertors or Validators are exported",
+						"Are you sure you want to export without 'converters.jar' or 'default_validators.jar' from the plugins? Press 'No' to add them automatically to the current export.");
+				});
+			}
+			if (!exportWithoutConvOrVal[0])
+			{
+				if (!exportModel.getPlugins().contains(CONVERTERS_JAR)) exportModel.getPlugins().add(CONVERTERS_JAR);
+				if (!exportModel.getPlugins().contains(DEFAULT_VALIDATORS_JAR)) exportModel.getPlugins().add(DEFAULT_VALIDATORS_JAR);
+			}
+			else getDialogSettings().put("export.no_validators_or_converters.question", true);
 		}
 
 		exportModel.saveSettings(getDialogSettings());
@@ -528,7 +552,8 @@ public class ExportWarWizard extends DirtySaveExportWizard implements IExportWiz
 
 		StringBuilder sb = new StringBuilder("./war_export.");
 		if (System.getProperty("os.name").toLowerCase().indexOf("win") > -1) sb.append("bat");
-		else sb.append("sh");
+		else if (System.getProperty("os.name", "generic").toLowerCase().indexOf("darwin") > 0) sb.append("macosx.sh");
+		else sb.append("linux.sh");
 
 		sb.append(" -s ").append(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution().getName());
 

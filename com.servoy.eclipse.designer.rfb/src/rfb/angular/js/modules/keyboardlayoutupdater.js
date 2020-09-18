@@ -136,6 +136,10 @@ angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegist
 		editorScope.sendUpdates = null;
 		if (isSendChanges) {
 			$editorService.sendChanges(obj);
+		} else {
+			if (event.keyCode > 36 && event.keyCode < 41) {
+				$editorService.keyPressed(event);
+			}
 		}
 
 	    }, 50);

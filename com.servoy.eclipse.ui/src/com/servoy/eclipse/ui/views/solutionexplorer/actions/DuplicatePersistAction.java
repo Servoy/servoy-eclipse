@@ -188,6 +188,10 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 							{
 								workingSetName[0] = (String)firstElement;
 							}
+							else
+							{
+								workingSetName[0] = null;
+							}
 						}
 					});
 				}
@@ -219,6 +223,7 @@ public class DuplicatePersistAction extends AbstractPersistSelectionAction
 				if (workingSetOfFormName != null)
 				{
 					workingSetNameCombo.setSelection(new StructuredSelection(workingSetOfFormName));
+					workingSetName[0] = workingSetOfFormName;
 				}
 				else
 				{

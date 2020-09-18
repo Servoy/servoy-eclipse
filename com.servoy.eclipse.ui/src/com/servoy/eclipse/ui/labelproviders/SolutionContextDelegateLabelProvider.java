@@ -17,15 +17,16 @@
 package com.servoy.eclipse.ui.labelproviders;
 
 
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
 
 /**
  * Delegate label provider that adds the solution context to the label.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class SolutionContextDelegateLabelProvider extends AbstractPersistContextDelegateLabelProvider
 {
@@ -56,7 +57,7 @@ public class SolutionContextDelegateLabelProvider extends AbstractPersistContext
 	public String getText(Object value)
 	{
 		String baseText = super.getText(value);
-		if (value != null && getContext() != null)
+		if (!baseText.equalsIgnoreCase(Messages.LabelUnresolved) && value != null && getContext() != null)
 		{
 			IPersist persist = getPersist(value);
 			if (persist != null)

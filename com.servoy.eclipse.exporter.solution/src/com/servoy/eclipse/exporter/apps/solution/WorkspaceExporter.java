@@ -18,6 +18,7 @@
 package com.servoy.eclipse.exporter.apps.solution;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,6 @@ import java.util.Set;
 import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Eclipse application that can be used for exporting servoy solutions in .servoy format (that can be used to import solutions afterwards in developer/app. server).
@@ -67,6 +68,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 		if (solution == null)
 		{
 			outputError("Solution in project '" + activeProject.getProject().getName() + "' is not valid. EXPORT FAILED for this solution.");
+			exitCode = EXIT_EXPORT_FAILED;
 			return;
 		}
 
@@ -76,9 +78,12 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 			checkDBsForDataExport(configuration, solution);
 			if (exitCode == EXIT_EXPORT_FAILED) return;
 
+			//at this point dbDown is false (to be ignored) when doing the actual export
+			//because we did the checks related to the DB above and in case we have inacessible servers that are used
+			//for sample or db metadata export, the export fails
 			SolutionExporter.exportSolutionToFile(solution, new File(configuration.getFileName()), configuration,
 				new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace())), configuration,
-				null, false, exportVersions, true, new NullProgressMonitor());
+				null, false, exportVersions, true);
 		}
 		catch (final Exception e)
 		{
@@ -90,70 +95,91 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 
 	protected void checkDBsForDataExport(ArgumentChest configuration, Solution solution) throws RepositoryException
 	{
-		if (configuration.isExportSampleData() || configuration.isExportMetaData() && configuration.isDBMetaDataExport())
+		if (configuration.isExportSampleData() || //
+			(configuration.isExportMetaData() && configuration.isDBMetaDataExport()))
 		{
 			Set<String> servers = TableDefinitionUtils.getNeededServerTables(solution, configuration.isExportReferencedModules(),
 				configuration.isExportI18NData()).keySet();
 			for (String serverName : servers)
 			{
 				IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager()
-					.getServer(serverName, false, false);
+					.getServer(serverName, true, false);//if mustBeEnabled is true, it returns null for disabled server
+
+				if (server == null)
+				{
+					markExportAsFailedDueToInaccessibleServer(configuration, serverName, "enabled");
+					continue;
+				}
+				Connection connection = null;
 				try
 				{
-					server.getConnection();
+					connection = server.getConnection();
 				}
 				catch (SQLException e)
 				{
 					Debug.error(e);
-					exitCode = EXIT_EXPORT_FAILED;
-					if (configuration.isExportSampleData())
-					{
-						outputError("Cannot connect to the DB server '" + serverName +
-							"' to export the sample data. Make sure it is started, or try again without exporting the sample data.");
-					}
-					if (configuration.isExportMetaData() && configuration.isDBMetaDataExport())
-					{
-						outputError("Cannot connect to the DB server '" + serverName +
-							"' to export the metadata. Make sure it is started, or try again without exporting the metadata.");
-					}
+					markExportAsFailedDueToInaccessibleServer(configuration, serverName, "valid and started");
+				}
+				finally
+				{
+					Utils.closeConnection(connection);
 				}
 			}
 		}
 	}
 
+	protected void markExportAsFailedDueToInaccessibleServer(ArgumentChest configuration, String serverName, String status)
+	{
+		exitCode = EXIT_EXPORT_FAILED;
+		String exportData = null;
+
+		if (configuration.isExportSampleData())
+		{
+			exportData = "sample data";
+		}
+		if (configuration.isExportMetaData() && configuration.isDBMetaDataExport())
+		{
+			if (exportData != null) exportData += " or ";
+			exportData = "metadata";
+		}
+		outputError("Cannot connect to the DB server '" + serverName +
+			"' to export the " + exportData + ". Make sure it is " + status + ", or try again without exporting the " + exportData + ".");
+	}
+
 	protected boolean checkExportedSolutionsVersions(ArgumentChest configuration, IServoyModel servoyModel)
 	{
-		boolean exportVersions = true;
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		boolean exportVersions = checkSolutionVersion(servoyModel, true, activeProject.getSolution().getName());
 		String[] exportedModules = configuration.getModulesToExport();
 		if (exportedModules != null)
 		{
 			for (String module : exportedModules)
 			{
-				if (Strings.isEmpty(servoyModel.getServoyProject(module).getSolution().getVersion()))
-				{
-					if (exportVersions)
-					{
-						output("#############################################################################");
-						output(
-							"WARNING! For using the exported file in the SERVOY DEVELOPER, please set versions for the following solutions, then re-export.");
-						exportVersions = false;
-					}
-					output("Missing version: " + module);
-				}
-			}
-			if (!exportVersions)
-			{
-				output("You can set the solution versions in the developer properties view.");
-				output("#############################################################################");
+				exportVersions = exportVersions && checkSolutionVersion(servoyModel, exportVersions, module);
 			}
 		}
-		else
+		if (!exportVersions)
 		{
-			//the exported modules should always contain the main solution name, if it is null then an error occurred
-			outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
-			exitCode = EXIT_EXPORT_FAILED;
+			output("You can set the solution versions in the developer properties view.");
+			output("#############################################################################");
 		}
 		return exportVersions;
+	}
+
+	protected boolean checkSolutionVersion(IServoyModel servoyModel, boolean exportVersions, String module)
+	{
+		if (Strings.isEmpty(servoyModel.getServoyProject(module).getSolution().getVersion()))
+		{
+			if (exportVersions)
+			{
+				output("#############################################################################");
+				output(
+					"WARNING! For using the exported file with SERVOY DEVELOPER, please set versions for the following solutions, then re-export.");
+			}
+			output("Missing version: " + module);
+			return false;
+		}
+		return true;
 	}
 
 

@@ -17,8 +17,13 @@
 
 package com.servoy.eclipse.ui.quickfix;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -28,7 +33,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
@@ -75,7 +82,38 @@ public class DeprecatedSpecQuickFix extends WorkbenchMarkerResolution
 				IPersist persist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), UUID.fromString(mk.getAttribute("uuid", "")));
 				if (persist instanceof WebComponent)
 				{
-					((WebComponent)persist).setTypeName(replacement);
+					WebComponent webComponent = (WebComponent)persist;
+
+					WebObjectSpecification oldSpec = WebComponentSpecProvider.getSpecProviderState()
+						.getWebComponentSpecification(webComponent.getTypeName());
+					WebObjectSpecification newSpec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(replacement);
+
+					if (oldSpec != null && newSpec != null)
+					{
+						Collection<PropertyDescription> deprecated = oldSpec.getAllPropertiesNames()//
+							.stream().map((String propname) -> oldSpec.getProperty(propname))//
+							.filter((PropertyDescription pd) -> pd != null && pd.getTag("replacement") != null &&
+								newSpec.getProperty((String)pd.getTag("replacement")) != null)//
+							.collect(Collectors.toCollection(ArrayList::new));
+
+						Map<String, Object> propertyValues = !deprecated.isEmpty()
+							? deprecated.stream().filter(pd -> webComponent.getProperty(pd.getName()) != null)
+								.collect(Collectors.toMap(pd -> (String)pd.getTag("replacement"), pd -> webComponent.getProperty(pd.getName())))
+							: Collections.EMPTY_MAP;
+
+						webComponent.setTypeName(replacement);
+
+						//copy the values for the replaced properties
+						for (String propertyName : propertyValues.keySet())
+						{
+							webComponent.setProperty(propertyName, propertyValues.get(propertyName));
+						}
+					}
+					else if (newSpec != null)
+					{
+						webComponent.setTypeName(replacement);
+					}
+
 				}
 				if (persist instanceof LayoutContainer)
 				{
@@ -182,7 +220,8 @@ public class DeprecatedSpecQuickFix extends WorkbenchMarkerResolution
 				(String)marker.getAttribute("solutionName"));
 			return Arrays.stream(servoyProject.getProject().findMarkers(ServoyBuilder.DEPRECATED_SPEC, false, IResource.DEPTH_INFINITE)).filter(
 				mk -> mk.getId() != marker.getId() && mk.getAttribute("replacement", null) != null &&
-					mk.getAttribute("replacement", "").equals(marker.getAttribute("replacement", ""))).toArray(IMarker[]::new);
+					mk.getAttribute("replacement", "").equals(marker.getAttribute("replacement", "")))
+				.toArray(IMarker[]::new);
 		}
 		catch (CoreException e)
 		{

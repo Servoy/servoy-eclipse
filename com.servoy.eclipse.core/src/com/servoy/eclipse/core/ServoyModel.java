@@ -146,6 +146,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.PersistIndexCache;
 import com.servoy.j2db.component.ComponentFactory;
@@ -3919,52 +3920,75 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			(event.getOldValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getOldValue()).getId())) ||
 			(event.getNewValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId())))
 		{
-			IFileAccess wsa = new WorkspaceFileAccess(getWorkspace());
-			if (IWorkingSetManager.CHANGE_WORKING_SET_REMOVE.equals(event.getProperty()))
+
+			Job job = new Job("Seriale working set")
 			{
-				if (event.getOldValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getOldValue()).getId()))
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					activeResourcesProject.removeWorkingSet(wsa, ((IWorkingSet)event.getOldValue()).getName());
-				}
-			}
-			else if (event.getNewValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId()))
-			{
-				if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(event.getProperty()))
-				{
-					Set<String> workingSetNames = activeResourcesProject.getWorkingSetNames();
-					String oldName = null;
-					for (String workingSetName : workingSetNames)
+
+					IFileAccess wsa = new WorkspaceFileAccess(getWorkspace());
+					if (IWorkingSetManager.CHANGE_WORKING_SET_REMOVE.equals(event.getProperty()))
 					{
-						IWorkingSet workingSet = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
-						if (workingSet == null)
+						if (event.getOldValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getOldValue()).getId()))
 						{
-							oldName = workingSetName;
-							break;
+							activeResourcesProject.removeWorkingSet(wsa, ((IWorkingSet)event.getOldValue()).getName());
 						}
 					}
-					if (oldName != null)
+					else if (event.getNewValue() instanceof IWorkingSet && SERVOY_WORKING_SET_ID.equals(((IWorkingSet)event.getNewValue()).getId()))
 					{
-						activeResourcesProject.renameWorkingSet(wsa, oldName, ((IWorkingSet)event.getNewValue()).getName());
-					}
-				}
-				else
-				{
-					IWorkingSet workingSet = (IWorkingSet)event.getNewValue();
-					List<String> paths = new ArrayList<String>();
-					IAdaptable[] resources = workingSet.getElements();
-					if (resources != null)
-					{
-						for (IAdaptable resource : resources)
+						if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(event.getProperty()))
 						{
-							if (resource instanceof IResource && ((IResource)resource).exists())
+							Set<String> workingSetNames = activeResourcesProject.getWorkingSetNames();
+							String oldName = null;
+							for (String workingSetName : workingSetNames)
 							{
-								paths.add(((IResource)resource).getFullPath().toString());
+								IWorkingSet workingSet = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+								if (workingSet == null)
+								{
+									oldName = workingSetName;
+									break;
+								}
+							}
+							if (oldName != null)
+							{
+
+								if (activeResourcesProject != null)
+								{
+									activeResourcesProject.renameWorkingSet(wsa, oldName, ((IWorkingSet)event.getNewValue()).getName());
+								}
+							}
+						}
+						else
+						{
+							IWorkingSet workingSet = (IWorkingSet)event.getNewValue();
+							List<String> paths = new ArrayList<String>();
+							IAdaptable[] resources = workingSet.getElements();
+							if (resources != null)
+							{
+								for (IAdaptable resource : resources)
+								{
+									if (resource instanceof IResource && ((IResource)resource).exists())
+									{
+										paths.add(((IResource)resource).getFullPath().toString());
+									}
+								}
+							}
+							if (activeResourcesProject != null)
+							{
+								activeResourcesProject.addWorkingSet(wsa, workingSet.getName(), paths);
 							}
 						}
 					}
-					activeResourcesProject.addWorkingSet(wsa, workingSet.getName(), paths);
+
+					return Status.OK_STATUS;
 				}
+			};
+			if (activeResourcesProject != null)
+			{
+				job.setRule(activeResourcesProject.getProject());
 			}
+			job.schedule();
 		}
 	}
 
@@ -3992,6 +4016,11 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 	@Override
 	protected BaseNGPackageManager createNGPackageManager()
 	{
+		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
+		for (String packageName : defaultPackageNames)
+		{
+			PlatformUI.getPreferenceStore().setDefault("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, true);
+		}
 		return new NGPackageManager(this);
 	}
 

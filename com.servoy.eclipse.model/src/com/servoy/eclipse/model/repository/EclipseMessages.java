@@ -62,6 +62,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportText;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.headlessclient.AbstractApplication;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -531,10 +532,10 @@ public class EclipseMessages implements ICustomMessageLoader
 	{
 		try
 		{
-			final TreeMap<String, I18NUtil.MessageEntry> messagesMap = new TreeMap<String, I18NUtil.MessageEntry>();
 			ServoyResourcesProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 			if (resourcesProject != null)
 			{
+				final TreeMap<String, I18NUtil.MessageEntry> messagesMap = new TreeMap<String, I18NUtil.MessageEntry>();
 				final String messageFileName = i18nServer + "." + i18nTable;
 
 				IResource messagesResource = resourcesProject.getProject().findMember(MESSAGES_DIR);
@@ -581,9 +582,10 @@ public class EclipseMessages implements ICustomMessageLoader
 
 					}, IResource.DEPTH_ONE, false);
 				}
+				return messagesMap;
 			}
 
-			return messagesMap;
+			return null;
 		}
 		catch (Exception ex)
 		{
@@ -750,7 +752,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				@Override
 				public Object visit(IPersist o)
 				{
-					if (o instanceof ISupportText)
+					if (o instanceof ISupportText || o instanceof WebComponent)
 					{
 						List<Pair<String, String>> componentI18NKeys = componentsI18NKeys.remove(o);
 						if (componentI18NKeys != null) i18nKeysToSave.addAll(componentI18NKeys);

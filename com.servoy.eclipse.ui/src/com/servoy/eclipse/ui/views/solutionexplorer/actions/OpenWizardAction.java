@@ -40,6 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.EditorUtil.SaveDirtyEditorsOutputEnum;
+import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.ICopyWarToCommandLineWizard;
 import com.servoy.eclipse.ui.wizards.IRestoreDefaultWizard;
 
@@ -98,6 +99,20 @@ public class OpenWizardAction extends Action
 				protected IDialogSettings getDialogBoundsSettings()
 				{
 					return EditorUtil.getDialogSettings(wizardClass.getSimpleName());
+				}
+
+				@Override
+				public void setShellStyle(int newShellStyle)
+				{
+					if (TutorialView.isTutorialViewOpen())
+					{
+						super.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE);
+						setBlockOnOpen(false);
+					}
+					else
+					{
+						super.setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.BORDER | SWT.TITLE);
+					}
 				}
 
 				@Override

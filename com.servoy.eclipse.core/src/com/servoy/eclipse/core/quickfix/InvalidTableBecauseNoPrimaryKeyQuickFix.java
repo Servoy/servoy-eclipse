@@ -62,7 +62,7 @@ public class InvalidTableBecauseNoPrimaryKeyQuickFix implements IMarkerResolutio
 		try
 		{
 			final Table table = (Table)server.getTable(tableName);
-			server.setTableMarkedAsHiddenInDeveloper(tableName, true);
+			server.setTableMarkedAsHiddenInDeveloper(table, true);
 			dataModelManager.updateHiddenInDeveloperState(table);
 		}
 		catch (RepositoryException e)

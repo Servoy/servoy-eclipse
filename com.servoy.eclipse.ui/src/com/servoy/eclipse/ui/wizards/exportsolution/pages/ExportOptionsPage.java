@@ -74,6 +74,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 	private Button exportUsingDbiFileInfoOnlyButton;
 	private final int resourcesProjectProblemsType;
 	private Button useImportSettingsButton;
+	private Text mainSolutionVersion;
 
 	public ExportOptionsPage(ExportSolutionWizard exportSolutionWizard)
 	{
@@ -95,7 +96,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		return (exportSolutionWizard.hasActiveSolutionDbDownErrors() ||
 			(exportUsingDbiFileInfoOnlyButton != null && exportUsingDbiFileInfoOnlyButton.getSelection()) ||
 			resourcesProjectProblemsType == BuilderUtils.HAS_NO_MARKERS || resourcesProjectProblemsType == BuilderUtils.HAS_WARNING_MARKERS) &&
-			super.canFlipToNextPage();
+			!"".equals(mainSolutionVersion.getText().trim()) && super.canFlipToNextPage();
 	}
 
 	private void updateMessages()
@@ -143,7 +144,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		comp.setLayout(layout);
 		Label mainSolution = new Label(comp, SWT.NONE);
 		mainSolution.setText("Solution version");
-		Text mainSolutionVersion = new Text(comp, SWT.BORDER);
+		mainSolutionVersion = new Text(comp, SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint = 200;
 		mainSolutionVersion.setLayoutData(gd);

@@ -238,7 +238,7 @@ public class WarExporter
 		{
 			// just always copy the nglibs to it even if it is just puur smart client
 			// the log4j libs are always needed.
-			copyNGLibs(targetLibDir);
+			copyNGLibs(targetLibDir, exportModel.isNGExport());
 		}
 		catch (IOException e)
 		{
@@ -713,10 +713,11 @@ public class WarExporter
 	/**
 	 * Add all NG_LIBS to the war.
 	 * @param targetLibDir
+	 * @param includeNGClientLib
 	 * @throws ExportException
 	 * @throws IOException
 	 */
-	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
+	private void copyNGLibs(File targetLibDir, boolean includeNGClientLib) throws ExportException, IOException
 	{
 		if (pluginFiles.isEmpty())
 		{
@@ -725,6 +726,7 @@ public class WarExporter
 		}
 		for (File file : pluginFiles)
 		{
+			if (!includeNGClientLib && file.getName().toLowerCase().startsWith("servoy_ngclient_")) continue;
 			copyFile(file, new File(targetLibDir, file.getName()));
 		}
 	}
@@ -991,7 +993,7 @@ public class WarExporter
 		{
 			SolutionExporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), exportModel,
 				new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace())), new EclipseExportUserChannel(exportModel, monitor),
-				null, TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(exportModel.getModulesToExport()), false, exportSolution, monitor);
+				null, TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportModel.getModulesToExport()), false, exportSolution);
 			monitor.done();
 		}
 		catch (RepositoryException e)
@@ -1222,6 +1224,12 @@ public class WarExporter
 		File pluginsDir = new File(tmpWarDir, "plugins");
 		pluginsDir.mkdirs();
 		List<String> plugins = exportModel.getPlugins();
+		boolean noConvertorsOrValidators = !plugins.contains("converters.jar") || !plugins.contains("default_validators.jar");
+		if (noConvertorsOrValidators)
+		{
+			// print to system out for the command line exporter.
+			System.out.println("converter.jar or default_validators.jar not exported so column converters or validators don't work");
+		}
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
 		try (Writer fw = new FileWriter(pluginProperties))
 		{

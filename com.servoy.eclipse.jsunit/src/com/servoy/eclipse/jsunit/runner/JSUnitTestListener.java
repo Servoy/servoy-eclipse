@@ -18,17 +18,17 @@ package com.servoy.eclipse.jsunit.runner;
 
 import java.util.List;
 
+import org.mozilla.javascript.Scriptable;
+
 import junit.framework.Test;
 import junit.framework.TestResult;
-
-import org.mozilla.javascript.Scriptable;
 
 /**
  * This object is wrapped into a javascript object so as to be seen by JSUnit as a test result listener. It only contains the interface methods that will be
  * available to JS, and forwards requests to it's JSUnitTestListenerHandler so that the obfuscation of test result conversion logic is not obstructed.
- * 
+ *
  * @author acostescu
- * 
+ *
  */
 public class JSUnitTestListener
 {
@@ -72,6 +72,16 @@ public class JSUnitTestListener
 	public void setResult(Object result)
 	{
 		if (result instanceof Scriptable) handler.setJSResult((Scriptable)result);
+	}
+
+	public Test popLastStartedTest()
+	{
+		return handler.popLastStartedTest();
+	}
+
+	public void stopAllStartedSuites()
+	{
+		handler.stopAllStartedSuites();
 	}
 
 }

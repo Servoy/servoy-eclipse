@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.json.JSONException;
 
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
@@ -43,14 +42,33 @@ import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 /**
+ * Used by various exporters (file exporter, cmd line file exporter, war exporter and cmd line war exporter) to export a solution as file.
  * @author emera
  */
 public class SolutionExporter
 {
 
+	/**
+	 * Does some checks if the sample data and metadata can be exported if the export model requires so,
+	 * then exports a solution as file.
+	 * @param activeSolution the solution to be exported
+	 * @param exportFile the file where to export the solution
+	 * @param exportModel the export model for the solution
+	 * @param eeI18NHelper the I18nHelper to get the i18n file names and content
+	 * @param userChannel the channel used to log/display messages to the user
+	 * @param modulesWebPackages the web packages to export
+	 * @param dbDown true if the db is down (or some needed servers/tables are not accessible)
+	 * @param exportVersions a flag for exporting the versions (usually true for file exporter and false for war exporter)
+	 * @param exportSolution include the active solution (if true a solution.xml and revision_info.xml are added to the resulting archive)
+	 *
+	 * @throws RepositoryException
+	 * @throws JSONException
+	 * @throws CoreException
+	 * @throws IOException
+	 */
 	public static void exportSolutionToFile(Solution activeSolution, File exportFile, IExportSolutionModel exportModel,
 		EclipseExportI18NHelper eeI18NHelper, IXMLExportUserChannel userChannel,
-		Map<String, List<File>> modulesWebPackages, boolean dbDown, boolean exportVersions, boolean exportSolution, IProgressMonitor monitor)
+		Map<String, List<File>> modulesWebPackages, boolean dbDown, boolean exportVersions, boolean exportSolution)
 		throws RepositoryException, JSONException, CoreException, IOException
 	{
 		final IApplicationServerSingleton as = ApplicationServerRegistry.get();

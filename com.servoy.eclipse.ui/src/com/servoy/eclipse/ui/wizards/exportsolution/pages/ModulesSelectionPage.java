@@ -32,6 +32,7 @@ import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
@@ -116,7 +117,7 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		projectProblemsType = BuilderUtils.getMarkers(exportSolutionWizard.getModel().getModulesToExport());
 		if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			moduleDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(exportSolutionWizard.getModel().getModulesToExport());
+			moduleDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(exportSolutionWizard.getModel().getModulesToExport());
 		}
 		else
 		{
@@ -209,7 +210,15 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 3;
 
-		Composite composite = new Composite(parent, SWT.NONE);
+		Composite rootComposite = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 1;
+		rootComposite.setLayout(layout);
+		rootComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		ScrolledComposite sc = new ScrolledComposite(rootComposite, SWT.V_SCROLL);
+		Composite composite = new Composite(sc, SWT.NONE);
+		sc.setContent(composite);
+		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Color backgroundColor = Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND);
 		composite.setBackground(backgroundColor);
 		composite.setLayout(gridLayout);
@@ -284,7 +293,12 @@ public class ModulesSelectionPage extends WizardPage implements Listener
 		}
 		initializeModulesToExport();
 
-		setControl(composite);
+		setControl(rootComposite);
+		sc.setExpandHorizontal(true);
+		sc.setExpandVertical(true);
+		sc.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		composite.layout();
+		sc.layout();
 	}
 
 	protected boolean setSolutionVersion(final IDeveloperServoyModel servoyModel, String module, String version, boolean displayError)

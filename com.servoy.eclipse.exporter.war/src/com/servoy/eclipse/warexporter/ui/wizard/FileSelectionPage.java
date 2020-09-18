@@ -414,7 +414,7 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 			{
 				modules[i] = modulesOfActiveProject[i].getProject().getName();
 			}
-			refreshDBIDownFlag(exportModel.isExportActiveSolution() && TableDefinitionUtils.hasDbDownErrorMarkersToIgnore(modules));
+			refreshDBIDownFlag(exportModel.isExportActiveSolution() && TableDefinitionUtils.hasDbDownErrorMarkersThatCouldBeIgnoredOnExport(modules));
 		}
 		else
 		{
@@ -423,8 +423,6 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 		enableSolutionExportData();
 
 		setControl(composite);
-
-		this.getWizard().getContainer().getShell().pack();
 	}
 
 	private void applyNrOfExportedSampleDataSpinnerValue()
@@ -664,5 +662,15 @@ public class FileSelectionPage extends WizardPage implements Listener, IRestoreD
 	public void performHelp()
 	{
 		PlatformUI.getWorkbench().getHelpSystem().displayHelp("com.servoy.eclipse.exporter.war.export_war_main");
+	}
+
+	@Override
+	public void setVisible(boolean visible)
+	{
+		super.setVisible(visible);
+		if (visible)
+		{
+			this.getWizard().getContainer().getShell().pack();
+		}
 	}
 }

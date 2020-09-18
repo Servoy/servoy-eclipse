@@ -248,7 +248,6 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
@@ -1076,17 +1075,24 @@ public class SolutionExplorerView extends ViewPart
 		runAndKeepTreePaths(runnable);
 	}
 
+	public void refreshTreeNodeFromModel(final SimpleUserNode node)
+	{
+		refreshTreeNodeFromModel(node, false);
+	}
+
 	/**
 	 * Refreshes the specified node from the tree. If the node is null, it refreshes the whole tree.
 	 *
 	 * @param node the node to be refreshed in the tree or null to refresh the whole tree.
 	 */
-	public void refreshTreeNodeFromModel(final SimpleUserNode node)
+	public void refreshTreeNodeFromModel(final SimpleUserNode node, final boolean cleanOldNodeChildren)
 	{
 		Runnable runnable = new Runnable()
 		{
 			public void run()
 			{
+				if (cleanOldNodeChildren) node.children = null;
+
 				if (treeFilter != null && treeFilter.getText() != null && treeFilter.getText().length() > 0)
 				{
 					filter(treeFilter.getText(), null);
@@ -2233,7 +2239,7 @@ public class SolutionExplorerView extends ViewPart
 				}
 
 				@Override
-				public void hiddenTableChanged(IServerInternal server, Table table)
+				public void hiddenTableChanged(IServerInternal server, ITable table)
 				{
 					if (table.getTableType() == ITable.VIEW)
 					{
@@ -3125,6 +3131,7 @@ public class SolutionExplorerView extends ViewPart
 		NewInMemoryDataSourceAction newViewFS = new NewInMemoryDataSourceAction(this, "Create view foundset", UserNodeType.VIEW_FOUNDSETS);
 		newActionInTreePrimary.registerAction(UserNodeType.VIEW_FOUNDSETS, newViewFS);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
+		newActionInTreePrimary.registerAction(UserNodeType.WORKING_SET, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);

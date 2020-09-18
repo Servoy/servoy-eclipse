@@ -349,8 +349,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						baseTable = formTable;
 					}
 				}
-				options = new DataProviderTreeViewer.DataProviderOptions(true, baseTable != null, baseTable != null, baseTable != null, true, true,
-					baseTable != null, baseTable != null, INCLUDE_RELATIONS.NESTED, true, true, null); // not sure all these params are ok - just used what was already used for form foundset
+				options = new DataProviderTreeViewer.DataProviderOptions(true, baseTable != null, baseTable != null, baseTable != null, false, false,
+					baseTable != null, baseTable != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 			}
 
 

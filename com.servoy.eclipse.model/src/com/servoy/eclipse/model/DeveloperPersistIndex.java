@@ -434,10 +434,10 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	}
 
 	@Override
-	protected void addInDatasourceCache(ConcurrentMap<String, IPersist> cache, IPersist persist)
+	protected void addInDatasourceCache(ConcurrentMap<String, IPersist> cache, IPersist persist, String datasource)
 	{
 		String name = ((ISupportName)persist).getName();
-		if (cache.containsKey(name))
+		if (name != null && cache.containsKey(name))
 		{
 			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
 			if (duplicates == null)
@@ -445,7 +445,6 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 				duplicates = new HashMap<String, List<IPersist>>();
 				duplicateNames.put(name, duplicates);
 			}
-			String datasource = ((TableNode)persist).getDataSource();
 			List<IPersist> duplicatePersists = duplicates.get(datasource + "_" + persist.getClass().getName());
 			if (duplicatePersists == null)
 			{
@@ -456,7 +455,7 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 			IPersist duplicatePersist = cache.get(name);
 			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
 		}
-		super.addInDatasourceCache(cache, persist);
+		super.addInDatasourceCache(cache, persist, datasource);
 	}
 
 	@Override

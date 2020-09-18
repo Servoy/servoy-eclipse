@@ -56,6 +56,7 @@ import com.servoy.j2db.util.Utils;
 public class TutorialView extends ViewPart
 {
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.TutorialView";
+	private static boolean isTutorialViewOpen = false;
 
 	private JSONObject dataModel;
 	BrowserDialog dialog = null;
@@ -212,7 +213,7 @@ public class TutorialView extends ViewPart
 					{
 						dialog = new BrowserDialog(parent.getShell(),
 							rowData.optString("gifURL"), false, false);
-						dialog.open(location, size);
+						dialog.open(location, size, false);
 					}
 					else
 					{
@@ -246,11 +247,24 @@ public class TutorialView extends ViewPart
 			Composite parent = rootComposite.getParent();
 			rootComposite.dispose();
 			createTutorialView(parent);
+			isTutorialViewOpen = true;
 			parent.layout(true, true);
 		}
 		catch (Exception e)
 		{
 			Debug.error(e);
 		}
+	}
+
+	public static boolean isTutorialViewOpen()
+	{
+		return isTutorialViewOpen;
+	}
+
+	@Override
+	public void dispose()
+	{
+		isTutorialViewOpen = false;
+		super.dispose();
 	}
 }

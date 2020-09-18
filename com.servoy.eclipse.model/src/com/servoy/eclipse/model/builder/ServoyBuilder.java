@@ -118,6 +118,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportMedia;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ITable;
@@ -933,7 +934,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						ServoyLog.logError(e);
 					}
 				}
-				else
+				else if (!PersistHelper.isOverrideOrphanElement((ISupportExtendsID)o))
 				{
 					ServoyLog.logError("Type name not found for webcomponent " + ((WebComponent)o).getName(), null);
 				}
