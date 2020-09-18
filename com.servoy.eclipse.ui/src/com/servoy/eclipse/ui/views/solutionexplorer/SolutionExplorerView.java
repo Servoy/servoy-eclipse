@@ -2228,6 +2228,12 @@ public class SolutionExplorerView extends ViewPart
 				}
 
 				@Override
+				public void tableInitialized(Table t)
+				{
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshTable(t);
+				}
+
+				@Override
 				public void hiddenTableChanged(IServerInternal server, Table table)
 				{
 					if (table.getTableType() == ITable.VIEW)

@@ -3546,6 +3546,21 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
+	public void refreshTable(ITable table)
+	{
+		PlatformSimpleUserNode serverNode = (PlatformSimpleUserNode)findChildNode(servers, table.getServerName());
+		if (serverNode != null)
+		{
+			SimpleUserNode tableNode = findChildNode(serverNode, table.getName());
+			// only refresh the tree if something on the table has changed
+			if (tableNode != null &&
+				tableNode.getFlags() != SolutionExplorerListContentProvider.determineFlags((IServerInternal)serverNode.getRealObject(), table.getName()))
+			{
+				refreshServerViewsNode((IServerInternal)serverNode.getRealObject());
+			}
+		}
+	}
+
 	public TreePath getTreePath(UUID uuid)
 	{
 		if (activeSolutionNode.getRealObject() != null)
