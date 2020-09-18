@@ -1336,10 +1336,31 @@ public class WarExporter
 
 	private void changeAndWritePropertiesFile(File tmpWarDir, File sourceFile) throws ExportException
 	{
-		try (FileOutputStream fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties")))
+		try (FileInputStream fis = new FileInputStream(sourceFile);
+			FileOutputStream fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties")))
 		{
-			Settings properties = Settings.getInstance();
-			properties.loadFromFile(sourceFile);
+			Properties properties = new SortedProperties();
+			properties.load(fis);
+
+			for (Object k : properties.keySet())
+			{
+				if (k instanceof String)
+				{
+					String key = (String)k;
+					if (shouldEncrypt(key) && !properties.getProperty(key, "").startsWith(IWarExportModel.enc_prefix))
+					{
+						try
+						{
+							String password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), properties.getProperty(key, ""));
+							properties.put(k, password);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("Could not encrypt property " + key, e);
+						}
+					}
+				}
+			}
 
 			if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
 			{
@@ -1420,6 +1441,12 @@ public class WarExporter
 		{
 			throw new ExportException("Failed to overwrite properties file", e);
 		}
+	}
+
+	private boolean shouldEncrypt(String key)
+	{
+		String lcKey = key.toLowerCase();
+		return lcKey.indexOf("password") != -1 || lcKey.indexOf("passphrase") != -1;
 	}
 
 	private void generatePropertiesFile(File tmpWarDir) throws ExportException
