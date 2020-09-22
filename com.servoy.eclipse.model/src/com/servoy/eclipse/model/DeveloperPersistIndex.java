@@ -32,6 +32,7 @@ import com.servoy.j2db.PersistIndex;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.Media;
@@ -284,26 +285,39 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	@Override
 	protected void addInNameCache(ConcurrentMap<String, IPersist> cache, IPersist persist)
 	{
-		String name = ((ISupportName)persist).getName();
-		if (cache.containsKey(name))
-		{
-			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-			if (duplicates == null)
-			{
-				duplicates = new HashMap<String, List<IPersist>>();
-				duplicateNames.put(name, duplicates);
-			}
-			List<IPersist> duplicatePersists = duplicates.get(persist.getClass().getName());
-			if (duplicatePersists == null)
-			{
-				duplicatePersists = new ArrayList<>();
-				duplicates.put(persist.getClass().getName(), duplicatePersists);
-			}
-			if (!duplicatePersists.contains(persist)) duplicatePersists.add(persist);
-			IPersist duplicatePersist = cache.get(name);
-			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
-		}
+		testDuplicateCache(cache, persist, persist.getClass().getName());
 		super.addInNameCache(cache, persist);
+	}
+
+	/**
+	 * @param cache
+	 * @param persist
+	 * @param cacheName
+	 */
+	protected void testDuplicateCache(Map<String, ? extends IPersist> cache, IPersist persist, String cacheName)
+	{
+		String name = ((ISupportName)persist).getName();
+		if (name != null)
+		{
+			IPersist duplicatePersist = cache.get(name);
+			if (duplicatePersist != null && !duplicatePersist.equals(persist))
+			{
+				Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
+				if (duplicates == null)
+				{
+					duplicates = new HashMap<String, List<IPersist>>();
+					duplicateNames.put(name, duplicates);
+				}
+				List<IPersist> duplicatePersists = duplicates.get(cacheName);
+				if (duplicatePersists == null)
+				{
+					duplicatePersists = new ArrayList<>();
+					duplicates.put(cacheName, duplicatePersists);
+				}
+				if (!duplicatePersists.contains(persist)) duplicatePersists.add(persist);
+				if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
+			}
+		}
 	}
 
 	@Override
@@ -436,51 +450,14 @@ public class DeveloperPersistIndex extends PersistIndex implements ISolutionMode
 	@Override
 	protected void addInDatasourceCache(ConcurrentMap<String, IPersist> cache, IPersist persist, String datasource)
 	{
-		String name = ((ISupportName)persist).getName();
-		if (name != null && cache.containsKey(name))
-		{
-			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-			if (duplicates == null)
-			{
-				duplicates = new HashMap<String, List<IPersist>>();
-				duplicateNames.put(name, duplicates);
-			}
-			List<IPersist> duplicatePersists = duplicates.get(datasource + "_" + persist.getClass().getName());
-			if (duplicatePersists == null)
-			{
-				duplicatePersists = new ArrayList<>();
-				duplicates.put(datasource + "_" + persist.getClass().getName(), duplicatePersists);
-			}
-			if (!duplicatePersists.contains(persist)) duplicatePersists.add(persist);
-			IPersist duplicatePersist = cache.get(name);
-			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add(duplicatePersist);
-		}
+		testDuplicateCache(cache, persist, datasource + '_' + persist.getClass().getName());
 		super.addInDatasourceCache(cache, persist, datasource);
 	}
 
 	@Override
-	protected void addInScopeCache(Map<String, ISupportScope> cache, ISupportScope persist)
+	protected void addInScopeCache(Map<String, IScriptElement> cache, IScriptElement persist)
 	{
-		String name = persist.getName();
-		if (cache.containsKey(name))
-		{
-			String scope = persist.getScopeName();
-			Map<String, List<IPersist>> duplicates = duplicateNames.get(name);
-			if (duplicates == null)
-			{
-				duplicates = new HashMap<String, List<IPersist>>();
-				duplicateNames.put(name, duplicates);
-			}
-			List<IPersist> duplicatePersists = duplicates.get(ISupportScope.class.getName() + "_" + scope);
-			if (duplicatePersists == null)
-			{
-				duplicatePersists = new ArrayList<>();
-				duplicates.put(ISupportScope.class.getName() + "_" + scope, duplicatePersists);
-			}
-			if (!duplicatePersists.contains(persist)) duplicatePersists.add((IPersist)persist);
-			ISupportScope duplicatePersist = cache.get(name);
-			if (!duplicatePersists.contains(duplicatePersist)) duplicatePersists.add((IPersist)duplicatePersist);
-		}
+		testDuplicateCache(cache, persist, ISupportScope.class.getName() + "_" + persist.getScopeName());
 		super.addInScopeCache(cache, persist);
 	}
 
