@@ -1,1 +1,19 @@
-<p>typeahead works!</p>
+<input
+		type="text"
+		class='bts-typeahead'
+		[svyFormat]="format"
+		[svyStartEdit]="'dataProviderID'"
+		[hostComponent]="self"
+		[value]="observableValue | async | formatFilter:format?.display:format?.type:format"
+		(change)="update($event.target.value)"
+		(selectItem)="valueChanged($event.item)"
+		[sabloTabseq]="tabSeq"
+		[svyTooltip]="toolTipText"
+		[ngbTypeahead]="filterValues"
+		[resultFormatter]="formatter"
+		[inputFormatter]="formatter"
+		(focus)="focus$.next('')"
+		(click)="click$.next('')"
+		#instance="ngbTypeahead"
+		#element
+/>
