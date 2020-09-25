@@ -38,9 +38,13 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -57,8 +61,10 @@ public class TutorialView extends ViewPart
 {
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.TutorialView";
 	private static boolean isTutorialViewOpen = false;
+	private static final String URL_TUTORIALS_LIST = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/listtutorials";
 
 	private JSONObject dataModel;
+	private JSONArray dataTutorialsList;
 	BrowserDialog dialog = null;
 
 	private Composite rootComposite;
@@ -66,11 +72,11 @@ public class TutorialView extends ViewPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		loadDataModel();
-		createTutorialView(parent);
+		loadDataModel(true, null);
+		createTutorialView(parent, true);
 	}
 
-	private void createTutorialView(Composite parent)
+	private void createTutorialView(Composite parent, boolean createDefaultTutorialsList)
 	{
 		rootComposite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -87,27 +93,185 @@ public class TutorialView extends ViewPart
 		mainContainer.setLayout(layout);
 		mainContainer.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
-		Label nameLabel = new Label(mainContainer, SWT.NONE);
-		nameLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		nameLabel.setText(dataModel.optString("name"));
-		FontDescriptor descriptor = FontDescriptor.createFrom(nameLabel.getFont());
-		descriptor = descriptor.setStyle(SWT.BOLD);
-		descriptor = descriptor.increaseHeight(12);
-		nameLabel.setFont(descriptor.createFont(this.getViewSite().getShell().getDisplay()));
-
-		JSONArray steps = dataModel.optJSONArray("steps");
-		if (steps != null)
+		if (createDefaultTutorialsList)
 		{
-			for (int i = 0; i < steps.length(); i++)
+			new TutorialsList(mainContainer);
+		}
+		else
+		{
+			Label nameLabel = new Label(mainContainer, SWT.NONE);
+			nameLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			nameLabel.setText(dataModel.optString("name"));
+			FontDescriptor descriptor = FontDescriptor.createFrom(nameLabel.getFont());
+			descriptor = descriptor.setStyle(SWT.BOLD);
+			descriptor = descriptor.increaseHeight(12);
+			nameLabel.setFont(descriptor.createFont(this.getViewSite().getShell().getDisplay()));
+
+			JSONArray steps = dataModel.optJSONArray("steps");
+			if (steps != null)
 			{
-				new RowComposite(mainContainer, steps.getJSONObject(i), i + 1);
+				for (int i = 0; i < steps.length(); i++)
+				{
+					new RowComposite(mainContainer, steps.getJSONObject(i), i + 1);
+				}
 			}
+
+			new TutorialButtons(mainContainer);
 		}
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		mainContainer.layout();
 		sc.layout();
+	}
+
+	/**
+	 * This class is representing the default tutorials list.
+	 */
+	private class TutorialsList extends Composite
+	{
+		public TutorialsList(Composite parent)
+		{
+			super(parent, SWT.FILL);
+			GridLayout layout = new GridLayout();
+			layout.numColumns = 1;
+			layout.verticalSpacing = 1;
+			layout.marginHeight = 1;
+			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			setLayout(layout);
+			setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+
+			Composite row = new Composite(this, SWT.FILL);
+			row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			row.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+
+			GridLayout rowLayout = new GridLayout();
+			rowLayout.numColumns = 1;
+			rowLayout.horizontalSpacing = 10;
+			rowLayout.marginHeight = 1;
+			rowLayout.marginTop = 10;
+			row.setLayout(rowLayout);
+
+			if (dataTutorialsList != null)
+			{
+				for (int i = 0; i < dataTutorialsList.length(); i++)
+				{
+					Label name = new Label(row, SWT.WRAP);
+					name.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					name.setText(dataTutorialsList.getJSONObject(i).optString("title"));
+					name.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+					FontDescriptor descriptor = FontDescriptor.createFrom(name.getFont());
+					descriptor = descriptor.setStyle(SWT.BOLD);
+					descriptor = descriptor.increaseHeight(6);
+					name.setFont(descriptor.createFont(parent.getDisplay()));
+					final String tutorialID = dataTutorialsList.getJSONObject(i).optString("id");
+
+					Label description = new Label(row, SWT.WRAP);
+					description.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description")));
+					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+					gd.widthHint = 200;
+					description.setLayoutData(gd);
+					descriptor = FontDescriptor.createFrom(description.getFont());
+					descriptor = descriptor.increaseHeight(2);
+					description.setFont(descriptor.createFont(parent.getDisplay()));
+
+					StyledText openLink = new StyledText(row, SWT.NONE);
+					openLink.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+					openLink.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW));
+					openLink.setEditable(false);
+					openLink.setText("open");
+					openLink.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+					descriptor = FontDescriptor.createFrom(openLink.getFont());
+					openLink.setFont(descriptor.createFont(parent.getDisplay()));
+					openLink.addMouseListener(new MouseAdapter()
+					{
+						@Override
+						public void mouseUp(MouseEvent event)
+						{
+							super.mouseUp(event);
+
+							if (event.getSource() instanceof StyledText)
+							{
+								BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+									"http://tutorials.servoy.com/solutions/content/index.html?viewTutorial=" + tutorialID, true, false);
+								tutorialDialog.open(true);
+							}
+						}
+					});
+				}
+			}
+		}
+	}
+
+	/**
+	 * Buttons used for opening the videos for the current and next tutorial.
+	 */
+	private class TutorialButtons extends Composite
+	{
+		public TutorialButtons(Composite parent)
+		{
+			super(parent, SWT.FILL);
+			GridLayout layout = new GridLayout();
+			layout.numColumns = 1;
+			layout.verticalSpacing = 1;
+			layout.marginHeight = 1;
+			setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			setLayout(layout);
+			setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+
+			Composite row = new Composite(this, SWT.FILL);
+			row.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			row.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+
+			GridLayout rowLayout = new GridLayout();
+			rowLayout.numColumns = 2;
+			rowLayout.horizontalSpacing = 10;
+			rowLayout.marginHeight = 1;
+			rowLayout.marginTop = 10;
+			row.setLayout(rowLayout);
+
+			Button currentTutorial = new Button(row, SWT.BUTTON1);
+			currentTutorial.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			currentTutorial.setText("Watch again");
+			currentTutorial.setToolTipText("Play the video for this tutorial.");
+			currentTutorial.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+			currentTutorial.addListener(SWT.Selection, new Listener()
+			{
+				@Override
+				public void handleEvent(Event event)
+				{
+					final String currentTutorialID = dataModel.optString("tutorialID");
+					BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+						"http://tutorials.servoy.com/solutions/content/index.html?viewTutorial=" + currentTutorialID, true, false);
+					tutorialDialog.open(true);
+				}
+			});
+
+			final String nextTutorialID = dataModel.optString("nextTutorialID");
+			if (nextTutorialID != null)
+			{
+				Button nextTutorial = new Button(row, SWT.BUTTON1);
+				nextTutorial.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+				nextTutorial.setText("Next tutorial");
+				nextTutorial.setToolTipText("Play the next tutorial.");
+				GridData gridData = new GridData();
+				gridData.horizontalAlignment = GridData.END;
+				nextTutorial.setLayoutData(gridData);
+				nextTutorial.setCursor(new Cursor(parent.getDisplay(), SWT.CURSOR_HAND));
+				nextTutorial.addListener(SWT.Selection, new Listener()
+				{
+					@Override
+					public void handleEvent(Event event)
+					{
+						BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+							"http://tutorials.servoy.com/solutions/content/index.html?viewTutorial=" + nextTutorialID, true, false);
+						tutorialDialog.open(true);
+					}
+				});
+			}
+		}
+
 	}
 
 	private class RowComposite extends Composite
@@ -225,35 +389,37 @@ public class TutorialView extends ViewPart
 		}
 	}
 
-	private void loadDataModel()
+	private void loadDataModel(boolean loadDefaultTutorialList, String url)
 	{
-//		URL favURL = com.servoy.eclipse.ui.Activator.getDefault().getBundle().getEntry("favorites/tutorial.json");
-//		String favoritesJSON = Utils.getURLContent(favURL);
-		dataModel = new JSONObject();
-	}
-
-	@Override
-	public void setFocus()
-	{
-
-	}
-
-	public void open(String url)
-	{
-		try (InputStream is = new URL(url).openStream())
+		try (InputStream is = new URL(loadDefaultTutorialList ? URL_TUTORIALS_LIST : url).openStream())
 		{
 			String jsonText = Utils.getTXTFileContent(is, Charset.forName("UTF-8"));
-			dataModel = new JSONObject(jsonText);
-			Composite parent = rootComposite.getParent();
-			rootComposite.dispose();
-			createTutorialView(parent);
-			isTutorialViewOpen = true;
-			parent.layout(true, true);
+			if (loadDefaultTutorialList)
+			{
+				dataTutorialsList = new JSONArray(jsonText);
+			}
+			else
+			{
+				dataModel = new JSONObject(jsonText);
+			}
+
 		}
 		catch (Exception e)
 		{
 			Debug.error(e);
 		}
+	}
+
+	public void openTutorial(String url)
+	{
+		loadDataModel(false, url);
+
+		Composite parent = rootComposite.getParent();
+		rootComposite.dispose();
+		createTutorialView(parent, false);
+		parent.layout(true, true);
+
+		isTutorialViewOpen = true;
 	}
 
 	public static boolean isTutorialViewOpen()
@@ -266,5 +432,33 @@ public class TutorialView extends ViewPart
 	{
 		isTutorialViewOpen = false;
 		super.dispose();
+	}
+
+	@Override
+	public void setFocus()
+	{
+
+	}
+
+	/**
+	 * Methods that removes the HTML tags from a text.
+	 * @param text the text to be checked.
+	 * @return the text without HTML tags.
+	 */
+	private String removeHTMLTags(final String text)
+	{
+		String copyText = text;
+		while (true)
+		{
+			if (copyText.indexOf('<') != -1 && copyText.indexOf('>') != -1)
+			{
+				copyText = copyText.replace(copyText.substring(copyText.indexOf('<'), text.indexOf('>') + 1), "");
+			}
+			else
+			{
+				break;
+			}
+		}
+		return copyText;
 	}
 }

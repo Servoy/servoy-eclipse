@@ -398,7 +398,7 @@ public class BrowserDialog extends Dialog
 						.getActiveWorkbenchWindow()
 						.getActivePage()
 						.showView(TutorialView.PART_ID);
-					view.open(tutorialUrl.startsWith("https://") ? tutorialUrl : "https://" + tutorialUrl);
+					view.openTutorial(tutorialUrl.startsWith("https://") ? tutorialUrl : "https://" + tutorialUrl);
 				}
 				catch (PartInitException e)
 				{
@@ -414,7 +414,7 @@ public class BrowserDialog extends Dialog
 						.getActiveWorkbenchWindow()
 						.getActivePage()
 						.showView(TutorialView.PART_ID);
-					view.open(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
+					view.openTutorial(introURL.getParameter("showTinyTutorial").startsWith("https://") ? introURL.getParameter("showTinyTutorial")
 						: "https://" + introURL.getParameter("showTinyTutorial"));
 				}
 				catch (PartInitException e)
