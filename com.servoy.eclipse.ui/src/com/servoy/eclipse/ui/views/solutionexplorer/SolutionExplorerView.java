@@ -2797,8 +2797,6 @@ public class SolutionExplorerView extends ViewPart
 			manager.add(menuManager);
 		}
 
-		manager.add(addAsModuleAction);
-
 		manager.add(new CopySourceFolderAction());
 	}
 
