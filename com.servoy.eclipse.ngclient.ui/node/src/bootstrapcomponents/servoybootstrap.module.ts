@@ -27,6 +27,7 @@ import { ServoyBootstrapImageMedia } from "./imagemedia/imagemedia";
 import { OwlDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { OwlMomentDateTimeModule} from '@danielmoncada/angular-datetime-picker';
 import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
+import { Select2Module } from 'ng-select2-component';
 
 @NgModule({
     declarations: [
@@ -58,7 +59,8 @@ import { NgbModule }  from '@ng-bootstrap/ng-bootstrap';
       FormsModule,
       OwlDateTimeModule,
       OwlMomentDateTimeModule,
-      NgbModule
+      NgbModule,
+      Select2Module
     ], 
     exports: [
       ServoyBootstrapImageMedia,

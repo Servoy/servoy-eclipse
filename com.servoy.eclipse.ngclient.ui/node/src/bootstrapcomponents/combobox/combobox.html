@@ -1,0 +1,15 @@
+<div #element class="bts-combobox"> 
+    <select2  
+        [multiple]="false"
+        [data]="data"
+        [svyFormat]="format"
+        [svyStartEdit]="'dataProviderID'"
+        [hostComponent]="self"
+        [svyTooltip]="toolTipText"
+        [sabloTabseq]="tabSeq"
+        [value]="observableValue | async | formatFilter:format?.display:format?.type:format"
+        (update)="updateValue($event)"
+        [minCountForSearch]="0"
+        > 
+    </select2>
+</div> 
