@@ -18,10 +18,13 @@ package com.servoy.eclipse.ui.node;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -208,13 +211,17 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 		if (data instanceof Object[])
 		{
 			final ArrayList<Media> draggedMedias = new ArrayList<Media>();
+			List<IAdaptable> addToWorkingSet = new ArrayList<IAdaptable>();
+			String[] solutionName = new String[1];
+			Map<String, List<Form>> toRemove = new HashMap<>();
 			for (Object o : (Object[])data)
 			{
 				if (o instanceof PersistDragData)
 				{
 					PersistDragData persistDragData = (PersistDragData)o;
-					ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persistDragData.solutionName);
-					final IPersist persist = project.getSolution().getChild(persistDragData.uuid);
+					solutionName[0] = persistDragData.solutionName;
+					ServoyProject prj = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName[0]);
+					final IPersist persist = prj.getSolution().getChild(persistDragData.uuid);
 
 					if (persist instanceof Form)
 					{
@@ -222,10 +229,6 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 						if (getCurrentTarget() instanceof SimpleUserNode && (((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET ||
 							((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.FORMS))
 						{
-							Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
-							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
-
-							IFile scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(form, false)));
 							ServoyResourcesProject resourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 							if (resourcesProject != null)
 							{
@@ -236,12 +239,13 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 									IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
 									if (ws != null)
 									{
-										List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
-										boolean modified = files.remove(scriptFile);
-										if (files.remove(file) || modified)
+										List<Form> list = toRemove.get(workingSetName);
+										if (list == null)
 										{
-											ws.setElements(files.toArray(new IAdaptable[0]));
+											list = new ArrayList<Form>();
+											toRemove.put(workingSetName, list);
 										}
+										list.add(form);
 									}
 								}
 							}
@@ -252,7 +256,9 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 								IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
 								if (ws != null)
 								{
-									PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(file, new IWorkingSet[] { ws });
+									Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
+									IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+									addToWorkingSet.add(ws.adaptElements(new IAdaptable[] { file })[0]);
 								}
 							}
 						}
@@ -262,6 +268,37 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 						draggedMedias.add((Media)persist);
 					}
 				}
+			}
+			if (toRemove.size() > 0)
+			{
+				toRemove.entrySet().forEach(entry -> {
+					IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(entry.getKey());
+					entry.getValue().forEach(form -> {
+						Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
+						IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
+						IFile scriptFile = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(form, false)));
+
+						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+						boolean modified = files.remove(scriptFile);
+						if (files.remove(file) || modified)
+						{
+							saveWorkingSet(files, solutionName, ws);
+						}
+					});
+
+				});
+			}
+			if (addToWorkingSet.size() > 0)
+			{
+				String workingSetName = ((SimpleUserNode)getCurrentTarget()).getName();
+				IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+
+				List<IAdaptable> filesAlreadyInWS = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+				if (filesAlreadyInWS.size() > 0)
+				{
+					addToWorkingSet.addAll(filesAlreadyInWS);
+				}
+				saveWorkingSet(addToWorkingSet, solutionName, ws);
 			}
 
 			if (draggedMedias.size() > 0)
@@ -362,6 +399,29 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 			}
 		}
 		return false;
+	}
+
+
+	/**
+	 * @param addToWorkingSet
+	 * @param solutionName
+	 * @param ws
+	 */
+	private void saveWorkingSet(List<IAdaptable> addToWorkingSet, String[] solutionName, IWorkingSet ws)
+	{
+		List<String> paths = new ArrayList<String>();
+		for (IAdaptable resource : addToWorkingSet)
+		{
+			if (resource instanceof IResource && ((IResource)resource).exists())
+			{
+				paths.add(((IResource)resource).getFullPath().toString());
+			}
+		}
+		if (solutionName != null && solutionName[0] != null)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName[0]).getResourcesProject()
+				.addWorkingSet(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()), ws.getName(), paths);
+		}
 	}
 
 	@Override
