@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -282,7 +281,8 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 						boolean modified = files.remove(scriptFile);
 						if (files.remove(file) || modified)
 						{
-							saveWorkingSet(files, solutionName, ws);
+							ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName[0]).getResourcesProject()
+								.saveWorkingSet(files, solutionName[0], ws.getName());
 						}
 					});
 
@@ -298,7 +298,8 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 				{
 					addToWorkingSet.addAll(filesAlreadyInWS);
 				}
-				saveWorkingSet(addToWorkingSet, solutionName, ws);
+				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName[0]).getResourcesProject()
+					.saveWorkingSet(addToWorkingSet, solutionName[0], ws.getName());
 			}
 
 			if (draggedMedias.size() > 0)
@@ -399,29 +400,6 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 			}
 		}
 		return false;
-	}
-
-
-	/**
-	 * @param addToWorkingSet
-	 * @param solutionName
-	 * @param ws
-	 */
-	private void saveWorkingSet(List<IAdaptable> addToWorkingSet, String[] solutionName, IWorkingSet ws)
-	{
-		List<String> paths = new ArrayList<String>();
-		for (IAdaptable resource : addToWorkingSet)
-		{
-			if (resource instanceof IResource && ((IResource)resource).exists())
-			{
-				paths.add(((IResource)resource).getFullPath().toString());
-			}
-		}
-		if (solutionName != null && solutionName[0] != null)
-		{
-			ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName[0]).getResourcesProject()
-				.addWorkingSet(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()), ws.getName(), paths);
-		}
 	}
 
 	@Override
