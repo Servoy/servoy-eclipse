@@ -292,7 +292,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 			{
 				try
 				{
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://servoy.com/profile/login/"));
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://admin.servoy-cloud.eu/"));
 				}
 				catch (PartInitException | MalformedURLException e1)
 				{

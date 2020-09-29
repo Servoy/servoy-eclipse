@@ -249,6 +249,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
@@ -2237,6 +2238,12 @@ public class SolutionExplorerView extends ViewPart
 					}
 					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
 					((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+				}
+
+				@Override
+				public void tableInitialized(Table t)
+				{
+					((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshTable(t);
 				}
 
 				@Override

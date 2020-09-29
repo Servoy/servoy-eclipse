@@ -237,7 +237,7 @@ public class WarExporter
 		{
 			// just always copy the nglibs to it even if it is just puur smart client
 			// the log4j libs are always needed.
-			copyNGLibs(targetLibDir);
+			copyNGLibs(targetLibDir, exportModel.isNGExport());
 		}
 		catch (IOException e)
 		{
@@ -712,10 +712,11 @@ public class WarExporter
 	/**
 	 * Add all NG_LIBS to the war.
 	 * @param targetLibDir
+	 * @param includeNGClientLib
 	 * @throws ExportException
 	 * @throws IOException
 	 */
-	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
+	private void copyNGLibs(File targetLibDir, boolean includeNGClientLib) throws ExportException, IOException
 	{
 		if (pluginFiles.isEmpty())
 		{
@@ -724,6 +725,7 @@ public class WarExporter
 		}
 		for (File file : pluginFiles)
 		{
+			if (!includeNGClientLib && file.getName().toLowerCase().startsWith("servoy_ngclient_")) continue;
 			copyFile(file, new File(targetLibDir, file.getName()));
 		}
 	}
@@ -1021,15 +1023,7 @@ public class WarExporter
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() || !exportModel.getUpgradedLicenses().isEmpty() ||
-				(exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0))
-			{
-				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
-			}
-			else
-			{
-				copyPropertiesFileToWar(tmpWarDir, sourceFile);
-			}
+			changeAndWritePropertiesFile(tmpWarDir, sourceFile);
 		}
 	}
 
@@ -1347,6 +1341,26 @@ public class WarExporter
 			Properties properties = new SortedProperties();
 			properties.load(fis);
 
+			for (Object k : properties.keySet())
+			{
+				if (k instanceof String)
+				{
+					String key = (String)k;
+					if (shouldEncrypt(key) && !properties.getProperty(key, "").startsWith(IWarExportModel.enc_prefix))
+					{
+						try
+						{
+							String password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), properties.getProperty(key, ""));
+							properties.put(k, password);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("Could not encrypt property " + key, e);
+						}
+					}
+				}
+			}
+
 			if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
 			{
 				properties.setProperty(Settings.USER_HOME, exportModel.getUserHome());
@@ -1428,27 +1442,10 @@ public class WarExporter
 		}
 	}
 
-	private void copyPropertiesFileToWar(File tmpWarDir, File sourceFile) throws ExportException
+	private boolean shouldEncrypt(String key)
 	{
-		File destFile = new File(tmpWarDir, "WEB-INF/servoy.properties");
-		try
-		{
-			if (destFile.createNewFile())
-			{
-				try (FileInputStream fis = new FileInputStream(sourceFile);
-					FileOutputStream fos = new FileOutputStream(destFile);
-					FileChannel sourceChannel = fis.getChannel();
-					FileChannel destinationChannel = fos.getChannel())
-				{
-					// Copy source file to destination file
-					destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			throw new ExportException("Couldn't copy the servoy properties file", e);
-		}
+		String lcKey = key.toLowerCase();
+		return lcKey.indexOf("password") != -1 || lcKey.indexOf("passphrase") != -1;
 	}
 
 	private void generatePropertiesFile(File tmpWarDir) throws ExportException

@@ -1073,6 +1073,18 @@ public abstract class AbstractMemServer<T extends ITable> implements IServerInte
 
 	/*
 	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.j2db.persistence.IServerInternal#isTableInvalidInDeveloperBecauseNoPk(java.lang.String)
+	 */
+	@Override
+	public boolean isTableInvalidInDeveloperBecauseNoPk(String tableName)
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
 	 *
 	 * @see com.servoy.j2db.persistence.IServerInternal#isTableMarkedAsMetaData(java.lang.String)
 	 */

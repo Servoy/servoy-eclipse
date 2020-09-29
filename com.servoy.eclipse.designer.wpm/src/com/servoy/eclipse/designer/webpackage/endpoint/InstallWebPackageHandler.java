@@ -277,19 +277,16 @@ public class InstallWebPackageHandler implements IDeveloperService
 													}
 													else
 													{
-														Display.getDefault().syncExec(new Runnable()
-														{
-															public void run()
-															{
-																response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager",
-																	null,
-																	"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
-																		", but you already have version " + installedVersion +
-																		" installed. Do you want to overwrite the installed one?",
-																	MessageDialog.QUESTION,
-																	new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL },
-																	0).open();
-															}
+														Display.getDefault().syncExec(() -> {
+
+															response[0] = new MessageDialog(Display.getDefault().getActiveShell(), "Servoy Package Manager",
+																null,
+																"'" + packageName + "' requires '" + nameAndVersion[0] + "' version " + installVersion +
+																	", but you have version " + installedVersion +
+																	" installed. Do you want to overwrite the installed one?",
+																MessageDialog.QUESTION,
+																new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL },
+																0).open();
 														});
 														installActions.add(nameAndVersion[0] + installVersion);
 													}

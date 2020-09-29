@@ -29,8 +29,10 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -282,6 +284,28 @@ public class ServoyResourcesProject implements IProjectNature
 		serializeServoyWorkingSets(fileAccess);
 		fireWorkingSetChanged(paths);
 	}
+
+	/**
+	 * @param addToWorkingSet
+	 * @param solutionName
+	 * @param ws
+	 */
+	public void saveWorkingSet(List<IAdaptable> addToWorkingSet, String solutionName, String WorkingSetName)
+	{
+		List<String> paths = new ArrayList<String>();
+		for (IAdaptable resource : addToWorkingSet)
+		{
+			if (resource instanceof IResource && ((IResource)resource).exists())
+			{
+				paths.add(((IResource)resource).getFullPath().toString());
+			}
+		}
+		if (solutionName != null)
+		{
+			addWorkingSet(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()), WorkingSetName, paths);
+		}
+	}
+
 
 	public void removeWorkingSet(IFileAccess fileAccess, String workingSetName)
 	{

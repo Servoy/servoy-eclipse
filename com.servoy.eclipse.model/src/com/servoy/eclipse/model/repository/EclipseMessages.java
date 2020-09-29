@@ -532,10 +532,10 @@ public class EclipseMessages implements ICustomMessageLoader
 	{
 		try
 		{
-			final TreeMap<String, I18NUtil.MessageEntry> messagesMap = new TreeMap<String, I18NUtil.MessageEntry>();
 			ServoyResourcesProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 			if (resourcesProject != null)
 			{
+				final TreeMap<String, I18NUtil.MessageEntry> messagesMap = new TreeMap<String, I18NUtil.MessageEntry>();
 				final String messageFileName = i18nServer + "." + i18nTable;
 
 				IResource messagesResource = resourcesProject.getProject().findMember(MESSAGES_DIR);
@@ -582,9 +582,10 @@ public class EclipseMessages implements ICustomMessageLoader
 
 					}, IResource.DEPTH_ONE, false);
 				}
+				return messagesMap;
 			}
 
-			return messagesMap;
+			return null;
 		}
 		catch (Exception ex)
 		{

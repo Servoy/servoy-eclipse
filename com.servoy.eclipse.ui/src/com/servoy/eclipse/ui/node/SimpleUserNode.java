@@ -50,6 +50,11 @@ public class SimpleUserNode implements IAdaptable
 	public SimpleUserNode[] children;
 	public SimpleUserNode parent;
 
+	public final static int FLAG_HIDDEN = 1;
+	public final static int FLAG_METADATA = 2;
+	public final static int FLAG_NO_PK = 4;
+	private int flags = 0;
+
 	public final static int TEXT_ITALIC = 1;
 	public final static int TEXT_GRAYED_OUT = 2;
 	private int appearanceFlags = 0;
@@ -168,6 +173,16 @@ public class SimpleUserNode implements IAdaptable
 	public void setDisplayName(String s)
 	{
 		name = s;
+	}
+
+	public void setFlags(int flags)
+	{
+		this.flags = flags;
+	}
+
+	public int getFlags()
+	{
+		return flags;
 	}
 
 	public void setAppearenceFlags(int flags)

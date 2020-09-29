@@ -514,7 +514,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.lang3"
          download-size="0"
          install-size="0"
-         version="3.10.0"
+         version="3.11.0"
          unpack="false"/>
 
    <plugin
@@ -535,7 +535,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
          id="org.apache.commons.commons-pool2"
          download-size="0"
          install-size="0"
-         version="2.8.0"
+         version="2.8.1"
          unpack="false"/>
 
    <plugin
