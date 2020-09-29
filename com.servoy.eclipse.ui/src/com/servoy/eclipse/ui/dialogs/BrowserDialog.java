@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,6 +51,7 @@ import org.eclipse.ui.internal.intro.impl.model.loader.ModelLoaderUtil;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
 import org.eclipse.ui.progress.IProgressService;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.IMainConceptsPageAction;
@@ -57,8 +60,10 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
+import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.eclipse.ui.views.TutorialView;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -189,127 +194,143 @@ public class BrowserDialog extends Dialog
 						try (InputStream is = new URL(importSample.startsWith("https://") ? importSample
 							: "https://" + importSample).openStream())
 						{
-							String[] urlParts = importSample.split("/");
-							if (urlParts.length >= 1)
+							IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+							if (importSample.endsWith("webpackage.json"))
 							{
-								final String solutionName = urlParts[urlParts.length - 1].substring(0, urlParts[urlParts.length - 1].indexOf("."));
-								ServoyProject sp = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
-								IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-								boolean[] overwrite = new boolean[] { false };
-								if (sp != null)
+								String content = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+								if (content != null && content.startsWith("{"))
 								{
-									Display.getDefault().syncExec(() -> {
-
-										overwrite[0] = UIUtils.askConfirmation(Display.getDefault().getActiveShell(), "Sample already exists in the workspace",
-											"Do you want to fully overwrite the installed sample again?");
-									});
-								}
-								if (sp == null || overwrite[0])
-								{
-									if (Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
-										.filter(
-											s -> s.isEnabled() &&
-												ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
-												((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()))
-													.isValid())
-										.count() == 0)
+									JSONObject obj = new JSONObject(content);
+									String solutionName = obj.optString("name", "");
+									if (!"".equals(solutionName))
 									{
-										// no valid servers
-										UIUtils.reportError("No valid server",
-											"There is no valid server defined in Servoy Developer, you must define servers / install PostgreSQL before importing the sample solution.");
-										return;
-									}
-
-									if (!shell.isDisposed()) shell.close();
-
-									final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(),
-										solutionName + ".servoy");
-									if (importSolutionFile.exists())
-									{
-										importSolutionFile.delete();
-									}
-									try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
-									{
-										Utils.streamCopy(is, fos);
-									}
-
-									//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
-									progressService.run(true, false, (IProgressMonitor monitor) -> {
-										ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
-										importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
-										importSolutionWizard.setAllowSolutionFilePathSelection(false);
-										importSolutionWizard.init(PlatformUI.getWorkbench(), null);
-										importSolutionWizard.setReportImportFail(true);
-										importSolutionWizard.setSkipModulesImport(false);
-										importSolutionWizard.setAllowDataModelChanges(true);
-										importSolutionWizard.setImportSampleData(true);
-										importSolutionWizard.shouldAllowSQLKeywords(true);
-										importSolutionWizard.shouldCreateMissingServer(true);
-										importSolutionWizard.setOverwriteModule(overwrite[0]);
-
-										ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel()
-											.getActiveResourcesProject();
-										String resourceProjectName = project == null ? getNewResourceProjectName() : null;
-
-										importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
-											monitor, false, false);
-										if (importSolutionWizard.isMissingServer() != null)
+										boolean install = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName) == null;
+										boolean shouldOverwrite = !install ? askOverwriteSolution() : false;
+										if (install || shouldOverwrite)
 										{
-											showTutorial[0] = introURL.getParameter("createDBConn");
+											if (!isValidServerPresent()) return;
+											progressService.run(true, false, (IProgressMonitor monitor) -> {
+												monitor.setTaskName("Installing solution " + solutionName);
+												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils
+													.getExtensions(IAutomaticImportWPMPackages.EXTENSION_ID);
+												if (defaultImports != null && defaultImports.size() > 0)
+												{
+													defaultImports.get(0).importPackage(obj, null);
+												}
+												monitor.done();
+											});
 										}
+									}
+									else
+									{
+										UIUtils.reportError("Cannot install sample",
+											"An error occured when trying to install the sample. Please try again later");
+									}
+								}
+							}
+							else
+							{
+								String[] urlParts = importSample.split("/");
+								if (urlParts.length >= 1)
+								{
+									final String solutionName = urlParts[urlParts.length - 1].substring(0, urlParts[urlParts.length - 1].indexOf("."));
+									boolean install = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName) == null;
+									boolean shouldOverwrite = !install ? askOverwriteSolution() : false;
+									if (install || shouldOverwrite)
+									{
+										if (!isValidServerPresent()) return;
 
-										try
+										if (!shell.isDisposed()) shell.close();
+
+										final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(),
+											solutionName + ".servoy");
+										if (importSolutionFile.exists())
 										{
 											importSolutionFile.delete();
 										}
-										catch (RuntimeException e)
+										try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
 										{
-											Debug.error(e);
+											Utils.streamCopy(is, fos);
 										}
-									});
-								}
-								else
-								{
-									if (!shell.isDisposed()) shell.close();
-									progressService.run(true, false, (IProgressMonitor monitor) -> {
-										ServoyModelManager.getServoyModelManager()
-											.getServoyModel()
-											.setActiveProject(ServoyModelManager.getServoyModelManager()
-												.getServoyModel()
-												.getServoyProject(solutionName), true);
-									});
-								}
-								ServoyModelManager.getServoyModelManager()
-									.getServoyModel()
-									.addActiveProjectListener(new IActiveProjectListener()
+
+										//TODO import packages if (importPackagesRunnable != null) progressService.run(true, false, importPackagesRunnable);
+										progressService.run(true, false, (IProgressMonitor monitor) -> {
+											ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+											importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
+											importSolutionWizard.setAllowSolutionFilePathSelection(false);
+											importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+											importSolutionWizard.setReportImportFail(true);
+											importSolutionWizard.setSkipModulesImport(false);
+											importSolutionWizard.setAllowDataModelChanges(true);
+											importSolutionWizard.setImportSampleData(true);
+											importSolutionWizard.shouldAllowSQLKeywords(true);
+											importSolutionWizard.shouldCreateMissingServer(true);
+											importSolutionWizard.setOverwriteModule(shouldOverwrite);
+
+											ServoyResourcesProject project = ServoyModelManager.getServoyModelManager().getServoyModel()
+												.getActiveResourcesProject();
+											String resourceProjectName = project == null ? getNewResourceProjectName() : null;
+
+											importSolutionWizard.doImport(importSolutionFile, resourceProjectName, project, false, false, true, null, null,
+												monitor, false, false);
+											if (importSolutionWizard.isMissingServer() != null)
+											{
+												showTutorial[0] = introURL.getParameter("createDBConn");
+											}
+
+											try
+											{
+												importSolutionFile.delete();
+											}
+											catch (RuntimeException e)
+											{
+												Debug.error(e);
+											}
+										});
+									}
+									else
 									{
-
-										@Override
-										public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-										{
-											return true;
-										}
-
-										@Override
-										public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-										{
-										}
-
-										@Override
-										public void activeProjectChanged(ServoyProject activeProject)
-										{
-											Display.getDefault().asyncExec(() -> {
-												if (introURL.getParameter("showTinyTutorial") != null)
-												{
-													showTinyTutorial(introURL);
-													if (!shell.isDisposed()) shell.close();
-												}
-											});
+										if (!shell.isDisposed()) shell.close();
+										progressService.run(true, false, (IProgressMonitor monitor) -> {
 											ServoyModelManager.getServoyModelManager()
 												.getServoyModel()
-												.removeActiveProjectListener(this);
-										}
-									});
+												.setActiveProject(ServoyModelManager.getServoyModelManager()
+													.getServoyModel()
+													.getServoyProject(solutionName), true);
+										});
+									}
+									ServoyModelManager.getServoyModelManager()
+										.getServoyModel()
+										.addActiveProjectListener(new IActiveProjectListener()
+										{
+
+											@Override
+											public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+											{
+												return true;
+											}
+
+											@Override
+											public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+											{
+											}
+
+											@Override
+											public void activeProjectChanged(ServoyProject activeProject)
+											{
+												Display.getDefault().asyncExec(() -> {
+													if (introURL.getParameter("showTinyTutorial") != null)
+													{
+														showTinyTutorial(introURL);
+														if (!shell.isDisposed()) shell.close();
+													}
+												});
+												ServoyModelManager.getServoyModelManager()
+													.getServoyModel()
+													.removeActiveProjectListener(this);
+											}
+										});
+								}
 							}
 						}
 						catch (Exception e)
@@ -377,6 +398,36 @@ public class BrowserDialog extends Dialog
 					}
 
 				}
+			}
+
+			protected boolean isValidServerPresent()
+			{
+				if (Arrays.stream(ApplicationServerRegistry.get().getServerManager().getServerConfigs())
+					.filter(
+						s -> s.isEnabled() &&
+							ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()) != null &&
+							((IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(s.getServerName()))
+								.isValid())
+					.count() == 0)
+				{
+					// no valid servers
+					UIUtils.reportError("No valid server",
+						"There is no valid server defined in Servoy Developer, you must define servers / install PostgreSQL before importing the sample solution.");
+					return false;
+				}
+				return true;
+			}
+
+			protected boolean askOverwriteSolution()
+			{
+				boolean[] overwrite = new boolean[] { false };
+				Display.getDefault().syncExec(() -> {
+
+					overwrite[0] = UIUtils.askConfirmation(Display.getDefault().getActiveShell(),
+						"Sample already exists in the workspace",
+						"Do you want to fully overwrite the installed sample again?");
+				});
+				return overwrite[0];
 			}
 
 			private String getNewResourceProjectName()

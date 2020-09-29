@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.ui.util;
 
+import org.json.JSONObject;
+
 import com.servoy.eclipse.ui.Activator;
 
 /**
@@ -30,4 +32,6 @@ public interface IAutomaticImportWPMPackages
 	void importDefaultResponsivePackages();
 
 	void importPackage(String packageName);
+
+	void importPackage(JSONObject obj, String version);
 }

@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.webpackage;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,6 +67,19 @@ public class AutomaticInstallWPMPackages implements IAutomaticImportWPMPackages
 		catch (Exception ex)
 		{
 			ServoyLog.logError(ex);
+		}
+	}
+
+	@Override
+	public void importPackage(JSONObject pck, String version)
+	{
+		try
+		{
+			InstallWebPackageHandler.importPackage(pck, version);
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError(e);
 		}
 	}
 }
