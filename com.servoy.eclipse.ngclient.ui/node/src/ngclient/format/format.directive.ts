@@ -123,7 +123,7 @@ export class SvyFormat implements OnChanges{
       }
       
       @HostListener('focus') onFocus() {
-          if (!this.svyFormat.isMask) return; 
+          if (!this.svyFormat || !this.svyFormat.isMask) return; 
           
           this.focusText = this.element.value;
           var pos = this.checkVal(true);
