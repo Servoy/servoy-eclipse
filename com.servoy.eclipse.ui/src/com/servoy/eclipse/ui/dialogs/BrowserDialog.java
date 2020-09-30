@@ -209,14 +209,16 @@ public class BrowserDialog extends Dialog
 										if (install || shouldOverwrite)
 										{
 											if (!isValidServerPresent()) return;
+											if (!shell.isDisposed()) shell.close();
 											progressService.run(true, false, (IProgressMonitor monitor) -> {
-												monitor.setTaskName("Installing solution " + solutionName);
+												monitor.beginTask("Installing solution " + solutionName, 1);
 												List<IAutomaticImportWPMPackages> defaultImports = ModelUtils
 													.getExtensions(IAutomaticImportWPMPackages.EXTENSION_ID);
 												if (defaultImports != null && defaultImports.size() > 0)
 												{
 													defaultImports.get(0).importPackage(obj, null);
 												}
+												monitor.worked(1);
 												monitor.done();
 											});
 										}
