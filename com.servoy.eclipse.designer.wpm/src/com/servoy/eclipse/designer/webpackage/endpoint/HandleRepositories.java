@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
-import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.osgi.service.prefs.BackingStoreException;
@@ -62,7 +60,7 @@ public class HandleRepositories implements IDeveloperService
 			String url = values.getString("url");
 			JSONObject result = new JSONObject();
 
-			List<JSONObject> allpackages = getAllInstalledPackagesService.setSelectedWebPackageIndex(url);
+			JSONArray allpackages = getAllInstalledPackagesService.setSelectedWebPackageIndex(url);
 			result.put("packages", allpackages);
 			JSONArray storedIndexes = null;
 			String indexes = Activator.getEclipsePreferences().node("wpm").get("indexes", null);

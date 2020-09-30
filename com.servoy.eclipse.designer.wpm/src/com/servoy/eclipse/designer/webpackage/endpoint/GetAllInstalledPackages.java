@@ -54,6 +54,7 @@ import org.sablo.specification.SpecReloadSubject.ISpecReloadListener;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -96,12 +97,12 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 
 	public JSONArray executeMethod(JSONObject msg)
 	{
-		return getAllInstalledPackages(msg, this, false);
+		return getAllInstalledPackages(msg, this, false, false);
 	}
 
-	public static JSONArray getAllInstalledPackages(boolean ignoreActiveSolution)
+	public static JSONArray getAllInstalledPackages(boolean ignoreActiveSolution, boolean includeAllRepositories)
 	{
-		return getAllInstalledPackages(null, null, ignoreActiveSolution);
+		return getAllInstalledPackages(null, null, ignoreActiveSolution, includeAllRepositories);
 	}
 
 	private static List<JSONObject> sortPackages(List<JSONObject> remotePackages)
@@ -114,7 +115,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return remotePackages;
 	}
 
-	private static JSONArray getAllInstalledPackages(JSONObject msg, GetAllInstalledPackages getAllInstalledPackagesService, boolean ignoreActiveSolution)
+	private static JSONArray getAllInstalledPackages(JSONObject msg, GetAllInstalledPackages getAllInstalledPackagesService,
+		boolean ignoreActiveSolution, boolean includeAllRepositories)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 		ServoyProject[] activeProjecWithModules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
@@ -123,8 +125,9 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		JSONArray result = new JSONArray();
 		try
 		{
-			List<JSONObject> remotePackages = getAllInstalledPackagesService != null ? getAllInstalledPackagesService.getRemotePackagesAndCheckForChanges()
-				: getRemotePackages();
+			List<JSONObject> remotePackages = getAllInstalledPackagesService != null
+				? getAllInstalledPackagesService.getRemotePackagesAndCheckForChanges(includeAllRepositories)
+				: getRemotePackages(includeAllRepositories);
 
 			for (JSONObject pack : remotePackages)
 			{
@@ -271,12 +274,12 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
-	public List<JSONObject> setSelectedWebPackageIndex(String index)
+	public JSONArray setSelectedWebPackageIndex(String index)
 	{
 		selectedWebPackageIndex = index;
 		try
 		{
-			return getRemotePackagesAndCheckForChanges();
+			return getAllInstalledPackages(null, this, false, false);
 		}
 		catch (Exception e)
 		{
@@ -286,19 +289,49 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	}
 
 
+	public List<JSONObject> getRemotePackagesAndCheckForChanges(boolean includeAllRepositories) throws Exception
+	{
+		return getRemotePackages(endpoint, includeAllRepositories);
+	}
+
 	public List<JSONObject> getRemotePackagesAndCheckForChanges() throws Exception
 	{
-		return getRemotePackages(endpoint);
+		return getRemotePackagesAndCheckForChanges(false);
+	}
+
+	public static List<JSONObject> getRemotePackages(boolean includeAllRepositories) throws Exception
+	{
+		return getRemotePackages(null, includeAllRepositories);
 	}
 
 	public static List<JSONObject> getRemotePackages() throws Exception
 	{
-		return getRemotePackages(null);
+		return getRemotePackages(false);
 	}
 
-	private static List<JSONObject> getRemotePackages(WebPackageManagerEndpoint endpoint) throws Exception
+	private static List<JSONObject> getRemotePackages(WebPackageManagerEndpoint endpoint, boolean includeAllRepositories) throws Exception
 	{
-		final List<JSONObject> remotePackages = getRemotePackages(selectedWebPackageIndex, true);
+		List<JSONObject> remotePackages;
+		if (includeAllRepositories)
+		{
+			remotePackages = new ArrayList<JSONObject>();
+			String indexes = Activator.getEclipsePreferences().node("wpm").get("indexes", null);
+			if (indexes != null)
+			{
+				JSONArray stored = new JSONArray(indexes);
+				for (int i = 0; i < stored.length(); i++)
+				{
+					JSONObject jsonObject = stored.getJSONObject(i);
+					remotePackages.addAll(getRemotePackagesFromRepository(jsonObject.getString("url"), true));
+				}
+			}
+			remotePackages.addAll(getRemotePackagesFromRepository(MAIN_WEBPACKAGEINDEX, true));
+		}
+		else
+		{
+			remotePackages = getRemotePackagesFromRepository(selectedWebPackageIndex, true);
+		}
+
 		if (endpoint != null)
 		{
 			// check for new in a new thread
@@ -315,7 +348,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							Pair<Long, List<JSONObject>> currentPackages = remotePackagesCache.get(wpIndex);
 							if (currentPackages != null)
 							{
-								List<JSONObject> newRemotePackages = getRemotePackages(wpIndex, false);
+								List<JSONObject> newRemotePackages = getRemotePackagesFromRepository(wpIndex, false);
 								if (newRemotePackages.isEmpty())
 								{
 									JSONObject jsonResult = new JSONObject();
@@ -346,7 +379,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return remotePackages;
 	}
 
-	private static synchronized List<JSONObject> getRemotePackages(String webPackageIndex, boolean useCache) throws Exception
+	private static synchronized List<JSONObject> getRemotePackagesFromRepository(String webPackageIndex, boolean useCache) throws Exception
 	{
 		if (!useCache || !remotePackagesCache.containsKey(webPackageIndex))
 		{
