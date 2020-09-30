@@ -44,7 +44,7 @@ describe('ServoyDefaultTextField', () => {
       expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
 
-  it('should call update method', () => {
+  it('should have value test', () => {
       component.dataProviderID = 'test';
       fixture.detectChanges();
       expect(component.getNativeElement().value).toBe('test');

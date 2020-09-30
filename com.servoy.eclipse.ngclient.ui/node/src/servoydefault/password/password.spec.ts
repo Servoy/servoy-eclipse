@@ -41,12 +41,17 @@ describe('PasswordComponent', () => {
       expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
   });
 
-  it('should call update method', () => {
+  it('should have value test', () => {
+    component.dataProviderID = 'test';
+    fixture.detectChanges();
+    expect(component.getNativeElement().value).toBe('test');
+  });
+
+  xit('should call update method', () => {
+      inputEl = fixture.debugElement.query(By.css('input'));
       spyOn(component, 'update');
-      component.dataProviderID = 'test';
-      fixture.whenStable().then(() => {
-          expect(component.update).toHaveBeenCalled();
-        });
+      inputEl.triggerEventHandler('change', null);
+      expect(component.update).toHaveBeenCalled();
   });
   
   it('should have a placeholder', () => {

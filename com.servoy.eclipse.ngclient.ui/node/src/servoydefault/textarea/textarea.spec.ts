@@ -47,15 +47,14 @@ describe("ServoyDefaultTextArea", () => {
       expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
   
-  it('should call update method', () => {
-      spyOn(component, 'update');
-      component.dataProviderID = 'test';
-      fixture.whenStable().then(() => {
-          expect(component.update).toHaveBeenCalled();
-        });
+  it('should have value test', () => {
+    component.dataProviderID = 'test';
+    fixture.detectChanges();
+    expect(component.getNativeElement().value).toBe('test');
   });
-  
+
   it('should have class: svy-textarea form-control form-control-sm input-sm svy-padding-xs', () => {
       expect( textArea.nativeElement.getAttribute('class')).toBe("svy-textarea form-control form-control-sm input-sm svy-padding-xs");
   });
+  
 });
