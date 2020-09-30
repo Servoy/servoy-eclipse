@@ -52,6 +52,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard.SolutionPackageInstallInfo;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
@@ -170,15 +171,32 @@ public class InstallWebPackageHandler implements IDeveloperService
 		String urlString = null;
 		String dependency = null;
 		String pckVersion = null;
-		for (int i = 0; i < jsonArray.length(); i++)
+		String currentVersion = ClientVersion.getPureVersion();
+		for (int i = jsonArray.length() - 1; i >= 0; i--)
 		{
 			JSONObject release = jsonArray.optJSONObject(i);
 			if (selectedVersion == null || selectedVersion.equals(release.optString("version", "")))
 			{
-				urlString = release.optString("url");
-				dependency = release.optString("dependency", null);
-				pckVersion = release.optString("version", "");
-				break;
+				if (selectedVersion == null && release.has("servoy-version"))
+				{
+					//if version is not specified, then we search for the latest compatible version
+					String servoyVersion = release.getString("servoy-version");
+					String[] minAndMax = servoyVersion.split(" - ");
+					if (WebPackageVersionComparator.compare(minAndMax[0], currentVersion) <= 0)
+					{
+						urlString = release.optString("url");
+						dependency = release.optString("dependency", null);
+						pckVersion = release.optString("version", "");
+						break;
+					}
+				}
+				else
+				{
+					urlString = release.optString("url");
+					dependency = release.optString("dependency", null);
+					pckVersion = release.optString("version", "");
+					break;
+				}
 			}
 		}
 

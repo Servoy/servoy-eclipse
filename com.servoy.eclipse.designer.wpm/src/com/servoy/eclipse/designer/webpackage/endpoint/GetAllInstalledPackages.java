@@ -417,7 +417,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 								{
 									String servoyVersion = jsonObject.getString("servoy-version");
 									String[] minAndMax = servoyVersion.split(" - ");
-									if (versionCompare(minAndMax[0], currentVersion) <= 0)
+									if (WebPackageVersionComparator.compare(minAndMax[0], currentVersion) <= 0)
 									{
 										toSort.add(jsonObject);
 									}
@@ -431,7 +431,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									@Override
 									public int compare(JSONObject o1, JSONObject o2)
 									{
-										return versionCompare(o2.optString("version", ""), o1.optString("version", ""));
+										return WebPackageVersionComparator.compare(o2.optString("version", ""), o1.optString("version", ""));
 									}
 								});
 
@@ -442,7 +442,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									{
 										String servoyVersion = jsonObject.getString("servoy-version");
 										String[] minAndMax = servoyVersion.split(" - ");
-										if (minAndMax.length > 1 && versionCompare(minAndMax[1], currentVersion) <= 0)
+										if (minAndMax.length > 1 && WebPackageVersionComparator.compare(minAndMax[1], currentVersion) <= 0)
 										{
 											break;
 										}
@@ -490,45 +490,6 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		checksum.update(listAsBytes, 0, listAsBytes.length);
 
 		return checksum.getValue();
-	}
-
-	private static int versionCompare(String v1, String v2)
-	{
-		String[] v1Split = v1.split("\\.");
-		String[] v2Split = v2.split("\\.");
-
-		// make the splits to be the same size, filling missing part with "0"
-		int v1SplitLength = v1Split.length, v2SplitLength = v2Split.length;
-		int maxVersionTags = Math.max(v1SplitLength, v2SplitLength);
-		if (v1SplitLength < maxVersionTags)
-		{
-			v1Split = Arrays.copyOf(v1Split, maxVersionTags);
-			Arrays.fill(v1Split, v1SplitLength, maxVersionTags, "0");
-		}
-		else if (v2SplitLength < maxVersionTags)
-		{
-			v2Split = Arrays.copyOf(v2Split, maxVersionTags);
-			Arrays.fill(v2Split, v2SplitLength, maxVersionTags, "0");
-		}
-
-		for (int i = 0; i < v1Split.length; i++)
-		{
-			int cv = 0;
-			try
-			{
-				int v1Nr = Integer.parseInt(v1Split[i]);
-				int v2Nr = Integer.parseInt(v2Split[i]);
-				cv = v1Nr - v2Nr;
-			}
-			catch (NumberFormatException ex)
-			{
-				cv = v1Split[i].compareTo(v2Split[i]);
-			}
-			if (cv == 0) continue;
-			return cv;
-		}
-
-		return v1.compareTo(v2);
 	}
 
 	private static String getUrlContents(String urlToRead)
