@@ -1,66 +1,66 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module'
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 
 import { ServoyDefaultTextField } from './textfield';
-import { FormattingService, TooltipService} from '../../ngclient/servoy_public'
-import { By } from "@angular/platform-browser";
+import { FormattingService, TooltipService} from '../../ngclient/servoy_public';
+import { By } from '@angular/platform-browser';
 
 
-describe("ServoyDefaultTextField", () => {
+describe('ServoyDefaultTextField', () => {
   let component: ServoyDefaultTextField;
   let fixture: ComponentFixture<ServoyDefaultTextField>;
   let textField;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultTextField],
       imports: [SabloModule, ServoyPublicModule],
-      providers: [FormattingService,TooltipService]
+      providers: [FormattingService, TooltipService]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyDefaultTextField);
-    textField = fixture.debugElement.query(By.css('input'))
+    textField = fixture.debugElement.query(By.css('input'));
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml", "startEdit"]);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit']);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  
+
   it('should have called servoyApi.getMarkupId', () => {
       expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
   });
-  
+
   it('should use start edit directive', () => {
       textField.triggerEventHandler('focus', null);
       fixture.detectChanges();
       expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
-  
+
   it('should call update method', () => {
-      spyOn(component, 'update');
       component.dataProviderID = 'test';
-      fixture.whenStable().then(() => {
-          expect(component.update).toHaveBeenCalled();
-          expect(component.getNativeElement().value).toBe('component.valueBeforeChange');
-        });
+      fixture.detectChanges();
+      expect(component.getNativeElement().value).toBe('test');
   });
-  
-  it('should call attachFocusListeners method', () => {
+
+  it('onfocusgained and lost needs to be called method', () => {
       expect(component.valueBeforeChange).toBe(undefined);
-      spyOn(component, 'attachFocusListeners');
+      component.onFocusGainedMethodID = jasmine.createSpy('onFocusGainedMethodID');
+      component.onFocusLostMethodID = jasmine.createSpy('onFocusLostMethodID');
+      component.attachFocusListeners(component.getFocusElement());
       textField.triggerEventHandler('focus', null);
       fixture.detectChanges();
-      fixture.whenStable().then(() => {
-          expect(component.attachFocusListeners).toHaveBeenCalled();
-          expect(component.valueBeforeChange).toBe('test'); 
-        });
+      expect(component.onFocusGainedMethodID).toHaveBeenCalled();
+      expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(0);
+      textField.triggerEventHandler('blur', null);
+      fixture.detectChanges();
+      expect(component.onFocusLostMethodID).toHaveBeenCalledTimes(1);
   });
 });
