@@ -268,7 +268,7 @@ public class ServoyLoginDialog extends TitleAreaDialog
 	{
 		parent.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		org.eclipse.swt.widgets.Button okBtn = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		if (!Utils.isAppleMacOS()) okBtn.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		if (!Utils.isAppleMacOS() && !Utils.isLinuxOS()) okBtn.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 	}
 
 	@Override
