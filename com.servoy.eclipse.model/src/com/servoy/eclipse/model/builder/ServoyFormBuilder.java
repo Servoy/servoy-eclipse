@@ -403,6 +403,7 @@ public class ServoyFormBuilder
 								{
 									checkDataProviders(markerResource, servoyProject, element.getPersistIfAvailable(), context, datasource,
 										fs);
+									addWebComponentMissingHandlers(markerResource, fs, element.getPersistIfAvailable(), form);
 								}
 							}
 						}
