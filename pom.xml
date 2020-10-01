@@ -368,7 +368,6 @@
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>org.eclipse.jface</module>
-				<module>org.eclipse.e4.ui.workbench.swt</module>
 				<module>j2db_documentation</module>
 			</modules>
 		</profile>
