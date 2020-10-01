@@ -17,42 +17,40 @@ describe("ServoyDefaultCalendar", () => {
     let component: ServoyDefaultCalendar;
     let fixture: ComponentFixture<ServoyDefaultCalendar>;
     let i18nProvider;
-    let dateTimeAdapter;
-    let owlDateTimeIntl;
+    //let dateTimeAdapter;
+   // let owlDateTimeIntl;
 
     beforeEach(async(() => {  
         i18nProvider = jasmine.createSpyObj("I18NProvider",["getI18NMessages"]);
         const promise = Promise.resolve({});
         i18nProvider.getI18NMessages.and.returnValue(promise);
 
-        dateTimeAdapter = jasmine.createSpyObj("DateTimeAdapter", ["setLocale", "isDateInstance"]);
-        owlDateTimeIntl = jasmine.createSpyObj("OwlDateTimeIntl", ["setBtnLabel", "cancelBtnLabel"]);
         (<any>window).moment = moment;
         
         TestBed.configureTestingModule({
             declarations: [ServoyDefaultCalendar],
             imports: [BrowserModule, SabloModule, ServoyPublicModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
-            providers: [Renderer2, FormattingService, { provide: DateTimeAdapter, useValue: dateTimeAdapter}, { provide: I18NProvider, useValue: i18nProvider },
-                {provide: OwlDateTimeIntl, useValue: owlDateTimeIntl}, SabloService]
+            providers: [Renderer2, FormattingService,{ provide: I18NProvider, useValue: i18nProvider },
+                OwlDateTimeIntl, SabloService]
         }).compileComponents();
     }));
 
     beforeEach(() => {
         fixture = TestBed.createComponent(ServoyDefaultCalendar);
         component = fixture.componentInstance;
-        component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+        component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml", 'startEdit']);
         fixture.detectChanges();
       });
 
-    xit('should create', () => {
-        let fixture = TestBed.createComponent(ServoyDefaultCalendar);
-        fixture.detectChanges();
-        fixture.whenStable().then(() => {
-            expect(component).toBeTruthy();
-        });
+    it('should create', () => {
+        expect(component).toBeTruthy();
     });
 
-    xit('should be ok', async() => {
+    it('should have called servoyApi.getMarkupId', () => {
+        expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
+    });
+    
+    it('should be ok', async() => {
         component.inputElementRef.nativeElement.value = 'test';
         fixture.detectChanges();
         fixture.whenStable().then(() => {
