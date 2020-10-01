@@ -1,7 +1,7 @@
 import { Component, Renderer2, SimpleChanges} from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
 import { Select2Data, Select2UpdateEvent, Select2Value } from 'ng-select2-component';
-import { ServoyDefaultBaseField } from 'servoydefault/basefield';
+import { ServoyDefaultBaseField } from '../basefield';
 import { Observable, Subscriber, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 

@@ -47,11 +47,12 @@ describe('PasswordComponent', () => {
     expect(component.getNativeElement().value).toBe('test');
   });
 
-  xit('should call update method', () => {
-      inputEl = fixture.debugElement.query(By.css('input'));
-      spyOn(component, 'update');
-      inputEl.triggerEventHandler('change', null);
-      expect(component.update).toHaveBeenCalled();
+  it('should call update method', () => {
+    spyOn(component, 'update');
+    inputEl = fixture.debugElement.query(By.css('input'));
+    inputEl.nativeElement.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.update).toHaveBeenCalled();
   });
   
   it('should have a placeholder', () => {

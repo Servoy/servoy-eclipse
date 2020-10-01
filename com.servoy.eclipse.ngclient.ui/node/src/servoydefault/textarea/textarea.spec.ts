@@ -8,8 +8,6 @@ import { FormattingService, TooltipService} from '../../ngclient/servoy_public'
 import { StartEditDirective } from "../../ngclient/utils/startedit.directive";
 import { DebugElement } from "@angular/core";
 import { By } from "@angular/platform-browser";
-import { ServoyApi } from "../../ngclient/servoy_api";
-
 
 describe("ServoyDefaultTextArea", () => {
   let component: ServoyDefaultTextArea;
@@ -51,6 +49,13 @@ describe("ServoyDefaultTextArea", () => {
     component.dataProviderID = 'test';
     fixture.detectChanges();
     expect(component.getNativeElement().value).toBe('test');
+  });
+
+  it('should call update method', () => {
+    spyOn(component, 'update');
+    textArea.nativeElement.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.update).toHaveBeenCalled();
   });
 
   it('should have class: svy-textarea form-control form-control-sm input-sm svy-padding-xs', () => {

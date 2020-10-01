@@ -107,7 +107,6 @@ describe('ServoyDefaultListBox', () => {
 
   it('should test selectedValues', () => {
     component.multiselectListbox = true;
-    const select = debugEl.query(By.css('select')).nativeElement;
     component.dataProviderID = 'test1\ntest2';
         component.ngOnChanges({
             dataProviderID: new SimpleChange(null, component.dataProviderID, true)
@@ -117,14 +116,12 @@ describe('ServoyDefaultListBox', () => {
     expect(component.selectedValues[1]).toEqual('test2');
   });
 
-  it('should call ngOnChanges', async() => {
-    fixture.whenStable().then(() => {
+  it('should call ngOnChanges', () => {
       component.multiselectListbox = true;
       spyOn(component, 'ngOnChanges');
       component.ngOnChanges({dataProviderID: new SimpleChange(1, 2, false)});
       fixture.detectChanges();
       expect(component.ngOnChanges).toHaveBeenCalled();
-    });
   });
 
   it( 'should render markupid ', () => {

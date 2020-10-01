@@ -18,6 +18,8 @@ import { WebsocketService } from '../../sablo/websocket.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LoggerFactory } from '../../sablo/logger.service';
 import { Select2Data } from 'ng-select2-component';
+import { By } from '@angular/platform-browser';
+import { DebugElement } from '@angular/core';
 
 const mockData = [
   {
@@ -47,12 +49,11 @@ function createDefaultValuelist() {
   return json;
 }
 
-
-
 describe('ComboboxComponent', () => {
   let component: ServoyDefaultCombobox;
   let fixture: ComponentFixture<ServoyDefaultCombobox>;
   let servoyApi;
+  let combobox: DebugElement;
   let converterService: ConverterService;
 
   beforeEach(async(() => {
@@ -76,9 +77,11 @@ describe('ComboboxComponent', () => {
 
     fixture = TestBed.createComponent(ServoyDefaultCombobox);
     fixture.componentInstance.servoyApi = servoyApi as ServoyApi;
+    combobox = fixture.debugElement.query(By.css('select2'));
 
     component = fixture.componentInstance;
     component.valuelistID = converterService.convertFromServerToClient(createDefaultValuelist(),'valuelist');
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit']);
     component.dataProviderID = 3;
     component.ngOnInit();
 
@@ -89,18 +92,31 @@ describe('ComboboxComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should set initial list of values', () => {
+  it('should have initial length = 3', () => {
     expect(component.valuelistID.length).toBe(3);
   });
 
-  it('should set initial list of values', () => {
-    expect(component.data.values).toEqual(formattedData.values, 'the valuelist doesn\'t have the values of the formattedData')
-  });
-
-  it('should have the default value 3', done => {
+  it('should have the default value 3', () => {
     component.observableValue.subscribe(value => {
       expect(value).toBe(3); // data provider's value
-      done();
     });
   });
+
+  it('should have called servoyApi.getMarkupId', () => {
+    expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
+  });
+
+  it('should use start edit directive', () => {
+    combobox.triggerEventHandler('focus', null);
+    fixture.detectChanges();
+    expect(component.servoyApi.startEdit).toHaveBeenCalled();
+  });
+
+  it('should call update method', () => {
+    spyOn(component, 'updateValue');
+    combobox.nativeElement.dispatchEvent(new Event('update')); 
+    fixture.detectChanges();
+    expect(component.updateValue).toHaveBeenCalled();
+  });
+
 });

@@ -40,7 +40,7 @@ describe('ServoyDefaultTextField', () => {
 
   it('should use start edit directive', () => {
       textField.triggerEventHandler('focus', null);
-      fixture.detectChanges();
+      fixture.detectChanges(); 
       expect(component.servoyApi.startEdit).toHaveBeenCalled();
   });
 
@@ -48,6 +48,14 @@ describe('ServoyDefaultTextField', () => {
       component.dataProviderID = 'test';
       fixture.detectChanges();
       expect(component.getNativeElement().value).toBe('test');
+  });
+
+  it('should call update method', () => {
+    spyOn(component, 'update');
+    textField = fixture.debugElement.query(By.css('input'));
+    textField.nativeElement.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(component.update).toHaveBeenCalled();
   });
 
   it('onfocusgained and lost needs to be called method', () => {
