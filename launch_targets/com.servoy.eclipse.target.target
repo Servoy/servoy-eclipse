@@ -60,11 +60,6 @@
 			<unit id="org.assertj.source" version="3.14.0.v20200120-1926"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/eclipse/updates/4.16/"/>
-		    <unit id="org.eclipse.sdk.ide" version="4.16.0.I20200604-0540"/>
-		    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.800.v20200514-1529"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/modeling/emf/emf/builds/release/2.21"/>
 		    <unit id="org.eclipse.emf.feature.group" version="2.21.0.v20200205-0529"/>
 	    </location>
@@ -77,6 +72,11 @@
 		    <repository location="http://developer.servoy.com/p2_repository/dltk_repository/2020.06/"/>
 		    <unit id="org.eclipse.dltk.core.servoy.feature.group" version="5.1.1.202008191341"/>
 		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202008191343"/>
+	    </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <repository location="https://download.eclipse.org/eclipse/updates/4.17/"/>
+		    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.900.v20200819-0940"/>
+		    <unit id="org.eclipse.sdk.ide" version="4.17.0.I20200902-1800"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/egit/updates-5.8.1"/>

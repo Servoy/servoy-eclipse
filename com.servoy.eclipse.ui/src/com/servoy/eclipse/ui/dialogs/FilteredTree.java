@@ -1092,7 +1092,7 @@ public class FilteredTree extends Composite
 				@Override
 				public void getName(AccessibleEvent e)
 				{
-					e.result = WorkbenchMessages.FilteredTree_AccessibleListenerClearButton;
+					e.result = "Clear filter field";
 				}
 			});
 			clearButton.getAccessible().addAccessibleControlListener(new AccessibleControlAdapter()
