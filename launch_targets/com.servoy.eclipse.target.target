@@ -15,10 +15,6 @@
 		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.202005172227"/>
 		    <repository location="http://dl.maketechnology.io/chromium-cef/rls/repository"/>
 	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://dl.maketechnology.io/chromium-swt/rls/repository"/>
-		    <unit id="org.eclipse.swt.chromium.feature.feature.group" version="0.10.2.201908130308"/>
-	    </location>
  		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://developer.servoy.com/p2_repository/ship_plugins/2020.12/"/>
 		    <unit id="com.servoy.css.core.feature.group" version="2.0.0.201308221100"/>

@@ -21,8 +21,8 @@ import java.util.Arrays;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
-import org.eclipse.swt.chromium.Browser;
-import org.eclipse.swt.chromium.BrowserFunction;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -49,7 +49,7 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 	{
 		try
 		{
-			browser = new Browser(parent, SWT.NONE);
+			browser = new Browser(parent, SWT.CHROMIUM);
 		}
 		catch (SWTError e)
 		{

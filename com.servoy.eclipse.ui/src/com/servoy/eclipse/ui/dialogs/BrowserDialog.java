@@ -83,7 +83,6 @@ public class BrowserDialog extends Dialog
 
 	private String url;
 	private Browser browser;
-	private org.eclipse.swt.chromium.Browser chromiumBrowser;
 	private Shell shell;
 	private boolean showSkipNextTime;
 	private static final int MIN_WIDTH = 900;
@@ -140,15 +139,8 @@ public class BrowserDialog extends Dialog
 			shell.setLayout(new FillLayout());
 		}
 		final Button[] showNextTime = new Button[1];
-		//load html file in textReader
-		if (useChromiumHint && new DesignerPreferences().useChromiumBrowser())
-		{
-			chromiumBrowser = new org.eclipse.swt.chromium.Browser(shell, SWT.NONE);
-		}
-		else
-		{
-			browser = new Browser(shell, SWT.NONE);
-		}
+
+		browser = new Browser(shell, (useChromiumHint && new DesignerPreferences().useChromiumBrowser()) ? SWT.CHROMIUM : SWT.NONE);
 		LocationListener locationListener = new LocationListener()
 		{
 			@Override
@@ -358,14 +350,7 @@ public class BrowserDialog extends Dialog
 							showNextTime[0].setVisible(false);
 						}
 						Rectangle bounds = parent.getBounds();
-						if (browser != null)
-						{
-							browser.setSize(bounds.width, bounds.height);
-						}
-						else
-						{
-							chromiumBrowser.setSize(bounds.width, bounds.height);
-						}
+						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
 						shell.layout(true, true);
 						return;
@@ -377,14 +362,7 @@ public class BrowserDialog extends Dialog
 						Rectangle bounds = new Rectangle((size.width - (int)(size.width / 1.5)) / 2 + size.x,
 							(size.height - (int)(size.height / 1.4)) / 2 + size.y, (int)(size.width / 1.5),
 							(int)(size.height / 1.4));
-						if (browser != null)
-						{
-							browser.setSize(bounds.width, bounds.height);
-						}
-						else
-						{
-							chromiumBrowser.setSize(bounds.width, bounds.height);
-						}
+						browser.setSize(bounds.width, bounds.height);
 						shell.setBounds(bounds);
 						shell.layout(true, true);
 						return;
@@ -481,28 +459,12 @@ public class BrowserDialog extends Dialog
 			{
 			}
 		};
-		if (browser != null)
-		{
-			browser.addLocationListener(locationListener);
-			browser.setUrl(url);
-			browser.setSize(size.width, size.height);
-		}
-		else
-		{
-			chromiumBrowser.addLocationListener(locationListener);
-			chromiumBrowser.setUrl(url);
-			chromiumBrowser.setSize(size.width, size.height);
-		}
+		browser.addLocationListener(locationListener);
+		browser.setUrl(url);
+		browser.setSize(size.width, size.height);
 		if (showSkipNextTime)
 		{
-			if (browser != null)
-			{
-				browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			}
-			else
-			{
-				chromiumBrowser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			}
+			browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			showNextTime[0] = new Button(shell, SWT.CHECK);
 			showNextTime[0].setText("Do not show this dialog anymore");
 			showNextTime[0].setSelection(!Utils.getAsBoolean(Settings.getInstance().getProperty(StartupPreferences.STARTUP_SHOW_START_PAGE, "true")));
@@ -519,7 +481,7 @@ public class BrowserDialog extends Dialog
 		}
 		shell.setLocation(location);
 		// in chromium i have to set size, else it shows very small
-		if (Util.isMac() || Util.isLinux() || chromiumBrowser != null)
+		if (Util.isMac() || Util.isLinux() || (browser.getStyle() & SWT.CHROMIUM) == SWT.CHROMIUM)
 		{
 			Rectangle rect = shell.computeTrim(location.x, location.y, size.width, size.height);
 			shell.setSize(rect.width, rect.height);
@@ -552,26 +514,12 @@ public class BrowserDialog extends Dialog
 	public void setUrl(String url)
 	{
 		this.url = url;
-		if (browser != null)
-		{
-			browser.setUrl(url);
-		}
-		else
-		{
-			chromiumBrowser.setUrl(url);
-		}
+		browser.setUrl(url);
 	}
 
 	public void setLocationAndSize(Point location, Dimension size)
 	{
-		if (browser != null)
-		{
-			browser.setSize(size.width, size.height);
-		}
-		else
-		{
-			chromiumBrowser.setSize(size.width, size.height);
-		}
+		browser.setSize(size.width, size.height);
 		shell.setLocation(location);
 		shell.setSize(size.width, size.height);
 	}
