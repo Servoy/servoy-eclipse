@@ -74,7 +74,13 @@ export class ApplicationService {
         this.windowRefService.nativeWindow.alert(message);
     }
     
-    public showUrl(url,target,targetOptions,timeout){
+    public showUrl(pUrl,target,targetOptions,timeout) {
+        let url = pUrl;
+        // for now, if url starts with 'solutions' we replace it with 'solution'
+        // in order for the security.logout to work, using the same server side code, on both ng1 and ng2
+        if(url && url.startsWith('solutions')) {
+            url = 'solution' + url.substring('solutions'.length);
+        }
         if(!target) target ='_blank';
         if(!timeout) timeout = 0;            
         setTimeout(() => {
