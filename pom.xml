@@ -10,7 +10,7 @@
 	<packaging>pom</packaging>
 	<version>2020.13.0.4000_b1</version>
 	<properties>
-		<tycho.version>1.7.0</tycho.version>
+		<tycho.version>2.0.0</tycho.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -395,7 +395,6 @@
 				<module>com.servoy.eclipse.notification</module>
 				<module>com.servoy.eclipse.ui.tweaks</module>
 				<module>org.eclipse.jface</module>
-				<module>org.eclipse.e4.ui.workbench.swt</module>
 				<module>j2db_documentation</module>
 				<module>com.servoy.eclipse.ngclient.ui</module>
 				<module>com.servoy.eclipse.nodejs.linux.gtk.x86_64</module>

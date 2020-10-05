@@ -77,7 +77,6 @@ Require-Bundle: org.eclipse.ui,
  com.servoy.eclipse.ui.tweaks,
  org.apache.commons.codec,
  org.eclipse.help,
- org.eclipse.swt.chromium,
  com.servoy.eclipse.ngclient,
  org.eclipse.equinox.security,
  com.servoy.eclipse.ngclient.ui

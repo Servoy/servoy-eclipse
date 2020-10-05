@@ -12,10 +12,10 @@
 	
 	<artifactId>com.servoy.eclipse.jre.linux.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>14.0.1</version>
+	<version>15.0.0</version>
 	
 	<properties>
-		<jre.version>jdk-14.0.1+7-jre</jre.version>
+		<jre.version>jdk-15+36-jre</jre.version>
 	</properties>
 	
 	<build>
@@ -43,7 +43,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7_openj9-0.20.0/OpenJDK14U-jre_x64_linux_openj9_14.0.1_7_openj9-0.20.0.tar.gz</url>
+							<url>https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk-15%2B36_openj9-0.22.0/OpenJDK15U-jre_x64_linux_openj9_15_36_openj9-0.22.0.tar.gz</url>
 							<outputFileName>${jre.version}.tar.gz</outputFileName>
 							<!-- sha256 4a90944fbe96cb6452391e952cc7c9b5136fb042a445eb205e31a029fd72fd7c -->
 						</configuration>

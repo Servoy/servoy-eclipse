@@ -2,7 +2,7 @@ package com.servoy.eclipse.designer.webpackage;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.chromium.Browser;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -17,7 +17,6 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 public class WebPackageManager extends EditorPart
 {
 	private Browser browser;
-	private org.eclipse.swt.browser.Browser internalBrowser;
 
 	@Override
 	public void doSave(IProgressMonitor monitor)
@@ -53,15 +52,7 @@ public class WebPackageManager extends EditorPart
 	@Override
 	public void createPartControl(Composite parent)
 	{
-
-		if (new DesignerPreferences().useChromiumBrowser())
-		{
-			browser = new Browser(parent, SWT.NONE);
-		}
-		else
-		{
-			internalBrowser = new org.eclipse.swt.browser.Browser(parent, SWT.NONE);
-		}
+		browser = new Browser(parent, new DesignerPreferences().useChromiumBrowser() ? SWT.CHROMIUM : SWT.NONE);
 
 		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
 		if (getEditorInput() instanceof WebPackageManagerEditorInput)
@@ -74,14 +65,7 @@ public class WebPackageManager extends EditorPart
 		}
 		try
 		{
-			if (browser != null)
-			{
-				browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
-			}
-			else
-			{
-				internalBrowser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
-			}
+			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
 		}
 		catch (Exception ex)
 		{
@@ -94,7 +78,6 @@ public class WebPackageManager extends EditorPart
 	public void setFocus()
 	{
 		if (browser != null) browser.setFocus();
-		if (internalBrowser != null) internalBrowser.setFocus();
 	}
 
 }

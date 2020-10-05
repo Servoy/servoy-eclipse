@@ -15,10 +15,6 @@
 		    <unit id="com.make.chromium.cef.feature.feature.group" version="0.4.0.202005172227"/>
 		    <repository location="http://dl.maketechnology.io/chromium-cef/rls/repository"/>
 	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://dl.maketechnology.io/chromium-swt/rls/repository"/>
-		    <unit id="org.eclipse.swt.chromium.feature.feature.group" version="0.10.2.201908130308"/>
-	    </location>
  		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://developer.servoy.com/p2_repository/ship_plugins/2020.12/"/>
 		    <unit id="com.servoy.css.core.feature.group" version="2.0.0.201308221100"/>
@@ -60,11 +56,6 @@
 			<unit id="org.assertj.source" version="3.14.0.v20200120-1926"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/eclipse/updates/4.16/"/>
-		    <unit id="org.eclipse.sdk.ide" version="4.16.0.I20200604-0540"/>
-		    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.800.v20200514-1529"/>
-	    </location>
-	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="http://download.eclipse.org/modeling/emf/emf/builds/release/2.21"/>
 		    <unit id="org.eclipse.emf.feature.group" version="2.21.0.v20200205-0529"/>
 	    </location>
@@ -79,6 +70,11 @@
 		    <unit id="org.eclipse.dltk.javascript.servoy.feature.group" version="5.1.1.202008191343"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+		    <repository location="https://download.eclipse.org/eclipse/updates/4.17/"/>
+		    <unit id="org.eclipse.equinox.executable.feature.group" version="3.8.900.v20200819-0940"/>
+		    <unit id="org.eclipse.sdk.ide" version="4.17.0.I20200902-1800"/>
+	    </location>
+	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
             <repository location="https://download.eclipse.org/egit/updates-5.8.1"/>
             <unit id="org.eclipse.egit.feature.group" version="5.8.1.202007141445-r"/>
             <unit id="org.eclipse.jgit.feature.group" version="5.8.1.202007141445-r"/>
@@ -86,4 +82,5 @@
             <unit id="org.eclipse.jgit.lfs.feature.group" version="5.8.1.202007141445-r"/>
         </location>
     </locations>
+	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
 </target>
