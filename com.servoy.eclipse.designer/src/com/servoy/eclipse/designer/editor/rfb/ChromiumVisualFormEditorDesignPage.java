@@ -49,7 +49,22 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 	{
 		try
 		{
-			browser = new Browser(parent, SWT.CHROMIUM);
+			browser = new Browser(parent, SWT.CHROMIUM)
+			{
+				// hack for https://bugs.eclipse.org/bugs/show_bug.cgi?id=567629
+				// because the internal browser does say "true" but the system didn't really know that that its own view had the focus now
+				// so the activation of parts and focus is screwed up. if we return false here all the time then SWT will force a focus Control.forceFocus()
+				@Override
+				public boolean isFocusControl()
+				{
+					return false;
+				}
+
+				@Override
+				protected void checkSubclass()
+				{
+				}
+			};
 		}
 		catch (SWTError e)
 		{
