@@ -106,12 +106,12 @@ public class OpenWizardAction extends Action
 				{
 					if (TutorialView.isTutorialViewOpen())
 					{
-						super.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE);
+						super.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
 						setBlockOnOpen(false);
 					}
 					else
 					{
-						super.setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.BORDER | SWT.TITLE);
+						super.setShellStyle(SWT.CLOSE | SWT.APPLICATION_MODAL | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
 					}
 				}
 
