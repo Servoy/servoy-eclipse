@@ -1440,8 +1440,9 @@ public class SolutionDeserializer
 					hasDocs = true;
 				}
 
-				if (resource.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) && jsFile.getParentFile().getParentFile() != null &&
-					jsFile.getParentFile().getParentFile().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) && !hasDocs)
+				if (resource.getName().endsWith(SolutionSerializer.CALCULATIONS_POSTFIX) && resource.getParent() != null &&
+					resource.getParent().getParent() != null &&
+					resource.getParent().getParent().getName().equals(SolutionSerializer.DATASOURCES_DIR_NAME) && !hasDocs)
 				{
 
 					if (calculationTypeInferencer == null)
