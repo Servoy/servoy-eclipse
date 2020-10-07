@@ -1638,10 +1638,4 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		return new ShowInContext(getEditorInput(), null);
 	}
-
-	public void refreshServerMainComposite()
-	{
-		mainComposite.layout();
-	}
-
 }
