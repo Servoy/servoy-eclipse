@@ -49,7 +49,8 @@ export class WindowService {
 
         this.renderer = rendererFactory.createRenderer(null, null);
         this.platformLocation.onPopState((event) => {
-            this.formService.goToForm(this.platformLocation.hash.replace('#', ''));
+            const form = this.platformLocation.hash.replace('#', '');
+            if (form) this.formService.goToForm(form);
         });
 
         this.windowCounter = 0;
