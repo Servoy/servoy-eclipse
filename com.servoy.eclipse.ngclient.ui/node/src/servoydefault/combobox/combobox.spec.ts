@@ -12,7 +12,7 @@ import { SabloDeferHelper } from '../../sablo/defer.service';
 import { ValuelistConverter } from '../../ngclient/converters/valuelist_converter';
 import { SpecTypesService } from '../../sablo/spectypes.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
-import { SessionStorageService } from '../../ngclient/services/webstorage/sessionstorage.service';
+import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ServicesService } from '../../sablo/services.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';

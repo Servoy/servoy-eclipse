@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { WebStorageModule } from '../ngclient/services/webstorage/webstorage.module';
+import { WebStorageModule } from './webstorage/webstorage.module';
 import { WindowRefService } from './util/windowref.service'
 import { TrustAsHtmlPipe } from './pipes/pipes'
 import { WebsocketService } from './websocket.service';

@@ -9,7 +9,7 @@ import { FoundsetConverter } from './foundset_converter';
 import { FoundsetLinkedConverter, FoundsetLinked } from './foundsetLinked_converter';
 import { SabloDeferHelper } from '../../sablo/defer.service';
 import { WebsocketService } from '../../sablo/websocket.service';
-import { SessionStorageService } from '../../ngclient/services/webstorage/sessionstorage.service';
+import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ViewportService } from '../services/viewport.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 

@@ -1,6 +1,6 @@
 import { TestBed, inject } from '@angular/core/testing';
 
-import { SessionStorageService } from '../../ngclient/services/webstorage/sessionstorage.service';
+import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 
 import { NGUtilsService } from './ngutils.service';
 

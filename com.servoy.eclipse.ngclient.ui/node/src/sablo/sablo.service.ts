@@ -1,5 +1,5 @@
 import { Injectable, } from '@angular/core';
-import { SessionStorageService } from '../ngclient/services/webstorage/sessionstorage.service';
+import { SessionStorageService } from './webstorage/sessionstorage.service';
 import { WindowRefService } from './util/windowref.service' 
 import { WebsocketService, WebsocketSession, WebsocketConstants } from '../sablo/websocket.service';
 import { ConverterService } from './converter.service'

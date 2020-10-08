@@ -8,7 +8,7 @@ import { ServicesService } from '../../sablo/services.service';
 import { ValuelistConverter } from './valuelist_converter';
 import { SabloDeferHelper} from '../../sablo/defer.service';
 import { WebsocketService } from '../../sablo/websocket.service';
-import { SessionStorageService } from '../../ngclient/services/webstorage/sessionstorage.service';
+import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
 
