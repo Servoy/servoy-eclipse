@@ -72,6 +72,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     changeListener: (change: FoundsetChangeEvent) => void;
     rendered: boolean;
     scrollToSelectionNeeded: boolean = true;
+    averageRowHeight: number;
+    actualPageSize: number = -1;
 
     constructor(renderer: Renderer2, logFactory: LoggerFactory) { 
         super(renderer);
@@ -107,7 +109,24 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
         window.setTimeout(() => {
 			//first time we need to wait a bit before we scroll
             this.scrollToSelection();
+            this.computeAverageRowHeight();
         }, 100);
+    }
+
+    computeAverageRowHeight() {
+        if (!this.rendered) return;
+        const children = this.getNativeElement().getElementsByTagName('tr');
+        const realRowCount = children.length;
+        if (realRowCount > 0) {
+            const firstChild = children[0];
+            const lastChild = children[children.length - 1];
+            this.averageRowHeight = Math.round((lastChild.offsetTop + lastChild.offsetHeight - firstChild.offsetTop) / realRowCount);
+        } else {
+            this.averageRowHeight = 25; // it won't be relevant anyway; it is equal to the default minRowHeight from .spec
+        }
+        const tbody = this.getNativeElement().getElementsByTagName('tbody')[0];
+        this.actualPageSize = Math.ceil(tbody.clientHeight / this.averageRowHeight) -1;
+        this.setCurrentPageIfNeeded();
     }
 
     private selectedRowIndexesChanged(oldValue: number[]) {
@@ -635,7 +654,14 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
 
     private setCurrentPageIfNeeded() {
         if (this.showPagination()) {
-            this.currentPage = Math.trunc(this.viewPort.measureScrollOffset() / (this.pageSize * this.getNumberFromPxString(this.minRowHeight))) + 1;
+            if (this.actualPageSize > 0) {
+                this.currentPage = Math.trunc(this.viewPort.measureScrollOffset() / (this.actualPageSize * this.averageRowHeight)) + 1;
+            }
+            else {
+                window.setTimeout(() => {
+                    this.setCurrentPageIfNeeded();
+                }, 100);
+            }
         }
     }
 
@@ -667,7 +693,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     }
 
     modifyPage() {
-        this.viewPort.setRenderedRange({start: this.pageSize * (this.currentPage - 1), end: this.pageSize * this.currentPage - 1});
+        this.viewPort.setRenderedRange({start: this.actualPageSize * (this.currentPage - 1), end: Math.min(this.foundset.viewPort.size,this.actualPageSize * this.currentPage)});
     }
 
     getRowClass(idx: number) {
@@ -690,7 +716,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
             if (event.keyCode == 33) { // PAGE UP KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.pageUp) return;
                 
-                const firstVisibleIndex = this.showPagination() ? this.pageSize * (this.currentPage - 1) : 1;
+                const firstVisibleIndex = this.showPagination() ? this.actualPageSize * Math.trunc(selection/this.actualPageSize) : 1;
                 fs.selectedRowIndexes = [firstVisibleIndex];
                 selectionChanged = (selection != firstVisibleIndex);
                 this.log.spam("svy extra table * keyPressed; scroll on PG UP");
@@ -699,7 +725,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
             else if (event.keyCode == 34) { // PAGE DOWN KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.pageDown) return;
 
-                const lastVisibleIndex = this.showPagination() ? this.pageSize * this.currentPage - 1 : (this.foundset.viewPort.rows.length - 1);
+                let lastVisibleIndex = this.showPagination() ? this.actualPageSize * (Math.trunc(selection/this.actualPageSize) + 1 ) -1 : (this.foundset.viewPort.rows.length - 1);
+                if (lastVisibleIndex > fs.serverSize -1 ) lastVisibleIndex = fs.serverSize -1;
                 fs.selectedRowIndexes = [lastVisibleIndex];
                 selectionChanged = (selection != lastVisibleIndex);
                 this.log.spam("svy extra table * keyPressed; scroll on PG DOWN");
@@ -752,7 +779,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
 
                 if (fs.hasMoreRows){
                     //if it has more rows, then load at most one more page if paging is used,  or the remaining records otherwise
-                    this.foundset.loadRecordsAsync(endIndex, this.pageSize > 0 ? Math.min(this.pageSize, this.foundset.serverSize-endIndex) : this.foundset.serverSize-endIndex);
+                    this.foundset.loadRecordsAsync(endIndex, this.actualPageSize > 0 ? Math.min(this.actualPageSize, this.foundset.serverSize-endIndex) : this.foundset.serverSize-endIndex);
                     this.foundsetChange.emit(this.foundset);
                 }
                 event.preventDefault();
