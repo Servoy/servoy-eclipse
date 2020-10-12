@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { FormsModule } from '@angular/forms'
+import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { MainComponent } from './main.component';
@@ -9,31 +9,32 @@ import { ServoyService } from './servoy.service';
 
 import { FormComponent, AddAttributeDirective } from './form/form_component.component';
 
-import { SabloModule } from '../sablo/sablo.module'
+import { SabloModule } from '../sablo/sablo.module';
 
 import { AllServicesModules } from './allservices.service';
 import { AllComponentsModule } from './allcomponents.module';
 import { DefaultLoginWindowComponent } from './services/default-login-window/default-login-window.component';
 import { FileUploadWindowComponent } from './services/file-upload-window/file-upload-window.component';
-import { DialogWindowComponent } from './services/dialog-window/dialog-window.component'
+import { DialogWindowComponent } from './services/dialog-window/dialog-window.component';
 import { HttpClientModule } from '@angular/common/http';
 import {UpperCasePipe, LowerCasePipe, DatePipe, DecimalPipe } from '@angular/common';
 
-import { I18NProvider } from './services/i18n_provider.service'
+import { I18NProvider } from './services/i18n_provider.service';
 import { DefaultNavigator } from '../servoycore/default-navigator/default-navigator';
-import { ErrorBean } from '../servoycore/error-bean/error-bean'; 
+import { ErrorBean } from '../servoycore/error-bean/error-bean';
 import { ServoyCoreSlider } from '../servoycore/slider/slider';
 import { SessionView } from '../servoycore/session-view/session-view';
-import { ViewportService } from './services/viewport.service'
+import { ViewportService } from './services/viewport.service';
 
 import { ComponentContributor } from './component_contributor.service';
 import { ServoyPublicModule } from './servoy_public.module';
-import { LoadingIndicatorComponent } from "../sablo/util/loading-indicator/loading-indicator";
+import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
 import { ServoyExtraTable } from '../servoyextra/table/table';
 
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ResizableModule } from 'angular-resizable-element';
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
+import { LocaleService } from './locale.service';
 
 @NgModule( {
     declarations: [
@@ -44,26 +45,26 @@ import { ListFormComponent } from '../servoycore/listformcomponent/listformcompo
         FileUploadWindowComponent,
         DefaultNavigator,
         SessionView,
-		ErrorBean,
+        ErrorBean,
         ServoyCoreSlider,
         DialogWindowComponent,
         LoadingIndicatorComponent,
         ServoyExtraTable,
         ListFormComponent
-    ], 
+    ],
     imports: [
-        BrowserModule, 
+        BrowserModule,
         NgbModule,
         FormsModule,
         SabloModule,
-		AllComponentsModule,
+        AllComponentsModule,
         AllServicesModules,
         HttpClientModule,
         ServoyPublicModule,
         ResizableModule,
         ScrollingModule
     ],
-    providers: [FormService, ServoyService, I18NProvider, UpperCasePipe,LowerCasePipe,
+    providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
                 DatePipe, DecimalPipe, ComponentContributor, ViewportService],
     bootstrap: [MainComponent],
     entryComponents: [DefaultLoginWindowComponent, FileUploadWindowComponent, DialogWindowComponent],

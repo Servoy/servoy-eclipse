@@ -12,8 +12,6 @@ import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.ser
 import { SabloService } from '../../sablo/sablo.service';
 import { DOCUMENT, PlatformLocation } from '@angular/common';
 import { ApplicationService } from './application.service';
-import { Router, NavigationStart } from '@angular/router';
-import { ServoyApi } from '../servoy_api';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { LoadingIndicatorService } from "../../sablo/util/loading-indicator/loading-indicator.service";
 

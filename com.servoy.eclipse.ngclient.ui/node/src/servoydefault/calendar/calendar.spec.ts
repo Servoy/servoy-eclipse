@@ -4,7 +4,7 @@ import { SabloModule } from '../../sablo/sablo.module'
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
 
 
-import { FormattingService,TooltipService, I18NProvider} from '../../ngclient/servoy_public'
+import { FormattingService, LocaleService, I18NProvider} from '../../ngclient/servoy_public'
 import { By, BrowserModule } from '@angular/platform-browser';
 import { ServoyDefaultCalendar } from "./calendar";
 import { DateTimeAdapter, OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
@@ -30,7 +30,7 @@ describe("ServoyDefaultCalendar", () => {
         TestBed.configureTestingModule({
             declarations: [ServoyDefaultCalendar],
             imports: [BrowserModule, SabloModule, ServoyPublicModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
-            providers: [Renderer2, FormattingService,{ provide: I18NProvider, useValue: i18nProvider },
+            providers: [Renderer2, FormattingService, { provide: LocaleService, useValue: {getLocale: () => 'en' } }, { provide: I18NProvider, useValue: i18nProvider },
                 OwlDateTimeIntl, SabloService]
         }).compileComponents();
     }));

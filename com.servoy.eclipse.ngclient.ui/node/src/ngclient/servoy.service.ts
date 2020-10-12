@@ -1,14 +1,11 @@
 import { Injectable } from '@angular/core';
-import { registerLocaleData } from '@angular/common';
 
-import { AllServiceService } from './allservices.service';
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { ConverterService } from '../sablo/converter.service'
 import { WindowRefService } from '../sablo/util/windowref.service';
 import { LoggerService, LoggerFactory } from '../sablo/logger.service'
 import { SabloDeferHelper } from '../sablo/defer.service';
-import { Deferred } from '../sablo/util/deferred';
 
 import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service'; 
 import { DateConverter } from './converters/date_converter'
@@ -24,10 +21,9 @@ import { IterableDiffers, IterableDiffer } from '@angular/core';
 
 import { SpecTypesService } from '../sablo/spectypes.service';
 
-import * as moment from 'moment';
-
 import { FormcomponentConverter } from './converters/formcomponent_converter';
 import { ComponentConverter } from './converters/component_converter';
+import { LocaleService } from './locale.service';
 
 class UIProperties {
   private uiProperties;
@@ -74,19 +70,17 @@ class SolutionSettings {
 
 @Injectable()
 export class ServoyService {
-  public static LOCALE = 'en';
   private solutionSettings: SolutionSettings = new SolutionSettings();
   private uiProperties: UIProperties;
 
   private findModeShortCutCallback: any = null;
   private log: LoggerService;
-  private loadedLocale: Deferred<any>;
 
   constructor(private websocketService: WebsocketService,
     private sabloService: SabloService,
     private windowRefService: WindowRefService,
     private sessionStorageService: SessionStorageService,
-    private i18nProvider: I18NProvider,
+    private localeService: LocaleService,
     converterService: ConverterService,
     specTypesService: SpecTypesService,
     sabloDeferHelper: SabloDeferHelper,
@@ -151,10 +145,10 @@ export class ServoyService {
       let locale = this.sessionStorageService.get('locale');
       if (locale) {
         const array = locale.split('-');
-        this.setLocale(array[0], array[1], true);
+        this.localeService.setLocale(array[0], array[1], true);
       } else {
         locale = this.sabloService.getLocale();
-        this.setLocale(locale.language, locale.country, true);
+        this.localeService.setLocale(locale.language, locale.country, true);
       }
     });
   }
@@ -172,61 +166,9 @@ export class ServoyService {
                                           { 'formname': formname, 'script': script, 'params': params }, false);
   }
 
-
-  public setLocale(language, country, initializing?) {
-    // TODO angular $translate and our i18n service
-    //            $translate.refresh();
-    this.loadedLocale = new Deferred<any>();
-    this.setAngularLocale(language, country).then(localeId => {
-      this.i18nProvider.flush();
-      this.sabloService.setLocale({ language: language, country: country, full: localeId });
-      if (!initializing) {
-        // in the session storage we always have the value set via applicationService.setLocale
-        this.sessionStorageService.set('locale', language + '-' + country);
-      }
-      ServoyService.LOCALE = localeId;
-      this.setMomentLocale(localeId);
-
-      this.loadedLocale.resolve(localeId);
-    }, () => {
-      this.loadedLocale.reject('Could not set Locale because angular locale could not be loaded.');
-    });
-  }
-
   public loaded(): Promise<any> {
-    return this.loadedLocale.promise;
+    return this.localeService.isLoaded();
   }
-
-  private setMomentLocale(localeId: string) {
-
-    import(`../../node_modules/moment/src/locale/${localeId}`).then(
-      module => {
-        moment.defineLocale(localeId, module);
-      },
-      () => {
-
-      });
-  }
-
-  private setAngularLocale(language: string, country: string) {
-    // angular locales are either <language lowercase> or <language lowercase> - <country uppercase>
-    const localeId = country !== undefined && country.length > 0 ?
-                      language.toLowerCase() + '-' + country.toUpperCase() : language.toLowerCase();
-    return new Promise<string>((resolve, reject) => {
-      import(`@angular/common/locales/${localeId}.js`).then(
-        module => {
-          registerLocaleData(module.default, localeId);
-          resolve(localeId);
-        },
-        () => {
-          import(`@angular/common/locales/${language.toLowerCase()}.js`).then(module => {
-            registerLocaleData(module.default, localeId.split('-')[0]);
-            resolve(language.toLowerCase());
-          }, reject);
-        });
-    });
-  }
-
 
   public setFindMode(formName: string, findmode: boolean) {
     if (findmode && this.findModeShortCutCallback == null) {
