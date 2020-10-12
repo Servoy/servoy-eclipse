@@ -35,7 +35,6 @@
     "jquery": "^3.5.1",
     "moment": "^2.29.0",
     "ng-select2-component": "^7.1.4",
-    "numeral": "^2.0.6",
     "rxjs": "^6.6.3",
     "tslib": "^2.0.1",
     "webpack": "^4.44.2",
