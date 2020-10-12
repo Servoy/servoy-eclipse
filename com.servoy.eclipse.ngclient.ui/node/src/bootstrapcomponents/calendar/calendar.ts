@@ -17,11 +17,11 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
     public filter: any;
     min: Date;
     max: Date;
-    
-    constructor(renderer: Renderer2) { 
+
+    constructor(renderer: Renderer2) {
         super(renderer);
     }
-    
+
     getFocusElement(): any {
         return this.inputElementRef.nativeElement;
     }
@@ -30,22 +30,22 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
         return this.inputElementRef.nativeElement;
     }
 
-    public disableDays(dateArray : Number[]) {
+    public disableDays(dateArray: Number[]) {
         this.filter = (d: moment.Moment): boolean => {
             return !dateArray.includes(d.day());
-        }
+        };
     }
- 
+
     public disableDates(dateArray: Date[]) {
         this.filter = (d: moment.Moment): boolean => {
           let result = true;
           dateArray.forEach(el => {
-            if (el.toString() === d.toDate().toString()) { 
+            if (el.toString() === d.toDate().toString()) {
                 result = false;
             }
           });
           return result;
-        }      
+        }
     }
 
     public setMinMaxDate(minDate: Date, maxDate: Date) {
