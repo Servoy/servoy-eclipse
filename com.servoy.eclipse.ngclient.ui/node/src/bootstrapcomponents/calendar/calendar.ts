@@ -1,4 +1,4 @@
-import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef} from '@angular/core';
+import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef, SimpleChanges} from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import * as moment from 'moment';
