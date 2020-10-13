@@ -18,10 +18,40 @@ export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
     min: Date;
     max: Date;
     
+    public firstDayOfWeek = 1;
+    public hour12Timer = false;
+    public pickerType = 'both';
+    public showSecondsTimer  = false;
+    
     constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef) { 
         super(renderer, cdRef);
+        
+        const ld = moment.localeData();
+        this.firstDayOfWeek = ld.firstDayOfWeek();
+        const  lts = ld.longDateFormat('LTS');
+        this.hour12Timer = lts.indexOf('a') >= 0 || lts.indexOf('A') >= 0;
     }
 
+    svyOnChanges( changes: SimpleChanges ) {
+        for ( let property in changes ) {
+            let change = changes[property];
+            switch ( property ) {
+                case 'format':
+                    const format = change.currentValue.display;
+                    const showCalendar = format.indexOf('y') >= 0 || format.indexOf('M') >= 0;
+                    const showTime = format.indexOf('h') >= 0 || format.indexOf('H') >= 0 || format.indexOf('m') >= 0;
+                    if (showCalendar) {
+                        if (showTime) this.pickerType = 'both';
+                        else this.pickerType = 'calendar'
+                    } else this.pickerType = 'timer'
+                    this.showSecondsTimer = format.indexOf('s') >= 0;
+                    this.hour12Timer = format.indexOf('h') >= 0 || format.indexOf('a') >= 0 || format.indexOf('A') >= 0;
+                    break;
+            }
+        }
+        super.svyOnChanges(changes);
+    }
+    
     getFocusElement(): any {
         return this.inputElementRef.nativeElement;
     }
