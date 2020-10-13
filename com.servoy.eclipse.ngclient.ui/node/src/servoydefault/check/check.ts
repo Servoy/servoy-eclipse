@@ -1,4 +1,4 @@
-import { Renderer2, Component, OnInit, SimpleChanges, AfterViewInit, Input } from '@angular/core';
+import { Renderer2, Component, ChangeDetectorRef, SimpleChanges, AfterViewInit, Input } from '@angular/core';
 import { FormattingService } from "../../ngclient/servoy_public";
 import { ServoyDefaultBaseChoice } from "../basechoice";
 
@@ -11,17 +11,18 @@ export class ServoyDefaultCheck extends ServoyDefaultBaseChoice {
     @Input() horizontalAlignment;
 
     selected: boolean = false;
-    constructor( renderer: Renderer2, formattingService: FormattingService ) {
-        super( renderer, formattingService );
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef,  formattingService: FormattingService ) {
+        super( renderer, cdRef, formattingService );
     }
 
-    ngAfterViewInit() {
+    svyOnInit() {
+        super.svyOnInit();
         this.attachEventHandlers( this.getNativeElement(), 0 )
     }
 
-    ngOnChanges( changes: SimpleChanges ) {
+    svyOnChanges( changes: SimpleChanges ) {
         this.setHorizontalAlignmentFlexbox( this.getNativeElement(), this.renderer, this.horizontalAlignment );
-        super.ngOnChanges( changes );
+        super.svyOnChanges( changes );
     }
 
     public setHorizontalAlignmentFlexbox( element: any, renderer: Renderer2, halign ) {

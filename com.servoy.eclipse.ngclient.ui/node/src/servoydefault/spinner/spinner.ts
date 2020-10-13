@@ -1,4 +1,4 @@
-import {Component, Renderer2, SimpleChanges} from '@angular/core';
+import {Component, Renderer2, SimpleChanges, ChangeDetectorRef} from '@angular/core';
 import {ServoyDefaultBaseField} from "../basefield";
 import {FormattingService} from "../../ngclient/servoy_public";
 
@@ -11,17 +11,17 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
 
   selection: any;
   private counter = 0;
-  constructor(renderer: Renderer2, formattingService: FormattingService) {
-    super(renderer, formattingService);
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
+    super(renderer,cdRef, formattingService);
   }
 
-  ngOnInit(){
+  svyOnInit(){
     this.selection = this.getSelectionFromDataprovider();
     this.addHandlersToInputAndSpinnerButtons();
-    super.ngOnInit();
+    super.svyOnInit();
   }
 
-  ngOnChanges(changes: SimpleChanges){
+  svyOnChanges(changes: SimpleChanges){
     for ( let property in changes ) {
       switch (property) {
         case 'dataProviderID':
@@ -29,7 +29,7 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
           break;
       }
     }
-    super.ngOnChanges(changes);
+    super.svyOnChanges(changes);
   }
 
   addHandlersToInputAndSpinnerButtons(){

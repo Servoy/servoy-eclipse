@@ -1,12 +1,12 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges,
-        Renderer2, ElementRef, ViewChild, AfterViewInit, Directive } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectorRef, SimpleChanges,
+        Renderer2, ElementRef, ViewChild, Directive } from '@angular/core';
 
 import {PropertyUtils, FormattingService} from '../ngclient/servoy_public'
 
 import {ServoyDefaultBaseComponent} from './basecomponent'
 
 @Directive()
-export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implements AfterViewInit {
+export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent{
 
     @Input() hideText;
     @Input() imageMediaID;
@@ -18,14 +18,14 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implemen
     @Input() textRotation;
     @Input() verticalAlignment;
 
-    @ViewChild('child', {static: true}) child:ElementRef;
+    @ViewChild('child') child:ElementRef;
 
-    constructor(renderer: Renderer2) {
-        super(renderer);
+    constructor(renderer: Renderer2,cdRef: ChangeDetectorRef) {
+        super(renderer,cdRef);
     }
 
-    ngAfterViewInit() {
-        super.ngAfterViewInit();
+    svyOnInit() {
+        super.svyOnInit();
         if ( this.onDoubleClickMethodID ) {
             this.renderer.listen( this.elementRef.nativeElement, 'dblclick', ( e ) => {
                 this.onDoubleClickMethodID( e );
@@ -33,7 +33,7 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implemen
         }
     }
 
-    ngOnChanges( changes: SimpleChanges ) {
+    svyOnChanges( changes: SimpleChanges ) {
         for ( let property in changes ) {
             let change = changes[property];
             switch ( property ) {
@@ -49,7 +49,7 @@ export class ServoyDefaultBaseLabel extends  ServoyDefaultBaseComponent implemen
                     break;
             }
         }
-        super.ngOnChanges(changes);
+        super.svyOnChanges(changes);
     }
 
     public getNativeChild() {

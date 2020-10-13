@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, Renderer2, SimpleChanges,ViewChild, ElementRef, AfterViewInit} from '@angular/core';
+import {Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges,ViewChild, ElementRef} from '@angular/core';
 import {ServoyDefaultBaseField} from "../basefield";
 import {FormattingService} from "../../ngclient/servoy_public";
 import { AngularEditorConfig } from '@kolkov/angular-editor';
@@ -7,7 +7,7 @@ import { AngularEditorConfig } from '@kolkov/angular-editor';
   selector: 'servoydefault-htmlarea',
   templateUrl: './htmlarea.html',
 })
-export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField implements AfterViewInit {
+export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField{
 
   @Input() editable;
   
@@ -18,11 +18,12 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField implements Aft
           defaultParagraphSeparator: 'p'
         };
   
-  constructor(renderer: Renderer2, formattingService: FormattingService) {
-    super(renderer, formattingService);
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
+    super(renderer, cdRef, formattingService);
   }
   
-  ngAfterViewInit() {
+  svyOnInit() {
+      super.svyOnInit();
       // ugly hack to fix the height
       let nativeElement = this.getNativeElement();
       let componentHeight = nativeElement.offsetHeight;

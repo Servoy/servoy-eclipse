@@ -1,29 +1,26 @@
-import { AfterViewInit, OnInit, Renderer2, SimpleChanges, Directive } from "@angular/core";
+import { Renderer2, SimpleChanges, Directive, ChangeDetectorRef } from "@angular/core";
 import {FormattingService, PropertyUtils} from "../ngclient/servoy_public";
 import {ServoyDefaultBaseField} from "./basefield";
 
 @Directive()
-export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField implements OnInit, AfterViewInit{
+export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField{
   
   selection: any[] = [];
   allowNullinc = 0;
   
-  constructor(renderer: Renderer2, formattingService: FormattingService){
-    super(renderer, formattingService);
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService){
+    super(renderer,cdRef, formattingService);
     super.attachHandlers();
   }
 
-  ngOnInit(){
-    this.onValuelistChange();
-  }
-
-  ngAfterViewInit(){
+  svyOnInit(){
+      this.onValuelistChange();
       this.setHandlersAndTabIndex();
   }
   
   abstract setSelectionFromDataprovider();
   
-  ngOnChanges( changes: SimpleChanges ) {
+  svyOnChanges( changes: SimpleChanges ) {
       for ( let property in changes ) {
           switch ( property ) {
               case "dataProviderID":
@@ -32,7 +29,7 @@ export abstract class ServoyDefaultBaseChoice extends  ServoyDefaultBaseField im
 
           }
       }
-      super.ngOnChanges(changes);
+      super.svyOnChanges(changes);
   }
   
   setHandlersAndTabIndex(){

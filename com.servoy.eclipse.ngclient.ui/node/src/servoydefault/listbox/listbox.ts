@@ -8,56 +8,28 @@ import { ServoyDefaultBaseField } from '../basefield'
     selector: 'servoydefault-listbox',
     templateUrl: './listbox.html'
 } )
-export class ServoyDefaultListBox extends ServoyDefaultBaseField implements AfterViewInit {
+export class ServoyDefaultListBox extends ServoyDefaultBaseField{
     @Input() multiselectListbox;
 
     selectedValues: any[];
 
-    @ViewChild('element') elementRef: ElementRef;
-
-    private changes: SimpleChanges;
-
-    constructor( private changeDetectorRef: ChangeDetectorRef, renderer: Renderer2, formattingService: FormattingService ) {
-        super( renderer, formattingService );
+    constructor( changeDetectorRef: ChangeDetectorRef, renderer: Renderer2, formattingService: FormattingService ) {
+        super( renderer, changeDetectorRef, formattingService );
     }
 
-    ngOnInit() {
-        //this method should do nothing
-    }
-
-    ngAfterViewInit() {
-        this.ngOnChanges( this.changes );
-        this.changeDetectorRef.detectChanges();
-        this.addAttributes();
-        this.attachFocusListeners( this.getFocusElement() );
-        this.attachHandlers();
-    }
-
-    ngOnChanges( changes: SimpleChanges ) {
-        if ( !this.elementRef ) {
-            if ( this.changes == null ) {
-                this.changes = changes;
-            }
-            else {
-                for ( let property in changes ) {
-                    this.changes[property] = changes[property];
+    svyOnChanges( changes: SimpleChanges ) {
+        for ( let property in changes ) {
+            switch ( property ) {
+            case "dataProviderID":
+                this.selectedValues = [];
+                if (this.multiselectListbox && this.dataProviderID) {
+                    this.selectedValues = (''+this.dataProviderID).split( '\n' );
                 }
+                break;
+                
             }
         }
-        else {
-            for ( let property in changes ) {
-                switch ( property ) {
-                    case "dataProviderID":
-                        this.selectedValues = [];
-                        if (this.multiselectListbox && this.dataProviderID) {
-                            this.selectedValues = (''+this.dataProviderID).split( '\n' );
-                        }
-                        break;
-
-                }
-            }
-            super.ngOnChanges( changes );
-        }
+        super.svyOnChanges( changes );
     }
 
     multiUpdate() {

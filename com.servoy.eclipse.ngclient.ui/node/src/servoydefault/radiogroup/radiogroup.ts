@@ -1,4 +1,4 @@
-import {Component, OnInit, Renderer2} from '@angular/core';
+import {Component, OnInit, Renderer2, ChangeDetectorRef} from '@angular/core';
 import {ServoyDefaultBaseChoice} from "../basechoice";
 import {FormattingService, PropertyUtils} from "../../ngclient/servoy_public";
 
@@ -10,8 +10,8 @@ import {FormattingService, PropertyUtils} from "../../ngclient/servoy_public";
 export class ServoyDefaultRadiogroup extends ServoyDefaultBaseChoice{
 
   value: any;
-  constructor(renderer: Renderer2, formattingService: FormattingService) {
-    super(renderer, formattingService);
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
+    super(renderer, cdRef, formattingService);
   }
 
   setSelectionFromDataprovider(){

@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ContentChild, TemplateRef, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectorRef , Renderer2, ContentChild, TemplateRef, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { ServoyBootstrapBaseComponent } from '../bts_basecomp';
 import { SabloService } from '../../sablo/sablo.service';
@@ -15,19 +15,17 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent {
   @Input() waitForData: any;
   @Input() height: number;
 
-  @ViewChild('element') elementRef:ElementRef;
-
   private realContainedForm: any;
   private formWillShowCalled: any;
 
   @ContentChild( TemplateRef  , {static: true})
   templateRef: TemplateRef<any>;
 
-  constructor(renderer: Renderer2) {
-    super(renderer);
+  constructor(renderer: Renderer2,cdRef: ChangeDetectorRef) {
+    super(renderer,cdRef);
   }
 
-  ngOnChanges( changes: SimpleChanges ) {
+  svyOnChanges( changes: SimpleChanges ) {
     if (changes) {
       for ( const property of Object.keys(changes) ) {
           const change = changes[property];
@@ -56,7 +54,7 @@ export class ServoyBootstrapTablesspanel extends ServoyBootstrapBaseComponent {
               }
             } 
         }
-        super.ngOnChanges(changes);
+        super.svyOnChanges(changes);
     }
 }
 

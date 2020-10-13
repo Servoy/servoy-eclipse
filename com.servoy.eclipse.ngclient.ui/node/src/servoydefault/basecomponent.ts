@@ -1,10 +1,10 @@
-import { Input, OnChanges, SimpleChanges, Renderer2, AfterViewInit, Directive } from '@angular/core';
+import { Input, OnChanges, SimpleChanges, Renderer2, ChangeDetectorRef, Directive } from '@angular/core';
 
 import {PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
 
 
 @Directive()
-export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements AfterViewInit, OnChanges {
+export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
 
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
@@ -32,13 +32,12 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements A
 
     timeoutID: number;
 
-    constructor(protected readonly renderer: Renderer2) {
-        super(renderer);
+    constructor(protected readonly renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
+        super(renderer, cdRef);
     }
 
-    ngAfterViewInit() {
-        super.ngAfterViewInit();
-        super.ngOnInit();
+    svyOnInit() {
+        super.svyOnInit();
         this.attachHandlers();
     }
 
@@ -91,7 +90,7 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements A
         return true;
     }
 
-    ngOnChanges( changes: SimpleChanges ) {
+    svyOnChanges( changes: SimpleChanges ) {
       if (changes) {
         for ( const property of Object.keys(changes) ) {
             const change = changes[property];
@@ -134,11 +133,9 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent implements A
                     if ( change.currentValue)
                         this.renderer.addClass( this.getNativeElement(), change.currentValue );
                     break;
-                case 'visible':
-                    PropertyUtils.setVisible( this.getNativeElement(), this.renderer , change.currentValue);
-                    break;
             }
         }
       }
+      super.svyOnChanges(changes);
     }
 }

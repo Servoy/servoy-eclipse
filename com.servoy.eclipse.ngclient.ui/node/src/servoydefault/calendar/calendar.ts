@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild,ChangeDetectorRef } from '@angular/core';
 
 import { LocaleService, FormattingService, I18NProvider } from '../../ngclient/servoy_public';
 
@@ -15,7 +15,7 @@ import * as moment from 'moment';
 } )
 export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
 
-    @ViewChild( 'inputElement' , {static: true} ) inputElementRef: ElementRef;
+    @ViewChild( 'inputElement') inputElementRef: ElementRef;
 
     public firstDayOfWeek = 1;
     public hour12Timer = false;
@@ -23,12 +23,13 @@ export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
     public showSecondsTimer  = false;
 
     constructor( renderer: Renderer2,
+                            cdRef: ChangeDetectorRef,
                             formattingService: FormattingService,
                             i18nProvider: I18NProvider,
                             localeService: LocaleService,
                             dateTimeAdapter: DateTimeAdapter<any> ,
                             owlDateTimeIntl: OwlDateTimeIntl) {
-        super(renderer, formattingService);
+        super(renderer, cdRef, formattingService);
         dateTimeAdapter.setLocale(  localeService.getLocale() );
         i18nProvider.getI18NMessages('servoy.button.ok', 'servoy.button.cancel').then((val) => {
             if (val['servoy.button.ok']) owlDateTimeIntl.setBtnLabel = val['servoy.button.ok'];
@@ -41,9 +42,9 @@ export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
         this.hour12Timer = lts.indexOf('a') >= 0 || lts.indexOf('A') >= 0;
     }
 
-    ngOnChanges( changes: SimpleChanges ) {
-        for ( const property in changes ) {
-            const change = changes[property];
+    svyOnChanges( changes: SimpleChanges ) {
+        for ( let property in changes ) {
+            let change = changes[property];
             switch ( property ) {
                 case 'format':
                     //                setDateFormat($scope.model.format, 'display');
@@ -62,7 +63,7 @@ export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
                     break;
             }
         }
-        super.ngOnChanges(changes);
+        super.svyOnChanges(changes);
     }
 
 

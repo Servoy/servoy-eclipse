@@ -1,7 +1,6 @@
 <div #element
     class="bts-radiogroup"
-    [ngClass]="styleClass"
-    [hidden]="!visible">
+    [ngClass]="styleClass">
     <label *ngFor="let item of valuelistID | notNullOrEmpty; let i = index;">
         <input type="{{inputType}}"
             [checked]="selection[i]"

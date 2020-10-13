@@ -1,7 +1,7 @@
 <button
     #element 
     class="bts-button" 
-    *ngIf="showAs !== 'html' && showAs !== 'trusted_html' && visible"
+    *ngIf="showAs !== 'html' && showAs !== 'trusted_html'"
     [sabloTabseq]="tabSeq"
     [id]="servoyApi.getMarkupId()"
     [svyTooltip]="toolTipText">
@@ -12,7 +12,7 @@
 <button 
 	#element
     class="bts-button" 
-    *ngIf="(showAs === 'html' || showAs === 'trusted_html') && visible"
+    *ngIf="(showAs === 'html' || showAs === 'trusted_html')"
     [sabloTabseq]="tabSeq"
     [id]="servoyApi.getMarkupId()"
     [innerHTML]="text | htmlFilter | trustAsHtml:isTrustedHTML()"

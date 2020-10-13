@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, Input, SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, Input, SimpleChanges } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { FormattingService } from '../../ngclient/servoy_public';
 
@@ -16,8 +16,8 @@ export class ServoyBootstrapTextbox extends ServoyBootstrapBasefield {
 
   valueBeforeChange: any;
   
-  constructor(renderer: Renderer2, private formattingService : FormattingService) {
-    super(renderer);
+  constructor(renderer: Renderer2,cdRef: ChangeDetectorRef, private formattingService : FormattingService) {
+    super(renderer, cdRef);
   }
 
   attachFocusListeners(nativeElement : any) {

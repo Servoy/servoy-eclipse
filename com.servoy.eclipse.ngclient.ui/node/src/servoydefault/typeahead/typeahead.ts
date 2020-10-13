@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, ViewChild, SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges } from '@angular/core';
 import { Observable, merge, Subject, of, Subscriber } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
 import {NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
@@ -18,9 +18,9 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
 
   private observer: Subscriber<object>;
 
-  constructor(renderer: Renderer2,
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
               formattingService: FormattingService) {
-    super(renderer, formattingService);
+    super(renderer, cdRef, formattingService);
     this.observableValue = new Observable(observer => {
       this.observer = observer;
       this.getObservableDataprovider().pipe(take(1)).subscribe(
@@ -56,8 +56,8 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
     return result;
   }
 
-  ngOnChanges( changes: SimpleChanges ) {
-    super.ngOnChanges(changes);
+  svyOnChanges( changes: SimpleChanges ) {
+    super.svyOnChanges(changes);
     if (changes['dataProviderID']) {
       if (this.observer) {
         this.getObservableDataprovider().pipe(take(1)).subscribe(

@@ -1,4 +1,4 @@
-import { Component, Renderer2} from '@angular/core';
+import { Component, Renderer2, ChangeDetectorRef} from '@angular/core';
 
 import {FormattingService} from '../../ngclient/servoy_public'
 
@@ -10,8 +10,8 @@ import {ServoyDefaultBaseField} from  '../basefield'
 } )
 export class ServoyDefaultHTMLView extends ServoyDefaultBaseField {
   
-    constructor(renderer: Renderer2, formattingService : FormattingService ) {
-        super(renderer,formattingService);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService : FormattingService ) {
+        super(renderer, cdRef, formattingService);
     }
 }
 

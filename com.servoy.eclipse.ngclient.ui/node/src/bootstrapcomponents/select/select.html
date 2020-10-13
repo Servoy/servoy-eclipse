@@ -1,7 +1,6 @@
 <select #element
     *ngIf="multiselect; else notMultiselect"
     (change)="onChange($event)"
-    [hidden]="!visible"
     class="bts-select"
     [ngClass]="styleClass"
     [id]="servoyApi.getMarkupId()"
@@ -26,7 +25,6 @@
 <ng-template #notMultiselect>
     <select #element
     (change)="onChange($event)"
-    [hidden]="!visible"
     class="bts-select"
     [ngClass]="styleClass"
     [id]="servoyApi.getMarkupId()"

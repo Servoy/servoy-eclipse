@@ -1,4 +1,4 @@
-import { Component, Renderer2, SimpleChanges} from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef} from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
 import { Select2Data, Select2UpdateEvent, Select2Value } from 'ng-select2-component';
 import { ServoyDefaultBaseField } from '../basefield';
@@ -11,13 +11,13 @@ import { take } from 'rxjs/operators';
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
 
-  data: Select2Data;
+  data: Select2Data = [];
   observableValue: Observable<any>; 
   private observer: Subscriber<any>;
 
-  constructor(renderer: Renderer2,
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, 
               formattingService: FormattingService) {
-    super(renderer, formattingService);
+    super(renderer, cdRef, formattingService);
     this.observableValue = new Observable(observer => {
       this.observer = observer;
       this.getObservableDataprovider().pipe(take(1)).subscribe(
@@ -25,9 +25,8 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
     });
   } 
 
-  ngOnInit() {
-      super.ngOnInit();
-      this.data = [];
+  svyOnInit() {
+      super.svyOnInit();
       this.setData();
   }
 
@@ -48,7 +47,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
     this.dataProviderIDChange.emit( this.dataProviderID );
   }
 
-  ngOnChanges( changes: SimpleChanges ) {
+  svyOnChanges( changes: SimpleChanges ) {
     // this change should be ignored for the combobox.
     delete changes['editable'];
     if (changes['dataProviderID']) {
@@ -57,7 +56,7 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
           displayValue => this.observer.next(displayValue));
       }
     }
-    super.ngOnChanges(changes);
+    super.svyOnChanges(changes);
   }
 
   getObservableDataprovider(): Observable<any> {

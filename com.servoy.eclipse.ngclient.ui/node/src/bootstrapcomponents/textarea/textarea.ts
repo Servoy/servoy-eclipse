@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Renderer2 } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, Renderer2 } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
@@ -6,18 +6,19 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
   templateUrl: './textarea.html',
   styleUrls: ['./textarea.scss']
 })
-export class ServoyBootstrapTextarea extends ServoyBootstrapBasefield implements OnInit {
+export class ServoyBootstrapTextarea extends ServoyBootstrapBasefield{
 
-  @Input() maxLength: number;
-
-  ngOnInit() {
-    super.ngOnInit();
-    if (!this.maxLength || this.maxLength == 0) {
-      this.maxLength = 524288;
+    @Input() maxLength: number;
+    
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
+        super(renderer, cdRef);
     }
-  }
-
-  constructor(renderer: Renderer2) {
-    super(renderer);
-  }
+    
+    svyOnInit() {
+        super.svyOnInit();
+        if (!this.maxLength || this.maxLength == 0) {
+            this.maxLength = 524288;
+        }
+    }
+    
 }

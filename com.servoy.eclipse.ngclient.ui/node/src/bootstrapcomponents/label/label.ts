@@ -1,20 +1,20 @@
 import { ServoyBootstrapBaseLabel } from "../bts_baselabel";
-import { Component, Input, AfterViewInit } from "@angular/core";
+import { Component, Input, Renderer2, ChangeDetectorRef } from "@angular/core";
 
 @Component({
     selector: 'servoybootstrap-label',
     templateUrl: './label.html',
     styleUrls: ['./label.scss'] 
 })
-export class ServoyBootstrapLabel extends ServoyBootstrapBaseLabel implements AfterViewInit {
+export class ServoyBootstrapLabel extends ServoyBootstrapBaseLabel {
 
     @Input() labelFor;
     @Input() styleClassExpression;
 
-    ngAfterViewInit() {
-        super.ngAfterViewInit();
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
+        super(renderer, cdRef);
     }
-
+    
     private getDataTarget(event): any {
         const dataTarget = event.target.closest("data-target");
         if (dataTarget && dataTarget[0]) {

@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, Output, EventEmitter, ContentChild, TemplateRef, OnInit, OnChanges, SimpleChanges, Renderer2} from '@angular/core';
+import { Component, ViewChild, Input, Output, EventEmitter, ContentChild, TemplateRef, ChangeDetectorRef, OnChanges, SimpleChanges, Renderer2} from '@angular/core';
 
 import { ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public'
 
@@ -8,7 +8,7 @@ import { Tab } from '../tabpanel/basetabpanel'
     selector: 'servoydefault-splitpane',
     templateUrl: './splitpane.html'
 } )
-export class ServoyDefaultSplitpane extends ServoyBaseComponent implements  OnInit, OnChanges {
+export class ServoyDefaultSplitpane extends ServoyBaseComponent {
 
     @Input() onChangeMethodID;
 
@@ -43,23 +43,25 @@ export class ServoyDefaultSplitpane extends ServoyBaseComponent implements  OnIn
     private leftTab:Tab;
     private rightTab:Tab;
 
-    constructor(renderer:Renderer2) {
-        super(renderer);
+    constructor(renderer:Renderer2, cdRef: ChangeDetectorRef) {
+        super(renderer, cdRef);
     }
     
-    ngOnInit() {
+    svyOnInit() {
         if (this.resizeWeight == undefined) this.resizeWeight = 0;
         if (this.pane1MinSize == undefined) this.pane1MinSize = 30;
         if (this.pane2MinSize == undefined) this.pane2MinSize = 30;
         if (this.divSize == undefined) this.divSize = 5;
+        super.svyOnInit();
     }
     
-    ngOnChanges(changes: SimpleChanges) {
+    svyOnChanges(changes: SimpleChanges) {
         if(changes["tabs"])
         {
             this.leftTab = this.tabSwitch(this.leftTab, this.tabs?this.tabs[0]:null);
             this.rightTab = this.tabSwitch(this.rightTab, this.tabs?this.tabs[1]:null);
         }
+        super.svyOnChanges(changes);
     }
     
     onChange( location ) {

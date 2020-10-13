@@ -1,5 +1,5 @@
 import { ServoyBootstrapBaseComponent } from "./bts_basecomp";
-import { Input, ViewChild, ElementRef, Renderer2, Directive } from "@angular/core";
+import { Input, ViewChild, ElementRef, Renderer2, Directive, ChangeDetectorRef } from "@angular/core";
 
 @Directive()
 export class ServoyBootstrapBaseLabel extends ServoyBootstrapBaseComponent {
@@ -7,8 +7,8 @@ export class ServoyBootstrapBaseLabel extends ServoyBootstrapBaseComponent {
     @Input() imageStyleClass;
     @Input() showAs;
 
-    constructor(renderer: Renderer2) {
-        super(renderer);
+    constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
+        super(renderer, cdRef);
     }
 
     isTrustedHTML(): boolean {

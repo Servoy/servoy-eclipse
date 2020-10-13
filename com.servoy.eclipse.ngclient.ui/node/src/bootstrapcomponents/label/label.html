@@ -2,8 +2,7 @@
     class="bts-label"
     [ngClass]="imageStyleClass"
     [sabloTabseq]="(onActionMethodID || onDoubleClickMethodID || onRightClickMethodID) ? tabSeq : -2"
-    [id]="servoyApi.getMarkupId()"
-    [hidden]="!visible">
+    [id]="servoyApi.getMarkupId()">
     <ng-container [ngTemplateOutlet]="template"></ng-container>
 </span>
 

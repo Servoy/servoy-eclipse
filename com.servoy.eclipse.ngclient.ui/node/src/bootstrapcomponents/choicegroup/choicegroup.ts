@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Renderer2, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, Renderer2, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
@@ -7,7 +7,7 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
   templateUrl: './choicegroup.html',
   styleUrls: ['./choicegroup.scss']
 })
-export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield implements OnInit {
+export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield{
 
   @Input() inputType;
   @Input() findmode;
@@ -16,19 +16,17 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield impleme
   selection: any[] = [];
   allowNullinc = 0;
 
-  constructor(renderer: Renderer2) {
-    super(renderer);
+  constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
+    super(renderer,cdRef);
   }
 
-  ngOnInit(){
-    this.onValuelistChange();
+  svyOnInit(){
+     super.svyOnInit();
+     this.onValuelistChange();
+     this.setHandlersAndTabIndex();
   }
 
-  ngAfterViewInit(){
-      this.setHandlersAndTabIndex();
-  }
-
-  ngOnChanges( changes: SimpleChanges ) {
+  svyOnChanges( changes: SimpleChanges ) {
     for ( let property in changes ) {
         switch ( property ) {
             case "dataProviderID":
@@ -37,7 +35,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield impleme
 
         }
     }
-    super.ngOnChanges(changes);
+    super.svyOnChanges(changes);
   }
 
   setHandlersAndTabIndex() {

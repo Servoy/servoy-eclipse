@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef, ContentChild, TemplateRef, Directive } from '@angular/core';
+import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef, ContentChild, TemplateRef, Directive, ChangeDetectorRef } from '@angular/core';
 import { WindowRefService } from '../sablo/util/windowref.service';
 import { ServoyBootstrapBaseComponent } from './bts_basecomp';
 import { BaseCustomObject } from '../sablo/spectypes.service';
@@ -14,9 +14,6 @@ export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
     @Input() tabIndex;
     @Output() tabIndexChange = new EventEmitter();
     
-    // this is a hack so that this element is done none statically (because it is nested in a view that is later visible)
-    @ViewChild('element') elementRef:ElementRef;
-    
     @ContentChild( TemplateRef  , {static: true})
     templateRef: TemplateRef<any>;
     
@@ -25,21 +22,19 @@ export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
     private waitingForServerVisibility = {};
     private lastSelectedTab: Tab;
     
-    constructor(renderer: Renderer2,protected windowRefService: WindowRefService) {
-        super(renderer);
+    constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef, protected windowRefService: WindowRefService) {
+        super(renderer, cdRef);
      }
     
-    ngOnChanges( changes: SimpleChanges ) {
+    svyOnChanges( changes: SimpleChanges ) {
         if ( changes["tabs"] ) {
             // quickly generate the id's for a the tab html id (and selecting it)
-            for ( let i = 0; i < this.tabs.length; i++ ) {
-                this.tabs[i]._id = this.servoyApi.getMarkupId() + "_tab_" + i;
-            }
+            this.generateIDs();
         }
         if ( changes["tabIndex"] ) {
             Promise.resolve( null ).then(() => { this.select( this.tabs[this.getRealTabIndex()] ) } );
         }
-        super.ngOnChanges(changes);
+        super.svyOnChanges(changes);
     }
     
     getForm( tab: Tab ) {
@@ -90,12 +85,23 @@ export class ServoyBootstrapBaseTabPanel extends ServoyBootstrapBaseComponent {
     }
     
     getSelectedTabId() {
+        if (this.tabs && this.tabs.length > 0 && !this.tabs[0]._id)
+        {
+           this.generateIDs();
+        }    
         if ( this.selectedTab ) return this.selectedTab._id;
         const tabIndex = this.getRealTabIndex();
         if (tabIndex > 0) {
             return this.tabs[tabIndex]._id;
         }
         else if (this.tabs && this.tabs.length > 0) return this.tabs[0]._id;
+    }
+    
+    private generateIDs()
+    {
+        for ( let i = 0; i < this.tabs.length; i++ ) {
+            this.tabs[i]._id = this.servoyApi.getMarkupId() + "_tab_" + i;
+        }
     }
     
     getRealTabIndex(): number {

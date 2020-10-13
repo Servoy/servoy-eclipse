@@ -1,32 +1,90 @@
-import { OnInit, AfterViewInit, Input, Renderer2, ElementRef, ViewChild, Directive } from '@angular/core';
+import { OnInit, AfterViewInit,OnChanges,SimpleChanges, Input, Renderer2, ElementRef, ViewChild, Directive, ChangeDetectorRef } from '@angular/core';
 import {ComponentContributor} from '../ngclient/component_contributor.service';
 import { ServoyApi } from './servoy_api';
 
 @Directive()
-export class ServoyBaseComponent implements AfterViewInit, OnInit {
+export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
     @Input() name;
     @Input() servoyApi: ServoyApi;
     @Input() servoyAttributes;
     
-    @ViewChild('element', {static: true}) elementRef:ElementRef;
+    @ViewChild('element', {static: false}) elementRef:ElementRef;
     
     readonly self: ServoyBaseComponent;
     private viewStateListeners: Set<IViewStateListener> = new Set();
     private componentContributor:ComponentContributor;
-
-    constructor(protected readonly renderer: Renderer2) {
+    private initialized:boolean;
+    private changes: SimpleChanges;
+    
+    constructor(protected readonly renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
         this.self = this;
         this.componentContributor = new ComponentContributor();
     }
     
+    //final method, do not override
     ngOnInit(){
-        this.addAttributes(); 
+        this.initializeComponent();
     }
     
+    //final method, do not override
     ngAfterViewInit() {
+        this.initializeComponent();
+        if (this.elementRef && this.changes)
+        {
+            this.svyOnChanges( this.changes );
+            this.changes = null;
+        }
+        this.cdRef.detectChanges();
+    }
+    
+    //final method, do not override
+    ngOnChanges( changes: SimpleChanges ) {
+        this.initializeComponent();
+        if ( !this.elementRef ) {
+            if ( this.changes == null ) {
+                this.changes = changes;
+            }
+            else {
+                for ( let property in changes ) {
+                    this.changes[property] = changes[property];
+                }
+            }
+        }
+        else {
+            if ( this.changes == null ) {
+                this.svyOnChanges( changes );
+            }
+            else
+            {
+                for ( let property in changes ) {
+                    this.changes[property] = changes[property];
+                }
+                this.svyOnChanges( this.changes );
+                this.changes = null;
+            }    
+        }
+    }
+    
+    // our init event that is called when dom is ready
+    svyOnInit(){
+        this.addAttributes(); 
         this.componentContributor.componentCreated(this);
         this.viewStateListeners.forEach(listener => listener.afterViewInit());
-     }
+    }
+   
+    // our change event that is called when dom is ready
+    svyOnChanges(changes: SimpleChanges){
+        
+    }
+    
+    protected initializeComponent()
+    {
+        if (!this.initialized && this.elementRef)
+        {
+            this.initialized = true;
+            this.svyOnInit();
+        }
+    }
     
     protected addAttributes() {
         if (!this.servoyAttributes) return;

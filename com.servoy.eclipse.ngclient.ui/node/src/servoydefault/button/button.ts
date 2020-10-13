@@ -1,4 +1,4 @@
-import { Component, Directive,ViewChild,QueryList,OnInit, Input, Output, EventEmitter, Renderer2, ElementRef, OnChanges,SimpleChanges } from '@angular/core';
+import { Component, Directive,ChangeDetectorRef,Renderer2 } from '@angular/core';
 
 import {ServoyDefaultBaseLabel} from  '../baselabel'
 
@@ -9,8 +9,8 @@ import {ServoyDefaultBaseLabel} from  '../baselabel'
 } )
 export class ServoyDefaultButton extends ServoyDefaultBaseLabel {
 
-    constructor(renderer: Renderer2) {
-        super(renderer);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
+        super(renderer, cdRef);
     }
 }
 

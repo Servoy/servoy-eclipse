@@ -11,8 +11,8 @@ export class ServoyDefaultCheckGroup extends ServoyDefaultBaseChoice{
 
   @Output() mainTabIndex;
 
-  constructor(renderer: Renderer2, formattingService: FormattingService, private cdRef: ChangeDetectorRef) {
-    super(renderer, formattingService);
+  constructor(renderer: Renderer2, formattingService: FormattingService, cdRef: ChangeDetectorRef) {
+    super(renderer, cdRef, formattingService);
   }
 
   getDataproviderFromSelection() {

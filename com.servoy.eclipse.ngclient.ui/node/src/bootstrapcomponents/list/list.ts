@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, Input, ViewChild, ElementRef, HostListener, SimpleChanges, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Renderer2, Input, ViewChild, ElementRef, HostListener, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
@@ -12,12 +12,12 @@ export class ServoyBootstrapList extends ServoyBootstrapBasefield {
 
   @Input() valuelistID: IValuelist;
 
-  constructor(renderer: Renderer2,
+  constructor(renderer: Renderer2,cdRef: ChangeDetectorRef,
      private showDisplayValuePipe: ShowDisplayValuePipe) {
-    super(renderer);
+    super(renderer, cdRef);
   }
 
-  ngOnChanges( changes: SimpleChanges ) {
+  svyOnChanges( changes: SimpleChanges ) {
     if (changes) {
       for ( const property of Object.keys(changes) ) {
           const change = changes[property];
@@ -27,7 +27,7 @@ export class ServoyBootstrapList extends ServoyBootstrapBasefield {
                   break;
             }
         }
-        super.ngOnChanges(changes);
+        super.svyOnChanges(changes);
     }
   }
 

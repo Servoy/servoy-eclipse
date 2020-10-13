@@ -1,4 +1,4 @@
-import { Component, Renderer2, ElementRef, ViewChild, Input} from '@angular/core';
+import { Component, Renderer2, ElementRef, ViewChild, Input, ChangeDetectorRef} from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import * as moment from 'moment';
@@ -11,15 +11,15 @@ import * as moment from 'moment';
 })
 export class ServoyBootstrapCalendar extends ServoyBootstrapBasefield {
 
-    @ViewChild( 'inputElement' , {static: true} ) inputElementRef: ElementRef;
+    @ViewChild( 'inputElement') inputElementRef: ElementRef;
     @Input() format;
 
     public filter: any;
     min: Date;
     max: Date;
-
-    constructor(renderer: Renderer2) {
-        super(renderer);
+    
+    constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef) { 
+        super(renderer, cdRef);
     }
 
     getFocusElement(): any {

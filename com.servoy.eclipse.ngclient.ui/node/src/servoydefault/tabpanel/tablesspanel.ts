@@ -1,4 +1,4 @@
-import { Component, Renderer2} from '@angular/core';
+import { Component, Renderer2,ChangeDetectorRef} from '@angular/core';
 
 import {BaseTabpanel,Tab} from "./basetabpanel"
 
@@ -11,7 +11,7 @@ import { LoggerFactory } from '../../sablo/logger.service'
     templateUrl: './tablesspanel.html'
 } )
 export class ServoyDefaultTablesspanel extends BaseTabpanel {
-    constructor(windowRefService: WindowRefService, logFactory : LoggerFactory, renderer:Renderer2) {
-       super(windowRefService, logFactory, renderer);
+    constructor(windowRefService: WindowRefService, cdRef: ChangeDetectorRef, logFactory : LoggerFactory, renderer:Renderer2) {
+       super(windowRefService, logFactory, renderer,cdRef);
     }
 }

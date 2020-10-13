@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, Renderer2, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef, Renderer2, SimpleChanges,ChangeDetectorRef } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
@@ -10,21 +10,16 @@ import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
 })
 export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
 
-  @ViewChild('element') elementRef: ElementRef;
-  
   @Input() valuelistID: IValuelist;
   @Input() multiselect;
   @Input() selectSize;
   selectedValues: any[];
 
-  ngOnInit() {
-  } 
-
-  constructor(renderer: Renderer2, private showDisplayValuePipe: ShowDisplayValuePipe) {
-    super(renderer);
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, private showDisplayValuePipe: ShowDisplayValuePipe) {
+    super(renderer, cdRef);
   }
 
-  ngOnChanges( changes: SimpleChanges ) {
+  svyOnChanges( changes: SimpleChanges ) {
     if (changes && this.elementRef) {
       for ( const property of Object.keys(changes) ) {
           const change = changes[property];
@@ -38,7 +33,7 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
                   break;
             }
         }
-        super.ngOnChanges(changes);
+        super.svyOnChanges(changes);
     }
   }
 

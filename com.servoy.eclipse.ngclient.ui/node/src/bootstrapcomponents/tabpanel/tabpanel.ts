@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, Output, EventEmitter, ViewChild, SimpleChanges, ElementRef,ContentChild, TemplateRef } from '@angular/core';
+import { Component, Renderer2, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 
 import { ServoyBootstrapBaseTabPanel,Tab } from '../bts_basetabpanel';
@@ -21,8 +21,8 @@ export class ServoyBootstrapTabpanel extends ServoyBootstrapBaseTabPanel {
   @Output() tabIndexChange = new EventEmitter();
   
   
-  constructor(renderer: Renderer2,windowRefService: WindowRefService) {
-      super(renderer,windowRefService);
+  constructor(renderer: Renderer2,cdRef: ChangeDetectorRef, windowRefService: WindowRefService) {
+      super(renderer,cdRef, windowRefService);
    }
   
   onTabChange( event: NgbTabChangeEvent ) {

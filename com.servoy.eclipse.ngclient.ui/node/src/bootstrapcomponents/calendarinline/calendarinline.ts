@@ -1,4 +1,4 @@
-import { Component, Renderer2} from '@angular/core';
+import { Component, Renderer2, ChangeDetectorRef} from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
@@ -12,8 +12,8 @@ export class ServoyBootstrapCalendarinline extends ServoyBootstrapBasefield {
     min: Date;
     max: Date;
 
-    constructor(renderer: Renderer2) { 
-        super(renderer);
+    constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef) { 
+        super(renderer, cdRef);
     }
 
     public disableDays(dateArray : Number[]) {

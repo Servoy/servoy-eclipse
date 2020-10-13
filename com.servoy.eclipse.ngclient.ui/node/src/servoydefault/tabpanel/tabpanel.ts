@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, Output, EventEmitter, Renderer2 , ElementRef} from '@angular/core';
+import { Component, ViewChild, Input, Output, EventEmitter, Renderer2 , ElementRef, ChangeDetectorRef} from '@angular/core';
 
 import { BaseTabpanel, Tab } from "./basetabpanel"
 
@@ -15,14 +15,11 @@ import { NgbTabset, NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
     templateUrl: './tabpanel.html'
 } )
 export class ServoyDefaultTabpanel extends BaseTabpanel {
-    @ViewChild( 'tabset' , {static: true})
+    @ViewChild( 'tabset')
     private tabset: NgbTabset;
     
-    // this is a hack so that this element is done none statically (because it is nested in a view that is later visible)
-    @ViewChild('element') elementRef:ElementRef;
-
-    constructor( windowRefService: WindowRefService, log : LoggerFactory, renderer: Renderer2) {
-        super( windowRefService, log, renderer );
+    constructor( windowRefService: WindowRefService, log : LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
+        super( windowRefService, log, renderer, cdRef );
     }
 
     onTabChange( event: NgbTabChangeEvent ) {

@@ -1,4 +1,4 @@
-import { Component, Renderer2,Input,ViewChild,SimpleChanges } from '@angular/core';
+import { Component, Renderer2,Input,ViewChild,SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import {IValuelist} from '../../sablo/spectypes.service';
 import {NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
@@ -15,15 +15,15 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield  {
   @Input() format;
   @Input() valuelistID: IValuelist;
   
-  @ViewChild('instance', {static: true}) instance: NgbTypeahead;
+  @ViewChild('instance') instance: NgbTypeahead;
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
   
   observableValue: Observable<object>;
   private observer: Subscriber<object>;
   
-  constructor(renderer: Renderer2) { 
-      super(renderer);
+  constructor(renderer: Renderer2,cdRef: ChangeDetectorRef) { 
+      super(renderer, cdRef);
       this.observableValue = new Observable(observer => {
           this.observer = observer;
           this.getObservableDataprovider().pipe(take(1)).subscribe(
@@ -31,8 +31,8 @@ export class ServoyBootstrapTypeahead extends ServoyBootstrapBasefield  {
         });
   }
 
-  ngOnChanges( changes: SimpleChanges ) {
-      super.ngOnChanges(changes);
+  svyOnChanges( changes: SimpleChanges ) {
+      super.svyOnChanges(changes);
       if (changes['dataProviderID']) {
         if (this.observer) {
           this.getObservableDataprovider().pipe(take(1)).subscribe(

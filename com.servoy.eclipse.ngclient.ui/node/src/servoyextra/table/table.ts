@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, Renderer2, ElementRef, AfterViewInit, EventEmitter, Output, OnDestroy } from '@angular/core';
+import { Component, ViewChild, Input, Renderer2, ElementRef, AfterViewInit, EventEmitter, Output, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public'
 import { IFoundset } from '../../sablo/spectypes.service';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
@@ -10,11 +10,10 @@ import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
     selector: 'servoyextra-table',
     templateUrl: './table.html'
 } )
-export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewInit, OnDestroy  {
+export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  {
   
     // this is a hack for test, so that this has a none static child ref because the child is in a nested template
     @ViewChild('child', {static: false}) child:ElementRef;
-    @ViewChild('element', {static: false}) elementRef:ElementRef;
     @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
     
     @Input() foundset : IFoundset;
@@ -75,13 +74,13 @@ export class ServoyExtraTable extends ServoyBaseComponent implements AfterViewIn
     averageRowHeight: number;
     actualPageSize: number = -1;
 
-    constructor(renderer: Renderer2, logFactory: LoggerFactory) { 
-        super(renderer);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory) { 
+        super(renderer, cdRef);
         this.log = logFactory.getLogger('Table');
     }
 
-    ngAfterViewInit() {
-        super.ngAfterViewInit();
+    svyOnInit() {
+        super.svyOnInit();
         this.rendered = true;
 
         this.computeTableWidth();

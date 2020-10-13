@@ -1,4 +1,4 @@
-import { OnInit, Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges } from '@angular/core';
+import { Input, Output, EventEmitter, SimpleChanges, Renderer2, Directive, OnChanges, ChangeDetectorRef } from '@angular/core';
 
 import {PropertyUtils, FormattingService} from '../ngclient/servoy_public';
 
@@ -7,7 +7,7 @@ import {ServoyDefaultBaseComponent} from './basecomponent';
 import {IValuelist} from '../sablo/spectypes.service';
 
 @Directive()
-export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implements OnInit, OnChanges {
+export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
 
     @Input() onDataChangeMethodID;
     @Input() onFocusGainedMethodID;
@@ -23,12 +23,12 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
 
     storedTooltip: any;
 
-    constructor(renderer: Renderer2, public formattingService: FormattingService) {
-        super(renderer);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
+        super(renderer,cdRef);
     }
 
-    ngOnInit() {
-      super.ngOnInit();
+    svyOnInit() {
+      super.svyOnInit();
       this.attachFocusListeners(this.getFocusElement());
       if (this.dataProviderID === undefined) {
           this.dataProviderID = null;
@@ -66,7 +66,7 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
         }
     }
 
-    ngOnChanges( changes: SimpleChanges ) {
+    svyOnChanges( changes: SimpleChanges ) {
       if (changes) {
         for ( const property of Object.keys(changes) ) {
             const change = changes[property];
@@ -87,7 +87,7 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent implemen
             }
         }
       }
-      super.ngOnChanges(changes);
+      super.svyOnChanges(changes);
     }
 
     update( val: string ) {

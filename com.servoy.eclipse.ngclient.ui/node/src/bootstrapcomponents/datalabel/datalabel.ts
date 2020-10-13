@@ -1,4 +1,4 @@
-import { Component, Input, AfterViewInit, Renderer2, Pipe, PipeTransform } from "@angular/core";
+import { Component, Input, AfterViewInit, Renderer2, Pipe, PipeTransform,ChangeDetectorRef } from "@angular/core";
 import { ServoyBootstrapBaseLabel } from "../bts_baselabel";
 
 @Component({
@@ -6,19 +6,15 @@ import { ServoyBootstrapBaseLabel } from "../bts_baselabel";
     templateUrl: './datalabel.html',
     styleUrls: ['./datalabel.scss'] 
 })
-export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel implements AfterViewInit {
+export class ServoyBootstrapDatalabel extends ServoyBootstrapBaseLabel {
 
     @Input() dataProviderID;
     @Input() styleClassExpression;
     @Input() valuelistID;
     @Input() format;
 
-    constructor(renderer: Renderer2) {
-        super(renderer);
-    }
-
-    ngAfterViewInit() {
-        super.ngAfterViewInit();
+    constructor(renderer: Renderer2,cdRef: ChangeDetectorRef) {
+        super(renderer,cdRef);
     }
 
     attachHandlers() {

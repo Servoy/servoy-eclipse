@@ -1,4 +1,4 @@
-import { Component, Renderer2, Input, EventEmitter, Output} from '@angular/core';
+import { Component, Renderer2, Input, EventEmitter, Output, ChangeDetectorRef} from '@angular/core';
 
 import {ServoyDefaultBaseComponent} from '../../servoydefault/basecomponent'
 
@@ -20,12 +20,12 @@ export class ServoyCoreSlider extends ServoyDefaultBaseComponent {
     
     @Output() dataProviderIDChange = new EventEmitter();
     
-    constructor(renderer: Renderer2) { 
-        super(renderer);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) { 
+        super(renderer, cdRef);
     }
    
-    ngOnInit() {
-        super.ngOnInit();
+    svyOnInit() {
+        super.svyOnInit();
         if (this.orientation == 'vertical')
         {
             this.renderer.setStyle(this.getNativeElement(), "-webkit-appearance", 'slider-vertical' );

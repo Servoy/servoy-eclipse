@@ -1,9 +1,9 @@
 import { ServoyBootstrapBaseComponent } from "./bts_basecomp";
-import { Directive, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, Renderer2 } from "@angular/core";
+import { Directive, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, Renderer2, ChangeDetectorRef } from "@angular/core";
 import { PropertyUtils } from '../ngclient/servoy_public';
 
 @Directive()
-export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent implements OnInit, OnChanges {
+export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
  
     @Input() onDataChangeMethodID;
     @Input() onFocusGainedMethodID;
@@ -17,18 +17,42 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent imple
 
     storedTooltip: any;
 
-    constructor(renderer: Renderer2) {
-        super(renderer);
+    constructor(renderer: Renderer2,  protected cdRef: ChangeDetectorRef) {
+        super(renderer,cdRef);
     }
 
-    ngOnInit() {
-        super.ngOnInit();
+    svyOnInit() {
+        super.svyOnInit();
         this.attachFocusListeners(this.getFocusElement());
         if (this.dataProviderID === undefined) {
             this.dataProviderID = null;
         }
     }
   
+    svyOnChanges( changes: SimpleChanges ) {
+        if (changes) {
+          for ( const property of Object.keys(changes) ) {
+              const change = changes[property];
+              switch ( property ) {
+                  case 'editable':
+                      if ( change.currentValue )
+                          this.renderer.removeAttribute(this.getFocusElement(),  'readonly' );
+                      else
+                          this.renderer.setAttribute(this.getFocusElement(),  'readonly', 'readonly' );
+                      break;
+                  case 'placeholderText':
+                      if ( change.currentValue ) this.renderer.setAttribute(this.getFocusElement(),   'placeholder', change.currentValue );
+                      else  this.renderer.removeAttribute(this.getFocusElement(),  'placeholder' );
+                      break;
+                  case 'selectOnEnter': 
+                      if ( change.currentValue ) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer);
+                      break;    
+                }
+            }
+            super.svyOnChanges(changes);
+        }
+    }
+    
     attachFocusListeners(nativeElement: any) {
           if (this.onFocusGainedMethodID)
               this.renderer.listen( nativeElement, 'focus', ( e ) => {
@@ -65,30 +89,6 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent imple
           this.dataProviderIDChange.emit(this.dataProviderID);
     }
        
-    ngOnChanges( changes: SimpleChanges ) {
-        if (changes && this.elementRef) {
-          for ( const property of Object.keys(changes) ) {
-              const change = changes[property];
-              switch ( property ) {
-                  case 'editable':
-                      if ( change.currentValue )
-                          this.renderer.removeAttribute(this.getFocusElement(),  'readonly' );
-                      else
-                          this.renderer.setAttribute(this.getFocusElement(),  'readonly', 'readonly' );
-                      break;
-                  case 'placeholderText':
-                      if ( change.currentValue ) this.renderer.setAttribute(this.getFocusElement(),   'placeholder', change.currentValue );
-                      else  this.renderer.removeAttribute(this.getFocusElement(),  'placeholder' );
-                      break;
-                  case 'selectOnEnter': 
-                      if ( change.currentValue ) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer);
-                      break;    
-                }
-            }
-            super.ngOnChanges(changes);
-        }
-    }
-
     public selectAll() {
         this.getNativeElement().select();
     }

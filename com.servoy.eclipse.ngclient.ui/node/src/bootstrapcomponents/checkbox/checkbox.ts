@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input } from '@angular/core';
+import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input,ChangeDetectorRef } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
@@ -6,22 +6,22 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
   templateUrl: './checkbox.html',
   styleUrls: ['./checkbox.scss']
 })
-export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield implements AfterViewInit {
+export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield {
 
   @Input() showAs;
 
   selected: boolean = false;
 
-  constructor(renderer: Renderer2) {
-    super(renderer);
-    super.attachHandlers();
+  constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
+    super(renderer,cdRef);
   }
 
-  ngAfterViewInit() {
-    this.attachEventHandlers(this.getNativeElement())
+  svyOnInit() {
+      super.svyOnInit();
+      this.attachEventHandlers(this.getNativeElement())
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  svyOnChanges(changes: SimpleChanges) {
     for ( let property in changes ) {
         switch ( property ) {
             case "dataProviderID":
@@ -30,8 +30,8 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield implements
 
         }
     }
-    super.ngOnChanges(changes);
-}
+    super.svyOnChanges(changes);
+  }
   
   attachEventHandlers(element: any) {
     if (!element)

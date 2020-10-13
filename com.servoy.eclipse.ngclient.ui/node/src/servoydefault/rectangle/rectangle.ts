@@ -1,21 +1,21 @@
-import {Component,Input, OnInit, Renderer2, SimpleChanges} from '@angular/core';
+import {Component,Input, ChangeDetectorRef, Renderer2, SimpleChanges} from '@angular/core';
 import {ServoyDefaultBaseComponent} from "../basecomponent";
 @Component({
   selector: 'servoydefault-rectangle',
   templateUrl: './rectangle.html'
 })
-export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent implements OnInit{
+export class ServoyDefaultRectangle extends ServoyDefaultBaseComponent{
     @Input() lineSize;
     @Input() roundedRadius;
     @Input() shapeType;
     
-    constructor(renderer: Renderer2) {
-        super(renderer);
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef) {
+        super(renderer, cdRef);
     }
     
-    ngOnChanges( changes: SimpleChanges ) {
+    svyOnChanges( changes: SimpleChanges ) {
         
-        super.ngOnChanges(changes);
+        super.svyOnChanges(changes);
         
         for ( let property in changes ) {
             let change = changes[property];

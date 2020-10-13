@@ -1,4 +1,4 @@
-import { Component, Renderer2, OnInit, OnChanges, SimpleChanges} from '@angular/core';
+import { Component, Renderer2,SimpleChanges, ChangeDetectorRef} from '@angular/core';
 
 import {FormattingService} from '../../ngclient/servoy_public'
 
@@ -8,14 +8,14 @@ import {ServoyDefaultBaseField} from  '../basefield'
     selector: 'servoydefault-imagemedia',
     templateUrl: './imagemedia.html'
 } )
-export class ServoyDefaultImageMedia extends ServoyDefaultBaseField implements OnInit, OnChanges {
+export class ServoyDefaultImageMedia extends ServoyDefaultBaseField{
   
     imageURL: string = "servoydefault/imagemedia/res/images/empty.gif";
     increment: number = 0;
     
-    constructor(renderer: Renderer2, 
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef ,
                 formattingService : FormattingService) {
-        super(renderer,formattingService);
+        super(renderer, cdRef, formattingService);
     }
     
     deleteMedia(): void {
@@ -32,13 +32,13 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField implements O
         }
     }
     
-    ngOnInit() {
-        super.ngOnInit();
+    svyOnInit() {
+        super.svyOnInit();
         this.updateImageURL(this.dataProviderID);
     }
     
-    ngOnChanges(changes: SimpleChanges): void {
-        super.ngOnChanges(changes);
+    svyOnChanges(changes: SimpleChanges): void {
+        super.svyOnChanges(changes);
         this.updateImageURL(changes.dataProviderID.currentValue);
     }
     

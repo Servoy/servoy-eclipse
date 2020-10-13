@@ -1,4 +1,4 @@
-import { Input, ContentChild, TemplateRef, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, Directive } from '@angular/core';
+import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Renderer2, Directive, ChangeDetectorRef } from '@angular/core';
 
 import { PropertyUtils, ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public'
 
@@ -13,7 +13,7 @@ import { ServoyDefaultBaseComponent } from '../basecomponent';
 
 
 @Directive()
-export abstract class BaseTabpanel extends ServoyBaseComponent implements OnChanges {
+export abstract class BaseTabpanel extends ServoyBaseComponent{
 
     @Input() onChangeMethodID;
 
@@ -46,21 +46,20 @@ export abstract class BaseTabpanel extends ServoyBaseComponent implements OnChan
     protected selectedTab: Tab;
     private log: LoggerService;
 
-    constructor( private windowRefService: WindowRefService, private logFactory : LoggerFactory, renderer:Renderer2 ) {
-        super(renderer);
+    constructor( private windowRefService: WindowRefService, private logFactory : LoggerFactory, renderer:Renderer2, cdRef: ChangeDetectorRef ) {
+        super(renderer, cdRef);
         this.log = logFactory.getLogger("BaseTabpanel");
     }
 
-    ngOnChanges( changes: SimpleChanges ) {
+    svyOnChanges( changes: SimpleChanges ) {
         if ( changes["tabs"] ) {
             // quickly generate the id's for a the tab html id (and selecting it)
-            for ( let i = 0; i < this.tabs.length; i++ ) {
-                this.tabs[i]._id = this.servoyApi.getMarkupId() + "_tab_" + i;
-            }
+           this.initTabID();
         }
         if ( changes["tabIndex"] ) {
             Promise.resolve( null ).then(() => { this.select( this.tabs[this.getRealTabIndex()] ) } );
         }
+        super.svyOnChanges(changes);
     }
 
     getForm( tab?: Tab ) {
@@ -176,6 +175,13 @@ export abstract class BaseTabpanel extends ServoyBaseComponent implements OnChan
         }
         if ( this.tabs && this.tabs.length > 0 ) return 0;
         return -1;
+    }
+    
+    private initTabID()
+    {
+        for ( let i = 0; i < this.tabs.length; i++ ) {
+            this.tabs[i]._id = this.servoyApi.getMarkupId() + "_tab_" + i;
+        }
     }
 }
 
