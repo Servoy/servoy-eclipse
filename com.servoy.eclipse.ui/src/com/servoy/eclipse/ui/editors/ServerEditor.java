@@ -79,7 +79,6 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
 
 import com.servoy.eclipse.core.IDeveloperServoyModel;
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -597,7 +596,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		});
 
-		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(logServerListener = new LogServerListener());
+		ApplicationServerRegistry.get().getServerManager().addServerConfigListener(logServerListener = new EnableServerListener());
 
 		Composite buttonsComposite = new Composite(advancedSettingsComposite, SWT.NONE);
 
@@ -1616,10 +1615,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		}
 	}
 
-	class LogServerListener implements IServerConfigListener
+	class EnableServerListener implements IServerConfigListener
 	{
 		public void serverConfigurationChanged(ServerConfig oldServerConfig, ServerConfig newServerConfig)
 		{
+			setInput(new ServerEditorInput(newServerConfig));
+			initDataBindings();
+			relayout();
 			if (serverConfigObservable.getObject().getServerName().equals(ApplicationServerRegistry.get().getServerManager().getLogServerName()))
 			{
 				logServerButton.setSelection(true);
@@ -1636,5 +1638,4 @@ public class ServerEditor extends EditorPart implements IShowInSource
 	{
 		return new ShowInContext(getEditorInput(), null);
 	}
-
 }

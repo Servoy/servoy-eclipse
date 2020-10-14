@@ -171,32 +171,36 @@ public class InstallWebPackageHandler implements IDeveloperService
 		String urlString = null;
 		String dependency = null;
 		String pckVersion = null;
-		String currentVersion = ClientVersion.getPureVersion();
+		String currentServoyVersion = ClientVersion.getPureVersion();
 		for (int i = jsonArray.length() - 1; i >= 0; i--)
 		{
 			JSONObject release = jsonArray.optJSONObject(i);
-			if (selectedVersion == null || selectedVersion.equals(release.optString("version", "")))
+			if (selectedVersion == null && release.has("servoy-version"))
 			{
-				if (selectedVersion == null && release.has("servoy-version"))
-				{
-					//if version is not specified, then we search for the latest compatible version
-					String servoyVersion = release.getString("servoy-version");
-					String[] minAndMax = servoyVersion.split(" - ");
-					if (WebPackageVersionComparator.compare(minAndMax[0], currentVersion) <= 0)
-					{
-						urlString = release.optString("url");
-						dependency = release.optString("dependency", null);
-						pckVersion = release.optString("version", "");
-						break;
-					}
-				}
-				else
+				//if version is not specified, then we search for the latest compatible version
+				String servoyVersion = release.getString("servoy-version");
+				String[] minAndMax = servoyVersion.split(" - ");
+				if (WebPackageVersionComparator.compare(minAndMax[0], currentServoyVersion) <= 0 && (pckVersion == null ||
+					WebPackageVersionComparator.compare(pckVersion, release.optString("version", "")) <= 0))
 				{
 					urlString = release.optString("url");
 					dependency = release.optString("dependency", null);
 					pckVersion = release.optString("version", "");
-					break;
 				}
+			}
+			else if (pckVersion == null || release.optString("version", "").equals(selectedVersion) ||
+				WebPackageVersionComparator.compare(pckVersion, release.optString("version", "")) <= 0)
+			{
+				//the selectedVersion or the latest version we found so far
+				urlString = release.optString("url");
+				dependency = release.optString("dependency", null);
+				pckVersion = release.optString("version", "");
+			}
+
+			if (release.optString("version", "").equals(selectedVersion))
+			{
+				//we have found the specific version we were looking for
+				break;
 			}
 		}
 

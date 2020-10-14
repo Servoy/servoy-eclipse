@@ -23,6 +23,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -49,6 +51,7 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 	{
 		try
 		{
+			boolean[] gained = new boolean[] { false };
 			browser = new Browser(parent, SWT.CHROMIUM)
 			{
 				// hack for https://bugs.eclipse.org/bugs/show_bug.cgi?id=567629
@@ -57,7 +60,9 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 				@Override
 				public boolean isFocusControl()
 				{
-					return false;
+					// System.err.println("is focus control  " + gained[0] + "," + super.isFocusControl());
+					if (!gained[0]) return false;
+					return super.isFocusControl();
 				}
 
 				@Override
@@ -65,6 +70,22 @@ public class ChromiumVisualFormEditorDesignPage extends RfbVisualFormEditorDesig
 				{
 				}
 			};
+			browser.addFocusListener(new FocusListener()
+			{
+
+				@Override
+				public void focusLost(FocusEvent e)
+				{
+					gained[0] = false;
+
+				}
+
+				@Override
+				public void focusGained(FocusEvent e)
+				{
+					gained[0] = true;
+				}
+			});
 		}
 		catch (SWTError e)
 		{

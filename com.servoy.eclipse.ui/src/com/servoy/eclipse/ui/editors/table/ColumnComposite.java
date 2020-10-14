@@ -649,7 +649,7 @@ public class ColumnComposite extends Composite
 				tname = tname.substring(0, tname.length() - 1);
 			}
 			IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 5)) + "_uuid";
+			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 5));
 			try
 			{
 				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType(t);
@@ -657,10 +657,12 @@ public class ColumnComposite extends Composite
 				if (defaultFirstColumnSequenceType == ColumnInfo.UUID_GENERATOR)
 				{
 					keyType = new DesignerPreferences().getPrimaryKeyUuidType();
+					colname += "_uuid";
 				}
 				else
 				{
 					keyType = PrimaryKeyType.INTEGER;
+					colname += "_id";
 				}
 				Column id = t.createNewColumn(nameValidator, colname, keyType.getColumnType(), keyType.getLength());
 				id.setDatabasePK(true);
