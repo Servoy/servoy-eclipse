@@ -664,7 +664,7 @@ public class ElementFactory
 
 					if (configuration.isFillName())
 					{
-						label.setName(name + "_label");
+						label.setName(getCorrectName(parent, name + "_label"));
 						if (label instanceof GraphicalComponent)
 						{
 							((GraphicalComponent)label).setLabelFor(name);
