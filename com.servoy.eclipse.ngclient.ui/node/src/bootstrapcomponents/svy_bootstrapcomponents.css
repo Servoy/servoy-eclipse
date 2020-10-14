@@ -86,6 +86,11 @@
     margin: 0;
 }
 
+.checkbox input {
+	margin: 0 .25em 0 0;
+	outline: #5bc0de auto 5px;
+}
+
 .bts-check div {
     min-height: 20px;
     margin-bottom: 0;
