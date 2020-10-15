@@ -166,7 +166,7 @@ public class DesignerPreferences
 	// if you change this, please change it in ServoyJSUnitTestRunner as well
 	public static final int WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT = 300; // 5 min (in hundreds of milliseconds); can be overridden via 'servoy.test.solution-load.timeout' system property
 
-	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = true;
+	public static final boolean USE_CHROMIUM_BROWSER_DEFAULT = Utils.isWindowsOS();
 
 	public static final boolean USE_CONTEXT_MENU_TUTORIALS_DEFAULT = true;
 
