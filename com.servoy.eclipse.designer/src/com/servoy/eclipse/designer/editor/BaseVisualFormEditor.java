@@ -414,9 +414,12 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		{
 			public void run()
 			{
-				boolean wasClosed = getSite().getPage().closeEditor(BaseVisualFormEditor.this, save);
-				if (save && !wasClosed) // the user clicked cancel
-					getSite().getPage().closeEditor(BaseVisualFormEditor.this, false);
+				if (getSite() != null && getSite().getPage() != null)
+				{
+					boolean wasClosed = getSite().getPage().closeEditor(BaseVisualFormEditor.this, save);
+					if (save && !wasClosed) // the user clicked cancel
+						getSite().getPage().closeEditor(BaseVisualFormEditor.this, false);
+				}
 			}
 		});
 	}
