@@ -29,10 +29,6 @@ import { ViewportService } from './services/viewport.service';
 import { ComponentContributor } from './component_contributor.service';
 import { ServoyPublicModule } from './servoy_public.module';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
-import { ServoyExtraTable } from '../servoyextra/table/table';
-
-import { ScrollingModule } from '@angular/cdk/scrolling';
-import { ResizableModule } from 'angular-resizable-element';
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
 import { LocaleService } from './locale.service';
 
@@ -49,7 +45,6 @@ import { LocaleService } from './locale.service';
         ServoyCoreSlider,
         DialogWindowComponent,
         LoadingIndicatorComponent,
-        ServoyExtraTable,
         ListFormComponent
     ],
     imports: [
@@ -60,9 +55,7 @@ import { LocaleService } from './locale.service';
         AllComponentsModule,
         AllServicesModules,
         HttpClientModule,
-        ServoyPublicModule,
-        ResizableModule,
-        ScrollingModule
+        ServoyPublicModule
     ],
     providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
                 DatePipe, DecimalPipe, ComponentContributor, ViewportService],

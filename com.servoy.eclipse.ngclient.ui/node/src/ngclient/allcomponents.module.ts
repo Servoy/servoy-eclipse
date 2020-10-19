@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { ServoyDefaultComponentsModule } from '../servoydefault/servoydefault.module';
 import { ServoyBootstrapComponentsModule } from "../bootstrapcomponents/servoybootstrap.module";
+import { ServoyExtraComponentsModule } from '../servoyextra/servoyextra.module';
 
 /**
  * This module should be generated in the developer and when exporting a WAR
@@ -11,11 +12,13 @@ import { ServoyBootstrapComponentsModule } from "../bootstrapcomponents/servoybo
   
   imports: [
     ServoyDefaultComponentsModule, 
-    ServoyBootstrapComponentsModule   
+    ServoyBootstrapComponentsModule,
+    ServoyExtraComponentsModule
   ],
   exports: [
     ServoyDefaultComponentsModule,
-    ServoyBootstrapComponentsModule 
+    ServoyBootstrapComponentsModule,
+    ServoyExtraComponentsModule
   ]
 })
 export class AllComponentsModule { }
