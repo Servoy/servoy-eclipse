@@ -124,6 +124,10 @@ public class NgDesktopClientConnection implements Closeable
 			jsonObj.put("width", settings.get("ngdesktop_width"));
 		if (settings.get("ngdesktop_height") != null && settings.get("ngdesktop_height").trim().length() > 0)
 			jsonObj.put("height", settings.get("ngdesktop_height"));
+		if (settings.get("ngdesktop_version") != null && settings.get("ngdesktop_version").trim().length() > 0)
+			jsonObj.put("version", settings.get("ngdesktop_version"));
+		if (settings.get("ngdesktop_include_update") != null && settings.get("ngdesktop_include_update").trim().length() > 0)
+			jsonObj.put("includeUpdate", settings.get("ngdesktop_include_update"));
 
 		final StringEntity input = new StringEntity(jsonObj.toString());
 		input.setContentType("application/json");

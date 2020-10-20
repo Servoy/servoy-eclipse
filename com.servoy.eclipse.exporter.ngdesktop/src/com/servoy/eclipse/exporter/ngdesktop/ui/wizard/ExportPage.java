@@ -17,10 +17,17 @@
 
 package com.servoy.eclipse.exporter.ngdesktop.ui.wizard;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardPage;
@@ -32,14 +39,19 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -66,15 +78,24 @@ public class ExportPage extends WizardPage
 	private Group sizeGroup;
 	private Text widthText;
 	private Text heightText;
+	private Group versionGroup;
+	private Combo srcVersionCombo;
+	private Button includeUpdateBtn;
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
+	private final String versionsUrl = "https://download.servoy.com/ngdesktop/src/versions.txt";
+	private final String[] versions = { "2020.06", "2020.12" };
+	private final boolean[] updates = { false, true };
+	private Map<String, Boolean> srcVersions = new TreeMap<String, Boolean>(); //sort by keys
 
 	public ExportPage(ExportNGDesktopWizard exportElectronWizard)
 	{
 		super("page1");
 		this.exportElectronWizard = exportElectronWizard;
 		setTitle("Export Servoy application");
+		for (int index = 0; index < versions.length; index++)
+			srcVersions.put(versions[index], Boolean.valueOf(updates[index]));
 	}
 
 	@Override
@@ -283,6 +304,60 @@ public class ExportPage extends WizardPage
 		gd.horizontalSpan = 2;
 		sizeGroup.setLayoutData(gd);
 
+		final Label srcVersionLabel = new Label(composite, SWT.NONE);
+		srcVersionLabel.setText("Source version:");
+		srcVersionLabel.setToolTipText("NG Desktop source version");
+
+		versionGroup = new Group(composite, SWT.NONE);
+		versionGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
+
+
+		srcVersionCombo = new Combo(versionGroup, SWT.READ_ONLY);
+		srcVersions = getAvailableVersions();
+
+		final Iterator<String> keys = srcVersions.keySet().iterator();
+		while (keys.hasNext())
+		{
+			final String key = keys.next();
+			srcVersionCombo.add(key);
+			final Object data = srcVersions.get(key);
+			srcVersionCombo.setData(key, data);
+		}
+		srcVersionCombo.select(0);
+		srcVersionCombo.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				final String key = ((Combo)event.widget).getText();
+				final Boolean supportUpdates = (Boolean)event.widget.getData(key);
+				includeUpdateBtn.setEnabled(supportUpdates.booleanValue());
+				if (!supportUpdates.booleanValue())
+				{
+					includeUpdateBtn.setData(Boolean.valueOf(false));
+					includeUpdateBtn.setSelection(false);
+				}
+			}
+		});
+
+		includeUpdateBtn = new Button(versionGroup, SWT.CHECK);
+		includeUpdateBtn.setText("Include update");
+		includeUpdateBtn.setEnabled(srcVersions.get(srcVersionCombo.getText()).booleanValue());
+		includeUpdateBtn.setData(Boolean.valueOf(false));
+
+		includeUpdateBtn.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent event)
+			{
+				includeUpdateListener(((Button)event.widget).getSelection());
+			}
+		});
+
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		versionGroup.setLayoutData(gd);
+
 		final Label noteLabel = new Label(composite, SWT.NONE);
 		noteLabel.setText("*For now we only support generating Windows branded installers");
 		noteLabel.setEnabled(false); //set to gray
@@ -296,22 +371,46 @@ public class ExportPage extends WizardPage
 		this.getWizard().getContainer().getShell().pack();
 	}
 
-	public String getIconPath()
+	private void includeUpdateListener(boolean value)
 	{
-		return iconPath.getText();
+		includeUpdateBtn.setData(Boolean.valueOf(value));
 	}
 
-	public String getImgPath()
+	private Map<String, Boolean> getAvailableVersions()
 	{
-		return imgPath.getText();
+		final Map<String, Boolean> result = new TreeMap<String, Boolean>(); //sorted map by keys
+		try
+		{
+			final URL url = new URL(versionsUrl);
+			final StringBuffer sb = new StringBuffer();
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream())))
+			{
+				String line = null;
+				while ((line = br.readLine()) != null)
+					sb.append(line);
+				final JSONObject jsonObj = new JSONObject(sb.toString());
+				final JSONArray value = (JSONArray)jsonObj.get("versions");
+				final JSONObject myObj = (JSONObject)value.get(0);
+				value.forEach((item) -> {
+					final int devVersion = ((JSONObject)item).getInt("developerMinVersion");
+					if (ClientVersion.getReleaseNumber() < devVersion)
+						return;
+					final Boolean supportUpdate = Boolean.valueOf(((JSONObject)item).getBoolean("supportUpdate"));
+					final String ngdesktopVersion = ((JSONObject)item).getString("ngDesktopVersion");
+					result.put(ngdesktopVersion, supportUpdate);
+				});
+				if (result.size() > 0)
+					return result;
+			}
+		}
+		catch (final IOException | NumberFormatException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return srcVersions;
 	}
 
-	public String getCopyright()
-	{
-		return copyrightText.getText();
-	}
-
-	private static String getInitialImportPath()
+	private String getInitialImportPath()
 	{
 		String as_dir = ApplicationServerRegistry.get().getServoyApplicationServerDirectory().replace("\\", "/").replace("//", "/");
 		if (!as_dir.endsWith("/")) as_dir += "/";
@@ -345,6 +444,7 @@ public class ExportPage extends WizardPage
 		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
 	}
 
+
 	public List<String> getSelectedPlatforms()
 	{
 		return selectedPlatforms;
@@ -364,5 +464,7 @@ public class ExportPage extends WizardPage
 		settings.put("copyright", copyrightText.getText());
 		settings.put("ngdesktop_width", widthText.getText().trim());
 		settings.put("ngdesktop_height", heightText.getText().trim());
+		settings.put("ngdesktop_version", srcVersionCombo.getText());
+		settings.put("ngdesktop_include_update", includeUpdateBtn.getData().toString());
 	}
 }
