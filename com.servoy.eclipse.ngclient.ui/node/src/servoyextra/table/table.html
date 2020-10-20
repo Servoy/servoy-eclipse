@@ -12,14 +12,14 @@
 				</th>
 			</tr>
 		</thead>
-		<tbody>
+		<tbody *ngIf="dataStream | async; let items">
 			<cdk-virtual-scroll-viewport style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()"
 				[itemSize]="getNumberFromPxString(minRowHeight)"
 				[minBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) / 2 : 200"
 				[maxBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) : 400">
-				<tr cdk-row *cdkVirtualFor="let row of foundset.viewPort.rows; let r = index;"
+				<tr cdk-row *cdkVirtualFor="let row of items; let r = index; trackBy: trackByIdx"
 					(click)="selectRow(r, $event)" [ngClass]="getRowClass(r)">
-					<td cdk-cell *ngFor="let column of columns; let i = index" [className]="'c' + i"
+					<td cdk-cell *ngFor="let column of columns; let i = index;" [className]="'c' + i"
 						(click)="cellClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
 						(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
 						(contextmenu)="onCellRightClick && onCellRightClick(r, i, foundset.viewPort.rows[r], $event, column.id)">

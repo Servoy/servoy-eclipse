@@ -21,6 +21,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
         ScrollingModule,
         NgbModule
     ],
-    providers: [],
+    providers: [AsyncPipe],
     exports: [ServoyExtraTable]})
 export class ServoyExtraComponentsModule {}

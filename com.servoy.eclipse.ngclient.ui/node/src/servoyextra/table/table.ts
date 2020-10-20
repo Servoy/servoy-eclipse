@@ -1,14 +1,18 @@
-import { Component, ViewChild, Input, Renderer2, ElementRef, AfterViewInit, EventEmitter, Output, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewChild, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public'
 import { IFoundset } from '../../sablo/spectypes.service';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { ResizeEvent } from 'angular-resizable-element';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { BehaviorSubject} from 'rxjs';
+import { auditTime, tap } from 'rxjs/operators';
+import {AsyncPipe} from '@angular/common';
 
 @Component( {
     selector: 'servoyextra-table',
-    templateUrl: './table.html'
+    templateUrl: './table.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  {
   
@@ -73,6 +77,10 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     scrollToSelectionNeeded: boolean = true;
     averageRowHeight: number;
     actualPageSize: number = -1;
+    dataStream = new BehaviorSubject<any[]>([]);
+    idx: number;
+    changedPage: boolean = false;
+    prevPage: number;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory) { 
         super(renderer, cdRef);
@@ -91,9 +99,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         {
             this.updateTableColumnStyleClass(i, { width: this.columns[i].width, minWidth: this.columns[i].width, maxWidth: this.columns[i].width });
         }
-        
         this.attachHandlers();
-        //this.addCellHandlers();
 
         this.changeListener = this.foundset.addChangeListener((event: FoundsetChangeEvent) => {
             if (event.sortColumnsChanged) {
@@ -106,26 +112,60 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         });
 
         window.setTimeout(() => {
-			//first time we need to wait a bit before we scroll
-            this.scrollToSelection();
+            //first time we need to wait a bit before we scroll
             this.computeAverageRowHeight();
         }, 100);
+
+        this.idx = 0;
+        this.viewPort.scrolledIndexChange.pipe(
+            auditTime(300),
+            tap((currIndex: number) => {
+                if (currIndex > this.viewPort.getRenderedRange().end + this.actualPageSize) {
+                    this.loadMoreRecords(this.viewPort.getRenderedRange().end + this.actualPageSize);
+                }
+                else {
+                    this.loadMoreRecords(currIndex);
+                }
+                this.idx = Math.min(currIndex, this.foundset.serverSize);
+                this.setCurrentPageIfNeeded();
+            })
+          ).subscribe();
+
+          setTimeout(() => this.dataStream.next(this.foundset.viewPort.rows), 50);
+          window.setTimeout(() => {
+            //first time we need to wait a bit before we scroll
+            this.scrollToSelection();
+        }, 400);
+    }
+    loadMoreRecords(currIndex : number) {
+        if (currIndex < (this.foundset.viewPort.startIndex - this.actualPageSize) || currIndex >= this.foundset.viewPort.rows.length) {
+            this.foundset.loadExtraRecordsAsync(currIndex >= this.foundset.viewPort.rows.length ? this.actualPageSize : (-1) * this.actualPageSize, false).then(() => {
+                this.recordsLoaded();
+            });
+            this.foundsetChange.emit(this.foundset);
+        }
+    }
+
+    private recordsLoaded() {
+        this.dataStream.next([...this.foundset.viewPort.rows]);
     }
 
     computeAverageRowHeight() {
         if (!this.rendered) return;
-        const children = this.getNativeElement().getElementsByTagName('tr');
-        const realRowCount = children.length;
-        if (realRowCount > 0) {
-            const firstChild = children[0];
-            const lastChild = children[children.length - 1];
-            this.averageRowHeight = Math.round((lastChild.offsetTop + lastChild.offsetHeight - firstChild.offsetTop) / realRowCount);
-        } else {
-            this.averageRowHeight = 25; // it won't be relevant anyway; it is equal to the default minRowHeight from .spec
+        if (this.actualPageSize == -1) {
+            const children = this.getNativeElement().getElementsByTagName('tr');
+            const realRowCount = children.length;
+            if (realRowCount > 0) {
+                const firstChild = children[0];
+                const lastChild = children[children.length - 1];
+                this.averageRowHeight = Math.round((lastChild.offsetTop + lastChild.offsetHeight - firstChild.offsetTop) / realRowCount);
+            } else {
+                this.averageRowHeight = 25; // it won't be relevant anyway; it is equal to the default minRowHeight from .spec
+            }
+            const tbody = this.getNativeElement().getElementsByTagName('tbody')[0];
+            this.actualPageSize = Math.ceil(tbody.clientHeight / this.averageRowHeight) - 1;
+            this.setCurrentPageIfNeeded();
         }
-        const tbody = this.getNativeElement().getElementsByTagName('tbody')[0];
-        this.actualPageSize = Math.ceil(tbody.clientHeight / this.averageRowHeight) -1;
-        this.setCurrentPageIfNeeded();
     }
 
     private selectedRowIndexesChanged(oldValue: number[]) {
@@ -169,8 +209,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     private scrollToSelection() {
         if (this.lastSelectionFirstElement !== -1) {
-            this.viewPort.scrollToIndex(this.lastSelectionFirstElement);
-            this.setCurrentPageIfNeeded();
+            this.viewPort.scrollToOffset(this.lastSelectionFirstElement * this.averageRowHeight);
+            this.currentPage = Math.floor(this.lastSelectionFirstElement / this.actualPageSize);
         }
     }
 
@@ -291,7 +331,9 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 }
             }
             this.foundset.sortColumns = sortCol + " " + sqlSortDirection;
-            this.foundset.sort([{ name: sortCol, direction: sqlSortDirection }]);
+            this.foundset.sort([{ name: sortCol, direction: sqlSortDirection }]).then(()=>{
+                this.dataStream.next(this.foundset.viewPort.rows);
+            });
             this.foundsetChange.emit(this.foundset);
         }
     }
@@ -646,15 +688,18 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         if(!this.viewPort) return;
         if (this.onViewPortChanged) 
         {
-            this.setCurrentPageIfNeeded();
             this.onViewPortChanged(this.viewPort.getRenderedRange().start, this.viewPort.getRenderedRange().end);
         }
     }
 
     private setCurrentPageIfNeeded() {
+        if (this.changedPage) {
+            this.changedPage = false;
+            return;
+        }
         if (this.showPagination()) {
             if (this.actualPageSize > 0) {
-                this.currentPage = Math.trunc(this.viewPort.measureScrollOffset() / (this.actualPageSize * this.averageRowHeight)) + 1;
+                this.currentPage =  Math.floor(this.idx / this.actualPageSize);
             }
             else {
                 window.setTimeout(() => {
@@ -692,7 +737,24 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     }
 
     modifyPage() {
-        this.viewPort.setRenderedRange({start: this.actualPageSize * (this.currentPage - 1), end: Math.min(this.foundset.viewPort.size,this.actualPageSize * this.currentPage)});
+        this.changedPage = true;
+        const startIndex = this.actualPageSize * (this.currentPage - 1);
+        const endIndex = Math.min(this.foundset.serverSize, this.actualPageSize * this.currentPage);
+        const offset = this.getNativeElement().getElementsByTagName('tbody')[0].clientHeight * (this.currentPage - 1);
+        if (this.prevPage > this.currentPage) {
+            
+            this.viewPort.scrollToOffset(offset - 2);
+        }
+        else {
+            if (this.idx + this.actualPageSize > this.foundset.serverSize) {
+                this.viewPort.scrollToOffset(this.viewPort.measureScrollOffset() + Math.trunc(this.averageRowHeight * this.idx % this.actualPageSize));
+            }
+            else
+            {
+                this.viewPort.scrollToOffset(offset);
+            }
+        }
+        this.prevPage = this.currentPage;
     }
 
     getRowClass(idx: number) {
@@ -778,7 +840,9 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
                 if (fs.hasMoreRows){
                     //if it has more rows, then load at most one more page if paging is used,  or the remaining records otherwise
-                    this.foundset.loadRecordsAsync(endIndex, this.actualPageSize > 0 ? Math.min(this.actualPageSize, this.foundset.serverSize-endIndex) : this.foundset.serverSize-endIndex);
+                    this.foundset.loadRecordsAsync(endIndex, this.actualPageSize > 0 ? Math.min(this.actualPageSize, this.foundset.serverSize-endIndex) : this.foundset.serverSize-endIndex).then(()=>{
+                        this.dataStream.next(this.foundset.viewPort.rows);
+                    });
                     this.foundsetChange.emit(this.foundset);
                 }
                 event.preventDefault();
@@ -790,4 +854,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             }
         }
     }
+
+    trackByIdx(i: number) {
+        return i;
+      }
 }
