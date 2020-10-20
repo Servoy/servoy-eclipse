@@ -307,7 +307,7 @@ export class FormService {
           }
           if ( elem.model[ConverterService.TYPES_KEY] != null ) {
             this.converterService.convertFromServerToClient( elem.model, elem.model[ConverterService.TYPES_KEY], null, (property: string) => elem.model ? elem.model[property] : elem.model );
-            //formCache.addConversionInfo( elem.name, elem.model[ConverterService.TYPES_KEY] );
+            formCache.addConversionInfo( elem.name, elem.model[ConverterService.TYPES_KEY] );
           }
           const formComponentProperties: FormComponentProperties = new FormComponentProperties(classes, layout);
           const structure = elem.model.foundset ?

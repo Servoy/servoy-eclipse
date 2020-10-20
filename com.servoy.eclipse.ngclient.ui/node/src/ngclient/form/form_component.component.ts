@@ -145,7 +145,17 @@ import { ServoyApi } from '../servoy_api'
 
       <ng-template #servoycoreErrorbean let-state="state"><servoycore-errorbean [error]="state.model.error" [servoyApi]="getServoyApi(state)" [toolTipText]="state.model.toolTipText" #cmp></servoycore-errorbean></ng-template>
       <ng-template #servoycoreSlider let-state="state"><servoycore-slider  *ngIf = "state.model.visible" [styleClass]="state.model.styleClass" [min]="state.model.min" [max]="state.model.max" [orientation]="state.model.orientation" [step]="state.model.step" [enabled]="state.model.enabled" [toolTipText]="state.model.toolTipText" [visible]="state.model.visible" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [background]="state.model.background" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [tabSeq]="state.model.tabSeq" [onChangeMethodID]="getHandler(state,'onChangeMethodID')" [onCreateMethodID]="getHandler(state,'onCreateMethodID')" [onSlideMethodID]="getHandler(state,'onSlideMethodID')" [onStartMethodID]="getHandler(state,'onStartMethodID')" [onStopMethodID]="getHandler(state,'onStopMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.svy_attributes" [name]="state.name" #cmp></servoycore-slider></ng-template>
-      <ng-template #servoycoreListformcomponent let-state="state"><servoycore-listformcomponent *ngIf = "state.model.visible" [parentForm]="self" [listFormComponent]="state" [responsivePageSize]="state.model.responsivePageSize" [pageLayout]="state.model.pageLayout" #cmp></servoycore-listformcomponent></ng-template>
+      <ng-template #servoycoreListformcomponent let-state="state">
+            <servoycore-listformcomponent [parentForm]="self"
+                *ngIf = "state.model.visible"  
+                (foundsetChange)="datachange(state.name,'foundset',$event)"
+                [listFormComponent]="state" 
+                [responsivePageSize]="state.model.responsivePageSize" 
+                [pageLayout]="state.model.pageLayout" 
+                [selectionChangedHandler]="getHandler(state,'onSelectionChanged')" 
+                #cmp>
+            </servoycore-listformcomponent>
+       </ng-template>
 
       <ng-template #servoyextraTable let-state="state">
         <servoyextra-table *ngIf = "state.model.visible" [foundset]="state.model.foundset" 
@@ -365,9 +375,13 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     datachange(component: string, property: string, value) {
-        const model = this.formCache.getComponent(component).model;
+        const model = (!component.includes("formcomponent")) ? this.formCache.getComponent(component).model : this.formCache.getFormComponent(component).model;
         const oldValue = model[property];
-        this.formCache.getComponent(component).model[property] = value;
+        if (!component.includes("formcomponent")) {
+            this.formCache.getComponent(component).model[property] = value;
+        } else {
+            this.formCache.getFormComponent(component).model[property] = value;
+        }
         this.formservice.sendChanges(this.name, component, property, value, oldValue);
     }
 
