@@ -475,31 +475,31 @@ angular.module('editorContent',['servoyApp'])
 	    var old_element = document.querySelectorAll("[svy-id='" + tpl[0].getAttribute("svy-id") + "']");
 		if (old_element.length == 1) return; //when it's already there, we don't do anything (this happens when the parent is overridden)
 		
-	    if (parent.children().length > 0) {
-	    	// we have to calculate insert point based on ordered location, just like on server side
-	    	var inserted = false;
-	    	var nodeLocation = parseInt((formData.formProperties.absoluteLayout[''] && tpl.children(0)) ? tpl.children(0).attr('form-index') : tpl.attr('svy-location'));
-	    	for (var i=0;i<parent.children().length;i++)
-	    	{
-          //skip parts
-          if(formData.formProperties.absoluteLayout[''] && parent.children()[i].children.length == 0) continue;
-	    		var currentLocation = parseInt((formData.formProperties.absoluteLayout[''] && parent.children()[i].children[0]) ? parent.children()[i].children[0].getAttribute('form-index') : parent.children()[i].getAttribute('svy-location'));
-	    		if (nodeLocation <= currentLocation)
-	    		{
-	    			tpl.insertBefore(parent.children()[i]);
-	    			inserted = true;
-	    			break;
-	    		}
-	    	}
-	    	if (!inserted)
-	    	{	
-	    		parent.append(tpl);
-	    	}
-	    }
-	    else
-	    {
-	    	parent.append(tpl)
-	    }
+		if (parent.children().length > 0) {
+			// we have to calculate insert point based on ordered location, just like on server side
+			var inserted = false;
+			var nodeLocation = parseInt((formData.formProperties.absoluteLayout[''] && tpl.children(0)) ? tpl.children(0).attr('form-index') : tpl.attr('svy-location'));
+			for (var i=0;i<parent.children().length;i++)
+			{
+				//skip parts
+				if(formData.formProperties.absoluteLayout[''] && parent.children()[i].children.length == 0) continue;
+				var currentLocation = parseInt((formData.formProperties.absoluteLayout[''] && parent.children()[i].children[0]) ? parent.children()[i].children[0].getAttribute('form-index') : parent.children()[i].getAttribute('svy-location'));
+				if (nodeLocation < currentLocation)
+				{
+					tpl.insertBefore(parent.children()[i]);
+					inserted = true;
+					break;
+				}
+			}
+			if (!inserted)
+			{	
+				parent.append(tpl);
+			}
+		}
+		else
+		{
+			parent.append(tpl)
+		}
   }
 	   
   function updateElementIfParentChange(elementId, updateData, getTemplateParam,forceUpdate,elementsToRemove) {
