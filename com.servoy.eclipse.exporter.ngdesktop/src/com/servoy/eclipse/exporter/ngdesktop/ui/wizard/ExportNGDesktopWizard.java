@@ -330,7 +330,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		}
 
 		myFile = new File(settings.get("image_path"));
-		if (myFile.exists() && myFile.isFile() && myFile.length() > LOGO_SIZE * 1024)
+		if (myFile.exists() && myFile.isFile() && myFile.length() > IMG_SIZE * 1024)
 		{
 			errorMsg.append("Image file exceeds the maximum allowed limit (" + IMG_SIZE * 1024 + " KB): " + myFile.length());
 			return errorMsg;
