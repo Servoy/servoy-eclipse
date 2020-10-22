@@ -658,6 +658,9 @@ public class MarkerMessages
 	public static ServoyMarker MethodEventParameters = new ServoyMarker(
 		"Event parameter is passed to event method; make sure it is used with right type (change method signature).", ServoyBuilder.EVENT_METHOD_MARKER_TYPE);
 
+	public static ServoyMarker MethodNoReturn = new ServoyMarker(
+		"Script method \"{0}\" should contain @return tag as it is returning a value from its code.", ServoyBuilder.SCRIPT_MARKER_TYPE);
+
 	public static ServoyMarker MissingDriver = new ServoyMarker("Server \"{0}\" has invalid/missing driver ( \"{1}\" ).", ServoyBuilder.MISSING_DRIVER);
 
 	public static ServoyMarker MissingConverter = new ServoyMarker("Converter \"{0}\" has been configured on dataprovider \"{1}\" but cannot be found.",

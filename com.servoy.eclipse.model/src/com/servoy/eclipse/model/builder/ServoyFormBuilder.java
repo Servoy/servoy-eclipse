@@ -836,7 +836,9 @@ public class ServoyFormBuilder
 							Debug.error(e);
 						}
 
+
 					}
+					ServoyBuilderUtils.addScriptMethodErrorMarkers(markerResource, scriptMethod);
 				}
 
 				if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
@@ -2400,6 +2402,7 @@ public class ServoyFormBuilder
 			{
 				markerResource.deleteMarkers(ServoyBuilder.RESERVED_WINDOW_OBJECT_USAGE_TYPE, true, IResource.DEPTH_INFINITE);
 				markerResource.deleteMarkers(ServoyBuilder.PROJECT_FORM_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+				markerResource.deleteMarkers(ServoyBuilder.SCRIPT_MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 			}
 		}
 		catch (CoreException e)
