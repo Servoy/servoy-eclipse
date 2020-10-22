@@ -71,6 +71,7 @@ export class WindowService {
                         this.create(window.name, window.type);
                         this.switchForm(window.name, window.switchForm, window.navigatorForm);
                         this.setTitle(window.name, window.title);
+                        this.setCSSClassName(window.name, window.cssClassName);
                         this.sabloService.callService('$windowService', 'touchForm', { name: window.showForm }, false).then( () => {
                           // in order to show all the windows the counter must be reset 
                           if (this.windowsRestored && !windowCounterReset) {
@@ -333,6 +334,12 @@ export class WindowService {
     }
 
     public setCSSClassName(name: string, cssClassName: string ) {
+        const currentWindow = 'window' + this.windowCounter;
+        const storedWindow = this.sessionStorageService.get(currentWindow);
+        if (storedWindow && !storedWindow.cssClassName) {
+            storedWindow.cssClassName = cssClassName;
+            this.sessionStorageService.set(currentWindow, storedWindow);
+        }
         if ( this.instances[name] ) {
             this.instances[name].cssClassName = cssClassName;
         }
