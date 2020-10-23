@@ -226,7 +226,7 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 					{
 						hardcodedText = "Not supported in smart client for listview/tableview";
 					}
-					else if ("width".equals(item.getText(0)) || "height".equals(item.getText(0)))
+					else if ("min-width".equals(item.getText(0)) || "min-height".equals(item.getText(0)))
 					{
 						ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite()
 							.getSelectionProvider().getSelection();
@@ -234,13 +234,13 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							Platform.getAdapterManager().getAdapter(((IStructuredSelection)selection).getFirstElement(),
 								IPersist.class) instanceof IFormElement)
 						{
-							if ("height".equals(item.getText(0)))
+							if ("min-height".equals(item.getText(0)))
 							{
-								hardcodedText = "If top and bottom are set (anchored) this is minimum height.";
+								hardcodedText = "If only one from top and bottom is set this is actual height. If both are set, this is minimum height.";
 							}
-							if ("width".equals(item.getText(0)))
+							if ("min-width".equals(item.getText(0)))
 							{
-								hardcodedText = "If left and right are set (anchored) this is minimum width.";
+								hardcodedText = "If only one from left and right is set this is actual width. If both are set, this is minimum width.";
 							}
 						}
 					}
