@@ -30,7 +30,9 @@ import { ComponentContributor } from './component_contributor.service';
 import { ServoyPublicModule } from './servoy_public.module';
 import { LoadingIndicatorComponent } from '../sablo/util/loading-indicator/loading-indicator';
 import { ListFormComponent } from '../servoycore/listformcomponent/listformcomponent';
+
 import { LocaleService } from './locale.service';
+import { NGGridsModule } from '../nggrids/nggrids.module';
 
 @NgModule( {
     declarations: [
@@ -55,7 +57,8 @@ import { LocaleService } from './locale.service';
         AllComponentsModule,
         AllServicesModules,
         HttpClientModule,
-        ServoyPublicModule
+        ServoyPublicModule,
+        NGGridsModule
     ],
     providers: [FormService, ServoyService, LocaleService, I18NProvider, UpperCasePipe, LowerCasePipe,
                 DatePipe, DecimalPipe, ComponentContributor, ViewportService],

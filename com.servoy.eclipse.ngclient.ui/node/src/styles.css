@@ -9,3 +9,6 @@
 @import "assets/styles/servoy.css";
 @import "bootstrapcomponents/svy_bootstrapcomponents.css";
 @import "servoyextra/servoyextra.css";
+
+@import "~ag-grid-enterprise/dist/styles/ag-grid.css";
+@import "~ag-grid-enterprise/dist/styles/ag-theme-alpine.css";

@@ -492,7 +492,7 @@ export class FormService {
   }
 
   public callServerSideApi(formname, beanname, methodName, args) {
-    this.sabloService.callService('formService', 'callServerSideApi', { formname: formname, beanname: beanname, methodName: methodName, args: args });
+    return this.sabloService.callService('formService', 'callServerSideApi', { formname: formname, beanname: beanname, methodName: methodName, args: args });
   }
 }
 
