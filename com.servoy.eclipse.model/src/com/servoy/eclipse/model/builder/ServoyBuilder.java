@@ -305,6 +305,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> METHOD_EVENT_PARAMETERS = new Pair<String, ProblemSeverity>("methodEventParameters",
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> METHOD_NO_RETURN = new Pair<String, ProblemSeverity>("methodNoReturn",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MEDIA_TIFF = new Pair<String, ProblemSeverity>("mediaTiff", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> CALCULATION_FORM_ACCESS = new Pair<String, ProblemSeverity>("calculationFormAccess",
 		ProblemSeverity.WARNING);
@@ -2038,6 +2040,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 							}
 
+						}
+						checkCancel();
+						if (o instanceof ScriptMethod)
+						{
+							ServoyBuilderUtils.addScriptMethodErrorMarkers(project, (ScriptMethod)o);
 						}
 						checkCancel();
 						checkDeprecatedElementUsage(o, project, flattenedSolution);
