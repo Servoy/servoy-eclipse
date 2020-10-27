@@ -313,7 +313,7 @@ export class DataGrid {
         if (!columnsModel && this.state.columns[field]) { // check if is already cached
             return this.state.columns[field];
         } else {
-            var columns = columnsModel ? columnsModel : columns;
+            let columns = columnsModel ? columnsModel : this.columns;
             for (var i = 0; i < columns.length; i++) {
                 var column = columns[i];
                 if (column.id === field || this.getColumnID(column, i) === field) {
