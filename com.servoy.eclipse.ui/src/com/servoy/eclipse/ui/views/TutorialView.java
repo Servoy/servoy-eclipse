@@ -23,6 +23,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Util;
@@ -50,8 +52,9 @@ import org.eclipse.ui.part.ViewPart;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.BrowserDialog;
-import com.servoy.j2db.ClientVersion;
+import com.servoy.eclipse.ui.dialogs.ServoyLoginDialog;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -64,8 +67,6 @@ public class TutorialView extends ViewPart
 	public static final String PART_ID = "com.servoy.eclipse.ui.views.TutorialView";
 	private static boolean isTutorialViewOpen = false;
 	private static final String URL_DEFAULT_TUTORIALS_LIST = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/listtutorials";
-	private static final String URL_TUTORIALS = "https://tutorials.servoy.com/solutions/content/index.html?servoyVersion=" + ClientVersion.getPureVersion() +
-		"&loginToken=" + System.getProperty("servoy.tutorial.url");
 
 	private JSONObject dataModel;
 	private JSONArray dataTutorialsList;
@@ -77,10 +78,10 @@ public class TutorialView extends ViewPart
 	public void createPartControl(Composite parent)
 	{
 		loadDataModel(true, null);
-		createTutorialView(parent, true, false);
+		createTutorialView(parent, true);
 	}
 
-	private void createTutorialView(Composite parent, boolean createDefaultTutorialsList, boolean openedFromDefaultTutorialList)
+	private void createTutorialView(Composite parent, boolean createDefaultTutorialsList)
 	{
 		rootComposite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -117,21 +118,13 @@ public class TutorialView extends ViewPart
 				public void mouseUp(MouseEvent event)
 				{
 					super.mouseUp(event);
-					if (openedFromDefaultTutorialList)
+					if (event.getSource() instanceof StyledText)
 					{
-						if (event.getSource() instanceof StyledText)
+						for (Control control : parent.getChildren())
 						{
-							for (Control control : parent.getChildren())
-							{
-								control.dispose();
-							}
-							createTutorialView(parent, true, false);
+							control.dispose();
 						}
-					}
-					else
-					{
-						BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), URL_TUTORIALS, true, false);
-						tutorialDialog.open(true);
+						createTutorialView(parent, true);
 					}
 				}
 			});
@@ -152,12 +145,11 @@ public class TutorialView extends ViewPart
 				}
 			}
 
-			new TutorialButtons(mainContainer, parent, openedFromDefaultTutorialList);
+			new TutorialButtons(mainContainer, parent);
 		}
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
 		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-		mainContainer.layout();
 		sc.requestLayout();
 	}
 
@@ -235,7 +227,7 @@ public class TutorialView extends ViewPart
 								{
 									control.dispose();
 								}
-								createTutorialView(firstParent, false, true);
+								createTutorialView(firstParent, false);
 							}
 						}
 					});
@@ -257,8 +249,9 @@ public class TutorialView extends ViewPart
 
 							if (event.getSource() instanceof StyledText)
 							{
+								System.out.println("login token: " + System.getProperty("servoy.tutorial.url"));
 								BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-									URL_TUTORIALS + "&viewTutorial=" + tutorialID, true, false);
+									Activator.TUTORIALS_URL + getLoginToken() + "&viewTutorial=" + tutorialID, true, false);
 								tutorialDialog.open(true);
 							}
 						}
@@ -273,7 +266,7 @@ public class TutorialView extends ViewPart
 	 */
 	private class TutorialButtons extends Composite
 	{
-		public TutorialButtons(Composite mainContainer, Composite fistParent, final boolean openedFromDefaultTutorialList)
+		public TutorialButtons(Composite mainContainer, Composite fistParent)
 		{
 			super(mainContainer, SWT.FILL);
 			GridLayout layout = new GridLayout();
@@ -307,7 +300,7 @@ public class TutorialView extends ViewPart
 				{
 					final String currentTutorialID = dataModel.optString("tutorialID");
 					BrowserDialog tutorialDialog = new BrowserDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
-						URL_TUTORIALS + "&viewTutorial=" + currentTutorialID, true, false);
+						Activator.TUTORIALS_URL + getLoginToken() + "&viewTutorial=" + currentTutorialID, true, false);
 					tutorialDialog.open(true);
 				}
 			});
@@ -335,7 +328,7 @@ public class TutorialView extends ViewPart
 						{
 							control.dispose();
 						}
-						createTutorialView(fistParent, false, openedFromDefaultTutorialList);
+						createTutorialView(fistParent, false);
 					}
 				});
 			}
@@ -384,7 +377,6 @@ public class TutorialView extends ViewPart
 			descriptor = FontDescriptor.createFrom(stepDescription.getFont());
 			descriptor = descriptor.increaseHeight(2);
 			stepDescription.setFont(descriptor.createFont(parent.getDisplay()));
-
 
 			StyledText gifURL = new StyledText(row, SWT.NONE);
 			gifURL.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -485,7 +477,7 @@ public class TutorialView extends ViewPart
 
 		Composite parent = rootComposite.getParent();
 		rootComposite.dispose();
-		createTutorialView(parent, false, false);
+		createTutorialView(parent, false);
 		parent.layout(true, true);
 
 		isTutorialViewOpen = true;
@@ -529,5 +521,27 @@ public class TutorialView extends ViewPart
 			}
 		}
 		return copyText;
+	}
+
+	private String getLoginToken()
+	{
+		ISecurePreferences preferences = SecurePreferencesFactory.getDefault();
+		ISecurePreferences node = preferences.node(ServoyLoginDialog.SERVOY_LOGIN_STORE_KEY);
+		String loginToken = null;
+
+		try
+		{
+			loginToken = node.get(ServoyLoginDialog.SERVOY_LOGIN_TOKEN, null);
+		}
+		catch (Exception e)
+		{
+			Debug.error(e);
+		}
+		if (loginToken == null)
+		{
+			loginToken = new ServoyLoginDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell()).doLogin();
+		}
+
+		return loginToken;
 	}
 }
