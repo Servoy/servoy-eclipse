@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input, ChangeDetectorRef } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
@@ -10,29 +10,29 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield {
 
   @Input() showAs;
 
-  selected: boolean = false;
+  selected = false;
 
-  constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
-    super(renderer,cdRef);
+  constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
+    super(renderer, cdRef);
   }
 
   svyOnInit() {
       super.svyOnInit();
-      this.attachEventHandlers(this.getNativeElement())
+      this.attachEventHandlers(this.getNativeElement());
   }
 
   svyOnChanges(changes: SimpleChanges) {
-    for ( let property in changes ) {
+    for ( const property in changes ) {
         switch ( property ) {
-            case "dataProviderID":
-                this.setSelectionFromDataprovider()
+            case 'dataProviderID':
+                this.setSelectionFromDataprovider();
                 break;
 
         }
     }
     super.svyOnChanges(changes);
   }
-  
+
   attachEventHandlers(element: any) {
     if (!element)
         element = this.getNativeElement();
@@ -44,17 +44,17 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield {
 
   itemClicked(event) {
     // reverse the selected value (data provider too)
-    if ( event.target.localName === 'span' || event.target.localName === 'label' 
+    if ( event.target.localName === 'span' || event.target.localName === 'label'
       || event.target.localName === 'div') {
       this.selected = !this.selected;
       event.preventDefault();
     }
     if (typeof this.dataProviderID === 'string') {
-      this.dataProviderID = this.dataProviderID == "1" ? "0" : "1";
+      this.dataProviderID = this.dataProviderID === '1' ? '0' : '1';
     } else {
       this.dataProviderID = this.dataProviderID > 0 ? 0 : 1;
     }
-    this.update(this.dataProviderID);
+    this.pushUpdate();
     event.target.blur();
   }
 
@@ -65,8 +65,8 @@ export class ServoyBootstrapCheckbox extends ServoyBootstrapBasefield {
   getSelectionFromDataprovider() {
     if ( !this.dataProviderID ) {
         return false;
-    } else if ( typeof this.dataProviderID === "string" ) {
-        return this.dataProviderID == "1";
+    } else if ( typeof this.dataProviderID === 'string' ) {
+        return this.dataProviderID === '1';
     } else {
         return this.dataProviderID > 0;
     }

@@ -1,9 +1,9 @@
 import { Component, ChangeDetectorRef, Renderer2, ViewChild, SimpleChanges } from '@angular/core';
 import { Observable, merge, Subject, of, Subscriber } from 'rxjs';
 import { ServoyDefaultBaseField } from '../basefield';
-import {NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
+import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { FormattingService } from '../../ngclient/servoy_public';
-import { map, debounceTime, distinctUntilChanged, filter, take, switchMap} from 'rxjs/operators';
+import { map, debounceTime, distinctUntilChanged, filter, take, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'servoydefault-typeahead',
@@ -11,21 +11,13 @@ import { map, debounceTime, distinctUntilChanged, filter, take, switchMap} from 
 })
 export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
   // this is a hack so that this can be none static access because this references in this component to a conditional template
-  @ViewChild('instance', {static: true}) instance: NgbTypeahead;
+  @ViewChild('instance', { static: true }) instance: NgbTypeahead;
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
-  observableValue: Observable<object>;
-
-  private observer: Subscriber<object>;
 
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
-              formattingService: FormattingService) {
+    formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);
-    this.observableValue = new Observable(observer => {
-      this.observer = observer;
-      this.getObservableDataprovider().pipe(take(1)).subscribe(
-        displayValue => this.observer.next(displayValue));
-    });
   }
 
   scroll($event: any) {
@@ -46,34 +38,8 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
     });
   }
 
-  isEditable() {
-    return this.valuelistID && !this.valuelistID.hasRealValues();
-  }
-
-  formatter = (result: {displayValue: string, realValue: object}) => {
-    if (result.displayValue === null) return '';
-    if (result.displayValue !== undefined) return result.displayValue;
-    return result;
-  }
-
-  svyOnChanges( changes: SimpleChanges ) {
+  svyOnChanges(changes: SimpleChanges) {
     super.svyOnChanges(changes);
-    if (changes['dataProviderID']) {
-      if (this.observer) {
-        this.getObservableDataprovider().pipe(take(1)).subscribe(
-          displayValue => this.observer.next(displayValue));
-      }
-    }
-  }
-
-  getObservableDataprovider(): Observable<any> {
-
-    if (this.valuelistID && this.valuelistID.hasRealValues()) {
-      const found = this.valuelistID.find(entry => entry.realValue === this.dataProviderID);
-      if (found) return of(found.displayValue);
-      return this.valuelistID.getDisplayValue(this.dataProviderID);
-    }
-    return of(this.dataProviderID);
   }
 
   values = (text$: Observable<string>) => {
@@ -81,14 +47,37 @@ export class ServoyDefaultTypeahead extends ServoyDefaultBaseField {
     const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
     const inputFocus$ = this.focus$;
 
-    return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe( switchMap(term => (term === '' ? of(this.valuelistID)
-    : this.valuelistID.filterList(term))));
+    return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(switchMap(term => (term === '' ? of(this.valuelistID)
+      : this.valuelistID.filterList(term))));
   }
 
-  valueChanged(value: {displayValue: string, realValue: object}) {
+  isEditable() {
+    return this.valuelistID && !this.valuelistID.hasRealValues();
+  }
+
+  resultFormatter = (result: { displayValue: string, realValue: object }) => {
+    if (result.displayValue === null) return '';
+    return this.formattingService.format(result.displayValue, this.format.display, this.format.type);
+  }
+
+  inputFormatter = (result: any) => {
+    if (result === null) return '';
+    if (result.displayValue !== undefined) result = result.displayValue;
+    else if (this.valuelistID.hasRealValues()) {
+      // on purpose test with == so that "2" equals to 2
+      // tslint:disable-next-line: triple-equals
+      const value = this.valuelistID.find((item) => item.realValue == result);
+      if (value) {
+        result = value.displayValue;
+      }
+    }
+    return this.formattingService.format(result, this.format.display, this.format.type);
+  }
+
+  valueChanged(value: { displayValue: string, realValue: object }) {
     if (value && value.realValue) this.dataProviderID = value.realValue;
     else if (value) this.dataProviderID = value;
     else this.dataProviderID = null;
-    this.dataProviderIDChange.emit( this.dataProviderID );
+    this.dataProviderIDChange.emit(this.dataProviderID);
   }
 }

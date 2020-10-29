@@ -1,10 +1,10 @@
 <input #element
     class="bts-textbox"
     type="{{inputType}}"
-    (change)="update($event.target.value)"
+    (change)="pushUpdate()"
     [ngClass]="styleClass"
     [placeholder]="placeholderText"
-    [value]="dataProviderID"
+    [(ngModel)]="dataProviderID"
     [svyFormat]="format"
     [svyDecimalKeyConverter]="format"
     [svyStartEdit]="'dataProviderID'"

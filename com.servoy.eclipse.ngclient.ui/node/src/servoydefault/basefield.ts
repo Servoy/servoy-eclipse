@@ -90,10 +90,7 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
       super.svyOnChanges(changes);
     }
 
-    update( val: string ) {
-        if (!this.findmode && this.format) {
-            this.dataProviderID = this.formattingService.parse(val, this.format, this.dataProviderID);
-        } else this.dataProviderID = val;
+    pushUpdate() {
         this.dataProviderIDChange.emit( this.dataProviderID );
     }
 

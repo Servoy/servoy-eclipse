@@ -9,9 +9,9 @@
         [hostComponent]="self"
         [svyTooltip]="toolTipText"
         [sabloTabseq]="tabSeq"
-        [value]="findmode ? observableValue : observableValue | async | formatFilter:format?.display:format?.type:format"
+        [value]="filteredDataProviderId"
         (update)="updateValue($event)"
         [minCountForSearch]="0"
-        > 
+        >
     </select2>
 </div> 

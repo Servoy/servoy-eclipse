@@ -1,6 +1,6 @@
 import {Component, Renderer2, SimpleChanges, ChangeDetectorRef} from '@angular/core';
-import {ServoyDefaultBaseField} from "../basefield";
-import {FormattingService} from "../../ngclient/servoy_public";
+import {ServoyDefaultBaseField} from '../basefield';
+import {FormattingService} from '../../ngclient/servoy_public';
 
 @Component( {
   selector: 'servoydefault-spinner',
@@ -12,17 +12,17 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
   selection: any;
   private counter = 0;
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
-    super(renderer,cdRef, formattingService);
+    super(renderer, cdRef, formattingService);
   }
 
-  svyOnInit(){
+  svyOnInit() {
     this.selection = this.getSelectionFromDataprovider();
     this.addHandlersToInputAndSpinnerButtons();
     super.svyOnInit();
   }
 
-  svyOnChanges(changes: SimpleChanges){
-    for ( let property in changes ) {
+  svyOnChanges(changes: SimpleChanges) {
+    for ( const property in changes ) {
       switch (property) {
         case 'dataProviderID':
           this.selection = this.getSelectionFromDataprovider();
@@ -32,16 +32,16 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
     super.svyOnChanges(changes);
   }
 
-  addHandlersToInputAndSpinnerButtons(){
-    let spinnerButtons = this.getNativeElement().getElementsByTagName('button');
+  addHandlersToInputAndSpinnerButtons() {
+    const spinnerButtons = this.getNativeElement().getElementsByTagName('button');
 
     this.renderer.listen( this.getNativeChild(), 'scroll', e => this.scrollCallback(e));
-    this.renderer.listen(this.getNativeChild(), 'keydown keypress',e => this.keydownKeypressCallback(e));
+    this.renderer.listen(this.getNativeChild(), 'keydown keypress', e => this.keydownKeypressCallback(e));
 
     this.renderer.listen(spinnerButtons[0], 'click', e => this.increment());
     this.renderer.listen(spinnerButtons[1], 'click', e => this.decrement());
 
-    for(let i = 0; i < spinnerButtons.length; i++) {
+    for (let i = 0; i < spinnerButtons.length; i++) {
         if (this.onActionMethodID)
           this.renderer.listen(spinnerButtons[i], 'click', e => this.onActionMethodID(e));
 
@@ -53,24 +53,24 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
     }
   }
 
-  //copied from angularui timepicker
+  // copied from angularui timepicker
   isScrollingUp(e) {
     if (e.originalEvent) {
       e = e.originalEvent;
     }
-    //pick correct delta variable depending on event
-    let delta = (e.wheelDelta) ? e.wheelDelta : -e.deltaY;
+    // pick correct delta variable depending on event
+    const delta = (e.wheelDelta) ? e.wheelDelta : -e.deltaY;
     return (e.detail || delta > 0);
-  };
+  }
 
-  scrollCallback(e){
+  scrollCallback(e) {
     if (!this.isDisabled()) {
       this.isScrollingUp(e) ? this.increment() : this.decrement();
     }
     e.preventDefault();
   }
 
-  keydownKeypressCallback(e){
+  keydownKeypressCallback(e) {
     if (!this.isDisabled()) {
       if (e.which == 40)
         this.decrement();
@@ -81,35 +81,35 @@ export class ServoyDefaultSpinner extends ServoyDefaultBaseField {
 
   isDisabled() {
     return this.enabled == false || this.editable == false;
-  };
+  }
 
-  increment(){
+  increment() {
     if (this.valuelistID) {
       this.counter = this.counter < this.valuelistID.length - 1 ? this.counter + 1 : 0;
-      this.dataProviderID = this.valuelistID[this.counter].realValue
+      this.dataProviderID = this.valuelistID[this.counter].realValue;
     }
-    this.update(this.dataProviderID);
-  };
+    this.pushUpdate();
+  }
 
   decrement() {
     if (this.valuelistID) {
       this.counter = this.counter > 0 ? this.counter - 1 : this.valuelistID.length - 1;
-      this.dataProviderID = this.valuelistID[this.counter].realValue
+      this.dataProviderID = this.valuelistID[this.counter].realValue;
     }
-    this.update(this.dataProviderID);
-  };
+    this.pushUpdate();
+  }
 
   getSelectionFromDataprovider() {
     if (!this.dataProviderID) {
       this.counter = 0;
-      return undefined
+      return undefined;
     }
 
     for (let i = 0; i < this.valuelistID.length; i++) {
-      let item = this.valuelistID[i];
+      const item = this.valuelistID[i];
       if (item && item.realValue && this.dataProviderID == item.realValue) {
-        let displayFormat = undefined;
-        let type = undefined;
+        let displayFormat;
+        let type;
         if (this.format && this.format.display)
           displayFormat = this.format.display;
         if (this.format && this.format.type)

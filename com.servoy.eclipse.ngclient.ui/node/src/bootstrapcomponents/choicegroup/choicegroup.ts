@@ -7,30 +7,30 @@ import { ServoyBootstrapBasefield } from '../bts_basefield';
   templateUrl: './choicegroup.html',
   styleUrls: ['./choicegroup.scss']
 })
-export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield{
+export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield {
 
   @Input() inputType;
   @Input() findmode;
-  @Input() valuelistID : IValuelist;
+  @Input() valuelistID: IValuelist;
   @Input() showAs;
   selection: any[] = [];
   allowNullinc = 0;
 
-  constructor(renderer: Renderer2,protected cdRef: ChangeDetectorRef) {
-    super(renderer,cdRef);
+  constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef) {
+    super(renderer, cdRef);
   }
 
-  svyOnInit(){
+  svyOnInit() {
      super.svyOnInit();
      this.onValuelistChange();
      this.setHandlersAndTabIndex();
   }
 
   svyOnChanges( changes: SimpleChanges ) {
-    for ( let property in changes ) {
+    for ( const property in changes ) {
         switch ( property ) {
-            case "dataProviderID":
-                this.setSelectionFromDataprovider()
+            case 'dataProviderID':
+                this.setSelectionFromDataprovider();
                 break;
 
         }
@@ -39,23 +39,23 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield{
   }
 
   setHandlersAndTabIndex() {
-    for(let i = 0; i < this.getNativeElement().children.length; i++){
-        let elm:HTMLLabelElement = this.getNativeElement().children[i];
-        this.attachEventHandlers(elm.children[0],i);
-      }     
+    for (let i = 0; i < this.getNativeElement().children.length; i++) {
+        const elm: HTMLLabelElement = this.getNativeElement().children[i];
+        this.attachEventHandlers(elm.children[0], i);
+      }
   }
 
   onValuelistChange() {
-    if(this.valuelistID)
-        if(this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0])) this.allowNullinc=1;
+    if (this.valuelistID)
+        if (this.valuelistID.length > 0 && this.isValueListNull(this.valuelistID[0])) this.allowNullinc = 1;
     this.setHandlersAndTabIndex();
-  };
+  }
 
   getDataproviderFromSelection() {
-    let returnValue = "";
+    let returnValue = '';
     this.selection.forEach((element, index) => {
       if (element === true)
-        returnValue += this.valuelistID[index + this.allowNullinc].realValue + '\n' 
+        returnValue += this.valuelistID[index + this.allowNullinc].realValue + '\n'
     });
     returnValue = returnValue.replace(/\n$/, ''); // remove the last \n
     if (returnValue === '') returnValue = null;
@@ -71,7 +71,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield{
         const item = this.valuelistID[i];
         if (item.realValue + '' === element + '' && !this.isValueListNull(item)) {
           if (this.inputType === 'radio') {
-            if (arr.length > 1) this.selection = []; else this.selection[i-this.allowNullinc] = item.realValue;
+            if (arr.length > 1) this.selection = []; else this.selection[i - this.allowNullinc] = item.realValue;
           } else {
             this.selection[i - this.allowNullinc] = true;
           }
@@ -89,7 +89,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield{
     if (this.inputType === 'radio') {
       this.dataProviderID = this.valuelistID[index + this.allowNullinc].realValue;
     } else {
-      this.selection[index] = event.target.checked; 
+      this.selection[index] = event.target.checked;
       let checkedTotal = 0;
       for (let i = 0; i < this.selection.length; i++) {
         if (this.selection[i] == true) checkedTotal++;
@@ -100,7 +100,7 @@ export class ServoyBootstrapChoicegroup extends ServoyBootstrapBasefield{
       }
       this.dataProviderID = this.getDataproviderFromSelection();
     }
-    if (changed) this.update(this.dataProviderID);
+    if (changed) this.pushUpdate();
     event.target.blur();
   }
 

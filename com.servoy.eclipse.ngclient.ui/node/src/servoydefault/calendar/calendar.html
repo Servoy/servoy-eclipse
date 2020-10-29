@@ -5,8 +5,9 @@
 	<input type="text"
       class='svy-calendar form-control form-control-sm input-sm svy-padding-xs svy-line-height-normal'
       [id]="servoyApi.getMarkupId()"
-      [value]="findmode ? dataProviderID : dataProviderID | formatFilter:format?.display:format?.type:format"
-      (change)="update($event.target.value)"
+      [(ngModel)]="dataProviderID"
+      [svyFormat]="format"
+      (change)="pushUpdate()"
       [svyStartEdit]="'dataProviderID'"
       [hostComponent]="self"
       [sabloTabseq]="tabSeq"

@@ -33,9 +33,10 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField{
     }
 
     multiUpdate() {
-        for ( var i = 0; i < this.selectedValues.length; i += 1 ) {
+        for ( let i = 0; i < this.selectedValues.length; i += 1 ) {
             this.selectedValues[i] = '' + this.selectedValues[i];
         }
-        this.update( this.selectedValues.join( '\n' ) );
+        this.dataProviderID = this.selectedValues.join( '\n' );
+        this.pushUpdate();
     }
 }

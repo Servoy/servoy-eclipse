@@ -1,9 +1,7 @@
 import { Component, Renderer2, SimpleChanges, ChangeDetectorRef} from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
-import { Select2Data, Select2UpdateEvent, Select2Value } from 'ng-select2-component';
+import { Select2Option, Select2UpdateEvent } from 'ng-select2-component';
 import { ServoyDefaultBaseField } from '../basefield';
-import { Observable, Subscriber, of } from 'rxjs';
-import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'servoydefault-combo',
@@ -11,62 +9,69 @@ import { take } from 'rxjs/operators';
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
 
-  data: Select2Data = [];
-  observableValue: Observable<any>; 
-  private observer: Subscriber<any>;
+  private static readonly DATEFORMAT = 'ddMMyyyHHmmss';
 
-  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, 
+  data: Select2OptionWithReal[] = [];
+  filteredDataProviderId: any;
+
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
               formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);
-    this.observableValue = new Observable(observer => {
-      this.observer = observer;
-      this.getObservableDataprovider().pipe(take(1)).subscribe(
-        displayValue => this.observer.next(displayValue));
-    });
-  } 
+  }
 
   svyOnInit() {
       super.svyOnInit();
       this.setData();
   }
-
   setData() {
     if (this.valuelistID) {
-        let options: Select2Data = [];
-        for(let i = 0; i < this.valuelistID.length; i++) {
-            options.push({ 
-              value: this.valuelistID.hasRealValues() ? this.valuelistID[i].realValue : this.valuelistID[i].displayValue, 
-              label: this.valuelistID[i].displayValue });
-        }
-        this.data = options;
-    }
+      const options: Select2OptionWithReal[] = [];
+      let formatter = ( value ) => {
+          return value;
+      };
+      if (this.valuelistID.isRealValueDate() ) {
+          const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyDefaultCombobox.DATEFORMAT;
+          formatter = ( value ) => {
+              return this.formattingService.format(value, dateFormat , 'DATETIME');
+          };
+      }
+      for (let i = 0; i < this.valuelistID.length; i++) {
+          options.push({
+              value: formatter(this.valuelistID[i].realValue),
+              realValue: this.valuelistID[i].realValue,
+              label: this.formattingService.format(this.valuelistID[i].displayValue, this.format.display, this.format.type)
+          });
+      }
+      this.data = options;
+}
   }
 
   updateValue(event: Select2UpdateEvent<any>) {
-    this.dataProviderID = event.value;
-    this.dataProviderIDChange.emit( this.dataProviderID );
+    this.filteredDataProviderId = event.value;
+    if (this.valuelistID.isRealValueDate() && event.value) {
+        const value = this.data.find(el => el.value === event.value);
+        this.dataProviderID = value.realValue;
+    } else this.dataProviderID = event.value;
+    this.dataProviderIDChange.emit(this.dataProviderID);
   }
 
   svyOnChanges( changes: SimpleChanges ) {
     // this change should be ignored for the combobox.
     delete changes['editable'];
+    if (changes['valuelistID']) {
+      this.setData();
+    }
     if (changes['dataProviderID']) {
-      if (this.observer) {
-        this.getObservableDataprovider().pipe(take(1)).subscribe(
-          displayValue => this.observer.next(displayValue));
-      }
+        // if the real value is a date and the
+        const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyDefaultCombobox.DATEFORMAT;
+        this.filteredDataProviderId = this.valuelistID.isRealValueDate() ?
+            this.formattingService.format(this.dataProviderID, dateFormat , 'DATETIME') :
+            this.dataProviderID;
     }
     super.svyOnChanges(changes);
   }
-
-  getObservableDataprovider(): Observable<any> {
-    
-    if (this.valuelistID && this.valuelistID.hasRealValues()) {
-      const found = this.valuelistID.find(entry => entry.realValue === this.dataProviderID);
-      if (found) return of(found.displayValue);
-      return this.valuelistID.getDisplayValue(this.dataProviderID);
-    }
-    return of(this.dataProviderID);
-  }
 }
 
+interface Select2OptionWithReal extends Select2Option {
+  realValue: any;
+}

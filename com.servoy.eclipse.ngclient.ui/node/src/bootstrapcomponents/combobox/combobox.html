@@ -7,7 +7,7 @@
         [hostComponent]="self"
         [svyTooltip]="toolTipText"
         [sabloTabseq]="tabSeq"
-        [value]="observableValue | async | formatFilter:format?.display:format?.type:format"
+        [value]="filteredDataProviderId"
         (update)="updateValue($event)"
         [minCountForSearch]="0"
         > 

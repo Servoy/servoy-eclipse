@@ -71,7 +71,7 @@ export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
         if ( event && event.value ) {
             this.dataProviderID = event.value.toDate();
         } else this.dataProviderID = null;
-        this.dataProviderIDChange.emit( this.dataProviderID );
+       super.pushUpdate();
     }
 
     getFocusElement(): any {

@@ -82,11 +82,15 @@ export class ServoyBootstrapSelect extends ServoyBootstrapBasefield {
         value = value.join('\n');
       }
       if ((this.dataProviderID + '') != (value + '')) {
-        this.update(value);
+        this.updateValue(value);
         return true;
       }
     }
     return false;
   }
+
+  updateValue(val: string) {
+    this.dataProviderID = val;
+    super.pushUpdate();
+  }
 }
- 

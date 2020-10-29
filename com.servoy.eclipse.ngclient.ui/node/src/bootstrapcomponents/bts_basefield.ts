@@ -1,10 +1,10 @@
-import { ServoyBootstrapBaseComponent } from "./bts_basecomp";
-import { Directive, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, Renderer2, ChangeDetectorRef } from "@angular/core";
+import { ServoyBootstrapBaseComponent } from './bts_basecomp';
+import { Directive, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, Renderer2, ChangeDetectorRef } from '@angular/core';
 import { PropertyUtils } from '../ngclient/servoy_public';
 
 @Directive()
 export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
- 
+
     @Input() onDataChangeMethodID;
     @Input() onFocusGainedMethodID;
     @Input() onFocusLostMethodID;
@@ -18,7 +18,7 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
     storedTooltip: any;
 
     constructor(renderer: Renderer2,  protected cdRef: ChangeDetectorRef) {
-        super(renderer,cdRef);
+        super(renderer, cdRef);
     }
 
     svyOnInit() {
@@ -28,7 +28,7 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
             this.dataProviderID = null;
         }
     }
-  
+
     svyOnChanges( changes: SimpleChanges ) {
         if (changes) {
           for ( const property of Object.keys(changes) ) {
@@ -44,15 +44,15 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
                       if ( change.currentValue ) this.renderer.setAttribute(this.getFocusElement(),   'placeholder', change.currentValue );
                       else  this.renderer.removeAttribute(this.getFocusElement(),  'placeholder' );
                       break;
-                  case 'selectOnEnter': 
+                  case 'selectOnEnter':
                       if ( change.currentValue ) PropertyUtils.addSelectOnEnter(this.getFocusElement(), this.renderer);
-                      break;    
+                      break;
                 }
             }
             super.svyOnChanges(changes);
         }
     }
-    
+
     attachFocusListeners(nativeElement: any) {
           if (this.onFocusGainedMethodID)
               this.renderer.listen( nativeElement, 'focus', ( e ) => {
@@ -65,18 +65,17 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
     }
 
     onDataChangeCallback(event, returnval) {
-        var stringValue = (typeof returnval === 'string' || returnval instanceof String);
+        const stringValue = (typeof returnval === 'string' || returnval instanceof String);
         if (returnval === false || stringValue) {
             this.renderer.removeClass(this.elementRef.nativeElement, 'ng-valid');
             this.renderer.addClass(this.elementRef.nativeElement, 'ng-invalid');
             if (stringValue) {
-                if (this.storedTooltip === false) { 
-                    this.storedTooltip = this.toolTipText; 
+                if (this.storedTooltip === false) {
+                    this.storedTooltip = this.toolTipText;
                 }
                 this.toolTipText = returnval;
             }
-        }
-        else {
+        } else {
             this.renderer.removeClass(this.elementRef.nativeElement, 'ng-invalid');
             this.renderer.addClass(this.elementRef.nativeElement, 'ng-valid');
             if (this.storedTooltip !== false) this.toolTipText = this.storedTooltip;
@@ -84,11 +83,10 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
         }
     }
 
-    update( val: string ) {
-          this.dataProviderID = val;
+    pushUpdate( ) {
           this.dataProviderIDChange.emit(this.dataProviderID);
     }
-       
+
     public selectAll() {
         this.getNativeElement().select();
     }
@@ -119,5 +117,5 @@ export class ServoyBootstrapBasefield extends ServoyBootstrapBaseComponent {
         }
         return this.dataProviderID;
     }
-    
+
 }

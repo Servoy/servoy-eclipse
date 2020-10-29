@@ -12,7 +12,7 @@ export class ServoyBootstrapList extends ServoyBootstrapBasefield {
 
   @Input() valuelistID: IValuelist;
 
-  constructor(renderer: Renderer2,cdRef: ChangeDetectorRef,
+  constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
      private showDisplayValuePipe: ShowDisplayValuePipe) {
     super(renderer, cdRef);
   }
@@ -49,11 +49,16 @@ export class ServoyBootstrapList extends ServoyBootstrapBasefield {
               if (listValue === displayValue) {
                   listValue = this.valuelistID[i].realValue;
                   break;
-              } 
+              }
           }
       }
       if (this.dataProviderID !== listValue) {
-          this.update(listValue);
+          this.updateValue(listValue);
       }
+  }
+
+  updateValue(val: string) {
+    this.dataProviderID = val;
+    super.pushUpdate();
   }
 }
