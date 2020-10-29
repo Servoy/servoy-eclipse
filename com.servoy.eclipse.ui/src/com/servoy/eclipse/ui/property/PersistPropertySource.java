@@ -3080,8 +3080,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
 					flattenedEditingSolution.getFlattenedForm(form).getDataSource());
-				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
-					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
+				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, true, true, true, table != null,
+					true, INCLUDE_RELATIONS.NESTED, true, true, null);
 
 			}
 
