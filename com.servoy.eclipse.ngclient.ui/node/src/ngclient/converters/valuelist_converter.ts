@@ -48,7 +48,13 @@ export class ValuelistConverter implements IConverter {
             currentClientValue.state.realToDisplayCache : state.realToDisplayCache;
           state.valuelistid = serverJSONValue.valuelistid;
           state.hasRealValues = serverJSONValue.hasRealValues;
-          newValue = new Valuelist(this.sabloService, this.sabloDeferHelper, state, serverJSONValue.values);
+          if (serverJSONValue.realValueAreDates || serverJSONValue.displayValueAreDates) {
+            serverJSONValue.values.forEach(element => {
+              if (serverJSONValue.realValueAreDates && element.realValue) element.realValue = new Date(element.realValue);
+              if (serverJSONValue.displayValueAreDates && element.displayValue) element.displayValue = new Date(element.displayValue);
+            });
+          }
+          newValue = new Valuelist(this.sabloService, this.sabloDeferHelper, serverJSONValue.realValueAreDates, state, serverJSONValue.values);
         }
       } else if (serverJSONValue[ValuelistConverter.DISPLAYVALUE]) {
         // this is the GETDISPLAYVALUE
@@ -116,12 +122,17 @@ class ValuelistState extends ChangeAwareState implements IDeferedState {
 
 export class Valuelist extends Array<{ displayValue: string, realValue: object }> implements IValuelist, IChangeAwareValue {
 
-  constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, public state: ValuelistState, values?: Array<{ displayValue: string, realValue: object }>) {
+  constructor(private sabloService: SabloService, private sabloDeferHelper: SabloDeferHelper, private realValueIsDate: boolean,
+              public state: ValuelistState, values?: Array<{ displayValue: string, realValue: object }>) {
     super();
     if (values) this.push(...values);
     // see https://blog.simontest.net/extend-array-with-typescript-965cc1134b3
     // set prototype, since adding a create method is not really working if we have the values
     Object.setPrototypeOf(this, Object.create(Valuelist.prototype));
+  }
+
+  isRealValueDate(): boolean {
+    return this.realValueIsDate;
   }
 
   getStateHolder(): ChangeAwareState {
