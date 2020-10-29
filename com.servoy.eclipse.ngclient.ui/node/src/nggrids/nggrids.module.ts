@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { AgGridModule } from 'ag-grid-angular';
 import 'ag-grid-enterprise';
 import { LicenseManager } from 'ag-grid-enterprise';
-import { SabloModule } from '../sablo/sablo.module';
 import { DataGrid } from './datagrid/datagrid';
 
 @NgModule({

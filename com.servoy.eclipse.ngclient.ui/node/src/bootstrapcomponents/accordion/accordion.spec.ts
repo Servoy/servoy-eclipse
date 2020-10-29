@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { Tab } from '../bts_basetabpanel';
 import { ServoyBootstrapAccordion } from './accordion';
@@ -12,7 +12,7 @@ describe('AccordionComponent', () => {
   let fixture: ComponentFixture<ServoyBootstrapAccordion>;
   const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml']);
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapAccordion ],
       imports: [NgbModule, SabloModule],
@@ -35,7 +35,7 @@ describe('AccordionComponent', () => {
 //    fixture.detectChanges();
   });
 
-  it('should create', () => {
-    //expect(component).toBeTruthy();
-  });
+  // it('should create', () => {
+  //   expect(component).toBeTruthy();
+  // });
 });

@@ -1,6 +1,6 @@
 import { Input, OnChanges, SimpleChanges, Renderer2, ChangeDetectorRef, Directive } from '@angular/core';
 
-import {PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
+import {Format, PropertyUtils, ServoyBaseComponent } from '../ngclient/servoy_public';
 
 
 @Directive()
@@ -17,7 +17,7 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
     @Input() enabled;
     @Input() fontType;
     @Input() foreground;
-    @Input() format;
+    @Input() format: Format;
     @Input() horizontalAlignment;
     @Input() location;
     @Input() margin;
