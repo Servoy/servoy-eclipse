@@ -182,8 +182,8 @@ public class CSSPositionPropertySource extends ComplexPropertySourceWithStandard
 			CSSPositionLabelProvider.INSTANCE, factory), new PropertyController<String, String>(RIGHT, RIGHT, null, CSSPositionLabelProvider.INSTANCE,
 				factory), new PropertyController<String, String>(BOTTOM, BOTTOM, null, CSSPositionLabelProvider.INSTANCE,
 					factory), new PropertyController<String, String>(LEFT, LEFT, null, CSSPositionLabelProvider.INSTANCE,
-						factory), new PropertyController<String, String>(WIDTH, WIDTH, null, CSSPositionLabelProvider.INSTANCE,
-							factory), new PropertyController<String, String>(HEIGHT, HEIGHT, null, CSSPositionLabelProvider.INSTANCE, factory) });
+						factory), new PropertyController<String, String>(WIDTH, "min-width", null, CSSPositionLabelProvider.INSTANCE,
+							factory), new PropertyController<String, String>(HEIGHT, "min-height", null, CSSPositionLabelProvider.INSTANCE, factory) });
 	}
 
 	@Override

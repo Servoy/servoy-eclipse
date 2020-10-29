@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.File;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -29,8 +30,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
-import org.sablo.specification.WebComponentSpecProvider;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
 import com.servoy.eclipse.ui.Activator;
@@ -97,7 +98,7 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 		}
 		if (isEnabled() && selectedProjects.size() > 0)
 		{
-			IPackageReader[] readers = WebComponentSpecProvider.getSpecProviderState().getAllPackageReaders();
+			List<IPackageReader> readers = ServoyModelFinder.getServoyModel().getNGPackageManager().getAllPackageReaders();
 			for (IPackageReader pr : readers)
 			{
 				String packageName = pr.getPackageName();
