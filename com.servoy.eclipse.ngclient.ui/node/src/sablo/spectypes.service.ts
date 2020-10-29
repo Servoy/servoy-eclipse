@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { ConverterService } from './converter.service'
+import { ConverterService } from './converter.service';
 
 import { IterableDiffers, IterableDiffer } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -16,42 +16,42 @@ export class SpecTypesService {
         if ( classRef ) {
             return new classRef();
         }
-        console.log( "returning just the basic custom object for  " + name + " none of the properties will be monitored" );
+        console.log( 'returning just the basic custom object for  ' + name + ' none of the properties will be monitored' );
         return new BaseCustomObject();
     }
 
     enhanceArrayType<T>( array: Array<T>, iterableDiffers: IterableDiffers ): ICustomArray<T> {
         if ( !instanceOfChangeAwareValue( array ) ) {
-            array["stateHolder"] = new ArrayState( array, iterableDiffers );
+            array['stateHolder'] = new ArrayState( array, iterableDiffers );
             Object.defineProperty( array, 'getStateHolder', {
                 enumerable: false,
-                value: function() { return this.stateHolder }
+                value: function() { return this.stateHolder; }
             } );
             Object.defineProperty( array, 'markForChanged', {
                 enumerable: false,
-                value: function() { this.stateHolder.notifyChangeListener() }
+                value: function() { this.stateHolder.notifyChangeListener(); }
             } );
-            array["stateHolder"].initDiffer();
+            array['stateHolder'].initDiffer();
         }
         return <ICustomArray<T>>array;
     }
 
     registerType( name: string, classRef: typeof BaseCustomObject, specProperties: Array<string> ) {
         this.registeredTypes.set( name, classRef );
-        classRef["__specProperties"] = specProperties;
+        classRef['__specProperties'] = specProperties;
     }
 
     getProperties( classRef ): Array<string> {
-        return classRef["__specProperties"];
+        return classRef['__specProperties'];
     }
 
     guessType( val: any ): string {
         let guess = null;
 
         if ( instanceOfCustomArray( val ) ) {
-            guess = "JSON_arr";
+            guess = 'JSON_arr';
         } else if ( instanceOfBaseCustomObject( val ) ) {
-            guess = "JSON_obj";
+            guess = 'JSON_obj';
         } // else TODO do any other types need guessing?
         //        else { // try to find it in types?
         //            this.registeredTypes.forEach(function(typeConstructorValue, typeNameKey) {
@@ -91,6 +91,7 @@ export interface IValuelist extends Array<{displayValue: string, realValue: any}
     filterList(filterString: string): Observable<any>;
     getDisplayValue(realValue: any): Observable<any>;
     hasRealValues(): boolean;
+    isRealValueDate(): boolean;
 }
 
 export interface IFoundset {
@@ -100,31 +101,31 @@ export interface IFoundset {
 	 * in case of large DB tables)
 	 */
 	serverSize: number;
-		
+
 	/**
 	 * this is the data you need to have loaded on client (just request what you need via provided
 	 * loadRecordsAsync or loadExtraRecordsAsync)
 	 */
 	viewPort: ViewPort;
-		
+
 	/**
 	 * array of selected records in foundset; indexes can be out of current
      * viewPort as well
      */
-	selectedRowIndexes: number[],
-		
+	selectedRowIndexes: number[];
+
 	/**
 	 * sort string of the foundset, the same as the one used in scripting for
      * foundset.sort and foundset.getCurrentSort. Example: 'orderid asc'.
      */
 	sortColumns: string;
-		
+
 	/**
 	 * the multiselect mode of the server's foundset; if this is false,
      * selectedRowIndexes can only have one item in it
 	 */
     multiSelect: boolean;
-		
+
     /**
      * if the foundset is large and on server-side only part of it is loaded (so
      * there are records in the foundset beyond 'serverSize') this is set to true;
@@ -134,7 +135,7 @@ export interface IFoundset {
      */
     hasMoreRows: boolean;
 
-    /** 
+    /**
      * columnFormats is only present if you specify
      * "provideColumnFormats": true inside the .spec file for this foundset property;
      * it gives the default column formatting that Servoy would normally use for
@@ -142,7 +143,7 @@ export interface IFoundset {
      * browser yourself; keys are the dataprovider names and values are objects that contain
      * the format contents
      */
-    columnFormats: Record<string, object>; 
+    columnFormats: Record<string, object>;
 
     /**
      * Request a change of viewport bounds from the server; the requested data will be loaded
@@ -219,7 +220,7 @@ export interface IFoundset {
      *                   will arrive browser-side. As with any promise you can register success, error
      *                   and finally callbacks.
      */
-     sort(sortColumns: Array<{ name: string, direction: ("asc" | "desc") }>): Promise<any>;
+     sort(sortColumns: Array<{ name: string, direction: ('asc' | 'desc') }>): Promise<any>;
 
      /**
      * Request a selection change of the selected row indexes. Returns a promise that is resolved
@@ -289,8 +290,8 @@ export interface IFoundset {
       * @see WebsocketSession.addIncomingMessageHandlingDoneTask if you need your code to execute after all properties that were linked to this foundset get their changes applied you can use WebsocketSession.addIncomingMessageHandlingDoneTask.
       * @param changeListener the listener to register.
       */
-     addChangeListener(changeListener : ChangeListener) : () => void;
-     removeChangeListener(changeListener : ChangeListener) : void;
+     addChangeListener(changeListener: ChangeListener): () => void;
+     removeChangeListener(changeListener: ChangeListener): void;
 
     /**
      * Mark the foundset data as changed on the client.
@@ -300,14 +301,14 @@ export interface IFoundset {
      * @param newValue the new value
      * @param oldValue the old value, is optional; the change is ignored if the oldValue is the same as the newValue
      */
-    columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any)
+    columnDataChanged(index: number, columnID: string, newValue: any, oldValue?: any);
 }
 
 export interface ViewportChangeEvent {
     // the following keys appear if each of these got updated from server; the names of those
     // keys suggest what it was that changed; oldValue and newValue are the values for what changed
     // (e.g. new server size and old server size) so not the whole foundset property new/old value
-    viewportRowsCompletelyChanged?:  { oldValue: object[], newValue: object[] },
+    viewportRowsCompletelyChanged?:  { oldValue: object[], newValue: object[] };
 
     // if we received add/remove/change operations on a set of rows from the viewport, this key
     // will be set; as seen below, it contains "updates" which is an array that holds a sequence of
@@ -316,16 +317,16 @@ export interface ViewportChangeEvent {
     // all the "startIndex" and "endIndex" values below are relative to the viewport's state after all
     // previous updates in the array were already processed (so they are NOT relative to the initial state);
     // indexes are 0 based
-    viewportRowsUpdated?: ViewportRowUpdates
+    viewportRowsUpdated?: ViewportRowUpdates;
 }
 
 export type ChangeListener = (changeEvent: ViewportChangeEvent) => void;
 
-export type ViewportRowUpdate = { type: ChangeType, startIndex: number, endIndex: number };
+export interface ViewportRowUpdate { type: ChangeType, startIndex: number, endIndex: number }
 export type ViewportRowUpdates = ViewportRowUpdate[];
 
 export enum ChangeType {
-    ROWS_CHANGED =0,
+    ROWS_CHANGED = 0,
 
     /**
     * When an INSERT happened but viewport size remained the same, it is
@@ -357,13 +358,13 @@ export class BaseCustomObject implements ICustomObject {
 
 }
 
-export type ViewPort  = {
+export interface ViewPort  {
     startIndex: number;
     size: number;
     rows: ViewPortRow[];
-}
+};
 
-export interface ViewPortRow extends Record<string, any>{
+export interface ViewPortRow extends Record<string, any> {
     _svyRowId: string;
 }
 
@@ -469,7 +470,7 @@ export class BaseCustomObjectState extends ChangeAwareState {
 
     private testChanged( propertyName: string | number, newObject: any, oldObject: any ) {
         if ( newObject !== oldObject ) return true;
-        if ( typeof newObject == "object" ) {
+        if ( typeof newObject == 'object' ) {
             if ( instanceOfChangeAwareValue( newObject ) ) {
                 return newObject.getStateHolder().hasChanges();
             } else {
@@ -480,7 +481,7 @@ export class BaseCustomObjectState extends ChangeAwareState {
     }
 
     public getHashKey(): string {
-        return this.hash + "_" + this.change;
+        return this.hash + '_' + this.change;
     }
 
 }
@@ -504,7 +505,7 @@ export class ArrayState extends BaseCustomObjectState {
 
     public clearChanges() {
         super.clearChanges();
-        this.initDiffer()
+        this.initDiffer();
     }
 
     public getChangedKeys(): Array<string | number> {
@@ -529,12 +530,11 @@ export class ArrayState extends BaseCustomObjectState {
                 if ( instanceOfChangeAwareValue( record.item ) ) {
                     return record.item.getStateHolder().markAllChanged( false );
                 }
-            } )
+            } );
             if ( addedOrRemoved != 0 ) {
                 // size changed, for now send whole array
                 this.markAllChanged( false );
-            }
-            else {
+            } else {
                 changes.sort(( a: number, b: number ) => {
                     return a - b;
                 } );
@@ -545,11 +545,11 @@ export class ArrayState extends BaseCustomObjectState {
 
 }
 
-export type ColumnRef = {
+export interface ColumnRef {
     _svyRowId: string;
     dp: string;
     value: string;
-}
+};
 
 export interface IFormComponentType {
 }

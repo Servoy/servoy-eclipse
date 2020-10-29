@@ -1,9 +1,7 @@
 import { DecimalkeyconverterDirective } from './decimalkeyconverter.directive';
 import { TestBed, ComponentFixture, fakeAsync, tick, flushMicrotasks, async, waitForAsync, inject } from '@angular/core/testing';
 import { Component, Input, ViewChild, ElementRef, DebugElement } from '@angular/core';
-import { SvyFormat } from '../format/format.directive';
 import { By } from '@angular/platform-browser';
-import { ServoyService } from '../servoy.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { I18NProvider } from '../services/i18n_provider.service';

@@ -1,7 +1,7 @@
 import { Directive , Input , ElementRef, HostListener} from '@angular/core';
-import { Format } from '../format/format.directive';
 import { getLocaleNumberSymbol, NumberSymbol } from '@angular/common';
 import { LocaleService } from '../locale.service';
+import { Format } from '../format/formatting.service';
 
 @Directive({
   selector: '[svyDecimalKeyConverter]'
