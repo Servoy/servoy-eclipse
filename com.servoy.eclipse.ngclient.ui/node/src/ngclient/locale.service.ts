@@ -5,6 +5,8 @@ import { registerLocaleData } from '@angular/common';
 import { SessionStorageService } from '../sablo/webstorage/sessionstorage.service';
 
 import * as moment from 'moment';
+import numbro from 'numbro';
+
 import { I18NProvider } from './services/i18n_provider.service';
 
 @Injectable()
@@ -37,19 +39,38 @@ export class LocaleService {
                 this.sessionStorageService.set('locale', language + '-' + country);
             }
             this.locale = localeId;
-            this.setMomentLocale(localeId);
-
-            this.loadedLocale.resolve(localeId);
+            Promise.all([this.setMomentLocale(localeId), this.setNumbroLocale(localeId)]).then( () =>
+                this.loadedLocale.resolve(localeId)
+                ).catch( () => this.loadedLocale.resolve(localeId));
         }, () => {
             this.loadedLocale.reject('Could not set Locale because angular locale could not be loaded.');
         });
     }
 
-    private setMomentLocale(localeId: string) {
-        import(`../../node_modules/moment/src/locale/${localeId}`).then(
+    private setMomentLocale(localeId: string): Promise<void> {
+        return import(`../../node_modules/moment/src/locale/${localeId}`).then(
             module => {
                 moment.defineLocale(localeId, module);
+            }).catch(e => {
+                if (localeId.indexOf('-') === -1) {
+                    return this.setMomentLocale(localeId + '-' + localeId.toUpperCase());
+                } else {
+                    console.log('moment locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
+                }
             });
+    }
+
+    private setNumbroLocale(localeId: string): Promise<void> {
+        return import(`numbro/languages/${localeId}`).then(module => {
+            numbro.registerLanguage(module.default);
+            numbro.setLanguage(localeId);
+        }).catch(e => {
+            if (localeId.indexOf('-') === -1) {
+                return this.setNumbroLocale(localeId + '-' + localeId.toUpperCase());
+            } else {
+                console.log('numbro locale for ' + localeId + ' didn\'t resolve, fallback to default en-US');
+            }
+        });
     }
 
     private setAngularLocale(language: string, country: string) {
