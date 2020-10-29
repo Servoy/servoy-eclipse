@@ -1,0 +1,8 @@
+<div style="width:100%; height:100%; overflow:hidden"
+     class='svy-extra-htmlarea'
+     [id]="servoyApi.getMarkupId()" 
+     [svyTooltip]="toolTipText"
+     [sabloTabseq]="tabSeq"
+     #element>
+  <angular-editor [id]="servoyApi.getMarkupId() + 'editor'"  [(ngModel)]="dataProviderID" (blur)="pushUpdate()" [config]="config"></angular-editor>
+</div>

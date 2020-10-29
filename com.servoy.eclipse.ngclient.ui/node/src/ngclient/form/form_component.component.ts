@@ -198,6 +198,33 @@ import { ServoyApi } from '../servoy_api'
         </servoyextra-table>
     </ng-template>
     
+    <ng-template #servoyextraHtmlarea let-state="state">
+        <servoyextra-htmlarea *ngIf = "state.model.visible" 
+                        [servoyApi]="getServoyApi(state)" 
+                        [servoyAttributes]="state.model.svy_attributes" 
+                        [background]="state.model.background" 
+                        [borderType]="state.model.borderType" 
+                        [dataProviderID]="state.model.dataProviderID" 
+                        (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" 
+                        [displaysTags]="state.model.displaysTags" 
+                        [enabled]="state.model.enabled" 
+                        [editable]="state.model.editable" 
+                        [name]="state.name" 
+                        [fontType]="state.model.fontType" 
+                        [foreground]="state.model.foreground" 
+                        [horizontalAlignment]="state.model.horizontalAlignment" 
+                        [location]="state.model.location" 
+                        [margin]="state.model.margin" 
+                        [size]="state.model.size" 
+                        [styleClass]="state.model.styleClass" 
+                        [tabSeq]="state.model.tabSeq" 
+                        [text]="state.model.text" 
+                        [toolTipText]="state.model.toolTipText" 
+                        [transparent]="state.model.transparent" 
+                        [visible]="state.model.visible" 
+                        #cmp>
+        </servoyextra-htmlarea></ng-template>
+     
     <ng-template #bootstrapcomponentsCalendar let-state="state"><servoybootstrap-calendar  *ngIf = "state.model.visible" [visible]="state.model.visible" [format]="state.model.format" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [findmode]="state.model.findmode" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [placeholderText]="state.model.placeholderText" [selectOnEnter]="state.model.selectOnEnter" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.svy_attributes" [name]="state.name" #cmp></servoybootstrap-calendar></ng-template>
     <ng-template #bootstrapcomponentsCalendarinline let-state="state"><servoybootstrap-calendarinline  *ngIf = "state.model.visible" [visible]="state.model.visible" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [toolTipText]="state.model.toolTipText"[onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')"[servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.svy_attributes" [name]="state.name" #cmp></servoybootstrap-calendarinline></ng-template>
     <ng-template #bootstrapcomponentsButton
@@ -288,6 +315,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('servoycoreListformcomponent', { static: true }) readonly servoycoreListformcomponent: TemplateRef<any>;
 
     @ViewChild('servoyextraTable', { static: true }) readonly servoyextraTable: TemplateRef<any>;
+    @ViewChild('servoyextraHtmlarea', { static: true }) readonly servoyextraHtmlarea: TemplateRef<any>;
 
     @ViewChild('bootstrapcomponentsCalendar', { static: true }) readonly bootstrapcomponentsCalendar: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsCalendarinline', { static: true }) readonly bootstrapcomponentsCalendarinline: TemplateRef<any>;
