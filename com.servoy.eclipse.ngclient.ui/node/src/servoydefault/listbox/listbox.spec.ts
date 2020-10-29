@@ -80,11 +80,11 @@ describe('ServoyDefaultListBox', () => {
   });
 
   it('should call update method', () => {
-    spyOn(component, 'update');
+    spyOn(component, 'pushUpdate');
     const select = debugEl.query(By.css('select')).nativeElement;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    expect(component.update).toHaveBeenCalled();
+    expect(component.pushUpdate).toHaveBeenCalled();
   });
 
   it('should call multiUpdate method', () => {
@@ -97,12 +97,12 @@ describe('ServoyDefaultListBox', () => {
     expect(component.multiUpdate).toHaveBeenCalled();
   });
 
-  it('should have data provider id = 1', () => {
+  it('should have data provider id = 2', () => {
     const select = debugEl.query(By.css('select')).nativeElement;
-    select.value = select.options[0].value;
+    select.value = select.options[1].value;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    expect(component.dataProviderID).toEqual(1);
+    expect(component.dataProviderID).toEqual(2);
   });
 
   it('should test selectedValues', () => {

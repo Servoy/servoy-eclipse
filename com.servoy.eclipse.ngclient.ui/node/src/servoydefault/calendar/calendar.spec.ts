@@ -1,44 +1,47 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { SabloModule } from '../../sablo/sablo.module'
-import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
+import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 
 
-import { FormattingService, LocaleService, I18NProvider} from '../../ngclient/servoy_public'
+import { LocaleService, I18NProvider, Format} from '../../ngclient/servoy_public';
 import { By, BrowserModule } from '@angular/platform-browser';
-import { ServoyDefaultCalendar } from "./calendar";
-import { DateTimeAdapter, OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
+import { ServoyDefaultCalendar } from './calendar';
+import { OwlDateTimeIntl, OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { Renderer2 } from '@angular/core';
 import { SabloService } from '../../sablo/sablo.service';
 import { FormsModule } from '@angular/forms';
-let moment = require('moment');
+const moment = require('moment');
 
-describe("ServoyDefaultCalendar", () => {
+describe('ServoyDefaultCalendar', () => {
     let component: ServoyDefaultCalendar;
     let fixture: ComponentFixture<ServoyDefaultCalendar>;
     let i18nProvider;
-    //let dateTimeAdapter;
+    // let dateTimeAdapter;
    // let owlDateTimeIntl;
 
-    beforeEach(async(() => {  
-        i18nProvider = jasmine.createSpyObj("I18NProvider",["getI18NMessages"]);
+    beforeEach(() => {
+        i18nProvider = jasmine.createSpyObj('I18NProvider', ['getI18NMessages']);
         const promise = Promise.resolve({});
         i18nProvider.getI18NMessages.and.returnValue(promise);
 
         (<any>window).moment = moment;
-        
+
         TestBed.configureTestingModule({
             declarations: [ServoyDefaultCalendar],
             imports: [BrowserModule, SabloModule, ServoyPublicModule, OwlDateTimeModule, FormsModule, OwlNativeDateTimeModule],
-            providers: [Renderer2, FormattingService, { provide: LocaleService, useValue: {getLocale: () => 'en' } }, { provide: I18NProvider, useValue: i18nProvider },
+            providers: [Renderer2, FormsModule, { provide: LocaleService, useValue: {getLocale: () => 'en' } }, { provide: I18NProvider, useValue: i18nProvider },
                 OwlDateTimeIntl, SabloService]
         }).compileComponents();
-    }));
+    });
 
     beforeEach(() => {
         fixture = TestBed.createComponent(ServoyDefaultCalendar);
         component = fixture.componentInstance;
-        component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml", 'startEdit']);
+        component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit']);
+        component.format = new Format();
+        component.format.type = 'DATETIME';
+        component.format.display = 'dd-MM-yyyy';
         fixture.detectChanges();
       });
 
@@ -49,18 +52,15 @@ describe("ServoyDefaultCalendar", () => {
     it('should have called servoyApi.getMarkupId', () => {
         expect( component.servoyApi.getMarkupId ).toHaveBeenCalled();
     });
-    
-    it('should be ok', async() => {
-        component.inputElementRef.nativeElement.value = 'test';
+
+    it('should be showing a formatted a date', waitForAsync(() => {
+        component.dataProviderID = new Date(2020, 10, 10);
         fixture.detectChanges();
         fixture.whenStable().then(() => {
-            let input = fixture.debugElement.query(By.css('input'));
-            let el = input.nativeElement;
-            expect(el.value).toBe('test');
-            el.value = 'someValue';
-            el.dispatchEvent(new Event('input'));
-            expect(component.inputElementRef.nativeElement.value).toBe('someValue');
-        })
-    }); 
-}); 
+            const input = fixture.debugElement.query(By.css('input'));
+            const el = input.nativeElement;
+            expect(el.value).toBe('10-11-2020');
+        });
+    }));
+});
 

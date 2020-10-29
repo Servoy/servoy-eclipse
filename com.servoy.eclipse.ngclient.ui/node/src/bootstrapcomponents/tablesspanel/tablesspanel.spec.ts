@@ -1,4 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
+import { SabloModule } from '../../sablo/sablo.module';
 
 import { ServoyBootstrapTablesspanel } from './tablesspanel';
 
@@ -6,17 +9,18 @@ describe('TablesspanelComponent', () => {
   let component: ServoyBootstrapTablesspanel;
   let fixture: ComponentFixture<ServoyBootstrapTablesspanel>;
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ ServoyBootstrapTablesspanel ]
+      declarations: [ ServoyBootstrapTablesspanel ],
+      imports: [NgbModule, SabloModule, ServoyPublicModule, SabloModule]
     })
     .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServoyBootstrapTablesspanel);
     component = fixture.componentInstance;
-    component.servoyApi =  jasmine.createSpyObj("ServoyApi", ["getMarkupId","trustAsHtml"]);
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml']);
     fixture.detectChanges();
   });
 

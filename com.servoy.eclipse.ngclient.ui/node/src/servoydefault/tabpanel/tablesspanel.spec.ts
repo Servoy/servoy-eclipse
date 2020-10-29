@@ -11,10 +11,11 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { WindowRefService } from '../../sablo/util/windowref.service'
 import { LoggerFactory } from '../../sablo/logger.service'
 import { SabloModule } from '../../sablo/sablo.module';
+import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
-    beforeEach( async(() => {
+    beforeEach( () => {
         servoyApi = jasmine.createSpyObj( "ServoyApi", ["getMarkupId", "formWillShow", "hideForm"] )
         servoyApi.getMarkupId.and.returnValue( "1" );
         servoyApi.formWillShow.and.returnValue( Promise.resolve( true ) );
@@ -23,10 +24,10 @@ describe( 'ServoyDefaultTabpanel', () => {
             declarations: [
                 ServoyDefaultTablesspanel
             ],
-            imports: [NgbModule, SabloModule],
+            imports: [NgbModule, SabloModule, ServoyPublicModule, SabloModule],
             providers: [WindowRefService, LoggerFactory]
         } ).compileComponents();
-    } ) );
+    } );
 
     function createComponentWithTabs() {
         const fixture = TestBed.createComponent( ServoyDefaultTablesspanel );

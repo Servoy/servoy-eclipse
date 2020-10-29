@@ -1,9 +1,9 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import {SimpleChange} from '@angular/core';
 import { By } from '@angular/platform-browser';
 
 import { ServoyDefaultLabel } from './label';
-import { TooltipService, ComponentContributor, ServoyApi} from '../../ngclient/servoy_public';
+import { TooltipService, ComponentContributor, ServoyApi, FormattingService} from '../../ngclient/servoy_public';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
 import { SabloModule } from '../../sablo/sablo.module';
 
@@ -13,10 +13,10 @@ describe( 'SvLabel', () => {
     let element;
     const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml']);
 
-    beforeEach( async(() => {
+    beforeEach( waitForAsync(() => {
         TestBed.configureTestingModule( {
             declarations: [ServoyDefaultLabel],
-            providers: [TooltipService, ComponentContributor],
+            providers: [TooltipService, FormattingService, ComponentContributor],
             imports: [
                 SabloModule, ServoyPublicModule],
         } )

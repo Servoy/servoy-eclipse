@@ -1,10 +1,9 @@
-import { async, ComponentFixture, TestBed, tick, fakeAsync, flushMicrotasks } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultCombobox } from './combobox';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
-import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
+import { Format, FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
 import { SabloModule } from '../../sablo/sablo.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { of } from 'rxjs';
 
 import { ConverterService } from '../../sablo/converter.service';
 import { SabloService } from '../../sablo/sablo.service';
@@ -17,9 +16,10 @@ import { ServicesService } from '../../sablo/services.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LoggerFactory } from '../../sablo/logger.service';
-import { Select2Data } from 'ng-select2-component';
+import { Select2Data, Select2Module } from 'ng-select2-component';
 import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
+import { DebugElement, SimpleChange } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 const mockData = [
   {
@@ -34,13 +34,13 @@ const mockData = [
     realValue: 3,
     displayValue: 'Cluj'
   },
-]
+];
 
-const formattedData : Select2Data = [
+const formattedData: Select2Data = [
     { value: '1', label: 'Bucuresti' },
     { value: '2', label: 'Timisoara'},
     { value: '3', label: 'Cluj' }
-]
+];
 
 function createDefaultValuelist() {
   const json = {};
@@ -56,7 +56,7 @@ describe('ComboboxComponent', () => {
   let combobox: DebugElement;
   let converterService: ConverterService;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'trustAsHtml']);
 
 
@@ -64,15 +64,15 @@ describe('ComboboxComponent', () => {
       declarations: [ ServoyDefaultCombobox],
       providers: [ FormattingService, TooltipService, ValuelistConverter, ConverterService, SabloService, SabloDeferHelper, SpecTypesService,
         LoggerFactory, WindowRefService, WebsocketService, ServicesService, SessionStorageService, LoadingIndicatorService],
-      imports: [ServoyPublicModule, SabloModule, NgbModule]
+      imports: [ServoyPublicModule, SabloModule, NgbModule, FormsModule, Select2Module]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    const sabloService: SabloService = TestBed.get( SabloService );
-    const sabloDeferHelper = TestBed.get( SabloDeferHelper );
-    converterService = TestBed.get( ConverterService );
+    const sabloService: SabloService = TestBed.inject( SabloService );
+    const sabloDeferHelper = TestBed.inject( SabloDeferHelper );
+    converterService = TestBed.inject( ConverterService );
     converterService.registerCustomPropertyHandler( 'valuelist', new ValuelistConverter( sabloService, sabloDeferHelper) );
 
     fixture = TestBed.createComponent(ServoyDefaultCombobox);
@@ -80,13 +80,18 @@ describe('ComboboxComponent', () => {
     combobox = fixture.debugElement.query(By.css('select2'));
 
     component = fixture.componentInstance;
-    component.valuelistID = converterService.convertFromServerToClient(createDefaultValuelist(),'valuelist');
-    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId','trustAsHtml', 'startEdit']);
+    component.valuelistID = converterService.convertFromServerToClient(createDefaultValuelist(), 'valuelist');
+    component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit']);
     component.dataProviderID = 3;
+    component.format = new Format();
+    component.format.type = 'NUMBER';
+    component.format.display = '####';
     component.ngOnInit();
-
+    component.ngOnChanges({
+      dataProviderID: new SimpleChange(null, 3, true)
+    });
     fixture.detectChanges();
-  }); 
+  });
 
   it('should create component', () => {
     expect(component).toBeTruthy();
@@ -97,9 +102,7 @@ describe('ComboboxComponent', () => {
   });
 
   it('should have the default value 3', () => {
-    component.observableValue.subscribe(value => {
-      expect(value).toBe(3); // data provider's value
-    });
+    expect(component.filteredDataProviderId).toBe(3); // data provider's value
   });
 
   it('should have called servoyApi.getMarkupId', () => {
@@ -114,7 +117,7 @@ describe('ComboboxComponent', () => {
 
   it('should call update method', () => {
     spyOn(component, 'updateValue');
-    combobox.nativeElement.dispatchEvent(new Event('update')); 
+    combobox.nativeElement.dispatchEvent(new Event('update'));
     fixture.detectChanges();
     expect(component.updateValue).toHaveBeenCalled();
   });
