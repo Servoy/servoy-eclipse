@@ -78,8 +78,7 @@ describe('ComboboxComponent', () => {
     component.servoyApi =  jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml', 'startEdit']);
     component.dataProviderID = 3;
     component.format = new Format();
-    component.format.type = 'NUMBER';
-    component.format.display = '####';
+    component.format.type = 'TEXT';
     component.ngOnInit();
     component.ngOnChanges({
       dataProviderID: new SimpleChange(null, 3, true)
