@@ -23,7 +23,7 @@ describe('ServoyDefaultTextField', () => {
     .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(waitForAsync(() => {
     fixture = TestBed.createComponent(ServoyDefaultTextField);
     textField = fixture.debugElement.query(By.css('input'));
     component = fixture.componentInstance;
@@ -32,7 +32,7 @@ describe('ServoyDefaultTextField', () => {
     component.format.type = 'NUMBER';
     component.format.display = '#,###.00';
     fixture.detectChanges();
-  });
+  }));
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -53,8 +53,9 @@ describe('ServoyDefaultTextField', () => {
       locationService.isLoaded().then(() => {
         component.dataProviderID = 1000;
         fixture.detectChanges();
-        fixture.whenStable().then(() =>
-        expect(component.getNativeElement().value).toBe('1.000,00'));
+        fixture.whenStable().then(() => {
+        expect(component.getNativeElement().value).toBe('1.000,00');
+      });
     });
   })));
 
