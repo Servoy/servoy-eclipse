@@ -18,17 +18,17 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
@@ -38,7 +38,6 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Solution;
 
 /**
@@ -98,14 +97,17 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 				}
 				else if (ServoyModel.SERVOY_WORKING_SET_ID.equals(ws.getId()))
 				{
-					final IEditorPart activeEditor = EditorUtil.getActivePage().getActiveEditor();
-					if (activeEditor != null && activeEditor.getEditorSite() != null)
+					for (IFile file : projectFiles)
 					{
-						MessageDialog.openWarning(activeEditor.getEditorSite().getShell(), "Cannot create working set",
-							"Cannot create working set because there is already a working set with the name " + workingSetName + "!");
-						return;
+						List<IAdaptable> files = new ArrayList<IAdaptable>(Arrays.asList(ws.getElements()));
+						if (files.size() > 0)
+						{
+							if (!files.contains(file))
+							{
+								PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(file, new IWorkingSet[] { ws });
+							}
+						}
 					}
-					//	PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(projectFiles[0], new IWorkingSet[] { ws });
 				}
 				else
 				{
