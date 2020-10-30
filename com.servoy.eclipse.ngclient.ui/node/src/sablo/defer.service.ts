@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Deferred } from '../sablo/util/deferred';
+import { Deferred, IDeferred } from '../sablo/util/deferred';
 
 import {LoggerService, LoggerFactory} from './logger.service';
 
@@ -60,8 +60,8 @@ export class SabloDeferHelper {
 }
 
 export interface IDeferedState {
-    deferred: {[key: string]: {defer: Deferred<any>, timeoutId: any}};
+    deferred: {[key: string]: {defer: IDeferred<any>, timeoutId: any}};
     currentMsgId: number;
     timeoutRejectLogPrefix: string;
-    init(deferred: {[key: string]: {defer: Deferred<any>, timeoutId: any}}, currentMsgId: number, timeoutRejectLogPrefix: string): void;
+    init(deferred: {[key: string]: {defer: IDeferred<any>, timeoutId: any}}, currentMsgId: number, timeoutRejectLogPrefix: string): void;
 }
