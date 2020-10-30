@@ -12,6 +12,7 @@ import { WebsocketService } from '../../sablo/websocket.service';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { ViewportService } from '../services/viewport.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
+import { ServoyTestingModule } from '../../testing/servoytesting.module';
 
 describe('FoundsetLinked Converter', () => {
   let converterService: ConverterService;
@@ -27,16 +28,17 @@ describe('FoundsetLinked Converter', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService, SabloDeferHelper, SpecTypesService, LoggerFactory,
-        WindowRefService, WebsocketService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
+      imports: [ServoyTestingModule],
+      providers: [FoundsetLinkedConverter, FoundsetConverter, ConverterService, SabloService, SpecTypesService, LoggerFactory,
+        WindowRefService, ServicesService, SessionStorageService, ViewportService, LoadingIndicatorService]
     });
 
-    sabloService = TestBed.get(SabloService);
+    sabloService = TestBed.inject(SabloService);
     sabloService.connect({}, {}, '');
-    sabloDeferHelper = TestBed.get(SabloDeferHelper);
-    const viewportService = TestBed.get(ViewportService);
-    loggerFactory = TestBed.get(LoggerFactory);
-    converterService = TestBed.get(ConverterService);
+    sabloDeferHelper = TestBed.inject(SabloDeferHelper);
+    const viewportService = TestBed.inject(ViewportService);
+    loggerFactory = TestBed.inject(LoggerFactory);
+    converterService = TestBed.inject(ConverterService);
     converterService.registerCustomPropertyHandler('foundset', new FoundsetConverter(converterService, sabloService, sabloDeferHelper, viewportService, loggerFactory));
     converterService.registerCustomPropertyHandler('fsLinked', new FoundsetLinkedConverter(converterService, sabloService, viewportService, loggerFactory));
     changeNotified = false;

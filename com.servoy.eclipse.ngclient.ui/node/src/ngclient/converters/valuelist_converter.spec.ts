@@ -7,10 +7,11 @@ import { SpecTypesService, instanceOfChangeAwareValue } from '../../sablo/specty
 import { ServicesService } from '../../sablo/services.service';
 import { ValuelistConverter } from './valuelist_converter';
 import { SabloDeferHelper} from '../../sablo/defer.service';
-import { WebsocketService } from '../../sablo/websocket.service';
 import { SessionStorageService } from '../../sablo/webstorage/sessionstorage.service';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { LoadingIndicatorService } from '../../sablo/util/loading-indicator/loading-indicator.service';
+import { TestWebsocketService } from '../../testing/servoytesting.module';
+import { WebsocketService } from '../../sablo/websocket.service';
 
 describe('ValuelistConverter', () => {
 
@@ -24,8 +25,9 @@ describe('ValuelistConverter', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ValuelistConverter, ConverterService, SabloService, SabloDeferHelper, SpecTypesService,
-        LoggerFactory, WindowRefService, WebsocketService, ServicesService, SessionStorageService, LoadingIndicatorService]
+      providers: [ValuelistConverter, ConverterService, SabloService, SpecTypesService,
+        LoggerFactory, WindowRefService, SabloDeferHelper, ServicesService, SessionStorageService, LoadingIndicatorService,
+        { provide: WebsocketService, useClass: TestWebsocketService }]
     });
 
     const sabloService: SabloService = TestBed.get( SabloService );
@@ -42,8 +44,8 @@ describe('ValuelistConverter', () => {
         }
     };
     sabloService.connect({}, {}, '');
-    const sabloDeferHelper = TestBed.get( SabloDeferHelper );
-    converterService = TestBed.get( ConverterService );
+    const sabloDeferHelper = TestBed.inject( SabloDeferHelper );
+    converterService = TestBed.inject( ConverterService );
     converterService.registerCustomPropertyHandler( 'valuelist', new ValuelistConverter( sabloService, sabloDeferHelper) );
   });
 
