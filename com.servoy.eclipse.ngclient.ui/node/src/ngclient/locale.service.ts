@@ -50,7 +50,8 @@ export class LocaleService {
     private setMomentLocale(localeId: string): Promise<void> {
         return import(`../../node_modules/moment/src/locale/${localeId}`).then(
             module => {
-                moment.defineLocale(localeId, module);
+                if (moment.locale() !== localeId)
+                    moment.defineLocale(localeId, module);
             }).catch(e => {
                 if (localeId.indexOf('-') === -1) {
                     return this.setMomentLocale(localeId + '-' + localeId.toUpperCase());
