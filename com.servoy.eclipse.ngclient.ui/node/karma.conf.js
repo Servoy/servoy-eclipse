@@ -33,6 +33,15 @@ module.exports = function (config) {
     logLevel: config.LOG_INFO,
     autoWatch: true,
     browsers: ['ChromeHeadless','Chrome', 'Edge'],
-    singleRun: false
+    singleRun: false,
+    customLaunchers: {
+      headlessChrome: {
+          base: "ChromeHeadless",
+          flags: [
+              "--no-sandbox",
+              "--js-flags=--max-old-space-size=8196",
+          ],
+      },
+    },
   });
 };
