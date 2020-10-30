@@ -57,29 +57,29 @@ describe('ServoyDefaultImageMedia', () => {
   });
 
   it('should be the default image url', () => {
-    expect(component.imageURL).toEqual('servoydefault/imagemedia/res/images/empty.gif');
+    expect(component.imageURL).toEqual(ServoyDefaultImageMedia.EMPTY);
   });
 
   it ('should delete the current uploaded file/image', () => {
-    component.imageURL = 'servoydefault/imagemedia/res/images/notemptymedia.gif'
-    imgUpload = fixture.debugElement.queryAll(By.css('.imgdelete'));
+    component.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
+    imgUpload = fixture.debugElement.queryAll(By.css('.fa-times'));
     imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
     fixture.detectChanges();
     expect(component.dataProviderID).toBeNull();
-    expect(component.imageURL).toEqual('servoydefault/imagemedia/res/images/empty.gif');
+    expect(component.imageURL).toEqual(ServoyDefaultImageMedia.EMPTY);
   });
 
   it('should call the upload service', () => {
-    imgUpload = fixture.debugElement.queryAll(By.css('.imgupload'));
+    imgUpload = fixture.debugElement.queryAll(By.css('.fa-upload'));
     imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
     fixture.detectChanges();
     expect(applicationService.showFileOpenDialog).toHaveBeenCalled();
   });
 
   it('should download file', () => {
-      component.imageURL = 'servoydefault/imagemedia/res/images/notemptymedia.gif';
+      component.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
       const spy = spyOn(component, 'downloadMedia');
-      imgUpload = fixture.debugElement.queryAll(By.css('.imgdownload'));
+      imgUpload = fixture.debugElement.queryAll(By.css('.fa-download'));
       imgUpload[0].nativeElement.dispatchEvent(new Event('click'));
       fixture.detectChanges();
       expect(spy).toHaveBeenCalled();

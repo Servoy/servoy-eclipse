@@ -1,4 +1,4 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef} from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild, ElementRef} from '@angular/core';
 
 import {FormattingService} from '../../ngclient/servoy_public';
 
@@ -10,7 +10,10 @@ import {ServoyDefaultBaseField} from  '../basefield';
 } )
 export class ServoyDefaultImageMedia extends ServoyDefaultBaseField {
 
-    imageURL = 'servoydefault/imagemedia/res/images/empty.gif';
+    public static readonly EMPTY = 'data:image/gif;base64,R0lGODlhEAAQALMAAAAAAP///1dzWYCcgoOehZq1nKfCqbnVu8biyPLy8s/Pz3p6emxsbA0NDcDAwAAAACH5BAEAAA4ALAAAAAAQABAAAAQR0MlJq7046827/2AojmRpThEAOw==';
+    public static readonly NOT_EMPTY = 'data:image/gif;base64,R0lGODlhMgAQAKECAAAAAAAAhP///////yH5BAEKAAMALAAAAAAyABAAAAJOnI+py+0PFZg02muA2GLi72icBoBmQpLByp6gyAWcsLpYOskxbVvwJpvQWr0HDqCb8YohZZCiCTBDUKQSOL08KcssJDmTer+ssniMTjcKADs=';
+
+    imageURL = ServoyDefaultImageMedia.EMPTY;
     increment = 0;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef ,
@@ -21,7 +24,7 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField {
     deleteMedia(): void {
         this.dataProviderID = null;
         this.pushUpdate();
-        this.imageURL = 'servoydefault/imagemedia/res/images/empty.gif';
+        this.imageURL = ServoyDefaultImageMedia.EMPTY;
     }
 
     downloadMedia(): void {
@@ -44,14 +47,38 @@ export class ServoyDefaultImageMedia extends ServoyDefaultBaseField {
     }
 
     private updateImageURL(dp) {
-        if (dp != null && dp != '') {
+        if (dp != null && dp !== '') {
             const contentType = dp.contentType;
-            if (contentType != null && contentType != undefined && contentType.indexOf('image') == 0) {
+            if (contentType != null && contentType !== undefined && contentType.indexOf('image') == 0) {
                 this.imageURL = dp.url;
             } else {
-                this.imageURL = 'servoydefault/imagemedia/res/images/notemptymedia.gif';
+                this.imageURL = ServoyDefaultImageMedia.NOT_EMPTY;
             }
         }
+    }
+
+    setCss(element) {
+        const alignStyle = { top: '0px', left: '0px' };
+        const imageHeight = element.clientHeight;
+        const imageWidth = element.clientWidth;
+        // vertical align cennter
+        const height = element.parentNode['clientHeight'];
+        if (height > imageHeight)
+            alignStyle.top = (height - imageHeight) / 2 + 'px';
+        // horizontal align (default left)
+        const width = element.parentNode['clientWidth'];
+        if (width > imageWidth) {
+            if (this.horizontalAlignment === 0 /*SwingConstants.CENTER*/)
+                alignStyle.left = (width - imageWidth) / 2 + 'px';
+            else if (this.horizontalAlignment === 4 /*SwingConstants.RIGHT*/)
+                alignStyle.left = (width - imageWidth) + 'px';
+            else {
+                if ((element.parentNode.childNodes.length > 1) && (imageHeight + 34 < height))
+                    alignStyle.left = '51px';
+            }
+        }
+        this.renderer.setStyle(element, 'top', alignStyle.top);
+        this.renderer.setStyle(element, 'left', alignStyle.left);
     }
 }
 
