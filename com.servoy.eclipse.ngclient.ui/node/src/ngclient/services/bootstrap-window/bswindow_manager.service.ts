@@ -26,7 +26,6 @@ export class BSWindowManager {
     findWindowByID(id) {
         var returnValue = null;
         Array.prototype.forEach.call(this.windows, function(window, index){
-            console.log(arguments);
             if (window.id === id) {
                 returnValue = window;
             }

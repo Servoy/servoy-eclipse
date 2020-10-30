@@ -16,7 +16,7 @@ import { ServicesService } from '../../sablo/services.service';
 import { WebsocketService } from '../../sablo/websocket.service';
 import { WindowRefService } from '../../sablo/util/windowref.service';
 import { LoggerFactory } from '../../sablo/logger.service';
-import { Select2Data, Select2Module } from 'ng-select2-component';
+import { Select2Module } from 'ng-select2-component';
 import { By } from '@angular/platform-browser';
 import { DebugElement, SimpleChange } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -34,12 +34,6 @@ const mockData = [
     realValue: 3,
     displayValue: 'Cluj'
   },
-];
-
-const formattedData: Select2Data = [
-    { value: '1', label: 'Bucuresti' },
-    { value: '2', label: 'Timisoara'},
-    { value: '3', label: 'Cluj' }
 ];
 
 function createDefaultValuelist() {

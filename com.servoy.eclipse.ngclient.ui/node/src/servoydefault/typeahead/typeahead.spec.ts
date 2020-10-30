@@ -9,14 +9,6 @@ import {IValuelist} from '../../sablo/spectypes.service';
 import { of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
-const testScheduler = new TestScheduler((actual, expected) => {
-  console.log('actual');
-  console.log(actual);
-  console.log('expected');
-  console.log(expected);
-  expect(actual).toEqual(expected);
-
-});
 
 const mockData = [
   {

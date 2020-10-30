@@ -401,7 +401,6 @@ describe( 'JSONArrayConverter', () => {
         const tabs = val.tabs as ICustomArray<Tab>;
         tabs.markForChanged();
         changes = converterService.convertFromClientToServer( val, "JSON_obj", val );
-        console.log( changes )
         expect( changes[CONTENT_VERSION] ).toBe( 1 );
         expect( changes[UPDATES] ).toBeDefined( "change object  shoulld have updates" );
         expect( changes[UPDATES].length ).toBe( 1, "should have 1 update" );

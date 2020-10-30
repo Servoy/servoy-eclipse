@@ -399,7 +399,6 @@ export class BSWindow {
                 this.renderer.setStyle(this.element, 'left', (event.pageX - this.offset.x) + "px");
             }
             if (this.options.resizable && this.resizing) {
-	console.log("body move in resize ")
                 var winBody = this.element.querySelector(this.options.selectors.body);
                 var winHeadFootHeight = 0;
                 var head = this.element.querySelector(this.options.selectors.handle);

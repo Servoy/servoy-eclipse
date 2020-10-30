@@ -54,7 +54,6 @@ describe('DateConverter', () => {
   
   it('should parse date string from server with timezone +0',  () => {
       var date:Date = dateConverter.fromServerToClient("2018-01-01T00:00:00" + offsetString(0));
-  console.log("2018-01-01T00:00:00" + offsetString(0) + " ::"  + date)
       expect(date).toBeDefined();
       expect(date.getFullYear()).toBe(2018);
       expect(date.getMonth()).toBe(0);

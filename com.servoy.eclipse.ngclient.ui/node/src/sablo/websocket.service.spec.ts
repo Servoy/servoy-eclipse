@@ -1,45 +1,44 @@
-import { TestBed, inject , fakeAsync,flush,discardPeriodicTasks} from '@angular/core/testing';
+import { TestBed, inject , fakeAsync, flush, discardPeriodicTasks} from '@angular/core/testing';
 
 import { WebsocketService } from './websocket.service';
 
-import {WindowRefService} from './util/windowref.service'
-import { ServicesService } from './services.service'
-import { ConverterService } from './converter.service'
-import { LoggerFactory } from './logger.service'
-import { LoadingIndicatorService } from "./util/loading-indicator/loading-indicator.service";
+import {WindowRefService} from './util/windowref.service';
+import { ServicesService } from './services.service';
+import { ConverterService } from './converter.service';
+import { LoggerFactory } from './logger.service';
+import { LoadingIndicatorService } from './util/loading-indicator/loading-indicator.service';
 
 describe('WebsocketService', () => {
     let windowRef;
     let normalWebSocket = null;
   beforeEach(() => {
-      normalWebSocket =  window["WebSocket"];
-      window["Web" + "Socket"] = WebSocketMock;
-      
-      windowRef =  {nativeWindow:{}}
-      const servicesService = jasmine.createSpyObj('ServicesService', ['callServiceApi','updateServiceScopes']);
-      const converterService = jasmine.createSpyObj('ConverterService', ['convertFromServerToClient','convertFromClientToServer','convertClientObject']);
+      normalWebSocket =  window['WebSocket'];
+      window['Web' + 'Socket'] = WebSocketMock;
+
+      windowRef =  {nativeWindow: {}};
+      const servicesService = jasmine.createSpyObj('ServicesService', ['callServiceApi', 'updateServiceScopes']);
+      const converterService = jasmine.createSpyObj('ConverterService', ['convertFromServerToClient', 'convertFromClientToServer', 'convertClientObject']);
       const loadingIndicatorService = jasmine.createSpyObj('SabloLoadingIndicator', ['showLoading', 'hideLoading', 'isShowing']);
       TestBed.configureTestingModule({
-      providers: [WebsocketService, 
-                  {provide: WindowRefService, useFactory:()=>windowRef},
-                  {provide: ServicesService, useFactory:()=>servicesService },
-                  {provide: ConverterService, useFactory:()=>converterService },
-                  {provide: LoadingIndicatorService, useFactory:() => loadingIndicatorService},LoggerFactory]
+      providers: [WebsocketService,
+                  {provide: WindowRefService, useFactory: () => windowRef},
+                  {provide: ServicesService, useFactory: () => servicesService },
+                  {provide: ConverterService, useFactory: () => converterService },
+                  {provide: LoadingIndicatorService, useFactory: () => loadingIndicatorService}, LoggerFactory]
     });
   });
-  
+
   afterEach(() => {
-      window["WebSocket"] = normalWebSocket;
-  })
+      window['WebSocket'] = normalWebSocket;
+  });
 
   it('should be created', inject([WebsocketService], (service: WebsocketService) => {
     expect(service).toBeTruthy();
   }));
   it('should be make a connection', inject([WebsocketService], fakeAsync((service: WebsocketService) => {
-      windowRef.nativeWindow = { location: {protocol:'http', host:"localhost",pathname:"/"}}
+      windowRef.nativeWindow = { location: {protocol: 'http', host: 'localhost', pathname: '/'}};
      const session = service.connect({}, {}, {}, null);
-      session.onopen((event)=> {console.log(event)})
-       flush(2);
+    flush(2);
      expect( session.isConnected()).toBeTruthy();
      discardPeriodicTasks();
     })));
@@ -47,23 +46,23 @@ describe('WebsocketService', () => {
 
 
 class WebSocketMock {
-    data: any;
-    public static instance:WebSocketMock;
-    public url:string;
-    public closed = false;
-    constructor(url:string) {
+    constructor(url: string) {
         this.url = url;
         WebSocketMock.instance = this;
         setTimeout(() => {
-            WebSocketMock.instance["onopen"](new CustomEvent("open"));
-        },1);
+            WebSocketMock.instance['onopen'](new CustomEvent('open'));
+        }, 1);
     }
-    
+    public static instance: WebSocketMock;
+    data: any;
+    public url: string;
+    public closed = false;
+
     public close() {
         this.closed = true;
-        WebSocketMock.instance["onclose"](new CustomEvent("close"));
+        WebSocketMock.instance['onclose'](new CustomEvent('close'));
     }
-    
+
     public send(data) {
         this.data = data;
     }
