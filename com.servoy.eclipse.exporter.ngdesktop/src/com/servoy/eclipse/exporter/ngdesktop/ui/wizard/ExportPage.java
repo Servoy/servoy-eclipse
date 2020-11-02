@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class ExportPage extends WizardPage
 	public static String MACOS_PLATFORM = "mac";
 	public static String LINUX_PLATFORM = "linux";
 
-	private Text applicationURLText;
+	private Text applicationUrlText;
 	private Text saveDirPath;
 	private Button browseDirButton;
 	private Group platformGroup;
@@ -81,6 +82,7 @@ public class ExportPage extends WizardPage
 	private Group versionGroup;
 	private Combo srcVersionCombo;
 	private Button includeUpdateBtn;
+	private Text updateUrlText;
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
@@ -108,14 +110,14 @@ public class ExportPage extends WizardPage
 		final Composite composite = new Composite(rootComposite, SWT.NONE);
 		composite.setLayout(gridLayout);
 
-		final Label applicationURLLabel = new Label(composite, SWT.NONE);
-		applicationURLLabel.setText("Servoy application URL");
-		applicationURLText = new Text(composite, SWT.BORDER);
-		applicationURLText.setText(getInitialApplicationURL());
+		final Label applicationUrlLabel = new Label(composite, SWT.NONE);
+		applicationUrlLabel.setText("Servoy application URL");
+		applicationUrlText = new Text(composite, SWT.BORDER);
+		applicationUrlText.setText(getApplicationUrl());
 
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
-		applicationURLText.setLayoutData(gd);
+		applicationUrlText.setLayoutData(gd);
 
 		final Label platformLabel = new Label(composite, SWT.NONE);
 		platformLabel.setText("Platform");
@@ -309,7 +311,7 @@ public class ExportPage extends WizardPage
 		srcVersionLabel.setToolTipText("NG Desktop source version");
 
 		versionGroup = new Group(composite, SWT.NONE);
-		versionGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
+		versionGroup.setLayout(new GridLayout(2, false));
 
 
 		srcVersionCombo = new Combo(versionGroup, SWT.READ_ONLY);
@@ -323,27 +325,21 @@ public class ExportPage extends WizardPage
 			final Object data = srcVersions.get(key);
 			srcVersionCombo.setData(key, data);
 		}
-		srcVersionCombo.select(0);
+		srcVersionCombo.select(getVersionIndex());
 		srcVersionCombo.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent event)
 			{
-				final String key = ((Combo)event.widget).getText();
-				final Boolean supportUpdates = (Boolean)event.widget.getData(key);
-				includeUpdateBtn.setEnabled(supportUpdates.booleanValue());
-				if (!supportUpdates.booleanValue())
-				{
-					includeUpdateBtn.setData(Boolean.valueOf(false));
-					includeUpdateBtn.setSelection(false);
-				}
+				srcVersionListener(event);
 			}
 		});
 
 		includeUpdateBtn = new Button(versionGroup, SWT.CHECK);
 		includeUpdateBtn.setText("Include update");
-		includeUpdateBtn.setEnabled(srcVersions.get(srcVersionCombo.getText()).booleanValue());
-		includeUpdateBtn.setData(Boolean.valueOf(false));
+		includeUpdateBtn.setEnabled(isUpdateAvailable());
+		includeUpdateBtn.setSelection(getIncludeUpdate());
+		includeUpdateBtn.setData(Boolean.toString(includeUpdateBtn.getSelection()));
 
 		includeUpdateBtn.addSelectionListener(new SelectionAdapter()
 		{
@@ -356,10 +352,34 @@ public class ExportPage extends WizardPage
 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
+		gd.verticalSpan = 1;
 		versionGroup.setLayoutData(gd);
 
+		final Label updateUrlLabel = new Label(composite, SWT.NONE);
+		updateUrlLabel.setText("Update location:");
+		updateUrlLabel.setToolTipText("URL location of the update(s)");
+
+		updateUrlText = new Text(composite, SWT.BORDER);
+		updateUrlText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
+		updateUrlText.setEditable(true);
+		updateUrlText.setVisible(true);
+		updateUrlText.setEnabled(includeUpdateBtn.getSelection());
+		updateUrlText.setText(getUpdateUrl());
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		updateUrlText.setLayoutData(gd);
+
+		final Label emptyLabel = new Label(composite, SWT.NONE);//added for dialog design
+		emptyLabel.setText("");
+		emptyLabel.setEnabled(false); //set to gray
+		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.verticalAlignment = GridData.GRAB_VERTICAL;
+		gd.horizontalSpan = 3;
+		emptyLabel.setLayoutData(gd);
+		emptyLabel.setVisible(true);
+
 		final Label noteLabel = new Label(composite, SWT.NONE);
-		noteLabel.setText("*For now we only support generating Windows branded installers");
+		noteLabel.setText("*For now we only support generating Windows branded installers/updates");
 		noteLabel.setEnabled(false); //set to gray
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.verticalAlignment = GridData.VERTICAL_ALIGN_END;
@@ -371,9 +391,23 @@ public class ExportPage extends WizardPage
 		this.getWizard().getContainer().getShell().pack();
 	}
 
+	private void srcVersionListener(SelectionEvent event)
+	{
+		final String key = ((Combo)event.widget).getText();
+		final Boolean supportUpdates = (Boolean)event.widget.getData(key);
+		includeUpdateBtn.setEnabled(isUpdateAvailable());
+		if (!supportUpdates.booleanValue())
+		{
+			includeUpdateBtn.setData(Boolean.toString(false));
+			includeUpdateBtn.setSelection(false);
+		}
+		updateUrlText.setEnabled(includeUpdateBtn.getSelection());
+	}
+
 	private void includeUpdateListener(boolean value)
 	{
-		includeUpdateBtn.setData(Boolean.valueOf(value));
+		updateUrlText.setEnabled(value);
+		includeUpdateBtn.setData(Boolean.toString(value));
 	}
 
 	private Map<String, Boolean> getAvailableVersions()
@@ -390,7 +424,6 @@ public class ExportPage extends WizardPage
 					sb.append(line);
 				final JSONObject jsonObj = new JSONObject(sb.toString());
 				final JSONArray value = (JSONArray)jsonObj.get("versions");
-				final JSONObject myObj = (JSONObject)value.get(0);
 				value.forEach((item) -> {
 					final int devVersion = ((JSONObject)item).getInt("developerMinVersion");
 					if (ClientVersion.getReleaseNumber() < devVersion)
@@ -417,15 +450,65 @@ public class ExportPage extends WizardPage
 		return Paths.get(as_dir).getParent().toString();
 	}
 
-	private String getInitialApplicationURL()
+	private String getApplicationUrl()
 	{
-		String applicationURL = exportElectronWizard.getDialogSettings().get("application_url");
-		if (applicationURL == null)
+		String applicationUrl = exportElectronWizard.getDialogSettings().get("app_url");
+		if (applicationUrl == null)
 		{
 			final String solutionName = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getSolution().getName();
-			applicationURL = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solutionName + "/index.html";
+			applicationUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solutionName + "/index.html";
 		}
-		return applicationURL;
+		return applicationUrl;
+	}
+
+	private int getVersionIndex()
+	{
+		//we need an index from a TreeMap
+		int index = 0;
+		final String version = exportElectronWizard.getDialogSettings().get("ngdesktop_version");
+		if (version != null && srcVersions.containsKey(version))
+		{
+			final Object[] keys = srcVersions.keySet().toArray();
+			while (!keys[index].equals(version))
+				index++;
+		}
+		return index;
+	}
+
+	private boolean getIncludeUpdate()
+	{
+		String includeUpdate = exportElectronWizard.getDialogSettings().get("include_update");
+		if (includeUpdate == null)
+			includeUpdate = "false";
+		return "true".equals(includeUpdate) ? true : false;
+	}
+
+	private String getUpdateUrl()
+	{
+		String urlStr = exportElectronWizard.getDialogSettings().get("update_url");
+		if (urlStr == null || urlStr.trim().length() == 0)
+		{
+			urlStr = applicationUrlText.getText().trim();
+			URL myUrl = null;
+			try
+			{
+				myUrl = new URL(urlStr);
+			}
+			catch (final MalformedURLException e)
+			{
+				urlStr = getApplicationUrl();
+				try
+				{
+					myUrl = new URL(urlStr);
+				}
+				catch (final MalformedURLException e1)
+				{
+					//nothing to do
+				}
+			}
+			if (myUrl != null) urlStr = myUrl.getProtocol() + "://" + myUrl.getAuthority() + "/updates";
+		}
+		return urlStr;
 	}
 
 	private String getDlgInitPath(String value)
@@ -440,15 +523,22 @@ public class ExportPage extends WizardPage
 	private Object platformSelectionChangeListener(String selectedPlatform)
 	{
 		final int index = selectedPlatforms.indexOf(selectedPlatform);
-		// the result type is different depending on the execution leaf
+		// the return type is different depending on the execution leaf
 		return index >= 0 ? selectedPlatforms.remove(index) : selectedPlatforms.add(selectedPlatform);
 	}
-
 
 	public List<String> getSelectedPlatforms()
 	{
 		return selectedPlatforms;
 	}
+
+	private boolean isUpdateAvailable()
+	{
+		final String selectedVersion = srcVersionCombo.getText();
+		final Boolean canBeUpdated = srcVersions.get(selectedVersion);
+		return canBeUpdated != null ? canBeUpdated.booleanValue() : false;
+	}
+
 
 	public void saveState()
 	{
@@ -458,13 +548,14 @@ public class ExportPage extends WizardPage
 		settings.put("osx_export", selectedPlatforms.indexOf(MACOS_PLATFORM) != -1);
 		settings.put("linux_export", selectedPlatforms.indexOf(LINUX_PLATFORM) != -1);
 		settings.put("save_dir", saveDirPath.getText().trim());
-		settings.put("app_url", applicationURLText.getText().trim());
+		settings.put("app_url", applicationUrlText.getText().trim());
 		settings.put("icon_path", iconPath.getText().trim());
 		settings.put("image_path", imgPath.getText().trim());
 		settings.put("copyright", copyrightText.getText());
 		settings.put("ngdesktop_width", widthText.getText().trim());
 		settings.put("ngdesktop_height", heightText.getText().trim());
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
-		settings.put("ngdesktop_include_update", includeUpdateBtn.getData().toString());
+		settings.put("include_update", includeUpdateBtn.getData().toString());
+		settings.put("update_url", updateUrlText.getText().trim());
 	}
 }

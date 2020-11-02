@@ -53,7 +53,7 @@ public class NgDesktopServiceMonitor implements Runnable, IProgressMonitor
 	{
 		while (!stopServiceMonitor)
 		{
-			if (currentStep < targetStep)
+			if (currentStep < targetStep && currentStep < totalSteps * 0.98) //slow down near the end
 			{
 				currentStep += progressUnit;
 				monitor.worked(progressUnit);
@@ -84,26 +84,31 @@ public class NgDesktopServiceMonitor implements Runnable, IProgressMonitor
 		this.targetStep = step;
 	}
 
+	@Override
 	public void beginTask(String taskName, int totalWork)
 	{
 		monitor.beginTask(taskName, totalWork);
 	}
 
+	@Override
 	public void setTaskName(String taskName)
 	{
 		monitor.setTaskName(taskName);
 	}
 
+	@Override
 	public void worked(int work)
 	{
 		monitor.worked(work);
 	}
 
+	@Override
 	public boolean isCanceled()
 	{
 		return monitor.isCanceled();
 	}
 
+	@Override
 	public void done()
 	{
 		monitor.done();
