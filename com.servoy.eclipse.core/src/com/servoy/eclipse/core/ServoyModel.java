@@ -190,6 +190,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
@@ -2086,6 +2087,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		flushFlattenedFormCache(realSolution);
 		if (realSolution)
 		{
+			// we must clean the cache before editing solution listeners are called
+			PersistIndexCache.reload();
+			FormElementHelper.INSTANCE.reload();
 			synchronized (fireRealPersistchangesJob)
 			{
 				realOutstandingChanges.addAll(changes);
