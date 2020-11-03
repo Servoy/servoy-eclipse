@@ -2805,6 +2805,17 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		final LinkedHashMap<UUID, IPersist> changed = new LinkedHashMap<UUID, IPersist>();
 		final LinkedHashMap<UUID, IPersist> changedEditing = new LinkedHashMap<UUID, IPersist>();
 		final Set<IPersist> changedScriptElements = new HashSet<IPersist>();
+
+		// store the deleted persists, else we loose them when updating editing solution
+		for (IPersist child : strayCats)
+		{
+			IPersist editingPersist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), child);
+			if (editingPersist != null)
+			{
+				changedEditing.put(child.getUUID(), editingPersist);
+			}
+		}
+
 		solution.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist persist)
