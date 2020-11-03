@@ -108,7 +108,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 				return UUID_TEXT_36;
 			}
 			if ((columnType.getSqlType() == Types.OTHER || columnType.getSqlType() == Types.JAVA_OBJECT) &&
-				Strings.isEmpty(info.getNativeTypename()))
+				!Strings.isEmpty(info.getNativeTypename()))
 			{
 				return info.getNativeTypename() + " (native type)";
 			}
