@@ -648,7 +648,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					return;
 				}
 			}
-			else if (!full_refresh && formParent.isFormComponent().booleanValue())
+			else if (!full_refresh && formParent != null && formParent.isFormComponent().booleanValue())
 			{
 				if (hasFormReference(flattenedSolution, getForm(), formParent))
 				{
