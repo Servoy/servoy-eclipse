@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
+import java.sql.Types;
+
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -103,6 +106,11 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 					return UUID_MEDIA_16;
 				}
 				return UUID_TEXT_36;
+			}
+			if ((columnType.getSqlType() == Types.OTHER || columnType.getSqlType() == Types.JAVA_OBJECT) &&
+				Strings.isEmpty(info.getNativeTypename()))
+			{
+				return info.getNativeTypename() + " (native type)";
 			}
 			return Column.getDisplayTypeString(columnType.getSqlType());
 		}
