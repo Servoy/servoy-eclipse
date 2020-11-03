@@ -51,6 +51,8 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheet;
 import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
 import com.servoy.eclipse.core.Activator;
@@ -69,9 +71,11 @@ import com.servoy.eclipse.model.util.WebFormComponentChildType;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.FlattenedTabPanel;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -83,6 +87,9 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -450,7 +457,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	 *
 	 * @param persist
 	 */
-	public void refresh(final List<IPersist> persists)
+	public void refresh(final List<IPersist> persists, boolean fullRefresh)
 	{
 		if (!closing)
 		{
@@ -460,7 +467,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 				{
 					if (!isClosing())
 					{
-						doRefresh(persists);
+						doRefresh(persists, fullRefresh);
 					}
 				}
 			});
@@ -470,11 +477,11 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	/**
 	 *
 	 */
-	protected void doRefresh(List<IPersist> persists)
+	protected void doRefresh(List<IPersist> persists, boolean fullRefresh)
 	{
 		if (graphicaleditor != null)
 		{
-			graphicaleditor.refreshPersists(persists);
+			graphicaleditor.refreshPersists(persists, fullRefresh);
 		}
 	}
 
@@ -521,6 +528,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		}
 
 		boolean full_refresh = false;
+		boolean form_refresh = false;
 		List<IPersist> changedChildren = new ArrayList<IPersist>();
 
 		// get all the uuids of the forms in the current hierarchy.
@@ -540,7 +548,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		for (final IPersist changed : changes)
 		{
 			// is it a child of the current form hierarchy?
-			IPersist formParent = changed.getAncestor(IRepository.FORMS);
+			Form formParent = (Form)changed.getAncestor(IRepository.FORMS);
 			if (formParent != null && formUuids.contains(formParent.getUUID()))
 			{
 				try
@@ -564,7 +572,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 								setPartName(form.getName());
 							}
 						});
-						full_refresh = true;
+						form_refresh = true;
 					}
 					else
 					{
@@ -573,7 +581,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						if (child == null)
 						{
 							// if is form component element, will not be found in hierarchy, just ignore for now
-							if (!(changed instanceof WebFormComponentChildType)) full_refresh = true;
+							if (!(changed instanceof WebFormComponentChildType)) form_refresh = true;
 							// add it so it gets cleared (refreshed) as child of the form
 							changedChildren.add(changed);
 						}
@@ -585,7 +593,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						// is it a part of this form?
 						if (changed instanceof Part)
 						{
-							full_refresh = true;
+							form_refresh = true;
 						}
 					}
 
@@ -612,14 +620,14 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 						// is it a part of this form?
 						if (override instanceof Part)
 						{
-							full_refresh = true;
+							form_refresh = true;
 						}
 					}
 				}
 				catch (RuntimeException e)
 				{
 					ServoyLog.logError(e);
-					full_refresh = true;
+					form_refresh = true;
 				}
 			}
 			else if (changed instanceof Media && ((Media)changed).getName().toLowerCase().endsWith(".css"))
@@ -640,24 +648,80 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 					return;
 				}
 			}
+			else if (!full_refresh && formParent.isFormComponent().booleanValue())
+			{
+				if (hasFormReference(flattenedSolution, getForm(), formParent))
+				{
+					full_refresh = true;
+				}
+			}
+
 		}
 
-		if (full_refresh)
+		if (form_refresh || full_refresh)
 		{
 			// refresh all
 			changedChildren.add(form);
 		}
 		if (changedChildren.size() > 0)
 		{
-			refresh(changedChildren);
+			refresh(changedChildren, full_refresh);
 		}
+	}
+
+	private static boolean hasFormReference(final FlattenedSolution fs, Form form, final Form formRef)
+	{
+		final boolean hasFormReference[] = { false };
+		Form flattenedForm = fs.getFlattenedForm(form);
+		flattenedForm.acceptVisitor(new IPersistVisitor()
+		{
+			@Override
+			public Object visit(IPersist o)
+			{
+				if (o instanceof IFormElement)
+				{
+					IFormElement formElement = (IFormElement)o;
+					FormElement fe = FormElementHelper.INSTANCE.getFormElement(formElement, fs, null, true);
+					if (hasFormReference(fs, fe, formRef))
+					{
+						hasFormReference[0] = true;
+						return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+					}
+				}
+				return IPersistVisitor.CONTINUE_TRAVERSAL;
+			}
+		});
+
+		return hasFormReference[0];
+	}
+
+	private static boolean hasFormReference(FlattenedSolution fs, FormElement formElement, Form formRef)
+	{
+		WebObjectSpecification spec = formElement.getWebComponentSpec();
+		if (spec != null)
+		{
+			Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+			if (properties.size() > 0)
+			{
+				for (PropertyDescription pd : properties)
+				{
+					Object propertyValue = formElement.getPropertyValue(pd.getName());
+					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+					if (frm != null && (frm == formRef || FlattenedForm.hasFormInHierarchy(frm, formRef) || hasFormReference(fs, frm, formRef)))
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public void activeProjectChanged(ServoyProject activeProject)
 	{
 		if (ServoyModelManager.getServoyModelManager().getServoyModel().isProjectActive(servoyProject))
 		{
-			refresh(null);
+			refresh(null, false);
 		}
 		else if (servoyProject == null && getPageCount() == 1)
 		{
@@ -696,7 +760,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		else if (updateInfo != IActiveProjectListener.RESOURCES_UPDATED_BECAUSE_ACTIVE_PROJECT_CHANGED)
 		{
 			// other stuff related to the active project has changed, so refresh the editor
-			refresh(null);
+			refresh(null, false);
 		}
 	}
 
