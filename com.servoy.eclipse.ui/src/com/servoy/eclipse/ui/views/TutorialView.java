@@ -88,19 +88,20 @@ public class TutorialView extends ViewPart
 		layout.numColumns = 1;
 		layout.verticalSpacing = 0;
 		rootComposite.setLayout(layout);
-		rootComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		rootComposite.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		ScrolledComposite sc = new ScrolledComposite(rootComposite, SWT.H_SCROLL | SWT.V_SCROLL);
 		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Composite mainContainer = new Composite(sc, SWT.NONE);
 		sc.setContent(mainContainer);
-		mainContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		layout = new GridLayout();
+		layout.numColumns = 1;
+		layout.verticalSpacing = 0;
 		mainContainer.setLayout(layout);
 		mainContainer.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		if (createDefaultTutorialsList)
 		{
-			new TutorialsList(mainContainer, parent);
+			new TutorialsList(mainContainer, parent, parent.getSize().x);
 		}
 		else
 		{
@@ -141,7 +142,7 @@ public class TutorialView extends ViewPart
 			{
 				for (int i = 0; i < steps.length(); i++)
 				{
-					new RowComposite(mainContainer, steps.getJSONObject(i), i + 1);
+					new RowComposite(mainContainer, steps.getJSONObject(i), i + 1, parent.getSize().x);
 				}
 			}
 
@@ -158,7 +159,7 @@ public class TutorialView extends ViewPart
 	 */
 	private class TutorialsList extends Composite
 	{
-		public TutorialsList(Composite mainContainer, Composite firstParent)
+		public TutorialsList(Composite mainContainer, Composite firstParent, int widthHint)
 		{
 			super(mainContainer, SWT.FILL);
 			GridLayout layout = new GridLayout();
@@ -199,7 +200,7 @@ public class TutorialView extends ViewPart
 					description.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 					description.setText(removeHTMLTags(dataTutorialsList.getJSONObject(i).optString("description")));
 					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-					gd.widthHint = 200;
+					gd.widthHint = widthHint - 70;
 					description.setLayoutData(gd);
 					descriptor = FontDescriptor.createFrom(description.getFont());
 					descriptor = descriptor.increaseHeight(2);
@@ -357,7 +358,7 @@ public class TutorialView extends ViewPart
 
 	private class RowComposite extends Composite
 	{
-		RowComposite(Composite parent, JSONObject rowData, int index)
+		RowComposite(Composite parent, JSONObject rowData, int index, int widthHint)
 		{
 			super(parent, SWT.FILL);
 			GridLayout layout = new GridLayout();
@@ -391,7 +392,7 @@ public class TutorialView extends ViewPart
 			stepDescription.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 			stepDescription.setText(rowData.optString("description"));
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gd.widthHint = 200;
+			gd.widthHint = widthHint - 70;
 			stepDescription.setLayoutData(gd);
 			descriptor = FontDescriptor.createFrom(stepDescription.getFont());
 			descriptor = descriptor.increaseHeight(2);
