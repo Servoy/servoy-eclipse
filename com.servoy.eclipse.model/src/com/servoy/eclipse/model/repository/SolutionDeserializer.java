@@ -1660,7 +1660,7 @@ public class SolutionDeserializer
 				ServoyLog.logError("Could not parse UUID -- generating new uuid", e);
 				uuid = UUID.randomUUID();
 			}
-			existingNode = AbstractRepository.searchPersist(parent, uuid);
+			existingNode = AbstractRepository.searchPersist(parent, uuid, parent);
 
 			if (existingNode == null)
 			{
