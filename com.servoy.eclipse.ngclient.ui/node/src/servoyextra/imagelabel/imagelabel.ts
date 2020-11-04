@@ -11,58 +11,73 @@ export class ServoyExtraImageLabel extends ServoyBaseComponent {
 
     @Input() onActionMethodID;
     @Input() onRightClickMethodID;
-    
+
     @Input() enabled;
     @Input() styleClass;
     @Input() tabSeq;
     @Input() visible;
     @Input() media;
-    
+
     imageURL: string = "bootstrapcomponents/imagemedia/images/empty.gif";
 
     private log: LoggerService;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory) { 
-        super(renderer, cdRef);
-        this.log = logFactory.getLogger('ImageLabel');
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory ) {
+        super( renderer, cdRef );
+        this.log = logFactory.getLogger( 'ImageLabel' );
     }
 
     svyOnInit() {
         super.svyOnInit();
+        this.attachHandlers();
     }
-    
+
     svyOnChanges( changes: SimpleChanges ) {
-        if (changes) {
-            for ( const property of Object.keys(changes) ) {
+        if ( changes ) {
+            for ( const property of Object.keys( changes ) ) {
                 const change = changes[property];
                 switch ( property ) {
-                case 'enabled':
-                    if ( change.currentValue )
-                        this.renderer.removeAttribute(this.getFocusElement(),  'disabled' );
-                    else
-                        this.renderer.setAttribute(this.getFocusElement(),  'disabled', 'disabled' );
-                    break;
-                case 'media':
-                    this.updateImageURL(change.currentValue);
-                    break;
-                case 'styleClass':
-                    if (change.previousValue)
-                        this.renderer.removeClass(this.getNativeElement(), change.previousValue );
-                    if ( change.currentValue)
-                        this.renderer.addClass( this.getNativeElement(), change.currentValue );
-                    break;
+                    case 'enabled':
+                        if ( change.currentValue )
+                            this.renderer.removeAttribute( this.getFocusElement(), 'disabled' );
+                        else
+                            this.renderer.setAttribute( this.getFocusElement(), 'disabled', 'disabled' );
+                        break;
+                    case 'media':
+                        this.updateImageURL( change.currentValue );
+                        break;
+                    case 'styleClass':
+                        if ( change.previousValue )
+                            this.renderer.removeClass( this.getNativeElement(), change.previousValue );
+                        if ( change.currentValue )
+                            this.renderer.addClass( this.getNativeElement(), change.currentValue );
+                        break;
                 }
             }
         }
-        super.svyOnChanges(changes);
+        super.svyOnChanges( changes );
     }
-    
+
     getFocusElement(): any {
         return this.getNativeElement();
     }
 
-    private updateImageURL(media: any) {
-       if (media) this.imageURL = media;
+    private updateImageURL( media: any ) {
+        if ( media ) this.imageURL = media;
+    }
+
+    protected attachHandlers() {
+        if ( this.onActionMethodID ) {
+            if ( this.getNativeElement().tagName == 'TEXTAREA' || this.getNativeElement().type == 'text' ) {
+                this.renderer.listen( this.getNativeElement(), 'keydown', e => { if ( e.keyCode == 13 ) this.onActionMethodID( e ) } );
+            }
+            else {
+                this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ) );
+            }
+        }
+        if ( this.onRightClickMethodID ) {
+            this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { this.onRightClickMethodID( e ); return false; } );
+        }
     }
 }
 
