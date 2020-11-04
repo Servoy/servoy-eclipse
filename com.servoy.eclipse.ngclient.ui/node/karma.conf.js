@@ -40,6 +40,7 @@ module.exports = function (config) {
           flags: [
               "--no-sandbox",
               "--js-flags=--max-old-space-size=8196",
+              "--disable-dev-shm-usage"
           ],
       },
     },
