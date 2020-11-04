@@ -1,6 +1,7 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ServoyExtraTable } from './table/table';
 import { ServoyExtraHtmlarea } from './htmlarea/htmlarea';
+import { ServoyExtraImageLabel } from './imagelabel/imagelabel';
 import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 import { SabloModule } from '../sablo/sablo.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -13,7 +14,8 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 @NgModule({
     declarations: [
         ServoyExtraTable,
-        ServoyExtraHtmlarea
+        ServoyExtraHtmlarea,
+        ServoyExtraImageLabel
     ],
     imports: [
         ServoyPublicModule,
@@ -28,7 +30,8 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
     providers: [AsyncPipe
     ],
     exports: [ServoyExtraTable,
-              ServoyExtraHtmlarea
+              ServoyExtraHtmlarea,
+              ServoyExtraImageLabel
     ],
     schemas: [
              CUSTOM_ELEMENTS_SCHEMA

@@ -222,6 +222,21 @@ import { ServoyApi } from '../servoy_api'
                         #cmp>
         </servoyextra-htmlarea>
     </ng-template>
+        
+    <ng-template #servoyextraImagelabel let-state="state">
+            <servoyextra-imagelabel  *ngIf = "state.model.visible" 
+                        [enabled]="state.model.enabled" 
+                        [visible]="state.model.visible" 
+                        [name]="state.name"  
+                        [media]="state.model.media" 
+                        [styleClass]="state.model.styleClass" 
+                        [servoyApi]="getServoyApi(state)"
+                        [tabSeq]="state.model.tabSeq" 
+                        [onActionMethodID]="getHandler(state,'onActionMethodID')" 
+                        [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" 
+                        #cmp>
+            </servoyextra-imagelabel>
+    </ng-template>
      
     <ng-template #bootstrapcomponentsCalendar let-state="state"><servoybootstrap-calendar  *ngIf = "state.model.visible" [visible]="state.model.visible" [format]="state.model.format" [readOnly]="state.model.readOnly" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [enabled]="state.model.enabled" [findmode]="state.model.findmode" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [placeholderText]="state.model.placeholderText" [selectOnEnter]="state.model.selectOnEnter" [tabSeq]="state.model.tabSeq" [toolTipText]="state.model.toolTipText" [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" [onFocusLostMethodID]="getHandler(state,'onFocusLostMethodID')" [onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')" [onFocusGainedMethodID]="getHandler(state,'onFocusGainedMethodID')" [onActionMethodID]="getHandler(state,'onActionMethodID')" [servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.svy_attributes" [name]="state.name" #cmp></servoybootstrap-calendar></ng-template>
     <ng-template #bootstrapcomponentsCalendarinline let-state="state"><servoybootstrap-calendarinline  *ngIf = "state.model.visible" [visible]="state.model.visible" [styleClass]="state.model.styleClass" [dataProviderID]="state.model.dataProviderID" (dataProviderIDChange)="datachange(state.name,'dataProviderID',$event)" [size]="state.model.size" (sizeChange)="datachange(state.name,'size',$event)" [location]="state.model.location" (locationChange)="datachange(state.name,'location',$event)" [toolTipText]="state.model.toolTipText"[onDataChangeMethodID]="getHandler(state,'onDataChangeMethodID')"[servoyApi]="getServoyApi(state)" [servoyAttributes]="state.model.svy_attributes" [name]="state.name" #cmp></servoybootstrap-calendarinline></ng-template>
@@ -278,7 +293,7 @@ import { ServoyApi } from '../servoy_api'
          #cmp>
      </nggrids-datagrid>
  </ng-template>
-	 <!-- component template generate end -->
+     <!-- component template generate end -->
    `
 })
 
@@ -314,6 +329,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
 
     @ViewChild('servoyextraTable', { static: true }) readonly servoyextraTable: TemplateRef<any>;
     @ViewChild('servoyextraHtmlarea', { static: true }) readonly servoyextraHtmlarea: TemplateRef<any>;
+    @ViewChild('servoyextraImagelabel', { static: true }) readonly servoyextraImagelabel: TemplateRef<any>;
 
     @ViewChild('bootstrapcomponentsCalendar', { static: true }) readonly bootstrapcomponentsCalendar: TemplateRef<any>;
     @ViewChild('bootstrapcomponentsCalendarinline', { static: true }) readonly bootstrapcomponentsCalendarinline: TemplateRef<any>;
