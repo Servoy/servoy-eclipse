@@ -231,6 +231,7 @@ import { ServoyApi } from '../servoy_api'
                         [media]="state.model.media" 
                         [styleClass]="state.model.styleClass" 
                         [servoyApi]="getServoyApi(state)"
+                        [servoyAttributes]="state.model.svy_attributes" 
                         [tabSeq]="state.model.tabSeq" 
                         [onActionMethodID]="getHandler(state,'onActionMethodID')" 
                         [onRightClickMethodID]="getHandler(state,'onRightClickMethodID')" 
