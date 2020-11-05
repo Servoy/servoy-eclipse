@@ -3,10 +3,16 @@ import { Component, ViewChild } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { GridOptions } from 'ag-grid-community';
 import { FoundsetChangeEvent } from '../../ngclient/converters/foundset_converter';
+import { ViewportService } from '../../ngclient/services/viewport.service';
 import { ServoyApi } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { IFoundset } from '../../sablo/spectypes.service';
 import { Deferred } from '../../sablo/util/deferred';
+import { DatePicker } from './editors/datepicker';
+import { FormEditor } from './editors/formeditor';
+import { SelectEditor } from './editors/selecteditor';
+import { TextEditor } from './editors/texteditor';
+import { TypeaheadEditor } from './editors/typeaheadeditor';
 
 const COLUMN_PROPERTIES_DEFAULTS = {
     headerTitle: { colDefProperty: "headerName", default: null },
@@ -42,15 +48,20 @@ export class DataGrid {
     @Input() myFoundset: IFoundset;
     @Output() foundsetChange = new EventEmitter();
     @Input() columns;
+    @Input() readOnly;
+    @Input() readOnlyColumnIds;
     @Input() hashedFoundsets;
     @Input() filterModel;
     @Input() rowStyleClassDataprovider;
-    @Input() _internalExpandedState
+    @Input() arrowsUpDownMoveWhenEditing;
+    @Input() _internalExpandedState;
+    @Input() _internalFormEditorValue;
     
 
     @Input() servoyApi: ServoyApi;
 
     @Input() onSort;
+    @Input() onColumnFormEditStarted;
 
     log: LoggerService;
     gridOptions: GridOptions;
@@ -91,6 +102,8 @@ export class DataGrid {
 
     // if row autoHeight, we need to do a refresh after first time data are displayed, to allow ag grid to re-calculate the heights
     isRefreshNeededForAutoHeight:boolean = false;
+
+    selectionEvent;
 
     constructor(logFactory: LoggerFactory) {
         this.log = logFactory.getLogger('DataGrid');
@@ -175,41 +188,41 @@ export class DataGrid {
             // column sort
             if (column.enableSort === false) colDef.sortable = false;
 
-            //TODO: add editors            
-            // if (column.editType) {
-            //     colDef.editable = isColumnEditable && (column.editType != 'CHECKBOX');
+            if (column.editType) {
+                colDef.editable = column.editType != 'CHECKBOX' ? this.isColumnEditable : false;
 
-            //     if(column.editType == 'TEXTFIELD' || column.editType == 'TYPEAHEAD') {
-            //         colDef.cellEditor = getTextEditor();
-            //         colDef.cellEditorParams = {
-            //               svyEditType: column.editType
-            //         }
-            //     }
-            //     else if(column.editType == 'DATEPICKER') {
-            //         colDef.cellEditor = getDatePicker();
-            //     }
-            //     else if(column.editType == 'COMBOBOX') {
-            //         colDef.cellEditor = getSelectEditor();
-            //     }
-            //     else if(column.editType == 'FORM') {
-            //         colDef.cellEditor = getFormEditor();
-            //     }
+                if(column.editType == 'TEXTFIELD') {
+                    colDef.cellEditorFramework = TextEditor
+                }
+                else if(column.editType == 'TYPEAHEAD') {
+                    colDef.cellEditorFramework = TypeaheadEditor
+                }
+                else if(column.editType == 'DATEPICKER') {
+                    colDef.cellEditorFramework = DatePicker;
+                }
+                else if(column.editType == 'COMBOBOX') {
+                    colDef.cellEditorFramework = SelectEditor;
+                }
+                else if(column.editType == 'FORM') {
+                    colDef.cellEditorFramework = FormEditor;
+                }
 
-            //     colDef.onCellValueChanged = function(params) {
-            //         var focused = document.activeElement;
-            //         // in case value change is triggered by clicking into another cell
-            //         // we need a timeout so the new cell will enter edit mode (updateFoundsetRecord needs
-            //         // to know the new editing cell, so it can restore its editing state after update)
-            //         if(focused && ($(gridDiv).has($(focused)).length)) {
-            //             setTimeout(function() {
-            //                 updateFoundsetRecord(params);
-            //             }, 200);
-            //         }
-            //         else {
-            //             updateFoundsetRecord(params);
-            //         }
-            //     }
-            // }
+                // const _this = this;
+                // colDef.onCellValueChanged = function(params) {
+                //     var focused = document.activeElement;
+                //     // in case value change is triggered by clicking into another cell
+                //     // we need a timeout so the new cell will enter edit mode (updateFoundsetRecord needs
+                //     // to know the new editing cell, so it can restore its editing state after update)
+                //     if(focused && ($(gridDiv).has($(focused)).length)) {
+                //         setTimeout(function() {
+                //             _this.updateFoundsetRecord(params);
+                //         }, 200);
+                //     }
+                //     else {
+                //         _this.updateFoundsetRecord(params);
+                //     }
+                // }
+            }
 
             //TODO: add filters
             // if (column.filterType) {
@@ -314,8 +327,8 @@ export class DataGrid {
             return this.state.columns[field];
         } else {
             let columns = columnsModel ? columnsModel : this.columns;
-            for (var i = 0; i < columns.length; i++) {
-                var column = columns[i];
+            for (let i = 0; i < columns.length; i++) {
+                let column = columns[i];
                 if (column.id === field || this.getColumnID(column, i) === field) {
                     // cache it in hashmap for quick retrieval
                     if(!columnsModel) this.state.columns[field] = column;
@@ -432,7 +445,7 @@ export class DataGrid {
     /**
      * Returns table's rowGroupColumns
      * */
-    getRowGroupColumns() {
+    getRowGroupColumns():any {
         var rowGroupCols = this.gridOptions.columnApi ? this.gridOptions.columnApi.getRowGroupColumns() : null;
         return rowGroupCols ? rowGroupCols : [];
     }
@@ -641,6 +654,104 @@ export class DataGrid {
     updateRows(rowUpdates, oldStartIndex, oldSize) { 
     }
 
+    updateFoundsetRecord(params) {
+        // var rowIndex = params.node.rowIndex;
+        // var colId = params.column.colId;
+
+        // // if we have an invalid cell data, ignore any updates for other cells
+        // if((invalidCellDataIndex.rowIndex != -1 && invalidCellDataIndex.rowIndex != rowIndex)
+        //     || (invalidCellDataIndex.colKey != '' && invalidCellDataIndex.colKey != colId)) {
+        //     return;
+        // }
+
+        // var row = params.data;
+        // var foundsetManager = getFoundsetManagerByFoundsetUUID(row._svyFoundsetUUID);
+        // if (!foundsetManager) foundsetManager = foundset;
+        // var foundsetRef = foundsetManager.foundset;
+        // var newValue = params.newValue;
+        // if(newValue && newValue.realValue !== undefined) {
+        //     newValue = newValue.realValue;
+        // }
+        // var oldValue = params.oldValue;
+        // if(oldValue && oldValue.realValue !== undefined) {
+        //     oldValue = oldValue.realValue;
+        // }
+        // var oldValueStr = oldValue;
+        // if(oldValueStr == null) oldValueStr = "";
+
+        // var col = getColumn(params.colDef.field);
+        // // ignore types in compare only for non null values ("200"/200 are equals, but ""/0 is not)
+        // var isValueChanged = newValue != oldValueStr || (!newValue && newValue !== oldValueStr);
+        // if(isValueChanged && newValue instanceof Date && oldValue instanceof Date) {
+        //     isValueChanged = newValue.toISOString() != oldValue.toISOString();
+        // }
+        // if(col && col.dataprovider && col.dataprovider.idForFoundset && (isValueChanged || invalidCellDataIndex.rowIndex != -1)) {
+        //     if(isValueChanged) {
+        //         foundsetRef.updateViewportRecord(row._svyRowId, col.dataprovider.idForFoundset, newValue, oldValue);
+        //         if($scope.handlers.onColumnDataChange) {
+        //             var currentEditCells = gridOptions.api.getEditingCells();
+        //             onColumnDataChangePromise = $scope.handlers.onColumnDataChange(
+        //                 getFoundsetIndexFromEvent(params),
+        //                 getColumnIndex(params.column.colId),
+        //                 oldValue,
+        //                 newValue,
+        //                 createJSEvent()
+        //             );
+        //             onColumnDataChangePromise.then(function(r) {
+        //                 if(r == false) {
+        //                     // if old value was reset, clear invalid state
+        //                     var currentValue = gridOptions.api.getValue(colId, params.node);
+        //                     if(currentValue && currentValue.realValue !== undefined) {
+        //                         currentValue = currentValue.realValue;
+        //                     }
+        //                     if(oldValue === currentValue) {
+        //                         invalidCellDataIndex.rowIndex = -1;
+        //                         invalidCellDataIndex.colKey = '';
+        //                     }
+        //                     else {
+        //                         invalidCellDataIndex.rowIndex = rowIndex;
+        //                         invalidCellDataIndex.colKey = colId;
+        //                     }
+        //                     var editCells = gridOptions.api.getEditingCells();
+        //                     if(isSelectionReady && (!editCells.length || (editCells[0].rowIndex != rowIndex || editCells[0].column.colId != colId))) {
+        //                         gridOptions.api.stopEditing();
+        //                         gridOptions.api.startEditingCell({
+        //                             rowIndex: rowIndex,
+        //                             colKey: colId
+        //                         });
+        //                         setTimeout(function() {
+        //                             selectionEvent = null;
+        //                             gridOptions.api.forEachNode( function(node) {
+        //                                 if (node.rowIndex === rowIndex) {
+        //                                     node.setSelected(true, true);
+        //                                 }
+        //                             });
+        //                         }, 0);
+        //                     }
+        //                 }
+        //                 else {
+        //                     invalidCellDataIndex.rowIndex = -1;
+        //                     invalidCellDataIndex.colKey = '';
+        //                     var editCells = gridOptions.api.getEditingCells();
+        //                     if(isSelectionReady && editCells.length == 0 && currentEditCells.length != 0) {
+        //                         gridOptions.api.startEditingCell({
+        //                             rowIndex: currentEditCells[0].rowIndex,
+        //                             colKey: currentEditCells[0].column.colId
+        //                         });
+        //                     }
+        //                 }
+        //                 onColumnDataChangePromise = null;
+        //             }).catch(function(e) {
+        //                 $log.error(e);
+        //                 invalidCellDataIndex.rowIndex = -1;
+        //                 invalidCellDataIndex.colKey = '';
+        //                 onColumnDataChangePromise = null;
+        //             });
+        //         }
+        //     }
+        // }
+    }
+
     /**
      * remove the given foundset hash from the model hashmap.
      * User to clear the memory
@@ -745,6 +856,18 @@ export class DataGrid {
         };
     }
 
+    getFoundsetIndexFromEvent(params): number {
+        let foundsetIndex;
+        if (this.isTableGrouped()) {
+            this.log.warn('select grouped record not supported yet');
+            foundsetIndex = -1;
+            // TODO use serverside API getRecordIndex
+        } else {
+            foundsetIndex = params.node.rowIndex + 1;
+        }
+        return foundsetIndex;
+    }
+
     /**
      * TODO parametrize foundset or add it into foundsetManager object
      * Returns the sort model for the root foundset
@@ -818,16 +941,110 @@ export class DataGrid {
         //						// FIXME there is no ag-grid method to force group expand for a specific key value
         //					}
     }
-
-    /**************************************************************************************************
-     **************************************************************************************************
-        *
-        *  Cell editors
-        *
-        **************************************************************************************************
-        **************************************************************************************************/
     
+    getValuelist(params, asCodeString?): any {
+        return this.getValuelistEx(params.node.data, params.column.colId, asCodeString)
+    }
+
     getValuelistEx(row, colId, asCodeString): any {
+        let column;
+        let foundsetRows;
+
+        const foundsetManager = this.getFoundsetManagerByFoundsetUUID(row._svyFoundsetUUID);
+        // if not root, it should use the column/foundsetRows from the hashed map
+        if (foundsetManager.isRoot) {
+            column = this.getColumn(colId);
+            foundsetRows = this.myFoundset.viewPort.rows;
+        } else if (this.hashedFoundsets) {
+            for (let i = 0; i < this.hashedFoundsets.length; i++) {
+                if (this.hashedFoundsets[i].foundsetUUID == foundsetManager.foundsetUUID) {
+                    column = this.getColumn(colId, this.hashedFoundsets[i].columns);
+                    foundsetRows = foundsetManager.foundset.viewPort.rows;
+                    break;
+                }
+            }
+        }
+        if(!column || !foundsetRows) {
+            this.log.error('Cannot find column/foundset to read the valuelist.');
+            return null;
+        }
+
+        // if it's a foundset linked prop (starting with Servoy 8.3.2) or not (prior to 8.3.2)
+        if (column.valuelist && column.valuelist.state
+                && column.valuelist.state["recordLinked"] != undefined) {
+            // _svyRowId: "5.10643;_0"
+            const rowId = row[ViewportService.ROW_ID_COL_KEY];
+            
+            if (column.valuelist.length == 0 && foundsetRows.length > 0) {
+                // this if is just for backwards compatilility editing comboboxes with valuelists with Servoy < 8.3.3 (there the foundset-linked-in-spec valuelists in custom objects
+                // would not be able to reference their foundset from client-side JS => for valuelists that were not actually linked
+                // client side valuelist.js would simulate a viewport that has as many items as the foundset rows containing really the same valuelist object
+                // and this did not work until the fix of SVY-12718 (valuelist.js was not able to find foundset from the same custom object) => valuelist viewport
+                // was length 0; this whole if can be removed once groupingtable's package will require Servoy >= 8.3.3
+                
+                // fall back to what was done previously - use root valuelist and foundset to resolve stuff (which will probably work except for related valuelists)
+                column = this.getColumn(colId);
+                foundsetRows = this.myFoundset.viewPort.rows;
+            }
+            
+            let idxInFoundsetViewport:any = -1;
+            for (let idx in foundsetRows)
+                if (foundsetRows[idx][ViewportService.ROW_ID_COL_KEY].indexOf(rowId) == 0) {
+                    idxInFoundsetViewport = idx;
+                    break;
+                }
+            
+            if (idxInFoundsetViewport >= 0 && idxInFoundsetViewport < column.valuelist.length) return asCodeString ? ".valuelist[" + idxInFoundsetViewport + "]" : column.valuelist[idxInFoundsetViewport];
+            else if (!column.valuelist.state["recordLinked"] && column.valuelist.length > 0) return asCodeString ? ".valuelist[0]" : column.valuelist[0];
+            else {
+                this.log.error('Cannot find the valuelist entry for the row that was clicked.');
+                return null;
+            }
+        }
+        else return asCodeString ? ".valuelist" : column.valuelist;
+    }
+
+    /**
+     * Callback used by ag-grid colDef.editable
+     */
+    isColumnEditable(args) {
+
+        const _this = args.context.componentParent;
+        // skip pinned (footer) nodes
+        if(args.node.rowPinned) return false;
+
+        // if read-only and no r-o columns
+        if(_this.readOnly && !_this.readOnlyColumnIds) return false;
+
+        const rowGroupCols = _this.getRowGroupColumns();
+        for (let i = 0; i < rowGroupCols.length; i++) {
+            if (args.colDef.field == rowGroupCols[i].colDef.field) {
+                return false;	// don't allow editing columns used for grouping
+            }
+        }
+
+        let isColumnEditable = true;
+        if (!_this.isTableGrouped()) {
+            const column = _this.getColumn(args.colDef.field);
+            if (column && column.isEditableDataprovider) {
+                const index = args.node.rowIndex - _this.foundset.foundset.viewPort.startIndex;
+                isColumnEditable = column.isEditableDataprovider[index];
+            }
+        }
+        else {
+            const foundsetManager = _this.getFoundsetManagerByFoundsetUUID(args.data._svyFoundsetUUID);
+            const index = foundsetManager.getRowIndex(args.data) - foundsetManager.foundset.viewPort.startIndex;
+            if (index >= 0 && foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_isEditableDataprovider"] != undefined) {
+                isColumnEditable = foundsetManager.foundset.viewPort.rows[index][args.colDef.field + "_isEditableDataprovider"];
+            }
+        }
+
+        // if editable check the r-o state from the runtime map
+        if(isColumnEditable && _this.readOnlyColumnIds && args.colDef.colId && _this.readOnlyColumnIds['_' + args.colDef.colId] != undefined) {
+            return !_this.readOnlyColumnIds['_' + args.colDef.colId];
+        }
+
+        return isColumnEditable && !_this.readOnly;
     }
 
     editCellAtWithTimeout(foundsetindex, columnindex) {
@@ -882,20 +1099,10 @@ class GroupedInfo {
  */
 class FoundsetManager {
 
-    dataGrid: DataGrid;
-    foundset: IFoundset;
-    isRoot: boolean;
-    foundsetUUID: string;
-
-    constructor(dataGrid: DataGrid, foundsetRef: IFoundset, foundsetUUID: string, isRoot: boolean) {
-        this.dataGrid = dataGrid;
-        this.foundset = foundsetRef;
-        this.isRoot = isRoot ? true : false;
-        this.foundsetUUID = foundsetUUID;
-
-        if (!this.isRoot) {
+    constructor(public dataGrid: DataGrid, public foundset: IFoundset, public foundsetUUID: string, public isRoot: boolean) {
+        if (!isRoot) {
             // add the change listener to the component
-            this.foundset.addChangeListener(this.foundsetListener);
+            foundset.addChangeListener(this.foundsetListener);
         }
     }
 
@@ -1077,12 +1284,7 @@ class FoundsetManager {
 
 class FoundsetServer {
 
-    dataGrid: DataGrid;
-    allData: any;
-
-    constructor(dataGrid: DataGrid, allData) {
-        this.dataGrid = dataGrid;
-        this.allData = allData;
+    constructor(public dataGrid: DataGrid, public allData) {
     }
 
     /**
@@ -1321,12 +1523,7 @@ class FoundsetServer {
 
 class FoundsetDatasource {
 
-    dataGrid: DataGrid;
-    foundsetServer;
-
-    constructor(dataGrid: DataGrid, foundsetServer) {
-        this.dataGrid = dataGrid;
-        this.foundsetServer = foundsetServer;
+    constructor(public dataGrid: DataGrid, public foundsetServer) {
     }
 
     getRows(params) {
@@ -1496,15 +1693,12 @@ class FoundsetDatasource {
 
 class GroupManager {
 
-    dataGrid: DataGrid;
-
     hashTree: GroupHashCache;
 
     groupedColumns = [];
     groupedValues = new Object();
     
-    constructor(dataGrid: DataGrid) {
-        this.dataGrid = dataGrid;
+    constructor(public dataGrid: DataGrid) {
         this.hashTree = new GroupHashCache(this.dataGrid);
     }
 
@@ -1763,11 +1957,9 @@ class GroupManager {
  * */
 class GroupHashCache {
 
-    dataGrid: DataGrid;
     rootGroupNode: GroupNode;
 
-    constructor(dataGrid: DataGrid) {
-        this.dataGrid = dataGrid;
+    constructor(public dataGrid: DataGrid) {
         this.rootGroupNode = new GroupNode(this.dataGrid, 'root');
     }
 
@@ -2182,14 +2374,10 @@ class GroupHashCache {
 
 class GroupNode {
 
-    dataGrid: DataGrid;
-    id:string;
     nodes = new Object();
     foundsetUUID = undefined;
 
-    constructor(dataGrid: DataGrid, id: string) {
-        this.dataGrid = dataGrid;
-        this.id = id;
+    constructor(public dataGrid: DataGrid, public id: string) {
     }
 
     /**

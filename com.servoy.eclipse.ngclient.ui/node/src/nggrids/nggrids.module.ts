@@ -1,14 +1,30 @@
 import { NgModule } from '@angular/core';
+import { OwlDateTimeModule } from '@danielmoncada/angular-datetime-picker';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AgGridModule } from 'ag-grid-angular';
 import 'ag-grid-enterprise';
 import { LicenseManager } from 'ag-grid-enterprise';
+import { ServoyPublicModule } from '../ngclient/servoy_public.module';
 import { DataGrid } from './datagrid/datagrid';
+import { DatePicker } from './datagrid/editors/datepicker';
+import { FormEditor } from './datagrid/editors/formeditor';
+import { SelectEditor } from './datagrid/editors/selecteditor';
+import { TextEditor } from './datagrid/editors/texteditor';
+import { TypeaheadEditor } from './datagrid/editors/typeaheadeditor';
 
 @NgModule({
     declarations: [
-        DataGrid
+        DataGrid,
+        TextEditor,
+        DatePicker,
+        FormEditor,
+        SelectEditor,
+        TypeaheadEditor
     ],
     imports: [
+        ServoyPublicModule,
+        OwlDateTimeModule,
+        NgbModule,
         AgGridModule.withComponents([])
     ],
     exports: [

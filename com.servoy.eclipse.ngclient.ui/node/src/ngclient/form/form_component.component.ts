@@ -288,12 +288,17 @@ import { ServoyApi } from '../servoy_api'
      <nggrids-datagrid [myFoundset]="state.model.myFoundset"
          (foundsetChange)="datachange(state.name,'myFoundset',$event)"
          [columns]="state.model.columns"
+         [readOnly]="state.model.readOnly"
+         [readOnlyColumnIds]="state.model.readOnlyColumnIds"
          [hashedFoundsets]="state.model.hashedFoundsets"
          [filterModel]="state.model.filterModel"
          [rowStyleClassDataprovider]="state.model.rowStyleClassDataprovider"
+         [arrowsUpDownMoveWhenEditing]="state.model.arrowsUpDownMoveWhenEditing"
          [_internalExpandedState]="state.model._internalExpandedState"
+         [_internalFormEditorValue]="state.model._internalFormEditorValue"
          [servoyApi]="getServoyApi(state)"
          [onSort]="getHandler(state,'onSort')"
+         [onColumnFormEditStarted]="getHandler(state,'onColumnFormEditStarted')"
          #cmp>
      </nggrids-datagrid>
  </ng-template>

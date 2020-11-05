@@ -8,7 +8,7 @@ export class ServoyApi {
     }
 
 
-    public formWillShow( formname, relationname?, formIndex ?) {
+    public formWillShow( formname, relationname?, formIndex ?): Promise<boolean> {
         return this.formservice.formWillShow( formname, true, this.formname, this.item.name, relationname, formIndex );
     }
 
