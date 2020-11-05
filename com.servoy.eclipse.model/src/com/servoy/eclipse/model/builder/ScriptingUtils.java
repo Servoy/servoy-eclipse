@@ -32,6 +32,7 @@ import org.eclipse.dltk.javascript.ast.Identifier;
 import org.eclipse.dltk.javascript.ast.ObjectInitializer;
 import org.eclipse.dltk.javascript.ast.ObjectInitializerPart;
 import org.eclipse.dltk.javascript.ast.PropertyInitializer;
+import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.Statement;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
@@ -41,6 +42,7 @@ import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Debug;
 
@@ -140,7 +142,7 @@ public class ScriptingUtils
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitDecimalLiteral(org.eclipse.dltk.javascript.ast.DecimalLiteral)
 				 */
 				@Override
@@ -151,7 +153,7 @@ public class ScriptingUtils
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitStringLiteral(org.eclipse.dltk.javascript.ast.StringLiteral)
 				 */
 				@Override
@@ -168,4 +170,45 @@ public class ScriptingUtils
 		return retval;
 	}
 
+	public static boolean isMissingReturnDocs(ScriptMethod method)
+	{
+		final Script script = javascriptParser.parse(method.getDeclaration(), dummyReporter);
+		List<Statement> statements = script.getStatements();
+		if (statements != null && statements.size() == 1 && (statements.get(0) instanceof VoidExpression))
+		{
+			Expression exp = ((VoidExpression)statements.get(0)).getExpression();
+			if (exp instanceof FunctionStatement)
+			{
+				boolean[] hasReturnStatement = new boolean[] { false };
+				try
+				{
+					((FunctionStatement)exp).getBody().traverse(new ASTVisitor()
+					{
+						@Override
+						public boolean visitGeneral(ASTNode node) throws Exception
+						{
+							if (node instanceof ReturnStatement)
+							{
+								hasReturnStatement[0] = true;
+							}
+							return super.visitGeneral(node);
+						}
+
+					});
+					if (hasReturnStatement[0])
+					{
+						if (exp.getDocumentation() != null && !exp.getDocumentation().getText().contains("@return"))
+						{
+							return true;
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		}
+		return false;
+	}
 }

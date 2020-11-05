@@ -27,12 +27,6 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
-import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
@@ -51,18 +45,13 @@ import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.server.ngclient.FormElement;
-import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.IContextProvider;
-import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.Utils;
 
 
@@ -304,33 +293,6 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		if (!isMobile() && seceditor != null) seceditor.saveSecurityElements();
 		super.doSave(monitor);
 
-		if (getForm().isFormComponent().booleanValue())
-		{
-			for (IWorkbenchPage page : PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPages())
-			{
-				for (IEditorReference editorReference : page.getEditorReferences())
-				{
-					IEditorPart editor = editorReference.getEditor(false);
-					if (editor instanceof VisualFormEditor && editor != this)
-					{
-						VisualFormEditor visualFormEditor = (VisualFormEditor)editor;
-						BaseVisualFormEditorDesignPage baseVisualFormEditorDesignPage = visualFormEditor.getGraphicaleditor();
-						if (baseVisualFormEditorDesignPage instanceof RfbVisualFormEditorDesignPage)
-						{
-							RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)baseVisualFormEditorDesignPage;
-							Form f = visualFormEditor.getForm();
-							final FlattenedSolution fs = Activator.getDefault().getDesignClient().getFlattenedSolution();
-
-							if (hasFormReference(fs, f, getForm()))
-							{
-								rfbVisualFormEditorDesignPage.refreshBrowserUrl(true);
-							}
-						}
-					}
-				}
-			}
-		}
-
 		try
 		{
 			EclipseMessages.saveFormI18NTexts(getForm());
@@ -342,61 +304,13 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 	}
 
-	private static boolean hasFormReference(final FlattenedSolution fs, Form form, final Form formRef)
-	{
-		final boolean hasFormReference[] = { false };
-		Form flattenedForm = fs.getFlattenedForm(form);
-		flattenedForm.acceptVisitor(new IPersistVisitor()
-		{
-			@Override
-			public Object visit(IPersist o)
-			{
-				if (o instanceof IFormElement)
-				{
-					IFormElement formElement = (IFormElement)o;
-					FormElement fe = FormElementHelper.INSTANCE.getFormElement(formElement, fs, null, true);
-					if (hasFormReference(fs, fe, formRef))
-					{
-						hasFormReference[0] = true;
-						return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-					}
-				}
-				return IPersistVisitor.CONTINUE_TRAVERSAL;
-			}
-		});
-
-		return hasFormReference[0];
-	}
-
-	private static boolean hasFormReference(FlattenedSolution fs, FormElement formElement, Form formRef)
-	{
-		WebObjectSpecification spec = formElement.getWebComponentSpec();
-		if (spec != null)
-		{
-			Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
-			if (properties.size() > 0)
-			{
-				for (PropertyDescription pd : properties)
-				{
-					Object propertyValue = formElement.getPropertyValue(pd.getName());
-					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
-					if (frm != null && (frm == formRef || FlattenedForm.hasFormInHierarchy(frm, formRef) || hasFormReference(fs, frm, formRef)))
-					{
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
 	/**
 	 *
 	 */
 	@Override
-	protected void doRefresh(List<IPersist> persists)
+	protected void doRefresh(List<IPersist> persists, boolean fullRefresh)
 	{
-		super.doRefresh(persists);
+		super.doRefresh(persists, fullRefresh);
 		if (!isMobile())
 		{
 			if (partseditor != null)

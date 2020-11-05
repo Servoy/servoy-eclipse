@@ -362,7 +362,7 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 	}
 
 	@Override
-	public void refreshPersists(final List<IPersist> persists)
+	public void refreshPersists(final List<IPersist> persists, boolean fullRefresh)
 	{
 		if (persists != null)
 		{
@@ -399,6 +399,11 @@ public abstract class RfbVisualFormEditorDesignPage extends BaseVisualFormEditor
 						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
 							new Object[] { form.getUUID(), form.extendsForm != null ? form.extendsForm.getUUID()
 								: null, form.getSize().width, form.getSize().height });
+					}
+					if (fullRefresh)
+					{
+						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh",
+							new Object[] { });
 					}
 					if (newStylesheetsFinal != null)
 					{

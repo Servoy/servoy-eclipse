@@ -210,6 +210,8 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			case NgDesktopClientConnection.ERROR :
 				final String errorMessage = conn.getStatusMessage();
 				errorMsg.append(errorMessage);
+				monitor.endChase();
+				monitor.done();
 				break;
 			case NgDesktopClientConnection.NOT_FOUND :
 				errorMsg.append("Build does not exist: " + tokenId);
@@ -343,9 +345,9 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 			return errorMsg;
 		}
 
+		int intValue;
 		try
 		{
-			int intValue;
 			value = settings.get("ngdesktop_width");
 			if (value.length() > 0)
 			{
@@ -370,7 +372,11 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		catch (final NumberFormatException e)
 		{
 			errorMsg.append("NumberFormatException: " + e.getMessage());
+			return errorMsg;
+
 		}
 		return errorMsg;
 	}
+
+
 }

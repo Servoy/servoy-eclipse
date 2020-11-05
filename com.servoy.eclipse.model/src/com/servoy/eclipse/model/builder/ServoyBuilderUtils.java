@@ -665,7 +665,7 @@ public class ServoyBuilderUtils
 
 	public static void addScriptMethodErrorMarkers(IResource markerResource, ScriptMethod method)
 	{
-		if (!method.getDeclaration().contains("@return") && method.getMethodCode().contains("return "))
+		if (ScriptingUtils.isMissingReturnDocs(method))
 		{
 			ServoyMarker mk = MarkerMessages.MethodNoReturn.fill(method.getName());
 			IMarker marker = ServoyBuilder.addMarker(markerResource, mk.getType(), mk.getText(), method.getLineNumberOffset(),

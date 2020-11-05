@@ -190,6 +190,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.scripting.ScriptEngine;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
@@ -2086,6 +2087,9 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		flushFlattenedFormCache(realSolution);
 		if (realSolution)
 		{
+			// we must clean the cache before editing solution listeners are called
+			PersistIndexCache.reload();
+			FormElementHelper.INSTANCE.reload();
 			synchronized (fireRealPersistchangesJob)
 			{
 				realOutstandingChanges.addAll(changes);
@@ -2801,6 +2805,17 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 		final LinkedHashMap<UUID, IPersist> changed = new LinkedHashMap<UUID, IPersist>();
 		final LinkedHashMap<UUID, IPersist> changedEditing = new LinkedHashMap<UUID, IPersist>();
 		final Set<IPersist> changedScriptElements = new HashSet<IPersist>();
+
+		// store the deleted persists, else we loose them when updating editing solution
+		for (IPersist child : strayCats)
+		{
+			IPersist editingPersist = AbstractRepository.searchPersist(servoyProject.getEditingSolution(), child);
+			if (editingPersist != null)
+			{
+				changedEditing.put(child.getUUID(), editingPersist);
+			}
+		}
+
 		solution.acceptVisitor(new IPersistVisitor()
 		{
 			public Object visit(IPersist persist)

@@ -820,7 +820,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	}
 
 	@Override
-	public void refreshPersists(List<IPersist> persists)
+	public void refreshPersists(List<IPersist> persists, boolean fullRefresh)
 	{
 		setPaletteItems();
 		try
