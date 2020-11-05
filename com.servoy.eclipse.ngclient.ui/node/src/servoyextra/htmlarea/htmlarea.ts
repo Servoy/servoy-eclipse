@@ -31,7 +31,6 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
     private log: LoggerService;
 
     config: AngularEditorConfig = {
-        editable: true,
         spellcheck: true,
         translate: 'no',
         defaultParagraphSeparator: 'p'
@@ -51,14 +50,14 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
         if ( this.dataProviderID === undefined ) {
             this.dataProviderID = null;
         }
-        //        // ugly hack to fix the height
-        //        let nativeElement = this.getNativeElement();
-        //        let componentHeight = nativeElement.offsetHeight;
-        //        //let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
-        //        let initialContentHeight = nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0].offsetHeight;
-        //        let initialEditorHeight = nativeElement.childNodes[0].childNodes[0].offsetHeight;
-        //        
-        //        this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], "height",  (initialContentHeight + componentHeight - initialEditorHeight) +'px');
+        // ugly hack to fix the height
+        let nativeElement = this.getNativeElement();
+        let componentHeight = nativeElement.offsetHeight;
+        //let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
+        let initialContentHeight = nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0].offsetHeight;
+        let initialEditorHeight = nativeElement.childNodes[0].childNodes[0].offsetHeight;
+
+        this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], "height", ( initialContentHeight + componentHeight - initialEditorHeight ) + 'px' );
 
     }
 
@@ -67,22 +66,6 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
             for ( const property of Object.keys( changes ) ) {
                 const change = changes[property];
                 switch ( property ) {
-                    case 'enabled':
-                        if ( change.currentValue )
-                            this.renderer.removeAttribute( this.getFocusElement(), 'disabled' );
-                        else
-                            this.renderer.setAttribute( this.getFocusElement(), 'disabled', 'disabled' );
-                        break;
-                    case 'editable':
-                        if ( change.currentValue )
-                            this.renderer.removeAttribute( this.getFocusElement(), 'readonly' );
-                        else
-                            this.renderer.setAttribute( this.getFocusElement(), 'readonly', 'readonly' );
-                        break;
-                    case 'placeholderText':
-                        if ( change.currentValue ) this.renderer.setAttribute( this.getFocusElement(), 'placeholder', change.currentValue );
-                        else this.renderer.removeAttribute( this.getFocusElement(), 'placeholder' );
-                        break;
                     case 'styleClass':
                         if ( change.previousValue )
                             this.renderer.removeClass( this.getNativeElement(), change.previousValue );

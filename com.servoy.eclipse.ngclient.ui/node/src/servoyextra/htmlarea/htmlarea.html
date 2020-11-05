@@ -5,5 +5,13 @@
      [svyTooltip]="toolTipText"
      [sabloTabseq]="tabSeq"
      #element>
-  <angular-editor [id]="servoyApi.getMarkupId() + 'editor'"  [(ngModel)]="dataProviderID" (blur)="pushUpdate()" [config]="config"></angular-editor>
+  <angular-editor 
+  		[placeholder]="placeholderText" 
+  		[editable]="editable" 
+		[enableToolbar] = "enabled"  	
+  		[id]="servoyApi.getMarkupId() + 'editor'"  
+  		[(ngModel)]="dataProviderID" 
+  		(blur)="pushUpdate()" 
+  		[config]="config">
+  </angular-editor>
 </div>
