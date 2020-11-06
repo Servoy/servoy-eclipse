@@ -7,8 +7,7 @@
      #element>
   <angular-editor 
   		[placeholder]="placeholderText" 
-  		[editable]="editable" 
-		[enableToolbar] = "enabled"  	
+  		[editable] = "isEditable"
   		[id]="servoyApi.getMarkupId() + 'editor'"  
   		[(ngModel)]="dataProviderID" 
   		(blur)="pushUpdate()" 

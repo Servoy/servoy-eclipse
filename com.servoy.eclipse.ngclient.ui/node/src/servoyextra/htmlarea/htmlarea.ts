@@ -1,5 +1,5 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public'
+import { ServoyBaseComponent, PropertyUtils } from '../../ngclient/servoy_public'
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
 
@@ -27,10 +27,14 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
     @Input() text;
     @Input() toolTipText;
     @Input() visible;
+    @Input() scrollbars;
 
     private log: LoggerService;
 
+    isEditable: boolean = true;
+    
     config: AngularEditorConfig = {
+        editable: this.isEditable,
         spellcheck: true,
         translate: 'no',
         defaultParagraphSeparator: 'p'
@@ -61,6 +65,19 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
 
     }
 
+    public getScrollX(): number {
+        return this.getNativeElement().scrollLeft;
+    }
+
+    public getScrollY(): number {
+        return this.getNativeElement().scrollTop;
+    }
+
+    public setScroll(x: number, y: number) {
+        this.getNativeElement().scrollLeft = x;
+        this.getNativeElement().scrollTop = y;
+    }
+    
     svyOnChanges( changes: SimpleChanges ) {
         if ( changes ) {
             for ( const property of Object.keys( changes ) ) {
@@ -72,6 +89,14 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
                         if ( change.currentValue )
                             this.renderer.addClass( this.getNativeElement(), change.currentValue );
                         break;
+                    case 'scrollbars':
+                        let element = this.getNativeChild().getElementsByClassName('angular-editor-textarea');
+                        PropertyUtils.setScrollbars(element, change.currentValue);
+                        break;
+                    case 'editable':
+                       this.isEditable = this.editable;
+                       break;
+                       
                 }
             }
         }
