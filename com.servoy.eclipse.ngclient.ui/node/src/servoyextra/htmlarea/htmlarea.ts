@@ -31,10 +31,9 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
 
     private log: LoggerService;
 
-    isEditable: boolean = true;
-    
     config: AngularEditorConfig = {
-        editable: this.isEditable,
+        editable: true,
+        enableToolbar: true,
         spellcheck: true,
         translate: 'no',
         defaultParagraphSeparator: 'p'
@@ -94,8 +93,12 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
                         PropertyUtils.setScrollbars(element, change.currentValue);
                         break;
                     case 'editable':
-                       this.isEditable = this.editable;
+                       this.config.editable = this.editable;
                        break;
+                    case 'enabled':
+                        this.config.enableToolbar = this.enabled;
+                        break;  
+                     
                        
                 }
             }
