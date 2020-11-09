@@ -45,6 +45,7 @@ import org.json.JSONObject;
 import org.sablo.specification.Package.DirPackageReader;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -180,8 +181,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 				//if version is not specified, then we search for the latest compatible version
 				String servoyVersion = release.getString("servoy-version");
 				String[] minAndMax = servoyVersion.split(" - ");
-				if (WebPackageVersionComparator.compare(minAndMax[0], currentServoyVersion) <= 0 && (pckVersion == null ||
-					WebPackageVersionComparator.compare(pckVersion, release.optString("version", "")) <= 0))
+				if (SemVerComparator.compare(minAndMax[0], currentServoyVersion) <= 0 && (pckVersion == null ||
+					SemVerComparator.compare(pckVersion, release.optString("version", "")) <= 0))
 				{
 					urlString = release.optString("url");
 					dependency = release.optString("dependency", null);
@@ -189,7 +190,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 				}
 			}
 			else if (pckVersion == null || release.optString("version", "").equals(selectedVersion) ||
-				WebPackageVersionComparator.compare(pckVersion, release.optString("version", "")) <= 0)
+				SemVerComparator.compare(pckVersion, release.optString("version", "")) <= 0)
 			{
 				//the selectedVersion or the latest version we found so far
 				urlString = release.optString("url");
