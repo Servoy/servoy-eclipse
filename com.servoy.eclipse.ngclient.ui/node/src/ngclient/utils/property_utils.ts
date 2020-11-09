@@ -148,7 +148,7 @@ export class PropertyUtils {
      public static setScrollbars(element, value) {
        let style = this.getScrollbarsStyleObj(value);
        Object.keys(style).forEach(key => {
-           element.style[key] = style[key];
+           element[0].style[key] = style[key];
        });
      };
      // internal function
