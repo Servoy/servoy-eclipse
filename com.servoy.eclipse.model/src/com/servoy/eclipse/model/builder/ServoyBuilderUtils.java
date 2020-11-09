@@ -673,8 +673,11 @@ public class ServoyBuilderUtils
 				IMarker.PRIORITY_NORMAL, null, method);
 			try
 			{
-				marker.setAttribute("Uuid", method.getUUID().toString());
-				marker.setAttribute("SolutionName", method.getRootObject().getName());
+				if (marker != null)
+				{
+					marker.setAttribute("Uuid", method.getUUID().toString());
+					marker.setAttribute("SolutionName", method.getRootObject().getName());
+				}
 			}
 			catch (CoreException e)
 			{
