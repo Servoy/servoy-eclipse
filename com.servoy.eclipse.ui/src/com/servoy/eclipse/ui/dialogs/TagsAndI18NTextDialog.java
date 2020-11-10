@@ -175,7 +175,8 @@ public class TagsAndI18NTextDialog extends Dialog
 					LayoutStyle.RELATED).add(addButton, GroupLayout.PREFERRED_SIZE, 56, GroupLayout.PREFERRED_SIZE).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(130, 130, 130).add(addButton)).add(
-					groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 426, Short.MAX_VALUE))).add(24, 24, 24)));
+					groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 426, Short.MAX_VALUE)))
+				.add(24, 24, 24)));
 			composite_1.setLayout(groupLayout);
 		}
 
@@ -183,6 +184,7 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		TabFolder tabFolder;
 		tabFolder = new TabFolder(composite_2, SWT.NONE);
+
 
 		final TabItem textTabItem = new TabItem(tabFolder, SWT.NONE);
 		textTabItem.setText("Text");
@@ -234,6 +236,36 @@ public class TagsAndI18NTextDialog extends Dialog
 
 		sashForm.setWeights(hideTags ? new int[] { 500 } : new int[] { 298, 500 });
 
+		final TabItem i18n = i18nTabItem;
+		tabFolder.addSelectionListener(new SelectionListener()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (tabFolder.getSelection()[0] == i18n)
+				{
+					if (!hideTags) i18nComposite.selectKey(value);
+				}
+				else if (tabFolder.getSelection()[0] == htmlPreviewTabItem)
+				{
+					if (HtmlUtils.hasUsefulHtmlContent(value))
+					{
+						browser.setText(value);
+						htmlPreviewTabItem.setControl(browser);
+					}
+					else htmlPreviewTabItem.setControl(null);
+				}
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				// TODO Auto-generated method stub
+
+			}
+		});
 		return composite;
 	}
 
@@ -289,13 +321,6 @@ public class TagsAndI18NTextDialog extends Dialog
 	protected void textModified()
 	{
 		value = text.getText();
-		if (!hideTags) i18nComposite.selectKey(value);
-		if (HtmlUtils.hasUsefulHtmlContent(value))
-		{
-			browser.setText(value);
-			htmlPreviewTabItem.setControl(browser);
-		}
-		else htmlPreviewTabItem.setControl(null);
 	}
 
 	protected void handleAdd()
