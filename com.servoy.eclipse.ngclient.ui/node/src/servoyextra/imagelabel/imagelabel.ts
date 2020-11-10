@@ -1,7 +1,6 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public'
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
-import { AngularEditorConfig } from '@kolkov/angular-editor';
 
 @Component( {
     selector: 'servoyextra-imagelabel',
