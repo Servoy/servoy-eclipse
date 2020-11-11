@@ -1,14 +1,14 @@
 import { Component, Renderer2, ViewChild, Input, ElementRef, ChangeDetectorRef, AfterViewInit, SimpleChanges } from '@angular/core';
 
-import { FormattingService } from '../../ngclient/servoy_public'
+import { FormattingService } from '../../ngclient/servoy_public';
 
-import { ServoyDefaultBaseField } from '../basefield'
+import { ServoyDefaultBaseField } from '../basefield';
 
 @Component( {
     selector: 'servoydefault-listbox',
     templateUrl: './listbox.html'
 } )
-export class ServoyDefaultListBox extends ServoyDefaultBaseField{
+export class ServoyDefaultListBox extends ServoyDefaultBaseField {
     @Input() multiselectListbox;
 
     selectedValues: any[];
@@ -18,19 +18,24 @@ export class ServoyDefaultListBox extends ServoyDefaultBaseField{
     }
 
     svyOnChanges( changes: SimpleChanges ) {
-        for ( let property in changes ) {
+        for ( const property of Object.keys(changes) ) {
             switch ( property ) {
-            case "dataProviderID":
+            case 'dataProviderID':
                 this.selectedValues = [];
                 if (this.multiselectListbox && this.dataProviderID) {
-                    this.selectedValues = (''+this.dataProviderID).split( '\n' );
+                    this.selectedValues = ('' + this.dataProviderID).split( '\n' );
                 }
                 break;
-                
+
             }
         }
         super.svyOnChanges( changes );
     }
+
+    attachHandlers() {
+        if (this.onActionMethodID) this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
+        super.attachHandlers();
+      }
 
     multiUpdate() {
         for ( let i = 0; i < this.selectedValues.length; i += 1 ) {

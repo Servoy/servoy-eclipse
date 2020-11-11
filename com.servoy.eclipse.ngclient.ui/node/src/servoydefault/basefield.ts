@@ -24,16 +24,27 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
     storedTooltip: any;
 
     constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, public formattingService: FormattingService) {
-        super(renderer,cdRef);
+        super(renderer, cdRef);
     }
 
     svyOnInit() {
       super.svyOnInit();
-      this.attachFocusListeners(this.getFocusElement());
       if (this.dataProviderID === undefined) {
           this.dataProviderID = null;
       }
     }
+
+    protected attachHandlers() {
+        super.attachHandlers();
+        this.attachFocusListeners(this.getFocusElement());
+        if (this.onActionMethodID) {
+            this.renderer.listen( this.getFocusElement(), 'keyup', ( e ) => {
+                if (this.formattingService.testKeyPressed(e, 13)) {
+                    this.onActionMethodID(e);
+                }
+            } );
+        }
+   }
 
     attachFocusListeners(nativeElement: any) {
         if (this.onFocusGainedMethodID)
@@ -47,18 +58,17 @@ export class ServoyDefaultBaseField extends  ServoyDefaultBaseComponent {
     }
 
     onDataChangeCallback(event, returnval) {
-        var stringValue = (typeof returnval === 'string' || returnval instanceof String);
+        const stringValue = (typeof returnval === 'string' || returnval instanceof String);
         if (returnval === false || stringValue) {
             this.renderer.removeClass(this.elementRef.nativeElement, 'ng-valid');
             this.renderer.addClass(this.elementRef.nativeElement, 'ng-invalid');
             if (stringValue) {
-                if (this.storedTooltip === false) { 
-                    this.storedTooltip = this.toolTipText; 
+                if (this.storedTooltip === false) {
+                    this.storedTooltip = this.toolTipText;
                 }
                 this.toolTipText = returnval;
             }
-        }
-        else {
+        } else {
             this.renderer.removeClass(this.elementRef.nativeElement, 'ng-invalid');
             this.renderer.addClass(this.elementRef.nativeElement, 'ng-valid');
             if (this.storedTooltip !== false) this.toolTipText = this.storedTooltip;

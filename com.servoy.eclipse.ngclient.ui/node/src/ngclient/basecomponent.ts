@@ -43,7 +43,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
             if ( this.changes == null ) {
                 this.changes = changes;
             } else {
-                for ( const property in changes ) {
+                for ( const property of Object.keys(changes) ) {
                     this.changes[property] = changes[property];
                 }
             }
@@ -51,7 +51,7 @@ export class ServoyBaseComponent implements AfterViewInit, OnInit, OnChanges {
             if ( this.changes == null ) {
                 this.svyOnChanges( changes );
             } else {
-                for ( const property in changes ) {
+                for ( const property of Object.keys(changes) ) {
                     this.changes[property] = changes[property];
                 }
                 this.svyOnChanges( this.changes );

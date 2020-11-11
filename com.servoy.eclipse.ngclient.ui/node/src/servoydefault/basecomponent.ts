@@ -42,24 +42,6 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
     }
 
     protected attachHandlers() {
-      if ( this.onActionMethodID ) {
-          if (this.onDoubleClickMethodID) {
-              const innerThis: ServoyDefaultBaseComponent = this;
-              this.renderer.listen( this.getNativeElement(), 'click', e => {
-                  if (innerThis.timeoutID) {
-                      window.clearTimeout(innerThis.timeoutID);
-                      innerThis.timeoutID = null;
-                      // double click, do nothing
-                  } else {
-                      innerThis.timeoutID = window.setTimeout(function() {
-                          innerThis.timeoutID = null;
-                          innerThis.onActionMethodID( e );
-                      }, 250); }
-               });
-          } else {
-              this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ));
-          }
-      }
       if ( this.onRightClickMethodID ) {
         this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { this.onRightClickMethodID( e ); return false; });
       }
