@@ -1,16 +1,17 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ViewChild, ViewChildren, TemplateRef, QueryList, Directive, ElementRef, Renderer2, NgModule, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import { FormService, FormCache, StructureCache, FormComponentCache, ComponentCache, ListFormComponentCache } from '../form.service';
 
-import { ServoyService } from '../servoy.service'
+import { ServoyService } from '../servoy.service';
 
-import { SabloService } from '../../sablo/sablo.service'
-import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
+import { SabloService } from '../../sablo/sablo.service';
+import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 
-import { ServoyApi } from '../servoy_api'
+import { ServoyApi } from '../servoy_api';
 
 @Component({
     selector: 'svy-form',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
       <div *ngIf="formCache.absolute" [ngStyle]="getAbsoluteFormStyle()" class="svy-form" svyAutosave> <!-- main div -->
            <div *ngFor="let part of formCache.parts" [config]="part"> <!-- part div -->
@@ -178,9 +179,15 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     private log: LoggerService;
     private self: FormComponent;
 
-    constructor(private formservice: FormService, private sabloService: SabloService, private servoyService: ServoyService, private logFactory: LoggerFactory) {
+    constructor(private formservice: FormService, private sabloService: SabloService,
+                private servoyService: ServoyService, private logFactory: LoggerFactory,
+                private changeHandler: ChangeDetectorRef) {
         this.self = this;
         this.log = logFactory.getLogger('FormComponent');
+    }
+
+    public detectChanges() {
+        this.changeHandler.markForCheck();
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -190,18 +197,15 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     getTemplate(item: StructureCache | ComponentCache | FormComponentCache): TemplateRef<any> {
         if (item instanceof StructureCache) {
             return this.svyResponsiveDiv;
-        }
-        else if (item instanceof ListFormComponentCache) {
+        } else if (item instanceof ListFormComponentCache) {
             return this.servoycoreListformcomponent;
-        }
-        else if (item instanceof FormComponentCache ) {
+        } else if (item instanceof FormComponentCache ) {
             return item.responsive ? this.formComponentResponsiveDiv : this.formComponentAbsoluteDiv;
-        }
-        else {
+        } else {
             if (this[item.type] === undefined && item.type !== undefined) {
                 this.log.error(this.log.buildMessage(() => ('Template for ' + item.type + ' was not found, please check form_component template.')));
             }
-            return this[item.type]
+            return this[item.type];
         }
     }
 
@@ -228,7 +232,7 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         };
         if (formData.model.borderType) {
             const borderStyle = formData.model.borderType;
-            for (var key in borderStyle) {
+            for (const key of Object.keys(borderStyle)) {
                 position[key] = position[key];
             }
         }
@@ -244,14 +248,14 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     public isFormAvailable(name): boolean {
-        //console.log("isFormAvailable: " + name + " " +  this.formservice.hasFormCacheEntry( name));
+        // console.log("isFormAvailable: " + name + " " +  this.formservice.hasFormCacheEntry( name));
         return this.formservice.hasFormCacheEntry(name);
     }
 
     datachange(component: string, property: string, value) {
-        const model = (!component.includes("formcomponent")) ? this.formCache.getComponent(component).model : this.formCache.getFormComponent(component).model;
+        const model = (!component.includes('formcomponent')) ? this.formCache.getComponent(component).model : this.formCache.getFormComponent(component).model;
         const oldValue = model[property];
-        if (!component.includes("formcomponent")) {
+        if (!component.includes('formcomponent')) {
             this.formCache.getComponent(component).model[property] = value;
         } else {
             this.formCache.getFormComponent(component).model[property] = value;
@@ -267,17 +271,16 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
         }
         let func = itemCache[handler];
         if (func == null) {
-            if(item.handlers instanceof Array && item.handlers.indexOf(handler) >= 0) {
+            if (item.handlers instanceof Array && item.handlers.indexOf(handler) >= 0) {
                 const me = this;
                 func = function(e) {
                 return me.formservice.executeEvent(me.name, item.name, handler, arguments);
-                }
+                };
                 itemCache[handler] = func;
-            }
-            else if(item.handlers && item.handlers[handler]){
+            } else if (item.handlers && item.handlers[handler]) {
                 func = function(e) {
                     item.handlers[handler]();
-                }
+                };
             }
         }
         return func;
@@ -293,17 +296,14 @@ export class FormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     public callApi(componentName: string, apiName: string, args: object): any {
-        let comp = this.components.find(item => item['name'] == componentName);
-        let proto = Object.getPrototypeOf(comp)
-        if (proto[apiName])
-        {
-            return proto[apiName].apply(comp, args); 
-        }
-        else
-        {
-            this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component '+ componentName +' was not found, please check component implementation.')));
+        const comp = this.components.find(item => item['name'] == componentName);
+        const proto = Object.getPrototypeOf(comp);
+        if (proto[apiName]) {
+            return proto[apiName].apply(comp, args);
+        } else {
+            this.log.error(this.log.buildMessage(() => ('Api ' + apiName + ' for component ' + componentName + ' was not found, please check component implementation.')));
             return null;
-        }    
+        }
     }
 }
 
@@ -318,12 +318,12 @@ export class AddAttributeDirective implements OnInit {
             this.config.classes.forEach(cls => this.renderer.addClass(this.el.nativeElement, cls));
         }
         if (this.config.styles) {
-            for (let key in this.config.styles) {
+            for (const key of Object.keys(this.config.styles)) {
                 this.renderer.setStyle(this.el.nativeElement, key, this.config.styles[key]);
             }
         }
         if (this.config.layout) {
-            for (let key in this.config.layout) {
+            for (const key of Object.keys(this.config.layout)) {
                 this.renderer.setStyle(this.el.nativeElement, key, this.config.layout[key]);
             }
         }

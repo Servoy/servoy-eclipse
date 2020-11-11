@@ -1,16 +1,14 @@
-import { Injectable, TemplateRef } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
 
 import { WebsocketService } from '../sablo/websocket.service';
 import { SabloService } from '../sablo/sablo.service';
 import { Deferred } from '../sablo/util/deferred';
-import { FormComponent } from './form/form_component.component';
 
 import { ConverterService } from '../sablo/converter.service';
 import { LoggerService, LoggerFactory } from '../sablo/logger.service';
 
 import { ServoyService, FormSettings } from './servoy.service';
-import { instanceOfChangeAwareValue, IChangeAwareValue, IFormComponentType, IFoundset, IComponentType } from '../sablo/spectypes.service';
+import { instanceOfChangeAwareValue, IChangeAwareValue } from '../sablo/spectypes.service';
 import { FormComponentType } from './converters/formcomponent_converter';
 import { Foundset } from './converters/foundset_converter';
 
@@ -72,7 +70,7 @@ export class FormCache {
     const beanConversion = this.conversionInfo[beanname];
     if (beanConversion == null) {
       this.conversionInfo[beanname] = conversionInfo;
-    } else for (const key in conversionInfo) {
+    } else for (const key of Object.keys(conversionInfo)) {
       beanConversion[key] = conversionInfo[key];
     }
   }
@@ -86,6 +84,12 @@ export class FormCache {
       }
     });
   }
+}
+
+export interface IFormComponent {
+  name: string;
+  detectChanges();
+  callApi(componentName: string, apiName: string, args: object): any;
 }
 
 export interface IComponentCache {
@@ -164,7 +168,7 @@ export class FormService {
 
   private formsCache: Map<String, FormCache>;
   private log: LoggerService;
-  private formComponentCache: Map<String, any>;
+  private formComponentCache: Map<String, IFormComponent | Deferred<any>>;
   //    private touchedForms:Map<String,boolean>;
 
   constructor(private sabloService: SabloService, private converterService: ConverterService, websocketService: WebsocketService, private logFactory: LoggerFactory,
@@ -184,7 +188,8 @@ export class FormService {
               if (!this.formComponentCache.has(formname)) {
                 this.formComponentCache.set(formname, new Deferred<any>());
               }
-              this.formComponentCache.get(formname).promise.then(() =>
+              const deferred = this.formComponentCache.get(formname) as Deferred<any>;
+              deferred.promise.then(() =>
                 this.formMessageHandler(this.formsCache.get(formname), formname, msg, conversionInfo, servoyService)
               );
             }
@@ -193,7 +198,7 @@ export class FormService {
         if (msg.call) {
           // if form is loaded just call the api
           if (this.formComponentCache.has(msg.call.form) && !(this.formComponentCache.get(msg.call.form) instanceof Deferred)) {
-            return this.formComponentCache.get(msg.call.form).callApi(msg.call.bean, msg.call.api, msg.call.args);
+            return ( <IFormComponent>this.formComponentCache.get(msg.call.form)).callApi(msg.call.bean, msg.call.api, msg.call.args);
           }
           if (!msg.call.delayUntilFormLoads) {
             // form is not loaded yet, api cannot wait; i think this should be an error
@@ -203,7 +208,8 @@ export class FormService {
           if (!this.formComponentCache.has(msg.call.form)) {
             this.formComponentCache.set(msg.call.form, new Deferred<any>());
           }
-          this.formComponentCache.get(msg.call.form).promise.then(function () {
+          const deferred = this.formComponentCache.get(msg.call.form) as Deferred<any>;
+          deferred.promise.then(function () {
             this.formComponentCache.get(msg.call.form).callApi(msg.call.bean, msg.call.api, msg.call.args);
           });
         }
@@ -214,8 +220,7 @@ export class FormService {
   private formMessageHandler(formCache: FormCache, formname: string, msg: any, conversionInfo: any, servoyService: ServoyService) {
     const formConversion = conversionInfo && conversionInfo.forms ? conversionInfo.forms[formname] : null;
     const formData = msg.forms[formname];
-    // tslint:disable-next-line:forin
-    for (const beanname in formData) {
+    for (const beanname of Object.keys(formData)) {
       let comp: IComponentCache = formCache.getComponent(beanname);
       if(!comp) { // is it a form component?
         comp = formCache.getFormComponent(beanname);
@@ -225,12 +230,11 @@ export class FormService {
         continue;
       }
       const beanConversion = formConversion ? formConversion[beanname] : null;
-      // tslint:disable-next-line:forin
-      for (const property in formData[beanname]) {
+      for (const property of Object.keys(formData[beanname])) {
         let value = formData[beanname][property];
         if (beanConversion && beanConversion[property]) {
           value = this.converterService.convertFromServerToClient(value, beanConversion[property], comp.model[property],
-            (property: string) => comp.model ? comp.model[property] : comp.model);
+            (prop: string) => comp.model ? comp.model[prop] : comp.model);
           if (instanceOfChangeAwareValue(value)) {
             value.getStateHolder().setChangeListener(this.createChangeListener(formCache.formname, beanname, property, value));
           }
@@ -241,21 +245,23 @@ export class FormService {
         servoyService.setFindMode(formname, formData[beanname]['findmode']);
       }
     }
+    const formComponent = this.formComponentCache.get(formname) as IFormComponent;
+    formComponent.detectChanges();
   }
 
   public getFormCacheByName(formName: string): FormCache {
     return this.formsCache.get(formName);
   }
 
-  public getFormCache(form: FormComponent): FormCache {
+  public getFormCache(form: IFormComponent): FormCache {
     if (this.formComponentCache.get(form.name) instanceof Deferred) {
-      this.formComponentCache.get(form.name).resolve();
+      ( <Deferred<any>>this.formComponentCache.get(form.name)).resolve(null);
     }
     this.formComponentCache.set(form.name, form);
     return this.formsCache.get(form.name);
   }
 
-  public destroy(form: FormComponent) {
+  public destroy(form: IFormComponent) {
     this.formComponentCache.delete(form.name);
   }
 
