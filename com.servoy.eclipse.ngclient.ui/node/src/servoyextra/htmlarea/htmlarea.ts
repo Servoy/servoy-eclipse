@@ -99,9 +99,7 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
                        break;
                     case 'enabled':
                         this.config.enableToolbar = this.enabled;
-                        break;  
-                     
-
+                        break;
                 }
             }
         }
