@@ -1,36 +1,75 @@
-import {Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges,ViewChild, ElementRef} from '@angular/core';
-import {ServoyDefaultBaseField} from "../basefield";
-import {FormattingService} from "../../ngclient/servoy_public";
+import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
+import { ServoyDefaultBaseField } from '../basefield';
+import { FormattingService, PropertyUtils } from '../../ngclient/servoy_public';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
 
 @Component({
   selector: 'servoydefault-htmlarea',
   templateUrl: './htmlarea.html',
 })
-export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField{
+export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField {
 
-  @Input() editable;
-  
   config: AngularEditorConfig = {
-          editable: true,
-          spellcheck: true,
-          translate: 'no',
-          defaultParagraphSeparator: 'p'
-        };
-  
+    editable: true,
+    spellcheck: true,
+    translate: 'no',
+    defaultParagraphSeparator: 'p'
+  };
+
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);
   }
-  
+
   svyOnInit() {
-      super.svyOnInit();
-      // ugly hack to fix the height
-      let nativeElement = this.getNativeElement();
-      let componentHeight = nativeElement.offsetHeight;
-      //let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
-      let initialContentHeight = nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0].offsetHeight;
-      let initialEditorHeight = nativeElement.childNodes[0].childNodes[0].offsetHeight;
-      
-      this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], "height",  (initialContentHeight + componentHeight - initialEditorHeight) +'px');
+    super.svyOnInit();
+
+    // ugly hack to fix the height
+    const nativeElement = this.getNativeElement();
+    const componentHeight = nativeElement.offsetHeight;
+    // let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
+    const initialContentHeight = nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0].offsetHeight;
+    const initialEditorHeight = nativeElement.childNodes[0].childNodes[0].offsetHeight;
+
+    this.renderer.setStyle(nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], 'height', (initialContentHeight + componentHeight - initialEditorHeight) + 'px');
+  }
+
+  svyOnChanges(changes: SimpleChanges) {
+    if (changes) {
+      for (const property of Object.keys(changes)) {
+        const change = changes[property];
+        switch (property) {
+          case 'styleClass':
+            if (change.previousValue)
+              this.renderer.removeClass(this.getNativeElement(), change.previousValue);
+            if (change.currentValue)
+              this.renderer.addClass(this.getNativeElement(), change.currentValue);
+            break;
+          case 'scrollbars':
+            if (change.currentValue) {
+              const element = this.getNativeChild().getElementsByClassName('angular-editor-textarea');
+              PropertyUtils.setScrollbars(element, change.currentValue);
+            }
+            break;
+          case 'editable':
+            this.config.editable = this.editable;
+            break;
+
+        }
+      }
+    }
+    super.svyOnChanges(changes);
+  }
+
+  public getScrollX(): number {
+    return this.getNativeElement().scrollLeft;
+  }
+
+  public getScrollY(): number {
+    return this.getNativeElement().scrollTop;
+  }
+
+  public setScroll(x: number, y: number) {
+    this.getNativeElement().scrollLeft = x;
+    this.getNativeElement().scrollTop = y;
   }
 }
