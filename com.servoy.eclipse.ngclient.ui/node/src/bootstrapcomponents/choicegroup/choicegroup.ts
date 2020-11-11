@@ -3,7 +3,7 @@ import { IValuelist } from '../../sablo/spectypes.service';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
-  selector: 'servoybootstrap-choicegroup',
+  selector: 'bootstrapcomponents-choicegroup',
   templateUrl: './choicegroup.html',
   styleUrls: ['./choicegroup.scss']
 })

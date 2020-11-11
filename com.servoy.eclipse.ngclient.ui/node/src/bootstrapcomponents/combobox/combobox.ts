@@ -5,7 +5,7 @@ import { Format, FormattingService } from '../../ngclient/servoy_public';
 import { Select2Option, Select2UpdateEvent } from 'ng-select2-component';
 
 @Component({
-    selector: 'servoybootstrap-combobox',
+    selector: 'bootstrapcomponents-combobox',
     templateUrl: './combobox.html',
     styleUrls: ['./combobox.scss']
 })

@@ -4,7 +4,7 @@ import { FormattingService } from '../../ngclient/servoy_public';
 
 @Component({
   // tslint:disable-next-line: component-selector
-  selector: 'servoybootstrap-textbox',
+  selector: 'bootstrapcomponents-textbox',
   templateUrl: './textbox.html',
   styleUrls: ['./textbox.scss']
 })

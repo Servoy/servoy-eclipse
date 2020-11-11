@@ -2,7 +2,7 @@ import { ServoyBootstrapBaseLabel } from "../bts_baselabel";
 import { Component, Input, Renderer2, ChangeDetectorRef } from "@angular/core";
 
 @Component({
-    selector: 'servoybootstrap-label',
+    selector: 'bootstrapcomponents-label',
     templateUrl: './label.html',
     styleUrls: ['./label.scss'] 
 })

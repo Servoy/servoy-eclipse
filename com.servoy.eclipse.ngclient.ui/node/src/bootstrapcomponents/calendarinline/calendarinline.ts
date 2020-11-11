@@ -2,7 +2,7 @@ import { Component, Renderer2, ChangeDetectorRef} from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
-  selector: 'servoybootstrap-calendarinline',
+  selector: 'bootstrapcomponents-calendarinline',
   templateUrl: './calendarinline.html',
   styleUrls: ['./calendarinline.scss']
 })

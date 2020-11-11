@@ -5,7 +5,7 @@ import { ServoyBootstrapBaseTabPanel,Tab } from '../bts_basetabpanel';
 import { NgbPanelChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'servoybootstrap-accordion',
+  selector: 'bootstrapcomponents-accordion',
   templateUrl: './accordion.html',
   styleUrls: ['./accordion.scss']
 })

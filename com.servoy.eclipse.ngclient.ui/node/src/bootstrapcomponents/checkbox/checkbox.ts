@@ -2,7 +2,7 @@ import { Component, OnInit, Renderer2, SimpleChanges, AfterViewInit, Input, Chan
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
-  selector: 'servoybootstrap-checkbox',
+  selector: 'bootstrapcomponents-checkbox',
   templateUrl: './checkbox.html',
   styleUrls: ['./checkbox.scss']
 })

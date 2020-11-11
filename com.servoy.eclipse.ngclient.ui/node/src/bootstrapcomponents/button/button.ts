@@ -3,7 +3,7 @@ import { Component, Renderer2, AfterViewInit, ViewChild, ElementRef, SimpleChang
 import { ServoyBootstrapBaseLabel } from '../bts_baselabel';
  
 @Component( {
-    selector: 'servoybootstrap-button',
+    selector: 'bootstrapcomponents-button',
     templateUrl: './button.html',
     styleUrls: ['./button.scss']
 } )

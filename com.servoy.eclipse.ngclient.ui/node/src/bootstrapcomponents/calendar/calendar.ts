@@ -4,7 +4,7 @@ import { OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
 import * as moment from 'moment';
 
 @Component({
-  selector: 'servoybootstrap-calendar',
+  selector: 'bootstrapcomponents-calendar',
   templateUrl: './calendar.html',
   styleUrls: ['./calendar.scss'],
   providers: [OwlDateTimeIntl]

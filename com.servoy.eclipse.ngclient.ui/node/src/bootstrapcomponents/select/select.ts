@@ -4,7 +4,7 @@ import { IValuelist } from '../../sablo/spectypes.service';
 import { ShowDisplayValuePipe } from '../lib/showDisplayValue.pipe';
 
 @Component({
-  selector: 'servoybootstrap-select',
+  selector: 'bootstrapcomponents-select',
   templateUrl: './select.html',
   styleUrls: ['./select.scss']
 })

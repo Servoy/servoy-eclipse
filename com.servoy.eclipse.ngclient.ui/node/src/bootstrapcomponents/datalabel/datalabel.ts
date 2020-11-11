@@ -2,7 +2,7 @@ import { Component, Input, AfterViewInit, Renderer2, Pipe, PipeTransform,ChangeD
 import { ServoyBootstrapBaseLabel } from "../bts_baselabel";
 
 @Component({
-    selector: 'servoybootstrap-datalabel',
+    selector: 'bootstrapcomponents-datalabel',
     templateUrl: './datalabel.html',
     styleUrls: ['./datalabel.scss'] 
 })

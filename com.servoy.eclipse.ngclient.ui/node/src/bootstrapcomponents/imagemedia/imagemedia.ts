@@ -2,7 +2,7 @@ import { Component, OnInit, Renderer2, Input, OnChanges, SimpleChanges, ChangeDe
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
-  selector: 'servoybootstrap-imagemedia',
+  selector: 'bootstrapcomponents-imagemedia',
   templateUrl: './imagemedia.html',
   styleUrls: ['./imagemedia.scss']
 })

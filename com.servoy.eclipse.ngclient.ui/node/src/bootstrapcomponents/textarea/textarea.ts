@@ -2,7 +2,7 @@ import { Component, Input, ChangeDetectorRef, Renderer2 } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
-  selector: 'servoybootstrap-textarea',
+  selector: 'bootstrapcomponents-textarea',
   templateUrl: './textarea.html',
   styleUrls: ['./textarea.scss']
 })

@@ -7,7 +7,7 @@ import { IValuelist } from '../../sablo/spectypes.service';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 
 @Component({
-  selector: 'servoybootstrap-typeahead',
+  selector: 'bootstrapcomponents-typeahead',
   templateUrl: './typeahead.html',
   styleUrls: ['./typeahead.scss']
 })

@@ -4,7 +4,7 @@ import { ServoyBootstrapBaseComponent } from '../bts_basecomp';
 import { SabloService } from '../../sablo/sablo.service';
 
 @Component({
-  selector: 'servoybootstrap-tablesspanel',
+  selector: 'bootstrapcomponents-tablesspanel',
   templateUrl: './tablesspanel.html',
   styleUrls: ['./tablesspanel.scss']
 })

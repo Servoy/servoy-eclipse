@@ -5,7 +5,7 @@ import { ServoyBootstrapBaseTabPanel,Tab } from '../bts_basetabpanel';
 import { NgbTabChangeEvent } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'servoybootstrap-tabpanel',
+  selector: 'bootstrapcomponents-tabpanel',
   templateUrl: './tabpanel.html',
   styleUrls: ['./tabpanel.scss']
 })
