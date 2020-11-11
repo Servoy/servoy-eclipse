@@ -4,7 +4,7 @@ import { Select2Option, Select2UpdateEvent } from 'ng-select2-component';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
-  selector: 'servoydefault-combo',
+  selector: 'servoydefault-combobox',
   templateUrl: './combobox.html'
 })
 export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
@@ -47,12 +47,15 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
   }
 
   updateValue(event: Select2UpdateEvent<any>) {
-    this.filteredDataProviderId = event.value;
-    if (this.valuelistID.isRealValueDate() && event.value) {
-        const value = this.data.find(el => el.value === event.value);
-        this.dataProviderID = value.realValue;
-    } else this.dataProviderID = event.value;
-    this.dataProviderIDChange.emit(this.dataProviderID);
+    if (this.filteredDataProviderId !== event.value) {
+      this.filteredDataProviderId = event.value;
+      if (this.valuelistID.isRealValueDate() && event.value) {
+          const value = this.data.find(el => el.value === event.value);
+          this.dataProviderID = value.realValue;
+      } else this.dataProviderID = event.value;
+      this.dataProviderIDChange.emit(this.dataProviderID);
+      if (this.onActionMethodID) this.onActionMethodID( new CustomEvent('click') );
+    }
   }
 
   svyOnChanges( changes: SimpleChanges ) {
