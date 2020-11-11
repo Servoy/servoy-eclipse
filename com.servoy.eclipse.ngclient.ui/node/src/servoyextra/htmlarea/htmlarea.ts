@@ -1,5 +1,5 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent, PropertyUtils } from '../../ngclient/servoy_public'
+import { ServoyBaseComponent, PropertyUtils } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
 
@@ -54,13 +54,13 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
             this.dataProviderID = null;
         }
         // ugly hack to fix the height
-        let nativeElement = this.getNativeElement();
-        let componentHeight = nativeElement.offsetHeight;
-        //let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
-        let initialContentHeight = nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0].offsetHeight;
-        let initialEditorHeight = nativeElement.childNodes[0].childNodes[0].offsetHeight;
+        const nativeElement = this.getNativeElement();
+        const componentHeight = nativeElement.offsetHeight;
+        // let toolBarHeight = nativeElement.childNodes[0].childNodes[0].childNodes[1].childNodes[1].offsetHeight;
+        const initialContentHeight = nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0].offsetHeight;
+        const initialEditorHeight = nativeElement.childNodes[0].childNodes[0].offsetHeight;
 
-        this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], "height", ( initialContentHeight + componentHeight - initialEditorHeight ) + 'px' );
+        this.renderer.setStyle( nativeElement.childNodes[0].childNodes[0].childNodes[2].childNodes[0], 'height', ( initialContentHeight + componentHeight - initialEditorHeight ) + 'px' );
 
     }
 
@@ -76,7 +76,7 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
         this.getNativeElement().scrollLeft = x;
         this.getNativeElement().scrollTop = y;
     }
-    
+
     svyOnChanges( changes: SimpleChanges ) {
         if ( changes ) {
             for ( const property of Object.keys( changes ) ) {
@@ -89,8 +89,10 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
                             this.renderer.addClass( this.getNativeElement(), change.currentValue );
                         break;
                     case 'scrollbars':
-                        let element = this.getNativeChild().getElementsByClassName('angular-editor-textarea');
-                        PropertyUtils.setScrollbars(element, change.currentValue);
+                        if (change.currentValue) {
+                            const element = this.getNativeChild().getElementsByClassName('angular-editor-textarea');
+                            PropertyUtils.setScrollbars(element, change.currentValue);
+                        }
                         break;
                     case 'editable':
                        this.config.editable = this.editable;
@@ -99,7 +101,7 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
                         this.config.enableToolbar = this.enabled;
                         break;  
                      
-                       
+
                 }
             }
         }
@@ -128,10 +130,9 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
     protected attachHandlers() {
         if ( this.onActionMethodID ) {
 
-            if ( this.getNativeElement().tagName == 'TEXTAREA' || this.getNativeElement().type == 'text' ) {
-                this.renderer.listen( this.getNativeElement(), 'keydown', e => { if ( e.keyCode == 13 ) this.onActionMethodID( e ) } );
-            }
-            else {
+            if ( this.getNativeElement().tagName === 'TEXTAREA' || this.getNativeElement().type === 'text' ) {
+                this.renderer.listen( this.getNativeElement(), 'keydown', e => { if ( e.keyCode === 13 ) this.onActionMethodID( e ); } );
+            } else {
                 this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ) );
             }
         }
