@@ -119,13 +119,13 @@
     "directive-selector": [
       true,
       "attribute",
-      ["servoydefault"],
+      ["servoydefault", "bootstrapcomponents", "servoycore"],
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      ["servoydefault"],
+      ["servoydefault", "bootstrapcomponents", "servoycore"],
       "kebab-case"
     ],
     "no-output-on-prefix": true,
