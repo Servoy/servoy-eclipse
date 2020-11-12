@@ -38,7 +38,7 @@ const CACHED_CHUNK_BLOCKS = 2;
 const NULL_VALUE = {displayValue: '', realValue: null};
 
 @Component({
-    selector: 'nggrids-datagrid',
+    selector: 'aggrid-groupingtable',
     templateUrl: './datagrid.html',
     styleUrls: ['./datagrid.css']
 })
@@ -60,6 +60,16 @@ export class DataGrid {
 
     @Input() servoyApi: ServoyApi;
 
+
+    @Input() onCellClick;
+    @Input() onCellDoubleClick;
+    @Input() onCellRightClick;
+    @Input() onColumnDataChange;
+    @Input() onColumnStateChanged;
+    @Input() onFooterClick;
+    @Input() onReady;
+    @Input() onRowGroupOpened;
+    @Input() onSelectedRowsChanged;
     @Input() onSort;
     @Input() onColumnFormEditStarted;
 
@@ -1199,11 +1209,11 @@ class FoundsetManager {
 
         // Wait for response
         const isRootFoundset = this.isRoot;
-        var requestId = 1 + Math.random();
+        let requestId = 1 + Math.random();
         this.dataGrid.state.waitFor.loadRecords = isRootFoundset ? requestId : 0; // we use state.waitfor.loadRecords only in the root foundset change listener
         // TODO can it handle multiple requests ?
         const _this = this;
-        var promise = this.foundset.loadRecordsAsync(startIndex, size);
+        const promise = this.foundset.loadRecordsAsync(startIndex, size);
         this.dataGrid.foundsetChange.emit(this.foundset);
         promise.finally(() => {
             // foundset change listener that checks for 'state.waitfor.loadRecords' is executed later,
