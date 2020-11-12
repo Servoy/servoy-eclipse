@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyExtraImageLabel } from './imagelabel';
 
@@ -6,7 +6,7 @@ describe('ImageLabelComponent', () => {
   let component: ServoyExtraImageLabel;
   let fixture: ComponentFixture<ServoyExtraImageLabel>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyExtraImageLabel ]
     })

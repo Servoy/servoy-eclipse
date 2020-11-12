@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultRadiogroup } from './radiogroup';
 import { SabloModule } from "../../sablo/sablo.module";
@@ -30,7 +30,7 @@ describe('ServoyDefaultRadiogroup', () => {
   let fixture: ComponentFixture<ServoyDefaultRadiogroup>;
   let input: DebugElement;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultRadiogroup],
       imports: [SabloModule, FormsModule, ServoyPublicModule],

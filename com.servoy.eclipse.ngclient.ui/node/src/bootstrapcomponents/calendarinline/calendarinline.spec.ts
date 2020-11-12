@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapCalendarinline } from './calendarinline';
 
@@ -6,7 +6,7 @@ describe('CalendarinlineComponent', () => {
   let component: ServoyBootstrapCalendarinline;
   let fixture: ComponentFixture<ServoyBootstrapCalendarinline>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapCalendarinline ]
     })

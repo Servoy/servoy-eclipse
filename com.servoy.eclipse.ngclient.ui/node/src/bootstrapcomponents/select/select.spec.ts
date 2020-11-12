@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapSelect } from './select';
 import { ShowDisplayValuePipe } from "../lib/showDisplayValue.pipe";
@@ -7,7 +7,7 @@ describe('SelectComponent', () => {
   let component: ServoyBootstrapSelect;
   let fixture: ComponentFixture<ServoyBootstrapSelect>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapSelect ], 
       providers: [ShowDisplayValuePipe]

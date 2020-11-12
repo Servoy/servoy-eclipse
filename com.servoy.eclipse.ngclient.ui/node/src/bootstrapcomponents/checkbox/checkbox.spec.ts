@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapCheckbox } from './checkbox';
 
@@ -6,7 +6,7 @@ describe('CheckboxComponent', () => {
   let component: ServoyBootstrapCheckbox;
   let fixture: ComponentFixture<ServoyBootstrapCheckbox>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapCheckbox ]
     })

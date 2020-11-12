@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 import { FormComponent, AddAttributeDirective } from './form_component.component';
@@ -21,7 +21,7 @@ describe('FormComponent', () => {
   let formService;
   let servoyService;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
       sabloService = jasmine.createSpyObj('SabloService', ['callService']);
       formService = jasmine.createSpyObj('FormService', {
                         getFormCache: {

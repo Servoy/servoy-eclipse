@@ -1,5 +1,5 @@
 import { Directive, Input} from '@angular/core';
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import { MainComponent } from './main.component';
 import {ServoyService} from './servoy.service';
 import {AllServiceService} from './allservices.service';
@@ -10,7 +10,7 @@ import { LoadingIndicatorService } from "../sablo/util/loading-indicator/loading
 
 describe('MainComponent', () => {
   const servicesService = jasmine.createSpyObj('ServoyService', ['connect']);
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         MainComponent,MockFormComponent,MockDefaultNavigator,MockSessionView
@@ -23,7 +23,7 @@ describe('MainComponent', () => {
         { provide:LoadingIndicatorService, useValue: {}}]
     }).compileComponents();
   }));
-  it('should create the main component', async(() => {
+  it('should create the main component', waitForAsync(() => {
     const fixture = TestBed.createComponent(MainComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();

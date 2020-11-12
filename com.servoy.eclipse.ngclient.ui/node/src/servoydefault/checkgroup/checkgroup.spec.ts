@@ -1,4 +1,4 @@
-import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultCheckGroup } from './checkgroup';
 import { SabloModule } from '../../sablo/sablo.module';
@@ -29,7 +29,7 @@ describe('ServoyDefaultCheckGroup', () => {
   let fixture: ComponentFixture<ServoyDefaultCheckGroup>;
   let servoyApi;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId', 'trustAsHtml']);
     mockData.hasRealValues = () => true;
 

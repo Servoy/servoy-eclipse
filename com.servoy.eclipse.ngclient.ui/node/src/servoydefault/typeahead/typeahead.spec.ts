@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { TestScheduler, } from 'rxjs/testing';
 import { ServoyDefaultTypeahead } from './typeahead';
 import { FormattingService, TooltipService, ServoyApi, Format} from '../../ngclient/servoy_public';
@@ -31,7 +31,7 @@ describe('TypeaheadComponent', () => {
   let fixture: ComponentFixture<ServoyDefaultTypeahead>;
   let servoyApi;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     servoyApi = jasmine.createSpyObj( 'ServoyApi', ['getMarkupId', 'trustAsHtml']);
     mockData.hasRealValues = () => true;
 

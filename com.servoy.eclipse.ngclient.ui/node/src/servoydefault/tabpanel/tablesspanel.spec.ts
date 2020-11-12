@@ -1,5 +1,5 @@
 import { Directive, Input, SimpleChanges, SimpleChange } from '@angular/core';
-import { TestBed, async, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultTablesspanel } from './tablesspanel';
 import { Tab } from './basetabpanel';
 
@@ -50,7 +50,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.tabs = tabs;
         return fixture;
     }
-    it( 'should create the tabpanel component', async(() => {
+    it( 'should create the tabpanel component', waitForAsync(() => {
         const fixture = TestBed.createComponent( ServoyDefaultTablesspanel );
         const app = fixture.debugElement.componentInstance;
         expect( app ).toBeTruthy();

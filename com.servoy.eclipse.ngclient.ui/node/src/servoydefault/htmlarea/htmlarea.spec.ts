@@ -1,4 +1,4 @@
-import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultHtmlarea  } from './htmlarea';
 import { FormattingService, ServoyApi, TooltipService } from '../../ngclient/servoy_public';
 import { SabloModule } from '../../sablo/sablo.module';
@@ -14,7 +14,7 @@ describe('HtmlareaComponent', () => {
 
   const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner']);
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
 
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultHtmlarea],

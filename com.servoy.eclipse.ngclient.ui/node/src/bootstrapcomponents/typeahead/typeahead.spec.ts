@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapTypeahead } from './typeahead';
 
@@ -12,7 +12,7 @@ describe('TypeaheadComponent', () => {
   let component: ServoyBootstrapTypeahead;
   let fixture: ComponentFixture<ServoyBootstrapTypeahead>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapTypeahead ],
       providers: [ FormattingService, TooltipService],

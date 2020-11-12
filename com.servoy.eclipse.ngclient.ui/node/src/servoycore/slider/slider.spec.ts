@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SabloModule } from '../../sablo/sablo.module'
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module'
@@ -11,7 +11,7 @@ describe("ServoyCoreSlider", () => {
   let component: ServoyCoreSlider;
   let fixture: ComponentFixture<ServoyCoreSlider>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyCoreSlider],
       imports: [SabloModule, ServoyPublicModule],

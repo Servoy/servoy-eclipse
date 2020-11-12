@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, waitForAsync } from '@angular/core/testing';
 
 import { SabloModule } from '../../sablo/sablo.module';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';
@@ -33,7 +33,7 @@ describe('ServoyDefaultListBox', () => {
   let debugEl: DebugElement;
   const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'isInDesigner']);
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
 
     TestBed.configureTestingModule({
       declarations: [ ServoyDefaultListBox],

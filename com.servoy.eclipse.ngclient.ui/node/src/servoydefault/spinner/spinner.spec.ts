@@ -1,4 +1,4 @@
-import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 
 import { ServoyDefaultSpinner } from './spinner';
 import { SabloModule } from '../../sablo/sablo.module';
@@ -30,7 +30,7 @@ describe('ServoyDefaultCheckGroup', () => {
   let buttonUp: any; let buttonDown: any;
   let servoyApi;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     servoyApi = jasmine.createSpyObj('ServoyApi', ['getMarkupId']);
 
     TestBed.configureTestingModule({

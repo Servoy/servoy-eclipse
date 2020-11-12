@@ -1,5 +1,5 @@
 import { Directive, Input, SimpleChanges, SimpleChange } from '@angular/core';
-import { TestBed, async,fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { ServoyDefaultTabpanel } from './tabpanel';
 import { Tab } from './basetabpanel';
 
@@ -14,7 +14,7 @@ import { SabloModule } from '../../sablo/sablo.module';
 
 describe( 'ServoyDefaultTabpanel', () => {
     let servoyApi;
-    beforeEach( async(() => {
+    beforeEach( waitForAsync(() => {
         servoyApi = jasmine.createSpyObj( "ServoyApi", ["getMarkupId", "formWillShow", "hideForm"] )
         servoyApi.getMarkupId.and.returnValue( "1" );
         servoyApi.formWillShow.and.returnValue( Promise.resolve( true ) );
@@ -49,7 +49,7 @@ describe( 'ServoyDefaultTabpanel', () => {
         fixture.componentInstance.tabs = tabs;
         return fixture;
     }
-    it( 'should create the tabpanel component', async(() => {
+    it( 'should create the tabpanel component', waitForAsync(() => {
         const fixture = TestBed.createComponent( ServoyDefaultTabpanel );
         const app = fixture.debugElement.componentInstance;
         expect( app ).toBeTruthy();

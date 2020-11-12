@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { FileUploadWindowComponent } from './file-upload-window.component';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -9,7 +9,7 @@ describe('FileUploadWindowComponent', () => {
   let component: FileUploadWindowComponent;
   let fixture: ComponentFixture<FileUploadWindowComponent>;
   let i18nProvider:any;
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     i18nProvider = jasmine.createSpyObj("I18NProvider",["getI18NMessages"]);
     const promise = Promise.resolve({});
     i18nProvider.getI18NMessages.and.returnValue(promise);

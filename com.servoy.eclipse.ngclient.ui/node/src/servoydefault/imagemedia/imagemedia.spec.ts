@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 
 import { SabloModule } from '../../sablo/sablo.module';
 import { ServoyPublicModule } from '../../ngclient/servoy_public.module';

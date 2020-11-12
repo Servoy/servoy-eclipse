@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapImageMedia } from './imagemedia';
 
@@ -6,7 +6,7 @@ describe('ImagemediaComponent', () => {
   let component: ServoyBootstrapImageMedia;
   let fixture: ComponentFixture<ServoyBootstrapImageMedia>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapImageMedia ]
     })

@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed, fakeAsync , tick} from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { LocalStorageService } from '../../../sablo/webstorage/localstorage.service';
 
@@ -12,7 +12,7 @@ describe('DefaultLoginWindowComponent', () => {
   let sabloService;
   let localStorageService
   let ngbActiveModal
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
       sabloService = jasmine.createSpyObj("SabloService",["callService"]);
       localStorageService = jasmine.createSpyObj("LocalStorageService",["set"]);
       ngbActiveModal = jasmine.createSpyObj("NgbActiveModal",["close"]);

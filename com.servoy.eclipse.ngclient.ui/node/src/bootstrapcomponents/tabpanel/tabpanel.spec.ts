@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapTabpanel } from './tabpanel';
 import { WindowRefService } from '../../sablo/util/windowref.service'
@@ -11,7 +11,7 @@ describe('TabpanelComponent', () => {
   let fixture: ComponentFixture<ServoyBootstrapTabpanel>;
   const servoyApi: jasmine.SpyObj<ServoyApi> = jasmine.createSpyObj<ServoyApi>('ServoyApi', ['getMarkupId', 'trustAsHtml']);
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapTabpanel ],
       imports: [NgbModule, SabloModule],

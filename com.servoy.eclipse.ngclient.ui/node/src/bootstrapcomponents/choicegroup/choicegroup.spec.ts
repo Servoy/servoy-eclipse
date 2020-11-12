@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ServoyBootstrapChoicegroup } from './choicegroup';
 
@@ -6,7 +6,7 @@ describe('ChoicegroupComponent', () => {
   let component: ServoyBootstrapChoicegroup;
   let fixture: ComponentFixture<ServoyBootstrapChoicegroup>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ServoyBootstrapChoicegroup ]
     })
