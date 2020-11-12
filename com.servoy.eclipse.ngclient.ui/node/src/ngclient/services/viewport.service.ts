@@ -149,7 +149,7 @@ export class ViewportService {
     }
 
     internalState.requests.push({ viewportDataChanged: r });
-    if (internalState.changeNotifier) internalState.changeNotifier();
+    internalState.notifyChangeListener();
   }
 
   private isChanged(newValue: any, oldValue: any, columnName: string, conversionInfo: any) {

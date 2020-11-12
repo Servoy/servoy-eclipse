@@ -106,7 +106,7 @@ describe('FoundsetConverter', () => {
         };
 
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
         expect(getAndClearNotified()).toEqual(false);
 
         // so no "w": false in server received value...
@@ -132,7 +132,7 @@ describe('FoundsetConverter', () => {
             }
         };
         fs = converterService.convertFromServerToClient(updateValue, 'foundset', fs);
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         const copy = new Foundset(sabloService, sabloDeferHelper, loggerFactory, converterService, viewportService, fs.state);
         copy.serverSize = 6;
@@ -219,7 +219,7 @@ describe('FoundsetConverter', () => {
         };
 
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         fs = converterService.convertFromServerToClient({
             'upd_serverSize': 8,
@@ -296,7 +296,7 @@ describe('FoundsetConverter', () => {
             }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         fs = converterService.convertFromServerToClient({
             'upd_serverSize': 5,
@@ -333,7 +333,7 @@ describe('FoundsetConverter', () => {
 
     it('Foundset changed completely (relation & parent record changed for example on server - to something that is larger then we want to cache; so we will request smaller viewport)', () => {
         fs = converterService.convertFromServerToClient(createDefaultFoundset(), 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         fs = converterService.convertFromServerToClient({
             'upd_serverSize': 12,
@@ -416,7 +416,7 @@ describe('FoundsetConverter', () => {
             }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         fs = converterService.convertFromServerToClient({
             'upd_serverSize': 14,
@@ -497,7 +497,7 @@ describe('FoundsetConverter', () => {
             'viewPort': { 'startIndex': 0, 'size': 9, 'rows': rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         fs = converterService.convertFromServerToClient({
             'upd_serverSize': 15,
@@ -556,7 +556,7 @@ describe('FoundsetConverter', () => {
             'viewPort': { 'startIndex': 0, 'size': 9, 'rows': rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         fs = converterService.convertFromServerToClient({
             'upd_serverSize': 14,
@@ -609,7 +609,7 @@ describe('FoundsetConverter', () => {
             'viewPort': { 'startIndex': 0, 'size': 9, 'rows': rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         fs = converterService.convertFromServerToClient({
             'upd_serverSize': 13,
@@ -669,7 +669,7 @@ describe('FoundsetConverter', () => {
             'viewPort': { 'startIndex': 0, 'size': 9, 'rows': rows.slice() }
         };
         fs = converterService.convertFromServerToClient(serverValue, 'foundset');
-        fs.state.setChangeNotifier(() => { changeNotified = true; });
+        fs.state.setChangeListener(() => { changeNotified = true; });
 
         fs.loadExtraRecordsAsync(4);
         expect(getAndClearNotified()).toEqual(true);

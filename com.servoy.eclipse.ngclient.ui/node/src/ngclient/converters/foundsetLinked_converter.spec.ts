@@ -79,7 +79,7 @@ describe('FoundsetLinked Converter', () => {
       serverValue = { forFoundset: 'myfoundset' };
 
       realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', undefined, componentModelGetter);
-      realClientValue.state.setChangeNotifier(() => { changeNotified = true; });
+      realClientValue.state.setChangeListener(() => { changeNotified = true; });
       serverValue = { forFoundset: 'myfoundset', sv: ':) --- static string ***' };
       realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', realClientValue, componentModelGetter);
 
@@ -122,7 +122,7 @@ describe('FoundsetLinked Converter', () => {
       serverValue = { forFoundset: 'myfoundset', w: false };
 
       realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', undefined, componentModelGetter);
-      realClientValue.state.setChangeNotifier(() => { changeNotified = true; });
+      realClientValue.state.setChangeListener(() => { changeNotified = true; });
 
       serverValue = { sv: ':) --- static string ***' };
       realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', realClientValue, componentModelGetter);
@@ -136,7 +136,7 @@ describe('FoundsetLinked Converter', () => {
     it('Should send value updates for when pushToServer is false', () => {
       serverValue = { forFoundset: 'myfoundset', w: false };
       realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', undefined, componentModelGetter);
-      realClientValue.state.setChangeNotifier(() => { changeNotified = true; });
+      realClientValue.state.setChangeListener(() => { changeNotified = true; });
 
       // *** initial size no viewport
       realClientValue.dataChanged(0, 'I am really changed and I should be sent');
@@ -175,7 +175,7 @@ describe('FoundsetLinked Converter', () => {
 
       serverValue = { forFoundset: 'myfoundset' };
       realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', undefined, componentModelGetter);
-      realClientValue.state.setChangeNotifier(() => { changeNotified = true; });
+      realClientValue.state.setChangeListener(() => { changeNotified = true; });
 
 
       serverValue = {
@@ -224,7 +224,7 @@ describe('FoundsetLinked Converter', () => {
 
       serverValue = { forFoundset: 'myfoundset', w: false };
       realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', undefined, componentModelGetter);
-      realClientValue.state.setChangeNotifier(() => { changeNotified = true; });
+      realClientValue.state.setChangeListener(() => { changeNotified = true; });
 
       serverValue = {
         'forFoundset': 'myfoundset',
@@ -241,7 +241,7 @@ describe('FoundsetLinked Converter', () => {
     it('Should not send value updates for when pushToServer is not specified', () => {
       serverValue = { forFoundset: 'myfoundset', w: false, 'vp': [10643, 10702, 10835, 10952, 11011, 11081] };
       realClientValue = converterService.convertFromServerToClient(serverValue, 'fsLinked', undefined, componentModelGetter);
-      realClientValue.state.setChangeNotifier(() => { changeNotified = true; });
+      realClientValue.state.setChangeListener(() => { changeNotified = true; });
 
       // *** initial size no viewport
       realClientValue.dataChanged(3, 1010101010);

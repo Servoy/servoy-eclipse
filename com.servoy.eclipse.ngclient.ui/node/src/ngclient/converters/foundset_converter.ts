@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
-import { IFoundset, ChangeListener, ViewPort, ViewPortRow, ViewportRowUpdate, ViewportRowUpdates, ViewportChangeEvent, ColumnRef } from '../../sablo/spectypes.service';
+import { IFoundset, ChangeListener, ViewPort, ViewPortRow, ViewportRowUpdate, ViewportRowUpdates, ViewportChangeEvent, ColumnRef, ChangeAwareState, IChangeAwareValue } from '../../sablo/spectypes.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { SabloDeferHelper, IDeferedState } from '../../sablo/defer.service';
 import { Deferred } from '../../sablo/util/deferred';
@@ -231,7 +231,7 @@ export class FoundsetConverter implements IConverter {
   }
 }
 
-export class Foundset implements IFoundset {
+export class Foundset implements IChangeAwareValue, IFoundset {
   /**
    * An identifier that allows you to use this foundset via the 'foundsetRef' type;
    * when a 'foundsetRef' type sends a foundset from server to client (for example
@@ -299,6 +299,9 @@ export class Foundset implements IFoundset {
     this.log = logFactory.getLogger('Foundset');
     this.viewPort = { startIndex: undefined, size: undefined, rows: [] };
   }
+  getStateHolder(): ChangeAwareState {
+    return this.state;
+  }
 
   public loadRecordsAsync(startIndex: number, size: number): Promise<any> {
     this.log.spam(this.log.buildMessage(() => ('svy foundset * loadRecordsAsync requested with (' + startIndex + ', ' + size + ')')));
@@ -309,7 +312,7 @@ export class Foundset implements IFoundset {
     req[FoundsetConverter.ID_KEY] = requestID;
     this.state.requests.push(req);
 
-    if (this.state.changeNotifier) this.state.changeNotifier();
+    this.state.notifyChangeListener();
     return this.state.deferred[requestID].defer.promise;
   }
 
@@ -322,7 +325,7 @@ export class Foundset implements IFoundset {
     req[FoundsetConverter.ID_KEY] = requestID;
     this.state.requests.push(req);
 
-    if (this.state.changeNotifier && !dontNotifyYet) this.state.changeNotifier();
+    if (!dontNotifyYet) this.state.notifyChangeListener();
     return this.state.deferred[requestID].defer.promise;
   }
 
@@ -335,13 +338,13 @@ export class Foundset implements IFoundset {
     req[FoundsetConverter.ID_KEY] = requestID;
     this.state.requests.push(req);
 
-    if (this.state.changeNotifier && !dontNotifyYet) this.state.changeNotifier();
+    if (!dontNotifyYet) this.state.notifyChangeListener();
     return this.state.deferred[requestID].defer.promise;
   }
 
   public notifyChanged() {
     this.log.spam(this.log.buildMessage(() => ('svy foundset * notifyChanged called')));
-    if (this.state.changeNotifier && this.state.requests.length > 0) this.state.changeNotifier();
+    if (this.state.requests.length > 0) this.state.notifyChangeListener();
   }
 
   public sort(columns: Array<{ name: string, direction: ('asc' | 'desc') }>): Promise<any> {
@@ -350,7 +353,7 @@ export class Foundset implements IFoundset {
     const requestID = this.sabloDeferHelper.getNewDeferId(this.state);
     req[FoundsetConverter.ID_KEY] = requestID;
     this.state.requests.push(req);
-    if (this.state.changeNotifier) this.state.changeNotifier();
+    this.state.notifyChangeListener();
     return this.state.deferred[requestID].defer.promise;
   }
 
@@ -361,7 +364,7 @@ export class Foundset implements IFoundset {
     if (sendSelectionViewportInitially !== undefined) request['sendSelectionViewportInitially'] = !!sendSelectionViewportInitially;
     if (initialSelectionViewportCentered !== undefined) request['initialSelectionViewportCentered'] = !!initialSelectionViewportCentered;
     this.state.requests.push(request);
-    if (this.state.changeNotifier) this.state.changeNotifier();
+    this.state.notifyChangeListener();
   }
 
   public requestSelectionUpdate(tmpSelectedRowIdxs: Array<number>): Promise<any> {
@@ -377,7 +380,7 @@ export class Foundset implements IFoundset {
     const req = { newClientSelectionRequest: tmpSelectedRowIdxs, selectionRequestID: msgId };
     req[FoundsetConverter.ID_KEY] = msgId;
     this.state.requests.push(req);
-    if (this.state.changeNotifier) this.state.changeNotifier();
+    this.state.notifyChangeListener();
 
     return this.state.selectionUpdateDefer.promise;
   }
@@ -406,7 +409,7 @@ export class Foundset implements IFoundset {
     else r.value = this.converterService.convertClientObject(r.value);
 
     this.state.requests.push({ viewportDataChanged: r });
-    if (this.state.changeNotifier) this.state.changeNotifier();
+    this.state.notifyChangeListener();
   }
 
   /**
@@ -442,7 +445,7 @@ type FoundsetRow = {
   foundsetId?: number;
 }
 
-class FoundsetState implements IDeferedState, IViewportConversion {
+class FoundsetState extends ChangeAwareState implements IDeferedState, IViewportConversion {
 
   deferred: { [key: string]: { defer: Deferred<any>, timeoutId: any } };
   currentMsgId: number;
@@ -450,7 +453,6 @@ class FoundsetState implements IDeferedState, IViewportConversion {
   changeListeners: ChangeListener[];
   requests = [];
   rowPrototype: FoundsetRow;
-  changeNotifier: Function;
   selectionUpdateDefer: Deferred<any>;
   push_to_server: any = undefined;
   viewportConversions: Record<string, object>[] = [];
@@ -481,10 +483,6 @@ class FoundsetState implements IDeferedState, IViewportConversion {
     for (let i = 0; i < this.changeListeners.length; i++) {
       this.changeListeners[i](foundsetChanges);
     }
-  }
-
-  public setChangeNotifier(changeNotifier: Function) {
-    this.changeNotifier = changeNotifier;
   }
 
   public isChanged() {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service'
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
-import { ChangeListener, ViewportChangeEvent } from '../../sablo/spectypes.service'
+import { ChangeAwareState, ChangeListener, IChangeAwareValue, ViewportChangeEvent } from '../../sablo/spectypes.service'
 import { SabloService } from '../../sablo/sablo.service';
 import { ViewportService, IViewportConversion } from '../services/viewport.service';
 import { FoundsetChangeEvent, Foundset } from '../converters/foundset_converter';
@@ -141,7 +141,7 @@ export class FoundsetLinkedConverter implements IConverter {
     }
 }
 
-export class FoundsetLinked extends Array<Object> {
+export class FoundsetLinked extends Array<Object> implements IChangeAwareValue{
     state : FoundsetLinkedState;
     idForFoundset : string;
 
@@ -151,6 +151,10 @@ export class FoundsetLinked extends Array<Object> {
         //see https://blog.simontest.net/extend-array-with-typescript-965cc1134b3
         //set prototype, since adding a create method is not really working if we have the values
         Object.setPrototypeOf(this, Object.create(FoundsetLinked.prototype));
+    }
+    
+    getStateHolder(): ChangeAwareState {
+        return this.state;
     }
 
     public dataChanged(index: number, newValue: any, oldValue?: any) {
@@ -165,20 +169,21 @@ export class FoundsetLinked extends Array<Object> {
     }
 }
 
-class FoundsetLinkedState implements IViewportConversion {
+class FoundsetLinkedState extends ChangeAwareState implements IViewportConversion {
     
     viewportConversions: Record<string, object>[] = [];
     changeListeners: Array<ChangeListener>;
     requests = [];
     conversionInfo = [];
     singleValueState : SingleValueState = undefined;
-    changeNotifier: Function;
     forFoundset: () => Foundset;
     recordLinked: boolean = false;
     push_to_server: boolean = undefined;// value is undefined when we shouldn't send changes to server, false if it should be shallow watched and true if it should be deep watched
     viewportSizeChangedListener: () => void;
     
-    constructor(private converterService: ConverterService) {}
+    constructor(private converterService: ConverterService) {
+        super();
+    }
     
     public addChangeListener(listener: (change: ViewportChangeEvent) => void) {
         this.changeListeners.push(listener);
@@ -201,10 +206,6 @@ class FoundsetLinkedState implements IViewportConversion {
         for(let i = 0; i < this.changeListeners.length; i++) {
             this.changeListeners[i](foundsetChanges);
         }
-    }
-    
-    public setChangeNotifier(changeNotifier: Function) {
-        this.changeNotifier = changeNotifier;
     }
     
     public isChanged() {
