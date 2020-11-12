@@ -46,7 +46,7 @@ export class DataGrid {
     @ViewChild('agGrid') agGrid: AgGridAngular;
     
     @Input() myFoundset: IFoundset;
-    @Output() foundsetChange = new EventEmitter();
+    @Output() myFoundsetChange = new EventEmitter();
     @Input() columns;
     @Input() readOnly;
     @Input() readOnlyColumnIds;
@@ -1214,7 +1214,7 @@ class FoundsetManager {
         // TODO can it handle multiple requests ?
         const _this = this;
         const promise = this.foundset.loadRecordsAsync(startIndex, size);
-        this.dataGrid.foundsetChange.emit(this.foundset);
+        this.dataGrid.myFoundsetChange.emit(this.foundset);
         promise.finally(() => {
             // foundset change listener that checks for 'state.waitfor.loadRecords' is executed later,
             // as last step when the response is processed, so postpone clearing the flag
