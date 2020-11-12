@@ -1,6 +1,6 @@
-import { Component, Renderer2, SimpleChanges, ChangeDetectorRef} from '@angular/core';
+import { Component, Renderer2, SimpleChanges, ChangeDetectorRef, ViewChild} from '@angular/core';
 import { FormattingService } from '../../ngclient/servoy_public';
-import { Select2Option, Select2UpdateEvent } from 'ng-select2-component';
+import { Select2Option, Select2UpdateEvent, Select2 } from 'ng-select2-component';
 import { ServoyDefaultBaseField } from '../basefield';
 
 @Component({
@@ -11,12 +11,28 @@ export class ServoyDefaultCombobox extends ServoyDefaultBaseField {
 
   private static readonly DATEFORMAT = 'ddMMyyyHHmmss';
 
+  @ViewChild(Select2) select2: Select2;
+
   data: Select2OptionWithReal[] = [];
   filteredDataProviderId: any;
 
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef,
               formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);
+  }
+
+  attachFocusListeners() {
+    if (this.onFocusGainedMethodID) {
+      this.select2.focus.subscribe(() => {
+        this.onFocusGainedMethodID(new CustomEvent('focus'));
+      });
+    }
+
+    if (this.onFocusLostMethodID) {
+      this.select2.blur.subscribe(() => {
+        this.onFocusLostMethodID(new CustomEvent('blur'));
+      });
+    }
   }
 
   svyOnInit() {

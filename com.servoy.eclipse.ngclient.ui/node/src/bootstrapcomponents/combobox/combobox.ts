@@ -1,8 +1,8 @@
-import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, Renderer2, Input, SimpleChanges, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { ServoyBootstrapBasefield } from '../bts_basefield';
 import { IValuelist } from '../../sablo/spectypes.service';
 import { Format, FormattingService } from '../../ngclient/servoy_public';
-import { Select2Option, Select2UpdateEvent } from 'ng-select2-component';
+import { Select2, Select2Option, Select2UpdateEvent } from 'ng-select2-component';
 
 @Component({
     selector: 'bootstrapcomponents-combobox',
@@ -13,6 +13,8 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield {
 
     private static readonly DATEFORMAT = 'ddMMyyyHHmmss';
 
+    @ViewChild(Select2) select2: Select2;
+
     @Input() format: Format;
     @Input() showAs;
     @Input() valuelistID: IValuelist;
@@ -22,6 +24,20 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield {
 
     constructor(renderer: Renderer2, protected cdRef: ChangeDetectorRef, private formatService: FormattingService) {
         super(renderer, cdRef);
+    }
+
+    attachFocusListeners() {
+        if (this.onFocusGainedMethodID) {
+            this.select2.focus.subscribe(() => {
+                this.onFocusGainedMethodID(new CustomEvent('focus'));
+            });
+        }
+
+        if (this.onFocusLostMethodID) {
+            this.select2.blur.subscribe(() => {
+                this.onFocusLostMethodID(new CustomEvent('blur'));
+            });
+        }
     }
 
     svyOnInit(): void {
@@ -37,7 +53,7 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield {
             // if the real value is a date and the
             const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyBootstrapCombobox.DATEFORMAT;
             this.filteredDataProviderId = this.valuelistID.isRealValueDate() ?
-                this.formatService.format(this.dataProviderID, dateFormat , 'DATETIME') :
+                this.formatService.format(this.dataProviderID, dateFormat, 'DATETIME') :
                 this.dataProviderID;
         }
         super.svyOnChanges(changes);
@@ -46,13 +62,13 @@ export class ServoyBootstrapCombobox extends ServoyBootstrapBasefield {
     setData() {
         if (this.valuelistID) {
             const options: Select2OptionWithReal[] = [];
-            let formatter = ( value ) => {
+            let formatter = (value) => {
                 return value;
             };
-            if (this.valuelistID.isRealValueDate() ) {
+            if (this.valuelistID.isRealValueDate()) {
                 const dateFormat = this.valuelistID.isRealValueDate() && this.format.type === 'DATETIME' ? this.format.display : ServoyBootstrapCombobox.DATEFORMAT;
-                formatter = ( value ) => {
-                    return this.formatService.format(value, dateFormat , 'DATETIME');
+                formatter = (value) => {
+                    return this.formatService.format(value, dateFormat, 'DATETIME');
                 };
             }
             for (let i = 0; i < this.valuelistID.length; i++) {
