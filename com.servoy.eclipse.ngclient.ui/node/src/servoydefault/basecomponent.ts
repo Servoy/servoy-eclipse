@@ -94,7 +94,9 @@ export class ServoyDefaultBaseComponent extends ServoyBaseComponent {
                     PropertyUtils.setHorizontalAlignment(  this.getNativeChild(), this.renderer , change.currentValue);
                     break;
                 case 'scrollbars':
-                    if (this.needsScrollbarInformation()) PropertyUtils.setScrollbars(this.getNativeChild(), change.currentValue);
+                    if (this.needsScrollbarInformation() && change.currentValue) {
+                        PropertyUtils.setScrollbars(this.getNativeChild(), this.renderer, change.currentValue);
+                    }
                     break;
                 case 'enabled':
                     if ( change.currentValue )

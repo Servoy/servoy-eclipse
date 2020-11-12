@@ -91,7 +91,7 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
                     case 'scrollbars':
                         if (change.currentValue) {
                             const element = this.getNativeChild().getElementsByClassName('angular-editor-textarea');
-                            PropertyUtils.setScrollbars(element, change.currentValue);
+                            PropertyUtils.setScrollbars(element, this.renderer, change.currentValue);
                         }
                         break;
                     case 'editable':
