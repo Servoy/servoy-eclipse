@@ -132,6 +132,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
+import com.servoy.j2db.IServoyBeanFactory2;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.DataException;
 import com.servoy.j2db.dataprocessing.FoundSet;
@@ -814,9 +815,19 @@ public class TypeCreator extends TypeCache
 				try
 				{
 					IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
-					Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
-						new Object[] { "developer", "developer", null });
-					addType(beanClass.getSimpleName(), beanInstance.getClass());
+					Class< ? > realBeanClass = null;
+					if (IServoyBeanFactory2.class.isAssignableFrom(beanClass))
+					{
+						realBeanClass = ((IServoyBeanFactory2)beanFactory).getDocsClass();
+					}
+					else
+					{
+						ServoyLog.logWarning("Found bean class: " + beanClass + ", that implements IServoyBeanFactory and not IServoyBeanFactory2", null);
+						Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(), (IClientPluginAccess)application.getPluginAccess(),
+							new Object[] { "developer", "developer", null });
+						realBeanClass = beanInstance.getClass();
+					}
+					addType(beanClass.getSimpleName(), realBeanClass);
 				}
 				catch (Exception e)
 				{
