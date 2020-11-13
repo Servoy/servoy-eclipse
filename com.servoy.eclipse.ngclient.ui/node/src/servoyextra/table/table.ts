@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent } from '../../ngclient/servoy_public'
 import { IFoundset } from '../../sablo/spectypes.service';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
@@ -21,7 +21,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
     
     @Input() foundset : IFoundset;
-    @Output() foundsetChange = new EventEmitter();
     @Input() columns;
     @Input() sortDirection: string;
     @Input() enableSort: boolean = true;
@@ -142,7 +141,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             this.foundset.loadExtraRecordsAsync(currIndex >= this.foundset.viewPort.rows.length ? this.actualPageSize : (-1) * this.actualPageSize, false).then(() => {
                 this.recordsLoaded();
             });
-            this.foundsetChange.emit(this.foundset);
         }
     }
 
@@ -334,7 +332,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             this.foundset.sort([{ name: sortCol, direction: sqlSortDirection }]).then(()=>{
                 this.dataStream.next(this.foundset.viewPort.rows);
             });
-            this.foundsetChange.emit(this.foundset);
         }
     }
 
@@ -681,7 +678,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         }
         this.scrollToSelectionNeeded = false; //we don't need to scroll to selection when we select a record by clicking on it
         this.foundset.requestSelectionUpdate(newSelection);
-        this.foundsetChange.emit(this.foundset);
     }
 
     onScroll(){
@@ -843,7 +839,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                     this.foundset.loadRecordsAsync(endIndex, this.actualPageSize > 0 ? Math.min(this.actualPageSize, this.foundset.serverSize-endIndex) : this.foundset.serverSize-endIndex).then(()=>{
                         this.dataStream.next(this.foundset.viewPort.rows);
                     });
-                    this.foundsetChange.emit(this.foundset);
                 }
                 event.preventDefault();
                 event.stopPropagation();
