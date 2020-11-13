@@ -1,28 +1,29 @@
 <style>
     .my-drop-zone { border: dotted 3px lightgray; }
-    .nv-file-over { border: dotted 3px red; } /* Default class applied to drop zones on over */
+    .nv-file-over {
+    display: table;
+    	background: #F8F8F8;
+    	border: 5px dashed #DDD;
+    	text-align: center;
+    	width: 100%;
+    	height: 100%;
+    } /* Default class applied to drop zones on over */
  
     html, body { height: 100%; }
 </style>
 <div class="svy-extra-fileupload container" 
     [ngClass]="styleClass">
- 
-    <div class="row"> 
- 
-        <div class="col-md-3">
- 
-            <div ng2FileDrop
-                 [ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
-                 (fileOver)="fileOverBase($event)"
-                 [uploader]="uploader"
-                 class="well my-drop-zone">
-                {{uploadText}}
-                
-            <input type="file" ng2FileSelect [uploader]="uploader" multiple  /><br/>
- 
-            <input type="file" ng2FileSelect [uploader]="uploader" />
-            </div>
-          
-        </div>
-    </div>
+    <div ng2FileDrop
+        [ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
+        ngfDrop ngfSelect
+        (fileOver)="fileOverBase($event)"
+        (click)="fileOverBase($event)"
+    	[uploader]="uploader"
+        class="well my-drop-zone"
+        ng2FileSelect>
+        	{{uploadText}}
+        	
+	</div>
+	
+	
 </div>
