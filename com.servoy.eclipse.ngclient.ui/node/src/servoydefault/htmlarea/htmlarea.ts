@@ -1,13 +1,15 @@
 import { Component, Input, ChangeDetectorRef, Renderer2, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { ServoyDefaultBaseField } from '../basefield';
 import { FormattingService, PropertyUtils } from '../../ngclient/servoy_public';
-import { AngularEditorConfig } from '@kolkov/angular-editor';
+import { AngularEditorConfig, AngularEditorComponent } from '@kolkov/angular-editor';
 
 @Component({
   selector: 'servoydefault-htmlarea',
   templateUrl: './htmlarea.html',
 })
 export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField {
+
+  @ViewChild(AngularEditorComponent) editor: AngularEditorComponent;
 
   config: AngularEditorConfig = {
     editable: true,
@@ -18,6 +20,19 @@ export class ServoyDefaultHtmlarea extends ServoyDefaultBaseField {
 
   constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, formattingService: FormattingService) {
     super(renderer, cdRef, formattingService);
+  }
+
+  attachFocusListeners() {
+    if (this.onFocusGainedMethodID) {
+      this.editor.focusEvent.subscribe(() => {
+        this.onFocusGainedMethodID(new CustomEvent('focus'));
+      });
+    }
+
+    this.editor.blurEvent.subscribe(() => {
+      this.pushUpdate();
+      if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
+    });
   }
 
   svyOnInit() {

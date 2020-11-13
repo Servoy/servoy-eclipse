@@ -1,8 +1,8 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges, Renderer2, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 
 import { LocaleService, FormattingService, I18NProvider } from '../../ngclient/servoy_public';
 
-import { DateTimeAdapter, OwlDateTimeIntl } from '@danielmoncada/angular-datetime-picker';
+import { DateTimeAdapter, OwlDateTimeIntl, OwlDateTimeComponent} from '@danielmoncada/angular-datetime-picker';
 
 import {ServoyDefaultBaseField} from '../basefield';
 
@@ -16,6 +16,7 @@ import * as moment from 'moment';
 export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
 
     @ViewChild( 'inputElement') inputElementRef: ElementRef;
+    @ViewChild(OwlDateTimeComponent) datetime: OwlDateTimeComponent<any>;
 
     public firstDayOfWeek = 1;
     public hour12Timer = false;
@@ -42,9 +43,25 @@ export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
         this.hour12Timer = lts.indexOf('a') >= 0 || lts.indexOf('A') >= 0;
     }
 
+    attachFocusListeners(nativeElement: any) {
+        super.attachFocusListeners(nativeElement);
+        if (this.onFocusGainedMethodID) {
+          this.datetime.afterPickerOpen.subscribe(() => {
+            this.onFocusGainedMethodID(new CustomEvent('focus'));
+          });
+        }
+
+        if (this.onFocusLostMethodID) {
+          this.datetime.afterPickerClosed.subscribe(() => {
+            this.onFocusLostMethodID(new CustomEvent('blur'));
+          });
+        }
+    }
+
+
     svyOnChanges( changes: SimpleChanges ) {
-        for ( let property in changes ) {
-            let change = changes[property];
+        for ( const property of Object.keys(changes) ) {
+            const change = changes[property];
             switch ( property ) {
                 case 'format':
                     //                setDateFormat($scope.model.format, 'display');
@@ -53,8 +70,8 @@ export class ServoyDefaultCalendar extends  ServoyDefaultBaseField {
                     const showTime = format.indexOf('h') >= 0 || format.indexOf('H') >= 0 || format.indexOf('m') >= 0;
                     if (showCalendar) {
                         if (showTime) this.pickerType = 'both';
-                        else this.pickerType = 'calendar'
-                    } else this.pickerType = 'timer'
+                        else this.pickerType = 'calendar';
+                    } else this.pickerType = 'timer';
                     this.showSecondsTimer = format.indexOf('s') >= 0;
                     this.hour12Timer = format.indexOf('h') >= 0 || format.indexOf('a') >= 0 || format.indexOf('A') >= 0;
                     break;

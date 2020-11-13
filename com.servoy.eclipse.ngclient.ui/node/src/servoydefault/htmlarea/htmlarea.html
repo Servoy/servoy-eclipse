@@ -9,7 +9,7 @@
     [editable] = "config.editable"
     [id]="servoyApi.getMarkupId() + 'editor'"  
     [(ngModel)]="dataProviderID" 
-    (blur)="pushUpdate()" 
-    [config]="config">
+    [config]="config"
+    #editor>
   </angular-editor>
 </div>

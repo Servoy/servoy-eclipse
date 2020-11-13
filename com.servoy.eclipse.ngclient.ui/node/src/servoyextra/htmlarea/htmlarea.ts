@@ -1,7 +1,7 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { ServoyBaseComponent, PropertyUtils } from '../../ngclient/servoy_public';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
-import { AngularEditorConfig } from '@kolkov/angular-editor';
+import { AngularEditorComponent, AngularEditorConfig } from '@kolkov/angular-editor';
 
 @Component( {
     selector: 'servoyextra-htmlarea',
@@ -28,6 +28,8 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
     @Input() toolTipText;
     @Input() visible;
     @Input() scrollbars;
+
+    @ViewChild(AngularEditorComponent) editor: AngularEditorComponent;
 
     private log: LoggerService;
 
@@ -115,14 +117,16 @@ export class ServoyExtraHtmlarea extends ServoyBaseComponent {
     }
 
     attachFocusListeners( nativeElement: any ) {
-        if ( this.onFocusGainedMethodID )
-            this.renderer.listen( nativeElement, 'focus', ( e ) => {
-                this.onFocusGainedMethodID( e );
-            } );
-        if ( this.onFocusLostMethodID )
-            this.renderer.listen( nativeElement, 'blur', ( e ) => {
-                this.onFocusLostMethodID( e );
-            } );
+        if (this.onFocusGainedMethodID) {
+            this.editor.focusEvent.subscribe(() => {
+              this.onFocusGainedMethodID(new CustomEvent('focus'));
+            });
+          }
+
+          this.editor.blurEvent.subscribe(() => {
+            this.pushUpdate();
+            if (this.onFocusLostMethodID) this.onFocusLostMethodID(new CustomEvent('blur'));
+          });
     }
 
     protected attachHandlers() {
