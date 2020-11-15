@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { SabloUtils } from '../../sablo/websocket.service';
-import { ColumnRef, ChangeType } from '../../sablo/spectypes.service';
+import { ColumnRef, ChangeType, ChangeAwareState } from '../../sablo/spectypes.service';
+import { Foundset } from '../converters/foundset_converter';
 
 
 @Injectable()
@@ -11,7 +12,7 @@ export class ViewportService {
 
   constructor(private converterService: ConverterService) { }
 
-  public updateWholeViewport(viewPort: any[], internalState: IViewportConversion, viewPortUpdate, viewPortUpdateConversions, propertyContext: PropertyContext): any[] {
+  public updateWholeViewport(viewPort: any[], internalState: FoundsetViewportState, viewPortUpdate, viewPortUpdateConversions, propertyContext: PropertyContext): any[] {
     if (viewPortUpdateConversions) {
       // do the actual conversion
       // TODO that "null" should be a changehandler, where do we get that here?
@@ -22,14 +23,14 @@ export class ViewportService {
     return viewPortUpdate;
   }
 
-  public updateAllConversionInfo(viewPort: any[], internalState, serverConversionInfo) {
-    internalState.viewportConversions = {};
+  public updateAllConversionInfo(viewPort: any[], internalState: FoundsetViewportState, serverConversionInfo) {
+    internalState.viewportConversions = [];
     for (let i = viewPort.length - 1; i >= 0; i--) {
       internalState.viewportConversions[i] = serverConversionInfo ? serverConversionInfo[i] : undefined;
     }
   }
 
-  public updateViewportGranularly(viewPort: any[], internalState, rowUpdates, rowUpdateConversions,
+  public updateViewportGranularly(viewPort: any[], internalState: FoundsetViewportState, rowUpdates, rowUpdateConversions,
     propertyContext: (propertyName: string) => any, simpleRowValue: boolean, rowPrototype?: any) {
     // partial row updates (remove/insert/update)
 
@@ -47,7 +48,7 @@ export class ViewportService {
     let j: number;
     for (i = 0; i < rowUpdates.length; i++) {
       const rowUpdate = rowUpdates[i];
-      if (rowUpdate.type == ChangeType.ROWS_CHANGED) {
+      if (rowUpdate.type === ChangeType.ROWS_CHANGED) {
         for (j = rowUpdate.startIndex; j <= rowUpdate.endIndex; j++) {
           let dpName: string;
           const relIdx = j - rowUpdate.startIndex;
@@ -64,7 +65,7 @@ export class ViewportService {
             if (rowConversionUpdate) {
               // update conversion info
               if (internalState.viewportConversions === undefined) {
-                internalState.viewportConversions = {};
+                internalState.viewportConversions = [];
               }
               internalState.viewportConversions[j] = rowConversionUpdate;
             } else if (internalState.viewportConversions !== undefined && internalState.viewportConversions[j] !== undefined)
@@ -80,9 +81,9 @@ export class ViewportService {
               if (rowConversionUpdate) {
                 // update conversion info
                 if (internalState.viewportConversions === undefined) {
-                  internalState.viewportConversions = {};
+                  internalState.viewportConversions = [];
                 }
-                if (internalState.viewportConversions[j] == undefined) {
+                if (internalState.viewportConversions[j] === undefined) {
                   internalState.viewportConversions[j] = {};
                 }
                 internalState.viewportConversions[j][dpName] = rowConversionUpdate[dpName];
@@ -91,21 +92,22 @@ export class ViewportService {
             }
           }
         }
-      } else if (rowUpdate.type == ChangeType.ROWS_INSERTED) {
+      } else if (rowUpdate.type === ChangeType.ROWS_INSERTED) {
         if (rowUpdateConversions && rowUpdateConversions[i]) this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], propertyContext, undefined);
         if (internalState.viewportConversions === undefined) {
-          internalState.viewportConversions = {};
+          internalState.viewportConversions = [];
         }
 
         for (j = rowUpdate.rows.length - 1; j >= 0; j--) {
           viewPort.splice(rowUpdate.startIndex, 0, rowUpdate.rows[j]);
           if (rowPrototype) rowUpdate.rows[j] = SabloUtils.cloneWithDifferentPrototype(rowUpdate.rows[j], rowPrototype);
           if (rowUpdateConversions && rowUpdateConversions[i]) {
-            internalState.viewportConversions[rowUpdate.startIndex + j] = (rowUpdateConversions && rowUpdateConversions[i] && rowUpdateConversions[i].rows) ? rowUpdateConversions[i].rows[j] : undefined;
+            internalState.viewportConversions[rowUpdate.startIndex + j] = (rowUpdateConversions && rowUpdateConversions[i] && rowUpdateConversions[i].rows) ?
+             rowUpdateConversions[i].rows[j] : undefined;
           }
         }
         rowUpdate.endIndex = rowUpdate.startIndex + rowUpdate.rows.length - 1; // prepare rowUpdate.endIndex for listener notifications
-      } else if (rowUpdate.type == ChangeType.ROWS_DELETED) {
+      } else if (rowUpdate.type === ChangeType.ROWS_DELETED) {
         if (rowUpdateConversions && rowUpdateConversions[i]) this.converterService.convertFromServerToClient(rowUpdate, rowUpdateConversions[i], propertyContext, undefined);
 
         const oldLength = viewPort.length;
@@ -120,7 +122,7 @@ export class ViewportService {
           }
         }
         viewPort.splice(rowUpdate.startIndex, rowUpdate.endIndex - rowUpdate.startIndex + 1);
-      } else if (rowUpdate.type == ViewportService.CHANGED_IN_LINKED_PROPERTY) {
+      } else if (rowUpdate.type === ViewportService.CHANGED_IN_LINKED_PROPERTY) {
         // just prepare it for the foundset change listener; components will want to handle this type of change as well so we should notify them when it happens
         rowUpdate.type = ChangeType.ROWS_CHANGED;
       }
@@ -129,7 +131,7 @@ export class ViewportService {
   }
 
 
-  public queueChange(viewPort: any[], internalState: any, deep: boolean, idx: number, columnName: string, newValue: any, oldValue?: any) {
+  public queueChange(viewPort: any[], internalState: FoundsetViewportState, deep: boolean, idx: number, columnName: string, newValue: any, oldValue?: any) {
     if (columnName === ViewportService.ROW_ID_COL_KEY) return;
 
     const conversionInfo = internalState.viewportConversions ? internalState.viewportConversions[idx] : undefined;
@@ -155,7 +157,7 @@ export class ViewportService {
   private isChanged(newValue: any, oldValue: any, columnName: string, conversionInfo: any) {
     if (newValue !== oldValue) {
       /* this doesn't seem to work correctly for 2 identical Date objects in Chrome when debugging; but it should */
-      if (typeof newValue == 'object') {
+      if (typeof newValue === 'object') {
         return ConverterService.isChanged(newValue, oldValue, conversionInfo ? (columnName ? conversionInfo[columnName] : conversionInfo) : undefined);
       }
       return true;
@@ -164,6 +166,9 @@ export class ViewportService {
   }
 }
 
-export interface IViewportConversion {
-  viewportConversions: Record<string, object>[];
+
+export class FoundsetViewportState extends ChangeAwareState {
+  viewportConversions: Record<string, object>[] = [];
+  forFoundset: () => Foundset;
+  requests = [];
 }

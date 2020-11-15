@@ -16,14 +16,14 @@ import { ServoyTestingModule } from '../../testing/servoytesting.module';
 describe('FoundsetConverter', () => {
 
     let converterService: ConverterService;
-    let loggerFactory;
+    let loggerFactory: LoggerFactory;
     let sabloService: SabloService;
     let viewportService: ViewportService;
-    let sabloDeferHelper;
+    let sabloDeferHelper: SabloDeferHelper;
     let fs: Foundset;
     let changeNotified = false;
-    let someDate;
-    let someDateMs;
+    let someDate: Date;
+    let someDateMs: any;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
