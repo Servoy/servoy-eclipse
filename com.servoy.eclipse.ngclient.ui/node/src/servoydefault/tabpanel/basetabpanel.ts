@@ -1,19 +1,19 @@
 import { Input, ContentChild, TemplateRef, Output, EventEmitter, SimpleChanges, Renderer2, Directive, ChangeDetectorRef } from '@angular/core';
 
-import { PropertyUtils, ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public'
+import { PropertyUtils, ServoyApi, ServoyBaseComponent } from '../../ngclient/servoy_public';
 
-import { WindowRefService } from '../../sablo/util/windowref.service'
+import { WindowRefService } from '../../sablo/util/windowref.service';
 
-import { BaseCustomObject } from '../../sablo/spectypes.service'
+import { BaseCustomObject } from '../../sablo/spectypes.service';
 
-import { LoggerService, LoggerFactory } from '../../sablo/logger.service'
+import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
 
 import { ServoyDefaultBaseComponent } from '../basecomponent';
 
 
 
 @Directive()
-export abstract class BaseTabpanel extends ServoyBaseComponent{
+export abstract class BaseTabpanel extends ServoyBaseComponent {
 
     @Input() onChangeMethodID;
 
@@ -30,7 +30,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
     @Input() styleClass;
     @Input() tabOrientation;
     @Input() tabSeq;
-    @Input() tabs: Array<Tab>
+    @Input() tabs: Array<Tab>;
     @Input() transparent;
     @Input() visible;
 
@@ -46,18 +46,18 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
     protected selectedTab: Tab;
     private log: LoggerService;
 
-    constructor( private windowRefService: WindowRefService, private logFactory : LoggerFactory, renderer:Renderer2, cdRef: ChangeDetectorRef ) {
+    constructor( private windowRefService: WindowRefService, private logFactory: LoggerFactory, renderer: Renderer2, cdRef: ChangeDetectorRef ) {
         super(renderer, cdRef);
-        this.log = logFactory.getLogger("BaseTabpanel");
+        this.log = logFactory.getLogger('BaseTabpanel');
     }
 
     svyOnChanges( changes: SimpleChanges ) {
-        if ( changes["tabs"] ) {
+        if ( changes['tabs'] ) {
             // quickly generate the id's for a the tab html id (and selecting it)
            this.initTabID();
         }
-        if ( changes["tabIndex"] ) {
-            Promise.resolve( null ).then(() => { this.select( this.tabs[this.getRealTabIndex()] ) } );
+        if ( changes['tabIndex'] ) {
+            Promise.resolve( null ).then(() => { this.select( this.tabs[this.getRealTabIndex()] ); } );
         }
         super.svyOnChanges(changes);
     }
@@ -82,11 +82,10 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
     }
 
     select( tab: Tab ) {
-        if ( !this.visible ) return;
         if ( this.isValidTab( tab ) ) {
-            this.log.debug(this.log.buildMessage(() => ("svy * Will select tab '" + (tab ? tab.containsFormId : undefined) + "'. Previously selected: '" + (this.selectedTab ? this.selectedTab.containsFormId : undefined) + "'. Same: " + (tab == this.selectedTab))));
+            this.log.debug(this.log.buildMessage(() => ('svy * Will select tab \'' + (tab ? tab.containsFormId : undefined) + '\'. Previously selected: \'' + (this.selectedTab ? this.selectedTab.containsFormId : undefined) + '\'. Same: ' + (tab == this.selectedTab))));
             if ( ( tab != undefined && this.selectedTab != undefined && tab.containsFormId == this.selectedTab.containsFormId && tab.relationName == this.selectedTab.relationName ) || ( tab == this.selectedTab ) ) return;
-            var selectEvent = this.windowRefService.nativeWindow.event ? this.windowRefService.nativeWindow.event : null;
+            const selectEvent = this.windowRefService.nativeWindow.event ? this.windowRefService.nativeWindow.event : null;
             if ( this.selectedTab ) {
                 if ( this.selectedTab.containsFormId && !this.waitingForServerVisibility[this.selectedTab.containsFormId] ) {
                     const formInWait = this.selectedTab.containsFormId;
@@ -94,14 +93,14 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
                     const currentSelectedTab = this.selectedTab;
                     this.lastSelectedTab = tab;
                     const promise = this.servoyApi.hideForm( this.selectedTab.containsFormId, null, null, tab.containsFormId, tab.relationName );
-                    this.log.debug(this.log.buildMessage(() => ("svy * Will hide previously selected form (tab): " + this.selectedTab.containsFormId)));
+                    this.log.debug(this.log.buildMessage(() => ('svy * Will hide previously selected form (tab): ' + this.selectedTab.containsFormId)));
                     promise.then(( ok ) => {
-                        this.log.debug(this.log.buildMessage(() => ("svy * Previously selected form (tab) hide completed with '" + ok + "': " + this.selectedTab.containsFormId)));
+                        this.log.debug(this.log.buildMessage(() => ('svy * Previously selected form (tab) hide completed with \'' + ok + '\': ' + this.selectedTab.containsFormId)));
                         delete this.waitingForServerVisibility[formInWait];
                         if ( this.lastSelectedTab != tab ) {
                             // visibility changed again, just ignore this
-                            this.log.debug(this.log.buildMessage(() => ("svy * Tab '" + tab.containsFormId + "': no longer active, ignore making it visible")));
-                            // it could be that the server was sending the correct state in the mean time already at the same time 
+                            this.log.debug(this.log.buildMessage(() => ('svy * Tab \'' + tab.containsFormId + '\': no longer active, ignore making it visible')));
+                            // it could be that the server was sending the correct state in the mean time already at the same time
                             // we try to hide it. just call show again to be sure.
                             if ( currentSelectedTab == this.selectedTab ) this.servoyApi.formWillShow( this.selectedTab.containsFormId, this.selectedTab.relationName );
                             return;
@@ -109,22 +108,21 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
                         if ( ok ) {
                             this.setFormVisible( tab, selectEvent );
                         }
-                    } )
+                    } );
                 }
-            }
-            else {
+            } else {
                 this.setFormVisible( tab, selectEvent );
             }
         }
     }
-    
-    getSelectedTab():Tab {
+
+    getSelectedTab(): Tab {
         return this.selectedTab;
     }
 
     private isValidTab( tab: Tab ) {
         if ( this.tabs ) {
-            for ( var i = 0; i < this.tabs.length; i++ ) {
+            for ( let i = 0; i < this.tabs.length; i++ ) {
                 if ( this.tabs[i] === tab ) {
                     return true;
                 }
@@ -135,7 +133,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
 
     private getTabIndex( tab: Tab ) {
         if ( tab ) {
-            for ( var i = 0; i < this.tabs.length; i++ ) {
+            for ( let i = 0; i < this.tabs.length; i++ ) {
                 if ( this.tabs[i] == tab ) {
                     return i + 1;
                 }
@@ -145,9 +143,10 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
     }
 
     protected setFormVisible( tab: Tab, event ) {
-        if ( tab.containsFormId ) this.servoyApi.formWillShow( tab.containsFormId, tab.relationName );
-        this.log.debug(this.log.buildMessage(() => ("svy * selectedTab = '" + tab.containsFormId + "' -- " + new Date().getTime())));
-        var oldSelected = this.selectedTab;
+        if ( tab.containsFormId )
+            this.servoyApi.formWillShow( tab.containsFormId, tab.relationName ).finally(() => this.cdRef.markForCheck());
+        this.log.debug(this.log.buildMessage(() => ('svy * selectedTab = \'' + tab.containsFormId + '\' -- ' + new Date().getTime())));
+        const oldSelected = this.selectedTab;
         this.selectedTab = tab;
         this.tabIndex = this.getTabIndex( this.selectedTab );
         this.tabIndexChange.emit( this.tabIndex );
@@ -164,7 +163,7 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
                 if (!this.tabs) return -1;
                 for ( let i = 0; i < this.tabs.length; i++ ) {
                     if (this.tabs[i].name == this.tabIndex) {
-                        this.tabIndex = i +1
+                        this.tabIndex = i + 1;
                         this.tabIndexChange.emit(i);
                         return i;
                     }
@@ -176,11 +175,10 @@ export abstract class BaseTabpanel extends ServoyBaseComponent{
         if ( this.tabs && this.tabs.length > 0 ) return 0;
         return -1;
     }
-    
-    private initTabID()
-    {
+
+    private initTabID() {
         for ( let i = 0; i < this.tabs.length; i++ ) {
-            this.tabs[i]._id = this.servoyApi.getMarkupId() + "_tab_" + i;
+            this.tabs[i]._id = this.servoyApi.getMarkupId() + '_tab_' + i;
         }
     }
 }
@@ -189,10 +187,10 @@ export class Tab extends BaseCustomObject {
     _id: string;
     name: string;
     containsFormId: string;
-    text: string
-    relationName: string
-    foreground: string
-    disabled: boolean
-    imageMediaID: string
-    mnemonic: string
+    text: string;
+    relationName: string;
+    foreground: string;
+    disabled: boolean;
+    imageMediaID: string;
+    mnemonic: string;
 }
