@@ -77,12 +77,6 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
                         else
                             this.renderer.setAttribute( this.getFocusElement(), 'disabled', 'disabled' );
                         break;
-                    case 'toolTipText':
-                        if ( change.currentValue )
-                            this.renderer.removeAttribute( this.getFocusElement(), 'disabled' );
-                        else
-                            this.renderer.setAttribute( this.getFocusElement(), 'disabled', 'disabled' );
-                        break;
                 }
             }
         }
