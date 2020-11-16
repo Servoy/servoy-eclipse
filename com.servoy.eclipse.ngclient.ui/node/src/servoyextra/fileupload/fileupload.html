@@ -1,29 +1,24 @@
-<style>
-    .my-drop-zone { border: dotted 3px lightgray; }
-    .nv-file-over {
-    display: table;
-    	background: #F8F8F8;
-    	border: 5px dashed #DDD;
-    	text-align: center;
-    	width: 100%;
-    	height: 100%;
-    } /* Default class applied to drop zones on over */
- 
-    html, body { height: 100%; }
-</style>
-<div class="svy-extra-fileupload container" 
-    [ngClass]="styleClass">
+<div class="svy-extra-fileupload container" [ngClass]="styleClass" [svyTooltip]="toolTipText">
     <div ng2FileDrop
-        [ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
-        ngfDrop ngfSelect
+        [ngClass]="{'svy-fu-dragover': hasBaseDropZoneOver}"
         (fileOver)="fileOverBase($event)"
-        (click)="fileOverBase($event)"
     	[uploader]="uploader"
-        class="well my-drop-zone"
-        ng2FileSelect>
-        	{{uploadText}}
+        class="well svy-fu-drop-box">
         	
+        	<i class="svy-fu-row {{uploader.progress > 0 ? [successIconStyleClass] : [iconStyleClass] }} custom-file-upload" 
+        		> </i>
+        	
+        	<label class="custom-file-upload" >  {{uploadText}}
+            	<div *ngIf="multiFileUpload; else elseBlock">
+					<input type="file" ng2FileSelect [uploader]="uploader" multiple  />
+				</div>
+				<ng-template #elseBlock>
+	            	<input type="file" ng2FileSelect [uploader]="uploader" />
+				</ng-template>
+			</label>
+            
+            <div class="progress svy-fu-progress-bar" style="">
+    	         <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': uploader.progress + '%' }"></div>
+        	</div>
 	</div>
-	
-	
 </div>

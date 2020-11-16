@@ -2,13 +2,16 @@ import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, Even
 import { ServoyBaseComponent } from '../../ngclient/servoy_public'
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { FileUploadModule, FileUploader } from 'ng2-file-upload';
+import { HttpClient, HttpClientModule, HttpRequest, HttpResponse, HttpEvent } from "@angular/common/http";
+import { Subscription } from "rxjs";
 
 //const URL = '/api/';
 const URL = 'https://evening-anchorage-3159.herokuapp.com/api/';
 
 @Component( {
     selector: 'servoyextra-fileupload',
-    templateUrl: './fileupload.html'
+    templateUrl: './fileupload.html',
+    styleUrls: ["./fileupload.css"]
 } )
 export class ServoyExtraFileUpload extends ServoyBaseComponent {
 
@@ -39,10 +42,10 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
     @Input() uploadNotSupportedFileText;
     @Input() toolTipText;
     @Input() visible;
-    
-    uploader:FileUploader;
-    hasBaseDropZoneOver:boolean;
-    
+
+    uploader: FileUploader;
+    hasBaseDropZoneOver: boolean;
+
     private log: LoggerService;
 
     constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory ) {
@@ -50,18 +53,6 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
         this.log = logFactory.getLogger( 'FileUpload' );
         this.uploader = new FileUploader( {
             url: URL,
-            disableMultipart: true, // 'DisableMultipart' must be 'true' for formatDataFunction to be called.
-            formatDataFunctionIsAsync: true,
-            formatDataFunction: async ( item ) => {
-                return new Promise(( resolve, reject ) => {
-                    resolve( {
-                        name: this.name,
-                        length: this.size,
-                        contentType: item._file.type,
-                        date: new Date()
-                    } );
-                } );
-            }
         } );
 
         this.hasBaseDropZoneOver = true;
@@ -81,6 +72,12 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
                 const change = changes[property];
                 switch ( property ) {
                     case 'enabled':
+                        if ( change.currentValue )
+                            this.renderer.removeAttribute( this.getFocusElement(), 'disabled' );
+                        else
+                            this.renderer.setAttribute( this.getFocusElement(), 'disabled', 'disabled' );
+                        break;
+                    case 'toolTipText':
                         if ( change.currentValue )
                             this.renderer.removeAttribute( this.getFocusElement(), 'disabled' );
                         else
