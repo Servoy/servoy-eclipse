@@ -1,24 +1,31 @@
-<div class="svy-extra-fileupload container" [ngClass]="styleClass" [svyTooltip]="toolTipText">
+<div class="svy-extra-fileupload container" 
+	[ngClass]="styleClass" 
+	[svyTooltip]="toolTipText"  
+	(click)= "fileInputClick()"
+	#element>
     <div ng2FileDrop
         [ngClass]="{'svy-fu-dragover': hasBaseDropZoneOver}"
         (fileOver)="fileOverBase($event)"
-    	[uploader]="uploader"
+    	[uploader]="uploader" 
+    	(onFileDrop) = "uploader.uploadAll()"
         class="well svy-fu-drop-box">
         	
         	<i class="svy-fu-row {{uploader.progress > 0 ? [successIconStyleClass] : [iconStyleClass] }} custom-file-upload" 
         		> </i>
         	
-        	<label class="custom-file-upload" >  {{uploadText}}
+        	<label id = "fileInputLabel" class="custom-file-upload" >  {{uploadText}}
             	<div *ngIf="multiFileUpload; else elseBlock">
-					<input type="file" ng2FileSelect [uploader]="uploader" multiple  />
+					<input type="file" ng2FileSelect [uploader]="uploader" multiple (onFileSelected) = "uploader.uploadAll()" />
 				</div>
 				<ng-template #elseBlock>
-	            	<input type="file" ng2FileSelect [uploader]="uploader" />
+	            	<input type="file" ng2FileSelect [uploader]="uploader" (onFileSelected) = "uploader.uploadAll()" />
 				</ng-template>
 			</label>
             
-            <div class="progress svy-fu-progress-bar" style="">
-    	         <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': uploader.progress + '%' }"></div>
+            <div class="svy-fu-row" *ngIf="uploader.progress > 0" >
+    	         <div class="svy-fu-progress-bar" role="progressbar" aria-valuenow="uploader.progress" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{ 'width': uploader.progress + '%' }">
+    	         	{{uploader.progress}}%
+    	         </div>
         	</div>
 	</div>
 </div>

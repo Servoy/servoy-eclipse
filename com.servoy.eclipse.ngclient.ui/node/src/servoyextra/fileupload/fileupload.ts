@@ -1,12 +1,7 @@
 import { Component, ViewChild, SimpleChanges, Input, Renderer2, ElementRef, EventEmitter, Output, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public'
+import { ServoyBaseComponent, SvyUtilsService } from '../../ngclient/servoy_public'
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
-import { FileUploadModule, FileUploader } from 'ng2-file-upload';
-import { HttpClient, HttpClientModule, HttpRequest, HttpResponse, HttpEvent } from "@angular/common/http";
-import { Subscription } from "rxjs";
-
-//const URL = '/api/';
-const URL = 'https://evening-anchorage-3159.herokuapp.com/api/';
+import { FileUploadModule, FileSelectDirective, FileUploader } from 'ng2-file-upload';
 
 @Component( {
     selector: 'servoyextra-fileupload',
@@ -25,6 +20,7 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
     @Input() accept;
     @Input() enabled;
     @Input() location;
+    @Input() name;
     @Input() size;
     @Input() styleClass;
     @Input() styleClassExpression;
@@ -48,22 +44,30 @@ export class ServoyExtraFileUpload extends ServoyBaseComponent {
 
     private log: LoggerService;
 
-    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory ) {
+    constructor( renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory, private utilsService: SvyUtilsService ) {
         super( renderer, cdRef );
         this.log = logFactory.getLogger( 'FileUpload' );
         this.uploader = new FileUploader( {
-            url: URL,
+            url: "",
         } );
-
-        this.hasBaseDropZoneOver = true;
+        this.hasBaseDropZoneOver = false;
     }
 
     public fileOverBase( e: any ): void {
         this.hasBaseDropZoneOver = e;
     }
 
+    public fileInputClick(): void {
+        let element: HTMLElement = document.getElementById( "fileInputLabel" ) as HTMLElement;
+        element.click();
+    }
+
     svyOnInit() {
         super.svyOnInit();
+        const url = this.utilsService.generateUploadUrl( this.servoyApi.getFormname(), this.name, "dataProviderID" );
+        this.uploader = new FileUploader( {
+            url: url,
+        });
     }
 
     svyOnChanges( changes: SimpleChanges ) {
