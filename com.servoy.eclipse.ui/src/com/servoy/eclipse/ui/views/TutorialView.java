@@ -32,6 +32,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Cursor;
@@ -42,7 +44,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -73,16 +74,45 @@ public class TutorialView extends ViewPart
 	BrowserDialog dialog = null;
 
 	private Composite rootComposite;
+	private boolean showTutorialsList;
 
 	@Override
 	public void createPartControl(Composite parent)
 	{
 		loadDataModel(true, null);
 		createTutorialView(parent, true);
+		parent.addControlListener(new ControlAdapter()
+		{
+			Runnable run = null;
+			long last = 0;
+
+			@Override
+			public void controlResized(ControlEvent e)
+			{
+				last = System.currentTimeMillis();
+				if (run == null)
+				{
+					run = () -> {
+						if ((System.currentTimeMillis() - last) < 300)
+						{
+							parent.getDisplay().timerExec(300, run);
+						}
+						else
+						{
+							createTutorialView(parent, showTutorialsList);
+							run = null;
+						}
+					};
+					parent.getDisplay().timerExec(300, run);
+				}
+			}
+		});
 	}
 
 	private void createTutorialView(Composite parent, boolean createDefaultTutorialsList)
 	{
+		this.showTutorialsList = createDefaultTutorialsList;
+		if (this.rootComposite != null) rootComposite.dispose();
 		rootComposite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
@@ -121,10 +151,6 @@ public class TutorialView extends ViewPart
 					super.mouseUp(event);
 					if (event.getSource() instanceof StyledText)
 					{
-						for (Control control : parent.getChildren())
-						{
-							control.dispose();
-						}
 						createTutorialView(parent, true);
 					}
 				}
@@ -236,10 +262,6 @@ public class TutorialView extends ViewPart
 								{
 									String url = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/tutorial/" + tutorialID;
 									loadDataModel(false, url);
-									for (Control control : firstParent.getChildren())
-									{
-										control.dispose();
-									}
 									createTutorialView(firstParent, false);
 								}
 							}
@@ -344,10 +366,6 @@ public class TutorialView extends ViewPart
 					{
 						String url = "https://tutorials.servoy.com/servoy-service/rest_ws/contentAPI/tutorial/" + id;
 						loadDataModel(false, url);
-						for (Control control : fistParent.getChildren())
-						{
-							control.dispose();
-						}
 						createTutorialView(fistParent, false);
 					}
 				});
@@ -496,7 +514,6 @@ public class TutorialView extends ViewPart
 		loadDataModel(false, url);
 
 		Composite parent = rootComposite.getParent();
-		rootComposite.dispose();
 		createTutorialView(parent, false);
 		parent.layout(true, true);
 
