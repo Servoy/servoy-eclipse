@@ -67,12 +67,7 @@ export class ServoyExtraImageLabel extends ServoyBaseComponent {
 
     protected attachHandlers() {
         if ( this.onActionMethodID ) {
-            if ( this.getNativeElement().tagName == 'TEXTAREA' || this.getNativeElement().type == 'text' ) {
-                this.renderer.listen( this.getNativeElement(), 'keydown', e => { if ( e.keyCode == 13 ) this.onActionMethodID( e ) } );
-            }
-            else {
-                this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ) );
-            }
+            this.renderer.listen( this.getNativeElement(), 'click', e => this.onActionMethodID( e ) );
         }
         if ( this.onRightClickMethodID ) {
             this.renderer.listen( this.getNativeElement(), 'contextmenu', e => { this.onRightClickMethodID( e ); return false; } );
