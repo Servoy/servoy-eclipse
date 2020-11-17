@@ -59,6 +59,7 @@ import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
+import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -417,7 +418,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 								{
 									String servoyVersion = jsonObject.getString("servoy-version");
 									String[] minAndMax = servoyVersion.split(" - ");
-									if (WebPackageVersionComparator.compare(minAndMax[0], currentVersion) <= 0)
+									if (SemVerComparator.compare(minAndMax[0], currentVersion) <= 0)
 									{
 										toSort.add(jsonObject);
 									}
@@ -431,7 +432,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									@Override
 									public int compare(JSONObject o1, JSONObject o2)
 									{
-										return WebPackageVersionComparator.compare(o2.optString("version", ""), o1.optString("version", ""));
+										return SemVerComparator.compare(o2.optString("version", ""), o1.optString("version", ""));
 									}
 								});
 
@@ -442,7 +443,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 									{
 										String servoyVersion = jsonObject.getString("servoy-version");
 										String[] minAndMax = servoyVersion.split(" - ");
-										if (minAndMax.length > 1 && WebPackageVersionComparator.compare(minAndMax[1], currentVersion) <= 0)
+										if (minAndMax.length > 1 && SemVerComparator.compare(minAndMax[1], currentVersion) <= 0)
 										{
 											break;
 										}

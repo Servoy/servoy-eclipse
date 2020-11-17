@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
 */
 
-package com.servoy.eclipse.designer.webpackage.endpoint;
+package com.servoy.eclipse.core.util;
 
 import java.util.Arrays;
 
@@ -23,7 +23,7 @@ import java.util.Arrays;
  * Used to compare web package versions.
  * @author emera
  */
-public class WebPackageVersionComparator
+public class SemVerComparator
 {
 	public static int compare(String v1, String v2)
 	{

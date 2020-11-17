@@ -25,10 +25,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardPage;
@@ -51,6 +49,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.SemVerComparator;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -70,7 +69,6 @@ public class ExportPage extends WizardPage
 	private Button browseDirButton;
 	private Group platformGroup;
 
-
 	private Text iconPath;
 	private Button browseIconButton;
 	private Text imgPath;
@@ -86,18 +84,15 @@ public class ExportPage extends WizardPage
 
 	private final List<String> selectedPlatforms = new ArrayList<String>();
 	private final ExportNGDesktopWizard exportElectronWizard;
-	private final String versionsUrl = "https://download.servoy.com/ngdesktop/src/versions.txt";
-	private final String[] versions = { "2020.06", "2020.12" };
-	private final boolean[] updates = { false, true };
-	private Map<String, Boolean> srcVersions = new TreeMap<String, Boolean>(); //sort by keys
+	private final String versionsUrl = "https://download.servoy.com/ngdesktop/versions.txt";
+	private final String FIRST_VERSION_THAT_SUPPORTS_UPDATES = "2020.12";
+	private List<String> remoteVersions = new ArrayList<String>();
 
 	public ExportPage(ExportNGDesktopWizard exportElectronWizard)
 	{
 		super("page1");
 		this.exportElectronWizard = exportElectronWizard;
 		setTitle("Export Servoy application");
-		for (int index = 0; index < versions.length; index++)
-			srcVersions.put(versions[index], Boolean.valueOf(updates[index]));
 	}
 
 	@Override
@@ -315,16 +310,11 @@ public class ExportPage extends WizardPage
 
 
 		srcVersionCombo = new Combo(versionGroup, SWT.READ_ONLY);
-		srcVersions = getAvailableVersions();
+		remoteVersions = getAvailableVersions();
 
-		final Iterator<String> keys = srcVersions.keySet().iterator();
-		while (keys.hasNext())
-		{
-			final String key = keys.next();
-			srcVersionCombo.add(key);
-			final Object data = srcVersions.get(key);
-			srcVersionCombo.setData(key, data);
-		}
+		remoteVersions.forEach((s) -> {
+			srcVersionCombo.add(s);
+		});
 		srcVersionCombo.select(getVersionIndex());
 		srcVersionCombo.addSelectionListener(new SelectionAdapter()
 		{
@@ -339,16 +329,6 @@ public class ExportPage extends WizardPage
 		includeUpdateBtn.setText("Include update");
 		includeUpdateBtn.setEnabled(isUpdateAvailable());
 		includeUpdateBtn.setSelection(getIncludeUpdate());
-		includeUpdateBtn.setData(Boolean.toString(includeUpdateBtn.getSelection()));
-
-		includeUpdateBtn.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent event)
-			{
-				includeUpdateListener(((Button)event.widget).getSelection());
-			}
-		});
 
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -363,7 +343,7 @@ public class ExportPage extends WizardPage
 		updateUrlText.setToolTipText("The maximum allowed length is " + ExportNGDesktopWizard.COPYRIGHT_LENGTH + " chars");
 		updateUrlText.setEditable(true);
 		updateUrlText.setVisible(true);
-		updateUrlText.setEnabled(includeUpdateBtn.getSelection());
+		updateUrlText.setEnabled(isUpdateUrl());
 		updateUrlText.setText(getUpdateUrl());
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
@@ -393,26 +373,12 @@ public class ExportPage extends WizardPage
 
 	private void srcVersionListener(SelectionEvent event)
 	{
-		final String key = ((Combo)event.widget).getText();
-		final Boolean supportUpdates = (Boolean)event.widget.getData(key);
 		includeUpdateBtn.setEnabled(isUpdateAvailable());
-		if (!supportUpdates.booleanValue())
-		{
-			includeUpdateBtn.setData(Boolean.toString(false));
-			includeUpdateBtn.setSelection(false);
-		}
-		updateUrlText.setEnabled(includeUpdateBtn.getSelection());
+		updateUrlText.setEnabled(isUpdateUrl());
 	}
 
-	private void includeUpdateListener(boolean value)
+	private List<String> getAvailableVersions()
 	{
-		updateUrlText.setEnabled(value);
-		includeUpdateBtn.setData(Boolean.toString(value));
-	}
-
-	private Map<String, Boolean> getAvailableVersions()
-	{
-		final Map<String, Boolean> result = new TreeMap<String, Boolean>(); //sorted map by keys
 		try
 		{
 			final URL url = new URL(versionsUrl);
@@ -424,23 +390,34 @@ public class ExportPage extends WizardPage
 					sb.append(line);
 				final JSONObject jsonObj = new JSONObject(sb.toString());
 				final JSONArray value = (JSONArray)jsonObj.get("versions");
-				value.forEach((item) -> {
-					final int devVersion = ((JSONObject)item).getInt("developerMinVersion");
-					if (ClientVersion.getReleaseNumber() < devVersion)
-						return;
-					final Boolean supportUpdate = Boolean.valueOf(((JSONObject)item).getBoolean("supportUpdate"));
-					final String ngdesktopVersion = ((JSONObject)item).getString("ngDesktopVersion");
-					result.put(ngdesktopVersion, supportUpdate);
-				});
-				if (result.size() > 0)
-					return result;
+				if (value != null && value.length() > 0)
+				{
+					final List<String> result = new ArrayList<String>();
+					value.forEach((item) -> {
+						final String servoyVersion = ((JSONObject)item).getString("servoyVersion");
+						final String devVersion = ClientVersion.getMajorVersion() + "." + ClientVersion.getMiddleVersion();
+						if (SemVerComparator.compare(devVersion, servoyVersion) < 0)
+							return;
+						result.add(((JSONObject)item).getString("ngDesktopVersion"));
+					});
+					if (result.size() > 0)
+					{
+						result.sort(Comparator.naturalOrder());
+						return result;
+					}
+				}
 			}
 		}
-		catch (final IOException | NumberFormatException e)
+		catch (final IOException e)
 		{
 			ServoyLog.logError(e);
 		}
-		return srcVersions;
+		finally
+		{
+			if (remoteVersions.isEmpty())
+				remoteVersions.add(FIRST_VERSION_THAT_SUPPORTS_UPDATES);
+		}
+		return remoteVersions;
 	}
 
 	private String getInitialImportPath()
@@ -463,24 +440,15 @@ public class ExportPage extends WizardPage
 
 	private int getVersionIndex()
 	{
-		//we need an index from a TreeMap
-		int index = 0;
+		//we need an index from a sorted list
 		final String version = exportElectronWizard.getDialogSettings().get("ngdesktop_version");
-		if (version != null && srcVersions.containsKey(version))
-		{
-			final Object[] keys = srcVersions.keySet().toArray();
-			while (!keys[index].equals(version))
-				index++;
-		}
-		return index;
+		final int result = remoteVersions.indexOf(version);
+		return result < 0 ? 0 : result;
 	}
 
 	private boolean getIncludeUpdate()
 	{
-		String includeUpdate = exportElectronWizard.getDialogSettings().get("include_update");
-		if (includeUpdate == null)
-			includeUpdate = "false";
-		return "true".equals(includeUpdate) ? true : false;
+		return exportElectronWizard.getDialogSettings().getBoolean("include_update");
 	}
 
 	private String getUpdateUrl()
@@ -534,11 +502,19 @@ public class ExportPage extends WizardPage
 
 	private boolean isUpdateAvailable()
 	{
-		final String selectedVersion = srcVersionCombo.getText();
-		final Boolean canBeUpdated = srcVersions.get(selectedVersion);
-		return canBeUpdated != null ? canBeUpdated.booleanValue() : false;
+		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
+		if (result > 0)
+			return true;
+		return false;
 	}
 
+	private boolean isUpdateUrl()
+	{
+		final int result = SemVerComparator.compare(srcVersionCombo.getText(), FIRST_VERSION_THAT_SUPPORTS_UPDATES);
+		if (result >= 0)
+			return true;
+		return false;
+	}
 
 	public void saveState()
 	{
@@ -555,7 +531,7 @@ public class ExportPage extends WizardPage
 		settings.put("ngdesktop_width", widthText.getText().trim());
 		settings.put("ngdesktop_height", heightText.getText().trim());
 		settings.put("ngdesktop_version", srcVersionCombo.getText());
-		settings.put("include_update", includeUpdateBtn.getData().toString());
+		settings.put("include_update", includeUpdateBtn.isEnabled() && includeUpdateBtn.getSelection());
 		settings.put("update_url", updateUrlText.getText().trim());
 	}
 }

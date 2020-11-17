@@ -62,7 +62,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </license>
 
    <url>
-      <update label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
+      <update label="Servoy Update Site" url="https://download.servoy.com/developer/latest/"/>
       <discovery label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
    </url>
 
@@ -105,24 +105,6 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    <includes
          id="org.eclipse.jgit.ssh.apache"
          version="0.0.0"/>
-
-   <includes
-         id="com.servoy.jre.linux.x86_64.feature"
-         version="12.0.0"
-         os="linux"
-         arch="x86_64"/>
-
-   <includes
-         id="com.servoy.jre.macosx.x86_64.feature"
-         version="12.0.0"
-         os="macosx"
-         arch="x86_64"/>
-
-   <includes
-         id="com.servoy.jre.win32.x86_64.feature"
-         version="12.0.0"
-         os="win32"
-         arch="x86_64"/>
 
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>

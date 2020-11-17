@@ -45,10 +45,9 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.IServoyBeanFactory;
+import com.servoy.j2db.IServoyBeanFactory2;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
-import com.servoy.j2db.documentation.persistence.docs.DocsTextArea;
-import com.servoy.j2db.documentation.persistence.docs.DocsTextField;
 import com.servoy.j2db.documentation.persistence.docs.DocsButton;
 import com.servoy.j2db.documentation.persistence.docs.DocsCalendar;
 import com.servoy.j2db.documentation.persistence.docs.DocsCheckBoxes;
@@ -61,6 +60,8 @@ import com.servoy.j2db.documentation.persistence.docs.DocsPortal;
 import com.servoy.j2db.documentation.persistence.docs.DocsRadioButtons;
 import com.servoy.j2db.documentation.persistence.docs.DocsRectShape;
 import com.servoy.j2db.documentation.persistence.docs.DocsTabPanel;
+import com.servoy.j2db.documentation.persistence.docs.DocsTextArea;
+import com.servoy.j2db.documentation.persistence.docs.DocsTextField;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -497,13 +498,20 @@ public class ElementUtil
 						{
 							Form form = (Form)bean.getParent();
 							IServoyBeanFactory beanFactory = (IServoyBeanFactory)beanClass.newInstance();
-							Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
-								(IClientPluginAccess)application.getPluginAccess(),
-								new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
-							beanClass = beanInstance.getClass();
-							if (beanInstance instanceof IScriptObject)
+							if (beanFactory instanceof IServoyBeanFactory2)
 							{
-								ScriptObjectRegistry.registerScriptObjectForClass(beanClass, (IScriptObject)beanInstance);
+								beanClass = ((IServoyBeanFactory2)beanFactory).getDocsClass();
+							}
+							else
+							{
+								Object beanInstance = beanFactory.getBeanInstance(application.getApplicationType(),
+									(IClientPluginAccess)application.getPluginAccess(),
+									new Object[] { ComponentFactory.getWebID(null, bean), form.getName(), form.getStyleName() });
+								beanClass = beanInstance.getClass();
+								if (beanInstance instanceof IScriptObject)
+								{
+									ScriptObjectRegistry.registerScriptObjectForClass(beanClass, (IScriptObject)beanInstance);
+								}
 							}
 						}
 						catch (Throwable t)

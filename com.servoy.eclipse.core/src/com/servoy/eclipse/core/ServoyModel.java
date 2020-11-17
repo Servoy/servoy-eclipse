@@ -179,6 +179,7 @@ import com.servoy.j2db.persistence.ITableListener.TableListener;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.IVariable;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.ScriptMethod;
@@ -193,6 +194,7 @@ import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
@@ -809,10 +811,12 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 			@Override
 			public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
 			{
+				List<String> datasources = new ArrayList<String>();
 				for (ITable table : tables)
 				{
 					table.removeIColumnListener(columnListener);
 					flushDataProvidersForTable(table);
+					datasources.add(table.getDataSource());
 				}
 				String[] tableNames = new String[tables.length];
 				for (int i = 0; i < tables.length; i++)
@@ -820,11 +824,13 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 					tableNames[i] = tables[i].getName();
 				}
 				clearCachedTables();
+				flushRelations(datasources);
 			}
 
 			@Override
 			public void tablesAdded(IServerInternal server, String[] tableNames)
 			{
+				List<String> datasources = new ArrayList<String>();
 				clearCachedTables();
 				try
 				{
@@ -834,12 +840,14 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 						{
 							(server.getTable(tableName)).addIColumnListener(columnListener);
 						}
+						datasources.add(DataSourceUtils.createDBTableDataSource(server.getName(), tableName));
 					}
 				}
 				catch (RepositoryException e)
 				{
 					ServoyLog.logError(e);
 				}
+				flushRelations(datasources);
 			}
 
 			@Override
@@ -857,6 +865,35 @@ public class ServoyModel extends AbstractServoyModel implements IDeveloperServoy
 				for (ServoyProject project : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 				{
 					project.getEditingFlattenedSolution().flushFlattenedFormCache();
+				}
+			}
+
+			private void flushRelations(List<String> changedDataSources)
+			{
+				try
+				{
+					Iterator<Relation> it = getFlattenedSolution().getRelations(false);
+					while (it.hasNext())
+					{
+						Relation relation = it.next();
+						if (changedDataSources.contains(relation.getPrimaryDataSource()) || changedDataSources.contains(relation.getForeignDataSource()))
+						{
+							relation.flushCashedItems();
+							ServoyProject servoyProject = getServoyProject(relation.getRootObject().getName());
+							if (servoyProject != null)
+							{
+								IPersist editingNode = servoyProject.getEditingPersist(relation.getUUID());
+								if (editingNode instanceof Relation)
+								{
+									((Relation)editingNode).flushCashedItems();
+								}
+							}
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Debug.error(ex);
 				}
 			}
 		};

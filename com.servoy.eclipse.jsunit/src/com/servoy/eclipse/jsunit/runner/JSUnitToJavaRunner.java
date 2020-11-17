@@ -282,7 +282,8 @@ public class JSUnitToJavaRunner
 
 	protected <T, X extends Exception> T runInRhino(RhinoContextRunnable<T, X> rhinoContextRunnable, String exceptionMessage) throws X
 	{
-		((ServoyContextFactory)ContextFactory.getGlobal()).setFeature(Context.FEATURE_ENHANCED_JAVA_ACCESS, true);
+		ContextFactory global = ContextFactory.getGlobal();
+		if (global instanceof ServoyContextFactory) ((ServoyContextFactory)global).setFeature(Context.FEATURE_ENHANCED_JAVA_ACCESS, true);
 		Context context = Context.enter();
 		try
 		{
