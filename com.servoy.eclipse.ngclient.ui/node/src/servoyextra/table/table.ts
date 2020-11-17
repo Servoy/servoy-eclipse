@@ -145,7 +145,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     computeAverageRowHeight() {
         if (!this.rendered) return;
-        if (this.actualPageSize == -1) {
+        if (this.actualPageSize === -1) {
             const children = this.getNativeElement().getElementsByTagName('tr');
             const realRowCount = children.length;
             if (realRowCount > 0) {
@@ -163,8 +163,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     private selectedRowIndexesChanged(oldValue: number[]) {
         if (this.foundset.selectedRowIndexes.length > 0) {
-            if (this.foundset.selectedRowIndexes != oldValue || this.lastSelectionFirstElement != this.foundset.selectedRowIndexes[0]) {
-                if (this.lastSelectionFirstElement != this.foundset.selectedRowIndexes[0]) {
+            if (this.foundset.selectedRowIndexes !== oldValue || this.lastSelectionFirstElement !== this.foundset.selectedRowIndexes[0]) {
+                if (this.lastSelectionFirstElement !== this.foundset.selectedRowIndexes[0]) {
                     this.log.spam('svy extra table * selectedRowIndexes changed; scrollToSelectionNeeded = true');
                     this.lastSelectionFirstElement = this.foundset.selectedRowIndexes[0];
                     if (this.scrollToSelectionNeeded) {
@@ -181,12 +181,12 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     private sortColumnsChanged(event: FoundsetChangeEvent) {
         let sortSet = false;
-        let sortColumnsA = this.foundset.sortColumns.split(/[\s,]+/);
+        const sortColumnsA = this.foundset.sortColumns.split(/[\s,]+/);
         if (sortColumnsA.length >= 2) {
             for (let i = 0; i < this.columns.length; i++) {
-                if (this.columns[i].dataprovider && sortColumnsA[0] == this.columns[i].dataprovider.idForFoundset) {
+                if (this.columns[i].dataprovider && sortColumnsA[0] === this.columns[i].dataprovider.idForFoundset) {
                     this.sortColumnIndex = i;
-                    this.sortDirection = sortColumnsA[1].toLowerCase() == 'asc' ? 'up' : 'down';
+                    this.sortDirection = sortColumnsA[1].toLowerCase() === 'asc' ? 'up' : 'down';
                     sortSet = true;
                     break;
                 }
@@ -207,7 +207,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     private computeTableHeight() {
         const tbody = this.getNativeElement().getElementsByTagName('tbody');
-        if (tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth == 0))) {
+        if (tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth === 0))) {
             this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 15; // TODO +2...
         } else if (tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
             this.scrollWidth = 0;
@@ -226,21 +226,21 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                     // TODO let h = paginationHeight + this.getNativeElement().clientHeight;
                     if (this.responsiveHeight === 0) {
                         // this case does not really work for ng1
-                        this.renderer.setStyle(this.getNativeElement(), "height", "100%");
-                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", "100%");
+                        this.renderer.setStyle(this.getNativeElement(), 'height', '100%');
+                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', '100%');
                     } else {
                         // this doesn't work for cdkVirtualFor because we need to provide it a size to make it display something
                         // and then it doesn't make sense to set the size based on the computed height because it's the one that we have set previously
-                        this.renderer.setStyle(this.getNativeElement(), "height", (this.responsiveHeight  - paginationHeight) + "px"); // TODO h + "px");
-                        this.renderer.setStyle(this.getNativeElement(), "max-height", this.responsiveHeight + "px");
-                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", this.getNativeElement().clientHeight + "px");
+                        this.renderer.setStyle(this.getNativeElement(), 'height', (this.responsiveHeight  - paginationHeight) + 'px'); // TODO h + "px");
+                        this.renderer.setStyle(this.getNativeElement(), 'max-height', this.responsiveHeight + 'px');
+                        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', this.getNativeElement().clientHeight + 'px');
                     }
                 } else if (this.responsiveHeight === 0) {
-                    this.renderer.setStyle(this.getNativeElement(), "height", "100%");
-                    this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", (this.getNativeElement().clientHeight - paginationHeight) + "px");
+                    this.renderer.setStyle(this.getNativeElement(), 'height', '100%');
+                    this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', (this.getNativeElement().clientHeight - paginationHeight) + 'px');
                 } else {
-                    this.renderer.setStyle(this.getNativeElement(), "height", this.responsiveHeight + "px");
-                    this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", (this.responsiveHeight - paginationHeight) + "px");
+                    this.renderer.setStyle(this.getNativeElement(), 'height', this.responsiveHeight + 'px');
+                    this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', (this.responsiveHeight - paginationHeight) + 'px');
                 }
             }
         }
@@ -252,7 +252,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     attachHandlers() {
         if (this.onHeaderClick || this.onHeaderRightClick) {
-            let headers = this.getNativeElement().getElementsByTagName('th');
+            const headers = this.getNativeElement().getElementsByTagName('th');
             for (let i = 0; i < headers.length; i++) {
                 if (this.onHeaderClick) {
                     this.renderer.listen(headers[i], 'click', e => this.headerClicked(i, e));
@@ -264,13 +264,13 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         }
 
         if (this.onFocusGainedMethodID) {
-            this.renderer.listen(this.getNativeElement().getElementsByTagName("table")[0], 'focus', e => {
+            this.renderer.listen(this.getNativeElement().getElementsByTagName('table')[0], 'focus', e => {
                 this.callFocusGained(e);
             });
         }
 
         if (this.onFocusLostMethodID) {
-            this.renderer.listen(this.getNativeElement().getElementsByTagName("table")[0], 'blur', e => {
+            this.renderer.listen(this.getNativeElement().getElementsByTagName('table')[0], 'blur', e => {
                 this.callFocusLost(e);
             });
         }
@@ -293,7 +293,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     private headerClicked(i: number, event?: Event):  void {
         this.onHeaderClick(i, this.sortDirection, event, this.columns[i].id)
             .then((ret: string) => {
-                if (ret === "override")
+                if (ret === 'override')
                     return;
                 if (this.enableSort) {
                     this.doFoundsetSQLSort(i);
@@ -308,14 +308,14 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         this.sortColumnIndex = sortColumnIndex;
         if (this.columns[sortColumnIndex].dataprovider) {
             const sortCol = this.columns[sortColumnIndex].dataprovider.idForFoundset;
-            let sqlSortDirection: 'asc' | 'desc' = "asc";
+            let sqlSortDirection: 'asc' | 'desc' = 'asc';
             if (this.foundset.sortColumns) {
-                let sortColumnsA = this.foundset.sortColumns.split(" ");
-                if (sortCol == sortColumnsA[0]) {
-                    sqlSortDirection = sortColumnsA[1].toLowerCase() == "asc" ? "desc" : "asc";
+                const sortColumnsA = this.foundset.sortColumns.split(' ');
+                if (sortCol === sortColumnsA[0]) {
+                    sqlSortDirection = sortColumnsA[1].toLowerCase() === 'asc' ? 'desc' : 'asc';
                 }
             }
-            this.foundset.sortColumns = sortCol + " " + sqlSortDirection;
+            this.foundset.sortColumns = sortCol + ' ' + sqlSortDirection;
             this.foundset.sort([{ name: sortCol, direction: sqlSortDirection }]).then(() => {
                 this.dataStream.next(this.foundset.viewPort.rows);
             });
@@ -325,7 +325,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     cellClick(rowIdx: number, colIdx: number, record: any, e: Event, columnId: string) {
         if (this.onCellDoubleClick && this.onCellClick) {
             const innerThis: ServoyExtraTable = this;
-            if (innerThis.lastClicked == rowIdx * colIdx) {
+            if (innerThis.lastClicked === rowIdx * colIdx) {
                 window.clearTimeout(this.timeoutID);
                 innerThis.lastClicked = -1;
                 innerThis.timeoutID = null;
@@ -347,20 +347,20 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         let columnStyle: object = this.columnStyleCache[column];
         if (columnStyle) return columnStyle;
 
-        columnStyle = { "overflow": "hidden"};
+        columnStyle = { 'overflow': 'hidden'};
         this.columnStyleCache[column] = columnStyle;
         const w = this.getNumberFromPxString(this.columns[column].width);
         if (w > -1) {
-            columnStyle["min-width"] = columnStyle["max-width"] = columnStyle["width"] = w + "px";
-        } else if (this.columns[column].width && (this.columns[column].width) != "auto") {
-            columnStyle["width"] = this.columns[column].width;
+            columnStyle['min-width'] = columnStyle['max-width'] = columnStyle['width'] = w + 'px';
+        } else if (this.columns[column].width && (this.columns[column].width) !== 'auto') {
+            columnStyle['width'] = this.columns[column].width;
         } else {
             const autoColumnPercentage = this.getAutoColumnPercentage();
             if (this.autoColumnPercentage) {
-                columnStyle["width"] = autoColumnPercentage + "%";
+                columnStyle['width'] = autoColumnPercentage + '%';
             } else {
                 if (!this.autoColumns) this.setColumnsToInitalWidthAndInitAutoColumns();
-                columnStyle["min-width"] = columnStyle["max-width"] = columnStyle["width"] = Math.floor( (this.getComponentWidth() - this.tableWidth - this.scrollWidth) / this.autoColumns.count) + "px";
+                columnStyle['min-width'] = columnStyle['max-width'] = columnStyle['width'] = Math.floor( (this.getComponentWidth() - this.tableWidth - this.scrollWidth) / this.autoColumns.count) + 'px';
             }
         }
         this.updateTableColumnStyleClass(column, columnStyle);
@@ -368,7 +368,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     }
     getComponentWidth() {
         if (!this.rendered) return 0;
-        if (this.componentWidth === undefined && this.getNativeElement().parentElement.parentElement.offsetWidth != 0) {
+        if (this.componentWidth === undefined && this.getNativeElement().parentElement.parentElement.offsetWidth !== 0) {
             this.componentWidth = Math.floor(this.getNativeElement().parentElement.parentElement.offsetWidth);
         }
         return this.componentWidth;
@@ -378,11 +378,11 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         let sumColumnsWithPercentage = 0;
         if (!this.autoColumns) return null;
 
-        for (let autoColumnIdx in this.autoColumns["columns"]) {
+        for (const autoColumnIdx in this.autoColumns['columns']) {
             let w = this.columns[autoColumnIdx].width;
             if (w) {
                 w = w.trim();
-                if (w.indexOf("%") == w.length - 1) {
+                if (w.indexOf('%') === w.length - 1) {
                     w = w.substring(0, w.length - 1);
                     if (!isNaN(Number(w))) {
                         nrColumnsWithPercentage++;
@@ -399,7 +399,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         let numberFromPxString = -1;
         if (s) {
             s = s.trim().toLowerCase();
-            if (s.indexOf("px") == s.length - 2) {
+            if (s.indexOf('px') === s.length - 2) {
                 s = s.substring(0, s.length - 2);
             }
             if (!isNaN(Number(s))) {
@@ -424,20 +424,20 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         return this.tableWidth;
     }
     isAutoResizeColumn(idx: number) {
-        return this.columns[idx].autoResize || (this.columns[idx].width == "auto");
+        return this.columns[idx].autoResize || (this.columns[idx].width === 'auto');
     }
 
     setColumnsToInitalWidthAndInitAutoColumns() {
-        let newAutoColumns = { columns: { }, minWidth: { }, autoResize: {}, count: 0 };
+        const newAutoColumns = { columns: { }, minWidth: { }, autoResize: {}, count: 0 };
         if (this.columns) {
             for (let i = 0; i < this.columns.length; i++) {
-                if (this.columns[i].initialWidth == undefined) {
-                    this.columns[i].initialWidth = this.columns[i].width == undefined ? "" : this.columns[i].width;
+                if (this.columns[i].initialWidth === undefined) {
+                    this.columns[i].initialWidth = this.columns[i].width === undefined ? '' : this.columns[i].width;
                 } else {
                     this.columns[i].width = this.columns[i].initialWidth;
                 }
 
-                let minWidth = this.getNumberFromPxString(this.columns[i].width);
+                const minWidth = this.getNumberFromPxString(this.columns[i].width);
                 if (this.isAutoResizeColumn(i) || minWidth < 0) {
                     newAutoColumns.columns[i] = true;
                     newAutoColumns.minWidth[i] = minWidth;
@@ -460,12 +460,12 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             fixedDelta += this.extraWidth;
             let w = this.getNumberFromPxString(this.columns[this.extraWidthColumnIdx].width);
             w += (0 - this.extraWidth);
-           this.columns[this.extraWidthColumnIdx].width = w + "px";
+           this.columns[this.extraWidthColumnIdx].width = w + 'px';
         }
 
         this.columnStyleCache = [];
-        let oldWidth = this.getAutoResizeColumnsWidth();
-        let newWidth = oldWidth + fixedDelta;
+        const oldWidth = this.getAutoResizeColumnsWidth();
+        const newWidth = oldWidth + fixedDelta;
 
         let usedDelta = 0;
         let lastAutoColumnIdx = -1;
@@ -478,7 +478,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                     if (w < this.autoColumns.minWidth[i]) {
                         w = this.autoColumns.minWidth[i];
                     }
-                    this.columns[i].width = w + "px";
+                    this.columns[i].width = w + 'px';
                     usedDelta += (w - oldW);
                     lastAutoColumnIdx = i;
                 } else {
@@ -494,7 +494,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 if (fixedDelta < 0) this.extraWidth = 0 - this.extraWidth;
                 let w = this.getNumberFromPxString(this.columns[lastAutoColumnIdx].width);
                 w += this.extraWidth;
-                this.columns[lastAutoColumnIdx].width = w + "px";
+                this.columns[lastAutoColumnIdx].width = w + 'px';
             }
         }
     }
@@ -511,21 +511,21 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     }
 
     getSortStyleClass(column: number) {
-        let lv_styles = "";
+        let lv_styles = '';
         if (this.enableSort) {
-           if ((this.sortColumnIndex == -1 &&  column == 0) || this.sortColumnIndex == column) {
+           if ((this.sortColumnIndex === -1 &&  column === 0) || this.sortColumnIndex === column) {
               lv_styles = this.sortStyleClass;
            }
         }
-        return this.columns[column].headerStyleClass == undefined ? lv_styles : lv_styles + " " + this.columns[column].headerStyleClass;
+        return this.columns[column].headerStyleClass === undefined ? lv_styles : lv_styles + ' ' + this.columns[column].headerStyleClass;
     }
 
     public getSortClass(column: number) {
-        let sortClass = "table-servoyextra-sort-hide";
+        let sortClass = 'table-servoyextra-sort-hide';
         if (this.enableSort) {
             let direction;
             let isGetSortFromSQL = this.sortColumnIndex < 0;
-            if (column == this.sortColumnIndex) {
+            if (column === this.sortColumnIndex) {
                 direction = this.sortDirection;
                 if (!direction) {
                     isGetSortFromSQL = true;
@@ -533,20 +533,20 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             }
             if (isGetSortFromSQL) {
                 if (this.foundset && this.foundset.sortColumns && this.columns[column].dataprovider) {
-                    let sortCol = this.columns[column].dataprovider.idForFoundset;
-                    let sortColumnsA = this.foundset.sortColumns.split(" ");
+                    const sortCol = this.columns[column].dataprovider.idForFoundset;
+                    const sortColumnsA = this.foundset.sortColumns.split(' ');
 
-                    if (sortCol == sortColumnsA[0]) {
-                        direction = sortColumnsA[1].toLowerCase() == "asc" ? "up" : "down";
+                    if (sortCol === sortColumnsA[0]) {
+                        direction = sortColumnsA[1].toLowerCase() === 'asc' ? 'up' : 'down';
                     }
                 }
             }
 
             if (direction) {
-                sortClass = "table-servoyextra-sort-show-" + direction + " " + this["sort" + direction + "Class"];
+                sortClass = 'table-servoyextra-sort-show-' + direction + ' ' + this['sort' + direction + 'Class'];
             }
         }
-        if (this.currentSortClass.length <= column || this.currentSortClass[column] != sortClass) {
+        if (this.currentSortClass.length <= column || this.currentSortClass[column] !== sortClass) {
             if (this.sortClassUpdateTimer) window.clearTimeout(this.sortClassUpdateTimer);
 
             this.sortClassUpdateTimer = window.setTimeout(() => {
@@ -560,69 +560,73 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         return sortClass;
     }
     updateTBodyStyle(tBodyEl: ElementRef) {
-        let tBodyStyle = {};
-        let componentWidth = this.getComponentWidth();
-        tBodyStyle['width'] = componentWidth + "px";
-        const tblHead = this.getNativeElement().getElementsByTagName("thead")[0];
+        const tBodyStyle = {};
+        const componentWidth = this.getComponentWidth();
+        tBodyStyle['width'] = componentWidth + 'px';
+        const tblHead = this.getNativeElement().getElementsByTagName('thead')[0];
         if (tblHead.style.display !== 'none') {
-            tBodyStyle['top'] = tblHead.offsetHeight + "px";
+            tBodyStyle['top'] = tblHead.offsetHeight + 'px';
         }
        if (this.showPagination()) {
             const pagination = this.getNativeElement().getElementsByTagName('ngb-pagination');
             if (pagination[0] && pagination[0].children[0]) {
-                tBodyStyle['bottom'] = (pagination[0].children[0].clientHeight + 2) + "px";
-                this.renderer.setStyle(pagination[0].children[0], "margin-bottom", "0");
-                this.renderer.setStyle(pagination[0].children[0], "position", "absolute");
-                this.renderer.setStyle(pagination[0].children[0], "bottom", "0");
+                tBodyStyle['bottom'] = (pagination[0].children[0].clientHeight + 2) + 'px';
+                this.renderer.setStyle(pagination[0].children[0], 'margin-bottom', '0');
+                this.renderer.setStyle(pagination[0].children[0], 'position', 'absolute');
+                this.renderer.setStyle(pagination[0].children[0], 'bottom', '0');
                 this.computeTableHeight();
             }
         }
 
-        for (let p in tBodyStyle) {
-            this.renderer.setStyle(tBodyEl, p, tBodyStyle[p]);
+        for (const p in tBodyStyle) {
+            if (tBodyStyle.hasOwnProperty(p)) {
+                this.renderer.setStyle(tBodyEl, p, tBodyStyle[p]);
+            }
         }
-        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", tBodyEl['clientHeight'] + "px");
+        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, 'height', tBodyEl['clientHeight'] + 'px');
     }
 
 
     getTHeadStyle() {
-        let tHeadStyle = {};
+        const tHeadStyle = {};
         if (this.enableSort || this.onHeaderClick) {
-            tHeadStyle["cursor"] = "pointer";
+            tHeadStyle['cursor'] = 'pointer';
         }
-        tHeadStyle["left"] = -this.getNativeElement().getElementsByTagName("table")[0].scrollLeft() + "px";
+        tHeadStyle['left'] = -this.getNativeElement().getElementsByTagName('table')[0].scrollLeft() + 'px';
         return tHeadStyle;
     }
 
     updateTableColumnStyleClass(columnIndex: number, style: any) {
         if (!this.columnCSSRules[columnIndex]) {
-            let clsName = "#table_" + this.servoyApi.getMarkupId() + " .c" + columnIndex;
+            const clsName = '#table_' + this.servoyApi.getMarkupId() + ' .c' + columnIndex;
             if (!this.columnCSSRules[columnIndex]) {
                 if (!this.targetStyleSheet) {
-                    let elem = document.createElement('style');
+                    const elem = document.createElement('style');
                     elem.type = 'text/css';
                     document.getElementsByTagName('head')[0].appendChild(elem);
                     this.targetStyleSheet = document.styleSheets[document.styleSheets.length - 1] as CSSStyleSheet;
                 }
-                let rules = this.targetStyleSheet.cssRules || this.targetStyleSheet.rules;
+                const rules = this.targetStyleSheet.cssRules || this.targetStyleSheet.rules;
                 this.targetStyleSheet.insertRule(clsName + '{}', rules.length);
                 this.columnCSSRules[columnIndex] = rules[rules.length - 1];
-                this.columnCSSRules[columnIndex].style["height"] = this.minRowHeight;
+                this.columnCSSRules[columnIndex].style['height'] = this.minRowHeight;
             }
         }
 
-        for (let p in style) {
-            this.columnCSSRules[columnIndex].style[p] = style[p];
+        for (const p in style) {
+            if (style.hasOwnProperty(p)) {
+                this.columnCSSRules[columnIndex].style[p] = style[p];
+            }
         }
     }
 
     onResizeEnd(event: ResizeEvent, columnIndex: number): void {
         window.clearTimeout(this.timeoutID);
         const headers = this.getNativeElement().getElementsByTagName('th');
-        const newWidth = Math.floor(event.rectangle.width) + "px";
-        this.renderer.setStyle(headers[columnIndex], "width", newWidth);
-        this.renderer.setStyle(headers[columnIndex], "min-width", newWidth);
-        this.renderer.setStyle(headers[columnIndex], "max-width", newWidth);
+        const newWidth = Math.floor(event.rectangle.width) + 'px';
+        this.renderer.setStyle(headers[columnIndex], 'width', newWidth);
+        this.renderer.setStyle(headers[columnIndex], 'min-width', newWidth);
+        this.renderer.setStyle(headers[columnIndex], 'max-width', newWidth);
         this.updateTableColumnStyleClass(columnIndex, { width: newWidth, minWidth: newWidth, maxWidth: newWidth });
         const innerThis: ServoyExtraTable = this;
         this.timeoutID = window.setTimeout(() => {
@@ -635,8 +639,8 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         let newSelection = [idxInFs];
         if (event.ctrlKey) {
             newSelection = this.foundset.selectedRowIndexes ? this.foundset.selectedRowIndexes.slice() : [];
-            let idxInSelected = newSelection.indexOf(idxInFs);
-            if (idxInSelected == -1) {
+            const idxInSelected = newSelection.indexOf(idxInFs);
+            if (idxInSelected === -1) {
                 newSelection.push(idxInFs);
             } else if (newSelection.length > 1) {
                 newSelection.splice(idxInSelected, 1);
@@ -645,7 +649,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             let start = -1;
             if (this.foundset.selectedRowIndexes) {
                 for (let j = 0; j < this.foundset.selectedRowIndexes.length; j++) {
-                    if (start == -1 || start > this.foundset.selectedRowIndexes[j]) {
+                    if (start === -1 || start > this.foundset.selectedRowIndexes[j]) {
                         start = this.foundset.selectedRowIndexes[j];
                     }
                 }
@@ -689,7 +693,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     public setSelectedHeader(columnIndex: number) {
         if (this.onHeaderClick) {
-            if (this.enableSort && (this.sortColumnIndex != columnIndex)) {
+            if (this.enableSort && (this.sortColumnIndex !== columnIndex)) {
                 this.sortDirection = null;
             }
             this.headerClicked(columnIndex);
@@ -705,7 +709,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     }
 
     public requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
-        let tbl = this.getNativeElement().getElementsByTagName("table")[0];
+        const tbl = this.getNativeElement().getElementsByTagName('table')[0];
         this.skipOnce = mustExecuteOnFocusGainedMethod === false;
         tbl.focus();
     }
@@ -732,9 +736,9 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     }
 
     getRowClass(idx: number) {
-        let rowClass = "";
+        let rowClass = '';
         if (this.foundset.selectedRowIndexes.indexOf(idx) > -1) {
-            rowClass += "table-servoyextra-selected ";
+            rowClass += 'table-servoyextra-selected ';
         }
         if (this.rowStyleClassDataprovider) {
             rowClass += this.rowStyleClassDataprovider[idx % this.pageSize];
@@ -743,29 +747,29 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     }
 
     keypressed(event: KeyboardEvent) {
-        let fs = this.foundset;
+        const fs = this.foundset;
         if (fs.selectedRowIndexes && fs.selectedRowIndexes.length > 0) {
             let selectionChanged = false;
-            let oldSelectedIdxs = fs.selectedRowIndexes.slice();
-            let selection = fs.selectedRowIndexes[0];
-            if (event.keyCode == 33) { // PAGE UP KEY
+            const oldSelectedIdxs = fs.selectedRowIndexes.slice();
+            const selection = fs.selectedRowIndexes[0];
+            if (event.key === 'PageUp') { // PAGE UP KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.pageUp) return;
 
                 const firstVisibleIndex = this.showPagination() ? this.actualPageSize * Math.trunc(selection / this.actualPageSize) : 1;
                 fs.selectedRowIndexes = [firstVisibleIndex];
-                selectionChanged = (selection != firstVisibleIndex);
-                this.log.spam("svy extra table * keyPressed; scroll on PG UP");
+                selectionChanged = (selection !== firstVisibleIndex);
+                this.log.spam('svy extra table * keyPressed; scroll on PG UP');
                 this.viewPort.scrollToIndex(firstVisibleIndex);
-            } else if (event.keyCode == 34) { // PAGE DOWN KEY
+            } else if (event.key === 'PageDown') { // PAGE DOWN KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.pageDown) return;
 
                 let lastVisibleIndex = this.showPagination() ? this.actualPageSize * (Math.trunc(selection / this.actualPageSize) + 1 ) - 1 : (this.foundset.viewPort.rows.length - 1);
                 if (lastVisibleIndex > fs.serverSize - 1 ) lastVisibleIndex = fs.serverSize - 1;
                 fs.selectedRowIndexes = [lastVisibleIndex];
-                selectionChanged = (selection != lastVisibleIndex);
-                this.log.spam("svy extra table * keyPressed; scroll on PG DOWN");
+                selectionChanged = (selection !== lastVisibleIndex);
+                this.log.spam('svy extra table * keyPressed; scroll on PG DOWN');
                 this.viewPort.scrollToIndex(lastVisibleIndex);
-            } else if (event.keyCode == 38) { // ARROW UP KEY
+            } else if (event.key === 'ArrowUp') { // ARROW UP KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.arrowUp) return;
 
                 if (selection > 0) {
@@ -775,7 +779,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                     selectionChanged = true;
                 }
                 event.preventDefault();
-            } else if (event.keyCode == 40) { // ARROW DOWN KEY
+            } else if (event.key === 'ArrowDown') { // ARROW DOWN KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.arrowDown) return;
 
                 if (selection + 1 < (fs.viewPort.startIndex + fs.viewPort.size)) {
@@ -785,14 +789,14 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                     selectionChanged = true;
                 }
                 event.preventDefault();
-            } else if (event.keyCode == 13) { // ENTER KEY
+            } else if (event.key === 'Enter') { // ENTER KEY
                 if (!this.keyCodeSettings.enter) return;
                 if (this.onCellClick) {
-                    this.onCellClick(selection + 1, null, fs.viewPort.rows[selection])
+                    this.onCellClick(selection + 1, null, fs.viewPort.rows[selection]);
                 }
-            } else if (event.keyCode == 36) { // HOME
+            } else if (event.key === 'Home') { // HOME
                 if (this.keyCodeSettings && !this.keyCodeSettings.home) return;
-                if (fs.selectedRowIndexes[0] != 0) {
+                if (fs.selectedRowIndexes[0] !== 0) {
                     fs.selectedRowIndexes = [0];
                     this.viewPort.scrollToIndex(0);
                     selectionChanged = true;
@@ -800,7 +804,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 event.preventDefault();
                 event.stopPropagation();
 
-            } else if (event.keyCode == 35) { // END
+            } else if (event.key === 'End') { // END
                 if (this.keyCodeSettings && !this.keyCodeSettings.end) return;
 
                 const endIndex = fs.viewPort.size - 1;
