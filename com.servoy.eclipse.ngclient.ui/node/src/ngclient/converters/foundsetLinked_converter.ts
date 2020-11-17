@@ -133,9 +133,9 @@ export class FoundsetLinkedConverter implements IConverter {
             if (internalState.isChanged()) {
                 if (!internalState.recordLinked) {
                     // we don't need to send rowId to server in this case; we just need value
-                    for (let index in internalState.requests) {
-                        internalState.requests[index][FoundsetLinkedConverter.PROPERTY_CHANGE] = internalState.requests[index].viewportDataChanged.value;
-                        delete internalState.requests[index].viewportDataChanged;
+                    for (const req of internalState.requests) {
+                        req[FoundsetLinkedConverter.PROPERTY_CHANGE] = req.viewportDataChanged.value;
+                        delete req.viewportDataChanged;
                     }
                 }
                 const tmp = internalState.requests;
