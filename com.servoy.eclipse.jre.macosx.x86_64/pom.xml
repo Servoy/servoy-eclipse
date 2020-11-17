@@ -12,10 +12,10 @@
 
 	<artifactId>com.servoy.eclipse.jre.macosx.x86_64</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>15.0.0</version>
+	<version>15.0.1</version>
 	
 	<properties>
-		<jre.version>jdk-15+36-jre</jre.version>
+		<jre.version>jdk-15.0.1+9-jre</jre.version>
 	</properties>
 	
 	<build>
@@ -43,7 +43,7 @@
 						</goals>
 						<phase>generate-resources</phase>
 						<configuration>
-							<url>https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk-15%2B36_openj9-0.22.0/OpenJDK15U-jre_x64_mac_openj9_15_36_openj9-0.22.0.tar.gz</url>
+							<url>https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk-15.0.1%2B9.1_openj9-0.23.0/OpenJDK15U-jre_x64_mac_openj9_15.0.1_9_openj9-0.23.0.tar.gz</url>
 							<outputFileName>${jre.version}.tar.gz</outputFileName>
 						</configuration>
 					</execution>
