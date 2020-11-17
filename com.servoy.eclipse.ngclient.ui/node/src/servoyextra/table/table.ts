@@ -15,17 +15,17 @@ import {AsyncPipe} from '@angular/common';
     changeDetection: ChangeDetectionStrategy.OnPush
 } )
 export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  {
-  
+
     // this is a hack for test, so that this has a none static child ref because the child is in a nested template
-    @ViewChild('child', {static: false}) child:ElementRef;
+    @ViewChild('child', {static: false}) child: ElementRef;
     @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
-    
-    @Input() foundset : IFoundset;
+
+    @Input() foundset: IFoundset;
     @Input() columns;
     @Input() sortDirection: string;
-    @Input() enableSort: boolean = true;
+    @Input() enableSort = true;
     @Input() sortStyleClass: string;
-    @Input() sortdownClass: string = "table-servoyextra-sort-down";
+    @Input() sortdownClass = 'table-servoyextra-sort-down';
     @Input() sortupClass: string = "table-servoyextra-sort-up";
     @Input() visible: boolean;
     @Input() styleClass: string;
@@ -111,7 +111,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         });
 
         window.setTimeout(() => {
-            //first time we need to wait a bit before we scroll
+            // first time we need to wait a bit before we scroll
             this.computeAverageRowHeight();
         }, 100);
 
@@ -119,12 +119,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         this.viewPort.scrolledIndexChange.pipe(
             auditTime(300),
             tap((currIndex: number) => {
-                if (currIndex > this.viewPort.getRenderedRange().end + this.actualPageSize) {
-                    this.loadMoreRecords(this.viewPort.getRenderedRange().end + this.actualPageSize);
-                }
-                else {
-                    this.loadMoreRecords(currIndex);
-                }
+                this.loadMoreRecords(currIndex);
                 this.idx = Math.min(currIndex, this.foundset.serverSize);
                 this.setCurrentPageIfNeeded();
             })
@@ -132,13 +127,14 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
           setTimeout(() => this.dataStream.next(this.foundset.viewPort.rows), 50);
           window.setTimeout(() => {
-            //first time we need to wait a bit before we scroll
+            // first time we need to wait a bit before we scroll
             this.scrollToSelection();
         }, 400);
     }
-    loadMoreRecords(currIndex : number) {
-        if (currIndex < (this.foundset.viewPort.startIndex - this.actualPageSize) || currIndex >= this.foundset.viewPort.rows.length) {
-            this.foundset.loadExtraRecordsAsync(currIndex >= this.foundset.viewPort.rows.length ? this.actualPageSize : (-1) * this.actualPageSize, false).then(() => {
+    loadMoreRecords(currIndex: number) {
+        if ((currIndex <= (this.foundset.viewPort.startIndex - this.actualPageSize) && this.foundset.viewPort.startIndex !== 0) ||
+         currIndex + this.actualPageSize >= this.foundset.viewPort.rows.length) {
+            this.foundset.loadExtraRecordsAsync(currIndex + this.actualPageSize >= this.foundset.viewPort.rows.length ? this.actualPageSize : (-1) * this.actualPageSize, false).then(() => {
                 this.recordsLoaded();
             });
         }
@@ -827,18 +823,15 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             } else if (event.keyCode == 35) { // END
                 if (this.keyCodeSettings && !this.keyCodeSettings.end) return;
 
-                const endIndex = fs.viewPort.size -1;
-                if (fs.selectedRowIndexes[0] != endIndex) {
+                const endIndex = fs.viewPort.size - 1;
+                if (fs.selectedRowIndexes[0] !== endIndex) {
                     fs.selectedRowIndexes = [endIndex];
                     selectionChanged = true;
-                    this.viewPort.scrollToIndex(endIndex);
-                }
-
-                if (fs.hasMoreRows){
-                    //if it has more rows, then load at most one more page if paging is used,  or the remaining records otherwise
-                    this.foundset.loadRecordsAsync(endIndex, this.actualPageSize > 0 ? Math.min(this.actualPageSize, this.foundset.serverSize-endIndex) : this.foundset.serverSize-endIndex).then(()=>{
-                        this.dataStream.next(this.foundset.viewPort.rows);
-                    });
+                    this.viewPort.scrollToOffset(this.getNumberFromPxString(this.viewPort._totalContentHeight));
+                    setTimeout(() => {
+                        const last = this.viewPort._contentWrapper.nativeElement.lastElementChild;
+                        last.scrollIntoView(false);
+                    }, 100);
                 }
                 event.preventDefault();
                 event.stopPropagation();
