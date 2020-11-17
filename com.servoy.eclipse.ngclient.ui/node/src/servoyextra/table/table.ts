@@ -37,7 +37,6 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     @Input() tabSeq;
     @Input() responsiveHeight;
     @Input() responsiveDynamicHeight;
-    @Input() absoluteLayout: boolean;
     @Input() lastSelectionFirstElement: number;
     @Input() keyCodeSettings: {arrowUp: boolean , arrowDown: boolean, end: boolean, enter: boolean, home: boolean, pageDown: boolean, pageUp: boolean};
 
@@ -208,12 +207,12 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     private computeTableHeight() {
         const tbody = this.getNativeElement().getElementsByTagName('tbody');
         if (tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth === 0))) {
-            this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 15; // TODO +2...
+            this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 17; // TODO +2...
         } else if (tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
             this.scrollWidth = 0;
         }
 
-        if (!this.absoluteLayout) {
+        if (!this.servoyApi.isInAbsoluteLayout()) {
             this.renderer.setStyle(this.getNativeElement(), 'position', 'relative');
 
             const pagination = this.getNativeElement().getElementsByTagName('ngb-pagination');
