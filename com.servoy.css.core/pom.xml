@@ -9,7 +9,7 @@
 	<properties>
 		<tycho.version>2.0.0</tycho.version>
 		<eclipse.url>http://download.eclipse.org/eclipse/updates/4.14/</eclipse.url>
-		<emf.url>http://download.eclipse.org/modeling/emf/emf/builds/release/2.16</emf.url>
+		<emf.url>http://download.eclipse.org/modeling/emf/emf/builds/release/2.23</emf.url>
 		<gef.url>http://download.eclipse.org/tools/gef/updates/legacy/releases/4.0.0_gef-master_1952/</gef.url>
 	</properties>
 

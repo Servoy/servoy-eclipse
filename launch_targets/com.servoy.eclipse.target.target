@@ -56,8 +56,8 @@
 			<unit id="org.assertj.source" version="3.14.0.v20200120-1926"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://download.eclipse.org/modeling/emf/emf/builds/release/2.21"/>
-		    <unit id="org.eclipse.emf.feature.group" version="2.21.0.v20200205-0529"/>
+		    <repository location="http://download.eclipse.org/modeling/emf/emf/builds/release/2.23"/>
+		    <unit id="org.eclipse.emf.feature.group" version="2.23.0.v20200822-0801"/>
 	    </location>
 	    <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository"/>
