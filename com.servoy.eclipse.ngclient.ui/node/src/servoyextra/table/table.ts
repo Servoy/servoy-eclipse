@@ -1,5 +1,5 @@
 import { Component, ViewChild, Input, Renderer2, ElementRef, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
-import { ServoyBaseComponent } from '../../ngclient/servoy_public'
+import { ServoyBaseComponent } from '../../ngclient/servoy_public';
 import { IFoundset } from '../../sablo/spectypes.service';
 import { LoggerFactory, LoggerService } from '../../sablo/logger.service';
 import { ResizeEvent } from 'angular-resizable-element';
@@ -26,7 +26,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     @Input() enableSort = true;
     @Input() sortStyleClass: string;
     @Input() sortdownClass = 'table-servoyextra-sort-down';
-    @Input() sortupClass: string = "table-servoyextra-sort-up";
+    @Input() sortupClass = 'table-servoyextra-sort-up';
     @Input() visible: boolean;
     @Input() styleClass: string;
     @Input() servoyApi;
@@ -37,9 +37,9 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     @Input() tabSeq;
     @Input() responsiveHeight;
     @Input() responsiveDynamicHeight;
-    @Input() absoluteLayout : boolean;
+    @Input() absoluteLayout: boolean;
     @Input() lastSelectionFirstElement: number;
-    @Input() keyCodeSettings : {arrowUp: boolean , arrowDown: boolean, end:boolean, enter:boolean, home: boolean, pageDown: boolean, pageUp: boolean};
+    @Input() keyCodeSettings: {arrowUp: boolean , arrowDown: boolean, end: boolean, enter: boolean, home: boolean, pageDown: boolean, pageUp: boolean};
 
     @Input() onViewPortChanged;
     @Input() onCellClick;
@@ -57,31 +57,31 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     private log: LoggerService;
     columnStyleCache: Array<object> = [];
     autoColumnPercentage: any;
-    tableWidth: number = 0;
-    scrollWidth: number = 0;
+    tableWidth = 0;
+    scrollWidth = 0;
     autoColumns: { [x: string]: any; count: any; length?: any; columns?: {}; minWidth?: {}; autoResize?: {}; };
     componentWidth: any;
-    needToUpdateAutoColumnsWidth: boolean = false;
+    needToUpdateAutoColumnsWidth = false;
     extraWidth: any;
     extraWidthColumnIdx: any;
     columnCSSRules: any[] = [];
     targetStyleSheet: CSSStyleSheet;
     timeoutid: number;
-    skipOnce: boolean = false;
+    skipOnce = false;
     currentSortClass: any[] = [];
     sortClassUpdateTimer: any;
-    currentPage: number = 1;
+    currentPage = 1;
     changeListener: (change: FoundsetChangeEvent) => void;
     rendered: boolean;
-    scrollToSelectionNeeded: boolean = true;
+    scrollToSelectionNeeded = true;
     averageRowHeight: number;
-    actualPageSize: number = -1;
+    actualPageSize = -1;
     dataStream = new BehaviorSubject<any[]>([]);
     idx: number;
-    changedPage: boolean = false;
+    changedPage = false;
     prevPage: number;
 
-    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory) { 
+    constructor(renderer: Renderer2, cdRef: ChangeDetectorRef, logFactory: LoggerFactory) {
         super(renderer, cdRef);
         this.log = logFactory.getLogger('Table');
     }
@@ -92,10 +92,9 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
         this.computeTableWidth();
         this.computeTableHeight();
-       
-        this.setColumnsToInitalWidthAndInitAutoColumns();   
-        for (let i = 0; i < this.columns.length; i++)
-        {
+
+        this.setColumnsToInitalWidthAndInitAutoColumns();
+        for (let i = 0; i < this.columns.length; i++) {
             this.updateTableColumnStyleClass(i, { width: this.columns[i].width, minWidth: this.columns[i].width, maxWidth: this.columns[i].width });
         }
         this.attachHandlers();
@@ -166,18 +165,16 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         if (this.foundset.selectedRowIndexes.length > 0) {
             if (this.foundset.selectedRowIndexes != oldValue || this.lastSelectionFirstElement != this.foundset.selectedRowIndexes[0]) {
                 if (this.lastSelectionFirstElement != this.foundset.selectedRowIndexes[0]) {
-                    this.log.spam("svy extra table * selectedRowIndexes changed; scrollToSelectionNeeded = true");
+                    this.log.spam('svy extra table * selectedRowIndexes changed; scrollToSelectionNeeded = true');
                     this.lastSelectionFirstElement = this.foundset.selectedRowIndexes[0];
                     if (this.scrollToSelectionNeeded) {
                         this.scrollToSelection();
-                    }
-                    else {
+                    } else {
                         this.scrollToSelectionNeeded = true;
                     }
                 }
             }
-        }
-        else {
+        } else {
             this.lastSelectionFirstElement = -1;
         }
     }
@@ -211,14 +208,13 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     private computeTableHeight() {
         const tbody = this.getNativeElement().getElementsByTagName('tbody');
         if (tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth == 0))) {
-            this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 15; //TODO +2...
-        }
-        else if (tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
+            this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 15; // TODO +2...
+        } else if (tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
             this.scrollWidth = 0;
         }
 
         if (!this.absoluteLayout) {
-            this.renderer.setStyle(this.getNativeElement(), "position", "relative");
+            this.renderer.setStyle(this.getNativeElement(), 'position', 'relative');
 
             const pagination = this.getNativeElement().getElementsByTagName('ngb-pagination');
             let paginationHeight = 0;
@@ -227,25 +223,22 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             }
             if (this.columns) {
                 if (this.responsiveDynamicHeight) {
-                    //TODO let h = paginationHeight + this.getNativeElement().clientHeight;
+                    // TODO let h = paginationHeight + this.getNativeElement().clientHeight;
                     if (this.responsiveHeight === 0) {
-                        //this case does not really work for ng1
+                        // this case does not really work for ng1
                         this.renderer.setStyle(this.getNativeElement(), "height", "100%");
                         this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", "100%");
-                    }
-                    else {
-                        //this doesn't work for cdkVirtualFor because we need to provide it a size to make it display something
-                        //and then it doesn't make sense to set the size based on the computed height because it's the one that we have set previously
-                        this.renderer.setStyle(this.getNativeElement(), "height", (this.responsiveHeight  - paginationHeight) + "px")//TODO h + "px");
+                    } else {
+                        // this doesn't work for cdkVirtualFor because we need to provide it a size to make it display something
+                        // and then it doesn't make sense to set the size based on the computed height because it's the one that we have set previously
+                        this.renderer.setStyle(this.getNativeElement(), "height", (this.responsiveHeight  - paginationHeight) + "px"); // TODO h + "px");
                         this.renderer.setStyle(this.getNativeElement(), "max-height", this.responsiveHeight + "px");
                         this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", this.getNativeElement().clientHeight + "px");
                     }
-                }
-                else if (this.responsiveHeight === 0) {
+                } else if (this.responsiveHeight === 0) {
                     this.renderer.setStyle(this.getNativeElement(), "height", "100%");
                     this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", (this.getNativeElement().clientHeight - paginationHeight) + "px");
-                }
-                else {
+                } else {
                     this.renderer.setStyle(this.getNativeElement(), "height", this.responsiveHeight + "px");
                     this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", (this.responsiveHeight - paginationHeight) + "px");
                 }
@@ -256,7 +249,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
     ngOnDestroy(): void {
         this.foundset.removeChangeListener(this.changeListener);
     }
-    
+
     attachHandlers() {
         if (this.onHeaderClick || this.onHeaderRightClick) {
             let headers = this.getNativeElement().getElementsByTagName('th');
@@ -270,17 +263,15 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             }
         }
 
-        if (this.onFocusGainedMethodID)
-        {
+        if (this.onFocusGainedMethodID) {
             this.renderer.listen(this.getNativeElement().getElementsByTagName("table")[0], 'focus', e => {
                 this.callFocusGained(e);
             });
         }
 
-        if (this.onFocusLostMethodID)
-        {
+        if (this.onFocusLostMethodID) {
             this.renderer.listen(this.getNativeElement().getElementsByTagName("table")[0], 'blur', e => {
-                this.callFocusLost(e);   
+                this.callFocusLost(e);
             });
         }
     }
@@ -325,13 +316,13 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 }
             }
             this.foundset.sortColumns = sortCol + " " + sqlSortDirection;
-            this.foundset.sort([{ name: sortCol, direction: sqlSortDirection }]).then(()=>{
+            this.foundset.sort([{ name: sortCol, direction: sqlSortDirection }]).then(() => {
                 this.dataStream.next(this.foundset.viewPort.rows);
             });
         }
     }
 
-    cellClick(rowIdx: number, colIdx: number, record: any, e: Event, columnId:string) {
+    cellClick(rowIdx: number, colIdx: number, record: any, e: Event, columnId: string) {
         if (this.onCellDoubleClick && this.onCellClick) {
             const innerThis: ServoyExtraTable = this;
             if (innerThis.lastClicked == rowIdx * colIdx) {
@@ -339,8 +330,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 innerThis.lastClicked = -1;
                 innerThis.timeoutID = null;
                 innerThis.onCellDoubleClick(rowIdx, colIdx, record, e, columnId);
-            }
-            else {
+            } else {
                 innerThis.lastClicked = rowIdx * colIdx;
                 innerThis.timeoutID = window.setTimeout(() => {
                     innerThis.timeoutID = null;
@@ -348,16 +338,15 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                     innerThis.onCellClick(rowIdx, colIdx, record, e, columnId);
                 }, 250);
             }
-        }
-        else if (this.onCellClick) {
+        } else if (this.onCellClick) {
             this.onCellClick(rowIdx, colIdx, this.foundset.viewPort.rows[rowIdx], e, columnId);
         }
     }
 
     getColumnStyle(column: number) {
-        let columnStyle : object = this.columnStyleCache[column];
+        let columnStyle: object = this.columnStyleCache[column];
         if (columnStyle) return columnStyle;
-        
+
         columnStyle = { "overflow": "hidden"};
         this.columnStyleCache[column] = columnStyle;
         const w = this.getNumberFromPxString(this.columns[column].width);
@@ -367,7 +356,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             columnStyle["width"] = this.columns[column].width;
         } else {
             const autoColumnPercentage = this.getAutoColumnPercentage();
-            if(this.autoColumnPercentage) {
+            if (this.autoColumnPercentage) {
                 columnStyle["width"] = autoColumnPercentage + "%";
             } else {
                 if (!this.autoColumns) this.setColumnsToInitalWidthAndInitAutoColumns();
@@ -406,7 +395,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         return nrColumnsWithPercentage ? (100 - sumColumnsWithPercentage) / (this.autoColumns.length - nrColumnsWithPercentage) : 0;
     }
 
-    getNumberFromPxString(s:string) {
+    getNumberFromPxString(s: string) {
         let numberFromPxString = -1;
         if (s) {
             s = s.trim().toLowerCase();
@@ -467,11 +456,11 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         let fixedDelta = delta;
 
         // if extraWidth was appended to last auto-resize column then remove it, and append it to delta
-        if(this.extraWidth) {
+        if (this.extraWidth) {
             fixedDelta += this.extraWidth;
             let w = this.getNumberFromPxString(this.columns[this.extraWidthColumnIdx].width);
-            w += (0 -this.extraWidth);
-           this.columns[this.extraWidthColumnIdx].width = w + "px";				
+            w += (0 - this.extraWidth);
+           this.columns[this.extraWidthColumnIdx].width = w + "px";
         }
 
         this.columnStyleCache = [];
@@ -485,7 +474,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 if (this.autoColumns.minWidth[i] > 0) {
                     const oldW = this.getNumberFromPxString(this.columns[i].width);
                     let w = Math.floor(oldW * newWidth / oldWidth);
-                    
+
                     if (w < this.autoColumns.minWidth[i]) {
                         w = this.autoColumns.minWidth[i];
                     }
@@ -498,18 +487,18 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             }
         }
 
-        if(lastAutoColumnIdx > -1) {
+        if (lastAutoColumnIdx > -1) {
             this.extraWidth = Math.round(Math.abs(fixedDelta) - Math.abs(usedDelta));
             this.extraWidthColumnIdx = lastAutoColumnIdx;
-            if(this.extraWidth) {
-                if(fixedDelta < 0) this.extraWidth = 0 - this.extraWidth;
+            if (this.extraWidth) {
+                if (fixedDelta < 0) this.extraWidth = 0 - this.extraWidth;
                 let w = this.getNumberFromPxString(this.columns[lastAutoColumnIdx].width);
                 w += this.extraWidth;
                 this.columns[lastAutoColumnIdx].width = w + "px";
             }
         }
     }
-    
+
 
     getAutoResizeColumnsWidth() {
         let autoColumnsWidth = 0;
@@ -521,15 +510,14 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         return autoColumnsWidth;
     }
 
-    getSortStyleClass(column: number){
+    getSortStyleClass(column: number) {
         let lv_styles = "";
         if (this.enableSort) {
-           if ((this.sortColumnIndex == -1 &&  column == 0) || this.sortColumnIndex == column) 
-           {
+           if ((this.sortColumnIndex == -1 &&  column == 0) || this.sortColumnIndex == column) {
               lv_styles = this.sortStyleClass;
            }
         }
-		return this.columns[column].headerStyleClass == undefined ? lv_styles : lv_styles + " " + this.columns[column].headerStyleClass;
+        return this.columns[column].headerStyleClass == undefined ? lv_styles : lv_styles + " " + this.columns[column].headerStyleClass;
     }
 
     public getSortClass(column: number) {
@@ -593,7 +581,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         for (let p in tBodyStyle) {
             this.renderer.setStyle(tBodyEl, p, tBodyStyle[p]);
         }
-        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", tBodyEl['clientHeight']+"px");
+        this.renderer.setStyle(this.viewPort._contentWrapper.nativeElement.parentElement, "height", tBodyEl['clientHeight'] + "px");
     }
 
 
@@ -606,7 +594,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         return tHeadStyle;
     }
 
-    updateTableColumnStyleClass(columnIndex:number, style:any) {
+    updateTableColumnStyleClass(columnIndex: number, style: any) {
         if (!this.columnCSSRules[columnIndex]) {
             let clsName = "#table_" + this.servoyApi.getMarkupId() + " .c" + columnIndex;
             if (!this.columnCSSRules[columnIndex]) {
@@ -614,7 +602,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                     let elem = document.createElement('style');
                     elem.type = 'text/css';
                     document.getElementsByTagName('head')[0].appendChild(elem);
-                    this.targetStyleSheet = document.styleSheets[document.styleSheets.length-1] as CSSStyleSheet;
+                    this.targetStyleSheet = document.styleSheets[document.styleSheets.length - 1] as CSSStyleSheet;
                 }
                 let rules = this.targetStyleSheet.cssRules || this.targetStyleSheet.rules;
                 this.targetStyleSheet.insertRule(clsName + '{}', rules.length);
@@ -628,7 +616,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         }
     }
 
-    onResizeEnd(event: ResizeEvent, columnIndex:number): void {
+    onResizeEnd(event: ResizeEvent, columnIndex: number): void {
         window.clearTimeout(this.timeoutID);
         const headers = this.getNativeElement().getElementsByTagName('th');
         const newWidth = Math.floor(event.rectangle.width) + "px";
@@ -667,19 +655,18 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 stop = start;
                 start = idxInFs;
             }
-            newSelection = []
+            newSelection = [];
             for (let n = start; n <= stop; n++) {
                 newSelection.push(n);
             }
         }
-        this.scrollToSelectionNeeded = false; //we don't need to scroll to selection when we select a record by clicking on it
+        this.scrollToSelectionNeeded = false; // we don't need to scroll to selection when we select a record by clicking on it
         this.foundset.requestSelectionUpdate(newSelection);
     }
 
-    onScroll(){
-        if(!this.viewPort) return;
-        if (this.onViewPortChanged) 
-        {
+    onScroll() {
+        if (!this.viewPort) return;
+        if (this.onViewPortChanged) {
             this.onViewPortChanged(this.viewPort.getRenderedRange().start, this.viewPort.getRenderedRange().end);
         }
     }
@@ -692,8 +679,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         if (this.showPagination()) {
             if (this.actualPageSize > 0) {
                 this.currentPage =  Math.floor(this.idx / this.actualPageSize);
-            }
-            else {
+            } else {
                 window.setTimeout(() => {
                     this.setCurrentPageIfNeeded();
                 }, 100);
@@ -713,12 +699,12 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         }
     }
 
-    public getViewPortPosition() : number[] {
+    public getViewPortPosition(): number[] {
         if (!this.viewPort) return null;
         return [this.viewPort.getRenderedRange().start, this.viewPort.getRenderedRange().end];
     }
 
-    public requestFocus(mustExecuteOnFocusGainedMethod:boolean) {
+    public requestFocus(mustExecuteOnFocusGainedMethod: boolean) {
         let tbl = this.getNativeElement().getElementsByTagName("table")[0];
         this.skipOnce = mustExecuteOnFocusGainedMethod === false;
         tbl.focus();
@@ -734,15 +720,11 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         const endIndex = Math.min(this.foundset.serverSize, this.actualPageSize * this.currentPage);
         const offset = this.getNativeElement().getElementsByTagName('tbody')[0].clientHeight * (this.currentPage - 1);
         if (this.prevPage > this.currentPage) {
-            
             this.viewPort.scrollToOffset(offset - 2);
-        }
-        else {
+        } else {
             if (this.idx + this.actualPageSize > this.foundset.serverSize) {
                 this.viewPort.scrollToOffset(this.viewPort.measureScrollOffset() + Math.trunc(this.averageRowHeight * this.idx % this.actualPageSize));
-            }
-            else
-            {
+            } else {
                 this.viewPort.scrollToOffset(offset);
             }
         }
@@ -768,25 +750,24 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             let selection = fs.selectedRowIndexes[0];
             if (event.keyCode == 33) { // PAGE UP KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.pageUp) return;
-                
-                const firstVisibleIndex = this.showPagination() ? this.actualPageSize * Math.trunc(selection/this.actualPageSize) : 1;
+
+                const firstVisibleIndex = this.showPagination() ? this.actualPageSize * Math.trunc(selection / this.actualPageSize) : 1;
                 fs.selectedRowIndexes = [firstVisibleIndex];
                 selectionChanged = (selection != firstVisibleIndex);
                 this.log.spam("svy extra table * keyPressed; scroll on PG UP");
                 this.viewPort.scrollToIndex(firstVisibleIndex);
-            }
-            else if (event.keyCode == 34) { // PAGE DOWN KEY
+            } else if (event.keyCode == 34) { // PAGE DOWN KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.pageDown) return;
 
-                let lastVisibleIndex = this.showPagination() ? this.actualPageSize * (Math.trunc(selection/this.actualPageSize) + 1 ) -1 : (this.foundset.viewPort.rows.length - 1);
-                if (lastVisibleIndex > fs.serverSize -1 ) lastVisibleIndex = fs.serverSize -1;
+                let lastVisibleIndex = this.showPagination() ? this.actualPageSize * (Math.trunc(selection / this.actualPageSize) + 1 ) - 1 : (this.foundset.viewPort.rows.length - 1);
+                if (lastVisibleIndex > fs.serverSize - 1 ) lastVisibleIndex = fs.serverSize - 1;
                 fs.selectedRowIndexes = [lastVisibleIndex];
                 selectionChanged = (selection != lastVisibleIndex);
                 this.log.spam("svy extra table * keyPressed; scroll on PG DOWN");
                 this.viewPort.scrollToIndex(lastVisibleIndex);
             } else if (event.keyCode == 38) { // ARROW UP KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.arrowUp) return;
-                
+
                 if (selection > 0) {
                     fs.selectedRowIndexes = [selection - 1];
                     this.viewPort.scrollToIndex(selection - 1);
@@ -796,7 +777,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 event.preventDefault();
             } else if (event.keyCode == 40) { // ARROW DOWN KEY
                 if (this.keyCodeSettings && !this.keyCodeSettings.arrowDown) return;
-                
+
                 if (selection + 1 < (fs.viewPort.startIndex + fs.viewPort.size)) {
                     fs.selectedRowIndexes = [selection + 1];
                     this.viewPort.scrollToIndex(selection + 1);
@@ -811,8 +792,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
                 }
             } else if (event.keyCode == 36) { // HOME
                 if (this.keyCodeSettings && !this.keyCodeSettings.home) return;
-                if (fs.selectedRowIndexes[0] != 0)
-                {
+                if (fs.selectedRowIndexes[0] != 0) {
                     fs.selectedRowIndexes = [0];
                     this.viewPort.scrollToIndex(0);
                     selectionChanged = true;
