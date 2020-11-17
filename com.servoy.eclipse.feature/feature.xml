@@ -62,7 +62,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
    </license>
 
    <url>
-      <update label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
+      <update label="Servoy Update Site" url="https://download.servoy.com/developer/latest/"/>
       <discovery label="Servoy Update Site" url="http://download.servoy.com/developer/8xx_updates"/>
    </url>
 
