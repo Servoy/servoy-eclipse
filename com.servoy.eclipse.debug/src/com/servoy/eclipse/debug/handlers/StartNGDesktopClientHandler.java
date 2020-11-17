@@ -28,11 +28,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
@@ -75,26 +75,20 @@ import com.servoy.j2db.util.Utils;
 public class StartNGDesktopClientHandler extends StartDebugHandler implements IRunnableWithProgress, IDebuggerStartListener
 {
 
-	//note that NGDDESKTOP_MAJOR_VERSION and NGDESKTOP_MINOR_VERSION are not related to servoy developer's version
-	static final String NGDESKTOP_MAJOR_VERSION = "2019";
-	static final String NGDESKTOP_MINOR_VERSION = "12";
-
-	static final int BUFFER_SIZE = 16 * 1024;
-	static final String MAC_EXTENSION = ".app";
-	static final String WINDOWS_EXTENSION = ".exe";
-	//Linux doesn't have any extension
-
-	public static final String WINDOWS_BUILD_PLATFORM = "win";
-	public static final String MAC_BUILD_PLATFORM = "mac";
-	public static final String LINUX_BUILD_PLATFORM = "linux";
-
-	public static final String NG_DESKTOP_APP_NAME = "servoyngdesktop";
+	public static final String NGDESKTOP_VERSION = "2020.12.0"; //version as specified in ngdesktop (electron-builder/app/package.json -> version)
+	public static final String NGDESKTOP_APP_NAME = "servoyngdesktop";
 	public static String DOWNLOAD_URL = System.getProperty("ngdesktop.download.url", "http://download.servoy.com/ngdesktop/");
-	public static final String NGDESKTOP_VERSION = NGDESKTOP_MAJOR_VERSION + "." + NGDESKTOP_MINOR_VERSION;
+	protected static String PLATFORM = Utils.isAppleMacOS() ? "-mac" : (Utils.isWindowsOS()) ? "-win" : "-linux";
+	protected static String LOCAL_PATH = Activator.getDefault().getStateLocation().toOSString() + File.separator;
+	protected static String NGDESKTOP_PREFIX = NGDESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
+
+	protected static final int BUFFER_SIZE = 16 * 1024;
 
 	static
 	{
 		if (!DOWNLOAD_URL.endsWith("/")) DOWNLOAD_URL += "/";
+		DOWNLOAD_URL += NGDESKTOP_VERSION + "/";
+
 	}
 
 	public static ITagResolver noReplacementResolver = new ITagResolver()
@@ -144,74 +138,67 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		return null;
 	}
 
-	public String getStartTitle()
+	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
-		return "NGDesktop client launch";
+		StartClientHandler.setLastCommand(StartClientHandler.START_NG_DESKTOP_CLIENT);
+		monitor.beginTask(getStartTitle(), 5);
+		monitor.worked(1);
+
+		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		ServoyProject activeProject = servoyModel.getActiveProject();
+
+		if (activeProject == null || activeProject.getSolution() == null) return;
+		final Solution solution = activeProject.getSolution();
+		if (isSmartClientType(solution)) return;
+
+		monitor.worked(2);
+		boolean downloadCancelled = false;
+		if (testAndStartDebugger())
+		{
+			try
+			{
+				if (archiveUpdateNeeded())
+				{
+					URL archiveUrl = new URL(DOWNLOAD_URL + NGDESKTOP_PREFIX + PLATFORM + ".tar.gz");
+					String savePath = Utils.isAppleMacOS() ? LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM : LOCAL_PATH;
+					deleteVersionFile();
+					downloadCancelled = downloadArchive(archiveUrl, savePath);
+				}
+				if (!downloadCancelled)
+				{
+					downloadVersionFile();
+					updateJsonFile(solution, monitor);
+					monitor.worked(2);
+					runNgDesktop(monitor);
+				}
+			}
+			catch (IllegalStateException | IOException e)
+			{
+				ServoyLog.logError(e.getMessage(), e);
+			}
+		}
+		monitor.done();
 	}
 
-
-	/**
-	 * Method for writing into servoy.json details about electron app.
-	 * Here can be also changed icon, url, or used modules.
-	 */
-
-	private void writeElectronJsonFile(Solution solution, String localPath, String fileExtension, IProgressMonitor monitor)
+	private boolean archiveUpdateNeeded() throws IOException
 	{
-
-		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html";
-
-		String osxContent = Utils.isAppleMacOS() ? File.separator + "Contents" : "";
-
-		//Mac folder structure is different, we should adapt url to that.
-		String fileUrl = osxContent + File.separator + (Utils.isAppleMacOS() ? "Resources" : "resources") + File.separator + "app.asar.unpacked" +
-			File.separator + "config" + File.separator + "servoy.json";
-
-		String fPath = localPath;
-		if (Utils.isAppleMacOS()) fPath += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + StartNGDesktopClientHandler.MAC_EXTENSION;
-
-		File f = new File(fPath + File.separator + fileUrl);
-
-		//Store servoy.json file as a JSONObject
-		String jsonFile = Utils.getTXTFileContent(f, Charset.forName("UTF-8"));
-		JSONObject configFile = new JSONObject(jsonFile);
-
-		JSONObject options = (JSONObject)configFile.get("options");
-		//put url and other options in servoy.json(we can put image also here, check servoy.json to see available options.
-		options.put("url", solutionUrl);
-		options.put("showMenu", true);
-		configFile.put("options", options);
-
-		try (FileWriter file = new FileWriter(f))
+		String versionFilename = NGDESKTOP_PREFIX + "-archive.version";
+		File currentVersionFile = new File(LOCAL_PATH + versionFilename);
+		if (!currentVersionFile.exists())
+			return true;
+		URL remoteVersionURL = new URL(DOWNLOAD_URL + versionFilename);
+		try (InputStream remoteStream = remoteVersionURL.openStream();
+			InputStream localStream = new FileInputStream(currentVersionFile))
 		{
-			BufferedWriter out = new BufferedWriter(file);
-			out.write(configFile.toString());
-			out.close();
-		}
-		catch (IOException e1)
-		{
-			ServoyLog.logError("Error writing  in servoy.json file " + fileUrl, e1);
-		}
 
-		//Now try opening servoyNGDesktop app.
-		try
-		{
-			String[] command;
-			if (Utils.isAppleMacOS())
+			byte[] remoteBuf = getBytes(remoteStream);
+			byte[] currentBuf = getBytes(localStream);
+			if (!Arrays.equals(remoteBuf, currentBuf))
 			{
-				command = new String[] { "/usr/bin/open", localPath + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
+				return true;
 			}
-			else
-			{//windows || linux
-				command = new String[] { localPath + File.separator + NG_DESKTOP_APP_NAME + fileExtension };
-			}
-			monitor.beginTask("Open NGDesktop", 3);
-			Runtime.getRuntime().exec(command);
 		}
-		catch (IOException e)
-		{
-			ServoyLog.logError("Cannot find servoy NGDesktop executable", e);
-		}
-
+		return false;
 	}
 
 	private byte[] getBytes(InputStream in) throws IOException
@@ -228,85 +215,117 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		}
 	}
 
-	/*
-	 * Compare the remote NGDesktop version with current version and delete current if it's the case. Deleting current version will enforce remote version
-	 * download
-	 */
-	private void checkForHigherVersion(File location)
+	private boolean downloadArchive(URL archiveUrl, String savePath)
 	{
+		final boolean[] cancelled = { false };
+		Display.getDefault().syncExec(new Runnable()
+		{
+			public void run()
+			{
+				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+				try
+				{
+					dialog.run(true, true, new DownloadNgDesktop(archiveUrl, savePath));
+				}
+				catch (InvocationTargetException | InterruptedException e)
+				{
+					ServoyLog.logError(e);
+				}
+				if (dialog.getProgressMonitor().isCanceled())
+				{
+					deleteVersionFile();
+					cancelled[0] = true;
+				}
+			}
+		});
+
+		return cancelled[0];
+	}
+
+	private void downloadVersionFile() throws IOException
+	{
+		File versionFilename = new File(NGDESKTOP_PREFIX + "-archive.version");
+		File currentVersionFile = new File(LOCAL_PATH + versionFilename);
+		URL remoteVersionURL = new URL(DOWNLOAD_URL + versionFilename);
+		try (InputStream remoteStream = remoteVersionURL.openStream();
+			OutputStream localStream = new FileOutputStream(currentVersionFile))
+		{
+
+			byte[] remoteBuf = getBytes(remoteStream);
+			localStream.write(remoteBuf); //this will overwrite the old content
+
+		}
+	}
+
+	private void deleteVersionFile()
+	{//this will enforce a new download
+		File currentVersionFile = new File(LOCAL_PATH + NGDESKTOP_PREFIX + "-archive.version");
+		if (currentVersionFile.exists())
+		{
+			currentVersionFile.delete();
+		}
+	}
+
+	/**
+	 * Method for writing into servoy.json details about electron app.
+	 * Here can be also changed icon, url, or used modules.
+	 */
+
+	private void updateJsonFile(Solution solution, IProgressMonitor monitor)
+	{
+
+		String solutionUrl = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html";
+		String resourceStr = Utils.isAppleMacOS() ? "/" + NGDESKTOP_APP_NAME + ".app/Contents/Resources" : File.separator + "resources";
+		String configLocation = resourceStr + File.separator + "app.asar.unpacked" + File.separator + "config" +
+			File.separator + "servoy.json";
+
+		String fPath = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + configLocation;
+
+		File f = new File(fPath);// + fileUrl);
+
+		//Store servoy.json file as a JSONObject
+		String jsonFile = Utils.getTXTFileContent(f, Charset.forName("UTF-8"));
+		JSONObject configFile = new JSONObject(jsonFile);
+
+		JSONObject options = (JSONObject)configFile.get("options");
+		//put url and other options in servoy.json(we can put image also here, check servoy.json to see available options.
+		options.put("url", solutionUrl);
+		options.put("showMenu", true);
+		configFile.put("options", options);
+
+		try (FileWriter file = new FileWriter(f);
+			BufferedWriter out = new BufferedWriter(file);)
+		{
+			out.write(configFile.toString());
+		}
+		catch (IOException e1)
+		{
+			//TODO: ServoyLog.logError("Error writing  in servoy.json file " + fileUrl, e1);
+		}
+	}
+
+	private void runNgDesktop(IProgressMonitor monitor)
+	{
+		//Now try opening servoyNGDesktop app.
 		try
 		{
-			File parentFile = location.getParentFile();
-			URL fileUrl = new URL(
-				DOWNLOAD_URL + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION + StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
-			File currentVersionFile = new File(parentFile.getAbsolutePath() + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
-				StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
-
-			byte[] remoteBuf = getBytes(fileUrl.openStream());
-			byte[] currentBuf = currentVersionFile.exists() ? getBytes(new FileInputStream(currentVersionFile)) : null;
-			if (!Arrays.equals(remoteBuf, currentBuf))
-			{
-				//TODO: notify user. if (user decide to download higher version) {
-				if (location.exists())
-				{
-					Files.walk(location.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-				}
-				OutputStream versionStream = new FileOutputStream(currentVersionFile);
-				versionStream.write(remoteBuf); //this will overwrite the old content
-				versionStream.close();
-				//} TODO: end
-			}
+			String extension = Utils.isAppleMacOS() ? ".app" : Utils.isWindowsOS() ? ".exe" : "";
+			String command = LOCAL_PATH + NGDESKTOP_PREFIX + PLATFORM + File.separator + NGDESKTOP_APP_NAME + extension;
+			monitor.beginTask("Open NGDesktop", 3);
+			String[] cmdArgs = Utils.isAppleMacOS() ? new String[] { "/usr/bin/open", command } : new String[] { command };
+			Runtime.getRuntime().exec(cmdArgs);
 		}
 		catch (IOException e)
 		{
-			ServoyLog.logError("Exception while checking for higher version: ", e);
+			ServoyLog.logError("Cannot find servoy NGDesktop executable", e);
 		}
 	}
 
-	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+	public String getStartTitle()
 	{
-		StartClientHandler.setLastCommand(StartClientHandler.START_NG_DESKTOP_CLIENT);
-		monitor.beginTask(getStartTitle(), 5);
-		monitor.worked(1);
-
-		IDeveloperServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject activeProject = servoyModel.getActiveProject();
-
-		if (activeProject == null || activeProject.getSolution() == null) return;
-		final Solution solution = activeProject.getSolution();
-		if (isSmartClientType(solution)) return;
-
-		monitor.worked(2);
-		if (testAndStartDebugger())
-		{
-			String extension = Utils.isAppleMacOS() ? MAC_EXTENSION : (Utils.isWindowsOS() ? WINDOWS_EXTENSION : "");
-			String platform = Utils.isAppleMacOS() ? MAC_BUILD_PLATFORM : (Utils.isWindowsOS()) ? WINDOWS_BUILD_PLATFORM : LINUX_BUILD_PLATFORM;
-			String appName = NG_DESKTOP_APP_NAME + "-" + NGDESKTOP_VERSION;
-			String localPath = Activator.getDefault().getStateLocation().append(appName + "-" + platform).toOSString();
-			String pathToExecutable = localPath + File.separator + NG_DESKTOP_APP_NAME + extension;
-
-			try
-			{
-				URL archiveUrl = new URL(StartNGDesktopClientHandler.DOWNLOAD_URL + appName + "-" + platform + ".tar.gz");
-				File executable = new File(pathToExecutable);
-				checkForHigherVersion(executable.getParentFile());
-				boolean downloadCancelled = false;
-				if (!executable.exists())
-				{
-					downloadCancelled = downloadArchive(archiveUrl, localPath);
-				}
-				if (!downloadCancelled)
-				{
-					writeElectronJsonFile(solution, localPath, extension, monitor);
-					monitor.worked(2);
-				}
-			}
-			catch (MalformedURLException e)
-			{
-			}
-		}
-		monitor.done();
+		return "NGDesktop client launch";
 	}
+
 
 	private boolean isSmartClientType(Solution solution)
 	{
@@ -325,43 +344,6 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 		return false;
 	}
 
-	private boolean downloadArchive(URL url, String localPath)
-	{
-		final boolean[] cancelled = { false };
-		Display.getDefault().syncExec(new Runnable()
-		{
-			public void run()
-			{
-				ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-				try
-				{
-					dialog.run(true, true, new DownloadElectron(url, localPath));
-				}
-				catch (InvocationTargetException | InterruptedException e)
-				{
-					ServoyLog.logError(e);
-				}
-				if (dialog.getProgressMonitor().isCanceled())
-				{
-					deleteVersionFile(localPath);
-					cancelled[0] = true;
-				}
-			}
-		});
-		return cancelled[0];
-	}
-
-	private void deleteVersionFile(String localPath)
-	{//this will enforce a new download
-		String parentPath = new File(localPath).getParentFile().getAbsolutePath();
-		File currentVersionFile = new File(parentPath + File.separator + "version" + StartNGDesktopClientHandler.NGDESKTOP_MAJOR_VERSION +
-			StartNGDesktopClientHandler.NGDESKTOP_MINOR_VERSION + ".txt");
-		if (currentVersionFile.exists())
-		{
-			currentVersionFile.delete();
-		}
-	}
-
 	@Override
 	protected IDebuggerStartListener getDebuggerAboutToStartListener()
 	{
@@ -376,16 +358,16 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 }
 
 
-class DownloadElectron implements IRunnableWithProgress
+class DownloadNgDesktop implements IRunnableWithProgress
 {
 	private final URL url;
-	private final String localPath;
+	private final String savePath;
 
-	public DownloadElectron(URL url, String localPath)
+	public DownloadNgDesktop(URL url, String savePath)
 	{
 		super();
 		this.url = url;
-		this.localPath = localPath;
+		this.savePath = savePath;
 	}
 
 	@Override
@@ -393,7 +375,63 @@ class DownloadElectron implements IRunnableWithProgress
 	{
 		try
 		{
-			extractTarGz(url, monitor);
+			int fileSize = getUrlSize(url);
+			File f = new File(savePath);
+
+			Path localPath = Paths.get(StartNGDesktopClientHandler.LOCAL_PATH);
+			if (Files.exists(localPath, LinkOption.NOFOLLOW_LINKS)) //delete previous version
+			{
+				Files.walk(localPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+			}
+
+			f.mkdirs();
+			Path outputPath = makeDirs();
+
+			int mbSize = Math.round((float)fileSize / (1024 * 1024)) * 2; //not sure why but TarArchive methods call stream methods twice
+			monitor.beginTask("Downloading NGDesktop executable", mbSize);
+
+			try (MonitorInputStream monInputStream = new MonitorInputStream(url.openStream(), StartNGDesktopClientHandler.BUFFER_SIZE, monitor);
+				TarArchiveInputStream archIS = new TarArchiveInputStream(new GzipCompressorInputStream(monInputStream));)
+			{
+				TarArchiveEntry entry = null;
+				while ((entry = archIS.getNextTarEntry()) != null)
+				{
+					Path path = outputPath.resolve(entry.getName()).normalize();
+					if (entry.isDirectory())
+					{
+						Files.createDirectories(path);
+					}
+					else if (entry.isSymbolicLink())
+					{
+						Files.createDirectories(path.getParent());
+						String dest = entry.getLinkName();
+						Files.createSymbolicLink(path, Paths.get(dest));
+					}
+					else
+					{
+						Files.createDirectories(path.getParent());
+						try (OutputStream out = Files.newOutputStream(path))
+						{
+							IOUtils.copy(archIS, out);//copy current archIS entry
+						}
+					}
+					if (!Files.isSymbolicLink(path) && !Utils.isWindowsOS())
+					{
+						Files.setPosixFilePermissions(path, getPosixFilePermissions(entry));
+					}
+				}
+				if (monInputStream.getCurrentStep() < mbSize)
+				{
+					monitor.worked(mbSize - monInputStream.getCurrentStep());
+					Thread.sleep(500);//give the user enough time to visually observe the completed (100%) progress bar
+				}
+				monInputStream.close();
+				monitor.done();
+			}
+			catch (CancellationException e)
+			{
+				throw new InterruptedException();
+			}
 		}
 		catch (IOException e)
 		{
@@ -459,73 +497,11 @@ class DownloadElectron implements IRunnableWithProgress
 		String fString = Activator.getDefault().getStateLocation().toOSString();
 		if (Utils.isAppleMacOS())
 		{
-			fString += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-				StartNGDesktopClientHandler.MAC_BUILD_PLATFORM;
+			fString += File.separator + "servoyngdesktop" + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-mac";
 		}
 		File f = new File(fString);
 		f.mkdirs();
 		return f.toPath().toAbsolutePath().normalize();
-	}
-
-	private void extractTarGz(URL tarGzUrl, IProgressMonitor monitor) throws IOException, InterruptedException
-	{
-		int fileSize = getUrlSize(tarGzUrl);
-		String fString = Activator.getDefault().getStateLocation().toOSString();
-		if (Utils.isAppleMacOS())
-		{
-			fString += File.separator + StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" +
-				StartNGDesktopClientHandler.MAC_BUILD_PLATFORM;
-		}
-		File f = new File(fString);
-		f.mkdirs();
-		Path outputPath = makeDirs();
-
-		int mbSize = Math.round((float)fileSize / (1024 * 1024)) * 2; //not sure why but TarArchive methods call stream methods twice
-		monitor.beginTask("Downloading NGDesktop executable", mbSize);
-
-		try (MonitorInputStream monInputStream = new MonitorInputStream(tarGzUrl.openStream(), StartNGDesktopClientHandler.BUFFER_SIZE, monitor);
-			TarArchiveInputStream archIS = new TarArchiveInputStream(new GzipCompressorInputStream(monInputStream));)
-		{
-			TarArchiveEntry entry = null;
-			while ((entry = archIS.getNextTarEntry()) != null)
-			{
-				Path path = outputPath.resolve(entry.getName()).normalize();
-				if (entry.isDirectory())
-				{
-					Files.createDirectories(path);
-				}
-				else if (entry.isSymbolicLink())
-				{
-					Files.createDirectories(path.getParent());
-					String dest = entry.getLinkName();
-					Files.createSymbolicLink(path, Paths.get(dest));
-				}
-				else
-				{
-					Files.createDirectories(path.getParent());
-					try (OutputStream out = Files.newOutputStream(path))
-					{
-						IOUtils.copy(archIS, out);//copy current archIS entry
-					}
-				}
-				if (!Files.isSymbolicLink(path) && !Utils.isWindowsOS())
-				{
-					Files.setPosixFilePermissions(path, getPosixFilePermissions(entry));
-				}
-			}
-			if (monInputStream.getCurrentStep() < mbSize)
-			{
-				monitor.worked(mbSize - monInputStream.getCurrentStep());
-				Thread.sleep(500);//give the user enough time to visually observe the completed (100%) progress bar
-			}
-			monInputStream.close();
-			monitor.done();
-		}
-		catch (CancellationException e)
-		{
-			throw new InterruptedException();
-		}
-
 	}
 
 	private Set<PosixFilePermission> getPosixFilePermissions(TarArchiveEntry entry)
