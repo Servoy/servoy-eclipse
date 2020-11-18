@@ -248,13 +248,23 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 							if (root instanceof Solution)
 							{
 								IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(root.getName());
-								if (newProject.exists()) newProject.delete(true, true, null);
+								IPath oldPath = null;
+								if (newProject.exists())
+								{
+									oldPath = newProject.getLocation();
+									newProject.delete(true, true, null);
+								}
 								IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(root.getName());
 								if (projectLocation != null)
 								{
 									IPath path = new Path(projectLocation);
 									path = path.append(root.getName());
 									description.setLocation(path);
+								}
+								else if (oldPath != null)
+								{
+									// create the project in the same place where it was
+									description.setLocation(oldPath);
 								}
 								newProject.create(description, null);
 								newProject.open(null);
