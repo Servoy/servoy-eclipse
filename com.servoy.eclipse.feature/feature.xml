@@ -68,7 +68,7 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <includes
          id="com.servoy.css.core"
-         version="0.0.0"/>
+         version="2.0.0.201308221100"/>
 
    <includes
          id="org.eclipse.dltk.core.servoy"
