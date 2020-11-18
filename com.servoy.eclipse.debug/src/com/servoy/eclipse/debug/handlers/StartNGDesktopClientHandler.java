@@ -267,7 +267,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	}
 
 	/**
-	 * Method for writing into servoy.json details about electron app.
+	 * Method for writing into servoy.json details about NgDesktop app.
 	 * Here can be also changed icon, url, or used modules.
 	 */
 
@@ -354,9 +354,7 @@ public class StartNGDesktopClientHandler extends StartDebugHandler implements IR
 	{
 
 	}
-
 }
-
 
 class DownloadNgDesktop implements IRunnableWithProgress
 {
@@ -375,50 +373,19 @@ class DownloadNgDesktop implements IRunnableWithProgress
 	{
 		try
 		{
-			int fileSize = getUrlSize(url);
-			File f = new File(savePath);
-
-			Path localPath = Paths.get(StartNGDesktopClientHandler.LOCAL_PATH);
-			if (Files.exists(localPath, LinkOption.NOFOLLOW_LINKS)) //delete previous version
-			{
-				Files.walk(localPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-			}
-
-			f.mkdirs();
+			deletePreviousNgDesktop();
 			Path outputPath = makeDirs();
 
-			int mbSize = Math.round((float)fileSize / (1024 * 1024)) * 2; //not sure why but TarArchive methods call stream methods twice
+			int mbSize = Math.round((float)getUrlSize(url) / (1024 * 1024)) * 2; //not sure why but TarArchive methods call stream methods twice
 			monitor.beginTask("Downloading NGDesktop executable", mbSize);
 
 			try (MonitorInputStream monInputStream = new MonitorInputStream(url.openStream(), StartNGDesktopClientHandler.BUFFER_SIZE, monitor);
-				TarArchiveInputStream archIS = new TarArchiveInputStream(new GzipCompressorInputStream(monInputStream));)
+				TarArchiveInputStream archInputStream = new TarArchiveInputStream(new GzipCompressorInputStream(monInputStream));)
 			{
 				TarArchiveEntry entry = null;
-				while ((entry = archIS.getNextTarEntry()) != null)
+				while ((entry = archInputStream.getNextTarEntry()) != null)
 				{
-					Path path = outputPath.resolve(entry.getName()).normalize();
-					if (entry.isDirectory())
-					{
-						Files.createDirectories(path);
-					}
-					else if (entry.isSymbolicLink())
-					{
-						Files.createDirectories(path.getParent());
-						String dest = entry.getLinkName();
-						Files.createSymbolicLink(path, Paths.get(dest));
-					}
-					else
-					{
-						Files.createDirectories(path.getParent());
-						try (OutputStream out = Files.newOutputStream(path))
-						{
-							IOUtils.copy(archIS, out);//copy current archIS entry
-						}
-					}
-					if (!Files.isSymbolicLink(path) && !Utils.isWindowsOS())
-					{
-						Files.setPosixFilePermissions(path, getPosixFilePermissions(entry));
-					}
+					processEntry(outputPath, entry, archInputStream);
 				}
 				if (monInputStream.getCurrentStep() < mbSize)
 				{
@@ -435,60 +402,18 @@ class DownloadNgDesktop implements IRunnableWithProgress
 		}
 		catch (IOException e)
 		{
-			ServoyLog.logError("Cannot find Electron in download center", e);
+			ServoyLog.logError("Cannot find NgDesktop in download center", e);
 			throw new InterruptedException();
 		}
-
 		monitor.done();
 	}
 
-	class MonitorInputStream extends BufferedInputStream
+	private void deletePreviousNgDesktop() throws IOException
 	{
-		IProgressMonitor monitor;
-		int bytesCount = 0;
-		int mbCount = 0;
-		int currentStep;
-
-		public MonitorInputStream(InputStream in, int size)
+		Path localPath = Paths.get(StartNGDesktopClientHandler.LOCAL_PATH);
+		if (Files.exists(localPath, LinkOption.NOFOLLOW_LINKS)) //delete previous version
 		{
-			super(in, size);
-		}
-
-		public MonitorInputStream(InputStream in, int size, IProgressMonitor monitor)
-		{
-			super(in, size);
-			this.monitor = monitor;
-		}
-
-		@Override
-		public int read(byte[] b, int off, int len) throws IOException
-		{
-			int n = super.read(b, off, len);
-			bytesCount += n;
-
-			int bytesToMegaBytes = Math.round((float)bytesCount / (1024 * 1024));// bytes => MB
-			if (bytesToMegaBytes > 0)
-			{
-				currentStep += bytesToMegaBytes;
-				monitor.worked(bytesToMegaBytes);
-				bytesCount = 0;
-				if (monitor.isCanceled())
-				{
-					throw new CancellationException();
-				}
-			}
-			return n;
-		}
-
-		@Override
-		public void close() throws IOException
-		{
-			super.close();
-		}
-
-		public int getCurrentStep()
-		{
-			return currentStep;
+			Files.walk(localPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
 		}
 	}
 
@@ -502,6 +427,33 @@ class DownloadNgDesktop implements IRunnableWithProgress
 		File f = new File(fString);
 		f.mkdirs();
 		return f.toPath().toAbsolutePath().normalize();
+	}
+
+	private void processEntry(Path outputPath, TarArchiveEntry entry, InputStream in) throws IOException
+	{
+		Path path = outputPath.resolve(entry.getName()).normalize();
+		if (entry.isDirectory())
+		{
+			Files.createDirectories(path);
+		}
+		else if (entry.isSymbolicLink())
+		{
+			Files.createDirectories(path.getParent());
+			String dest = entry.getLinkName();
+			Files.createSymbolicLink(path, Paths.get(dest));
+		}
+		else
+		{
+			Files.createDirectories(path.getParent());
+			try (OutputStream out = Files.newOutputStream(path))
+			{
+				IOUtils.copy(in, out);//copy current archIS entry
+			}
+		}
+		if (!Files.isSymbolicLink(path) && !Utils.isWindowsOS())
+		{
+			Files.setPosixFilePermissions(path, getPosixFilePermissions(entry));
+		}
 	}
 
 	private Set<PosixFilePermission> getPosixFilePermissions(TarArchiveEntry entry)
@@ -573,5 +525,55 @@ class DownloadNgDesktop implements IRunnableWithProgress
 				((HttpURLConnection)conn).disconnect();
 			}
 		}
+	}
+}
+
+class MonitorInputStream extends BufferedInputStream
+{
+	IProgressMonitor monitor;
+	int bytesCount = 0;
+	int mbCount = 0;
+	int currentStep;
+
+	public MonitorInputStream(InputStream in, int size)
+	{
+		super(in, size);
+	}
+
+	public MonitorInputStream(InputStream in, int size, IProgressMonitor monitor)
+	{
+		super(in, size);
+		this.monitor = monitor;
+	}
+
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException
+	{
+		int n = super.read(b, off, len);
+		bytesCount += n;
+
+		int bytesToMegaBytes = Math.round((float)bytesCount / (1024 * 1024));// bytes => MB
+		if (bytesToMegaBytes > 0)
+		{
+			currentStep += bytesToMegaBytes;
+			monitor.worked(bytesToMegaBytes);
+			bytesCount = 0;
+			if (monitor.isCanceled())
+			{
+				throw new CancellationException();
+			}
+		}
+		return n;
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		super.close();
+	}
+
+	public int getCurrentStep()
+	{
+		return currentStep;
 	}
 }
