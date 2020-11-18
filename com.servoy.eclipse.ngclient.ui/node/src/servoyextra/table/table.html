@@ -12,25 +12,19 @@
 				</th>
 			</tr>
 		</thead>
-		<tbody *ngIf="dataStream | async; let items">
-			<cdk-virtual-scroll-viewport style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()"
-				[itemSize]="getNumberFromPxString(minRowHeight)"
-				[minBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) / 2 : 200"
-				[maxBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) : 400">
-				<tr cdk-row *cdkVirtualFor="let row of items; let r = index; trackBy: trackByIdx"
-					(click)="selectRow(r, $event)" [ngClass]="getRowClass(r)">
-					<td cdk-cell *ngFor="let column of columns; let i = index;" [className]="'c' + i"
-						(click)="cellClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
-						(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
-						(contextmenu)="onCellRightClick && onCellRightClick(r, i, foundset.viewPort.rows[r], $event, column.id)">
-						<div [innerHtml]="column.dataprovider[foundset.viewPort.rows.indexOf(row)]"></div>
-					</td>
-				</tr>
-			</cdk-virtual-scroll-viewport>
+		<tbody style="overflow-x:hidden;" (scrolledIndexChange)="onScroll()">
+			<tr *uiScroll="let row of datasource; let r = index" (click)="selectRow(r, $event)" [ngClass]="getRowClass(r)">
+				<td *ngFor="let column of columns; let i = index;" [className]="'c' + i"
+					(click)="cellClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
+					(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
+					(contextmenu)="onCellRightClick && onCellRightClick(r, i, foundset.viewPort.rows[r], $event, column.id)">
+					<div [innerHtml]="row[i]"></div>
+				</td>
+			</tr>
 		</tbody>
 		<tfoot>
 			<ngb-pagination *ngIf="showPagination()"
-				[ngClass]="{'svy-pagination': true, 'svy-nomargin': servoyApi.isInAbsoluteLayout()} " [(page)]="currentPage"
+				[ngClass]="{'svy-pagination': true, 'svy-nomargin': absoluteLayout} " [(page)]="currentPage"
 				[pageSize]="actualPageSize" [collectionSize]="foundset.serverSize" (pageChange)="modifyPage()" [maxSize]="1"
 				[ellipses]="false">
 			</ngb-pagination>
