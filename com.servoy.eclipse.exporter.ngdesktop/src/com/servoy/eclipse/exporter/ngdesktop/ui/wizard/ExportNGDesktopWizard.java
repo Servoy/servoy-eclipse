@@ -130,7 +130,7 @@ public class ExportNGDesktopWizard extends Wizard implements IExportWizard
 		{
 			final String tmpDir = settings.get("save_dir").replaceAll("\\\\", "/");
 			final String saveDir = tmpDir.endsWith("/") ? tmpDir : tmpDir + "/";
-			final String archiveName = StartNGDesktopClientHandler.NG_DESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform +
+			final String archiveName = StartNGDesktopClientHandler.NGDESKTOP_APP_NAME + "-" + StartNGDesktopClientHandler.NGDESKTOP_VERSION + "-" + platform +
 				".tar.gz";
 			final File archiveFile = new File(saveDir + archiveName);
 			downloadArchive(archiveFile, monitor, errorMsg);

@@ -145,6 +145,13 @@
 								<version>${project.version}</version>
 							</restrictTo>
 						</filter>
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>com.servoy.css.core</id>
+							<restrictTo>
+								<version>${project.version}</version>
+							</restrictTo>
+						</filter>
 					</filters>
 					<includePackedArtifacts>true</includePackedArtifacts>
 				</configuration>
