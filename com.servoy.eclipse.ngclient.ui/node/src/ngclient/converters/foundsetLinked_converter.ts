@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IConverter, ConverterService, PropertyContext } from '../../sablo/converter.service';
 import { LoggerService, LoggerFactory } from '../../sablo/logger.service';
-import { ChangeAwareState, ChangeListener, IChangeAwareValue, ViewportChangeEvent } from '../../sablo/spectypes.service';
+import { ChangeAwareState, ChangeListener, IChangeAwareValue, instanceOfChangeAwareValue, ViewportChangeEvent } from '../../sablo/spectypes.service';
 import { SabloService } from '../../sablo/sablo.service';
 import { ViewportService, FoundsetViewportState } from '../services/viewport.service';
 import { FoundsetChangeEvent, Foundset } from '../converters/foundset_converter';
@@ -62,15 +62,16 @@ export class FoundsetLinkedConverter implements IConverter {
                 // the rest will always be treated as a full viewport update (single values are actually going to generate a full viewport of 'the one' new value)
 
                 let wholeViewport: any[];
-                let conversionInfo: any[];
+                let conversionInfos: any[];
                 if (serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] !== undefined || serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE_UPDATE] !== undefined) {
                     // just update single value from server and make copies of it to duplicate
-                    conversionInfo = this.converterService.getInDepthProperty(serverJSONValue, ConverterService.TYPES_KEY,
+                    const conversionInfo = this.converterService.getInDepthProperty(serverJSONValue, ConverterService.TYPES_KEY,
                         serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] !== undefined ? FoundsetLinkedConverter.SINGLE_VALUE : FoundsetLinkedConverter.SINGLE_VALUE_UPDATE);
                     const singleValue = serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] !== undefined ?
                     serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE] : serverJSONValue[FoundsetLinkedConverter.SINGLE_VALUE_UPDATE];
                     internalState.singleValueState = new SingleValueState(this, propertyContext, conversionInfo);
                     wholeViewport = internalState.handleSingleValue(singleValue);
+                    conversionInfos = internalState.singleValueState.conversionInfos;
                     if (internalState.viewportSizeChangedListener === undefined) {
                         this.sabloService.addIncomingMessageHandlingDoneTask(() => {
                             const fs: Foundset = internalState.forFoundset();
@@ -89,11 +90,11 @@ export class FoundsetLinkedConverter implements IConverter {
                 } else if (serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE] !== undefined) {
                     internalState.singleValueState = undefined;
                     internalState.recordLinked = true;
-                    conversionInfo = this.converterService.getInDepthProperty(serverJSONValue, ConverterService.TYPES_KEY, FoundsetLinkedConverter.VIEWPORT_VALUE);
+                    conversionInfos = this.converterService.getInDepthProperty(serverJSONValue, ConverterService.TYPES_KEY, FoundsetLinkedConverter.VIEWPORT_VALUE);
                     wholeViewport = serverJSONValue[FoundsetLinkedConverter.VIEWPORT_VALUE];
                 }
 
-                if (wholeViewport !== undefined) this.updateWholeViewport(newValue, internalState, wholeViewport, conversionInfo, propertyContext);
+                if (wholeViewport !== undefined) this.updateWholeViewport(newValue, internalState, wholeViewport, conversionInfos, propertyContext);
                 else if (!didSomething) {
                     this.log.error(this.log.buildMessage(() => 'Can\'t interpret foundset linked prop. server update correctly: '
                     + JSON.stringify(serverJSONValue, undefined, 2)));
@@ -110,11 +111,18 @@ export class FoundsetLinkedConverter implements IConverter {
     }
 
     public updateWholeViewport(propValue: FoundsetLinked, internalState: FoundsetLinkedState, wholeViewport: any[], conversionInfos: any[], propertyContext: PropertyContext) {
-        const rows = propValue.viewportService.updateWholeViewport([], internalState, wholeViewport, conversionInfos, propertyContext);
+        const rows = propValue.viewportService.updateWholeViewport(propValue, internalState, wholeViewport, conversionInfos, propertyContext);
 
         // update current value reference because that is what is present in the model
         propValue.splice(0, propValue.length);
-        for (let tz = 0; tz < rows.length; tz++) propValue.push(rows[tz]);
+        for (let tz = 0; tz < rows.length; tz++) {
+            if (instanceOfChangeAwareValue(rows[tz])) {
+                rows[tz].getStateHolder().setChangeListener(() => {
+                propValue.dataChanged(tz, rows[tz]);
+                });
+            }
+            propValue.push(rows[tz]);
+        }
 
         if (propValue && internalState && internalState.changeListeners.length > 0) {
             const notificationParamForListeners: ViewportChangeEvent = {};
@@ -167,10 +175,12 @@ export class FoundsetLinked extends Array<Object> implements IChangeAwareValue {
         if (this.state.push_to_server === undefined) return; // we ignore all changes
 
         if (newValue === undefined) newValue = null;
-        if (this.state.singleValueState) {
-            const wholeViewport = this.state.handleSingleValue(newValue);
-            if (wholeViewport !== undefined) this.state.singleValueState.updateWholeViewport(this, this.state, wholeViewport);
-        }
+        // do we really need to update the whole viewport? if changes are queued to send to server, and that will cause
+        // data to be changed in the foundset viewport, those will anyway be sent from server causing an update of the viewport here
+        // if (this.state.singleValueState) {
+        //     const wholeViewport = this.state.handleSingleValue(newValue);
+        //     if (wholeViewport !== undefined) this.state.singleValueState.updateWholeViewport(this, this.state, wholeViewport);
+        // }
         this.viewportService.queueChange(this, this.state, this.state.push_to_server, index, null, newValue, oldValue);
     }
 }

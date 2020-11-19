@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { ICellEditorParams } from 'ag-grid-community';
 import { DatagridEditor } from './datagrideditor';
 
@@ -6,7 +6,7 @@ import { DatagridEditor } from './datagrideditor';
     selector: 'datagrid-formeditor',
     template: `
       <div id="nggridformeditor" [style.width.px]="width" [style.height.px]="height">
-        <!-- svy-form [name]="editForm"></svy-form -->
+        <ng-template [ngTemplateOutlet]="getTemplate()" [ngTemplateOutletContext]="{name:getForm()}"></ng-template>
       </div>
     `
 })
@@ -15,6 +15,10 @@ export class FormEditor extends DatagridEditor implements OnDestroy {
     editForm;
     width: number = 300;
     height: number = 200;
+
+    constructor(private cdRef: ChangeDetectorRef) {
+        super();
+    }
 
     agInit(params: ICellEditorParams): void {
         super.agInit(params);
@@ -31,7 +35,7 @@ export class FormEditor extends DatagridEditor implements OnDestroy {
         }
 
         this.editForm = column.editForm;
-        this.dataGrid.servoyApi.formWillShow(this.editForm);
+        this.dataGrid.servoyApi.formWillShow(this.editForm).finally(() => this.cdRef.markForCheck());
     }
 
     ngAfterViewInit(): void {
@@ -49,5 +53,13 @@ export class FormEditor extends DatagridEditor implements OnDestroy {
     ngOnDestroy(): void {
         const column = this.dataGrid.getColumn(this.params.column.getColId());
         this.dataGrid.servoyApi.hideForm(column.editForm);
+    }
+
+    getForm() {
+        return this.editForm;
+    }
+
+    getTemplate() {
+        return this.dataGrid.templateRef;
     }
 }

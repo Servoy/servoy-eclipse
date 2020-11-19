@@ -31,7 +31,7 @@ export class JSONObjectConverter implements IConverter {
             if ( typeof serverJSONValue[JSONObjectConverter.PUSH_TO_SERVER] !== 'undefined' ) internalState[JSONObjectConverter.PUSH_TO_SERVER] = serverJSONValue[JSONObjectConverter.PUSH_TO_SERVER];
             internalState[JSONObjectConverter.CONTENT_VERSION] = serverJSONValue[JSONObjectConverter.CONTENT_VERSION];
 
-            for ( var c in newValue ) {
+            for ( let c in newValue ) {
                 let elem = newValue[c];
                 let conversionInfo = null;
                 if ( serverJSONValue[ConverterService.TYPES_KEY] ) {
@@ -41,6 +41,13 @@ export class JSONObjectConverter implements IConverter {
                 if ( conversionInfo ) {
                     internalState.conversionInfo[c] = conversionInfo;
                     newValue[c] = elem = this.converterService.convertFromServerToClient( elem, conversionInfo, currentClientValue ? currentClientValue[c] : undefined, customObjectPropertyContext);
+                }
+                if (instanceOfChangeAwareValue(elem)) {
+                    // child is able to handle it's own change mechanism
+                    elem.getStateHolder().setChangeListener(() => {
+                        internalState.getChangedKeys().push(c);
+                        internalState.notifyChangeListener();
+                    });
                 }
                 clientObject[c] = elem;
             }
@@ -77,6 +84,14 @@ export class JSONObjectConverter implements IConverter {
                         internalState.conversionInfo[key] = conversionInfo;
                         currentClientValue[key] = val = this.converterService.convertFromServerToClient( val, conversionInfo, currentClientValue[key], customObjectPropertyContext );
                     } else currentClientValue[key] = val;
+
+                    if (instanceOfChangeAwareValue(currentClientValue[key])) {
+                        // child is able to handle it's own change mechanism
+                        currentClientValue[key].getStateHolder().setChangeListener(() => {
+                            internalState.getChangedKeys().push(key);
+                            internalState.notifyChangeListener();
+                        });
+                    }
                 }
                 internalState.ignoreChanges = false;
                 internalState.clearChanges();

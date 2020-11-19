@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { OwlDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -22,6 +23,7 @@ import { TypeaheadEditor } from './datagrid/editors/typeaheadeditor';
         TypeaheadEditor
     ],
     imports: [
+        CommonModule,
         ServoyPublicModule,
         OwlDateTimeModule,
         NgbModule,

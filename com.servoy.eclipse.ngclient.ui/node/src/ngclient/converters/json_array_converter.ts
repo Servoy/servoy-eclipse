@@ -47,6 +47,7 @@ export class JSONArrayConverter implements IConverter {
             if (instanceOfChangeAwareValue(elem)) {
               // child is able to handle it's own change mechanism
               elem.getStateHolder().setChangeListener(() => {
+                state.getChangedKeys().push(c);
                 state.notifyChangeListener();
               });
             }
@@ -94,6 +95,7 @@ export class JSONArrayConverter implements IConverter {
               if (instanceOfChangeAwareValue(val)) {
                 // child is able to handle it's own change mechanism
                 val.getStateHolder().setChangeListener(() => {
+                  state.getChangedKeys().push(idx);
                   state.notifyChangeListener();
                 });
               }
@@ -121,6 +123,7 @@ export class JSONArrayConverter implements IConverter {
               if (instanceOfChangeAwareValue(val)) {
                 // child is able to handle it's own change mechanism
                 val.getStateHolder().setChangeListener(() => {
+                  state.getChangedKeys().push(idx);
                   state.notifyChangeListener();
                 });
               }

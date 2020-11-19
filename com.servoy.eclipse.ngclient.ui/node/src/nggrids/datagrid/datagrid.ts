@@ -1,4 +1,4 @@
-import { EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, ContentChild, Input, TemplateRef } from '@angular/core';
 import { Component, ViewChild } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { GridOptions } from 'ag-grid-community';
@@ -42,7 +42,11 @@ const NULL_VALUE = {displayValue: '', realValue: null};
     templateUrl: './datagrid.html',
     styleUrls: ['./datagrid.css']
 })
-export class DataGrid {    
+export class DataGrid {
+
+    @ContentChild( TemplateRef  , {static: true})
+    templateRef: TemplateRef<any>;
+
     @ViewChild('agGrid') agGrid: AgGridAngular;
     
     @Input() myFoundset: IFoundset;
@@ -114,7 +118,7 @@ export class DataGrid {
 
     selectionEvent;
 
-    constructor(logFactory: LoggerFactory) {
+    constructor(logFactory: LoggerFactory, public cdRef: ChangeDetectorRef) {
         this.log = logFactory.getLogger('DataGrid');
         this.gridOptions = <GridOptions> {
             context: {
