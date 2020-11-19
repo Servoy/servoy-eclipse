@@ -17,12 +17,12 @@
 				[itemSize]="getNumberFromPxString(minRowHeight)"
 				[minBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) / 2 : 200"
 				[maxBufferPx]="pageSize ? pageSize * getNumberFromPxString(minRowHeight) : 400">
-				<tr cdk-row *cdkVirtualFor="let row of items; let r = index; trackBy: trackByIdx"
-					(click)="selectRow(r, $event)" [ngClass]="getRowClass(r)">
+				<tr cdk-row *cdkVirtualFor="let row of items; let r = index;"
+					(click)="selectRow(r + this.foundset.viewPort.startIndex, $event)" [ngClass]="getRowClass(r + this.foundset.viewPort.startIndex)">
 					<td cdk-cell *ngFor="let column of columns; let i = index;" [className]="'c' + i"
-						(click)="cellClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
-						(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r, i, foundset.viewPort.rows[r], $event, column.id)"
-						(contextmenu)="onCellRightClick && onCellRightClick(r, i, foundset.viewPort.rows[r], $event, column.id)">
+						(click)="cellClick(r + this.foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)"
+						(dblclick)="onCellDoubleClick && !onCellClick && onCellDoubleClick(r+ this.foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)"
+						(contextmenu)="onCellRightClick && onCellRightClick(r + this.foundset.viewPort.startIndex, i, foundset.viewPort.rows[r], $event, column.id)">
 						<div [innerHtml]="column.dataprovider[foundset.viewPort.rows.indexOf(row)]"></div>
 					</td>
 				</tr>

@@ -123,17 +123,17 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             })
           ).subscribe();
 
-          setTimeout(() => this.dataStream.next(this.foundset.viewPort.rows), 50);
-          window.setTimeout(() => {
-            // first time we need to wait a bit before we scroll
+        setTimeout(() => {
+            this.dataStream.next(this.foundset.viewPort.rows);
             this.scrollToSelection();
-        }, 400);
+        }, 50);
     }
-    loadMoreRecords(currIndex: number) {
-        if ((currIndex <= (this.foundset.viewPort.startIndex - this.actualPageSize) && this.foundset.viewPort.startIndex !== 0) ||
+    loadMoreRecords(currIndex: number, scroll?: boolean) {
+        if ((this.foundset.viewPort.startIndex !== 0 && currIndex < this.actualPageSize) ||
          currIndex + this.actualPageSize >= this.foundset.viewPort.rows.length) {
             this.foundset.loadExtraRecordsAsync(currIndex + this.actualPageSize >= this.foundset.viewPort.rows.length ? this.actualPageSize : (-1) * this.actualPageSize, false).then(() => {
                 this.recordsLoaded();
+                if (scroll) this.scrollToSelection();
             });
         }
     }
@@ -165,11 +165,16 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             if (this.foundset.selectedRowIndexes !== oldValue || this.lastSelectionFirstElement !== this.foundset.selectedRowIndexes[0]) {
                 if (this.lastSelectionFirstElement !== this.foundset.selectedRowIndexes[0]) {
                     this.log.spam('svy extra table * selectedRowIndexes changed; scrollToSelectionNeeded = true');
-                    this.lastSelectionFirstElement = this.foundset.selectedRowIndexes[0];
-                    if (this.scrollToSelectionNeeded) {
-                        this.scrollToSelection();
+                    if ((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) < this.viewPort.getRenderedRange().start ||
+                        (this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) > this.viewPort.getRenderedRange().end) {
+                        this.loadMoreRecords(this.lastSelectionFirstElement, true);
                     } else {
-                        this.scrollToSelectionNeeded = true;
+                        this.lastSelectionFirstElement = this.foundset.selectedRowIndexes[0] + this.foundset.viewPort.startIndex;
+                        if (this.scrollToSelectionNeeded) {
+                            this.scrollToSelection();
+                        } else {
+                            this.scrollToSelectionNeeded = true;
+                        }
                     }
                 }
             }
@@ -199,15 +204,28 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     private scrollToSelection() {
         if (this.lastSelectionFirstElement !== -1) {
-            this.viewPort.scrollToOffset(this.lastSelectionFirstElement * this.averageRowHeight);
-            this.currentPage = Math.floor(this.lastSelectionFirstElement / this.actualPageSize);
+            console.log('scroll to selection '+this.lastSelectionFirstElement);
+            if (this.viewPort.getDataLength() > 0) {
+                if ((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) < this.viewPort.getRenderedRange().start ||
+                (this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) > this.viewPort.getRenderedRange().end) {
+                    this.loadMoreRecords(this.lastSelectionFirstElement, true);
+                } else {
+                    this.viewPort.scrollToOffset((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) * this.averageRowHeight);
+                    this.currentPage = Math.floor((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) / this.actualPageSize);
+                }
+            } else {
+                window.setTimeout(() => {
+                    // first time we need to wait a bit before we scroll
+                    this.scrollToSelection();
+                }, 400);
+            }
         }
     }
 
     private computeTableHeight() {
         const tbody = this.getNativeElement().getElementsByTagName('tbody');
         if (tbody && (tbody[0].scrollHeight > tbody[0].clientHeight && (this.scrollWidth === 0))) {
-            this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 17; // TODO +2...
+            this.scrollWidth = tbody[0].offsetWidth - tbody[0].clientWidth + 17;
         } else if (tbody && (tbody[0].scrollHeight <= tbody[0].clientHeight) && (this.scrollWidth > 0)) {
             this.scrollWidth = 0;
         }
@@ -806,10 +824,11 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             } else if (event.key === 'End') { // END
                 if (this.keyCodeSettings && !this.keyCodeSettings.end) return;
 
-                const endIndex = fs.viewPort.size - 1;
+                const endIndex = fs.viewPort.size - 1 + fs.viewPort.startIndex;
                 if (fs.selectedRowIndexes[0] !== endIndex) {
                     fs.selectedRowIndexes = [endIndex];
                     selectionChanged = true;
+                    this.scrollToSelectionNeeded = false;
                     this.viewPort.scrollToOffset(this.getNumberFromPxString(this.viewPort._totalContentHeight));
                     setTimeout(() => {
                         const last = this.viewPort._contentWrapper.nativeElement.lastElementChild;
@@ -825,8 +844,4 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
             }
         }
     }
-
-    trackByIdx(i: number) {
-        return i;
-      }
 }
