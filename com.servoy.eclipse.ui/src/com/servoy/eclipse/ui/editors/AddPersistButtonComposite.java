@@ -22,46 +22,41 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.util.Pair;
 
-public class AddValueListButtonComposite extends Composite
+public abstract class AddPersistButtonComposite extends Composite
 {
 	private IPersist persist;
-	private final Button addValueListMethodButton;
+	private final Button addPersistMethodButton;
 	private TreeSelectDialog dialog;
 
-	public AddValueListButtonComposite(Composite parent, int style)
+	public AddPersistButtonComposite(Composite parent, int style, String text)
 	{
 		super(parent, style);
-		addValueListMethodButton = new Button(this, SWT.NONE);
-		addValueListMethodButton.addSelectionListener(new SelectionAdapter()
+		addPersistMethodButton = new Button(this, SWT.NONE);
+		addPersistMethodButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(final SelectionEvent e)
 			{
-				ValueList valueList = createValueList((Solution)persist.getAncestor(IRepository.SOLUTIONS));
-				if (valueList != null)
+				IPersist newPersist = createPersist((Solution)persist.getAncestor(IRepository.SOLUTIONS));
+				if (newPersist != null)
 				{
 					dialog.refreshTree();
-					dialog.setSelection(new Integer(valueList.getID()));
+					dialog.setSelection(new Integer(newPersist.getID()));
 				}
 			}
 		});
-		addValueListMethodButton.setText("Create Value List");
+		addPersistMethodButton.setText(text);
 		final GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(10, 10, 10).add(addValueListMethodButton).add(13, 13, 13)));
+			groupLayout.createSequentialGroup().add(10, 10, 10).add(addPersistMethodButton).add(13, 13, 13)));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addValueListMethodButton)).addContainerGap()));
+			groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addPersistMethodButton)).addContainerGap()));
 		setLayout(groupLayout);
 	}
 
@@ -70,17 +65,7 @@ public class AddValueListButtonComposite extends Composite
 		this.persist = persist;
 	}
 
-	private ValueList createValueList(Solution editingSolution)
-	{
-		ValueList val = null;
-		Pair<String, String> name = NewValueListAction.askValueListName(Display.getDefault().getActiveShell(), editingSolution.getName());
-		if (name != null)
-		{
-			val = NewValueListAction.createValueList(name.getLeft(),
-				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name.getRight()).getEditingSolution());
-		}
-		return val;
-	}
+	protected abstract IPersist createPersist(Solution editingSolution);
 
 	public void setDialog(TreeSelectDialog dialog)
 	{

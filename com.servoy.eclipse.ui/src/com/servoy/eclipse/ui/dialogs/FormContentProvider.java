@@ -139,7 +139,7 @@ public class FormContentProvider implements ITreeContentProvider
 	@Override
 	public void inputChanged(final Viewer viewer, Object oldInput, final Object inputElement)
 	{
-		if (inputElement instanceof FormListOptions && !inputElement.equals(options))
+		if (inputElement instanceof FormListOptions)
 		{
 			Job job = new Job("Searching possible parent forms")
 			{

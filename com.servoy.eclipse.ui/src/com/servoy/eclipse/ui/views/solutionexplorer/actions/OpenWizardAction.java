@@ -88,7 +88,7 @@ public class OpenWizardAction extends Action
 				selection = (IStructuredSelection)windowSelection;
 			}
 			wizard.init(PlatformUI.getWorkbench(), selection);
-
+			initWizard(wizard);
 			// Instantiates the wizard container with the wizard and opens it
 			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
 			{
@@ -249,6 +249,7 @@ public class OpenWizardAction extends Action
 			}
 			dialog.create();
 			dialog.open();
+			handleWizardReturnValue(wizard);
 			wizard.dispose();
 
 		}
@@ -260,5 +261,15 @@ public class OpenWizardAction extends Action
 		{
 			ServoyLog.logError(e);
 		}
+	}
+
+	public void handleWizardReturnValue(IWorkbenchWizard wizard)
+	{
+
+	}
+
+	public void initWizard(IWorkbenchWizard wizard)
+	{
+
 	}
 }

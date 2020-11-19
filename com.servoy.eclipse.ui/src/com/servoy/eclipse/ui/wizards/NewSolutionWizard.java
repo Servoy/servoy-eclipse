@@ -410,7 +410,21 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 //		RunDesignClientDialog dialog = new RunDesignClientDialog(getShell());
 //		dialog.setBlockOnOpen(true);
 //		dialog.open();
-//		dialog.close();
+//		dialog.close();\
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.eclipse.ui.views.PropertySheet");
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		});
 		return true;
 	}
 
