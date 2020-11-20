@@ -204,14 +204,13 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
 
     private scrollToSelection() {
         if (this.lastSelectionFirstElement !== -1) {
-            console.log('scroll to selection '+this.lastSelectionFirstElement);
             if (this.viewPort.getDataLength() > 0) {
                 if ((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) < this.viewPort.getRenderedRange().start ||
                 (this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) > this.viewPort.getRenderedRange().end) {
                     this.loadMoreRecords(this.lastSelectionFirstElement, true);
                 } else {
                     this.viewPort.scrollToOffset((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) * this.averageRowHeight);
-                    this.currentPage = Math.floor((this.lastSelectionFirstElement - this.foundset.viewPort.startIndex) / this.actualPageSize);
+                    this.currentPage = Math.floor(this.lastSelectionFirstElement / this.actualPageSize);
                 }
             } else {
                 window.setTimeout(() => {
@@ -741,7 +740,7 @@ export class ServoyExtraTable extends ServoyBaseComponent implements OnDestroy  
         const endIndex = Math.min(this.foundset.serverSize, this.actualPageSize * this.currentPage);
         const offset = this.getNativeElement().getElementsByTagName('tbody')[0].clientHeight * (this.currentPage - 1);
         if (this.prevPage > this.currentPage) {
-            this.viewPort.scrollToOffset(offset - 2);
+            this.viewPort.scrollToOffset(offset - 2);// TODO SVY-15634
         } else {
             if (this.idx + this.actualPageSize > this.foundset.serverSize) {
                 this.viewPort.scrollToOffset(this.viewPort.measureScrollOffset() + Math.trunc(this.averageRowHeight * this.idx % this.actualPageSize));
